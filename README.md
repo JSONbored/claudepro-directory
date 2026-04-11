@@ -1,10 +1,16 @@
+![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
+
+<div align="center">
+
 # HeyClaude
 
 **Discover and share the best Claude configurations**
 324+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
 Formerly Claude Pro Directory.
 
-[🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
+[🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
+
+</div>
 
 ---
 
@@ -401,3 +407,29 @@ Option C (advanced): commit content files directly.
 - **[Simple Text Statusline - Statuslines](https://heyclau.de/statuslines/simple-text-statusline)** - Ultra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead
 - **[Starship Powerline Theme - Statuslines](https://heyclau.de/statuslines/starship-powerline-theme)** - Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code
 - **[Workspace Project Depth Indicator - Statuslines](https://heyclau.de/statuslines/workspace-project-depth-indicator)** - Claude Code workspace depth tracker showing monorepo navigation level, project root detection, and directory depth visualization for context awareness.
+
+---
+
+<div align="center">
+
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JSONbored/claudepro-directory&type=Date)](https://www.star-history.com/#JSONbored/claudepro-directory&Date)
+
+## 📊 Activity
+
+![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
+
+## 👥 Contributors
+
+Thanks to everyone who has contributed to making HeyClaude better.
+
+<a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
+</a>
+
+---
+
+[Website](https://heyclau.de) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq) • [Twitter](https://x.com/jsonbored) • [License](LICENSE)
+
+</div>
