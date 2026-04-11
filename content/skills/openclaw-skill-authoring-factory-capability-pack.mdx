@@ -1,0 +1,129 @@
+---
+title: OpenClaw Skill Authoring Factory Capability Pack Skill
+slug: openclaw-skill-authoring-factory-capability-pack
+category: skills
+description: 'Expert OpenClaw skill-authoring capability pack for repeatable research, validation, packaging, and distribution workflows.'
+cardDescription: 'Build high-quality OpenClaw-compatible skills with deterministic structure, freshness controls, and packaging standards.'
+seoTitle: OpenClaw Skill Authoring Factory Capability Pack Skill
+seoDescription: 'Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://github.com/openclaw/openclaw'
+downloadUrl: /downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip -o openclaw-skill-authoring-factory-capability-pack.zip && unzip -o openclaw-skill-authoring-factory-capability-pack.zip -d ./openclaw-skill-authoring-factory-capability-pack'
+usageSnippet: 'Use this skill to create, verify, and package OpenClaw-compatible skills at production quality.'
+copySnippet: |-
+  # Trigger
+  "Apply the OpenClaw skill authoring factory capability pack."
+
+  # Required output
+  1) Skill specification and success criteria
+  2) Retrieval and freshness plan
+  3) Packaging and validation output
+  4) Distribution metadata checklist
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://github.com/openclaw/openclaw'
+  - 'https://github.com/openclaw/openclaw/blob/main/README.md'
+  - 'https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Target domain and use case
+  - Source-of-truth docs
+  - Validation command set
+tags:
+  - openclaw
+  - skill-authoring
+  - packaging
+  - ai-agents
+  - capability-pack
+keywords:
+  - openclaw skills
+  - skill packaging workflow
+  - capability pack authoring
+  - ai workflow distribution
+readingTime: 9
+packageVerified: true
+difficultyScore: 86
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://github.com/openclaw/openclaw
+- https://github.com/openclaw/openclaw/blob/main/README.md
+- https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md
+
+## Core Workflow
+
+1. Define exact user problem, inputs, and expected outputs.
+2. Gather current official docs and mark freshness date.
+3. Build skill content with deterministic sections and constraints.
+4. Validate with smoke runs and failure-path checks.
+5. Package and publish with checksum and metadata integrity.
+
+## Overview
+
+This skill operationalizes repeatable skill creation for OpenClaw and adjacent agent ecosystems.
+
+## Capability Scope
+
+- Skill spec and scope definition
+- Retrieval-source governance
+- Validation and QA workflow
+- Packaging and checksum controls
+- Catalog publication readiness
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Every skill must include verifiedAt and retrievalSources.
+- Do not publish packages without deterministic checksum verification.
+- Keep scope narrow enough for repeatable real-world execution.
+- Require failure-path examples before marking production.
+
+## Troubleshooting
+
+**Issue:** Skill works in one agent but not another  
+**Fix:** include explicit adaptation notes per non-native platform.
+
+**Issue:** Skill gets stale quickly  
+**Fix:** enforce verifiedAt and retrievalSources refresh policy.
+
+**Issue:** Package integrity is unclear  
+**Fix:** publish deterministic checksum and regenerate only on content changes.
+
+## Output Contract
+
+1. Skill spec with acceptance criteria.
+2. Retrieval/freshness table.
+3. Packaging manifest and checksum.
+4. Validation evidence and known limitations.

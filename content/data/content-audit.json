@@ -352,6 +352,15 @@
   },
   {
     "category": "collections",
+    "filePath": "content/collections/agent-operator-growth-master-pack.mdx",
+    "slug": "agent-operator-growth-master-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "collections",
     "filePath": "content/collections/api-development-starter-kit.mdx",
     "slug": "api-development-starter-kit",
     "metadataOnly": false,
@@ -2098,6 +2107,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/ai-business-idea-validation-capability-pack.mdx",
+    "slug": "ai-business-idea-validation-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/ai-search-ranking-content-cluster-strategy.mdx",
     "slug": "ai-search-ranking-content-cluster-strategy",
     "metadataOnly": false,
@@ -2170,6 +2188,33 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/coderabbit-lite-pr-review-capability-pack.mdx",
+    "slug": "coderabbit-lite-pr-review-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/codex-automations-orchestrator-capability-pack.mdx",
+    "slug": "codex-automations-orchestrator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/codex-plugin-creator-capability-pack.mdx",
+    "slug": "codex-plugin-creator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/csv-excel-data-wrangler.mdx",
     "slug": "csv-excel-data-wrangler",
     "metadataOnly": false,
@@ -2233,6 +2278,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/git-cliff-release-changelog-capability-pack.mdx",
+    "slug": "git-cliff-release-changelog-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/github-actions-ai-cicd.mdx",
     "slug": "github-actions-ai-cicd",
     "metadataOnly": false,
@@ -2253,6 +2307,15 @@
     "category": "skills",
     "filePath": "content/skills/google-workspace-gemini-automation.mdx",
     "slug": "google-workspace-gemini-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/husky-commit-governance-capability-pack.mdx",
+    "slug": "husky-commit-governance-capability-pack",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2359,6 +2422,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/n8n-operations-resilience-capability-pack.mdx",
+    "slug": "n8n-operations-resilience-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/n8n-production-security-capability-pack.mdx",
     "slug": "n8n-production-security-capability-pack",
     "metadataOnly": false,
@@ -2379,6 +2451,15 @@
     "category": "skills",
     "filePath": "content/skills/openclaw-operator-capability-pack.mdx",
     "slug": "openclaw-operator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-skill-authoring-factory-capability-pack.mdx",
+    "slug": "openclaw-skill-authoring-factory-capability-pack",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2530,6 +2611,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/unraid-ca-template-authoring-capability-pack.mdx",
+    "slug": "unraid-ca-template-authoring-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/v0-rapid-prototyping.mdx",
     "slug": "v0-rapid-prototyping",
     "metadataOnly": false,
@@ -2568,6 +2658,15 @@
     "category": "skills",
     "filePath": "content/skills/windsurf-collaborative-development.mdx",
     "slug": "windsurf-collaborative-development",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/zero-budget-saas-launch-capability-pack.mdx",
+    "slug": "zero-budget-saas-launch-capability-pack",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],

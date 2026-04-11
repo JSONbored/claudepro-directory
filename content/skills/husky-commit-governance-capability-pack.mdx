@@ -1,0 +1,129 @@
+---
+title: Husky Commit Governance Capability Pack Skill
+slug: husky-commit-governance-capability-pack
+category: skills
+description: 'Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.'
+cardDescription: 'Set up practical pre-commit and commit-msg hooks that improve quality without bloating CI costs.'
+seoTitle: Husky Commit Governance Capability Pack Skill
+seoDescription: 'Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://typicode.github.io/husky/'
+downloadUrl: /downloads/skills/husky-commit-governance-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack'
+usageSnippet: 'Use this skill to install lean local hooks that prevent bad commits before CI.'
+copySnippet: |-
+  # Trigger
+  "Apply the husky commit governance capability pack to this repository."
+
+  # Required output
+  1) Hook matrix (pre-commit, commit-msg, optional pre-push)
+  2) Fast-path command list (< 10s target)
+  3) Contributor bypass/override policy
+  4) Drift and maintenance checklist
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://typicode.github.io/husky/'
+  - 'https://www.conventionalcommits.org/en/v1.0.0/'
+  - 'https://commitlint.js.org/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Node package scripts for validation
+  - Conventional commit policy
+  - Contributor onboarding docs
+tags:
+  - husky
+  - git-hooks
+  - commitlint
+  - developer-experience
+  - capability-pack
+keywords:
+  - husky hooks setup
+  - commit governance
+  - local quality gates
+  - precommit optimization
+readingTime: 8
+packageVerified: true
+difficultyScore: 79
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://typicode.github.io/husky/
+- https://www.conventionalcommits.org/en/v1.0.0/
+- https://commitlint.js.org/
+
+## Core Workflow
+
+1. Define minimum local gate set for the repository type.
+2. Keep hooks fast and deterministic to avoid bypass behavior.
+3. Enforce commit message standard with clear error messages.
+4. Align local checks with CI checks to prevent drift.
+5. Document safe bypass conditions for emergency workflows.
+
+## Overview
+
+This skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.
+
+## Capability Scope
+
+- Hook design and prioritization
+- Runtime/latency optimization
+- Commit message policy enforcement
+- Contributor ergonomics and onboarding
+- Governance drift controls
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Keep pre-commit checks fast enough to avoid bypass patterns.
+- Use the same underlying scripts for local hooks and CI.
+- Document approved bypass conditions for emergency fixes only.
+- Treat commit-msg enforcement as required for changelog quality.
+
+## Troubleshooting
+
+**Issue:** Hooks are too slow and developers bypass them  
+**Fix:** keep pre-commit to staged-file checks only.
+
+**Issue:** Hook failures differ from CI failures  
+**Fix:** use shared scripts for local and CI paths.
+
+**Issue:** Commit message confusion  
+**Fix:** provide examples in failing output and contributor docs.
+
+## Output Contract
+
+1. Minimal hook policy with justifications.
+2. Exact script wiring in package manager config.
+3. Failure UX recommendations.
+4. Maintenance checklist for future contributors.

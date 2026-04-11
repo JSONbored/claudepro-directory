@@ -33,11 +33,11 @@ export default function SubmitPage() {
               with verification metadata and retrieval sources.
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
-              Job listings are private and handled separately through the{" "}
+              Hiring opportunities are handled through the{" "}
               <a href="/jobs/post" className="text-primary underline underline-offset-4">
                 jobs intake flow
               </a>
-              .
+              so we can review and publish listings with the right details.
             </p>
           </div>
 

@@ -1,0 +1,129 @@
+---
+title: Git-Cliff Release Changelog Capability Pack Skill
+slug: git-cliff-release-changelog-capability-pack
+category: skills
+description: 'Expert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.'
+cardDescription: 'Generate stable, high-signal changelogs and release notes with git-cliff and conventional commit discipline.'
+seoTitle: Git-Cliff Release Changelog Capability Pack Skill
+seoDescription: 'Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://git-cliff.org/docs/'
+downloadUrl: /downloads/skills/git-cliff-release-changelog-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack'
+usageSnippet: 'Use this skill to enforce changelog quality from commit history through release publication.'
+copySnippet: |-
+  # Trigger
+  "Apply the git-cliff release changelog capability pack for this release."
+
+  # Required output
+  1) Conventional commit compliance report
+  2) Proposed release version and rationale
+  3) Generated changelog sections
+  4) Tag/release execution checklist
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://git-cliff.org/docs/'
+  - 'https://www.conventionalcommits.org/en/v1.0.0/'
+  - 'https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Conventional commit policy
+  - Git tags access
+  - Release workflow ownership
+tags:
+  - git-cliff
+  - changelog
+  - releases
+  - conventional-commits
+  - capability-pack
+keywords:
+  - git cliff changelog
+  - automated release notes
+  - conventional commits release
+  - semantic version workflow
+readingTime: 8
+packageVerified: true
+difficultyScore: 84
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://git-cliff.org/docs/
+- https://www.conventionalcommits.org/en/v1.0.0/
+- https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases
+
+## Core Workflow
+
+1. Validate commit history quality against conventional commit policy.
+2. Determine next version from merged change scope.
+3. Generate changelog draft and remove low-signal noise.
+4. Stage release commit/tag plan with rollback path.
+5. Publish release and verify changelog consistency.
+
+## Overview
+
+This skill gives agents a deterministic release process that produces readable changelogs without manual rewrite churn.
+
+## Capability Scope
+
+- Commit history normalization
+- Semver recommendation logic
+- Changelog generation and section tuning
+- Release tagging and publication checks
+- Post-release verification and correction
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Enforce conventional commits before changelog generation.
+- Keep release source-of-truth tied to tags on protected branches.
+- Exclude bot-only and merge-noise commits from user-facing notes.
+- Require human review before publishing release artifacts.
+
+## Troubleshooting
+
+**Issue:** Changelog section grouping is noisy  
+**Fix:** tighten commit scopes and skip bots/merge-only commits.
+
+**Issue:** Wrong version bump recommendation  
+**Fix:** map feat/fix/breaking conventions explicitly in config.
+
+**Issue:** Release notes differ from changelog  
+**Fix:** derive both from same generated artifact path.
+
+## Output Contract
+
+1. Proposed version with justification.
+2. Clean changelog text ready for merge.
+3. Tag/release command sequence.
+4. Verification notes and fallback steps.

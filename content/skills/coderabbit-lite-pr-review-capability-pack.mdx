@@ -1,0 +1,137 @@
+---
+title: Code Review Automation Capability Pack Skill
+slug: coderabbit-lite-pr-review-capability-pack
+category: skills
+description: 'Expert code-review capability pack for deterministic PR audits, risk-ranked findings, and low-noise fix planning without SaaS lock-in.'
+cardDescription: 'Run a local, repeatable PR review loop with severity scoring, false-positive control, and fix-ready output.'
+seoTitle: Code Review Automation Capability Pack Skill
+seoDescription: 'Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews'
+downloadUrl: /downloads/skills/coderabbit-lite-pr-review-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack'
+usageSnippet: 'Use this skill to run a deterministic PR audit, rank findings by severity, and generate fix-ready patch guidance.'
+copySnippet: |-
+  # Trigger
+  "Apply the code review automation capability pack to this PR."
+
+  # Required output
+  1) Risk-ranked findings (P0-P3) with evidence
+  2) Exploitability notes and blast-radius estimate
+  3) Minimal patch plan grouped by file ownership
+  4) Post-fix validation checklist
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://docs.github.com/en/pull-requests'
+  - 'https://owasp.org/www-project-top-ten/'
+  - 'https://cheatsheetseries.owasp.org/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Repository access and PR diff
+  - Security severity policy
+  - Test/lint/typecheck commands
+tags:
+  - code-review
+  - pull-requests
+  - security
+  - capability-pack
+  - automation
+keywords:
+  - pull request audit
+  - local code review automation
+  - severity scoring
+  - exploitability analysis
+readingTime: 9
+packageVerified: true
+difficultyScore: 88
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+Refresh references before using this skill for critical production decisions.
+
+## Retrieval Sources
+
+- https://docs.github.com/en/pull-requests
+- https://owasp.org/www-project-top-ten/
+- https://cheatsheetseries.owasp.org/
+
+## Core Workflow
+
+1. Build threat model from changed files and data boundaries.
+2. Classify findings by exploitability and operational impact.
+3. Remove low-confidence noise before presenting blockers.
+4. Produce minimal, file-scoped patch plan with validation gates.
+5. Re-check changed attack surfaces after fixes land.
+
+## Overview
+
+This skill teaches agents to perform fast, low-noise code reviews that mimic senior reviewer behavior: clear severity, concrete evidence, and fix-first recommendations.
+
+## Capability Scope
+
+- PR diff triage and risk scoring
+- Security and reliability regression detection
+- False-positive suppression rules
+- Patch-plan generation with owner mapping
+- Post-fix verification guidance
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Do not block merges on low-confidence findings.
+- Require concrete code evidence for every high-severity claim.
+- Separate exploitability from style concerns.
+- Always include rollback or quick-mitigation options.
+
+## Troubleshooting
+
+**Issue:** Too many low-signal findings  
+**Fix:** tighten rule set to changed files and critical paths first.
+
+**Issue:** Security findings lack proof  
+**Fix:** require request/response, data-flow, or control-path evidence.
+
+**Issue:** Patch plan is too broad  
+**Fix:** break by file ownership and dependency boundary.
+
+## Output Contract
+
+1. Risk-ranked findings with direct evidence.
+2. Priority fix plan with smallest safe diff.
+3. Validation commands and pass criteria.
+4. Remaining residual risks and follow-ups.
+
+## Validation Checklist
+
+- Confirm findings map to changed code.
+- Run test/lint/typecheck after patch.
+- Re-check auth, input validation, and data handling paths.
+- Verify no new critical findings introduced by fixes.
