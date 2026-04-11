@@ -11,9 +11,11 @@
 ## Schema and Quality Checks
 
 - [ ] `pnpm validate:content` passed
+- [ ] `pnpm validate:packages` passed
 - [ ] `pnpm audit:content` ran and I reviewed findings
 - [ ] No forbidden fields were added (`viewCount`, `copyCount`, `popularityScore`)
 - [ ] Install/use/copy paths are practical and complete
+- [ ] Skill submissions include capability metadata when applicable (`skillType`, `skillLevel`, `verificationStatus`, `verifiedAt`, `retrievalSources`, `testedPlatforms`)
 
 ## Validation
 

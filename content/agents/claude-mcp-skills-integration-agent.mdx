@@ -101,7 +101,7 @@ copySnippet: >-
         "command": "npx",
         "args": ["-y", "@modelcontextprotocol/server-github"],
         "env": {
-          "GITHUB_TOKEN": "ghp_your_token_here"
+          "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN"
         }
       },
       "postgres": {
@@ -532,7 +532,7 @@ copySnippet: >-
 
   {
     "env": {
-      "API_KEY": "sk-1234567890"
+      "API_KEY": "YOUR_API_KEY"
     }
   }
 
@@ -552,7 +552,7 @@ copySnippet: >-
 
   ```bash
 
-  export GITHUB_TOKEN=ghp_your_token
+  export GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 
   ```
 
@@ -710,7 +710,7 @@ Simon Willison's October 16, 2025 article highlighted: **"Claude Skills maybe bi
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "GITHUB_TOKEN": "ghp_your_token_here"
+        "GITHUB_TOKEN": "YOUR_GITHUB_TOKEN"
       }
     },
     "postgres": {
@@ -990,7 +990,7 @@ node --version
 // ❌ Don't hardcode secrets
 {
   "env": {
-    "API_KEY": "sk-1234567890"
+    "API_KEY": "YOUR_API_KEY"
   }
 }
 
@@ -1004,7 +1004,7 @@ node --version
 
 Then set in shell:
 ```bash
-export GITHUB_TOKEN=ghp_your_token
+export GITHUB_TOKEN=YOUR_GITHUB_TOKEN
 ```
 
 **Tool Permissions Denied**

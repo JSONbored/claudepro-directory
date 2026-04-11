@@ -98,6 +98,63 @@ body:
       placeholder: claude skill install my-skill
     validations:
       required: false
+  - type: dropdown
+    id: skill_type
+    attributes:
+      label: Skill type
+      options:
+        - general
+        - capability-pack
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: skill_level
+    attributes:
+      label: Skill level
+      options:
+        - foundational
+        - advanced
+        - expert
+      default: 1
+    validations:
+      required: true
+  - type: dropdown
+    id: verification_status
+    attributes:
+      label: Verification status
+      options:
+        - draft
+        - validated
+        - production
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: verified_at
+    attributes:
+      label: Verified date (YYYY-MM-DD)
+      placeholder: 2026-04-10
+    validations:
+      required: false
+  - type: textarea
+    id: retrieval_sources
+    attributes:
+      label: Retrieval sources
+      description: Comma or newline-separated official docs used to verify this skill.
+      placeholder: |
+        https://docs.example.com
+        https://api.example.com/reference
+    validations:
+      required: false
+  - type: input
+    id: tested_platforms
+    attributes:
+      label: Tested platforms
+      description: Comma-separated list
+      placeholder: Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini
+    validations:
+      required: false
   - type: textarea
     id: usage_snippet
     attributes:

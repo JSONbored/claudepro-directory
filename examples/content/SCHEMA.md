@@ -20,7 +20,7 @@ Every entry should include:
 - `hooks`: `trigger`, `usageSnippet`, `copySnippet`, `configSnippet`, `scriptBody`
 - `mcp`: `installCommand`, `usageSnippet`, `copySnippet`, `configSnippet`
 - `rules`: `copySnippet`
-- `skills`: `installCommand`, `usageSnippet`, `copySnippet`, `downloadUrl`
+- `skills`: `installCommand`, `usageSnippet`, `copySnippet`, `downloadUrl`, `skillType`, `skillLevel`, `verificationStatus`, `verifiedAt`, `retrievalSources`, `testedPlatforms`
 - `statuslines`: `scriptLanguage`, `usageSnippet`, `copySnippet`, `configSnippet`, `scriptBody`
 
 ## Forbidden fields
@@ -39,6 +39,27 @@ Upvotes are now owned by D1 (`votes_entries`) and not contributor metadata.
 - Community submissions should provide external source/release URLs.
 - Skills local packages must be `.zip` under `/downloads/skills/...`.
 - MCP local packages must be `.mcpb` under `/downloads/mcp/...`.
+
+## Skills capability metadata
+
+Skills support two operating modes:
+
+- `skillType: general`
+- `skillType: capability-pack`
+
+Capability packs are deep, version-aware skills and must include:
+
+- `skillLevel: expert`
+- `verificationStatus` (`validated` or `production`)
+- `verifiedAt` (ISO date `YYYY-MM-DD`)
+- `retrievalSources` (array of official docs/reference URLs)
+- `testedPlatforms` (array, e.g. Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini)
+- Required sections in markdown body:
+  - `## Knowledge Freshness`
+  - `## Retrieval Sources`
+  - `## Core Workflow`
+  - `## Capability Scope`
+  - `## Production Rules`
 
 ## Validation workflow
 

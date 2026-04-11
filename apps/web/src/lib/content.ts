@@ -61,6 +61,12 @@ export type ContentEntry = {
   installationOrder?: string[];
   estimatedSetupTime?: string;
   difficulty?: string;
+  skillType?: "general" | "capability-pack";
+  skillLevel?: "foundational" | "advanced" | "expert";
+  verificationStatus?: "draft" | "validated" | "production";
+  verifiedAt?: string;
+  retrievalSources?: string[];
+  testedPlatforms?: string[];
   prerequisites?: string[];
   hasPrerequisites?: boolean;
   hasTroubleshooting?: boolean;

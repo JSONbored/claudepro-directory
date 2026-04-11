@@ -2080,8 +2080,53 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/agent-evals-regression-gate.mdx",
+    "slug": "agent-evals-regression-gate",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ai-agent-observability-incident-response.mdx",
+    "slug": "ai-agent-observability-incident-response",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ai-search-ranking-content-cluster-strategy.mdx",
+    "slug": "ai-search-ranking-content-cluster-strategy",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/audio-transcription-summarization.mdx",
     "slug": "audio-transcription-summarization",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/base-l2-smart-contract-launchpad.mdx",
+    "slug": "base-l2-smart-contract-launchpad",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/browser-agent-workflow-automation.mdx",
+    "slug": "browser-agent-workflow-automation",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2116,6 +2161,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx",
+    "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/csv-excel-data-wrangler.mdx",
     "slug": "csv-excel-data-wrangler",
     "metadataOnly": false,
@@ -2134,8 +2188,35 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/docker-compose-production-blueprints.mdx",
+    "slug": "docker-compose-production-blueprints",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/docx-report-generator.mdx",
     "slug": "docx-report-generator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ethereum-base-smart-contract-security-capability-pack.mdx",
+    "slug": "ethereum-base-smart-contract-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ethereum-solidity-security-foundry.mdx",
+    "slug": "ethereum-solidity-security-foundry",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2161,8 +2242,35 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/github-actions-secure-cicd-capability-pack.mdx",
+    "slug": "github-actions-secure-cicd-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/google-workspace-gemini-automation.mdx",
+    "slug": "google-workspace-gemini-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/image-ocr-table-extraction.mdx",
     "slug": "image-ocr-table-extraction",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/indexnow-search-indexing-accelerator.mdx",
+    "slug": "indexnow-search-indexing-accelerator",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2197,8 +2305,98 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/mcp-server-authoring-security-capability-pack.mdx",
+    "slug": "mcp-server-authoring-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mcp-server-security-hardening.mdx",
+    "slug": "mcp-server-security-hardening",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mcp-tool-contract-testing.mdx",
+    "slug": "mcp-tool-contract-testing",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/mintlify-documentation-automation.mdx",
     "slug": "mintlify-documentation-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/model-routing-cost-latency-optimizer.mdx",
+    "slug": "model-routing-cost-latency-optimizer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/n8n-ai-agent-workflow-architect.mdx",
+    "slug": "n8n-ai-agent-workflow-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/n8n-production-security-capability-pack.mdx",
+    "slug": "n8n-production-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-agent-ops-hardening.mdx",
+    "slug": "openclaw-agent-ops-hardening",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-operator-capability-pack.mdx",
+    "slug": "openclaw-operator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/opennext-cloudflare-capability-pack.mdx",
+    "slug": "opennext-cloudflare-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/pagespeed-insights-optimizer.mdx",
+    "slug": "pagespeed-insights-optimizer",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2215,6 +2413,15 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/playwright-mcp-browser-automation-engineer.mdx",
+    "slug": "playwright-mcp-browser-automation-engineer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/postgresql-query-optimization.mdx",
     "slug": "postgresql-query-optimization",
     "metadataOnly": false,
@@ -2224,8 +2431,53 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/prompt-injection-defense-guardrails.mdx",
+    "slug": "prompt-injection-defense-guardrails",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/proxmox-ve-api-capability-pack.mdx",
+    "slug": "proxmox-ve-api-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/proxmox-ve-api-orchestrator.mdx",
+    "slug": "proxmox-ve-api-orchestrator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/raycast-extension-dev-publish-capability-pack.mdx",
+    "slug": "raycast-extension-dev-publish-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/rest-api-client-harness.mdx",
     "slug": "rest-api-client-harness",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/saas-pricing-experimentation-engine.mdx",
+    "slug": "saas-pricing-experimentation-engine",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -2253,6 +2505,24 @@
     "category": "skills",
     "filePath": "content/skills/trpc-type-safe-api.mdx",
     "slug": "trpc-type-safe-api",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/unraid-api-automation-operator.mdx",
+    "slug": "unraid-api-automation-operator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/unraid-api-v2-capability-pack.mdx",
+    "slug": "unraid-api-v2-capability-pack",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],

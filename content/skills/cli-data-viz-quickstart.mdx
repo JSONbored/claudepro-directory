@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
 documentationUrl: 'https://matplotlib.org/'
 downloadUrl: /downloads/skills/cli-data-viz-quickstart.zip
-packageVerified: true
 installable: true
 installCommand: npm i vega vega-lite
 usageSnippet: npm i vega vega-lite
@@ -22,6 +21,19 @@ copySnippet: |-
   df = pd.read_csv('data.csv')
   df.groupby('category')['value'].sum().plot(kind='bar')
   plt.tight_layout(); plt.savefig('chart.png', dpi=200)
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://matplotlib.org/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Python 3.11+ or Node.js 18+
   - matplotlib/seaborn or vega/vega-lite
@@ -48,6 +60,7 @@ keywords:
   - visualization
   - viz
 readingTime: 5
+packageVerified: true
 difficultyScore: 96
 hasTroubleshooting: true
 hasPrerequisites: false

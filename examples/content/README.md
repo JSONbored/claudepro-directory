@@ -24,3 +24,4 @@ Important:
 
 - Do not add `viewCount`, `copyCount`, or `popularityScore` to content files.
 - Upvotes are owned by D1 and not user-submitted content metadata.
+- Skill entries should include capability metadata (`skillType`, `skillLevel`, `verificationStatus`, `verifiedAt`, `retrievalSources`, `testedPlatforms`).

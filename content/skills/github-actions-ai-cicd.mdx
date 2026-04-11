@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-16'
 documentationUrl: 'https://docs.github.com/en/actions'
 downloadUrl: /downloads/skills/github-actions-ai-cicd.zip
-packageVerified: true
 installable: true
 installCommand: 'curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd'
 usageSnippet: 'Claude can design, generate, and optimize GitHub Actions workflows for comprehensive CI/CD pipelines. This skill enables automated testing, intelligent deployment strategies, security scanning, performance monitoring, and infrastructure provisioning - all triggered by GitHub events with AI-optimized configurations.'
@@ -186,6 +185,19 @@ copySnippet: |-
               }
           env:
             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-16'
+retrievalSources:
+  - 'https://docs.github.com/en/actions'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - GitHub repository with Actions enabled
   - 'Test suite (Vitest, Jest, Playwright)'
@@ -213,6 +225,7 @@ keywords:
   - skills
   - tools
 readingTime: 5
+packageVerified: true
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false

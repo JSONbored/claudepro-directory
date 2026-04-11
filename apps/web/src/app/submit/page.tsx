@@ -29,6 +29,10 @@ export default function SubmitPage() {
               category-specific GitHub issue template with schema-aligned fields.
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
+              Skill submissions now support both general skills and deep capability packs
+              with verification metadata and retrieval sources.
+            </p>
+            <p className="max-w-xl text-sm leading-7 text-muted-foreground">
               Job listings are private and handled separately through the{" "}
               <a href="/jobs/post" className="text-primary underline underline-offset-4">
                 jobs intake flow

@@ -32,7 +32,18 @@ export const CATEGORY_SCHEMAS = {
   },
   skills: {
     required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["installCommand", "usageSnippet", "copySnippet", "downloadUrl"]
+    recommended: [
+      "installCommand",
+      "usageSnippet",
+      "copySnippet",
+      "downloadUrl",
+      "skillType",
+      "skillLevel",
+      "verificationStatus",
+      "verifiedAt",
+      "retrievalSources",
+      "testedPlatforms"
+    ]
   },
   statuslines: {
     required: ["title", "slug", "description", "cardDescription"],
@@ -41,6 +52,17 @@ export const CATEGORY_SCHEMAS = {
 };
 
 export const FORBIDDEN_CONTENT_FIELDS = ["viewCount", "copyCount", "popularityScore"];
+export const SKILL_TYPE_VALUES = ["general", "capability-pack"];
+export const SKILL_LEVEL_VALUES = ["foundational", "advanced", "expert"];
+export const VERIFICATION_STATUS_VALUES = ["draft", "validated", "production"];
+const DEFAULT_TESTED_PLATFORMS = [
+  "Claude",
+  "Codex",
+  "OpenClaw",
+  "Cursor",
+  "Windsurf",
+  "Gemini"
+];
 
 export function headingId(text) {
   return text
@@ -336,6 +358,57 @@ export function inferStructuredFields(data, body, category) {
             ["mcp", "skills", "hooks", "statuslines", "commands"].includes(category)
         );
 
+  const normalizedSkillType =
+    category === "skills"
+      ? data.skillType
+        ? String(data.skillType).trim().toLowerCase()
+        : String(data.slug || "").endsWith("-capability-pack")
+          ? "capability-pack"
+          : "general"
+      : "";
+
+  const skillType = SKILL_TYPE_VALUES.includes(normalizedSkillType)
+    ? normalizedSkillType
+    : "general";
+  const skillLevel =
+    category === "skills"
+      ? data.skillLevel
+        ? String(data.skillLevel).trim().toLowerCase()
+        : skillType === "capability-pack"
+          ? "expert"
+          : "advanced"
+      : "";
+  const verificationStatus =
+    category === "skills"
+      ? data.verificationStatus
+        ? String(data.verificationStatus).trim().toLowerCase()
+        : skillType === "capability-pack"
+          ? "validated"
+          : "draft"
+      : "";
+  const verifiedAt =
+    category === "skills"
+      ? data.verifiedAt
+        ? String(data.verifiedAt).trim()
+        : data.dateAdded
+          ? String(data.dateAdded).trim()
+          : ""
+      : "";
+  const retrievalSources =
+    category === "skills"
+      ? Array.isArray(data.retrievalSources)
+        ? data.retrievalSources.map(String).map((value) => value.trim()).filter(Boolean)
+        : data.documentationUrl
+          ? [String(data.documentationUrl).trim()]
+          : []
+      : [];
+  const testedPlatforms =
+    category === "skills"
+      ? Array.isArray(data.testedPlatforms)
+        ? data.testedPlatforms.map(String).map((value) => value.trim()).filter(Boolean)
+        : [...DEFAULT_TESTED_PLATFORMS]
+      : [];
+
   return {
     cardDescription: data.cardDescription
       ? String(data.cardDescription)
@@ -356,7 +429,13 @@ export function inferStructuredFields(data, body, category) {
           : inferHookTrigger(combinedText)
         : data.trigger
           ? String(data.trigger)
-          : ""
+          : "",
+    skillType: category === "skills" ? skillType : "",
+    skillLevel: category === "skills" ? skillLevel : "",
+    verificationStatus: category === "skills" ? verificationStatus : "",
+    verifiedAt,
+    retrievalSources,
+    testedPlatforms
   };
 }
 
@@ -394,6 +473,9 @@ export function validateEntry(category, data, inferred = {}) {
     if (installIndex >= 0) recommendedFields.splice(installIndex, 1);
   }
 
+  const enumErrors = [];
+  const semanticErrors = [];
+
   for (const field of schema?.required ?? []) {
     if (
       merged[field] === undefined ||
@@ -414,7 +496,49 @@ export function validateEntry(category, data, inferred = {}) {
     }
   }
 
-  return { missingRequired, missingRecommended };
+  if (category === "skills") {
+    const skillType = String(merged.skillType || "").trim().toLowerCase();
+    const skillLevel = String(merged.skillLevel || "").trim().toLowerCase();
+    const verificationStatus = String(merged.verificationStatus || "").trim().toLowerCase();
+    const verifiedAt = String(merged.verifiedAt || "").trim();
+    const retrievalSources = Array.isArray(merged.retrievalSources)
+      ? merged.retrievalSources.map((value) => String(value).trim()).filter(Boolean)
+      : [];
+    const testedPlatforms = Array.isArray(merged.testedPlatforms)
+      ? merged.testedPlatforms.map((value) => String(value).trim()).filter(Boolean)
+      : [];
+
+    if (skillType && !SKILL_TYPE_VALUES.includes(skillType)) {
+      enumErrors.push(`Invalid skillType: ${skillType}`);
+    }
+    if (skillLevel && !SKILL_LEVEL_VALUES.includes(skillLevel)) {
+      enumErrors.push(`Invalid skillLevel: ${skillLevel}`);
+    }
+    if (verificationStatus && !VERIFICATION_STATUS_VALUES.includes(verificationStatus)) {
+      enumErrors.push(`Invalid verificationStatus: ${verificationStatus}`);
+    }
+    if (verifiedAt && !/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt)) {
+      semanticErrors.push("verifiedAt must be ISO date format YYYY-MM-DD");
+    }
+
+    if (skillType === "capability-pack") {
+      if (!retrievalSources.length) {
+        semanticErrors.push("capability-pack skills must include retrievalSources");
+      }
+      if (!verifiedAt) {
+        semanticErrors.push("capability-pack skills must include verifiedAt");
+      }
+      if (skillLevel && skillLevel !== "expert") {
+        semanticErrors.push("capability-pack skills must use skillLevel: expert");
+      }
+    }
+
+    if (!testedPlatforms.length) {
+      semanticErrors.push("skills must define testedPlatforms");
+    }
+  }
+
+  return { missingRequired, missingRecommended, enumErrors, semanticErrors };
 }
 
 export function orderFrontmatter(data) {
@@ -444,6 +568,12 @@ export function orderFrontmatter(data) {
     "installationOrder",
     "estimatedSetupTime",
     "difficulty",
+    "skillType",
+    "skillLevel",
+    "verificationStatus",
+    "verifiedAt",
+    "retrievalSources",
+    "testedPlatforms",
     "prerequisites",
     "tags",
     "keywords",

@@ -12,7 +12,6 @@ dateAdded: '2025-10-15'
 repoUrl: 'https://github.com/openai/whisper'
 documentationUrl: 'https://github.com/openai/whisper'
 downloadUrl: /downloads/skills/audio-transcription-summarization.zip
-packageVerified: true
 installable: true
 installCommand: pip install openai-whisper
 usageSnippet: pip install openai-whisper
@@ -22,6 +21,19 @@ copySnippet: |-
 
   # Python whisper (pip install -U openai-whisper)
   whisper input.wav --model small --language en --output_format txt
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://github.com/openai/whisper'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - ffmpeg
   - Python 3.11+ or whisper.cpp
@@ -46,6 +58,7 @@ keywords:
   - transcription
   - whisper
 readingTime: 3
+packageVerified: true
 difficultyScore: 71
 hasTroubleshooting: true
 hasPrerequisites: false

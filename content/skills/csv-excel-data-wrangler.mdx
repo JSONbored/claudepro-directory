@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
 documentationUrl: 'https://pandas.pydata.org/'
 downloadUrl: /downloads/skills/csv-excel-data-wrangler.zip
-packageVerified: true
 installable: true
 installCommand: pip install pandas openpyxl
 usageSnippet: pip install pandas openpyxl
@@ -30,6 +29,19 @@ copySnippet: |-
   sales_by_region = df.groupby('region', dropna=False)['total'].sum().reset_index()
 
   sales_by_region.to_excel('sales_by_region.xlsx', index=False)
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://pandas.pydata.org/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Python 3.11+
   - pandas
@@ -57,6 +69,7 @@ keywords:
   - wrangler
   - xlsx
 readingTime: 4
+packageVerified: true
 difficultyScore: 94
 hasTroubleshooting: true
 hasPrerequisites: false

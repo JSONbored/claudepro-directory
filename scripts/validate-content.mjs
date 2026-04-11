@@ -58,6 +58,14 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       }
     }
 
+    if (validation.enumErrors?.length) {
+      failures.push(`${entry}: ${validation.enumErrors.join("; ")}`);
+    }
+
+    if (validation.semanticErrors?.length) {
+      failures.push(`${entry}: ${validation.semanticErrors.join("; ")}`);
+    }
+
     for (const field of FORBIDDEN_CONTENT_FIELDS) {
       if (parsed.data[field] !== undefined) {
         failures.push(`${entry}: forbidden field present -> ${field}`);
@@ -105,6 +113,38 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       }
       if (localDownload && parsed.data.packageVerified !== true) {
         failures.push(`${entry}: local /downloads package must set packageVerified: true`);
+      }
+    }
+
+    if (category === "skills") {
+      const skillType = String(parsed.data.skillType ?? inferred.skillType ?? "")
+        .trim()
+        .toLowerCase();
+      const retrievalSources = Array.isArray(parsed.data.retrievalSources)
+        ? parsed.data.retrievalSources
+            .map((value) => String(value).trim())
+            .filter(Boolean)
+        : [];
+
+      for (const url of retrievalSources) {
+        if (!/^https:\/\//i.test(url)) {
+          failures.push(`${entry}: retrievalSources must use https URLs -> ${url}`);
+        }
+      }
+
+      if (skillType === "capability-pack") {
+        const requiredSections = [
+          "## Knowledge Freshness",
+          "## Retrieval Sources",
+          "## Core Workflow",
+          "## Capability Scope",
+          "## Production Rules"
+        ];
+        for (const heading of requiredSections) {
+          if (!normalizedBody.includes(heading)) {
+            failures.push(`${entry}: capability-pack missing section -> ${heading}`);
+          }
+        }
       }
     }
   }

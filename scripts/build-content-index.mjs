@@ -276,6 +276,18 @@ async function main() {
           ? String(data.estimatedSetupTime)
           : undefined,
         difficulty: data.difficulty ? String(data.difficulty) : undefined,
+        skillType: inferred.skillType || undefined,
+        skillLevel: inferred.skillLevel || undefined,
+        verificationStatus: inferred.verificationStatus || undefined,
+        verifiedAt: inferred.verifiedAt || undefined,
+        retrievalSources:
+          Array.isArray(inferred.retrievalSources) && inferred.retrievalSources.length
+            ? inferred.retrievalSources
+            : undefined,
+        testedPlatforms:
+          Array.isArray(inferred.testedPlatforms) && inferred.testedPlatforms.length
+            ? inferred.testedPlatforms
+            : undefined,
         prerequisites: Array.isArray(data.prerequisites)
           ? data.prerequisites.map(String)
           : undefined,

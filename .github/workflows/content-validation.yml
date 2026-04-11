@@ -47,7 +47,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate content schema
-        run: pnpm validate:content
+        run: pnpm validate:content:strict
 
       - name: Validate downloadable packages
         run: pnpm validate:packages

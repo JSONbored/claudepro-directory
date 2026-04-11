@@ -1,0 +1,131 @@
+---
+title: Proxmox VE API Orchestrator Skill
+slug: proxmox-ve-api-orchestrator
+category: skills
+description: 'Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.'
+cardDescription: 'Proxmox automation skill for repeatable VM/LXC operations, backups, and cluster-safe workflows.'
+seoTitle: Proxmox VE API Orchestrator Skill
+seoDescription: 'Reusable AI skill for Proxmox API operations with secure token auth, orchestration sequencing, and operational safeguards.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+downloadUrl: /downloads/skills/proxmox-ve-api-orchestrator.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator'
+usageSnippet: Use this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.
+copySnippet: |-
+  # Trigger
+  "Run the Proxmox VE API orchestrator skill for this infrastructure request."
+
+  # Required output
+  1) Pre-flight checks (capacity, node health, locks)
+  2) Operation sequence with dependencies
+  3) Failure and rollback handling
+  4) Post-operation verification report
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Proxmox VE cluster or node API access
+  - Token-based auth with scoped permissions
+  - Defined operational policy for infra changes
+tags:
+  - proxmox
+  - virtualization
+  - infrastructure
+  - api
+  - homelab
+keywords:
+  - proxmox automation
+  - vm orchestration
+  - lxc automation
+  - proxmox api
+readingTime: 7
+packageVerified: true
+difficultyScore: 79
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill helps AI agents orchestrate Proxmox operations in a way that is safe for real infrastructure. It emphasizes pre-flight validation, explicit sequencing, and validation after each change.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Inventory of target nodes, VMs, and LXCs
+- Maintenance window and rollback criteria
+- Backup/snapshot policy for stateful workloads
+
+## What This Skill Delivers
+
+- Operation plans for create/update/migrate/backup/restore
+- Cluster-safe sequencing and lock awareness
+- Capacity and health validation checks
+- Change reporting with verification evidence
+
+## How to Use This Skill
+
+1. Gather current cluster state and constraints.
+2. Build deterministic operation graph.
+3. Gate risky operations behind approvals.
+4. Execute with bounded retries and timeout limits.
+5. Validate final state and produce run report.
+
+## Troubleshooting
+
+**Issue:** Migration operations fail mid-flight  
+**Fix:** Add pre-flight checks for storage/network/node health and fallback target node.
+
+**Issue:** API token works but operation is denied  
+**Fix:** Review token role scopes and map required privileges per endpoint.
+
+**Issue:** Post-change drift appears hours later  
+**Fix:** Add delayed verification checks for resource pressure and service health.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

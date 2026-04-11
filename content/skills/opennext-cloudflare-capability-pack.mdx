@@ -1,0 +1,140 @@
+---
+title: OpenNext Cloudflare Capability Pack Skill
+slug: opennext-cloudflare-capability-pack
+category: skills
+description: 'Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture.'
+cardDescription: 'Deep operational skill for running Next.js via OpenNext on Cloudflare Workers with correct caching, bindings, and reliability controls.'
+seoTitle: OpenNext Cloudflare Capability Pack Skill
+seoDescription: 'Advanced AI skill for OpenNext Cloudflare deployments, including Workers runtime patterns, cache behavior, and operational hardening.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://opennext.js.org/cloudflare/get-started'
+downloadUrl: /downloads/skills/opennext-cloudflare-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip -o opennext-cloudflare-capability-pack.zip && unzip -o opennext-cloudflare-capability-pack.zip -d ./opennext-cloudflare-capability-pack'
+usageSnippet: Use this skill when shipping Next.js applications to Cloudflare Workers with OpenNext and needing correctness + performance at scale.
+copySnippet: |-
+  # Trigger
+  "Use the OpenNext Cloudflare capability pack for this deployment plan."
+
+  # Required output
+  1) Runtime architecture map
+  2) Binding/env/secret model
+  3) Cache and revalidation strategy
+  4) Deploy and rollback procedure
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://opennext.js.org/cloudflare/get-started'
+  - 'https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/'
+  - 'https://developers.cloudflare.com/workers/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Next.js codebase and Cloudflare account
+  - Wrangler configuration access
+  - Deployment environment separation (dev/prod)
+tags:
+  - opennext
+  - cloudflare
+  - nextjs
+  - workers
+  - capability-pack
+keywords:
+  - opennext cloudflare
+  - nextjs workers deployment
+  - edge runtime patterns
+  - cloudflare workers nextjs
+readingTime: 10
+packageVerified: true
+difficultyScore: 88
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+
+- https://opennext.js.org/cloudflare/get-started
+- https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/
+- https://developers.cloudflare.com/workers/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+
+This capability pack teaches agents how to correctly design, deploy, and operate Next.js workloads on Cloudflare Workers using OpenNext. It is tuned for production behavior, not toy deployments.
+
+## Capability Scope
+
+- OpenNext build/runtime model on Workers
+- Binding strategy (D1, KV, R2, secrets, env vars)
+- Cache behavior and invalidation patterns
+- Route-specific security and performance controls
+- Observability, alerting, and rollout safety
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Treat API routes and static routes with separate cache/security policies.
+- Keep secret values out of repo and build output.
+- Verify behavior in dev and prod workers separately.
+- Enforce explicit rollback and incident pathways.
+
+## Troubleshooting
+
+**Issue:** Unexpected cache behavior after deploy  
+**Fix:** Validate cache headers, Cloudflare cache rules, and OpenNext route semantics together.
+
+**Issue:** Local works, Worker fails  
+**Fix:** Check bindings/env parity and runtime-specific API differences.
+
+**Issue:** Deploys are correct but latency is inconsistent  
+**Fix:** Profile critical routes, tighten cache strategy, and isolate expensive dynamic operations.
+
+## Output Contract
+
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

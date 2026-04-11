@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-23'
 documentationUrl: 'https://bun.sh/docs'
 downloadUrl: /downloads/skills/bun-runtime-modern-javascript.zip
-packageVerified: true
 installable: true
 installCommand: 'curl -L https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip -o bun-runtime-modern-javascript.zip && unzip -o bun-runtime-modern-javascript.zip -d ./bun-runtime-modern-javascript'
 usageSnippet: 'Claude can build and deploy JavaScript/TypeScript applications using Bun, the all-in-one JavaScript runtime that''s 3x faster than Node.js for package installs and startup time. Bun includes a native bundler, test runner, package manager, and TypeScript transpiler in a single binary. From APIs to CLIs to build tools, Bun provides drop-in Node.js compatibility with modern performance.'
@@ -42,6 +41,19 @@ copySnippet: |-
   });
 
   console.log(`Listening on http://localhost:${server.port}`);
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-23'
+retrievalSources:
+  - 'https://bun.sh/docs'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Bun 1.0+
   - macOS/Linux/WSL
@@ -67,6 +79,7 @@ keywords:
   - tools
   - typescript
 readingTime: 4
+packageVerified: true
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false

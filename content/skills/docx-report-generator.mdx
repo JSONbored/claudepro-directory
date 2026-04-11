@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
 documentationUrl: 'https://docxtpl.readthedocs.io/'
 downloadUrl: /downloads/skills/docx-report-generator.zip
-packageVerified: true
 installable: true
 installCommand: 'curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator'
 usageSnippet: 'Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.'
@@ -22,6 +21,19 @@ copySnippet: |-
   context = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }
   doc.render(context)
   doc.save('invoice.docx')
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://docxtpl.readthedocs.io/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Python 3.11+
   - docxtpl
@@ -46,6 +58,7 @@ keywords:
   - templating
   - tools
 readingTime: 5
+packageVerified: true
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false

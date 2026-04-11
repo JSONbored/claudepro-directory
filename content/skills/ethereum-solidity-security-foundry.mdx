@@ -1,0 +1,131 @@
+---
+title: Ethereum Solidity Security Foundry Skill
+slug: ethereum-solidity-security-foundry
+category: skills
+description: 'Build and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.'
+cardDescription: 'Smart contract development skill focused on secure Solidity architecture, testing rigor, and safer deployment practices.'
+seoTitle: Ethereum Solidity Security Foundry Skill
+seoDescription: 'Reusable AI skill for secure Ethereum smart contract development using Solidity, Foundry tests, fuzzing, and OpenZeppelin standards.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://ethereum.org/developers/docs/'
+downloadUrl: /downloads/skills/ethereum-solidity-security-foundry.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip -o ethereum-solidity-security-foundry.zip && unzip -o ethereum-solidity-security-foundry.zip -d ./ethereum-solidity-security-foundry'
+usageSnippet: 'Use this skill to design secure Solidity contracts and enforce quality with Foundry test, fuzz, and invariant workflows.'
+copySnippet: |-
+  # Trigger
+  "Apply the Ethereum Solidity security Foundry skill to this contract."
+
+  # Required output
+  1) Threat model and asset flow
+  2) Contract architecture with security controls
+  3) Test/fuzz/invariant plan
+  4) Deployment and verification checklist
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://ethereum.org/developers/docs/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Solidity project initialized with Foundry
+  - Clear protocol/token specification
+  - Target chain and deployment constraints
+tags:
+  - ethereum
+  - solidity
+  - foundry
+  - smart-contracts
+  - security
+keywords:
+  - ethereum smart contract skill
+  - solidity security
+  - foundry testing
+  - openzeppelin patterns
+readingTime: 8
+packageVerified: true
+difficultyScore: 86
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill gives AI agents a security-first operating model for Ethereum smart contracts. It combines pragmatic architecture guidance with strict testing discipline and deployment safeguards.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Contract requirements and threat boundaries
+- Access controls and upgrade policy decisions
+- Testnet deployment pipeline
+
+## What This Skill Delivers
+
+- Security-centric contract design review
+- Foundry unit, fuzz, and invariant test strategy
+- Common exploit class defenses (reentrancy, auth, oracle, rounding, griefing)
+- Pre-deploy and post-deploy operational checklist
+
+## How to Use This Skill
+
+1. Define assets, actors, and privileged operations.
+2. Build minimal contract surface area with explicit invariants.
+3. Implement and test against adversarial cases.
+4. Run static/dynamic checks before deployment.
+5. Deploy progressively with monitoring and pause controls.
+
+## Troubleshooting
+
+**Issue:** Tests pass but invariants fail under fuzzing  
+**Fix:** Revisit state transitions and assumptions around edge-case ordering.
+
+**Issue:** Access control too broad  
+**Fix:** Replace role overreach with least-privilege split roles and delayed admin ops.
+
+**Issue:** Upgrades create storage breakage  
+**Fix:** Add storage layout checks and upgrade simulation in CI before release.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://ethereum.org/developers/docs/
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

@@ -12,7 +12,6 @@ dateAdded: '2025-10-15'
 repoUrl: 'https://github.com/mozilla/readability'
 documentationUrl: 'https://github.com/mozilla/readability'
 downloadUrl: /downloads/skills/website-crawler-summarizer.zip
-packageVerified: true
 installable: true
 installCommand: 'curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d ./website-crawler-summarizer'
 usageSnippet: 'Claude can crawl websites, extract content from web pages, clean HTML to readable text, respect robots.txt, and generate structured summaries or documentation from web content. Perfect for research, competitive analysis, and content aggregation.'
@@ -26,6 +25,19 @@ copySnippet: |-
   const article = new Readability(doc.window.document).parse();
   console.log(article.title);
   console.log(article.textContent);
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://github.com/mozilla/readability'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Node.js 18+ or Python 3.11+
   - Playwright or Puppeteer (for JavaScript rendering)
@@ -52,6 +64,7 @@ keywords:
   - tools
   - website
 readingTime: 6
+packageVerified: true
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false

@@ -1,0 +1,132 @@
+---
+title: OpenClaw Agent Ops Hardening Skill
+slug: openclaw-agent-ops-hardening
+category: skills
+description: 'Harden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.'
+cardDescription: 'Production hardening for OpenClaw deployments, including permissions, network segmentation, and abuse-resistant agent controls.'
+seoTitle: OpenClaw Agent Ops Hardening Skill
+seoDescription: 'AI operations skill for OpenClaw environments focused on policy enforcement, secure runtime design, and operational resilience.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://github.com/openclaw/openclaw'
+downloadUrl: /downloads/skills/openclaw-agent-ops-hardening.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip -o openclaw-agent-ops-hardening.zip && unzip -o openclaw-agent-ops-hardening.zip -d ./openclaw-agent-ops-hardening'
+usageSnippet: Use this skill to move OpenClaw agents from prototype state to secure and monitorable production operation.
+copySnippet: |-
+  # Trigger
+  "Run the OpenClaw ops hardening skill for this deployment."
+
+  # Required output
+  1) Threat model and trust boundaries
+  2) Permission matrix for tools/actions
+  3) Runtime hardening changes
+  4) Incident response checklist
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://github.com/openclaw/openclaw'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Running OpenClaw environment (self-hosted or managed)
+  - Inventory of enabled tools and external integrations
+  - Access to runtime/network/security configuration
+tags:
+  - openclaw
+  - ai-agents
+  - security
+  - hardening
+  - operations
+keywords:
+  - openclaw security
+  - agent hardening
+  - ai ops
+  - least privilege
+  - agent runtime security
+readingTime: 8
+packageVerified: true
+difficultyScore: 81
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill provides a practical hardening framework for OpenClaw deployments. It focuses on reducing attack surface while preserving developer velocity: least privilege, clear approval paths, and observable failure handling.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Tool and connector inventory
+- Environment separation plan (dev/staging/prod)
+- Centralized logs and alert destination
+
+## What This Skill Delivers
+
+- Threat model tailored to agentic execution
+- Permission and approval policy per tool class
+- Runtime hardening checklist (secrets, network, filesystem, egress)
+- Incident handling runbook for abuse, drift, and data exposure
+
+## How to Use This Skill
+
+1. Identify data classes and protected operations.
+2. Map tools to minimal required permissions.
+3. Add explicit policy checks for sensitive actions.
+4. Add audit logs with correlation IDs.
+5. Validate with adversarial prompts and abuse scenarios.
+
+## Troubleshooting
+
+**Issue:** Agent can execute risky actions too broadly  
+**Fix:** Split capabilities into scoped tools and add approval for privileged operations.
+
+**Issue:** Difficult to trace harmful outputs  
+**Fix:** Add structured logging for prompt, tool call, decision, and result lifecycle.
+
+**Issue:** Secrets exposed in generated output  
+**Fix:** Add redaction middleware and blocklist checks before response emission.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://github.com/openclaw/openclaw
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

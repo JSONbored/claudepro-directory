@@ -11,7 +11,6 @@ authorProfileUrl: 'https://github.com/JSONbored'
 dateAdded: '2025-10-15'
 documentationUrl: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview'
 downloadUrl: /downloads/skills/rest-api-client-harness.zip
-packageVerified: true
 installable: true
 installCommand: 'curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness'
 usageSnippet: 'Claude can interact with REST APIs: make requests, handle authentication (API keys, OAuth, JWT), paginate through results, handle rate limits with retries, and process responses. Build API integration scripts, test endpoints, and extract data from web services.'
@@ -34,6 +33,19 @@ copySnippet: |-
     }
     return items;
   }
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2025-10-15'
+retrievalSources:
+  - 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
 prerequisites:
   - Node.js 18+
   - undici or axios HTTP client library
@@ -60,6 +72,7 @@ keywords:
   - skills
   - tools
 readingTime: 6
+packageVerified: true
 difficultyScore: 100
 hasTroubleshooting: true
 hasPrerequisites: false

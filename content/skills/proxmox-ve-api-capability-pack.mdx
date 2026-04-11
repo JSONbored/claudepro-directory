@@ -1,0 +1,140 @@
+---
+title: Proxmox VE API Capability Pack Skill
+slug: proxmox-ve-api-capability-pack
+category: skills
+description: 'Expert Proxmox VE API capability skill for VM/LXC lifecycle orchestration, task polling, auth safety, and cluster-aware operations.'
+cardDescription: Deep Proxmox API skill for reliable infrastructure automation with safe sequencing and operational guardrails.
+seoTitle: Proxmox VE API Capability Pack Skill
+seoDescription: 'Advanced AI capability skill for Proxmox VE API operations, including lifecycle orchestration, auth, and failure-safe runbooks.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+downloadUrl: /downloads/skills/proxmox-ve-api-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack'
+usageSnippet: Use this skill when an agent must automate Proxmox tasks with cluster-safe sequencing and production-grade verification.
+copySnippet: |-
+  # Trigger
+  "Use the Proxmox VE API capability pack skill for this infrastructure operation."
+
+  # Required output
+  1) Endpoint and task-state mapping
+  2) Pre-flight and capacity checks
+  3) Operation sequence with stop conditions
+  4) Post-flight validation and rollback guidance
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API'
+  - 'https://pve.proxmox.com/wiki/Main_Page'
+  - 'https://pve.proxmox.com/pve-docs/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Proxmox API token with least-privilege scope
+  - Node/cluster topology inventory
+  - Backup/snapshot policy
+tags:
+  - proxmox
+  - virtualization
+  - api
+  - infrastructure
+  - capability-pack
+keywords:
+  - proxmox api
+  - vm orchestration
+  - lxc automation
+  - homelab virtualization
+readingTime: 9
+packageVerified: true
+difficultyScore: 86
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+
+- https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
+- https://pve.proxmox.com/wiki/Main_Page
+- https://pve.proxmox.com/pve-docs/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+
+This capability pack teaches agents how to operate Proxmox VE safely and predictably through the API. It goes beyond generic automation by enforcing cluster-aware operational discipline.
+
+## Capability Scope
+
+- Token auth/session behavior and secure usage
+- Task lifecycle semantics and polling strategies
+- VM/LXC lifecycle orchestration patterns
+- Migration/backup/restore safety constraints
+- Failure classification and rollback protocol
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Gate write operations behind pre-flight checks.
+- Never assume synchronous completion for async tasks.
+- Validate desired state after each task completion.
+- Keep operations idempotent where possible.
+
+## Troubleshooting
+
+**Issue:** API call returns success but workload state is wrong  
+**Fix:** Tie workflow completion to task result plus post-state verification.
+
+**Issue:** Migration flakiness under load  
+**Fix:** Add capacity and network health gates before migration.
+
+**Issue:** Permission confusion across tokens  
+**Fix:** Maintain explicit token-role matrix per workflow.
+
+## Output Contract
+
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

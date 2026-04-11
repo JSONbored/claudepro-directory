@@ -62,6 +62,14 @@ export function SubmitForm() {
   const [trigger, setTrigger] = useState("");
   const [assetContent, setAssetContent] = useState("");
   const [tags, setTags] = useState("");
+  const [skillType, setSkillType] = useState("general");
+  const [skillLevel, setSkillLevel] = useState("advanced");
+  const [verificationStatus, setVerificationStatus] = useState("draft");
+  const [verifiedAt, setVerifiedAt] = useState("");
+  const [retrievalSources, setRetrievalSources] = useState("");
+  const [testedPlatforms, setTestedPlatforms] = useState(
+    "Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini"
+  );
 
   const issueUrl = useMemo(() => {
     const template = categoryTemplateMap[category] ?? "submit-entry.md";
@@ -89,6 +97,14 @@ export function SubmitForm() {
     if (trigger) params.set("trigger", trigger);
     if (assetContent) params.set("full_copyable_content", assetContent);
     if (assetContent) params.set("guide_content_markdown", assetContent);
+    if (category === "skills") {
+      params.set("skill_type", skillType);
+      params.set("skill_level", skillLevel);
+      params.set("verification_status", verificationStatus);
+      if (verifiedAt) params.set("verified_at", verifiedAt);
+      if (retrievalSources) params.set("retrieval_sources", retrievalSources);
+      if (testedPlatforms) params.set("tested_platforms", testedPlatforms);
+    }
 
     return `${siteConfig.githubUrl}/issues/new?${params.toString()}`;
   }, [
@@ -103,14 +119,21 @@ export function SubmitForm() {
     githubUrl,
     installCommand,
     slug,
+    skillLevel,
+    skillType,
     tags,
+    testedPlatforms,
     toolName,
-    trigger
+    trigger,
+    retrievalSources,
+    verificationStatus,
+    verifiedAt
   ]);
 
   const categoryNeedsAsset = categoriesRequiringAssetContent.has(category);
   const categoryNeedsTrigger = category === "hooks";
   const categoryNeedsCommandSyntax = category === "commands";
+  const categoryNeedsSkillMetadata = category === "skills";
 
   const isReady = Boolean(category);
 
@@ -297,6 +320,90 @@ export function SubmitForm() {
             className="submit-textarea min-h-56"
           />
         </div>
+      ) : null}
+
+      {categoryNeedsSkillMetadata ? (
+        <>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1">
+              <label htmlFor="submit-skill-type" className="submit-label">Skill type</label>
+              <Select value={skillType} onValueChange={setSkillType}>
+                <SelectTrigger id="submit-skill-type" className="submit-select-trigger">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="directory-select-content">
+                  <SelectItem value="general">general</SelectItem>
+                  <SelectItem value="capability-pack">capability-pack</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="submit-skill-level" className="submit-label">Skill level</label>
+              <Select value={skillLevel} onValueChange={setSkillLevel}>
+                <SelectTrigger id="submit-skill-level" className="submit-select-trigger">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="directory-select-content">
+                  <SelectItem value="foundational">foundational</SelectItem>
+                  <SelectItem value="advanced">advanced</SelectItem>
+                  <SelectItem value="expert">expert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="submit-verification-status" className="submit-label">Verification</label>
+              <Select value={verificationStatus} onValueChange={setVerificationStatus}>
+                <SelectTrigger id="submit-verification-status" className="submit-select-trigger">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="directory-select-content">
+                  <SelectItem value="draft">draft</SelectItem>
+                  <SelectItem value="validated">validated</SelectItem>
+                  <SelectItem value="production">production</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="submit-verified-at" className="submit-label">
+              Verified date (YYYY-MM-DD)
+            </label>
+            <input
+              id="submit-verified-at"
+              value={verifiedAt}
+              onChange={(event) => setVerifiedAt(event.target.value)}
+              placeholder="2026-04-10"
+              className="submit-input"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="submit-retrieval-sources" className="submit-label">
+              Retrieval sources
+            </label>
+            <textarea
+              id="submit-retrieval-sources"
+              value={retrievalSources}
+              onChange={(event) => setRetrievalSources(event.target.value)}
+              placeholder="https://docs.example.com, https://api.example.com/reference"
+              className="submit-textarea"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="submit-tested-platforms" className="submit-label">
+              Tested platforms
+            </label>
+            <input
+              id="submit-tested-platforms"
+              value={testedPlatforms}
+              onChange={(event) => setTestedPlatforms(event.target.value)}
+              placeholder="Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini"
+              className="submit-input"
+            />
+          </div>
+        </>
       ) : null}
 
       <div className="space-y-1">

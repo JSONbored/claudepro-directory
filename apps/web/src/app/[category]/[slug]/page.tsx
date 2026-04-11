@@ -296,7 +296,19 @@ export default async function DetailPage({ params }: DetailPageProps) {
     entry.argumentHint ? { label: "Arguments", value: entry.argumentHint } : null,
     entry.scriptLanguage ? { label: "Format", value: entry.scriptLanguage } : null,
     entry.estimatedSetupTime ? { label: "Setup time", value: entry.estimatedSetupTime } : null,
-    entry.difficulty ? { label: "Difficulty", value: entry.difficulty } : null
+    entry.difficulty ? { label: "Difficulty", value: entry.difficulty } : null,
+    entry.category === "skills" && entry.skillType
+      ? { label: "Skill type", value: entry.skillType }
+      : null,
+    entry.category === "skills" && entry.skillLevel
+      ? { label: "Skill level", value: entry.skillLevel }
+      : null,
+    entry.category === "skills" && entry.verificationStatus
+      ? { label: "Verification", value: entry.verificationStatus }
+      : null,
+    entry.category === "skills" && entry.verifiedAt
+      ? { label: "Verified", value: entry.verifiedAt }
+      : null
   ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
   const githubStars = Number(
     "githubStars" in entry && typeof entry.githubStars === "number"
@@ -601,6 +613,24 @@ export default async function DetailPage({ params }: DetailPageProps) {
                       <Sparkles className="size-3.5 shrink-0 text-muted-foreground" />
                       <span className="truncate">{entry.trigger}</span>
                     </span>
+                  </div>
+                ) : null}
+                {entry.category === "skills" && entry.skillType ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Skill type</span>
+                    <span className="truncate text-foreground">{entry.skillType}</span>
+                  </div>
+                ) : null}
+                {entry.category === "skills" && entry.skillLevel ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Skill level</span>
+                    <span className="truncate text-foreground">{entry.skillLevel}</span>
+                  </div>
+                ) : null}
+                {entry.category === "skills" && entry.verificationStatus ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Verification</span>
+                    <span className="truncate text-foreground">{entry.verificationStatus}</span>
                   </div>
                 ) : null}
                 {githubStars > 0 ? (
