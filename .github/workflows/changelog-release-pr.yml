@@ -1,0 +1,75 @@
+name: Changelog Release PR
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "CHANGELOG.md"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog-pr:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'docs(changelog):') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n1 || true)"
+          if [ -z "$latest" ]; then
+            next="v1.0.0"
+          else
+            base="${latest#v}"
+            IFS='.' read -r major minor patch <<< "$base"
+            patch=$((patch + 1))
+            next="v${major}.${minor}.${patch}"
+          fi
+          echo "next=${next}" >> "$GITHUB_OUTPUT"
+          echo "next_no_v=${next#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "${PWD}:/repo" \
+            -w /repo \
+            orhunp/git-cliff:latest \
+            --config .git-cliff.toml \
+            --tag "${{ steps.version.outputs.next }}" \
+            --output CHANGELOG.md
+
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: release/changelog-${{ steps.version.outputs.next }}
+          title: "chore(release): ${{ steps.version.outputs.next_no_v }}"
+          commit-message: "docs(changelog): prepare release ${{ steps.version.outputs.next }}"
+          body: |
+            ## Summary
+            Automated changelog update for `${{ steps.version.outputs.next }}`.
+
+            ## What changed
+            - Regenerated `CHANGELOG.md` using `git-cliff`
+            - Prepared release metadata for next merge-to-main
+
+            ## Notes
+            - Merge this PR to trigger auto-tag/release workflow.
+          labels: |
+            release
+            changelog
+          add-paths: |
+            CHANGELOG.md
+

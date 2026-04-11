@@ -157,6 +157,29 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function writeFileIfChanged(filePath, content) {
+  if (fs.existsSync(filePath)) {
+    const current = fs.readFileSync(filePath, "utf8");
+    if (current === content) return false;
+  }
+
+  const tempFile = `${filePath}.${process.pid}.${Date.now()}.tmp`;
+  fs.writeFileSync(tempFile, content);
+  fs.renameSync(tempFile, filePath);
+  return true;
+}
+
+function copyFileIfChanged(sourcePath, destPath) {
+  const source = fs.readFileSync(sourcePath);
+  if (fs.existsSync(destPath)) {
+    const current = fs.readFileSync(destPath);
+    if (Buffer.compare(source, current) === 0) return false;
+  }
+
+  fs.writeFileSync(destPath, source);
+  return true;
+}
+
 ensureDir(generatedDir);
 ensureDir(publicDataDir);
 ensureDir(skillsDownloadsDir);
@@ -164,7 +187,7 @@ ensureDir(mcpDownloadsDir);
 
 for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
   if (!fileName.endsWith(".zip")) continue;
-  fs.copyFileSync(
+  copyFileIfChanged(
     path.join(contentRoot, "skills", fileName),
     path.join(skillsDownloadsDir, fileName)
   );
@@ -172,7 +195,7 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
 
 for (const fileName of fs.readdirSync(path.join(contentRoot, "mcp"))) {
   if (!fileName.endsWith(".mcpb")) continue;
-  fs.copyFileSync(
+  copyFileIfChanged(
     path.join(contentRoot, "mcp", fileName),
     path.join(mcpDownloadsDir, fileName)
   );
@@ -370,13 +393,9 @@ async function main() {
   });
 
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
-  const tempOutputFile = `${outputFile}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(tempOutputFile, payload);
-  fs.renameSync(tempOutputFile, outputFile);
+  const wroteContentIndex = writeFileIfChanged(outputFile, payload);
   const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
-  const tempDirectoryOutputFile = `${directoryOutputFile}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(tempDirectoryOutputFile, directoryPayload);
-  fs.renameSync(tempDirectoryOutputFile, directoryOutputFile);
+  const wroteDirectoryIndex = writeFileIfChanged(directoryOutputFile, directoryPayload);
 
   const directoryStats = directoryRepo ? repoStats.get(directoryRepo.key) : null;
   const siteStatsPayload = {
@@ -385,9 +404,10 @@ async function main() {
     githubForks: directoryStats?.forks ?? null,
     repoUpdatedAt: directoryStats?.updatedAt ?? null
   };
-  const siteStatsTmp = `${siteStatsFile}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(siteStatsTmp, `${JSON.stringify(siteStatsPayload, null, 2)}\n`);
-  fs.renameSync(siteStatsTmp, siteStatsFile);
+  const wroteSiteStats = writeFileIfChanged(
+    siteStatsFile,
+    `${JSON.stringify(siteStatsPayload, null, 2)}\n`
+  );
 
   const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
     ? JSON.parse(fs.readFileSync(legacyVoteSeedFile, "utf8"))
@@ -396,13 +416,22 @@ async function main() {
     rawLegacySeed && typeof rawLegacySeed === "object" && typeof rawLegacySeed.votes === "object"
       ? rawLegacySeed.votes
       : {};
-  const generatedSeedTmp = `${generatedLegacyVoteSeedFile}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(generatedSeedTmp, `${JSON.stringify(votes, null, 2)}\n`);
-  fs.renameSync(generatedSeedTmp, generatedLegacyVoteSeedFile);
+  const wroteLegacySeed = writeFileIfChanged(
+    generatedLegacyVoteSeedFile,
+    `${JSON.stringify(votes, null, 2)}\n`
+  );
 
-  console.log(`Wrote ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`);
   console.log(
-    `Wrote ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`
+    `${wroteContentIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`
+  );
+  console.log(
+    `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`
+  );
+  console.log(
+    `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`
+  );
+  console.log(
+    `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`
   );
 }
 

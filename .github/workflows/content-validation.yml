@@ -6,6 +6,7 @@ on:
       - "content/**"
       - "scripts/**"
       - "examples/content/**"
+      - ".github/workflows/content-validation.yml"
       - "package.json"
       - "pnpm-lock.yaml"
   push:
@@ -15,6 +16,7 @@ on:
       - "content/**"
       - "scripts/**"
       - "examples/content/**"
+      - ".github/workflows/content-validation.yml"
       - "package.json"
       - "pnpm-lock.yaml"
 

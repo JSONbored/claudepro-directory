@@ -59,7 +59,7 @@ const nextConfig = {
       {
         source:
           "/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases)/:slug/llms.txt",
-        destination: "/guides/:slug",
+        destination: "/guides/:slug/llms.txt",
         permanent: true
       },
       {
