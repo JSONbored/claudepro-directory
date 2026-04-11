@@ -9,6 +9,8 @@
     "pretype-check": "node ../../scripts/build-content-index.mjs && next typegen",
     "prepreview": "node ../../scripts/build-content-index.mjs",
     "predeploy": "node ../../scripts/build-content-index.mjs",
+    "predeploy:dev": "node ../../scripts/build-content-index.mjs",
+    "predeploy:prod": "node ../../scripts/build-content-index.mjs",
     "dev": "next dev",
     "build": "next build",
     "type-check": "tsc --noEmit",
