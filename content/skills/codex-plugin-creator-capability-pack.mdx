@@ -1,0 +1,129 @@
+---
+title: Codex Plugin Creator Capability Pack Skill
+slug: codex-plugin-creator-capability-pack
+category: skills
+description: 'Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.'
+cardDescription: 'Design and ship Codex plugins with clean manifests, bounded permissions, and reusable packaging standards.'
+seoTitle: Codex Plugin Creator Capability Pack Skill
+seoDescription: 'Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://github.com/openai/codex'
+downloadUrl: /downloads/skills/codex-plugin-creator-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack'
+usageSnippet: 'Use this skill to scaffold and harden Codex plugins with explicit capabilities and low operational risk.'
+copySnippet: |-
+  # Trigger
+  "Apply the Codex plugin creator capability pack."
+
+  # Required output
+  1) Plugin architecture and capability boundaries
+  2) Manifest and permissions review
+  3) Security and observability checklist
+  4) Release and maintenance plan
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://github.com/openai/codex'
+  - 'https://github.com/modelcontextprotocol'
+  - 'https://spec.modelcontextprotocol.io/specification/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Plugin use case and scope
+  - Manifest and MCP requirements
+  - Deployment target constraints
+tags:
+  - codex
+  - plugins
+  - mcp
+  - developer-tooling
+  - capability-pack
+keywords:
+  - codex plugin development
+  - mcp plugin architecture
+  - plugin permission boundaries
+  - ai tooling extensions
+readingTime: 9
+packageVerified: true
+difficultyScore: 87
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://github.com/openai/codex
+- https://github.com/modelcontextprotocol
+- https://spec.modelcontextprotocol.io/specification/
+
+## Core Workflow
+
+1. Define plugin scope, trust boundaries, and runtime dependencies.
+2. Build manifest with minimum required capabilities only.
+3. Validate tool behavior and failure paths with smoke tests.
+4. Add observability and troubleshooting hooks.
+5. Publish with maintenance and compatibility policy.
+
+## Overview
+
+This skill helps agents build practical plugins that stay secure and maintainable instead of becoming one-off brittle integrations.
+
+## Capability Scope
+
+- Plugin architecture and capability boundaries
+- Manifest quality and permission minimization
+- MCP tool interoperability guidance
+- Error handling and observability setup
+- Release governance and compatibility notes
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Minimize plugin permissions and document each permission reason.
+- Validate tool contracts against strict schema expectations.
+- Keep plugin error handling explicit and observable.
+- Ship updates with backward-compatibility notes when behavior changes.
+
+## Troubleshooting
+
+**Issue:** Plugin has excessive privilege scope  
+**Fix:** reduce manifest permissions to explicit operational minimum.
+
+**Issue:** Tool calls are inconsistent across clients  
+**Fix:** enforce contract tests against expected schema/shape.
+
+**Issue:** Plugin errors are hard to diagnose  
+**Fix:** add request IDs, structured logs, and clear failure categories.
+
+## Output Contract
+
+1. Plugin plan with trust boundaries.
+2. Manifest with justification per permission.
+3. Validation and smoke-test protocol.
+4. Maintenance and deprecation plan.

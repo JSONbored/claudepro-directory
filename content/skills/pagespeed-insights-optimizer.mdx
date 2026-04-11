@@ -1,0 +1,184 @@
+---
+title: PageSpeed Insights Optimization Skill for AI Agents
+slug: pagespeed-insights-optimizer
+category: skills
+description: Structured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.
+cardDescription: 'Improve PSI/Lighthouse scores with a strict workflow for LCP, render-blocking resources, and unused JS/CSS while preserving design and behavior.'
+seoTitle: PageSpeed Insights Optimization Skill for AI Agents
+seoDescription: 'Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://web.dev/articles/vitals'
+downloadUrl: /downloads/skills/pagespeed-insights-optimizer.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer'
+usageSnippet: Use this skill whenever you need measurable PSI/Lighthouse improvements while keeping UI/UX unchanged.
+copySnippet: |-
+  # Trigger
+  "Run the PageSpeed Insights optimizer skill on this route and only propose
+  changes that preserve visual output and behavior."
+
+  # Required output
+  1) Baseline metrics (mobile + desktop): FCP, LCP, TBT, CLS, SI
+  2) Top bottlenecks ordered by expected impact
+  3) Smallest safe patch set
+  4) Validation rerun with before/after deltas
+
+  # Hard constraints
+  - No visual redesign
+  - No feature removal
+  - Keep accessibility and SEO intact
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://web.dev/articles/vitals'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Live URL or preview URL that can be tested by Lighthouse/PageSpeed Insights
+  - Access to run local build/type-check commands
+  - Ability to patch frontend code and redeploy for verification
+  - Optional access to Chrome DevTools trace for deep diagnostics
+tags:
+  - pagespeed
+  - lighthouse
+  - core-web-vitals
+  - web-performance
+  - optimization
+keywords:
+  - ai-skill
+  - pagespeed
+  - lighthouse
+  - lcp
+  - cls
+  - tbt
+  - performance
+  - optimization
+  - core-web-vitals
+  - skills
+readingTime: 7
+packageVerified: true
+difficultyScore: 78
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: direct skill package support using `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-format content (`SKILL.md`) and can be used as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.
+
+## Prerequisites
+
+- A route to test (production, staging, or preview URL)
+- Baseline Lighthouse/PageSpeed run for **mobile and desktop**
+- Ability to run project checks after edits (`type-check`, `build`, smoke tests)
+- Access to deploy and re-test
+
+## What This Skill Optimizes
+
+- LCP diagnosis and render delay reduction
+- Render-blocking CSS/JS mitigation
+- Unused JavaScript/CSS reduction
+- Third-party script scheduling strategy
+- Cache policy and static asset delivery consistency
+- Regression-safe micro-optimizations for initial route payload
+
+## How to Use This Skill
+
+### Prompt Pattern
+
+Use this prompt:
+
+```text
+Apply the PageSpeed Insights optimizer skill to <route>.
+Constraints:
+1) No UI/UX redesign or feature removal.
+2) Preserve accessibility and SEO behavior.
+3) Prioritize highest-impact, lowest-risk fixes first.
+Deliverables:
+- Baseline metrics table (mobile + desktop)
+- Ranked bottlenecks and root causes
+- Minimal patch plan
+- Post-change metrics with deltas
+```
+
+### Execution Flow
+
+1. Capture baseline metrics and record exact failing audits.
+2. Identify the current LCP element and why it is delayed.
+3. Apply smallest change set that targets top bottlenecks only.
+4. Re-run benchmarks and compare deltas.
+5. If gains are below threshold, stop and report diminishing returns.
+
+## Optimization Playbook
+
+### 1) LCP and above-the-fold path
+
+- Reduce server and render delay for the LCP element.
+- Ensure critical route data and styles load predictably.
+- Move non-critical work after first render.
+
+### 2) Render-blocking resources
+
+- Keep critical CSS minimal.
+- Defer non-critical scripts and low-priority widgets.
+- Avoid introducing blocking dependencies in root layout.
+
+### 3) Bundle pressure
+
+- Defer or split route-noncritical bundles.
+- Remove or gate dead/unused client-side modules.
+- Keep initial route payload focused on first-screen needs.
+
+### 4) Third-party impact
+
+- Delay analytics and low-priority scripts.
+- Verify no third-party library blocks first paint.
+- Keep third-party bytes and main-thread work accountable.
+
+### 5) Cache + delivery checks
+
+- Ensure static assets use long-lived immutable caching where safe.
+- Ensure API and dynamic routes are not accidentally over-cached.
+- Validate cache behavior after deploy.
+
+## Troubleshooting
+
+**Issue:** Score regresses after adding "helpful" scripts  
+**Fix:** Prioritize first-view rendering; move non-critical scripts to idle/lazy load.
+
+**Issue:** LCP remains high despite JS reductions  
+**Fix:** Re-check the actual LCP element, image/font loading path, and render delay.
+
+**Issue:** Mobile score volatile between runs  
+**Fix:** Use median over multiple runs and compare stable deltas, not single spikes.
+
+**Issue:** Good lab scores but poor field data  
+**Fix:** Track CrUX trends and verify real-user bottlenecks (device/network mix, third-party load).
+
+## Notes for This Repository
+
+- Use the generated index and existing scripts (`pnpm type-check`, `pnpm build`) after each optimization patch.
+- Keep changes scoped to measurable performance deltas.
+- Preserve the current visual layout and interaction model.

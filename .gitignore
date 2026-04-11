@@ -1,128 +1,15 @@
-# Dependencies
 node_modules
-apps/edge/functions/node_modules
-
-# Build outputs
-dist
-dist-ssr
 .next
-apps/web/.next
-out
-
-# Next.js TypeScript (auto-generated)
-apps/web/next-env.d.ts
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS files
+.open-next
+.wrangler
 .DS_Store
+dist
+coverage
+.dev.vars
+.dev.vars.*
+AGENTS.md
+docs/jobs-listings-private-flow.md
 
-# Deployment
-.vercel
-
-# Project specific
-.claude/
-.cursor/
-docs/
-
-# Migration planning (analysis only, no code changes)
-.migration/
-
-# CodeRabbit generated reports/summaries (should not be committed)
-DELIVERABLES.md
-FINAL_TEST_REPORT.md
-README_TESTS.md
-TESTING_COMPLETE.md
-TESTS_CREATED.txt
-TEST_RESULTS.md
-TEST_SUMMARY.md
-fix-test-issues.sh
-
-# Source ZIPs in content/skills/ are git-tracked for GitHub discoverability
-apps/web/public/downloads/skills/*.zip
-
-# Exception: Allow skill ZIPs in content/skills/ (overrides global ~/.gitignore_global *.zip rule)
+# Ensure first-party package assets remain tracked even if a global ignore has *.zip
 !content/skills/*.zip
-
-# Dynamic sitemap served by Supabase edge function (do not commit local copies)
-apps/web/public/sitemap.xml
-
-# Cache files
-.eslintcache
-*.tsbuildinfo
-.parcel-cache/
-.turbo/
-.temp/
-.build-cache/
-
-# Environment files
-.env*
-!.env.example
-
-# Backup files
-*.orig
-*.bak
-backups/
-
-# Build analysis
-stats.html
-
-# System files
-Thumbs.db
-
-tsconfig.tsbuildinfo
-apps/web/.tsbuildinfo
-.env*.local
-
-manifest.json
-
-# Supabase schema dump (contains secrets in trigger definitions)
-apps/edge/schema.sql
-supabase/migrations/*
-
-.launchd/com.claudepro.backup.plist
-
-.launchd/install.sh
-
-.launchd/README.md
-
-.launchd/uninstall.sh
-
-# Turborepo
-.turbo
-
-# Playwright test artifacts
-test-results/
-playwright-report/
-*.spec.ts-snapshots/
-*.spec.tsx-snapshots/
-.playwright/
-
-apps/edge/functions/deno.lock
-
-packages/edge-runtime/src/utils/email/templates/template-map.json
-
-apps/web/src/lib/data/README.md
-config/tools/ESLINT_RULES.md
-config/tools/LINT-QUICK-REFERENCE.md
-config/tools/LINTING.md
-config/tools/TYPE-CHECK-QUICK-REFERENCE.md
-config/tools/TYPE-CHECKING.md
-config/tools/NEW-ESLINT-RULES.md
+!content/mcp/*.mcpb

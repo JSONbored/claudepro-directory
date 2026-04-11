@@ -1,0 +1,147 @@
+---
+title: Unraid API v2 Capability Pack Skill
+slug: unraid-api-v2-capability-pack
+category: skills
+description: 'Deep, version-pinned Unraid API capability skill covering auth, schema patterns, safe mutations, and operational automation design.'
+cardDescription: 'Expert Unraid API skill with endpoint behavior, auth flows, error patterns, and production-safe automation guardrails.'
+seoTitle: Unraid API v2 Capability Pack Skill
+seoDescription: 'Expert AI skill for the latest Unraid API usage, including auth, endpoint contracts, safe operations, and reliability workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://docs.unraid.net/API/'
+downloadUrl: /downloads/skills/unraid-api-v2-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip -o unraid-api-v2-capability-pack.zip && unzip -o unraid-api-v2-capability-pack.zip -d ./unraid-api-v2-capability-pack'
+usageSnippet: Use this skill when building real Unraid API automations and requiring up-to-date endpoint semantics and operational safeguards.
+copySnippet: |-
+  # Trigger
+  "Apply the Unraid API v2 capability pack skill for this automation request."
+
+  # Required output
+  1) API endpoint contract mapping
+  2) Auth and permission model
+  3) Safe mutation plan with rollback checks
+  4) Tested request/response examples
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://docs.unraid.net/API/'
+  - 'https://docs.unraid.net/API/how-to-use-the-api/'
+  - 'https://docs.unraid.net/category/release-notes/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Unraid server with API enabled
+  - Scoped API key/token
+  - Target operation runbook and maintenance policy
+tags:
+  - unraid
+  - api
+  - homelab
+  - automation
+  - capability-pack
+keywords:
+  - unraid api v2
+  - unraid automation
+  - homelab api skill
+  - server operations
+readingTime: 9
+packageVerified: true
+difficultyScore: 84
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+
+- https://docs.unraid.net/API/
+- https://docs.unraid.net/API/how-to-use-the-api/
+- https://docs.unraid.net/category/release-notes/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+
+This is an expert-level capability skill for Unraid API operations. It is intended to teach an agent the practical details needed to build correct, safe automations against the current API surface.
+
+## Capability Scope
+
+- Authentication and session/token model
+- Endpoint family classification (read-only vs state-changing)
+- Data model assumptions and schema normalization
+- Mutation safety and confirmation workflows
+- Error handling, retries, idempotency, and rollback constraints
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Core Operating Model
+
+1. Discover current state before any write operations.
+2. Validate preconditions and maintenance window constraints.
+3. Execute minimal mutation set with explicit verification checkpoints.
+4. Emit an operation report with before/after snapshots and rollback notes.
+
+## Production Rules
+
+- Never run destructive actions without explicit confirmation.
+- Require idempotency strategy for retryable writes.
+- Separate health/read telemetry from mutation workflows.
+- Keep credentials scoped and rotated.
+
+## Troubleshooting
+
+**Issue:** Same automation works on one server but fails on another  
+**Fix:** Capture and compare API version/capability differences before execution.
+
+**Issue:** Partial state updates on retries  
+**Fix:** Introduce operation IDs and idempotent guard checks.
+
+**Issue:** Difficult post-mortem analysis  
+**Fix:** Add structured execution logs with endpoint, payload hash, and result metadata.
+
+## Output Contract
+
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

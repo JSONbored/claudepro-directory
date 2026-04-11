@@ -1,0 +1,385 @@
+---
+title: Simple Text Statusline - Statuslines
+slug: simple-text-statusline
+category: statuslines
+description: >-
+  Ultra-lightweight plain text statusline with no colors or special characters
+  for maximum compatibility and minimal overhead
+cardDescription: >-
+  Ultra-lightweight plain text statusline with no colors or special characters
+  for maximum compatibility and minimal overhead
+seoTitle: Simple Text Statusline - Statuslines
+seoDescription: >-
+  Ultra-lightweight plain text statusline with no colors or special characters
+  for maximum compatibility and minimal overhead Discover tools for AI
+  development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-01'
+installable: true
+usageSnippet: '[Model: claude-sonnet-4.5] [Dir: ~/projects/my-app] [Tokens: 1234]'
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh",
+      "refreshInterval": 300
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh",
+      "refreshInterval": 300
+    }
+  }
+scriptLanguage: bash
+scriptBody: >-
+  #!/usr/bin/env bash
+
+
+  # Simple Text Statusline for Claude Code
+
+  # Plain text only - maximum compatibility
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract values using bash built-ins (no jq required)
+
+  model=$(echo "$input" | grep -o '"model":"[^"]*"' | cut -d'"' -f4)
+
+  dir=$(echo "$input" | grep -o '"path":"[^"]*"' | cut -d'"' -f4 | sed
+  "s|$HOME|~|")
+
+  tokens=$(echo "$input" | grep -o '"totalTokens":[0-9]*' | cut -d':' -f2)
+
+
+  # Default values if extraction fails
+
+  model=${model:-"unknown"}
+
+  dir=${dir:-"~"}
+
+  tokens=${tokens:-"0"}
+
+
+  # Build simple plain text status
+
+  echo "[Model: $model] [Dir: $dir] [Tokens: $tokens]"
+prerequisites:
+  - Claude Code CLI installed and configured
+  - Bash shell available (bash 3.0+ sufficient for basic operations)
+  - 'grep command (standard POSIX utility, usually pre-installed)'
+  - 'cut command (standard POSIX utility, usually pre-installed)'
+  - >-
+    sed command (standard POSIX utility, usually pre-installed, for home
+    directory shortening)
+  - >-
+    Terminal with basic text output support (works on any terminal including
+    TTY, no color support required)
+tags:
+  - simple
+  - plain-text
+  - minimal
+  - bash
+  - lightweight
+  - no-dependencies
+keywords:
+  - bash
+  - claude
+  - development
+  - lightweight
+  - minimal
+  - no-dependencies
+  - plain-text
+  - simple
+  - statusline
+  - statuslines
+  - text
+  - tools
+readingTime: 1
+difficultyScore: 1
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Zero dependencies - pure bash implementation
+- No color codes or special characters
+- Works on any terminal including basic TTY
+- Extremely fast execution (<5ms)
+- Compatible with screen readers
+- No jq or external tools required
+- Perfect for SSH sessions or slow connections
+- UTF-8 safe character encoding for international terminals
+
+## Use Cases
+
+- SSH sessions over slow or unreliable connections
+- Legacy terminals without color support
+- Screen reader accessibility requirements
+- Embedded systems or resource-constrained environments
+- Debugging when color codes cause issues
+- CI/CD pipelines requiring minimal statusline overhead
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 3.0+ sufficient for basic operations)
+- grep command (standard POSIX utility, usually pre-installed)
+- cut command (standard POSIX utility, usually pre-installed)
+- sed command (standard POSIX utility, usually pre-installed, for home directory shortening)
+- Terminal with basic text output support (works on any terminal including TTY, no color support required)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh",
+    "refreshInterval": 300
+  }
+}
+```
+
+## Examples
+### Simple Text Statusline with awk (More Robust)
+Enhanced version using awk for more robust JSON parsing while maintaining zero external dependencies
+```bash
+#!/usr/bin/env bash
+
+# Simple Text Statusline with awk (More Robust)
+# Plain text only - uses awk for better JSON parsing
+
+# Read JSON from stdin
+read -r input
+
+# Extract values using awk (usually pre-installed, more robust than grep/cut)
+model=$(echo "$input" | awk -F'"' '/"model"/{for(i=1;i<=NF;i++){if($i=="id" || $i=="display_name"){print $(i+2);exit}}}' 2>/dev/null || echo "")
+
+# Try alternative paths
+if [ -z "$model" ]; then
+  model=$(echo "$input" | awk -F'"' '/"model"/{print $4;exit}' 2>/dev/null || echo "")
+fi
+
+# Extract directory using awk
+dir=$(echo "$input" | awk -F'"' '/"current_dir"/{print $4;exit}' 2>/dev/null || echo "")
+
+if [ -z "$dir" ]; then
+  dir=$(echo "$input" | awk -F'"' '/"path"/{print $4;exit}' 2>/dev/null || echo "")
+fi
+
+# Shorten home directory to ~
+if [ -n "$HOME" ] && [ -n "$dir" ]; then
+  dir=$(echo "$dir" | sed "s|^$HOME|~|" 2>/dev/null || echo "$dir")
+fi
+
+# Extract tokens using awk
+tokens=$(echo "$input" | awk -F'[:,\}]' '/"total_lines_added"/{print $2;exit}' 2>/dev/null | tr -d ' ' || echo "")
+
+if [ -z "$tokens" ]; then
+  tokens=$(echo "$input" | awk -F'[:,\}]' '/"totalTokens"/{print $2;exit}' 2>/dev/null | tr -d ' ' || echo "")
+fi
+
+# Default values if extraction fails
+model=${model:-unknown}
+dir=${dir:-~}
+tokens=${tokens:-0}
+
+# Remove 'claude-' prefix from model name if present
+model=$(echo "$model" | sed 's/^claude-//' 2>/dev/null || echo "$model")
+
+# Build simple plain text status
+echo "[Model: $model] [Dir: $dir] [Tokens: $tokens]"
+```
+### Simple Text Statusline Minimal Version
+Absolute minimal version with only model name for ultra-lightweight usage
+```bash
+#!/usr/bin/env bash
+
+# Simple Text Statusline Minimal Version
+# Absolute minimal - only model name
+
+read -r input
+
+# Extract model using simplest method
+model=$(echo "$input" | grep -o '"model":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "unknown")
+
+# Remove 'claude-' prefix if present
+model=$(echo "$model" | sed 's/^claude-//' 2>/dev/null || echo "$model")
+
+# Output minimal status
+echo "[$model]"
+```
+### Simple Text Statusline Installation Example
+Complete setup script with dependency verification (minimal dependencies required)
+```bash
+#!/bin/bash
+# Installation script for Simple Text Statusline
+
+# Check for grep (required for JSON parsing)
+if ! command -v grep &> /dev/null; then
+    echo "Error: grep command not found - this is a standard POSIX utility"
+    echo "Install coreutils: Linux (sudo apt-get install coreutils or sudo yum install coreutils)"
+    exit 1
+else
+    echo "grep command available"
+fi
+
+# Check for cut (required for JSON parsing)
+if ! command -v cut &> /dev/null; then
+    echo "Error: cut command not found - this is a standard POSIX utility"
+    echo "Install coreutils: Linux (sudo apt-get install coreutils or sudo yum install coreutils)"
+    exit 1
+else
+    echo "cut command available"
+fi
+
+# Check for sed (required for home directory shortening)
+if ! command -v sed &> /dev/null; then
+    echo "Error: sed command not found - this is a standard POSIX utility"
+    echo "Install coreutils: Linux (sudo apt-get install coreutils or sudo yum install coreutils)"
+    exit 1
+else
+    echo "sed command available"
+fi
+
+# Check for awk (optional, for enhanced version)
+if ! command -v awk &> /dev/null; then
+    echo "Warning: awk command not found - enhanced version will not work"
+    echo "Install awk: Linux (sudo apt-get install gawk or sudo yum install gawk)"
+    echo "Note: Basic version works without awk"
+else
+    echo "awk command available (optional, for enhanced version)"
+fi
+
+# Test grep for JSON parsing
+if echo '{"model":"test"}' | grep -o '"model":"[^"]*"' | cut -d'"' -f4 | grep -q 'test'; then
+    echo "grep/cut JSON parsing working: $(echo '{"model":"test"}' | grep -o '"model":"[^"]*"' | cut -d'"' -f4)"
+else
+    echo "Warning: grep/cut JSON parsing test failed"
+fi
+
+# Test sed for home directory replacement
+if [ -n "$HOME" ]; then
+    test_dir="$HOME/projects/test"
+    shortened=$(echo "$test_dir" | sed "s|^$HOME|~|")
+    if [ "$shortened" = "~/projects/test" ]; then
+        echo "sed home directory replacement working: $shortened"
+    else
+        echo "Warning: sed home directory replacement test failed"
+    fi
+else
+    echo "Warning: HOME environment variable not set"
+fi
+
+# Test awk for JSON parsing (if available)
+if command -v awk &> /dev/null; then
+    test_model=$(echo '{"model":{"id":"test"}}' | awk -F'"' '/"model"/{print $4;exit}' 2>/dev/null || echo "")
+    if [ -n "$test_model" ]; then
+        echo "awk JSON parsing working: $test_model"
+    else
+        echo "Warning: awk JSON parsing test failed (this is expected for complex JSON)"
+    fi
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/simple-text-statusline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Simple Text Statusline for Claude Code
+# Plain text only - maximum compatibility
+
+read -r input
+
+model=$(echo "$input" | grep -o '"model":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
+
+if [ -z "$model" ]; then
+  model=$(echo "$input" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4 2>/dev/null || echo "")
+fi
+
+if echo "$input" | grep -q '"workspace"'; then
+  dir=$(echo "$input" | grep -o '"current_dir":"[^"]*"' | cut -d'"' -f4 2>/dev/null || echo "")
+else
+  dir=$(echo "$input" | grep -o '"path":"[^"]*"' | cut -d'"' -f4 2>/dev/null || echo "")
+fi
+
+if [ -n "$HOME" ] && [ -n "$dir" ]; then
+  dir=$(echo "$dir" | sed "s|^$HOME|~|" 2>/dev/null || echo "$dir")
+fi
+
+if echo "$input" | grep -q '"cost"'; then
+  tokens=$(echo "$input" | grep -o '"total_lines_added":[0-9]*' | cut -d':' -f2 2>/dev/null || echo "")
+  if [ -z "$tokens" ]; then
+    tokens=$(echo "$input" | grep -o '"totalTokens":[0-9]*' | cut -d':' -f2 2>/dev/null || echo "")
+  fi
+else
+  tokens=$(echo "$input" | grep -o '"totalTokens":[0-9]*' | cut -d':' -f2 2>/dev/null || echo "")
+fi
+
+model=${model:-unknown}
+dir=${dir:-~}
+tokens=${tokens:-0}
+
+model=$(echo "$model" | sed 's/^claude-//' 2>/dev/null || echo "$model")
+
+echo "[Model: $model] [Dir: $dir] [Tokens: $tokens]"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/simple-text-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh","refreshInterval":300}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh","refreshInterval":300}' .claude/settings.json > .claude/settings.json.tmp 2>/dev/null
+    if [ $? -eq 0 ]; then
+        mv .claude/settings.json.tmp .claude/settings.json
+    else
+        echo "Warning: jq not available - manually update .claude/settings.json"
+        rm -f .claude/settings.json.tmp
+    fi
+fi
+
+echo "Simple Text Statusline installed successfully!"
+echo "Note: This statusline uses only standard POSIX utilities (grep, cut, sed)"
+echo "Note: No jq or external tools required - maximum compatibility"
+echo "Test: echo '{\"model\":\"test\"}' | .claude/statuslines/simple-text-statusline.sh"
+```
+
+## Troubleshooting
+### Values showing as empty or 'unknown'
+
+JSON parsing relies on specific format. Ensure Claude Code is outputting standard JSON. Test with: echo '$input' to see raw JSON. Check JSON structure: echo '$input' | grep -o '"model":"[^"]*"' (should return model field). Verify grep pattern: grep uses regex - ensure JSON format matches expected pattern. Try alternative extraction: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}') for more robust parsing. Check if JSON is minified: Minified JSON may break grep patterns - use awk instead.
+### Home directory not shortened to ~
+
+Check that $HOME environment variable is set correctly: echo $HOME (should return home directory path). If using sudo, HOME may not be preserved: Use sudo -H to set HOME or sudo -E to preserve variables. Test sed replacement: echo '$HOME/projects/test' | sed "s|^$HOME|~|" (should return ~/projects/test). Verify HOME is not empty: if [ -z "$HOME" ]; then echo "HOME not set"; fi. Add HOME to env_keep in /etc/sudoers for persistent fix: echo 'Defaults env_keep += "HOME"' | sudo tee -a /etc/sudoers.d/home-preserve.
+### grep or cut command not found
+
+These are standard POSIX utilities. Install coreutils package: Linux (sudo apt-get install coreutils or sudo yum install coreutils), macOS (pre-installed). Verify installation: command -v grep (should return path like /usr/bin/grep). Test commands: echo 'test' | grep 'test' (should return 'test'), echo 'a:b:c' | cut -d':' -f2 (should return 'b'). If on embedded system, ensure busybox is installed: busybox provides minimal grep/cut/sed implementations. Check PATH: echo $PATH (should include /usr/bin, /bin).
+### JSON parsing breaks when Claude Code changes output format
+
+grep/cut parsing is fragile. Switch to jq-based statusline or use awk: awk 'BEGIN { FS="\""; RS="," }; { if ($2 == "model") {print $4} }' for robust parsing. Use awk for better JSON handling: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}'). Consider using jq if available: model=$(echo '$input' | jq -r '.model.id // .model.display_name // "unknown"') for most robust parsing. Test with sample JSON: echo '{"model":"test"}' | grep -o '"model":"[^"]*"' (should work). Update grep patterns if JSON structure changes.
+### HOME not preserved when running script with sudo
+
+Use sudo -H to set HOME or sudo -E to preserve variables. Add HOME to env_keep in /etc/sudoers for persistent fix: echo 'Defaults env_keep += "HOME"' | sudo tee -a /etc/sudoers.d/home-preserve. Test: sudo -H bash script.sh (should preserve HOME). Check current HOME: echo $HOME (should show home directory). Verify sudo preserves: sudo -E env | grep HOME (should show HOME variable). Alternative: Hardcode home directory path in script if HOME is unreliable, but this reduces portability.
+### Model name includes 'claude-' prefix when it shouldn't
+
+Script removes 'claude-' prefix: model=$(echo '$model' | sed 's/^claude-//'). Verify sed works: echo 'claude-opus-4-1' | sed 's/^claude-//' (should return 'opus-4-1'). Check if sed is available: command -v sed (should return path). Test pattern: sed 's/^claude-//' should remove leading 'claude-' from model name. If prefix still appears, check extraction: echo '$input' | grep -o '"model":"[^"]*"' (may extract full model ID). Update sed pattern if needed: sed 's/^claude-//' or sed 's/claude-//'.
+### Directory path shows full path instead of shortened ~
+
+Check HOME variable: echo $HOME (should be set). Verify sed replacement: echo '$HOME/projects/test' | sed "s|^$HOME|~|" (should return ~/projects/test). Test with actual path: test_path="$HOME/projects/test"; echo "$test_path" | sed "s|^$HOME|~|". Check if path starts with HOME: if [[ "$dir" == "$HOME"* ]]; then echo "Path starts with HOME"; fi. Verify sed pattern: sed uses | as delimiter to avoid conflicts with / in paths. If still not working, check that dir variable contains full path: echo "$dir" (should show full path).
+### Tokens always showing as 0
+
+Check JSON structure: echo '$input' | grep -o '"total_lines_added":[0-9]*' (should return token field). Try alternative field: echo '$input' | grep -o '"totalTokens":[0-9]*'. Verify extraction: tokens=$(echo '$input' | grep -o '"total_lines_added":[0-9]*' | cut -d':' -f2) (should return number). Check if cost object exists: echo '$input' | grep -q '"cost"' (should return true). Test with sample: echo '{"total_lines_added":1234}' | grep -o '"total_lines_added":[0-9]*' | cut -d':' -f2 (should return 1234). If still 0, JSON structure may have changed - update grep pattern.

@@ -1,0 +1,129 @@
+---
+title: n8n Operations Resilience Capability Pack Skill
+slug: n8n-operations-resilience-capability-pack
+category: skills
+description: 'Expert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.'
+cardDescription: 'Run n8n in production with retry strategy, failure isolation, and secure credential governance.'
+seoTitle: n8n Operations Resilience Capability Pack Skill
+seoDescription: 'Advanced AI skill for production n8n operations including reliability patterns, security controls, and workflow incident response.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://docs.n8n.io/'
+downloadUrl: /downloads/skills/n8n-operations-resilience-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack'
+usageSnippet: 'Use this skill to harden n8n workflows for production reliability, security, and fast incident response.'
+copySnippet: |-
+  # Trigger
+  "Apply the n8n operations resilience capability pack."
+
+  # Required output
+  1) Workflow reliability design
+  2) Credential/security controls
+  3) Failure recovery runbooks
+  4) Monitoring and alert map
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://docs.n8n.io/'
+  - 'https://docs.n8n.io/hosting/'
+  - 'https://docs.n8n.io/workflows/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - n8n instance access
+  - Workflow inventory
+  - Secrets management baseline
+tags:
+  - n8n
+  - operations
+  - workflow-automation
+  - reliability
+  - capability-pack
+keywords:
+  - n8n production operations
+  - workflow resilience
+  - n8n incident response
+  - n8n credential security
+readingTime: 8
+packageVerified: true
+difficultyScore: 86
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://docs.n8n.io/
+- https://docs.n8n.io/hosting/
+- https://docs.n8n.io/workflows/
+
+## Core Workflow
+
+1. Inventory workflows by business criticality.
+2. Add retry, timeout, and idempotency protections.
+3. Enforce credential scope and secret-rotation policy.
+4. Build incident runbooks for queue, node, and downstream failures.
+5. Add monitoring and alerting with actionable thresholds.
+
+## Overview
+
+This skill gives agents an operational blueprint for running n8n safely in environments where workflow failure has real business impact.
+
+## Capability Scope
+
+- Workflow reliability patterns
+- Credential and secret governance
+- Failure isolation and retries
+- Incident playbook design
+- Monitoring/alert instrumentation
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Require idempotency strategy for side-effecting workflows.
+- Scope credentials to least privilege and rotate regularly.
+- Define dead-letter or fallback behavior for failed executions.
+- Publish runbooks for queue, dependency, and auth failures.
+
+## Troubleshooting
+
+**Issue:** Retries cause duplicate side effects  
+**Fix:** enforce idempotency keys and dedupe controls.
+
+**Issue:** Credential sprawl across workflows  
+**Fix:** centralize and scope credentials by workflow domain.
+
+**Issue:** Silent failures in non-critical jobs  
+**Fix:** add alert thresholds and dead-letter visibility.
+
+## Output Contract
+
+1. Reliability architecture by workflow class.
+2. Security controls and credential policy.
+3. Incident runbook actions per failure mode.
+4. Monitoring plan with exact alert thresholds.

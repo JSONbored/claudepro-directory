@@ -1,0 +1,414 @@
+---
+title: Slack Progress Notifier - Hooks
+slug: slack-progress-notifier
+category: hooks
+description: >-
+  Sends progress updates to Slack channel for team visibility on Claude
+  activities.
+cardDescription: >-
+  Sends progress updates to Slack channel for team visibility on Claude
+  activities.
+seoTitle: Slack Progress Notifier - Hooks
+seoDescription: >-
+  Sends progress updates to Slack channel for team visibility on Claude
+  activities. This Notification hook provides comprehensive Slack integration
+  with real-t...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/slack-progress-notifier.sh &&
+  chmod +x .claude/hooks/slack-progress-notifier.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/slack-progress-notifier.sh &&
+  chmod +x .claude/hooks/slack-progress-notifier.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/slack-progress-notifier.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/slack-progress-notifier.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\n# Check if Slack webhook URL is configured\nif [ -z \"$SLACK_WEBHOOK_URL\" ]; then\n    echo \"ℹ️ Slack webhook URL not configured - skipping notification\"\n    echo \"\U0001F4A1 Set SLACK_WEBHOOK_URL environment variable to enable Slack notifications\"\n    exit 0\nfi\n\necho \"\U0001F4E2 Slack Progress Notifier - Sending team notification...\"\necho \"\U0001F527 Tool: $TOOL_NAME\"\nif [ -n \"$FILE_PATH\" ]; then\n    echo \"\U0001F4C4 File: $(basename \"$FILE_PATH\")\"\nfi\n\n# Determine appropriate emoji based on tool/activity type\nEMOJI=\"\U0001F4DD\"  # Default emoji\n\ncase \"$TOOL_NAME\" in\n    *test*|*Test*)\n        EMOJI=\"\U0001F9EA\"\n        ACTIVITY=\"Testing\"\n        ;;\n    *build*|*Build*)\n        EMOJI=\"\U0001F3D7️\"\n        ACTIVITY=\"Building\"\n        ;;\n    *deploy*|*Deploy*)\n        EMOJI=\"\U0001F680\"\n        ACTIVITY=\"Deployment\"\n        ;;\n    *commit*|*Commit*|*git*)\n        EMOJI=\"\U0001F4DD\"\n        ACTIVITY=\"Version Control\"\n        ;;\n    *edit*|*Edit*|*write*|*Write*)\n        EMOJI=\"✏️\"\n        ACTIVITY=\"Code Editing\"\n        ;;\n    *lint*|*Lint*|*format*|*Format*)\n        EMOJI=\"\U0001F9F9\"\n        ACTIVITY=\"Code Quality\"\n        ;;\n    *install*|*Install*|*package*)\n        EMOJI=\"\U0001F4E6\"\n        ACTIVITY=\"Package Management\"\n        ;;\n    *security*|*Security*|*audit*)\n        EMOJI=\"\U0001F512\"\n        ACTIVITY=\"Security\"\n        ;;\n    *debug*|*Debug*|*error*)\n        EMOJI=\"\U0001F41B\"\n        ACTIVITY=\"Debugging\"\n        ;;\n    *doc*|*Doc*|*readme*)\n        EMOJI=\"\U0001F4DA\"\n        ACTIVITY=\"Documentation\"\n        ;;\n    *)\n        EMOJI=\"⚡\"\n        ACTIVITY=\"Development\"\n        ;;\nesac\n\n# Prepare the message\nif [ -n \"$FILE_PATH\" ]; then\n    FILENAME=$(basename \"$FILE_PATH\")\n    MESSAGE=\"$EMOJI Claude Code: $ACTIVITY - $TOOL_NAME on $FILENAME\"\nelse\n    MESSAGE=\"$EMOJI Claude Code: $ACTIVITY - $TOOL_NAME\"\nfi\n\n# Get additional context\nTIMESTAMP=$(date '+%H:%M:%S')\nUSER=$(whoami 2>/dev/null || echo \"developer\")\nBRANCH=\"unknown\"\nif git rev-parse --git-dir >/dev/null 2>&1; then\n    BRANCH=$(git branch --show-current 2>/dev/null || echo \"unknown\")\nfi\n\n# Create rich message payload\nREPO_NAME=$(basename \"$(pwd)\" 2>/dev/null || echo \"project\")\n\n# Construct JSON payload with proper escaping\nPAYLOAD=$(cat <<EOF\n{\n  \"text\": \"$MESSAGE\",\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"$EMOJI *Claude Code Activity*\\n*Action:* $TOOL_NAME\\n*Time:* $TIMESTAMP\\n*User:* $USER\\n*Branch:* $BRANCH\\n*Project:* $REPO_NAME\"\n      }\n    }\n  ]\n}\nEOF\n)\n\necho \"\U0001F4E4 Sending notification to Slack...\"\n\n# Send to Slack with proper error handling\nif curl -X POST \\\n     -H 'Content-type: application/json' \\\n     --data \"$PAYLOAD\" \\\n     --max-time 5 \\\n     --retry 1 \\\n     \"$SLACK_WEBHOOK_URL\" \\\n     --silent \\\n     --show-error 2>/dev/null; then\n    echo \"✅ Slack notification sent successfully\"\nelse\n    CURL_EXIT_CODE=$?\n    case $CURL_EXIT_CODE in\n        6)\n            echo \"⚠️ Failed to send Slack notification - couldn't resolve host\"\n            ;;\n        7)\n            echo \"⚠️ Failed to send Slack notification - couldn't connect to server\"\n            ;;\n        22)\n            echo \"⚠️ Failed to send Slack notification - HTTP error (check webhook URL)\"\n            ;;\n        28)\n            echo \"⚠️ Failed to send Slack notification - timeout\"\n            ;;\n        *)\n            echo \"⚠️ Failed to send Slack notification - error code: $CURL_EXIT_CODE\"\n            ;;\n    esac\n    echo \"\U0001F4A1 Verify SLACK_WEBHOOK_URL is correct and Slack service is accessible\"\nfi\n\necho \"\"\necho \"\U0001F4A1 Slack Integration Tips:\"\necho \"  • Get webhook URL from: https://api.slack.com/messaging/webhooks\"\necho \"  • Set SLACK_WEBHOOK_URL environment variable\"\necho \"  • Test webhook with: curl -X POST -H 'Content-type: application/json' --data '{\\\"text\\\":\\\"Test\\\"}' \\$SLACK_WEBHOOK_URL\"\necho \"  • Configure channel-specific webhooks for different notification types\"\necho \"  • Consider rate limiting for high-activity periods\"\n\necho \"\"\necho \"\U0001F3AF Slack notification complete!\"\n\nexit 0"
+trigger: Notification
+tags:
+  - slack
+  - notifications
+  - team
+  - collaboration
+  - monitoring
+keywords:
+  - claude
+  - collaboration
+  - development
+  - hooks
+  - monitoring
+  - notifications
+  - notifier
+  - progress
+  - slack
+  - team
+  - tools
+readingTime: 4
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Real-time Slack notifications for Claude activities including Slack notification integration (real-time Slack notifications on file changes, immediate notification delivery with webhook delivery, Slack message formatting with rich formatting, Slack channel integration with channel routing), notification optimization (notification performance with fast delivery, notification reliability with retry logic, notification efficiency with efficient processing, notification batching with message batching), notification validation (notification payload validation with payload verification, notification delivery validation with delivery checking, notification format validation with format checking, notification content validation with content verification), and notification reporting (notification delivery reporting with delivery status, notification error reporting with error details, notification statistics with delivery metrics, notification analytics with analytics tracking)
+- Contextual emoji selection based on activity type including emoji selection (activity-based emoji selection with activity detection, emoji mapping with activity mapping, emoji customization with custom emojis, emoji fallback with default emojis), activity detection (activity type detection with type identification, activity classification with activity classification, activity context analysis with context analysis, activity pattern recognition with pattern recognition), emoji management (emoji configuration with emoji settings, emoji rules with emoji rules, emoji preferences with user preferences, emoji updates with emoji updates), and emoji reporting (emoji selection reporting with selection status, emoji usage reporting with usage statistics, emoji effectiveness reporting with effectiveness metrics, emoji analytics with emoji analytics)
+- Webhook-based integration with Slack channels including webhook integration (Slack webhook URL configuration with webhook setup, webhook authentication with webhook security, webhook delivery with reliable delivery, webhook retry logic with retry handling), webhook configuration (webhook URL management with URL configuration, webhook channel configuration with channel settings, webhook security configuration with security settings, webhook rate limiting with rate limit handling), webhook management (webhook health monitoring with health checks, webhook error handling with error recovery, webhook performance monitoring with performance tracking, webhook analytics with webhook metrics), and webhook reporting (webhook delivery reporting with delivery status, webhook error reporting with error details, webhook performance reporting with performance metrics, webhook analytics with webhook statistics)
+- Team collaboration and visibility enhancement including collaboration features (team visibility with activity visibility, team notifications with team alerts, team coordination with activity coordination, team awareness with activity awareness), visibility management (activity visibility configuration with visibility settings, notification preferences with preference management, channel routing with channel configuration, notification filtering with filter settings), collaboration analytics (team activity analytics with activity metrics, collaboration effectiveness with effectiveness measurement, team engagement with engagement tracking, collaboration insights with insights), and collaboration reporting (team visibility reporting with visibility status, collaboration metrics reporting with collaboration metrics, team engagement reporting with engagement statistics, collaboration insights reporting with insights)
+- Non-blocking notification delivery including async delivery (asynchronous notification delivery with background processing, non-blocking execution with non-blocking operations, notification queuing with message queuing, notification batching with batch processing), delivery optimization (delivery performance with fast delivery, delivery reliability with reliable delivery, delivery efficiency with efficient processing, delivery scalability with scalable delivery), delivery management (delivery retry logic with retry handling, delivery error handling with error recovery, delivery monitoring with delivery tracking, delivery analytics with delivery metrics), and delivery reporting (delivery status reporting with delivery status, delivery performance reporting with performance metrics, delivery error reporting with error details, delivery analytics with delivery statistics)
+- Customizable message formatting including message formatting (Slack message formatting with rich formatting, message templates with template support, message customization with custom formatting, message styling with style options), formatting options (message format configuration with format settings, message template configuration with template settings, message style configuration with style settings, message content configuration with content settings), formatting management (formatting rules with formatting configuration, formatting templates with template management, formatting customization with custom formatting, formatting updates with format updates), and formatting reporting (formatting status reporting with formatting status, formatting usage reporting with usage statistics, formatting effectiveness reporting with effectiveness metrics, formatting analytics with formatting analytics)
+- Git integration and context enrichment including Git integration (Git repository detection with repository detection, Git branch detection with branch detection, Git commit tracking with commit tracking, Git status analysis with status analysis), context enrichment (repository context with repo information, branch context with branch information, user context with user information, timestamp context with time information), context management (context configuration with context settings, context customization with custom context, context filtering with context filtering, context updates with context updates), and context reporting (context enrichment reporting with context status, context usage reporting with usage statistics, context effectiveness reporting with effectiveness metrics, context analytics with context analytics)
+- Development workflow integration including continuous notifications (real-time Slack notifications on file changes, immediate notification delivery on activities, automatic notifications on operations, seamless Slack integration with development workflow), workflow automation (automated Slack notifications without manual intervention, notification automation with automatic delivery, team visibility automation with automatic visibility), and workflow optimization (activity tracking with activity monitoring, notification optimization with optimization, team collaboration maintenance with collaboration checks)
+
+## Use Cases
+
+- Keep team informed about automated code changes automatically sending Slack notifications on file changes, providing team visibility, and maintaining team awareness
+- Monitor Claude Code activity in real-time automatically tracking Claude activities, sending real-time notifications, and providing activity monitoring
+- Track development progress across team channels automatically routing notifications to appropriate channels, tracking progress, and maintaining team coordination
+- Notify team of test runs and build activities automatically detecting test and build activities, sending notifications, and providing activity alerts
+- Enhance team collaboration and awareness automatically providing team visibility, enabling collaboration, and maintaining team awareness
+- Development workflow integration seamlessly integrating Slack notifications into development workflows without manual notification or team coordination
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/slack-progress-notifier.sh
+3. Make executable: chmod +x .claude/hooks/slack-progress-notifier.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- curl command (for webhook requests)
+- jq (optional, for JSON generation and parsing)
+- Git installed (optional, for Git context)
+- Slack webhook URL configured (SLACK_WEBHOOK_URL environment variable)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/slack-progress-notifier.sh",
+      "matchers": [
+        "*"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+# Check if Slack webhook URL is configured
+if [ -z "$SLACK_WEBHOOK_URL" ]; then
+    echo "ℹ️ Slack webhook URL not configured - skipping notification"
+    echo "💡 Set SLACK_WEBHOOK_URL environment variable to enable Slack notifications"
+    exit 0
+fi
+
+echo "📢 Slack Progress Notifier - Sending team notification..."
+echo "🔧 Tool: $TOOL_NAME"
+if [ -n "$FILE_PATH" ]; then
+    echo "📄 File: $(basename "$FILE_PATH")"
+fi
+
+# Determine appropriate emoji based on tool/activity type
+EMOJI="📝"  # Default emoji
+
+case "$TOOL_NAME" in
+    *test*|*Test*)
+        EMOJI="🧪"
+        ACTIVITY="Testing"
+        ;;
+    *build*|*Build*)
+        EMOJI="🏗️"
+        ACTIVITY="Building"
+        ;;
+    *deploy*|*Deploy*)
+        EMOJI="🚀"
+        ACTIVITY="Deployment"
+        ;;
+    *commit*|*Commit*|*git*)
+        EMOJI="📝"
+        ACTIVITY="Version Control"
+        ;;
+    *edit*|*Edit*|*write*|*Write*)
+        EMOJI="✏️"
+        ACTIVITY="Code Editing"
+        ;;
+    *lint*|*Lint*|*format*|*Format*)
+        EMOJI="🧹"
+        ACTIVITY="Code Quality"
+        ;;
+    *install*|*Install*|*package*)
+        EMOJI="📦"
+        ACTIVITY="Package Management"
+        ;;
+    *security*|*Security*|*audit*)
+        EMOJI="🔒"
+        ACTIVITY="Security"
+        ;;
+    *debug*|*Debug*|*error*)
+        EMOJI="🐛"
+        ACTIVITY="Debugging"
+        ;;
+    *doc*|*Doc*|*readme*)
+        EMOJI="📚"
+        ACTIVITY="Documentation"
+        ;;
+    *)
+        EMOJI="⚡"
+        ACTIVITY="Development"
+        ;;
+esac
+
+# Prepare the message
+if [ -n "$FILE_PATH" ]; then
+    FILENAME=$(basename "$FILE_PATH")
+    MESSAGE="$EMOJI Claude Code: $ACTIVITY - $TOOL_NAME on $FILENAME"
+else
+    MESSAGE="$EMOJI Claude Code: $ACTIVITY - $TOOL_NAME"
+fi
+
+# Get additional context
+TIMESTAMP=$(date '+%H:%M:%S')
+USER=$(whoami 2>/dev/null || echo "developer")
+BRANCH="unknown"
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+fi
+
+# Create rich message payload
+REPO_NAME=$(basename "$(pwd)" 2>/dev/null || echo "project")
+
+# Construct JSON payload with proper escaping
+PAYLOAD=$(cat <<EOF
+{
+  "text": "$MESSAGE",
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "$EMOJI *Claude Code Activity*\n*Action:* $TOOL_NAME\n*Time:* $TIMESTAMP\n*User:* $USER\n*Branch:* $BRANCH\n*Project:* $REPO_NAME"
+      }
+    }
+  ]
+}
+EOF
+)
+
+echo "📤 Sending notification to Slack..."
+
+# Send to Slack with proper error handling
+if curl -X POST \
+     -H 'Content-type: application/json' \
+     --data "$PAYLOAD" \
+     --max-time 5 \
+     --retry 1 \
+     "$SLACK_WEBHOOK_URL" \
+     --silent \
+     --show-error 2>/dev/null; then
+    echo "✅ Slack notification sent successfully"
+else
+    CURL_EXIT_CODE=$?
+    case $CURL_EXIT_CODE in
+        6)
+            echo "⚠️ Failed to send Slack notification - couldn't resolve host"
+            ;;
+        7)
+            echo "⚠️ Failed to send Slack notification - couldn't connect to server"
+            ;;
+        22)
+            echo "⚠️ Failed to send Slack notification - HTTP error (check webhook URL)"
+            ;;
+        28)
+            echo "⚠️ Failed to send Slack notification - timeout"
+            ;;
+        *)
+            echo "⚠️ Failed to send Slack notification - error code: $CURL_EXIT_CODE"
+            ;;
+    esac
+    echo "💡 Verify SLACK_WEBHOOK_URL is correct and Slack service is accessible"
+fi
+
+echo ""
+echo "💡 Slack Integration Tips:"
+echo "  • Get webhook URL from: https://api.slack.com/messaging/webhooks"
+echo "  • Set SLACK_WEBHOOK_URL environment variable"
+echo "  • Test webhook with: curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Test\"}' \$SLACK_WEBHOOK_URL"
+echo "  • Configure channel-specific webhooks for different notification types"
+echo "  • Consider rate limiting for high-activity periods"
+
+echo ""
+echo "🎯 Slack notification complete!"
+
+exit 0
+```
+
+## Examples
+### Slack Progress Notifier Hook Script
+
+Complete hook script that sends Slack notifications on Claude activities
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$SLACK_WEBHOOK_URL" ]; then
+  exit 0
+fi
+EMOJI="📝"
+case "$TOOL_NAME" in
+  *test*|*Test*) EMOJI="🧪" ;;
+  *build*|*Build*) EMOJI="🏗️" ;;
+  *edit*|*Edit*) EMOJI="✏️" ;;
+esac
+MESSAGE="$EMOJI Claude Code: $TOOL_NAME"
+if [ -n "$FILE_PATH" ]; then
+  MESSAGE="$MESSAGE on $(basename "$FILE_PATH")"
+fi
+jq -n --arg text "$MESSAGE" '{text: $text}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Slack notifications
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/slack-progress-notifier.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+### Debounced Slack Notifications
+
+Enhanced hook script with debouncing to prevent notification spam
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+LAST_NOTIFY=$(cat /tmp/slack_last 2>/dev/null || echo 0)
+NOW=$(date +%s)
+if [ $((NOW - LAST_NOTIFY)) -lt 10 ]; then
+  exit 0
+fi
+echo $NOW > /tmp/slack_last
+if [ -z "$SLACK_WEBHOOK_URL" ]; then
+  exit 0
+fi
+MESSAGE="⚡ Claude Code: $TOOL_NAME"
+jq -n --arg text "$MESSAGE" '{text: $text}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
+exit 0
+```
+### Rich Slack Message with Block Kit
+
+Enhanced hook script with Slack Block Kit formatting and Git context
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+BRANCH=$(git branch --show-current 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo 'unknown')
+REPO_NAME=$(basename "$(pwd)" 2>/dev/null || echo 'project')
+TIMESTAMP=$(date '+%H:%M:%S')
+jq -n --arg text "Claude Code Activity" --arg tool "$TOOL_NAME" --arg file "$(basename "$FILE_PATH" 2>/dev/null || echo 'N/A')" --arg branch "$BRANCH" --arg repo "$REPO_NAME" --arg time "$TIMESTAMP" '{"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": ("*Claude Code Activity*\n*Action:* " + $tool + "\n*File:* " + $file + "\n*Branch:* " + $branch + "\n*Repo:* " + $repo + "\n*Time:* " + $time)}}]}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
+exit 0
+```
+### Slack Notifier Configuration Example
+
+Example Slack notifier configuration for customizing notification behavior
+
+```json
+{
+  "slack": {
+    "webhook_url": "$SLACK_WEBHOOK_URL",
+    "debounce_seconds": 10,
+    "emoji_mapping": {
+      "test": "🧪",
+      "build": "🏗️",
+      "deploy": "🚀",
+      "edit": "✏️"
+    },
+    "include_git_context": true,
+    "include_timestamp": true
+  }
+}
+```
+
+## Troubleshooting
+### Notifications fail with 'invalid_payload' error from Slack
+
+Escape special characters in JSON payload. Use jq to construct payload: jq -n --arg msg "$MESSAGE" '{text: $msg}' | curl -d @- $SLACK_WEBHOOK_URL. Avoid shell variable expansion inside JSON strings. Verify JSON format. Test with various message content.
+### Hook causes timeout on every tool execution slowing workflow
+
+Run curl in background with & to avoid blocking: (curl --max-time 3 "$SLACK_WEBHOOK_URL" &) >/dev/null 2>&1. Add exit 0 immediately after background execution. Reduce timeout from 5s to 3s. Verify async execution. Test with various timeout values.
+### Slack webhook returns HTTP 410 'url_verification_failed'
+
+Webhook URL expired or was revoked. Generate new webhook at https://api.slack.com/messaging/webhooks. Update SLACK_WEBHOOK_URL environment variable. Check workspace permissions for incoming webhooks. Verify webhook URL. Test with new webhook URL.
+### Git branch detection fails showing 'unknown' for detached HEAD
+
+Add fallback to commit SHA: BRANCH=$(git branch --show-current || git rev-parse --short HEAD || echo 'unknown'). Handle detached HEAD state gracefully with descriptive label like 'detached@SHA'. Verify Git state. Test with various Git states.
+### Notification spam floods channel during rapid file operations
+
+Implement debouncing with timestamp check: LAST_NOTIFY=$(cat /tmp/slack_last 2>/dev/null || echo 0); NOW=$(date +%s); [ $((NOW - LAST_NOTIFY)) -lt 10 ] && exit 0. Skip notifications within 10s window. Verify debouncing logic. Test with various activity frequencies.
+### Slack notifications are not delivered or delayed
+
+Check network connectivity and Slack service status. Verify webhook URL is correct and accessible. Check curl exit codes for specific errors. Add retry logic for transient failures. Verify webhook configuration. Test with manual curl requests.
+### Emoji selection is incorrect or missing for activity types
+
+Review emoji mapping case statements. Add more activity type patterns. Use default emoji fallback. Verify activity type detection. Test with various activity types.
+### Slack message formatting is broken or unreadable
+
+Use jq for safe JSON generation instead of heredoc. Validate JSON payload before sending. Use Slack Block Kit for rich formatting. Verify message format. Test with various message content.

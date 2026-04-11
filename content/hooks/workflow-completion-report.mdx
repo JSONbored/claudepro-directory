@@ -1,0 +1,667 @@
+---
+title: Workflow Completion Report - Hooks
+slug: workflow-completion-report
+category: hooks
+description: >-
+  Generates a comprehensive report when Claude Code workflow stops, including
+  files modified, tests run, and git status.
+cardDescription: >-
+  Generates a comprehensive report when Claude Code workflow stops, including
+  files modified, tests run, and git status.
+seoTitle: Workflow Completion Report - Hooks
+seoDescription: >-
+  Generates a comprehensive report when Claude Code workflow stops, including
+  files modified, tests run, and git status. This Stop hook provides
+  comprehensive ...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/workflow-completion-report.sh &&
+  chmod +x .claude/hooks/workflow-completion-report.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/workflow-completion-report.sh &&
+  chmod +x .claude/hooks/workflow-completion-report.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/workflow-completion-report.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/workflow-completion-report.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\necho \"\U0001F4CA ═══════════════════════════════════════════════════\"\necho \"\U0001F3AF WORKFLOW COMPLETION REPORT\"\necho \"\U0001F4C5 Session Completed: $(date)\"\necho \"═══════════════════════════════════════════════════\"\n\n# Session metadata\nSESSION_ID=\"session-$(date +%Y%m%d_%H%M%S)\"\nCOMPLETION_TIME=$(date)\nSTART_TIME=\"unknown\"\nUSER=$(whoami 2>/dev/null || echo \"developer\")\nHOST=$(hostname 2>/dev/null || echo \"unknown\")\nWORKDIR=$(pwd)\nPROJECT_NAME=$(basename \"$WORKDIR\" 2>/dev/null || echo \"project\")\n\necho \"\U0001F3F7️ Session Info:\"\necho \"  • Session ID: $SESSION_ID\"\necho \"  • Project: $PROJECT_NAME\"\necho \"  • User: $USER@$HOST\"\necho \"  • Directory: $WORKDIR\"\n\n# Attempt to determine session duration\nif [ -d \".claude\" ] && [ \"$(find .claude -type f 2>/dev/null | wc -l)\" -gt 0 ]; then\n    START_TIMESTAMP=$(stat -f %B .claude/*.log 2>/dev/null | sort | head -1 || date +%s)\n    END_TIMESTAMP=$(date +%s)\n    DURATION=$((END_TIMESTAMP - START_TIMESTAMP))\n    HOURS=$((DURATION / 3600))\n    MINUTES=$(((DURATION % 3600) / 60))\n    echo \"  • Duration: ${HOURS}h ${MINUTES}m\"\nelse\n    echo \"  • Duration: Unknown (no .claude directory)\"\nfi\n\necho \"\"\necho \"\U0001F4C1 File System Analysis:\"\necho \"═══════════════════════════\"\n\n# Git analysis\nif git rev-parse --git-dir >/dev/null 2>&1; then\n    echo \"\U0001F4CA Git Repository Status:\"\n    \n    BRANCH=$(git branch --show-current 2>/dev/null || echo \"unknown\")\n    echo \"  • Current branch: $BRANCH\"\n    \n    # Count modified files\n    MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')\n    echo \"  • Modified files: $MODIFIED_FILES\"\n    \n    # Show file status breakdown\n    if [ \"$MODIFIED_FILES\" -gt 0 ]; then\n        echo \"  • File status breakdown:\"\n        git status --porcelain 2>/dev/null | cut -c1-2 | sort | uniq -c | while read -r count status; do\n            case \"$status\" in\n                \"M \"*) echo \"    - Modified: $count files\" ;;\n                \"A \"*) echo \"    - Added: $count files\" ;;\n                \"D \"*) echo \"    - Deleted: $count files\" ;;\n                \"??\"*) echo \"    - Untracked: $count files\" ;;\n                *) echo \"    - Other ($status): $count files\" ;;\n            esac\n        done\n    fi\n    \n    # Diff statistics\n    DIFF_STATS=$(git diff --stat 2>/dev/null)\n    if [ -n \"$DIFF_STATS\" ]; then\n        echo \"  • Changes summary:\"\n        echo \"$DIFF_STATS\" | tail -1 | sed 's/^/    /' 2>/dev/null || echo \"    No statistics available\"\n    fi\n    \n    # List modified files (top 10)\n    if [ \"$MODIFIED_FILES\" -gt 0 ]; then\n        echo \"  • Modified files (top 10):\"\n        git status --porcelain 2>/dev/null | head -10 | while read -r status file; do\n            echo \"    - $file ($status)\"\n        done\n    fi\n    \n    # Recent commits\n    echo \"  • Recent commits:\"\n    git log --oneline -3 2>/dev/null | sed 's/^/    /' || echo \"    No recent commits\"\n    \nelse\n    echo \"❓ Not a git repository\"\n    echo \"  • Analyzing file system changes...\"\n    \n    # Alternative: look for recently modified files\n    echo \"  • Recently modified files (last 2 hours):\"\n    find . -type f -newermt '2 hours ago' 2>/dev/null | head -10 | while read -r file; do\n        echo \"    - $file\"\n    done\nfi\n\necho \"\"\necho \"\U0001F9EA Testing & Quality Analysis:\"\necho \"═══════════════════════════════\"\n\n# Test framework detection and analysis\nTEST_FRAMEWORK=\"none\"\nTEST_COUNT=0\n\nif [ -f \"package.json\" ]; then\n    echo \"\U0001F4E6 Node.js Project Analysis:\"\n    \n    # Detect test framework\n    if grep -q '\"jest\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"jest\"\n        echo \"  • Testing framework: Jest\"\n    elif grep -q '\"vitest\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"vitest\"\n        echo \"  • Testing framework: Vitest\"\n    elif grep -q '\"mocha\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"mocha\"\n        echo \"  • Testing framework: Mocha\"\n    else\n        echo \"  • Testing framework: Not detected\"\n    fi\n    \n    # Count test files\n    TEST_COUNT=$(find . -name \"*.test.*\" -o -name \"*.spec.*\" | grep -v node_modules | wc -l | tr -d ' ')\n    echo \"  • Test files found: $TEST_COUNT\"\n    \n    # Dependencies analysis\n    DEPS_COUNT=$(jq -r '.dependencies // {} | keys | length' package.json 2>/dev/null || echo \"unknown\")\n    DEV_DEPS_COUNT=$(jq -r '.devDependencies // {} | keys | length' package.json 2>/dev/null || echo \"unknown\")\n    echo \"  • Dependencies: $DEPS_COUNT production, $DEV_DEPS_COUNT development\"\n    \n    # Check for outdated packages\n    echo \"  • Checking for outdated packages...\"\n    OUTDATED_COUNT=$(npm outdated 2>/dev/null | tail -n +2 | wc -l | tr -d ' ')\n    if [ \"$OUTDATED_COUNT\" -gt 0 ]; then\n        echo \"    - $OUTDATED_COUNT packages have updates available\"\n    else\n        echo \"    - All packages are up to date\"\n    fi\n    \nelif [ -f \"requirements.txt\" ] || [ -f \"setup.py\" ] || [ -f \"pyproject.toml\" ]; then\n    echo \"\U0001F40D Python Project Analysis:\"\n    \n    if command -v pytest >/dev/null 2>&1; then\n        TEST_FRAMEWORK=\"pytest\"\n        echo \"  • Testing framework: pytest\"\n        TEST_COUNT=$(find . -name \"test_*.py\" -o -name \"*_test.py\" | wc -l | tr -d ' ')\n    else\n        echo \"  • Testing framework: unittest (built-in)\"\n        TEST_COUNT=$(find . -name \"test*.py\" | wc -l | tr -d ' ')\n    fi\n    echo \"  • Test files found: $TEST_COUNT\"\n    \nelif [ -f \"Cargo.toml\" ]; then\n    echo \"\U0001F980 Rust Project Analysis:\"\n    echo \"  • Testing framework: Built-in (cargo test)\"\n    TEST_COUNT=$(find . -name \"*.rs\" -exec grep -l \"#\\[test\\]\" {} \\; | wc -l | tr -d ' ')\n    echo \"  • Files with tests: $TEST_COUNT\"\n    \nelse\n    echo \"❓ Project type not recognized\"\nfi\n\n# Performance and metrics\necho \"\"\necho \"\U0001F4C8 Performance & Metrics:\"\necho \"═══════════════════════════\"\n\n# Code complexity analysis (basic)\nif [ \"$TEST_COUNT\" -gt 0 ]; then\n    echo \"✅ Test Coverage Status:\"\n    echo \"  • Test files available: $TEST_COUNT\"\n    echo \"  • Testing framework: $TEST_FRAMEWORK\"\nelse\n    echo \"⚠️ No test files detected\"\nfi\n\n# File type analysis\necho \"\U0001F4CA Codebase Composition:\"\nfor ext in js ts jsx tsx py rs go java c cpp; do\n    count=$(find . -name \"*.$ext\" | grep -v node_modules | wc -l | tr -d ' ')\n    if [ \"$count\" -gt 0 ]; then\n        echo \"  • .$ext files: $count\"\n    fi\ndone\n\n# Lines of code estimation\nTOTAL_LOC=$(find . -type f \\( -name \"*.js\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.tsx\" -o -name \"*.py\" -o -name \"*.rs\" -o -name \"*.go\" \\) | grep -v node_modules | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo \"unknown\")\necho \"  • Estimated lines of code: $TOTAL_LOC\"\n\n# Session archival\necho \"\"\necho \"\U0001F4BE Session Archival:\"\necho \"═══════════════════\"\n\n# Create session report file\nREPORT_FILE=\".claude-reports/$SESSION_ID.log\"\nmkdir -p .claude-reports\n\ncat > \"$REPORT_FILE\" << EOF\nCLAUDE CODE WORKFLOW COMPLETION REPORT\n======================================\n\nSession ID: $SESSION_ID\nCompleted: $COMPLETION_TIME\nProject: $PROJECT_NAME\nUser: $USER@$HOST\nDirectory: $WORKDIR\n\nFILE CHANGES:\n$(git status --porcelain 2>/dev/null || echo \"Not a git repository\")\n\nDIFF STATISTICS:\n$(git diff --stat 2>/dev/null || echo \"No git changes\")\n\nTEST STATUS:\n- Framework: $TEST_FRAMEWORK\n- Test files: $TEST_COUNT\n\nPROJECT METRICS:\n- Total LOC (estimated): $TOTAL_LOC\n- Modified files: $MODIFIED_FILES\n\nEOF\n\necho \"\U0001F4C4 Session report saved: $REPORT_FILE\"\necho \"\U0001F4C1 Report directory: .claude-reports/\"\n\n# Cleanup old reports (keep last 30)\nfind .claude-reports -name \"session-*.log\" | sort | head -n -30 | xargs rm -f 2>/dev/null\n\necho \"\"\necho \"\U0001F4A1 Workflow Summary:\"\necho \"═══════════════════\"\necho \"  • Session completed successfully\"\necho \"  • Files modified: $MODIFIED_FILES\"\necho \"  • Test files available: $TEST_COUNT\"\necho \"  • Project type: $([ -f package.json ] && echo 'Node.js' || [ -f requirements.txt ] && echo 'Python' || [ -f Cargo.toml ] && echo 'Rust' || echo 'Unknown')\"\necho \"  • Git repository: $([ -d .git ] && echo 'Yes' || echo 'No')\"\n\necho \"\"\necho \"\U0001F3AF Next Steps:\"\necho \"  • Review all changes before committing\"\necho \"  • Run tests to ensure code quality\"\necho \"  • Update documentation if needed\"\necho \"  • Consider code review for significant changes\"\n\necho \"\"\necho \"\U0001F4CA ═══════════════════════════════════════════════════\"\necho \"\U0001F389 Workflow completion report generated successfully!\"\necho \"\U0001F4CB Full report available at: $REPORT_FILE\"\necho \"═══════════════════════════════════════════════════\"\n\nexit 0"
+trigger: Stop
+tags:
+  - reporting
+  - workflow
+  - analytics
+  - summary
+  - stop-hook
+keywords:
+  - analytics
+  - claude
+  - completion
+  - development
+  - hooks
+  - report
+  - reporting
+  - stop-hook
+  - summary
+  - tools
+  - workflow
+readingTime: 5
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Comprehensive workflow completion summary including workflow summary (comprehensive workflow completion summary with summary generation, workflow completion analysis with completion analysis, workflow summary reporting with summary status, workflow summary analytics with summary statistics), summary management (summary configuration with summary settings, summary customization with custom summary, summary monitoring with summary tracking, summary updates with summary updates), summary optimization (summary performance optimization with performance improvement, summary accuracy optimization with accuracy improvement, summary completeness optimization with completeness improvement, summary analytics with summary statistics), and summary reporting (workflow summary reporting with summary status, workflow completion reporting with completion status, workflow summary analytics with summary statistics)
+- Detailed file modification tracking including file tracking (detailed file modification tracking with modification monitoring, file change analysis with change analysis, file tracking optimization with optimization tracking, file tracking reporting with tracking status), tracking management (tracking configuration with tracking settings, tracking customization with custom tracking, tracking monitoring with tracking monitoring, tracking updates with tracking updates), tracking optimization (tracking performance optimization with performance improvement, tracking accuracy optimization with accuracy improvement, tracking completeness optimization with completeness improvement, tracking analytics with tracking statistics), and tracking reporting (file tracking reporting with tracking status, file change reporting with change status, file tracking optimization reporting with optimization status, tracking analytics with tracking statistics)
+- Git status and change analysis including git analysis (Git status and change analysis with status checking, Git change detection with change identification, Git analysis optimization with optimization checking, Git analysis reporting with analysis status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis completeness optimization with completeness improvement, analysis analytics with analysis statistics), and analysis reporting (Git analysis reporting with analysis status, Git change reporting with change status, Git analysis optimization reporting with optimization status, analysis analytics with analysis statistics)
+- Test execution and coverage reporting including test reporting (test execution and coverage reporting with test execution tracking, test coverage analysis with coverage analysis, test reporting optimization with optimization tracking, test reporting reporting with reporting status), reporting management (reporting configuration with reporting settings, reporting customization with custom reporting, reporting monitoring with reporting monitoring, reporting updates with reporting updates), reporting optimization (reporting performance optimization with performance improvement, reporting accuracy optimization with accuracy improvement, reporting completeness optimization with completeness improvement, reporting analytics with reporting statistics), and reporting reporting (test reporting reporting with reporting status, test coverage reporting with coverage status, test reporting optimization reporting with optimization status, reporting analytics with reporting statistics)
+- Performance metrics and timing analysis including performance analysis (performance metrics and timing analysis with metrics collection, timing analysis with timing checking, performance analysis optimization with optimization checking, performance analysis reporting with analysis status), analysis management (analysis configuration with analysis settings, analysis customization with custom analysis, analysis monitoring with analysis tracking, analysis updates with analysis updates), analysis optimization (analysis performance optimization with performance improvement, analysis accuracy optimization with accuracy improvement, analysis completeness optimization with completeness improvement, analysis analytics with analysis statistics), and analysis reporting (performance analysis reporting with analysis status, timing analysis reporting with timing status, performance analysis optimization reporting with optimization status, analysis analytics with analysis statistics)
+- Session archival and historical tracking including session archival (session archival and historical tracking with archival management, historical tracking with tracking management, session archival optimization with optimization management, session archival reporting with archival status), archival management (archival configuration with archival settings, archival customization with custom archival, archival monitoring with archival monitoring, archival updates with archival updates), archival optimization (archival performance optimization with performance improvement, archival accuracy optimization with accuracy improvement, archival completeness optimization with completeness improvement, archival analytics with archival statistics), and archival reporting (session archival reporting with archival status, historical tracking reporting with tracking status, session archival optimization reporting with optimization status, archival analytics with archival statistics)
+- Multi-language project support including project support (multi-language project support with language detection, project type detection with type identification, project support optimization with optimization checking, project support reporting with support status), support management (support configuration with support settings, support customization with custom support, support monitoring with support tracking, support updates with support updates), support optimization (support performance optimization with performance improvement, support accuracy optimization with accuracy improvement, support completeness optimization with completeness improvement, support analytics with support statistics), and support reporting (project support reporting with support status, language detection reporting with detection status, project support optimization reporting with optimization status, support analytics with support statistics)
+- Development workflow integration including continuous reporting (automatic workflow completion reporting on workflow stop, immediate workflow summary feedback on completion, automatic session archival on workflow completion, seamless workflow reporting integration with development workflow), workflow automation (automated workflow reporting without manual intervention, workflow completion automation with automatic reporting, workflow archival automation with automatic archival), and workflow optimization (workflow reporting tracking with reporting monitoring, workflow completion tracking with completion monitoring, workflow performance maintenance with performance checks)
+
+## Use Cases
+
+- Generate detailed session completion reports automatically generating comprehensive reports, tracking session metadata, and providing workflow completion feedback
+- Track development productivity and progress automatically tracking file modifications, analyzing Git changes, and providing productivity metrics
+- Document code changes and modifications automatically documenting file changes, tracking modifications, and providing change documentation
+- Analyze test coverage and quality metrics automatically detecting test frameworks, analyzing test coverage, and providing quality metrics
+- Create historical record of workflow sessions automatically archiving sessions, tracking historical data, and providing session history
+- Development workflow integration seamlessly integrating workflow reporting into development workflows without manual reporting or session tracking
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/workflow-completion-report.sh
+3. Make executable: chmod +x .claude/hooks/workflow-completion-report.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Git (optional, for Git analysis)
+- jq (optional, for JSON parsing of package.json)
+- Node.js/npm (optional, for Node.js project analysis)
+- Python/pytest (optional, for Python project analysis)
+- Rust/cargo (optional, for Rust project analysis)
+- stat command (optional, for file timestamp analysis)
+- timeout command (optional, for outdated package check timeout)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/workflow-completion-report.sh",
+      "matchers": [
+        "*"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/bin/bash
+
+echo "📊 ═══════════════════════════════════════════════════"
+echo "🎯 WORKFLOW COMPLETION REPORT"
+echo "📅 Session Completed: $(date)"
+echo "═══════════════════════════════════════════════════"
+
+# Session metadata
+SESSION_ID="session-$(date +%Y%m%d_%H%M%S)"
+COMPLETION_TIME=$(date)
+START_TIME="unknown"
+USER=$(whoami 2>/dev/null || echo "developer")
+HOST=$(hostname 2>/dev/null || echo "unknown")
+WORKDIR=$(pwd)
+PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
+
+echo "🏷️ Session Info:"
+echo "  • Session ID: $SESSION_ID"
+echo "  • Project: $PROJECT_NAME"
+echo "  • User: $USER@$HOST"
+echo "  • Directory: $WORKDIR"
+
+# Attempt to determine session duration
+if [ -d ".claude" ] && [ "$(find .claude -type f 2>/dev/null | wc -l)" -gt 0 ]; then
+    START_TIMESTAMP=$(stat -f %B .claude/*.log 2>/dev/null | sort | head -1 || date +%s)
+    END_TIMESTAMP=$(date +%s)
+    DURATION=$((END_TIMESTAMP - START_TIMESTAMP))
+    HOURS=$((DURATION / 3600))
+    MINUTES=$(((DURATION % 3600) / 60))
+    echo "  • Duration: ${HOURS}h ${MINUTES}m"
+else
+    echo "  • Duration: Unknown (no .claude directory)"
+fi
+
+echo ""
+echo "📁 File System Analysis:"
+echo "═══════════════════════════"
+
+# Git analysis
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Git Repository Status:"
+    
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    echo "  • Current branch: $BRANCH"
+    
+    # Count modified files
+    MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    echo "  • Modified files: $MODIFIED_FILES"
+    
+    # Show file status breakdown
+    if [ "$MODIFIED_FILES" -gt 0 ]; then
+        echo "  • File status breakdown:"
+        git status --porcelain 2>/dev/null | cut -c1-2 | sort | uniq -c | while read -r count status; do
+            case "$status" in
+                "M "*) echo "    - Modified: $count files" ;;
+                "A "*) echo "    - Added: $count files" ;;
+                "D "*) echo "    - Deleted: $count files" ;;
+                "??"*) echo "    - Untracked: $count files" ;;
+                *) echo "    - Other ($status): $count files" ;;
+            esac
+        done
+    fi
+    
+    # Diff statistics
+    DIFF_STATS=$(git diff --stat 2>/dev/null)
+    if [ -n "$DIFF_STATS" ]; then
+        echo "  • Changes summary:"
+        echo "$DIFF_STATS" | tail -1 | sed 's/^/    /' 2>/dev/null || echo "    No statistics available"
+    fi
+    
+    # List modified files (top 10)
+    if [ "$MODIFIED_FILES" -gt 0 ]; then
+        echo "  • Modified files (top 10):"
+        git status --porcelain 2>/dev/null | head -10 | while read -r status file; do
+            echo "    - $file ($status)"
+        done
+    fi
+    
+    # Recent commits
+    echo "  • Recent commits:"
+    git log --oneline -3 2>/dev/null | sed 's/^/    /' || echo "    No recent commits"
+    
+else
+    echo "❓ Not a git repository"
+    echo "  • Analyzing file system changes..."
+    
+    # Alternative: look for recently modified files
+    echo "  • Recently modified files (last 2 hours):"
+    find . -type f -newermt '2 hours ago' 2>/dev/null | head -10 | while read -r file; do
+        echo "    - $file"
+    done
+fi
+
+echo ""
+echo "🧪 Testing & Quality Analysis:"
+echo "═══════════════════════════════"
+
+# Test framework detection and analysis
+TEST_FRAMEWORK="none"
+TEST_COUNT=0
+
+if [ -f "package.json" ]; then
+    echo "📦 Node.js Project Analysis:"
+    
+    # Detect test framework
+    if grep -q '"jest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="jest"
+        echo "  • Testing framework: Jest"
+    elif grep -q '"vitest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="vitest"
+        echo "  • Testing framework: Vitest"
+    elif grep -q '"mocha"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="mocha"
+        echo "  • Testing framework: Mocha"
+    else
+        echo "  • Testing framework: Not detected"
+    fi
+    
+    # Count test files
+    TEST_COUNT=$(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l | tr -d ' ')
+    echo "  • Test files found: $TEST_COUNT"
+    
+    # Dependencies analysis
+    DEPS_COUNT=$(jq -r '.dependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
+    DEV_DEPS_COUNT=$(jq -r '.devDependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
+    echo "  • Dependencies: $DEPS_COUNT production, $DEV_DEPS_COUNT development"
+    
+    # Check for outdated packages
+    echo "  • Checking for outdated packages..."
+    OUTDATED_COUNT=$(npm outdated 2>/dev/null | tail -n +2 | wc -l | tr -d ' ')
+    if [ "$OUTDATED_COUNT" -gt 0 ]; then
+        echo "    - $OUTDATED_COUNT packages have updates available"
+    else
+        echo "    - All packages are up to date"
+    fi
+    
+elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+    echo "🐍 Python Project Analysis:"
+    
+    if command -v pytest >/dev/null 2>&1; then
+        TEST_FRAMEWORK="pytest"
+        echo "  • Testing framework: pytest"
+        TEST_COUNT=$(find . -name "test_*.py" -o -name "*_test.py" | wc -l | tr -d ' ')
+    else
+        echo "  • Testing framework: unittest (built-in)"
+        TEST_COUNT=$(find . -name "test*.py" | wc -l | tr -d ' ')
+    fi
+    echo "  • Test files found: $TEST_COUNT"
+    
+elif [ -f "Cargo.toml" ]; then
+    echo "🦀 Rust Project Analysis:"
+    echo "  • Testing framework: Built-in (cargo test)"
+    TEST_COUNT=$(find . -name "*.rs" -exec grep -l "#\[test\]" {} \; | wc -l | tr -d ' ')
+    echo "  • Files with tests: $TEST_COUNT"
+    
+else
+    echo "❓ Project type not recognized"
+fi
+
+# Performance and metrics
+echo ""
+echo "📈 Performance & Metrics:"
+echo "═══════════════════════════"
+
+# Code complexity analysis (basic)
+if [ "$TEST_COUNT" -gt 0 ]; then
+    echo "✅ Test Coverage Status:"
+    echo "  • Test files available: $TEST_COUNT"
+    echo "  • Testing framework: $TEST_FRAMEWORK"
+else
+    echo "⚠️ No test files detected"
+fi
+
+# File type analysis
+echo "📊 Codebase Composition:"
+for ext in js ts jsx tsx py rs go java c cpp; do
+    count=$(find . -name "*.$ext" | grep -v node_modules | wc -l | tr -d ' ')
+    if [ "$count" -gt 0 ]; then
+        echo "  • .$ext files: $count"
+    fi
+done
+
+# Lines of code estimation
+TOTAL_LOC=$(find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -o -name "*.py" -o -name "*.rs" -o -name "*.go" \) | grep -v node_modules | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+echo "  • Estimated lines of code: $TOTAL_LOC"
+
+# Session archival
+echo ""
+echo "💾 Session Archival:"
+echo "═══════════════════"
+
+# Create session report file
+REPORT_FILE=".claude-reports/$SESSION_ID.log"
+mkdir -p .claude-reports
+
+cat > "$REPORT_FILE" << EOF
+CLAUDE CODE WORKFLOW COMPLETION REPORT
+======================================
+
+Session ID: $SESSION_ID
+Completed: $COMPLETION_TIME
+Project: $PROJECT_NAME
+User: $USER@$HOST
+Directory: $WORKDIR
+
+FILE CHANGES:
+$(git status --porcelain 2>/dev/null || echo "Not a git repository")
+
+DIFF STATISTICS:
+$(git diff --stat 2>/dev/null || echo "No git changes")
+
+TEST STATUS:
+- Framework: $TEST_FRAMEWORK
+- Test files: $TEST_COUNT
+
+PROJECT METRICS:
+- Total LOC (estimated): $TOTAL_LOC
+- Modified files: $MODIFIED_FILES
+
+EOF
+
+echo "📄 Session report saved: $REPORT_FILE"
+echo "📁 Report directory: .claude-reports/"
+
+# Cleanup old reports (keep last 30)
+find .claude-reports -name "session-*.log" | sort | head -n -30 | xargs rm -f 2>/dev/null
+
+echo ""
+echo "💡 Workflow Summary:"
+echo "═══════════════════"
+echo "  • Session completed successfully"
+echo "  • Files modified: $MODIFIED_FILES"
+echo "  • Test files available: $TEST_COUNT"
+echo "  • Project type: $([ -f package.json ] && echo 'Node.js' || [ -f requirements.txt ] && echo 'Python' || [ -f Cargo.toml ] && echo 'Rust' || echo 'Unknown')"
+echo "  • Git repository: $([ -d .git ] && echo 'Yes' || echo 'No')"
+
+echo ""
+echo "🎯 Next Steps:"
+echo "  • Review all changes before committing"
+echo "  • Run tests to ensure code quality"
+echo "  • Update documentation if needed"
+echo "  • Consider code review for significant changes"
+
+echo ""
+echo "📊 ═══════════════════════════════════════════════════"
+echo "🎉 Workflow completion report generated successfully!"
+echo "📋 Full report available at: $REPORT_FILE"
+echo "═══════════════════════════════════════════════════"
+
+exit 0
+```
+
+## Examples
+### Workflow Completion Report Hook Script
+
+Complete hook script that automatically generates comprehensive workflow completion reports when Claude Code workflow stops
+
+```bash
+#!/bin/bash
+echo "📊 ═══════════════════════════════════════════════════"
+echo "🎯 WORKFLOW COMPLETION REPORT"
+echo "📅 Session Completed: $(date)"
+echo "═══════════════════════════════════════════════════"
+SESSION_ID="session-$(date +%Y%m%d_%H%M%S)"
+COMPLETION_TIME=$(date)
+WORKDIR=$(pwd)
+PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
+echo "🏷️ Session Info:"
+echo "  • Session ID: $SESSION_ID"
+echo "  • Project: $PROJECT_NAME"
+echo "  • Directory: $WORKDIR"
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Git Repository Status:"
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    echo "  • Current branch: $BRANCH"
+    MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    echo "  • Modified files: $MODIFIED_FILES"
+    if [ "$MODIFIED_FILES" -gt 0 ]; then
+        echo "  • File status breakdown:"
+        git status --porcelain 2>/dev/null | cut -c1-2 | sort | uniq -c | while read -r count status; do
+            case "$status" in
+                "M "*) echo "    - Modified: $count files" ;;
+                "A "*) echo "    - Added: $count files" ;;
+                "D "*) echo "    - Deleted: $count files" ;;
+                "??"*) echo "    - Untracked: $count files" ;;
+            esac
+        done
+    fi
+fi
+REPORT_FILE=".claude-reports/$SESSION_ID.log"
+mkdir -p .claude-reports
+cat > "$REPORT_FILE" << EOF
+CLAUDE CODE WORKFLOW COMPLETION REPORT
+======================================
+
+Session ID: $SESSION_ID
+Completed: $COMPLETION_TIME
+Project: $PROJECT_NAME
+Directory: $WORKDIR
+
+FILE CHANGES:
+$(git status --porcelain 2>/dev/null || echo "Not a git repository")
+
+EOF
+echo "📄 Session report saved: $REPORT_FILE"
+echo "🎉 Workflow completion report generated successfully!"
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic workflow completion reporting
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/workflow-completion-report.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+### Enhanced Workflow Completion Report with Session Tracking
+
+Enhanced hook script with session duration tracking, Git diff statistics, test framework detection, and automatic report cleanup
+
+```bash
+#!/bin/bash
+echo "📊 ═══════════════════════════════════════════════════"
+echo "🎯 WORKFLOW COMPLETION REPORT"
+echo "📅 Session Completed: $(date)"
+echo "═══════════════════════════════════════════════════"
+SESSION_ID="session-$(date +%Y%m%d_%H%M%S)"
+COMPLETION_TIME=$(date)
+START_TIME="unknown"
+if [ -f ".claude/session-start" ]; then
+    START_TIMESTAMP=$(cat .claude/session-start 2>/dev/null || echo "")
+    if [ -n "$START_TIMESTAMP" ]; then
+        END_TIMESTAMP=$(date +%s)
+        DURATION=$((END_TIMESTAMP - START_TIMESTAMP))
+        HOURS=$((DURATION / 3600))
+        MINUTES=$(((DURATION % 3600) / 60))
+        echo "  • Duration: ${HOURS}h ${MINUTES}m"
+    fi
+fi
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Git Repository Status:"
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    DIFF_STATS=$(git diff --stat 2>/dev/null)
+    if [ -n "$DIFF_STATS" ]; then
+        echo "  • Changes summary:"
+        echo "$DIFF_STATS" | tail -1 | sed 's/^/    /' 2>/dev/null
+    fi
+fi
+if [ -f "package.json" ]; then
+    echo "📦 Node.js Project Analysis:"
+    if grep -q '"jest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="jest"
+        echo "  • Testing framework: Jest"
+    elif grep -q '"vitest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="vitest"
+        echo "  • Testing framework: Vitest"
+    fi
+    TEST_COUNT=$(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l | tr -d ' ')
+    echo "  • Test files found: $TEST_COUNT"
+fi
+REPORT_FILE=".claude-reports/$SESSION_ID.log"
+mkdir -p .claude-reports
+cat > "$REPORT_FILE" << EOF
+CLAUDE CODE WORKFLOW COMPLETION REPORT
+======================================
+
+Session ID: $SESSION_ID
+Completed: $COMPLETION_TIME
+Duration: ${HOURS}h ${MINUTES}m
+
+FILE CHANGES:
+$(git status --porcelain 2>/dev/null || echo "Not a git repository")
+
+DIFF STATISTICS:
+$(git diff --stat 2>/dev/null || echo "No git changes")
+
+TEST STATUS:
+- Framework: $TEST_FRAMEWORK
+- Test files: $TEST_COUNT
+
+EOF
+find .claude-reports -name "session-*.log" -type f -printf "%T@ %p\n" | sort -n | head -n -30 | cut -d" " -f2- | xargs rm -f 2>/dev/null
+echo "📄 Session report saved: $REPORT_FILE"
+echo "🎉 Workflow completion report generated successfully!"
+exit 0
+```
+### Workflow Completion Report with Multi-Language Project Support
+
+Enhanced hook script with multi-language project detection (Node.js, Python, Rust), dependency analysis, outdated package checking with timeout, and comprehensive metrics
+
+```bash
+#!/bin/bash
+echo "📊 ═══════════════════════════════════════════════════"
+echo "🎯 WORKFLOW COMPLETION REPORT"
+echo "📅 Session Completed: $(date)"
+echo "═══════════════════════════════════════════════════"
+SESSION_ID="session-$(date +%Y%m%d_%H%M%S)"
+COMPLETION_TIME=$(date)
+WORKDIR=$(pwd)
+PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "📊 Git Repository Status:"
+    BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
+    MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+    echo "  • Current branch: $BRANCH"
+    echo "  • Modified files: $MODIFIED_FILES"
+    if [ "$MODIFIED_FILES" -gt 0 ]; then
+        echo "  • Modified files (top 10):"
+        git status --porcelain 2>/dev/null | head -10 | while read -r status file; do
+            echo "    - $file ($status)"
+        done
+    fi
+    echo "  • Recent commits:"
+    git log --oneline -3 2>/dev/null | sed 's/^/    /' || echo "    No recent commits"
+fi
+if [ -f "package.json" ]; then
+    echo "📦 Node.js Project Analysis:"
+    TEST_COUNT=$(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l | tr -d ' ')
+    echo "  • Test files found: $TEST_COUNT"
+    DEPS_COUNT=$(jq -r '.dependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
+    DEV_DEPS_COUNT=$(jq -r '.devDependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
+    echo "  • Dependencies: $DEPS_COUNT production, $DEV_DEPS_COUNT development"
+    timeout 10 npm outdated 2>/dev/null | tail -n +2 | wc -l | tr -d ' ' | while read -r OUTDATED_COUNT; do
+        if [ "$OUTDATED_COUNT" -gt 0 ]; then
+            echo "  • Outdated packages: $OUTDATED_COUNT"
+        else
+            echo "  • All packages are up to date"
+        fi
+    done
+elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+    echo "🐍 Python Project Analysis:"
+    if command -v pytest >/dev/null 2>&1; then
+        TEST_FRAMEWORK="pytest"
+        echo "  • Testing framework: pytest"
+        TEST_COUNT=$(find . -name "test_*.py" -o -name "*_test.py" | wc -l | tr -d ' ')
+    else
+        echo "  • Testing framework: unittest (built-in)"
+        TEST_COUNT=$(find . -name "test*.py" | wc -l | tr -d ' ')
+    fi
+    echo "  • Test files found: $TEST_COUNT"
+elif [ -f "Cargo.toml" ]; then
+    echo "🦀 Rust Project Analysis:"
+    echo "  • Testing framework: Built-in (cargo test)"
+    TEST_COUNT=$(find . -name "*.rs" -exec grep -l "#\\[test\\]" {} \; | wc -l | tr -d ' ')
+    echo "  • Files with tests: $TEST_COUNT"
+fi
+TOTAL_LOC=$(find . -type f \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -o -name "*.py" -o -name "*.rs" -o -name "*.go" \) | grep -v node_modules | xargs wc -l 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+echo "📊 Codebase Composition:"
+echo "  • Estimated lines of code: $TOTAL_LOC"
+REPORT_FILE=".claude-reports/$SESSION_ID.log"
+mkdir -p .claude-reports
+cat > "$REPORT_FILE" << EOF
+CLAUDE CODE WORKFLOW COMPLETION REPORT
+======================================
+
+Session ID: $SESSION_ID
+Completed: $COMPLETION_TIME
+Project: $PROJECT_NAME
+
+FILE CHANGES:
+$(git status --porcelain 2>/dev/null || echo "Not a git repository")
+
+PROJECT METRICS:
+- Total LOC (estimated): $TOTAL_LOC
+- Modified files: $MODIFIED_FILES
+- Test files: $TEST_COUNT
+
+EOF
+find .claude-reports -name "session-*.log" -type f -printf "%T@ %p\n" | sort -n | head -n -30 | cut -d" " -f2- | xargs rm -f 2>/dev/null
+echo "📄 Session report saved: $REPORT_FILE"
+echo "🎉 Workflow completion report generated successfully!"
+exit 0
+```
+### Workflow Completion Report Configuration Example
+
+Example workflow completion report configuration for customizing report generation behavior
+
+```json
+{
+  "workflow_completion_report": {
+    "enabled": true,
+    "report_directory": ".claude-reports",
+    "keep_reports": 30,
+    "session_tracking": true,
+    "git_analysis": true,
+    "test_analysis": true,
+    "dependency_analysis": true,
+    "outdated_check_timeout": 10,
+    "project_types": ["nodejs", "python", "rust", "go", "java"],
+    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/target/**", "**/dist/**", "**/build/**"]
+  }
+}
+```
+
+## Troubleshooting
+### Report shows 'unknown' for session duration and start time
+
+Hook reads .claude/session-start file but file may not exist. Create marker: 'echo "$(date +%s)" > .claude/session-start' at init, then read: 'START_TIMESTAMP=$(cat .claude/session-start)'. Verify .claude directory exists. Check file permissions.
+### Outdated package check causes long delays (npm outdated hangs)
+
+npm outdated performs network checks timing out on slow connections. Add wrapper: 'timeout 10 npm outdated 2>/dev/null || echo "Check skipped"'. Or comment out for speed. Verify timeout command available. Check network connectivity.
+### Report directory cleanup removes current session's report file
+
+Sort bug: 'find | sort | head -n -30' removes newest alphabetically. Fix with time sort: 'find .claude-reports -type f -printf "%T@ %p\n" | sort -n | head -n -30 | cut -d" " -f2- | xargs rm -f'. Verify find supports -printf. Check file timestamps.
+### Diff statistics show empty output despite uncommitted changes
+
+git diff excludes untracked files. Combine: 'git diff --stat; git diff --cached --stat' for staged. Or use: 'git diff HEAD --stat' showing all uncommitted modifications. Verify Git repository state. Check git diff command.
+### Test file count inaccurate with nested test directories
+
+find without depth limit includes node_modules. Add exclusion: 'find . -name "*.test.*" -not -path "*/node_modules/*" -not -path "*/vendor/*"' for accurate counts. Verify find command. Check exclusion patterns.
+### Session report file not created in .claude-reports directory
+
+Verify .claude-reports directory exists and has write permissions: 'mkdir -p .claude-reports && chmod 755 .claude-reports'. Check disk space. Verify REPORT_FILE path. Test directory creation manually.
+### Git branch detection fails in detached HEAD state
+
+git branch --show-current returns empty in detached HEAD. Use: 'git rev-parse --abbrev-ref HEAD' or 'git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD'. Verify Git repository state. Check HEAD reference.
+### Lines of code estimation fails or shows incorrect count
+
+wc -l may fail on binary files or very large files. Add file type filtering: 'find . -type f \( -name "*.js" -o -name "*.ts" \) | xargs wc -l 2>/dev/null'. Verify find command. Check file exclusions. Test wc command manually.

@@ -1,0 +1,407 @@
+---
+title: API Latency Breakdown - Statuslines
+slug: api-latency-breakdown
+category: statuslines
+description: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection for Claude Code
+  sessions.
+cardDescription: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection f...
+seoTitle: API Latency Breakdown - Statuslines
+seoDescription: >-
+  API latency breakdown monitor showing network time vs processing time split,
+  p95 latency tracking, and performance bottleneck detection for Claude Code
+  sessi...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+installable: true
+usageSnippet: '✓ FAST | API: 2.34s (85%) | Network: 0.41s (15%) | █████████████████░░░'
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/api-latency-breakdown.sh"
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/api-latency-breakdown.sh"
+    }
+  }
+scriptLanguage: bash
+scriptBody: >-
+  #!/usr/bin/env bash
+
+
+  # API Latency Breakdown Monitor for Claude Code
+
+  # Shows network/waiting time vs actual API processing time
+
+
+  # Read JSON from stdin
+
+  read -r input
+
+
+  # Extract values
+
+  total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+
+  api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+
+
+  # Calculate network/waiting time (total - API)
+
+  network_time=$((total_duration_ms - api_duration_ms))
+
+
+  # Avoid negative values
+
+  if [ $network_time -lt 0 ]; then
+    network_time=0
+  fi
+
+
+  # Convert to seconds for display
+
+  api_seconds=$(echo "scale=2; $api_duration_ms / 1000" | bc)
+
+  network_seconds=$(echo "scale=2; $network_time / 1000" | bc)
+
+  total_seconds=$(echo "scale=2; $total_duration_ms / 1000" | bc)
+
+
+  # Calculate percentage split
+
+  if [ $total_duration_ms -gt 0 ]; then
+    api_percentage=$(( (api_duration_ms * 100) / total_duration_ms ))
+    network_percentage=$(( 100 - api_percentage ))
+  else
+    api_percentage=0
+    network_percentage=0
+  fi
+
+
+  # Performance assessment (network time should be minimal)
+
+  if [ $network_time -lt 1000 ]; then  # < 1 second network time
+    PERF_COLOR="\033[38;5;46m"   # Green: Excellent
+    PERF_STATUS="✓ FAST"
+  elif [ $network_time -lt 5000 ]; then  # < 5 seconds
+    PERF_COLOR="\033[38;5;226m"  # Yellow: Moderate
+    PERF_STATUS="⚠ SLOW"
+  else
+    PERF_COLOR="\033[38;5;196m"  # Red: Poor performance
+    PERF_STATUS="✗ BOTTLENECK"
+  fi
+
+
+  RESET="\033[0m"
+
+
+  # Build ratio bar (API vs Network)
+
+  API_BAR="\033[48;5;75m"    # Blue background for API time
+
+  NET_BAR="\033[48;5;214m"   # Orange background for network time
+
+
+  # Create 20-char bar showing split
+
+  api_chars=$((api_percentage / 5))  # Each char = 5%
+
+  net_chars=$((network_percentage / 5))
+
+
+  if [ $api_chars -gt 0 ]; then
+    api_bar=$(printf "${API_BAR} %.0s" $(seq 1 $api_chars))${RESET}
+  else
+    api_bar=""
+  fi
+
+
+  if [ $net_chars -gt 0 ]; then
+    net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
+  else
+    net_bar=""
+  fi
+
+
+  # Output statusline
+
+  echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s
+  (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) |
+  ${api_bar}${net_bar}"
+prerequisites:
+  - Claude Code CLI installed and configured
+  - Bash shell available (bash 4.0+ recommended for arithmetic operations)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - >-
+    bc calculator (bc 1.07+ recommended for floating point calculations,
+    optional - script falls back to integer math)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for ratio
+    bar visualization)
+  - >-
+    Write access to /tmp directory (optional, for P95 latency tracking if using
+    enhanced version)
+tags:
+  - api-latency
+  - performance
+  - monitoring
+  - bottleneck
+  - network
+keywords:
+  - api
+  - api-latency
+  - bottleneck
+  - breakdown
+  - claude
+  - development
+  - latency
+  - monitoring
+  - network
+  - performance
+  - statuslines
+  - tools
+readingTime: 2
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- API latency breakdown showing processing time vs network/waiting time
+- Percentage split visualization with color-coded bar chart
+- Performance bottleneck detection (network time thresholds)
+- Real-time latency tracking with sub-second precision
+- Color-coded performance status (green <1s, yellow 1-5s, red >5s network time)
+- Visual ratio bar (blue = API processing, orange = network overhead)
+- Helps identify network issues vs API performance problems
+- Lightweight bash with bc for floating-point calculations
+
+## Use Cases
+
+- Performance debugging for slow Claude Code responses
+- Identifying network bottlenecks vs API processing delays
+- Optimizing API call efficiency in distributed teams
+- Troubleshooting VPN/proxy latency issues
+- Monitoring API performance degradation over time
+- Production environment SLA monitoring
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- bc calculator (bc 1.07+ recommended for floating point calculations, optional - script falls back to integer math)
+- Terminal with ANSI color code support (256-color mode recommended for ratio bar visualization)
+- Write access to /tmp directory (optional, for P95 latency tracking if using enhanced version)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/api-latency-breakdown.sh"
+  }
+}
+```
+
+## Examples
+### Enhanced Latency Breakdown with P95 Tracking
+Extended version with percentile latency tracking and historical comparison
+```bash
+#!/usr/bin/env bash
+
+# Enhanced API Latency Breakdown with P95 Tracking
+
+input=$(cat)
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+network_time=$((total_duration_ms - api_duration_ms))
+
+if [ $network_time -lt 0 ]; then
+  network_time=0
+fi
+
+# Store latency history in /tmp
+HIST_FILE="/tmp/claude_latency_history.txt"
+echo "$network_time" >> "$HIST_FILE"
+
+# Calculate P95 if we have enough samples (last 20 measurements)
+if [ -f "$HIST_FILE" ] && [ $(wc -l < "$HIST_FILE") -ge 20 ]; then
+  p95_network=$(sort -n "$HIST_FILE" | tail -n 20 | awk 'BEGIN{c=0} {a[c++]=$1} END{print a[int(c*0.95)]}')
+  p95_display=$(echo "scale=2; $p95_network / 1000" | bc 2>/dev/null || echo "$((p95_network / 1000))")
+  p95_info=" | P95: ${p95_display}s"
+else
+  p95_info=""
+fi
+
+api_seconds=$(echo "scale=2; $api_duration_ms / 1000" | bc 2>/dev/null || echo "$((api_duration_ms / 1000))")
+network_seconds=$(echo "scale=2; $network_time / 1000" | bc 2>/dev/null || echo "$((network_time / 1000))")
+
+if [ $total_duration_ms -gt 0 ]; then
+  api_percentage=$(( (api_duration_ms * 100) / total_duration_ms ))
+  network_percentage=$(( 100 - api_percentage ))
+else
+  api_percentage=0
+  network_percentage=0
+fi
+
+if [ $network_time -lt 1000 ]; then
+  PERF_COLOR="\033[38;5;46m"
+  PERF_STATUS="✓ FAST"
+elif [ $network_time -lt 5000 ]; then
+  PERF_COLOR="\033[38;5;226m"
+  PERF_STATUS="⚠ SLOW"
+else
+  PERF_COLOR="\033[38;5;196m"
+  PERF_STATUS="✗ BOTTLENECK"
+fi
+
+RESET="\033[0m"
+API_BAR="\033[48;5;75m"
+NET_BAR="\033[48;5;214m"
+
+api_chars=$((api_percentage / 5))
+net_chars=$((network_percentage / 5))
+
+api_bar=$(printf "${API_BAR} %.0s" $(seq 1 $api_chars))${RESET}
+net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
+
+echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%)${p95_info} | ${api_bar}${net_bar}"
+```
+### Latency Breakdown with Custom Thresholds
+Configurable performance thresholds for different network environments
+```bash
+#!/usr/bin/env bash
+
+# API Latency Breakdown with Custom Thresholds
+# Configure via environment variables
+
+FAST_THRESHOLD=${LATENCY_FAST_THRESHOLD:-1000}    # Default: 1 second
+SLOW_THRESHOLD=${LATENCY_SLOW_THRESHOLD:-5000}    # Default: 5 seconds
+
+input=$(cat)
+
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+api_duration_ms=$(echo "$input" | jq -r '.cost.total_api_duration_ms // 0')
+network_time=$((total_duration_ms - api_duration_ms))
+
+if [ $network_time -lt 0 ]; then
+  network_time=0
+fi
+
+api_seconds=$(echo "scale=2; $api_duration_ms / 1000" | bc 2>/dev/null || echo "$((api_duration_ms / 1000))")
+network_seconds=$(echo "scale=2; $network_time / 1000" | bc 2>/dev/null || echo "$((network_time / 1000))")
+
+if [ $total_duration_ms -gt 0 ]; then
+  api_percentage=$(( (api_duration_ms * 100) / total_duration_ms ))
+  network_percentage=$(( 100 - api_percentage ))
+else
+  api_percentage=0
+  network_percentage=0
+fi
+
+# Custom thresholds
+if [ $network_time -lt $FAST_THRESHOLD ]; then
+  PERF_COLOR="\033[38;5;46m"
+  PERF_STATUS="✓ FAST"
+elif [ $network_time -lt $SLOW_THRESHOLD ]; then
+  PERF_COLOR="\033[38;5;226m"
+  PERF_STATUS="⚠ SLOW"
+else
+  PERF_COLOR="\033[38;5;196m"
+  PERF_STATUS="✗ BOTTLENECK"
+fi
+
+RESET="\033[0m"
+API_BAR="\033[48;5;75m"
+NET_BAR="\033[48;5;214m"
+
+api_chars=$((api_percentage / 5))
+net_chars=$((network_percentage / 5))
+
+api_bar=$(printf "${API_BAR} %.0s" $(seq 1 $api_chars))${RESET}
+net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
+
+echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) | ${api_bar}${net_bar}"
+```
+### API Latency Breakdown Installation Example
+Complete setup script with bc installation check
+```bash
+#!/bin/bash
+# Installation script for API Latency Breakdown
+
+mkdir -p .claude/statuslines
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+  echo "Installing bc for floating point calculations..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install bc
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get install -y bc || sudo yum install -y bc
+  else
+    echo "Please install bc manually: https://www.gnu.org/software/bc/"
+  fi
+fi
+
+cat > .claude/statuslines/api-latency-breakdown.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# [Script content from first example]
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/api-latency-breakdown.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/api-latency-breakdown.sh"}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/api-latency-breakdown.sh"}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "API Latency Breakdown installed successfully!"
+echo "Note: bc is required for floating point calculations. If not installed, script will use integer math."
+```
+
+## Troubleshooting
+### Network time showing negative or zero despite slow responses
+
+Verify both cost.total_duration_ms and cost.total_api_duration_ms fields exist: echo '$input' | jq .cost. Negative protection caps network_time at 0. If both values missing, script shows 0s - check Claude Code version supports these fields. Verify JSON structure: jq '.cost | keys' to see available fields.
+### API percentage always showing 100% with no network time
+
+This indicates total_duration_ms equals total_api_duration_ms (no measurable network overhead). Verify calculations: network_time = total - API. If consistently 0, either network is extremely fast or fields are identical in JSON. Check actual JSON values: echo '$input' | jq '.cost.total_duration_ms, .cost.total_api_duration_ms'. Test with known slow network to verify detection works.
+### Performance status showing BOTTLENECK incorrectly
+
+Thresholds: <1s green (FAST), 1-5s yellow (SLOW), >5s red (BOTTLENECK). Adjust thresholds in script if your network baseline differs. VPN users may see higher normal latency. Modify: network_time -lt 5000 to higher value for VPN environments. Use custom thresholds version: export LATENCY_FAST_THRESHOLD=2000 LATENCY_SLOW_THRESHOLD=10000.
+### Ratio bar not displaying or showing as empty
+
+Bar uses ANSI background colors (\033[48;5;Xm). Ensure terminal supports 256-color mode: tput colors (should return 256). If bars show as spaces only, verify ANSI escape codes working: echo -e '\033[48;5;75m BLUE \033[0m'. Check terminal emulator color support settings. Verify echo -e flag is used for escape sequence interpretation.
+### bc: command not found when calculating percentages
+
+Install bc: brew install bc (macOS), apt install bc (Linux), or download from https://www.gnu.org/software/bc/. Alternative: use integer math only: api_percentage=$((api_duration_ms * 100 / total_duration_ms)) - removes decimal precision but works without bc. Script includes fallback to integer math if bc unavailable. Verify bc installation: which bc.
+### Floating point seconds showing as integers (no decimals)
+
+This indicates bc is not working or fallback to integer math is active. Check bc installation: bc --version. Verify bc command in script: echo 'scale=2; 1234 / 1000' | bc (should return 1.34). If bc fails, script uses integer division: $((api_duration_ms / 1000)) which truncates decimals. Install bc for decimal precision.
+### Percentage calculations showing incorrect values
+
+Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_duration_ms > 0 before division. Test calculation: api_percentage=$((api_duration_ms * 100 / total_duration_ms)). Ensure values are numeric: echo "$api_duration_ms" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large.
+### Statusline output showing raw ANSI codes instead of colors
+
+Verify echo -e flag is used for escape sequence interpretation. Check terminal supports ANSI colors: echo -e '\033[38;5;46mGreen\033[0m'. Some terminals require explicit color support enabled. Check TERM environment variable: echo $TERM (should include 'xterm' or '256color'). Verify terminal emulator settings for color support.

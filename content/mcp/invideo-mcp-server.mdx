@@ -1,0 +1,229 @@
+---
+title: Invideo MCP Server for Claude
+slug: invideo-mcp-server
+category: mcp
+description: Build video creation capabilities into your applications
+cardDescription: Build video creation capabilities into your applications
+seoTitle: Invideo MCP Server for Claude
+seoDescription: >-
+  Build video creation capabilities into your applications Discover tools for AI
+  development.
+author: invideo
+dateAdded: '2025-09-18'
+documentationUrl: 'https://invideo.io/ai/mcp'
+downloadUrl: /downloads/mcp/invideo-mcp-server.mcpb
+packageVerified: true
+installable: true
+installCommand: claude mcp list && claude mcp status invideo
+usageSnippet: claude mcp list && claude mcp status invideo
+copySnippet: |-
+  {
+    "invideo": {
+      "url": "https://mcp.invideo.io/sse",
+      "transport": "sse"
+    }
+  }
+configSnippet: |-
+  {
+    "invideo": {
+      "url": "https://mcp.invideo.io/sse",
+      "transport": "sse"
+    }
+  }
+estimatedSetupTime: 3 minutes
+difficulty: beginner
+prerequisites:
+  - 'Invideo account (sign up at https://invideo.io if needed)'
+  - >-
+    Invideo API key or OAuth credentials - get from Invideo account settings or
+    Developer Hub
+  - 'HTTP/SSE transport support (remote MCP server at https://mcp.invideo.io/sse)'
+  - Internet connection (remote Invideo API access required)
+  - >-
+    Understanding of video rendering/processing times (varies by video length,
+    quality, and account tier)
+  - >-
+    Understanding of storage limits (varies by account tier - check account
+    settings for current limits)
+  - >-
+    Understanding of export quotas (varies by account tier - check account
+    settings for monthly export limits)
+  - >-
+    Understanding of supported media formats (MP4, MOV for video; JPG, PNG for
+    images; check documentation for full list)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of video creation concepts (rendering, templates, voiceovers,
+    subtitles, export formats, aspect ratios)
+tags:
+  - video
+  - invideo
+  - media
+  - content-creation
+  - ai-video
+keywords:
+  - ai-video
+  - claude
+  - content-creation
+  - development
+  - invideo
+  - mcp
+  - mcp servers
+  - media
+  - server
+  - tools
+  - video
+readingTime: 1
+difficultyScore: 1
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Content
+
+Transform your content creation workflow by connecting Claude to Invideo's AI-powered video platform. Generate professional videos from text prompts, edit existing videos programmatically, add voiceovers and music, create reusable templates, and export in multiple formats—all through natural language commands. Scale your video production, automate content creation, and deliver engaging visual content with AI-powered video generation.
+
+## Features
+
+- Generate videos from text prompts with AI-powered creation
+- Edit existing videos programmatically with timeline controls
+- Add voiceovers and background music with audio mixing
+- Create reusable video templates for consistent branding
+- Export videos in multiple formats and resolutions (MP4, MOV, various aspect ratios)
+- Add subtitles and captions with automatic transcription
+- Apply video effects, transitions, and filters
+- Manage video projects and media library programmatically
+- Advanced InVideo video creation and editing with AI-powered script generation, template library access, and automated video production
+- Batch operations support for efficient bulk video creation, editing, and rendering with automatic rate limit handling and retry logic
+- Real-time video synchronization capabilities with webhook integration support for monitoring video processing and triggering automated workflows
+
+## Use Cases
+
+- Generate marketing videos at scale with automated production
+- Create social media content automatically for multiple platforms
+- Produce educational video content with consistent formatting
+- Edit video presentations and training materials programmatically
+- Batch produce video variations with different text, images, or music
+- Create personalized video campaigns with dynamic content
+- Generate video summaries from blog posts or articles
+- Automate video production workflows with template-based creation
+- Build automated video production workflows that sync external systems with InVideo for real-time video creation and content management
+
+## Installation
+
+### Claude Code
+
+1. Get your Invideo API key from account settings or set up OAuth credentials (if using OAuth)
+2. claude mcp add --transport sse invideo https://mcp.invideo.io/sse
+3. Add INVideo_API_KEY to your environment or configuration if using API key authentication
+4. Verify installation: claude mcp list
+5. Test connection: claude mcp status invideo
+
+### Claude Desktop
+
+1. Get your Invideo API key from account settings or set up OAuth credentials (if using OAuth)
+2. Open your Claude Desktop configuration file (see configPath below)
+3. Add the Invideo server configuration with SSE transport pointing to https://mcp.invideo.io/sse
+4. Add INVideo_API_KEY to environment variables in configuration if using API key authentication
+5. Restart Claude Desktop
+6. Authenticate with your Invideo account when prompted (if using OAuth)
+
+## Requirements
+
+- Invideo account (sign up at https://invideo.io if needed)
+- Invideo API key or OAuth credentials - get from Invideo account settings or Developer Hub
+- HTTP/SSE transport support (remote MCP server at https://mcp.invideo.io/sse)
+- Internet connection (remote Invideo API access required)
+- Understanding of video rendering/processing times (varies by video length, quality, and account tier)
+- Understanding of storage limits (varies by account tier - check account settings for current limits)
+- Understanding of export quotas (varies by account tier - check account settings for monthly export limits)
+- Understanding of supported media formats (MP4, MOV for video; JPG, PNG for images; check documentation for full list)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of video creation concepts (rendering, templates, voiceovers, subtitles, export formats, aspect ratios)
+
+## Configuration
+
+```json
+{
+  "invideo": {
+    "url": "https://mcp.invideo.io/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Create a 30-second product video
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create a 30-second product video"
+```
+### Add subtitles to my video
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Add subtitles to my video"
+```
+### Generate a video from this blog post
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate a video from this blog post"
+```
+### Export video in 1080p MP4
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Export video in 1080p MP4"
+```
+### Create Video from Template
+Create a new InVideo video from a template with custom script and media
+```typescript
+// Create InVideo video from template
+const video = await invideo.videos.create({
+  template_id: "template-id",
+  script: "Your video script text here",
+  media: [{
+    type: "image",
+    url: "https://example.com/image.jpg"
+  }]
+});
+```
+
+## Security
+
+- OAuth authentication or API key for secure account access
+- Respect copyright for media assets (use licensed or royalty-free content)
+- Monitor storage usage limits to avoid service disruption
+- Check export quota restrictions based on account tier
+- Verify media file sources and licensing before use in videos
+- InVideo API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- InVideo OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- InVideo video IDs and project identifiers may expose content structure and media assets - ensure InVideo resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for InVideo MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- InVideo webhook configurations and payloads may contain sensitive video metadata and media information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Authentication error: could not authenticate user
+
+Verify OAuth credentials are valid in Invideo account settings. For API key authentication, ensure the key is copied correctly and hasn't expired. Check username and password are correct if using basic auth. Ensure account isn't locked or suspended. Re-authenticate if needed or regenerate API key from account settings.
+### Video export or rendering queue taking too long
+
+Check rendering queue status in Invideo dashboard. Large videos, high resolution, or complex effects take longer to process. Verify your account tier supports requested video length and quality settings. Free tier may have longer processing times. Contact support if queue appears stuck or exceeds expected processing time for your video specifications.
+### Storage limit exceeded when uploading media
+
+Check storage usage in Invideo account settings. Delete unused videos, templates, or media assets to free space. Upgrade account tier for higher storage limits. Compress media files before upload to save space. Consider using external storage or linking to media instead of uploading when possible.
+### Unsupported media format error on upload
+
+Verify media files are in supported formats: MP4, MOV for video; JPG, PNG, WEBP for images. Audio formats typically include MP3, WAV. Convert unsupported formats using video converter tools before uploading. Check file isn't corrupted and file size doesn't exceed account tier limits. Review Invideo documentation for complete list of supported formats.
+### InVideo MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### InVideo rate limit errors when processing multiple video requests
+
+Implement exponential backoff retry logic with jitter. Use InVideo API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed template data. Check InVideo documentation for specific rate limits.
+### InVideo video creation or rendering failures
+
+Check video file size limits and template availability. Verify account permissions allow video creation. Ensure network connectivity is stable. For large videos, use chunked upload API with resumable upload support.
+### InVideo MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify InVideo API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

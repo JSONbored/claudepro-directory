@@ -1,29 +1,13 @@
-import { generatePageMetadata } from '@heyclaude/web-runtime/data';
-import { type Metadata } from 'next';
+import Link from "next/link";
 
-import { NotFoundEmpty } from '@/src/components/primitives/feedback/empty-state';
-
-export async function generateMetadata(): Promise<Metadata> {
-  return generatePageMetadata('/404');
-}
-
-/**
- * Static Generation: 404 page is fully static
- * No dynamic data fetching - can be pre-rendered at build time
- */
-export const revalidate = false;
-
-/**
- * Renders the site's 404 Not Found page using the NotFoundEmpty presentation.
- *
- * @returns The React element for the 404 page.
- *
- * @see {@link "@/src/components/primitives/feedback/empty-state".NotFoundEmpty}
- */
 export default function NotFound() {
   return (
-    <div className="bg-background flex min-h-screen items-center justify-center px-4">
-      <NotFoundEmpty />
+    <div className="container-shell flex min-h-[50vh] flex-col items-center justify-center gap-4 py-16 text-center">
+      <span className="eyebrow">404</span>
+      <h1 className="section-title">Page not found.</h1>
+      <Link href="/" className="rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground">
+        Back home
+      </Link>
     </div>
   );
 }

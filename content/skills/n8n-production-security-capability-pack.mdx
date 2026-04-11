@@ -1,0 +1,140 @@
+---
+title: n8n Production Security Capability Pack Skill
+slug: n8n-production-security-capability-pack
+category: skills
+description: 'Expert n8n capability skill focused on secure production operation, workflow isolation, secret hygiene, and abuse-resistant automation design.'
+cardDescription: 'Deep n8n production security skill for safe AI workflows, credential protection, and incident-ready operations.'
+seoTitle: n8n Production Security Capability Pack Skill
+seoDescription: 'Advanced AI skill for securing n8n in production with workflow guardrails, credential controls, and operational hardening practices.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://docs.n8n.io/hosting/securing/'
+downloadUrl: /downloads/skills/n8n-production-security-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip -o n8n-production-security-capability-pack.zip && unzip -o n8n-production-security-capability-pack.zip -d ./n8n-production-security-capability-pack'
+usageSnippet: 'Use this skill when deploying or auditing n8n workflows that involve AI nodes, sensitive data, or external side effects.'
+copySnippet: |-
+  # Trigger
+  "Apply the n8n production security capability pack to this workflow stack."
+
+  # Required output
+  1) Threat model
+  2) Credential and access control map
+  3) Workflow hardening checklist
+  4) Incident response and audit plan
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://docs.n8n.io/hosting/securing/overview/'
+  - 'https://docs.n8n.io/hosting/configuration/environment-variables/'
+  - 'https://docs.n8n.io/advanced-ai/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - 'n8n environment inventory (workspaces, credentials, workflows)'
+  - Security policy baseline
+  - Alerting destination for incidents
+tags:
+  - n8n
+  - security
+  - automation
+  - ai-workflows
+  - capability-pack
+keywords:
+  - n8n security
+  - n8n hardening
+  - workflow security
+  - credential governance
+readingTime: 9
+packageVerified: true
+difficultyScore: 85
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+
+- https://docs.n8n.io/hosting/securing/overview/
+- https://docs.n8n.io/hosting/configuration/environment-variables/
+- https://docs.n8n.io/advanced-ai/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+
+This capability pack teaches an agent how to operate n8n securely in production. It is focused on practical controls that reduce breach risk and workflow abuse without destroying usability.
+
+## Capability Scope
+
+- Credential handling and secret lifecycle
+- Workflow-level blast-radius reduction
+- AI node risk boundaries
+- Code node and custom logic controls
+- Logging, alerts, and forensic readiness
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Keep credentials segmented by workflow purpose.
+- Gate destructive actions behind explicit approval.
+- Validate AI output before external writes.
+- Preserve full workflow execution traceability.
+
+## Troubleshooting
+
+**Issue:** Credential leaks through logs or outputs  
+**Fix:** Redact sensitive fields and disable verbose logging for secure paths.
+
+**Issue:** AI node triggers unintended side effects  
+**Fix:** Add deterministic validation/approval stage before mutation nodes.
+
+**Issue:** Hard to scope incident impact  
+**Fix:** Isolate workflows by domain and use least-privilege credentials.
+
+## Output Contract
+
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

@@ -1,0 +1,65 @@
+name: README Refresh PR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "content/**"
+      - "scripts/generate-readme.mjs"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh-readme:
+    if: ${{ github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'docs(readme):') }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: refresh-readme-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate README
+        run: pnpm generate:readme
+
+      - name: Create README update PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/readme-refresh
+          title: "docs(readme): refresh generated catalog index"
+          commit-message: "docs(readme): refresh generated catalog index"
+          body: |
+            ## Summary
+            Automated README refresh after content or generator changes on `main`.
+
+            ## What changed
+            - Regenerated `README.md` from repository content.
+
+            ## Why
+            - Keep README listing in sync without manual maintenance.
+          labels: |
+            docs
+            automation
+          add-paths: |
+            README.md

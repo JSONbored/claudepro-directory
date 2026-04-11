@@ -1,4 +1,5 @@
 # Changelog
+
 ## 2025-10-18 - Pattern-Based SEO Metadata Architecture
 
 **TL;DR:** Migrated from 1,600+ lines of legacy metadata code to a modern pattern-based architecture with template-driven metadata generation. All 41 routes now use 8 reusable patterns, achieving 100% coverage with titles (53-60 chars) and descriptions (150-160 chars) optimized for October 2025 SEO standards and AI search engines.
@@ -30,18 +31,21 @@ Replaced legacy metadata registry system with enterprise-grade pattern-based arc
 ### Technical Details
 
 **Pattern Architecture:**
+
 - All routes classified into 8 patterns with confidence-based activation
 - Template functions receive context (route, params, item data) and generate type-safe metadata
 - Multi-tier padding system ensures descriptions always meet 150-160 char requirement
 - 100% pattern coverage verified via route scanner (41/41 routes)
 
 **SEO Optimization (October 2025):**
+
 - AI citation optimization (ChatGPT, Perplexity, Claude search)
 - Schema.org 29.3 compliance with server-side JSON-LD
 - Recency signals (dateModified) for fresh content
 - Year inclusion in descriptions for AI search queries
 
 **Files Added (5 new):**
+
 1. `src/lib/seo/metadata-templates.ts` - Template functions for 8 route patterns
 2. `src/lib/seo/route-classifier.ts` - Pattern detection with confidence scoring
 3. `src/lib/seo/route-scanner.ts` - Static route discovery tool
@@ -49,6 +53,7 @@ Replaced legacy metadata registry system with enterprise-grade pattern-based arc
 5. `scripts/validation/validate-metadata.ts` - Consolidated metadata validation
 
 **Files Modified (5 total):**
+
 1. `src/lib/seo/metadata-generator.ts` - Pattern-based generation (removed 234 lines)
 2. `src/lib/seo/metadata-registry.ts` - Types and utilities only (removed 1,783 lines)
 3. `src/lib/config/seo-config.ts` - Updated documentation
@@ -56,6 +61,7 @@ Replaced legacy metadata registry system with enterprise-grade pattern-based arc
 5. `package.json` - Added validate:metadata and validate:metadata:quick commands
 
 **Performance & Security:**
+
 - ✅ Synchronous metadata generation (no Promise overhead, build-time optimization)
 - ✅ Type-safe with Zod validation throughout
 - ✅ 76.6% code reduction in metadata-registry.ts (2,328 → 545 lines)
@@ -63,6 +69,7 @@ Replaced legacy metadata registry system with enterprise-grade pattern-based arc
 - ✅ Git hook validation prevents SEO regressions
 
 **Deployment:**
+
 - No database migrations required
 - No environment variables needed
 - TypeScript compilation verified - zero errors
@@ -131,6 +138,7 @@ The badge system follows a configuration-driven approach with full type safety a
 ```
 
 **Reputation Tiers:**
+
 - **Newcomer** (0-49): Just getting started 🌱
 - **Contributor** (50-199): Active community member ⭐
 - **Regular** (200-499): Trusted contributor 💎
@@ -139,6 +147,7 @@ The badge system follows a configuration-driven approach with full type safety a
 - **Legend** (2500+): Legendary status 👑
 
 **Award Criteria Types:**
+
 - `ReputationCriteria`: Reach minimum reputation score
 - `CountCriteria`: Perform action X times (posts, comments, submissions, etc.)
 - `StreakCriteria`: Maintain daily/weekly activity streak
@@ -148,6 +157,7 @@ The badge system follows a configuration-driven approach with full type safety a
 **UI/UX Implementation:**
 
 **1. "NEW" Badge (0-7 Day Content):**
+
 ```typescript
 // Utility function - production-grade validation
 export function isNewContent(dateAdded?: string): boolean {
@@ -165,19 +175,21 @@ export function isNewContent(dateAdded?: string): boolean {
 ```
 
 **2. Newest-First Featured Sorting:**
+
 ```typescript
 // Updated fallback algorithm (featured.server.ts:538-544)
 const additionalItems = rawData
   .filter((item) => !trendingSlugs.has(item.slug))
   .sort((a, b) => {
-    const dateA = new Date(a.dateAdded ?? '1970-01-01').getTime();
-    const dateB = new Date(b.dateAdded ?? '1970-01-01').getTime();
+    const dateA = new Date(a.dateAdded ?? "1970-01-01").getTime();
+    const dateB = new Date(b.dateAdded ?? "1970-01-01").getTime();
     return dateB - dateA; // Newest first
   })
   .slice(0, LOADER_CONFIG.MAX_ITEMS_PER_CATEGORY - trendingItems.length);
 ```
 
 **3. Responsive Card Design:**
+
 ```typescript
 // Mobile-first utility classes (ui-constants.ts)
 CARD_BADGE_CONTAINER: 'flex flex-wrap gap-1 sm:gap-2 mb-4',
@@ -190,6 +202,7 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 ```
 
 **Security & Performance:**
+
 - ✅ All badge actions use `authedAction` middleware with user authentication
 - ✅ Public queries validate input with Zod schemas (brandedId validation)
 - ✅ Repository methods return type-safe `RepositoryResult<T>` wrappers
@@ -201,11 +214,13 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 - ✅ TypeScript strict mode compliant with proper undefined guards
 
 **Database Schema:**
+
 - `user_badges` table: Links users to earned badges with featured status and award timestamp
 - Indexed on `user_id` and `badge_id` for performant queries
 - Foreign keys to `users` and `badges` tables with CASCADE deletion
 
 **Files Added (7 new):**
+
 1. `src/lib/config/badges.config.ts` - Badge registry with 20+ achievement definitions
 2. `src/lib/config/reputation.config.ts` - Reputation tiers, point values, helper functions
 3. `src/lib/actions/badges.actions.ts` - Server actions for badge management
@@ -216,6 +231,7 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 8. `src/components/features/reputation/reputation-breakdown.tsx` - Reputation visualization
 
 **Files Modified (8 total):**
+
 1. `src/lib/utils/content.utils.ts` - Added `isNewContent()` utility function
 2. `src/components/features/content/config-card.tsx` - Added NewBadge integration in renderTopBadges slot
 3. `src/lib/services/featured.server.ts` - Updated fallback sorting to newest-first (dateAdded DESC)
@@ -226,6 +242,7 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 8. `src/lib/repositories/user-badge.repository.ts` - Added badge query methods
 
 **Consolidation Wins:**
+
 - ✅ Zero new files for UI features - reused existing components and utilities
 - ✅ Centralized responsive patterns in `ui-constants.ts` (eliminates future duplication)
 - ✅ Configuration-driven badge system (easy to add new badges without code changes)
@@ -233,6 +250,7 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 - ✅ Modular architecture - badge/reputation systems are fully independent
 
 **Testing Recommendations:**
+
 1. **Badge System**: Award badges through admin interface, verify display on user profiles, test featured badge toggle (max 5 limit)
 2. **Reputation**: Verify point accumulation for posts/votes/comments, check tier progression, validate breakdown visualization
 3. **"NEW" Badge**: Content added in last 7 days should show badge on all preview cards
@@ -240,6 +258,7 @@ CARD_METADATA_BADGES: 'flex items-center gap-1 text-xs flex-wrap sm:flex-nowrap'
 5. **Responsive Design**: Test card layouts on mobile (375px), tablet (768px), desktop (1024px+) for proper wrapping and stacking
 
 **Deployment Notes:**
+
 - Database migration required for `user_badges` table (handled separately)
 - No environment variables needed for badge/reputation system
 - Badge definitions can be modified in config without database changes
@@ -265,32 +284,37 @@ Added BetterStack heartbeat monitoring integration to both Vercel cron jobs (dai
 ### Technical Details
 
 **Monitoring Configuration:**
+
 - **Daily Maintenance Cron**: Sends heartbeat at ~3 AM UTC after successful cache warming, job expiration, and email sequence processing
 - **Weekly Tasks Cron**: Sends heartbeat Monday 12 AM UTC after successful featured content calculation and weekly digest distribution
 - **BetterStack Settings**: Daily 24h period with 30min grace, Weekly 7d period with 2h grace, alerts on missing heartbeat
 
 **Implementation Pattern:**
+
 ```typescript
 // Only send on complete success
 if (failedTasks === 0) {
-  const { env } = await import('@/src/lib/schemas/env.schema');
+  const { env } = await import("@/src/lib/schemas/env.schema");
   const heartbeatUrl = env.BETTERSTACK_HEARTBEAT_DAILY_MAINTENANCE;
 
   if (heartbeatUrl) {
     try {
       await fetch(heartbeatUrl, {
-        method: 'GET',
+        method: "GET",
         signal: AbortSignal.timeout(5000), // Non-blocking
       });
-      logger.info('BetterStack heartbeat sent successfully');
+      logger.info("BetterStack heartbeat sent successfully");
     } catch (error) {
-      logger.warn('Failed to send BetterStack heartbeat (non-critical)', { error });
+      logger.warn("Failed to send BetterStack heartbeat (non-critical)", {
+        error,
+      });
     }
   }
 }
 ```
 
 **Security Features:**
+
 - ✅ No hardcoded URLs - stored in Vercel environment variables
 - ✅ Type-safe validation with Zod urlString schema
 - ✅ Server-only execution - never exposed to client bundle
@@ -299,17 +323,20 @@ if (failedTasks === 0) {
 - ✅ Lazy import pattern to avoid circular dependencies
 
 **Files Modified:**
+
 - `src/lib/schemas/env.schema.ts` - Added heartbeat URL environment variables to serverEnvSchema
 - `src/app/api/cron/daily-maintenance/route.ts` - Added heartbeat ping after successful task completion
 - `src/app/api/cron/weekly-tasks/route.ts` - Added heartbeat ping after successful task completion
 
 **Why Success-Only Reporting:**
+
 - Simpler than dual success/failure reporting
 - More reliable (network issues during failure could cause false negatives)
 - Standard practice for heartbeat monitoring (Cronitor, Healthchecks.io)
 - BetterStack alerts when expected heartbeat doesn't arrive (missing = failure detected)
 
 **Deployment:**
+
 - Environment variables configured in Vercel for production and preview environments
 - No code changes needed after initial deployment - fully managed via Vercel env vars
 - TypeScript compilation verified - all type checks pass
@@ -359,6 +386,7 @@ Conducted comprehensive market research targeting October 2025's most transforma
 ### Technical Details
 
 **Market Research Validation:**
+
 - All content validated against 5-15 October 2025 sources per topic
 - Keywords targeting VERY HIGH ranking potential in AI development tools market
 - Zero content duplication with existing 16 agents, 18 rules, 17 skills, 6 statuslines, 12 commands
@@ -371,6 +399,7 @@ Conducted comprehensive market research targeting October 2025's most transforma
   - Claude/GPT-4.1/Gemini 2.x: All supporting 1M+ token contexts in 2025
 
 **Content Quality Standards:**
+
 - **Agents:** 8+ features, 5+ use cases, extensive multi-agent workflow examples with Python/TypeScript
 - **Statuslines:** Bash scripts with jq integration, real-time monitoring, color-coded status indicators
 - **Rules:** Comprehensive code patterns with ✅ Good and ❌ Bad examples, security best practices
@@ -380,6 +409,7 @@ Conducted comprehensive market research targeting October 2025's most transforma
 - Production-grade code examples tested against October 2025 versions
 
 **SEO Optimization:**
+
 - Targeted high-value keywords: "autogen v0.4 2025", "windsurf ai ide", "v0 component generation", "langgraph multi-agent"
 - Content length optimized for value: agents 2000-2500 words, commands 1500-2000 words, skills 1200-1500 words
 - Proper metadata: tags, descriptions, SEO titles, GitHub/documentation URLs
@@ -387,37 +417,23 @@ Conducted comprehensive market research targeting October 2025's most transforma
 
 **Files Added (20 total):**
 
-*Agents:*
+_Agents:_
+
 1. `content/agents/multi-agent-orchestration-specialist.json`
 2. `content/agents/semantic-kernel-enterprise-agent.json`
 3. `content/agents/autogen-conversation-agent-builder.json`
 4. `content/agents/domain-specialist-ai-agents.json`
 
-*Statuslines:*
-5. `content/statuslines/multi-provider-token-counter.json`
-6. `content/statuslines/mcp-server-status-monitor.json`
-7. `content/statuslines/starship-powerline-theme.json`
-8. `content/statuslines/real-time-cost-tracker.json`
+_Statuslines:_ 5. `content/statuslines/multi-provider-token-counter.json` 6. `content/statuslines/mcp-server-status-monitor.json` 7. `content/statuslines/starship-powerline-theme.json` 8. `content/statuslines/real-time-cost-tracker.json`
 
-*Rules:*
-9. `content/rules/typescript-5x-strict-mode-expert.json`
-10. `content/rules/react-19-concurrent-features-specialist.json`
-11. `content/rules/windsurf-ai-native-ide-patterns.json`
-12. `content/rules/security-first-react-components.json`
+_Rules:_ 9. `content/rules/typescript-5x-strict-mode-expert.json` 10. `content/rules/react-19-concurrent-features-specialist.json` 11. `content/rules/windsurf-ai-native-ide-patterns.json` 12. `content/rules/security-first-react-components.json`
 
-*Commands:*
-13. `content/commands/v0-generate.json`
-14. `content/commands/autogen-workflow.json`
-15. `content/commands/mintlify-docs.json`
-16. `content/commands/cursor-rules.json`
+_Commands:_ 13. `content/commands/v0-generate.json` 14. `content/commands/autogen-workflow.json` 15. `content/commands/mintlify-docs.json` 16. `content/commands/cursor-rules.json`
 
-*Skills:*
-17. `content/skills/v0-rapid-prototyping.json`
-18. `content/skills/windsurf-collaborative-development.json`
-19. `content/skills/github-actions-ai-cicd.json`
-20. `content/skills/mintlify-documentation-automation.json`
+_Skills:_ 17. `content/skills/v0-rapid-prototyping.json` 18. `content/skills/windsurf-collaborative-development.json` 19. `content/skills/github-actions-ai-cicd.json` 20. `content/skills/mintlify-documentation-automation.json`
 
 **Verification:**
+
 - ✅ All 20 files created with proper JSON structure
 - ✅ Zero duplication with existing content (verified against all category slugs)
 - ✅ Market validation: All topics trending in October 2025 AI development space
@@ -466,6 +482,7 @@ Conducted extensive market research and keyword analysis to identify the most va
 ### Technical Details
 
 **Market Research Validation:**
+
 - All content validated against 3-10 October 2025 sources per topic
 - Keywords selected for VERY HIGH to MEDIUM-HIGH ranking potential
 - Zero content duplication with existing 10 skills, 11 rules, 10 agents
@@ -477,6 +494,7 @@ Conducted extensive market research and keyword analysis to identify the most va
   - React Server Components: React 19 paradigm shift (2025)
 
 **Content Quality Standards:**
+
 - **Skills:** Requirements, use cases, installation, examples, troubleshooting sections
 - **Rules:** Comprehensive code patterns, best practices, anti-patterns documentation
 - **Agents:** 8+ features, 5+ use cases, extensive production-ready code examples
@@ -484,6 +502,7 @@ Conducted extensive market research and keyword analysis to identify the most va
 - Production-grade code examples tested against October 2025 versions
 
 **SEO Optimization:**
+
 - Targeted high-value keywords: "playwright testing 2025", "cloudflare workers ai", "react server components"
 - Content length optimized for value (not padding) - skills 800-1200 words, agents 1500-2000 words
 - Proper metadata: tags, descriptions, SEO titles for all content
@@ -491,7 +510,8 @@ Conducted extensive market research and keyword analysis to identify the most va
 
 **Files Added (20 total):**
 
-*Skills:*
+_Skills:_
+
 1. `content/skills/playwright-e2e-testing.json`
 2. `content/skills/cloudflare-workers-ai-edge.json`
 3. `content/skills/webassembly-module-development.json`
@@ -500,24 +520,12 @@ Conducted extensive market research and keyword analysis to identify the most va
 6. `content/skills/zod-schema-validator.json`
 7. `content/skills/supabase-realtime-database.json`
 
-*Rules:*
-8. `content/rules/react-server-components-expert.json`
-9. `content/rules/nextjs-15-performance-architect.json`
-10. `content/rules/graphql-federation-specialist.json`
-11. `content/rules/kubernetes-devsecops-engineer.json`
-12. `content/rules/terraform-infrastructure-architect.json`
-13. `content/rules/ai-prompt-engineering-expert.json`
-14. `content/rules/wcag-accessibility-auditor.json`
+_Rules:_ 8. `content/rules/react-server-components-expert.json` 9. `content/rules/nextjs-15-performance-architect.json` 10. `content/rules/graphql-federation-specialist.json` 11. `content/rules/kubernetes-devsecops-engineer.json` 12. `content/rules/terraform-infrastructure-architect.json` 13. `content/rules/ai-prompt-engineering-expert.json` 14. `content/rules/wcag-accessibility-auditor.json`
 
-*Agents:*
-15. `content/agents/ai-devops-automation-engineer-agent.json`
-16. `content/agents/full-stack-ai-development-agent.json`
-17. `content/agents/ai-code-review-security-agent.json`
-18. `content/agents/data-pipeline-engineering-agent.json`
-19. `content/agents/product-management-ai-agent.json`
-20. `content/agents/cloud-infrastructure-architect-agent.json`
+_Agents:_ 15. `content/agents/ai-devops-automation-engineer-agent.json` 16. `content/agents/full-stack-ai-development-agent.json` 17. `content/agents/ai-code-review-security-agent.json` 18. `content/agents/data-pipeline-engineering-agent.json` 19. `content/agents/product-management-ai-agent.json` 20. `content/agents/cloud-infrastructure-architect-agent.json`
 
 **Verification:**
+
 - ✅ All 20 files created with proper JSON structure
 - ✅ Zero duplication with existing content (verified against all slugs)
 - ✅ Market validation: All topics trending in October 2025
@@ -602,6 +610,7 @@ const results = await batchFetch(loaders);
 ```
 
 **Files Modified (7 total):**
+
 1. `src/app/page.tsx` - Dynamic data loading and enrichment
 2. `src/components/features/home/index.tsx` - Dynamic stats display
 3. `src/components/shared/lazy-content-loaders.tsx` - Dynamic loader generation
@@ -611,6 +620,7 @@ const results = await batchFetch(loaders);
 7. `CHANGELOG.md` - This entry
 
 **Key Architectural Benefits:**
+
 - **Zero Manual Updates:** Adding category to `UNIFIED_CATEGORY_REGISTRY` → Everything auto-updates
 - **Type-Safe:** Full TypeScript inference with generic types
 - **DRY Principle:** Single source of truth (registry) drives everything
@@ -619,6 +629,7 @@ const results = await batchFetch(loaders);
 - **Documentation:** Comprehensive inline comments explaining architecture
 
 **Verification:**
+
 - ✅ TypeScript: No errors (`npm run type-check`)
 - ✅ Build: Production build successful with proper bundle sizes
 - ✅ Skills: Automatically appears in Featured, Stats (with icon), All section
@@ -685,6 +696,7 @@ Introduced Skills as a first-class content category within the platform's unifie
 All changes follow configuration-driven architecture with zero duplication. Skills benefit from existing platform capabilities (trending, caching, related content, offline support) with no custom logic required. Implementation touched 23 files across routing, schemas, build, SEO, validation, and UI - all following DRY principles and reusing established patterns.
 
 **Key architectural benefits:**
+
 - Zero custom routing logic (uses unified `[category]` routes)
 - Automatic platform feature support (trending, search, caching, analytics)
 - Type-safe throughout with Zod validation
@@ -828,6 +840,7 @@ Integrated Collections as a first-class content category within the platform's d
 The consolidation involved 27 file modifications across routing, schemas, caching, security, UI components, and tests. All changes follow the codebase's core principles of consolidation, DRY, type safety, and configuration-driven architecture. Collections retain all unique features (CollectionDetailView with embedded items, prerequisites section, installation order, compatibility matrix) while benefiting from uniform platform integration.
 
 **Key architectural improvements:**
+
 - Reduced code duplication by ~150 lines through route consolidation
 - Eliminated maintenance burden of parallel routing systems
 - Enabled future collection features to automatically work with existing platform capabilities
@@ -950,6 +963,7 @@ Elevated the visual polish of core UI elements with modern animations and refine
 ### User Experience
 
 When you toggle between light and dark themes, you'll notice:
+
 - A smooth circular expansion that follows your cursor
 - Subtle blur effect that creates depth during transition
 - Natural, polished animation that feels responsive and delightful
@@ -1048,13 +1062,14 @@ Rebuilt the entire navigation system from the ground up with a focus on develope
 ### Technical Implementation
 
 **Navigation Configuration Pattern:**
+
 ```typescript
 export const PRIMARY_NAVIGATION: NavigationLink[] = [
   {
-    label: 'Statuslines',
-    href: '/statuslines',
+    label: "Statuslines",
+    href: "/statuslines",
     icon: Monitor,
-    description: 'Editor status bar configs',
+    description: "Editor status bar configs",
     isNew: true,
   },
   // ... more links
@@ -1062,13 +1077,13 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
 
 export const SECONDARY_NAVIGATION: NavigationSection[] = [
   {
-    heading: 'Discover',
+    heading: "Discover",
     links: [
       {
-        label: 'For You',
-        href: '/for-you',
+        label: "For You",
+        href: "/for-you",
         icon: Sparkles,
-        description: 'Personalized recommendations',
+        description: "Personalized recommendations",
       },
       // ... more links
     ],
@@ -1077,6 +1092,7 @@ export const SECONDARY_NAVIGATION: NavigationSection[] = [
 ```
 
 **Announcement Configuration:**
+
 ```typescript
 {
   id: 'statuslines-launch-2025-10',
@@ -1093,6 +1109,7 @@ export const SECONDARY_NAVIGATION: NavigationSection[] = [
 ```
 
 **Command Menu Usage:**
+
 - Press ⌘K/Ctrl+K anywhere on the site
 - Type to search (e.g., "agents", "trending", "submit")
 - Arrow keys to navigate results
@@ -1100,8 +1117,10 @@ export const SECONDARY_NAVIGATION: NavigationSection[] = [
 - Escape to close menu
 
 **Dismissal Hook:**
+
 ```tsx
-const { isDismissed, dismiss, reset, getDismissalTime } = useAnnouncementDismissal('announcement-id');
+const { isDismissed, dismiss, reset, getDismissalTime } =
+  useAnnouncementDismissal("announcement-id");
 
 // Check if dismissed
 if (!isDismissed) {
@@ -1158,10 +1177,10 @@ const timestamp = getDismissalTime(); // Returns ISO string or null
 export const PRIMARY_NAVIGATION: NavigationLink[] = [
   // ... existing links
   {
-    label: 'Your New Category',
-    href: '/new-category',
+    label: "Your New Category",
+    href: "/new-category",
     icon: YourIcon,
-    description: 'Description for command menu',
+    description: "Description for command menu",
     isNew: true, // Optional: Shows pulsing dot
   },
 ];
@@ -1169,13 +1188,13 @@ export const PRIMARY_NAVIGATION: NavigationLink[] = [
 // Secondary navigation (dropdown)
 export const SECONDARY_NAVIGATION: NavigationSection[] = [
   {
-    heading: 'Your Section',
+    heading: "Your Section",
     links: [
       {
-        label: 'Your Link',
-        href: '/your-link',
+        label: "Your Link",
+        href: "/your-link",
         icon: YourIcon,
-        description: 'Short description',
+        description: "Short description",
       },
     ],
   },
@@ -1189,21 +1208,22 @@ export const SECONDARY_NAVIGATION: NavigationSection[] = [
 
 export const announcements: AnnouncementConfig[] = [
   {
-    id: 'unique-announcement-id-2025-10',
-    variant: 'default', // default | outline | secondary | destructive
-    tag: 'New', // Optional badge
-    title: 'Your announcement text (max 100 chars recommended)',
-    href: '/optional-link', // Optional
-    icon: 'ArrowUpRight', // Optional Lucide icon name
-    startDate: '2025-10-10T00:00:00Z',
-    endDate: '2025-10-17T23:59:59Z',
-    priority: 'high', // high | medium | low
+    id: "unique-announcement-id-2025-10",
+    variant: "default", // default | outline | secondary | destructive
+    tag: "New", // Optional badge
+    title: "Your announcement text (max 100 chars recommended)",
+    href: "/optional-link", // Optional
+    icon: "ArrowUpRight", // Optional Lucide icon name
+    startDate: "2025-10-10T00:00:00Z",
+    endDate: "2025-10-17T23:59:59Z",
+    priority: "high", // high | medium | low
     dismissible: true, // false for critical alerts
   },
 ];
 ```
 
 **Announcement Priority Rules:**
+
 1. Only ONE announcement shows at a time
 2. Must be within start/end date range
 3. Highest priority wins (high > medium > low)
@@ -1211,6 +1231,7 @@ export const announcements: AnnouncementConfig[] = [
 5. Dismissal state tracked per-user in localStorage
 
 **Testing Navigation Changes:**
+
 - Verify links work in all contexts (desktop nav, mobile menu, command menu)
 - Test keyboard navigation (Tab, Enter, Escape, ⌘K)
 - Check screen reader announcements
@@ -1268,6 +1289,7 @@ Redesigned the hero section with modern animations and refined the search experi
 ### Technical Implementation
 
 **Meteor Animation System:**
+
 ```typescript
 <Meteors
   number={20}
@@ -1280,12 +1302,14 @@ Redesigned the hero section with modern animations and refined the search experi
 ```
 
 **Character Animation:**
+
 - Each character rotates independently with rotateX transforms
 - Entry: rotateX(90deg) → rotateX(0deg)
 - Exit: rotateX(0deg) → rotateX(90deg)
 - Transform origin: bottom center for natural rolling effect
 
 **Search Icon Positioning:**
+
 ```tsx
 <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
   <Search className="h-5 w-5 text-accent" />
@@ -1307,18 +1331,14 @@ When implementing similar animations:
 // ✅ Constrain animations to viewport
 <div className="absolute inset-0 max-h-screen">
   <YourAnimation />
-</div>
+</div>;
 
 // ✅ Prevent hydration mismatches
 const [isMounted, setIsMounted] = useState(false);
 useEffect(() => setIsMounted(true), []);
 
 // ✅ Use stable keys for animated lists
-characters.map((item) => (
-  <motion.span key={item.id}>
-    {item.char}
-  </motion.span>
-))
+characters.map((item) => <motion.span key={item.id}>{item.char}</motion.span>);
 ```
 
 ---
@@ -1364,6 +1384,7 @@ Improved the visual presentation and functionality of content browsing with refi
 ### Technical Implementation
 
 **Masonry Layout Calculation:**
+
 ```typescript
 const rowGap = 24; // gap-6 = 24px
 const rowHeight = 1; // Fine-grained control
@@ -1372,6 +1393,7 @@ const rowSpan = Math.ceil((contentHeight + rowGap) / (rowHeight + rowGap));
 ```
 
 **Observer Lifecycle:**
+
 - Observer creates when element mounts AND `hasMore && !loading`
 - Observer destroys and recreates when loading/pagination states change
 - Prevents stale observers from blocking new content loads
@@ -1513,12 +1535,13 @@ Major refactoring to enhance type safety and schema validation across the platfo
 ### Technical Implementation
 
 **Branded Type Pattern:**
+
 ```typescript
 // Schema definition
 export const contentIdSchema = nonEmptyString
   .max(200)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  .brand<'ContentId'>();
+  .brand<"ContentId">();
 
 export type ContentId = z.infer<typeof contentIdSchema>;
 
@@ -1533,19 +1556,22 @@ const interactionSchema = z.object({
 });
 
 // Conversion at boundaries
-const recommendations = items.map(item => ({
+const recommendations = items.map((item) => ({
   slug: toContentId(item.slug), // Convert database string to branded type
 }));
 ```
 
 **Sanitization Transform Pattern:**
+
 ```typescript
 // Before: Inline duplicate code (11+ instances)
-email: z.string().email().transform((val) => val.toLowerCase().trim())
+email: z.string()
+  .email()
+  .transform((val) => val.toLowerCase().trim());
 
 // After: Centralized reusable function
-import { normalizeEmail } from './primitives/sanitization-transforms';
-email: z.string().email().transform(normalizeEmail)
+import { normalizeEmail } from "./primitives/sanitization-transforms";
+email: z.string().email().transform(normalizeEmail);
 ```
 
 ### Code Quality
@@ -1582,7 +1608,10 @@ When working with user/session/content identifiers:
 
 ```typescript
 // ✅ Correct: Use branded types in schemas
-import { userIdSchema, contentIdSchema } from '@/lib/schemas/branded-types.schema';
+import {
+  userIdSchema,
+  contentIdSchema,
+} from "@/lib/schemas/branded-types.schema";
 
 const schema = z.object({
   user_id: userIdSchema,
@@ -1590,7 +1619,7 @@ const schema = z.object({
 });
 
 // ✅ Correct: Convert at boundaries
-import { toContentId } from '@/lib/schemas/branded-types.schema';
+import { toContentId } from "@/lib/schemas/branded-types.schema";
 
 const contentId = toContentId(databaseSlug); // Validates and converts
 
@@ -1602,12 +1631,17 @@ When adding input sanitization:
 
 ```typescript
 // ✅ Correct: Use centralized transforms
-import { normalizeEmail, trimString } from '@/lib/schemas/primitives/sanitization-transforms';
+import {
+  normalizeEmail,
+  trimString,
+} from "@/lib/schemas/primitives/sanitization-transforms";
 
-email: z.string().email().transform(normalizeEmail)
+email: z.string().email().transform(normalizeEmail);
 
 // ❌ Incorrect: Don't write inline transforms
-email: z.string().email().transform((val) => val.toLowerCase().trim())
+email: z.string()
+  .email()
+  .transform((val) => val.toLowerCase().trim());
 ```
 
 ### Related Resources
@@ -1665,6 +1699,7 @@ Comprehensive migration of shadcn/ui components to React 19 standards, removing 
 ### Technical Implementation
 
 **Before (Deprecated React.forwardRef):**
+
 ```tsx
 const Component = React.forwardRef<
   React.ElementRef<typeof Primitive>,
@@ -1676,6 +1711,7 @@ Component.displayName = Primitive.displayName;
 ```
 
 **After (React 19 Ref-as-Prop):**
+
 ```tsx
 const Component = ({
   className,
@@ -1683,19 +1719,19 @@ const Component = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof Primitive> & {
   ref?: React.Ref<React.ElementRef<typeof Primitive>>;
-}) => (
-  <Primitive ref={ref} className={cn(/* ... */)} {...props} />
-);
+}) => <Primitive ref={ref} className={cn(/* ... */)} {...props} />;
 Component.displayName = Primitive.displayName;
 ```
 
 **Type Safety Pattern:**
+
 - Maintained `React.ComponentPropsWithoutRef<typeof Primitive>` for all props
 - Added intersection type: `& { ref?: React.Ref<...> }` for optional ref
 - Preserved `React.ElementRef<typeof Primitive>` for exact ref typing
 - All components remain fully type-safe with strict TypeScript mode
 
 **Files Modified (6 files, 15 component instances):**
+
 - `src/components/ui/avatar.tsx` - 3 components (Avatar, AvatarImage, AvatarFallback)
 - `src/components/ui/checkbox.tsx` - 1 component (Checkbox)
 - `src/components/ui/command.tsx` - 7 components (Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandSeparator, CommandItem)
@@ -1704,6 +1740,7 @@ Component.displayName = Primitive.displayName;
 - `src/components/ui/switch.tsx` - 1 component (Switch)
 
 **Import Optimization:**
+
 - Auto-formatter converted all `import * as React` to `import type * as React`
 - React only used for type annotations, not runtime values
 - Cleaner imports that get stripped at compile time
@@ -1735,9 +1772,7 @@ const MyComponent = ({
   ...props
 }: React.ComponentPropsWithoutRef<typeof Primitive> & {
   ref?: React.Ref<React.ElementRef<typeof Primitive>>;
-}) => (
-  <Primitive ref={ref} className={cn(/* ... */)} {...props} />
-);
+}) => <Primitive ref={ref} className={cn(/* ... */)} {...props} />;
 ```
 
 **Do not use** `React.forwardRef` - it's deprecated in React 19.
@@ -1882,6 +1917,7 @@ const { email, setEmail, isSubmitting, subscribe } = useNewsletter({
 ### For Users
 
 No visible changes - all features work exactly as before:
+
 - Card interactions (clicks, navigation, bookmarks, copy)
 - Newsletter subscription flow
 - Copy button behavior
@@ -1974,7 +2010,7 @@ if (!firstItem) return;
 ```typescript
 // Runtime validation with explicit errors (src/lib/supabase/*.ts)
 if (!(supabaseUrl && supabaseAnonKey)) {
-  throw new Error('Missing required Supabase environment variables');
+  throw new Error("Missing required Supabase environment variables");
 }
 ```
 
@@ -1986,7 +2022,8 @@ const getCell = (i: number, j: number): number => {
   const row = matrix[i];
   if (!row) throw new Error(`Matrix row ${i} undefined`);
   const value = row[j];
-  if (value === undefined) throw new Error(`Matrix cell [${i}][${j}] undefined`);
+  if (value === undefined)
+    throw new Error(`Matrix cell [${i}][${j}] undefined`);
   return value;
 };
 ```
@@ -2025,6 +2062,7 @@ const getCell = (i: number, j: number): number => {
 ### For Contributors
 
 All new code must pass:
+
 - TypeScript compilation with strict mode (no `any`, no `!`)
 - Biome linting with production rules
 - Lighthouse CI thresholds (90+ performance, 95+ accessibility/SEO)
@@ -2157,13 +2195,12 @@ recency_decay = exp(-ln(2) * days_since / 30)
 **For You Feed Algorithm:**
 
 ```typescript
-final_score = (
-  affinity_based * 0.40 +
-  collaborative * 0.30 +
+final_score =
+  affinity_based * 0.4 +
+  collaborative * 0.3 +
   trending * 0.15 +
-  interest_match * 0.10 +
-  diversity_bonus * 0.05
-)
+  interest_match * 0.1 +
+  diversity_bonus * 0.05;
 ```
 
 **Collaborative Filtering:**
@@ -2247,13 +2284,15 @@ All content automatically participates in personalization algorithms. No special
 Configure in Vercel (or deployment platform):
 
 **Daily Affinity Calculation:**
+
 - URL: `/api/cron/calculate-affinities`
 - Schedule: `0 2 * * *` (2 AM UTC)
 - Header: `Authorization: Bearer ${CRON_SECRET}`
 
 **Nightly Similarity Calculation:**
+
 - URL: `/api/cron/calculate-similarities`
-- Schedule: `0 3 * * *` (3 AM UTC)  
+- Schedule: `0 3 * * *` (3 AM UTC)
 - Header: `Authorization: Bearer ${CRON_SECRET}`
 
 **Required Environment Variable:**
@@ -2330,20 +2369,22 @@ Implemented a personalized configuration discovery tool that helps users find th
 ### Technical Implementation
 
 **Recommendation Scoring Logic:**
+
 ```typescript
 // Multi-factor weighted scoring (must sum to 1.0)
 weights = {
-  useCase: 0.35,        // Primary driver
-  toolPreference: 0.20, // Category preference
-  experience: 0.15,     // Complexity filtering
-  integrations: 0.15,   // Required tools
-  focusAreas: 0.10,     // Fine-tuning
-  popularity: 0.03,     // Community signal
-  trending: 0.02,       // Discovery boost
-}
+  useCase: 0.35, // Primary driver
+  toolPreference: 0.2, // Category preference
+  experience: 0.15, // Complexity filtering
+  integrations: 0.15, // Required tools
+  focusAreas: 0.1, // Fine-tuning
+  popularity: 0.03, // Community signal
+  trending: 0.02, // Discovery boost
+};
 ```
 
 **Diversity Algorithm:**
+
 - Prevents all results from same category
 - Balances match score with category variety
 - Configurable diversity weight (default: 0.3)
@@ -2351,6 +2392,7 @@ weights = {
 - Fills remaining slots with balanced selection
 
 **URL Strategy (Research-Backed):**
+
 - Landing page indexed (SEO target)
 - Result pages noindexed (avoid infinite URL combinations)
 - Shareable via social/referral traffic (not organic)
@@ -2358,6 +2400,7 @@ weights = {
 - Prevents thin content penalty from personalized variations
 
 **Files Added:**
+
 - `src/lib/schemas/recommender.schema.ts` - Quiz and result validation schemas
 - `src/lib/recommender/algorithm.ts` - Core recommendation engine
 - `src/lib/recommender/scoring.ts` - Individual scoring functions
@@ -2375,12 +2418,14 @@ weights = {
 - `src/components/ui/dialog.tsx` - Dialog component for share modal
 
 **Files Modified:**
+
 - `src/lib/seo/metadata-registry.ts` - Added recommender routes with AI optimization
 - `src/lib/icons.tsx` - Added Award, Facebook, Linkedin icons
 - `scripts/generate-sitemap.ts` - Added tools pages to sitemap generation
-- `public/robots.txt` - Added /tools* to allowed paths
+- `public/robots.txt` - Added /tools\* to allowed paths
 
 **Performance:**
+
 - Client-side quiz with zero server calls until submit
 - Single server action on completion (<100ms)
 - In-memory computation, no database queries
@@ -2390,6 +2435,7 @@ weights = {
 - Total bundle: 13 kB (landing), 7.89 kB (results)
 
 **Security:**
+
 - Zod schema validation for all user inputs
 - Enum-based answers prevent injection attacks
 - Rate limiting via Redis (20 req/min recommendations)
@@ -2399,6 +2445,7 @@ weights = {
 - No sensitive data stored or exposed
 
 **SEO Strategy:**
+
 - Landing page optimized for "claude configuration recommender"
 - LLMs.txt route for AI chatbot citations (ChatGPT, Perplexity, Claude)
 - Result pages excluded from index (robots: noindex, follow)
@@ -2407,6 +2454,7 @@ weights = {
 - HowTo structured data for AI understanding
 
 **Extensibility for Future LLM Integration:**
+
 - Algorithm designed with enhancement hooks
 - `enhanceWithLLM()` function stub in place
 - Token usage tracking scaffolded
@@ -2485,6 +2533,7 @@ Implemented a complete user collections system that extends the existing bookmar
 ### Technical Implementation
 
 **Database Schema:**
+
 - `user_collections.slug` - Auto-generated from name, unique per user
 - `user_collections.is_public` - Controls visibility on profiles
 - `user_collections.item_count` - Denormalized count updated by triggers
@@ -2492,6 +2541,7 @@ Implemented a complete user collections system that extends the existing bookmar
 - Foreign keys ensure referential integrity (user, collection cascading)
 
 **Server Actions:**
+
 - Rate limits: 20 creates/min, 30 updates/min, 50 item operations/min
 - Type-safe with Zod schemas matching database constraints
 - Automatic revalidation of affected pages (library, profiles, collections)
@@ -2499,6 +2549,7 @@ Implemented a complete user collections system that extends the existing bookmar
 - Authentication checks via Supabase auth
 
 **Files Added:**
+
 - `supabase/migrations/2025-10-07-user-collections.sql` - Collection tables migration
 - `src/lib/actions/collection-actions.ts` - Collection CRUD server actions
 - `src/app/account/library/page.tsx` - Main library page with tabs
@@ -2510,6 +2561,7 @@ Implemented a complete user collections system that extends the existing bookmar
 - `src/app/u/[slug]/collections/[collectionSlug]/page.tsx` - Public collection view
 
 **Files Modified:**
+
 - `supabase/schema.sql` - Added user_collections and collection_items tables
 - `src/lib/icons.tsx` - Added FolderOpen and Share2 icons
 - `src/app/account/layout.tsx` - Updated navigation to "Library"
@@ -2518,6 +2570,7 @@ Implemented a complete user collections system that extends the existing bookmar
 - `src/components/features/content/collection-card.tsx` - Added bookmark button
 
 **Performance:**
+
 - Denormalized item counts prevent N+1 queries
 - Database triggers auto-update counts on insert/delete
 - Proper indexing on user_id, slug, is_public for fast queries
@@ -2525,6 +2578,7 @@ Implemented a complete user collections system that extends the existing bookmar
 - Static generation for all public collection pages
 
 **Security:**
+
 - Row Level Security enforces collection ownership
 - Public collections only visible when is_public = true
 - Collection items inherit parent visibility rules
@@ -2580,41 +2634,49 @@ Added comprehensive gamification system that automatically tracks user contribut
 ### Database Triggers Flow
 
 **When user creates a post:**
+
 1. `trigger_reputation_on_post` → calculates reputation (+10)
 2. `trigger_check_badges_on_reputation` → checks all badge criteria
 3. Awards "First Post" (1 post), "10 Posts" (10 posts), etc.
 
 **When user's post gets voted:**
+
 1. `trigger_reputation_on_vote` → recalculates reputation (+5 per vote)
 2. Checks badge criteria → awards "Popular Post" (10 votes)
 
 **When submission is merged:**
+
 1. `trigger_reputation_on_submission` → awards +20 reputation
 2. Checks criteria → awards "Contributor" badge
 
 ### Badge Definitions
 
 **Engagement Badges:**
+
 - 📝 First Post (1 post)
 - ✍️ 10 Posts (10 posts)
 - 📚 50 Posts (50 posts)
 
 **Contribution Badges:**
+
 - 🔥 Popular Post (10 votes on single post)
 - ⭐ Viral Post (50 votes on single post)
 - 🎯 Contributor (1 merged submission)
 
 **Milestone Badges:**
+
 - 💯 100 Reputation
 - 👑 1000 Reputation
 
 **Special Badges:**
+
 - 🚀 Early Adopter (manual)
 - ✓ Verified (manual)
 
 ### Technical Implementation
 
 **Database Functions:**
+
 - `calculate_user_reputation()` - Aggregate all contribution points
 - `check_and_award_badge()` - Check single badge criteria
 - `check_all_badges()` - Check all badges for user
@@ -2622,6 +2684,7 @@ Added comprehensive gamification system that automatically tracks user contribut
 - Badge check trigger on reputation updates
 
 **Files Added:**
+
 - `src/lib/schemas/activity.schema.ts` - Activity and reputation types
 - `src/lib/actions/activity-actions.ts` - Activity aggregation actions
 - `src/lib/actions/reputation-actions.ts` - Reputation calculation actions
@@ -2633,6 +2696,7 @@ Added comprehensive gamification system that automatically tracks user contribut
 - `supabase/migrations/2025-10-07-badge-awarding-system.sql` - Badge migrations
 
 **Performance:**
+
 - Activity summaries cached for 5 minutes
 - Reputation calculation optimized with indexed queries
 - Badge checks only run when reputation changes
@@ -2691,14 +2755,17 @@ Extended the existing user authentication system with comprehensive profile mana
 ### Technical Details
 
 **Server Actions:**
+
 - `updateProfile` - Type-safe profile updates with Zod validation
 - `refreshProfileFromOAuth` - Sync latest avatar from OAuth provider
 
 **Database Functions:**
+
 - `handle_new_user()` - Trigger function for OAuth profile sync
 - `refresh_profile_from_oauth()` - Manual avatar refresh function
 
 **Initial Badges:**
+
 - First Post, 10 Posts, 50 Posts (engagement)
 - Popular Post, Viral Post (contribution)
 - Early Adopter, Verified (special)
@@ -2706,6 +2773,7 @@ Extended the existing user authentication system with comprehensive profile mana
 - Reputation milestones (100, 1000 points)
 
 **Files Added:**
+
 - `src/lib/schemas/profile.schema.ts` - Profile validation schemas
 - `src/lib/schemas/badge.schema.ts` - Badge types and schemas
 - `src/lib/actions/profile-actions.ts` - Profile update server actions
@@ -2713,6 +2781,7 @@ Extended the existing user authentication system with comprehensive profile mana
 - `src/components/features/profile/badge-display.tsx` - Badge UI components
 
 **Security:**
+
 - Row Level Security (RLS) policies for badges and user_badges tables
 - Server-side authorization checks in all profile actions
 - Zod schema validation for all profile inputs
@@ -2761,12 +2830,14 @@ Added comprehensive submission tracking infrastructure using Supabase database w
 ### Technical Details
 
 **Database Schema:**
+
 - `submissions.user_id` → Foreign key to `users.id`
 - `submissions.status` → ENUM ('pending', 'merged', 'rejected')
 - `submissions.content_type` → Submission category (agents, mcp, rules, etc.)
 - Composite index on (status, created_at DESC) for efficient filtering
 
 **Files Added:**
+
 - `src/components/submit/sidebar/*.tsx` - 6 new sidebar components
 - `src/lib/actions/submission-stats-actions.ts` - Statistics server actions
 - `src/components/submit/template-selector.tsx` - Template selection UI
@@ -2861,6 +2932,7 @@ Implemented comprehensive analytics page for sponsors to track the performance o
 ### Technical Implementation
 
 **Data Structure:**
+
 - Tracks content_type, content_id, tier, dates, and status
 - Links to users table for sponsor identification
 - Integration with view tracking (Redis) for real-time metrics
@@ -2953,11 +3025,13 @@ Added email template infrastructure using React Email, enabling the platform to 
 ### Technical Details
 
 **Files Added:**
+
 - `src/emails/` - Email templates directory
 - Email development dependencies in package.json
 - npm script: `email:dev` for preview server
 
 **Use Cases:**
+
 - Welcome emails for new users
 - Submission notifications
 - Newsletter digests

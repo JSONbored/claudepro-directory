@@ -1,0 +1,292 @@
+---
+title: Claude Code Docker Statusline - Container Health Monitoring
+slug: docker-health-statusline
+category: statuslines
+description: >-
+  Docker statusline configuration for Claude Code CLI. Features real-time health
+  monitoring, color-coded indicators, and container tracking. Production-ready.
+cardDescription: >-
+  Docker statusline configuration for Claude Code CLI. Features real-time health
+  monitoring, color-coded indicators, and container tracking.
+seoTitle: Claude Code Docker Statusline - Container Health Monitoring
+seoDescription: >-
+  Docker statusline configuration for Claude Code CLI. Features real-time health
+  monitoring, color-coded indicators, and container tracking. Production-ready.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-19'
+documentationUrl: 'https://docs.docker.com/reference/cli/docker/container/stats/'
+installable: true
+usageSnippet: "\U0001F433 ● 3/5"
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/docker-health-statusline.sh",
+      "refreshInterval": 2000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/docker-health-statusline.sh",
+      "refreshInterval": 2000
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\n# Docker Health Statusline\n# Real-time container health monitoring for Claude Code CLI\n\n# Get running containers count\nrunning=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get total containers\ntotal=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Get unhealthy containers\nunhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')\n\n# Color codes\nGREEN='\\033[0;32m'\nYELLOW='\\033[1;33m'\nRED='\\033[0;31m'\nBLUE='\\033[0;34m'\nNC='\\033[0m' # No Color\n\n# Status indicator\nif [ \"$unhealthy\" -gt 0 ]; then\n    status=\"${RED}●${NC}\"\nelif [ \"$running\" -eq 0 ]; then\n    status=\"${YELLOW}○${NC}\"\nelse\n    status=\"${GREEN}●${NC}\"\nfi\n\n# Display statusline\necho -e \"${BLUE}\U0001F433${NC} ${status} ${running}/${total}\""
+prerequisites:
+  - >-
+    Docker Engine installed and running (Docker 17.05+ recommended for health
+    check support)
+  - >-
+    Bash shell available (bash 4.0+ recommended for arithmetic operations and
+    string manipulation)
+  - Docker CLI accessible in PATH (docker command must be available)
+  - >-
+    User permissions to run docker commands (user must be in docker group on
+    Linux or have Docker Desktop access on macOS/Windows)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded health indicators)
+  - >-
+    Docker daemon socket accessible (DOCKER_HOST environment variable or default
+    socket at /var/run/docker.sock)
+tags:
+  - docker
+  - statusline
+  - monitoring
+  - health-check
+  - containers
+  - CLI
+  - claude-code
+  - devops
+keywords:
+  - claude
+  - claude-code
+  - CLI
+  - containers
+  - development
+  - devops
+  - docker
+  - health
+  - health-check
+  - monitoring
+  - statusline
+  - statuslines
+  - tools
+readingTime: 1
+difficultyScore: 2
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Real-time container count display (running/total)
+- Color-coded health status indicators (green=healthy, yellow=stopped, red=unhealthy)
+- Docker whale emoji for visual identification
+- Lightweight bash implementation with minimal overhead
+- Automatic unhealthy container detection
+- Configurable refresh interval (default 2000ms)
+- Container name truncation for long names
+- Docker Compose project detection and display
+
+## Use Cases
+
+- Monitoring Docker container health during development
+- Quick visual confirmation of running containers
+- DevOps workflows requiring constant container status awareness
+- Multi-container application development with health checks
+- CI/CD pipeline monitoring for containerized services
+- Debugging container startup issues with real-time status feedback
+
+## Requirements
+
+- Docker Engine installed and running (Docker 17.05+ recommended for health check support)
+- Bash shell available (bash 4.0+ recommended for arithmetic operations and string manipulation)
+- Docker CLI accessible in PATH (docker command must be available)
+- User permissions to run docker commands (user must be in docker group on Linux or have Docker Desktop access on macOS/Windows)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded health indicators)
+- Docker daemon socket accessible (DOCKER_HOST environment variable or default socket at /var/run/docker.sock)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/docker-health-statusline.sh",
+    "refreshInterval": 2000
+  }
+}
+```
+
+## Examples
+### Enhanced Docker Health Statusline with Container Names
+Extended version displaying unhealthy container names for quick identification
+```bash
+#!/bin/bash
+
+# Enhanced Docker Health Statusline with Container Names
+
+running=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')
+total=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')
+unhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+if [ "$unhealthy" -gt 0 ]; then
+    status="${RED}●${NC}"
+    unhealthy_names=$(docker ps --filter health=unhealthy --format '{{.Names}}' 2>/dev/null | tr '\n' ',' | sed 's/,$//')
+    if [ -n "$unhealthy_names" ]; then
+        echo -e "${BLUE}🐳${NC} ${status} ${running}/${total} (${RED}${unhealthy_names}${NC})"
+    else
+        echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+    fi
+elif [ "$running" -eq 0 ]; then
+    status="${YELLOW}○${NC}"
+    echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+else
+    status="${GREEN}●${NC}"
+    echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+fi
+```
+### Docker Health Statusline with Restart Count
+Version showing container restart counts for monitoring stability
+```bash
+#!/bin/bash
+
+# Docker Health Statusline with Restart Count
+
+running=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')
+total=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')
+unhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')
+
+# Get containers with restart count > 0
+restarting=$(docker ps -a --filter 'restart-count=1' --format '{{.Names}}' 2>/dev/null | wc -l | tr -d ' ')
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+if [ "$unhealthy" -gt 0 ]; then
+    status="${RED}●${NC}"
+elif [ "$restarting" -gt 0 ]; then
+    status="${YELLOW}⚠${NC}"
+elif [ "$running" -eq 0 ]; then
+    status="${YELLOW}○${NC}"
+else
+    status="${GREEN}●${NC}"
+fi
+
+if [ "$restarting" -gt 0 ]; then
+    echo -e "${BLUE}🐳${NC} ${status} ${running}/${total} (${restarting} restarted)"
+else
+    echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+fi
+```
+### Docker Health Statusline Installation Example
+Complete setup script with Docker daemon verification and permissions check
+```bash
+#!/bin/bash
+# Installation script for Docker Health Statusline
+
+# Check if Docker is installed
+if ! command -v docker &> /dev/null; then
+    echo "Error: Docker is not installed or not in PATH"
+    echo "Install Docker: https://docs.docker.com/get-docker/"
+    exit 1
+fi
+
+# Check if Docker daemon is running
+if ! docker ps &> /dev/null; then
+    echo "Error: Docker daemon is not running"
+    echo "Start Docker daemon and try again"
+    exit 1
+fi
+
+# Check user permissions
+if ! docker ps &> /dev/null; then
+    echo "Warning: User may not have Docker permissions"
+    echo "On Linux, add user to docker group: sudo usermod -aG docker $USER"
+    echo "Then log out and log back in"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/docker-health-statusline.sh << 'SCRIPT_EOF'
+#!/bin/bash
+
+# Docker Health Statusline
+# Real-time container health monitoring for Claude Code CLI
+
+running=$(docker ps -q 2>/dev/null | wc -l | tr -d ' ')
+total=$(docker ps -a -q 2>/dev/null | wc -l | tr -d ' ')
+unhealthy=$(docker ps --filter health=unhealthy -q 2>/dev/null | wc -l | tr -d ' ')
+
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+if [ "$unhealthy" -gt 0 ]; then
+    status="${RED}●${NC}"
+elif [ "$running" -eq 0 ]; then
+    status="${YELLOW}○${NC}"
+else
+    status="${GREEN}●${NC}"
+fi
+
+echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/docker-health-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/docker-health-statusline.sh","refreshInterval":2000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/docker-health-statusline.sh","refreshInterval":2000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Docker Health Statusline installed successfully!"
+echo "Test with: docker ps"
+```
+
+## Troubleshooting
+### Statusline shows 0/0 containers even when containers are running
+
+Verify Docker daemon is running with 'docker ps'. Check user has permissions to access Docker socket. On Linux, add user to docker group with 'sudo usermod -aG docker $USER' and restart terminal. On macOS/Windows, ensure Docker Desktop is running. Verify DOCKER_HOST environment variable if using remote Docker daemon.
+### Colors not displaying correctly in statusline output
+
+Ensure terminal supports ANSI color codes. Set TERM=xterm-256color in shell profile (~/.bashrc or ~/.zshrc). Verify colorScheme setting in statusline.json matches terminal capabilities. Test with: echo -e '\033[0;32mGREEN\033[0m'. If colors still don't work, terminal may not support ANSI codes.
+### Statusline causing performance lag or high CPU usage
+
+Increase refreshInterval to 3000-5000ms in configuration. Reduce docker ps query frequency. Consider caching container count between refresh cycles for better performance. Use docker ps -q (quiet mode) to reduce output parsing overhead. Monitor Docker daemon performance with 'docker stats'.
+### Health check status not updating or always showing healthy
+
+Confirm containers have HEALTHCHECK defined in Dockerfile or docker-compose.yml. Verify docker version supports health checks (17.05+). Run 'docker inspect CONTAINER' to check health configuration. Check health check interval and timeout settings. Verify health check command is working: docker exec CONTAINER health-check-command.
+### Permission denied errors when running docker commands
+
+On Linux: Add user to docker group: sudo usermod -aG docker $USER, then log out and log back in. Verify group membership: groups $USER. Check Docker socket permissions: ls -l /var/run/docker.sock. On macOS/Windows: Ensure Docker Desktop is running and user has proper permissions. Check Docker Desktop settings for user access.
+### Unhealthy containers not being detected by statusline
+
+Verify health check filter syntax: docker ps --filter health=unhealthy. Check if containers actually have health checks configured: docker inspect CONTAINER | jq '.[0].State.Health'. Ensure Docker version supports health checks (17.05+). Verify health check command is failing as expected. Check health check logs: docker inspect CONTAINER | jq '.[0].State.Health.Log'.
+### Docker daemon connection errors or socket not found
+
+Verify Docker daemon is running: systemctl status docker (Linux) or check Docker Desktop status (macOS/Windows). Check DOCKER_HOST environment variable: echo $DOCKER_HOST. Default socket location: /var/run/docker.sock (Linux) or ~/.docker/run/docker.sock (macOS). Verify socket exists: ls -l /var/run/docker.sock. Restart Docker daemon if needed.
+### Statusline showing incorrect container counts
+
+Verify docker ps commands are working: docker ps -q | wc -l. Check for stopped containers: docker ps -a -q | wc -l. Ensure script is using correct flags: -q for quiet mode, -a for all containers. Verify wc and tr commands are available: which wc tr. Check for hidden characters in output: docker ps -q | od -c.

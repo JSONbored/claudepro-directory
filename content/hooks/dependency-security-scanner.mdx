@@ -1,0 +1,480 @@
+---
+title: Dependency Security Scanner - Hooks
+slug: dependency-security-scanner
+category: hooks
+description: >-
+  Real-time vulnerability scanning for dependencies with automated CVE
+  detection, severity assessment, and patch recommendations. This PostToolUse
+  hook automatically triggers security scans when dependency manifest files
+  (package.json, requirements.txt, Cargo.toml, go.mod, Gemfile, composer.json)
+  are modified.
+cardDescription: >-
+  Real-time vulnerability scanning for dependencies with automated CVE
+  detection, severity assessment, and patch recommendations.
+seoTitle: Dependency Security Scanner - Hooks
+seoDescription: >-
+  Real-time vulnerability scanning for dependencies with automated CVE
+  detection, severity assessment, and patch recommendations. This PostToolUse
+  hook automat...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-19'
+documentationUrl: 'https://docs.npmjs.com/cli/v8/commands/npm-audit'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/dependency-security-scanner.sh
+  && chmod +x .claude/hooks/dependency-security-scanner.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/dependency-security-scanner.sh
+  && chmod +x .claude/hooks/dependency-security-scanner.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/dependency-security-scanner.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/dependency-security-scanner.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Configuration\nSECURITY_REPORT=\".claude/reports/security-scan-$(date +%Y%m%d).txt\"\nSEVERITY_THRESHOLD=${SEVERITY_THRESHOLD:-medium}\n\nmkdir -p \"$(dirname \"$SECURITY_REPORT\")\"\n\n# Function to check if file is a dependency manifest\nis_dependency_file() {\n  local file=$1\n  \n  case \"$(basename \"$file\")\" in\n    package.json|package-lock.json|yarn.lock|pnpm-lock.yaml)\n      echo \"npm\"\n      return 0\n      ;;\n    requirements.txt|Pipfile|Pipfile.lock|poetry.lock)\n      echo \"pip\"\n      return 0\n      ;;\n    Cargo.toml|Cargo.lock)\n      echo \"cargo\"\n      return 0\n      ;;\n    go.mod|go.sum)\n      echo \"go\"\n      return 0\n      ;;\n    Gemfile|Gemfile.lock)\n      echo \"bundler\"\n      return 0\n      ;;\n    composer.json|composer.lock)\n      echo \"composer\"\n      return 0\n      ;;\n    *)\n      return 1\n      ;;\n  esac\n}\n\n# Function to run npm audit\nscan_npm_dependencies() {\n  echo \"\U0001F4E6 Scanning npm dependencies for vulnerabilities...\" >&2\n  \n  if ! command -v npm &> /dev/null; then\n    echo \"⚠️ npm not found - install Node.js for security scanning\" >&2\n    return\n  fi\n  \n  echo \"\" >> \"$SECURITY_REPORT\"\n  echo \"NPM Audit Report - $(date)\" >> \"$SECURITY_REPORT\"\n  echo \"================================\" >> \"$SECURITY_REPORT\"\n  \n  # Run npm audit\n  AUDIT_OUTPUT=$(npm audit --json 2>/dev/null)\n  \n  if [ -n \"$AUDIT_OUTPUT\" ]; then\n    # Parse vulnerabilities\n    CRITICAL=$(echo \"$AUDIT_OUTPUT\" | jq -r '.metadata.vulnerabilities.critical // 0')\n    HIGH=$(echo \"$AUDIT_OUTPUT\" | jq -r '.metadata.vulnerabilities.high // 0')\n    MODERATE=$(echo \"$AUDIT_OUTPUT\" | jq -r '.metadata.vulnerabilities.moderate // 0')\n    LOW=$(echo \"$AUDIT_OUTPUT\" | jq -r '.metadata.vulnerabilities.low // 0')\n    \n    echo \"Critical: $CRITICAL | High: $HIGH | Moderate: $MODERATE | Low: $LOW\" >> \"$SECURITY_REPORT\"\n    \n    # Alert on critical/high vulnerabilities\n    if [ \"$CRITICAL\" -gt 0 ] || [ \"$HIGH\" -gt 0 ]; then\n      echo \"\" >&2\n      echo \"\U0001F6A8 SECURITY ALERT: Critical or High severity vulnerabilities detected!\" >&2\n      echo \"   Critical: $CRITICAL vulnerabilities\" >&2\n      echo \"   High: $HIGH vulnerabilities\" >&2\n      echo \"\" >&2\n      echo \"\U0001F527 Run 'npm audit fix' to automatically fix vulnerabilities\" >&2\n      echo \"\U0001F527 Run 'npm audit fix --force' for breaking changes\" >&2\n    fi\n    \n    # Get fixable vulnerabilities\n    FIXABLE=$(echo \"$AUDIT_OUTPUT\" | jq -r '.metadata.vulnerabilities.info // 0')\n    if [ \"$FIXABLE\" -gt 0 ]; then\n      echo \"\U0001F4A1 $FIXABLE vulnerabilities can be fixed automatically\" >&2\n    fi\n  else\n    echo \"✅ No vulnerabilities detected\" >> \"$SECURITY_REPORT\"\n  fi\n}\n\n# Function to scan Python dependencies\nscan_pip_dependencies() {\n  echo \"\U0001F40D Scanning Python dependencies for vulnerabilities...\" >&2\n  \n  if command -v safety &> /dev/null; then\n    echo \"\" >> \"$SECURITY_REPORT\"\n    echo \"Python Safety Report - $(date)\" >> \"$SECURITY_REPORT\"\n    echo \"=================================\" >> \"$SECURITY_REPORT\"\n    \n    safety check --json 2>/dev/null | \\\n      jq -r '.[] | \"\\(.package): \\(.vulnerability)\"' 2>/dev/null >> \"$SECURITY_REPORT\" || \\\n      echo \"✅ No vulnerabilities detected\" >> \"$SECURITY_REPORT\"\n  elif command -v pip-audit &> /dev/null; then\n    echo \"Running pip-audit...\" >&2\n    pip-audit --format json 2>/dev/null >> \"$SECURITY_REPORT\" || \\\n      echo \"\U0001F4A1 Install pip-audit: pip install pip-audit\" >&2\n  else\n    echo \"\U0001F4A1 Install safety or pip-audit for Python security scanning\" >&2\n  fi\n}\n\n# Function to scan Rust dependencies\nscan_cargo_dependencies() {\n  echo \"\U0001F980 Scanning Rust dependencies for vulnerabilities...\" >&2\n  \n  if command -v cargo &> /dev/null; then\n    if cargo audit --version &> /dev/null; then\n      echo \"\" >> \"$SECURITY_REPORT\"\n      echo \"Cargo Audit Report - $(date)\" >> \"$SECURITY_REPORT\"\n      echo \"==============================\" >> \"$SECURITY_REPORT\"\n      \n      cargo audit --json 2>/dev/null >> \"$SECURITY_REPORT\" || \\\n        echo \"✅ No vulnerabilities detected\" >> \"$SECURITY_REPORT\"\n    else\n      echo \"\U0001F4A1 Install cargo-audit: cargo install cargo-audit\" >&2\n    fi\n  fi\n}\n\n# Function to scan Go dependencies\nscan_go_dependencies() {\n  echo \"\U0001F439 Scanning Go dependencies for vulnerabilities...\" >&2\n  \n  if command -v govulncheck &> /dev/null; then\n    echo \"\" >> \"$SECURITY_REPORT\"\n    echo \"Go Vulnerability Check - $(date)\" >> \"$SECURITY_REPORT\"\n    echo \"==================================\" >> \"$SECURITY_REPORT\"\n    \n    govulncheck ./... 2>/dev/null >> \"$SECURITY_REPORT\" || \\\n      echo \"✅ No vulnerabilities detected\" >> \"$SECURITY_REPORT\"\n  else\n    echo \"\U0001F4A1 Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest\" >&2\n  fi\n}\n\n# Main execution\nDEP_TYPE=$(is_dependency_file \"$FILE_PATH\")\n\nif [ -n \"$DEP_TYPE\" ]; then\n  echo \"\U0001F510 Security scan triggered: $FILE_PATH\" >&2\n  echo \"\U0001F4CB Dependency type: $DEP_TYPE\" >&2\n  \n  # Run appropriate scanner\n  case \"$DEP_TYPE\" in\n    npm)\n      scan_npm_dependencies\n      ;;\n    pip)\n      scan_pip_dependencies\n      ;;\n    cargo)\n      scan_cargo_dependencies\n      ;;\n    go)\n      scan_go_dependencies\n      ;;\n    *)\n      echo \"\U0001F4A1 Security scanning available for: npm, pip, cargo, go\" >&2\n      ;;\n  esac\n  \n  # General security tips\n  echo \"\" >&2\n  echo \"\U0001F6E1️ Dependency Security Best Practices:\" >&2\n  echo \"   • Keep dependencies updated regularly\" >&2\n  echo \"   • Review security advisories before updates\" >&2\n  echo \"   • Use lock files to ensure reproducible builds\" >&2\n  echo \"   • Minimize dependency count to reduce attack surface\" >&2\n  echo \"   • Enable automated security alerts in your repo\" >&2\n  \n  if [ -s \"$SECURITY_REPORT\" ]; then\n    echo \"\" >&2\n    echo \"\U0001F4C4 Security report: $SECURITY_REPORT\" >&2\n  fi\nfi\n\nexit 0"
+trigger: PostToolUse
+tags:
+  - security
+  - dependencies
+  - vulnerability
+  - cve
+  - automation
+keywords:
+  - automation
+  - claude
+  - cve
+  - dependencies
+  - dependency
+  - development
+  - hooks
+  - scanner
+  - security
+  - tools
+  - vulnerability
+readingTime: 1
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Automated vulnerability scanning on dependency file changes with PostToolUse hook integration detecting write/edit operations on manifest files
+- CVE database integration for real-time threat detection using official vulnerability databases (NVD, OSV, GitHub Advisory Database) with automatic updates
+- Severity-based alerting (critical, high, medium, low) with CVSS scores and detailed vulnerability descriptions including exploitability information
+- Automatic patch version recommendations with fix commands (npm audit fix, pip-audit --fix) and compatibility checks for safe upgrades
+- Support for npm 10.x+, yarn 4.x+, pip-audit 2.9.0+, safety, cargo-audit, govulncheck, bundler-audit, and composer audit with automatic tool detection
+- License compliance checking and risk assessment with license type detection and policy enforcement for copyleft and proprietary licenses
+- Supply chain security validation with SBOM (Software Bill of Materials) generation support for compliance and audit requirements
+- Real-time alerting with immediate notifications when critical or high severity vulnerabilities are detected during development
+
+## Use Cases
+
+- Continuous security monitoring during dependency updates automatically scanning when package files are modified in real-time
+- CI/CD pipeline integration for automated vulnerability detection ensuring security checks run on every dependency change
+- Compliance scanning for security audits generating detailed reports with vulnerability counts and remediation steps
+- Real-time CVE alerting on new vulnerabilities providing immediate notifications when security issues are discovered
+- Supply chain security validation ensuring third-party dependencies meet security requirements before integration
+- Development workflow optimization providing immediate security feedback as dependencies are added or updated during active development
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/dependency-security-scanner.sh
+3. Make executable: chmod +x .claude/hooks/dependency-security-scanner.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Package manager: npm 10.x+, Yarn 4.x+, pip-audit 2.9.0+, safety, cargo-audit, govulncheck, or bundler-audit
+- Security tools: npm audit (built-in), pip-audit 2.9.0+, safety, cargo-audit, govulncheck, bundler-audit, or composer audit
+- jq JSON processor for parsing audit output
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/dependency-security-scanner.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Configuration
+SECURITY_REPORT=".claude/reports/security-scan-$(date +%Y%m%d).txt"
+SEVERITY_THRESHOLD=${SEVERITY_THRESHOLD:-medium}
+
+mkdir -p "$(dirname "$SECURITY_REPORT")"
+
+# Function to check if file is a dependency manifest
+is_dependency_file() {
+  local file=$1
+  
+  case "$(basename "$file")" in
+    package.json|package-lock.json|yarn.lock|pnpm-lock.yaml)
+      echo "npm"
+      return 0
+      ;;
+    requirements.txt|Pipfile|Pipfile.lock|poetry.lock)
+      echo "pip"
+      return 0
+      ;;
+    Cargo.toml|Cargo.lock)
+      echo "cargo"
+      return 0
+      ;;
+    go.mod|go.sum)
+      echo "go"
+      return 0
+      ;;
+    Gemfile|Gemfile.lock)
+      echo "bundler"
+      return 0
+      ;;
+    composer.json|composer.lock)
+      echo "composer"
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Function to run npm audit
+scan_npm_dependencies() {
+  echo "📦 Scanning npm dependencies for vulnerabilities..." >&2
+  
+  if ! command -v npm &> /dev/null; then
+    echo "⚠️ npm not found - install Node.js for security scanning" >&2
+    return
+  fi
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "NPM Audit Report - $(date)" >> "$SECURITY_REPORT"
+  echo "================================" >> "$SECURITY_REPORT"
+  
+  # Run npm audit
+  AUDIT_OUTPUT=$(npm audit --json 2>/dev/null)
+  
+  if [ -n "$AUDIT_OUTPUT" ]; then
+    # Parse vulnerabilities
+    CRITICAL=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities.critical // 0')
+    HIGH=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities.high // 0')
+    MODERATE=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities.moderate // 0')
+    LOW=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities.low // 0')
+    
+    echo "Critical: $CRITICAL | High: $HIGH | Moderate: $MODERATE | Low: $LOW" >> "$SECURITY_REPORT"
+    
+    # Alert on critical/high vulnerabilities
+    if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+      echo "" >&2
+      echo "🚨 SECURITY ALERT: Critical or High severity vulnerabilities detected!" >&2
+      echo "   Critical: $CRITICAL vulnerabilities" >&2
+      echo "   High: $HIGH vulnerabilities" >&2
+      echo "" >&2
+      echo "🔧 Run 'npm audit fix' to automatically fix vulnerabilities" >&2
+      echo "🔧 Run 'npm audit fix --force' for breaking changes" >&2
+    fi
+    
+    # Get fixable vulnerabilities
+    FIXABLE=$(echo "$AUDIT_OUTPUT" | jq -r '.metadata.vulnerabilities.info // 0')
+    if [ "$FIXABLE" -gt 0 ]; then
+      echo "💡 $FIXABLE vulnerabilities can be fixed automatically" >&2
+    fi
+  else
+    echo "✅ No vulnerabilities detected" >> "$SECURITY_REPORT"
+  fi
+}
+
+# Function to scan Python dependencies
+scan_pip_dependencies() {
+  echo "🐍 Scanning Python dependencies for vulnerabilities..." >&2
+  
+  if command -v safety &> /dev/null; then
+    echo "" >> "$SECURITY_REPORT"
+    echo "Python Safety Report - $(date)" >> "$SECURITY_REPORT"
+    echo "=================================" >> "$SECURITY_REPORT"
+    
+    safety check --json 2>/dev/null | \
+      jq -r '.[] | "\(.package): \(.vulnerability)"' 2>/dev/null >> "$SECURITY_REPORT" || \
+      echo "✅ No vulnerabilities detected" >> "$SECURITY_REPORT"
+  elif command -v pip-audit &> /dev/null; then
+    echo "Running pip-audit..." >&2
+    pip-audit --format json 2>/dev/null >> "$SECURITY_REPORT" || \
+      echo "💡 Install pip-audit: pip install pip-audit" >&2
+  else
+    echo "💡 Install safety or pip-audit for Python security scanning" >&2
+  fi
+}
+
+# Function to scan Rust dependencies
+scan_cargo_dependencies() {
+  echo "🦀 Scanning Rust dependencies for vulnerabilities..." >&2
+  
+  if command -v cargo &> /dev/null; then
+    if cargo audit --version &> /dev/null; then
+      echo "" >> "$SECURITY_REPORT"
+      echo "Cargo Audit Report - $(date)" >> "$SECURITY_REPORT"
+      echo "==============================" >> "$SECURITY_REPORT"
+      
+      cargo audit --json 2>/dev/null >> "$SECURITY_REPORT" || \
+        echo "✅ No vulnerabilities detected" >> "$SECURITY_REPORT"
+    else
+      echo "💡 Install cargo-audit: cargo install cargo-audit" >&2
+    fi
+  fi
+}
+
+# Function to scan Go dependencies
+scan_go_dependencies() {
+  echo "🐹 Scanning Go dependencies for vulnerabilities..." >&2
+  
+  if command -v govulncheck &> /dev/null; then
+    echo "" >> "$SECURITY_REPORT"
+    echo "Go Vulnerability Check - $(date)" >> "$SECURITY_REPORT"
+    echo "==================================" >> "$SECURITY_REPORT"
+    
+    govulncheck ./... 2>/dev/null >> "$SECURITY_REPORT" || \
+      echo "✅ No vulnerabilities detected" >> "$SECURITY_REPORT"
+  else
+    echo "💡 Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+  fi
+}
+
+# Main execution
+DEP_TYPE=$(is_dependency_file "$FILE_PATH")
+
+if [ -n "$DEP_TYPE" ]; then
+  echo "🔐 Security scan triggered: $FILE_PATH" >&2
+  echo "📋 Dependency type: $DEP_TYPE" >&2
+  
+  # Run appropriate scanner
+  case "$DEP_TYPE" in
+    npm)
+      scan_npm_dependencies
+      ;;
+    pip)
+      scan_pip_dependencies
+      ;;
+    cargo)
+      scan_cargo_dependencies
+      ;;
+    go)
+      scan_go_dependencies
+      ;;
+    *)
+      echo "💡 Security scanning available for: npm, pip, cargo, go" >&2
+      ;;
+  esac
+  
+  # General security tips
+  echo "" >&2
+  echo "🛡️ Dependency Security Best Practices:" >&2
+  echo "   • Keep dependencies updated regularly" >&2
+  echo "   • Review security advisories before updates" >&2
+  echo "   • Use lock files to ensure reproducible builds" >&2
+  echo "   • Minimize dependency count to reduce attack surface" >&2
+  echo "   • Enable automated security alerts in your repo" >&2
+  
+  if [ -s "$SECURITY_REPORT" ]; then
+    echo "" >&2
+    echo "📄 Security report: $SECURITY_REPORT" >&2
+  fi
+fi
+
+exit 0
+```
+
+## Examples
+### Dependency Security Scanner Hook Script
+
+Complete hook script that performs real-time security scanning when dependency files are modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+SECURITY_REPORT=".claude/reports/security-scan-$(date +%Y%m%d).txt"
+mkdir -p "$(dirname "$SECURITY_REPORT")"
+is_dependency_file() {
+  local file=$1
+  case "$(basename "$file")" in
+    package.json|package-lock.json|yarn.lock|pnpm-lock.yaml)
+      echo "npm"
+      return 0
+      ;;
+    requirements.txt|Pipfile|Pipfile.lock|poetry.lock)
+      echo "pip"
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+DEP_TYPE=$(is_dependency_file "$FILE_PATH")
+if [ -n "$DEP_TYPE" ]; then
+  echo "Security scan triggered: $FILE_PATH" >&2
+  if [ "$DEP_TYPE" = "npm" ]; then
+    if command -v npm &> /dev/null; then
+      npm audit --json 2>/dev/null | jq '.' > "$SECURITY_REPORT" || echo "No vulnerabilities detected" >> "$SECURITY_REPORT"
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable security scanning on dependency file changes
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/dependency-security-scanner.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Python Security Scanning with pip-audit
+
+Enhanced hook script for Python security auditing using pip-audit 2.9.0+ or safety
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  if command -v pip-audit &> /dev/null; then
+    echo "Running pip-audit for Python security scanning..." >&2
+    pip-audit --format=json 2>/dev/null | jq '.' || pip-audit
+  elif command -v safety &> /dev/null; then
+    echo "Running Safety security scanner..." >&2
+    safety check --json 2>/dev/null | jq '.' || safety check
+  fi
+fi
+exit 0
+```
+### Rust Security Scanning with cargo-audit
+
+Enhanced hook script for Rust security auditing using cargo-audit
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "Cargo.toml" ] || [ -f "Cargo.lock" ]; then
+  if command -v cargo &> /dev/null; then
+    if cargo audit --version &> /dev/null; then
+      echo "Running cargo-audit for Rust security scanning..." >&2
+      cargo audit --json 2>/dev/null | jq '.' || cargo audit
+    else
+      echo "Install cargo-audit: cargo install cargo-audit" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Go Security Scanning with govulncheck
+
+Enhanced hook script for Go security auditing using govulncheck
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f "go.mod" ] || [ -f "go.sum" ]; then
+  if command -v govulncheck &> /dev/null; then
+    echo "Running govulncheck for Go security scanning..." >&2
+    govulncheck ./... 2>/dev/null || echo "No vulnerabilities detected"
+  else
+    echo "Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### PostToolUse hook triggers but npm audit shows empty results
+
+Ensure package-lock.json exists (run npm install first). Check npm version supports audit (npm 10.x+). Verify network connectivity for CVE database access. Try npm audit --registry=https://registry.npmjs.org. Verify package.json and package-lock.json are in the project root.
+### Critical vulnerabilities reported but npm audit fix fails
+
+Breaking changes require --force flag but review impact first: npm audit fix --force. Check if vulnerability is in transitive dependency requiring upstream fix. Pin vulnerable package version with resolutions in package.json. Consider alternative packages. Review npm audit output for specific fix recommendations.
+### Python safety check reports vulnerabilities in dev packages
+
+Separate dev and prod requirements: safety check -r requirements.txt. Use --ignore to suppress false positives: safety check --ignore 12345. Check if vulnerability affects your usage context. Update to patched versions in requirements.txt. Consider using pip-audit 2.9.0+ with --exclude-dev flag.
+### Security scan creates duplicate reports on each save
+
+Hook runs on every write/edit matcher trigger. Implement debouncing with timestamp check. Use daily report files to prevent spam: .claude/reports/security-scan-$(date +%Y%m%d).txt. Add file hash check to skip scans if content unchanged. Consider using file modification time comparison.
+### Cargo audit fails with index update errors in CI
+
+Pre-download advisory database: cargo audit fetch in CI setup. Use offline mode if network restricted: cargo audit --offline. Cache advisory-db directory between runs. Check firewall rules for https://github.com/rustsec access. Verify cargo-audit is installed: cargo install cargo-audit.
+### pip-audit reports false positives for development dependencies
+
+Configure pip-audit to exclude dev dependencies: pip-audit --exclude-dev. Review pip-audit configuration for project-specific exclusions. Use --skip-editable flag for editable installs. Verify pip-audit 2.9.0+ version for improved accuracy. Use --ignore-vuln ID to exclude specific vulnerabilities.
+### govulncheck not found despite Go installation
+
+Install govulncheck: go install golang.org/x/vuln/cmd/govulncheck@latest. Verify Go version is 1.18+ for govulncheck support. Check PATH includes $GOPATH/bin or $HOME/go/bin. Use full path to govulncheck if not in PATH. Verify Go modules are initialized: go mod init.
+### Hook triggers on non-dependency file changes
+
+Refine file detection logic in is_dependency_file() function. Add explicit file extension checks. Use more specific matchers in hook configuration. Add early exit for non-dependency files. Consider using file path patterns instead of basename matching for better accuracy.

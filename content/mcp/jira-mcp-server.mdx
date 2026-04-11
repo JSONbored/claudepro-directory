@@ -1,0 +1,232 @@
+---
+title: Jira MCP Server for Claude
+slug: jira-mcp-server
+category: mcp
+description: Manage Jira tickets and Confluence documentation
+cardDescription: Manage Jira tickets and Confluence documentation
+seoTitle: Jira MCP Server for Claude
+seoDescription: >-
+  Manage Jira tickets and Confluence documentation Discover tools for AI
+  development.
+author: Atlassian
+dateAdded: '2025-09-18'
+documentationUrl: 'https://www.atlassian.com/platform/remote-mcp-server'
+downloadUrl: /downloads/mcp/jira-mcp-server.mcpb
+packageVerified: true
+installable: true
+installCommand: claude mcp list && claude mcp status jira
+usageSnippet: claude mcp list && claude mcp status jira
+copySnippet: |-
+  {
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/sse",
+      "transport": "sse"
+    }
+  }
+configSnippet: |-
+  {
+    "atlassian": {
+      "url": "https://mcp.atlassian.com/v1/sse",
+      "transport": "sse"
+    }
+  }
+estimatedSetupTime: 4 minutes
+difficulty: intermediate
+prerequisites:
+  - Atlassian account (Jira Cloud or self-hosted Jira instance access)
+  - >-
+    OAuth credentials or API token (Jira Cloud: email + API token from account
+    settings; self-hosted: Personal Access Token or OAuth)
+  - >-
+    HTTP/SSE transport support (remote MCP server at
+    https://mcp.atlassian.com/v1/sse)
+  - Internet connection (remote Atlassian API access required)
+  - >-
+    Understanding of Atlassian API rate limits (enforced on API tokens from Nov
+    22, 2025; free apps rate limited from Aug 18, 2025 - implement caching and
+    pagination)
+  - >-
+    Understanding of OAuth scopes (read:jira-work, write:jira-work for Jira;
+    read:confluence-content.all, write:confluence-content for Confluence)
+  - Understanding of JQL (Jira Query Language) for advanced search and filtering
+  - >-
+    Understanding of workspace/project permissions and visibility settings
+    (required for accessing projects and issues)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - >-
+    Understanding of project management concepts (issues, sprints, boards,
+    workflows, custom fields, Confluence spaces and pages)
+tags:
+  - jira
+  - confluence
+  - atlassian
+  - project-management
+  - documentation
+keywords:
+  - atlassian
+  - claude
+  - confluence
+  - development
+  - documentation
+  - jira
+  - mcp
+  - mcp servers
+  - project-management
+  - server
+  - tools
+readingTime: 1
+difficultyScore: 1
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Content
+
+Streamline your project management and documentation workflows by connecting Claude to Atlassian's Jira and Confluence. Create and update issues, manage Confluence pages, search across both platforms, link tickets to documentation, and generate reports—all through natural language commands. Automate workflows, query with JQL, and maintain seamless integration between project tracking and documentation.
+
+## Features
+
+- Create and update Jira issues with custom fields and metadata
+- Manage Confluence pages and spaces with version control
+- Search across both Jira and Confluence with unified queries
+- Link issues to documentation seamlessly with bidirectional references
+- Generate reports from project data with custom metrics and filters
+- Query issues using JQL (Jira Query Language) for advanced filtering
+- Manage sprints, boards, and workflows programmatically
+- Access project permissions and user roles for access control
+- Advanced Jira issue and project management with agile board configuration, sprint planning, and team collaboration features
+- Batch operations support for efficient bulk issue operations, project management, and workflow automation with automatic rate limit handling and retry logic
+- Real-time project synchronization capabilities with webhook integration support for monitoring Jira events and triggering automated workflows
+
+## Use Cases
+
+- Create Jira tickets from requirements with automatic field population
+- Update Confluence documentation automatically from code changes or releases
+- Link issues to wiki pages for context and bidirectional traceability
+- Generate sprint reports and metrics with custom aggregations
+- Manage team workflows across tools with unified automation
+- Query and filter issues using JQL for advanced project analysis
+- Automate issue transitions and workflow state changes
+- Sync project data between Jira and external systems via API
+- Build automated project management workflows that sync external systems with Jira for real-time issue tracking and team collaboration
+
+## Installation
+
+### Claude Code
+
+1. Set up OAuth credentials in Atlassian Developer Console or get API token for Jira Cloud (email + API token)
+2. claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse
+3. Add OAuth credentials or API token to your environment or configuration
+4. Verify installation: claude mcp list
+5. Test connection: claude mcp status jira
+
+### Claude Desktop
+
+1. Set up OAuth credentials in Atlassian Developer Console or get API token for Jira Cloud (email + API token)
+2. Open your Claude Desktop configuration file (see configPath below)
+3. Add the Atlassian server configuration with SSE transport pointing to https://mcp.atlassian.com/v1/sse
+4. Add OAuth credentials or API token to environment variables in configuration
+5. Restart Claude Desktop
+6. Authenticate with your Atlassian account when prompted (if using OAuth)
+
+## Requirements
+
+- Atlassian account (Jira Cloud or self-hosted Jira instance access)
+- OAuth credentials or API token (Jira Cloud: email + API token from account settings; self-hosted: Personal Access Token or OAuth)
+- HTTP/SSE transport support (remote MCP server at https://mcp.atlassian.com/v1/sse)
+- Internet connection (remote Atlassian API access required)
+- Understanding of Atlassian API rate limits (enforced on API tokens from Nov 22, 2025; free apps rate limited from Aug 18, 2025 - implement caching and pagination)
+- Understanding of OAuth scopes (read:jira-work, write:jira-work for Jira; read:confluence-content.all, write:confluence-content for Confluence)
+- Understanding of JQL (Jira Query Language) for advanced search and filtering
+- Understanding of workspace/project permissions and visibility settings (required for accessing projects and issues)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of project management concepts (issues, sprints, boards, workflows, custom fields, Confluence spaces and pages)
+
+## Configuration
+
+```json
+{
+  "atlassian": {
+    "url": "https://mcp.atlassian.com/v1/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Create a Jira bug for the login issue
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create a Jira bug for the login issue"
+```
+### Update the API documentation in Confluence
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update the API documentation in Confluence"
+```
+### Find all issues assigned to me
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Find all issues assigned to me"
+```
+### Generate a sprint report
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate a sprint report"
+```
+### Create Issue with Custom Fields
+Create a new Jira issue with custom fields and metadata
+```typescript
+// Create Jira issue with custom fields
+const issue = await jira.issues.create({
+  project: { key: "PROJ" },
+  summary: "Fix authentication bug",
+  description: "Issue description",
+  issuetype: { name: "Bug" },
+  customfield_10001: "custom-value"
+});
+```
+
+## Security
+
+- OAuth authentication or API token (Jira Cloud: email + API token) for secure account access
+- Respect space and project permissions (verify access before operations)
+- Use JQL for precise query filtering to minimize data exposure
+- Regular backups recommended for critical data and configurations
+- Monitor API usage and rate limits to avoid service disruption
+- Jira API tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Jira OAuth access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes
+- Jira issue, project, and board IDs may expose organizational structure and development patterns - ensure Jira resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Jira MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Jira webhook configurations and payloads may contain sensitive issue data and project information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### HTTP 429 rate limit error starting November 2025
+
+Atlassian enforces rate limits on API tokens from Nov 22, 2025. Check Retry-After and X-RateLimit-Reset headers in API responses. Implement caching to reduce redundant API calls, use pagination for large result sets, and leverage webhooks for real-time updates instead of polling. Monitor rate limit headers to stay within token limits.
+### Free app rate limiting starting August 2025
+
+Free apps rate limited from Aug 18, 2025, with burst limits from Aug 28, 2025. Upgrade to paid tier for higher limits. Implement jitter on scheduled tasks to distribute load, optimize JQL queries to reduce API calls, and batch operations when possible. Consider using webhooks instead of polling for updates.
+### OAuth token authentication failed or expired
+
+Re-authenticate via OAuth flow to get new token. Verify token hasn't been revoked in Atlassian admin settings. Check token scope includes required permissions for Jira (read:jira-work, write:jira-work) and Confluence (read:confluence-content.all, write:confluence-content). For Jira Cloud, you can also use API token authentication (email + API token) as an alternative.
+### Cannot access project or issues - permission denied
+
+Verify your Atlassian account has project access. Check project visibility settings allow API access. Ensure OAuth scope includes appropriate permissions (read:jira-work, write:jira-work). Verify you're using the correct Jira instance URL and that the project key is correct. Check if project requires specific user roles or permissions.
+### JQL search queries returning no results or errors
+
+Validate JQL syntax is correct using Jira's JQL builder or JQL validator. Check field names match custom field IDs (use cf[10001] format for custom fields). Verify search permissions for projects in query. Use /rest/api/3/search endpoint with proper authentication. Ensure field names are correct (e.g., 'assignee' not 'assignedTo'). Test JQL query directly in Jira UI first to verify it works.
+### Jira MCP server authentication errors with API tokens
+
+Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Jira rate limit errors when making multiple API calls
+
+Implement exponential backoff retry logic with jitter. Use Jira API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed issue data. Jira allows 100 requests per minute per user.
+### Jira issue or project access denied errors
+
+Verify token has access to the issue or project. Check project permissions and user role. Ensure token has required scopes (read:jira-work, write:jira-work) for target operations.
+### Jira MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Jira API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

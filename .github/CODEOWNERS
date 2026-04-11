@@ -1,0 +1,7 @@
+# Default owner for all repository paths.
+* @JSONbored
+
+# Content and schema paths.
+/content/** @JSONbored
+/scripts/** @JSONbored
+/.github/** @JSONbored

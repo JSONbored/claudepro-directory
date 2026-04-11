@@ -1,0 +1,131 @@
+---
+title: MCP Tool Contract Testing Skill
+slug: mcp-tool-contract-testing
+category: skills
+description: 'Validate MCP server tools with contract-style tests to catch schema drift, unsafe behavior, and integration regressions early.'
+cardDescription: 'Test-first MCP tool validation for safer integrations, stronger reliability, and lower breakage risk.'
+seoTitle: MCP Tool Contract Testing Skill
+seoDescription: 'Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://modelcontextprotocol.io/specification/2025-06-18/'
+downloadUrl: /downloads/skills/mcp-tool-contract-testing.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing'
+usageSnippet: Use this skill to define and enforce MCP tool behavior contracts before deploying server updates.
+copySnippet: |-
+  # Trigger
+  "Run the MCP tool contract testing skill on this server update."
+
+  # Required output
+  1) Tool contract matrix
+  2) Positive/negative test cases
+  3) Schema compliance report
+  4) Release go/no-go summary
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://modelcontextprotocol.io/specification/2025-06-18/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - MCP server implementation and tool catalog
+  - Staging environment for test execution
+  - Known expected outputs per critical tool
+tags:
+  - mcp
+  - testing
+  - contracts
+  - reliability
+  - api
+keywords:
+  - mcp testing
+  - tool contract validation
+  - mcp schema checks
+  - ai tool reliability
+readingTime: 6
+packageVerified: true
+difficultyScore: 77
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill helps AI agents enforce explicit behavior contracts for MCP tools. It prevents accidental schema drift, unsafe edge-case handling, and hidden regressions when tools evolve.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Contract definitions for high-value tools
+- Stable test inputs and expected outputs
+- Regression thresholds for release decisions
+
+## What This Skill Delivers
+
+- Contract catalog for each tool endpoint
+- Validation suite for payload and response guarantees
+- Safety/negative tests for malformed and adversarial inputs
+- Regression summary for release gating
+
+## How to Use This Skill
+
+1. Define mandatory response fields and allowed ranges.
+2. Build positive and negative test vectors.
+3. Execute against baseline and candidate builds.
+4. Compare behavior and schema diffs.
+5. Block release when contract-critical checks fail.
+
+## Troubleshooting
+
+**Issue:** Tool output changes break downstream clients  
+**Fix:** Add strict backward-compatibility contract checks for public fields.
+
+**Issue:** Tests pass but runtime still fails on edge cases  
+**Fix:** Add adversarial input suites and timeout/error propagation checks.
+
+**Issue:** Frequent false positives in test suite  
+**Fix:** Split deterministic contract checks from heuristic quality checks.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://modelcontextprotocol.io/specification/2025-06-18/
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

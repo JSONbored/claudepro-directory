@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: HeyClaude API
+  version: 1.0.0
+servers:
+  - url: https://heyclau.de
+  - url: https://dev.heyclau.de
+paths:
+  /api/votes/query:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                keys:
+                  type: array
+                  maxItems: 1000
+                  items:
+                    type: string
+                    pattern: "^[a-z0-9-]+:[a-z0-9-]+$"
+                clientId:
+                  type: string
+                  minLength: 1
+                  maxLength: 128
+              required:
+                - keys
+      responses:
+        "200":
+          description: Query succeeded
+        "400":
+          description: Invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "500":
+          description: Internal error
+  /api/votes/toggle:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                key:
+                  type: string
+                  pattern: "^[a-z0-9-]+:[a-z0-9-]+$"
+                clientId:
+                  type: string
+                  minLength: 8
+                  maxLength: 128
+                vote:
+                  type: boolean
+              required:
+                - key
+                - clientId
+                - vote
+      responses:
+        "200":
+          description: Toggle succeeded
+        "400":
+          description: Invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "500":
+          description: Internal error
+        "503":
+          description: Votes DB not configured
+  /api/newsletter/subscribe:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                email:
+                  type: string
+                  format: email
+                  maxLength: 320
+                source:
+                  type: string
+                  maxLength: 64
+              required:
+                - email
+      responses:
+        "200":
+          description: Subscribe accepted
+        "400":
+          description: Invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "502":
+          description: Provider error
+        "503":
+          description: Not configured
+  /api/newsletter/webhook:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              properties:
+                type:
+                  type: string
+                data:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Webhook accepted
+        "400":
+          description: Invalid JSON
+        "401":
+          description: Invalid signature
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "502":
+          description: Notification failed
+        "503":
+          description: Webhook not configured
+  /api/download:
+    get:
+      parameters:
+        - in: query
+          name: asset
+          required: true
+          schema:
+            type: string
+            maxLength: 256
+            anyOf:
+              - pattern: "^/downloads/skills/[a-z0-9-]+\\.zip$"
+              - pattern: "^/downloads/mcp/[a-z0-9-]+\\.mcpb$"
+      responses:
+        "200":
+          description: Download served
+        "400":
+          description: Invalid asset
+        "404":
+          description: Not found
+        "429":
+          description: Rate limited
+  /api/github-stats:
+    get:
+      responses:
+        "200":
+          description: GitHub repository stats
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  repo:
+                    type: string
+                    example: "JSONbored/claudepro-directory"
+                  stars:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                  forks:
+                    type: integer
+                    minimum: 0
+                    nullable: true
+                  updatedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                required:
+                  - repo
+                  - stars
+                  - forks
+                  - updatedAt
+        "429":
+          description: Rate limited
+        "500":
+          description: Invalid repo configuration
+        "502":
+          description: Upstream unavailable

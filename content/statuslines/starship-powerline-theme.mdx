@@ -1,0 +1,496 @@
+---
+title: Starship Powerline Theme - Statuslines
+slug: starship-powerline-theme
+category: statuslines
+description: >-
+  Starship-inspired powerline statusline with Nerd Font glyphs, modular
+  segments, and Git integration for Claude Code
+cardDescription: >-
+  Starship-inspired powerline statusline with Nerd Font glyphs, modular
+  segments, and Git integration for Claude Code
+seoTitle: Starship Powerline Theme - Statuslines
+seoDescription: >-
+  Starship-inspired powerline statusline with Nerd Font glyphs, modular
+  segments, and Git integration for Claude Code Discover tools for AI
+  development.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-16'
+installable: true
+usageSnippet: ' snnt  156k  main '
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh",
+      "refreshInterval": 1000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh",
+      "refreshInterval": 1000
+    }
+  }
+scriptLanguage: bash
+scriptBody: >-
+  #!/usr/bin/env bash
+
+
+  # Starship-Inspired Powerline Theme
+
+  # Requires Nerd Font
+
+
+  read -r input
+
+
+  # Extract data
+
+  model=$(echo "$input" | jq -r '.model // "unknown"' | sed 's/claude-//' | sed
+  's/sonnet/snnt/' | sed 's/-4-5//')
+
+  tokens=$(echo "$input" | jq -r '.session.totalTokens // 0')
+
+  workdir=$(echo "$input" | jq -r '.workspace.path // "."')
+
+
+  # Git info
+
+  cd "$workdir" 2>/dev/null
+
+  if git rev-parse --git-dir > /dev/null 2>&1; then
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
+    if [ -z "$(git status --porcelain)" ]; then
+      git_icon=""
+      git_color="\033[32m"
+    else
+      git_icon=""
+      git_color="\033[33m"
+    fi
+    git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
+  fi
+
+
+  # Model segment
+
+  model_segment="\033[36m ${model}\033[0m"
+
+
+  # Token segment with icon
+
+  token_k=$((tokens / 1000))
+
+  token_segment="\033[35m ${token_k}k\033[0m"
+
+
+  # Build powerline
+
+  echo -e "${model_segment} ${token_segment}${git_segment}"
+prerequisites:
+  - Claude Code CLI installed and configured
+  - >-
+    Bash shell available (bash 4.0+ recommended for pattern matching and string
+    manipulation)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - >-
+    Git command (optional, for git branch and status display - git 2.0+
+    recommended)
+  - >-
+    Nerd Font installed and configured in terminal (required for glyphs -
+    FiraCode Nerd Font, MesloLGS NF, or Hack Nerd Font recommended)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded segments)
+tags:
+  - starship
+  - powerline
+  - nerd-fonts
+  - git
+  - theme
+keywords:
+  - claude
+  - development
+  - git
+  - nerd-fonts
+  - powerline
+  - starship
+  - statuslines
+  - theme
+  - tools
+readingTime: 1
+difficultyScore: 2
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Starship-inspired modular design
+- Nerd Font glyphs for icons
+- Git branch and status
+- Condensed model names
+- Token count in thousands
+- Powerline-style separators
+- Customizable segment ordering
+- Color themes matching Starship presets
+
+## Use Cases
+
+- Starship prompt users wanting consistent aesthetics in Claude Code
+- Developers using Nerd Fonts across all terminal tools
+- Teams standardizing on Starship design language
+- Visual continuity between shell prompt and AI assistant statusline
+- Power users requiring modular, configurable statusline segments
+- Presentations or streaming with polished terminal aesthetics
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for pattern matching and string manipulation)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Git command (optional, for git branch and status display - git 2.0+ recommended)
+- Nerd Font installed and configured in terminal (required for glyphs - FiraCode Nerd Font, MesloLGS NF, or Hack Nerd Font recommended)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded segments)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Starship Powerline with Cost Display
+Extended version showing cost alongside tokens and git status
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Starship Powerline with Cost Display
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//' | sed 's/-4//' | sed 's/opus/ops/' | sed 's/haiku/hk/')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // .session.estimatedCost // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // "."')
+
+# Git info
+if [ -n "$workdir" ] && [ "$workdir" != "." ]; then
+  cd "$workdir" 2>/dev/null || cd .
+else
+  cd . 2>/dev/null || true
+fi
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    git_icon=""
+    git_color="\033[32m"
+  else
+    git_icon=""
+    git_color="\033[33m"
+  fi
+  
+  git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
+else
+  git_segment=""
+fi
+
+# Model segment
+model_segment="\033[36m ${model}\033[0m"
+
+# Token segment
+if [ $tokens -gt 0 ]; then
+  token_k=$((tokens / 1000))
+  if [ $token_k -eq 0 ]; then
+    token_k=1
+  fi
+  token_segment="\033[35m ${token_k}k\033[0m"
+else
+  token_segment="\033[35m 0k\033[0m"
+fi
+
+# Cost segment (yellow)
+if command -v awk > /dev/null 2>&1; then
+  cost_formatted=$(awk "BEGIN {printf \"%.3f\", $cost}" 2>/dev/null || echo "0.000")
+else
+  cost_formatted="0.000"
+fi
+
+cost_segment="\033[33m \$${cost_formatted}\033[0m"
+
+RESET="\033[0m"
+
+# Build powerline: model | tokens | cost | git
+if [ -n "$git_segment" ]; then
+  echo -e "${model_segment} ${token_segment} ${cost_segment}${git_segment}${RESET}"
+else
+  echo -e "${model_segment} ${token_segment} ${cost_segment}${RESET}"
+fi
+```
+### Starship Powerline with Custom Model Abbreviations
+Version with configurable model name abbreviations via environment variables
+```bash
+#!/usr/bin/env bash
+
+# Starship Powerline with Custom Model Abbreviations
+
+read -r input
+
+# Custom model abbreviations via environment variables (defaults to standard)
+SONNET_ABBR=${STARSHIP_SONNET_ABBR:-snnt}
+OPUS_ABBR=${STARSHIP_OPUS_ABBR:-ops}
+HAIKU_ABBR=${STARSHIP_HAIKU_ABBR:-hk}
+GPT4_ABBR=${STARSHIP_GPT4_ABBR:-gpt4}
+GEMINI_ABBR=${STARSHIP_GEMINI_ABBR:-gem}
+
+# Extract model
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//')
+
+# Apply custom abbreviations
+if [[ "$model" == *"sonnet"* ]]; then
+  model=$(echo "$model" | sed "s/sonnet/$SONNET_ABBR/" | sed 's/-4-5//' | sed 's/-4//')
+elif [[ "$model" == *"opus"* ]]; then
+  model=$(echo "$model" | sed "s/opus/$OPUS_ABBR/")
+elif [[ "$model" == *"haiku"* ]]; then
+  model=$(echo "$model" | sed "s/haiku/$HAIKU_ABBR/")
+elif [[ "$model" == *"gpt-4"* ]] || [[ "$model" == *"gpt4"* ]]; then
+  model=$GPT4_ABBR
+elif [[ "$model" == *"gemini"* ]]; then
+  model=$GEMINI_ABBR
+fi
+
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // "."')
+
+# Git info
+if [ -n "$workdir" ] && [ "$workdir" != "." ]; then
+  cd "$workdir" 2>/dev/null || cd .
+else
+  cd . 2>/dev/null || true
+fi
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    git_icon=""
+    git_color="\033[32m"
+  else
+    git_icon=""
+    git_color="\033[33m"
+  fi
+  
+  git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
+else
+  git_segment=""
+fi
+
+# Model segment
+model_segment="\033[36m ${model}\033[0m"
+
+# Token segment
+if [ $tokens -gt 0 ]; then
+  token_k=$((tokens / 1000))
+  if [ $token_k -eq 0 ]; then
+    token_k=1
+  fi
+  token_segment="\033[35m ${token_k}k\033[0m"
+else
+  token_segment="\033[35m 0k\033[0m"
+fi
+
+RESET="\033[0m"
+
+# Build powerline
+if [ -n "$git_segment" ]; then
+  echo -e "${model_segment} ${token_segment}${git_segment}${RESET}"
+else
+  echo -e "${model_segment} ${token_segment}${RESET}"
+fi
+```
+### Starship Powerline Installation Example
+Complete setup script with Nerd Font verification and Git command testing
+```bash
+#!/bin/bash
+# Installation script for Starship Powerline Theme
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for Git (optional, for git segment)
+if ! command -v git &> /dev/null; then
+    echo "Warning: Git command not found - git segment will not display"
+    echo "Install Git: macOS (brew install git), Linux (sudo apt-get install git or sudo yum install git)"
+else
+    echo "Git command available: $(git --version 2>/dev/null || echo 'version unknown')"
+fi
+
+# Test Git commands
+if command -v git &> /dev/null; then
+    if git rev-parse --git-dir &> /dev/null 2>&1; then
+        echo "Git repository detected: $(git symbolic-ref --short HEAD 2>/dev/null || echo 'detached HEAD')"
+    else
+        echo "Not in a git repository (git segment will be empty)"
+    fi
+    
+    if git status --porcelain &> /dev/null 2>&1; then
+        echo "Git status command working"
+    else
+        echo "Warning: Git status command test failed"
+    fi
+fi
+
+# Test Nerd Font glyphs
+if echo -e '  ' &> /dev/null; then
+    echo "Nerd Font glyphs supported:   (branch icons)"
+else
+    echo "Warning: Nerd Font glyphs may not display correctly"
+    echo "Install Nerd Font: https://www.nerdfonts.com/"
+    echo "Recommended fonts: FiraCode Nerd Font, MesloLGS NF, Hack Nerd Font"
+    echo "After installation, set terminal font and run: fc-cache -fv"
+fi
+
+# Test ANSI color codes
+if echo -e '\033[36mCyan\033[0m' &> /dev/null; then
+    echo "ANSI color codes supported: \033[36mCyan\033[0m, \033[35mMagenta\033[0m, \033[32mGreen\033[0m, \033[33mYellow\033[0m"
+else
+    echo "Warning: ANSI color codes may not display correctly"
+fi
+
+# Test model abbreviation
+if echo 'claude-sonnet-4-5' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//' | grep -q 'snnt'; then
+    echo "Model abbreviation working: $(echo 'claude-sonnet-4-5' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//')"
+else
+    echo "Warning: Model abbreviation test failed"
+fi
+
+# Test token formatting
+if [ $((12345 / 1000)) -eq 12 ]; then
+    echo "Token formatting working: 12345 tokens = $((12345 / 1000))k"
+else
+    echo "Warning: Token formatting test failed"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/starship-powerline-theme.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Starship-Inspired Powerline Theme for Claude Code
+# Requires Nerd Font for glyphs
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//' | sed 's/-4//' | sed 's/opus/ops/' | sed 's/haiku/hk/')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // "."')
+
+if [ -n "$workdir" ] && [ "$workdir" != "." ]; then
+  cd "$workdir" 2>/dev/null || cd .
+else
+  cd . 2>/dev/null || true
+fi
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "detached")
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    git_icon=""
+    git_color="\033[32m"
+  else
+    git_icon=""
+    git_color="\033[33m"
+  fi
+  
+  git_segment="${git_color}  ${branch} ${git_icon}\033[0m"
+else
+  git_segment=""
+fi
+
+model_segment="\033[36m ${model}\033[0m"
+
+if [ $tokens -gt 0 ]; then
+  token_k=$((tokens / 1000))
+  if [ $token_k -eq 0 ]; then
+    token_k=1
+  fi
+  token_segment="\033[35m ${token_k}k\033[0m"
+else
+  token_segment="\033[35m 0k\033[0m"
+fi
+
+RESET="\033[0m"
+
+if [ -n "$git_segment" ]; then
+  echo -e "${model_segment} ${token_segment}${git_segment}${RESET}"
+else
+  echo -e "${model_segment} ${token_segment}${RESET}"
+fi
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/starship-powerline-theme.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Starship Powerline Theme installed successfully!"
+echo "Note: Install Nerd Font for glyphs to display correctly"
+echo "Recommended: FiraCode Nerd Font, MesloLGS NF, Hack Nerd Font"
+echo "After font installation, set terminal font and run: fc-cache -fv"
+echo "Test: echo -e '  ' (should display branch icons, not boxes)"
+```
+
+## Troubleshooting
+### Nerd Font glyphs showing as boxes or missing symbols
+
+Install Nerd Font and configure terminal. Test: echo -e '  ' (should display branch icons, not boxes). Set font to 'FiraCode Nerd Font Mono' or 'MesloLGS NF'. Run fc-cache -fv to refresh font cache. Verify font installation: fc-list | grep -i nerd (should list Nerd Fonts). For VS Code: Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart terminal after font change. If still showing boxes, terminal may not support Unicode - use no-nerd-font version.
+### Git status shows '(detached)' instead of branch name
+
+You're in detached HEAD state (normal for commit checkouts). Run git branch -q to see state. Checkout branch: git checkout main or create: git checkout -b feature-name. Verify branch: git symbolic-ref --short HEAD (should return branch name, not 'detached'). Check git state: git rev-parse --git-dir (should return .git path). If in detached state, script shows 'detached' - this is expected behavior. To fix: Checkout a branch or create new branch from current commit.
+### Git icons not rendering correctly in VS Code terminal
+
+Add to settings.json: "terminal.integrated.fontFamily": "'FiraCode Nerd Font Mono'". Restart VS Code. If issues persist, install: sudo apt install fonts-symbola (Linux) or use system font installer (macOS). Verify font in VS Code: Open terminal, check font settings. Alternative: Use no-nerd-font version if Nerd Fonts unavailable. Test glyphs: echo -e '  ' (should display icons, not boxes). Check VS Code terminal settings: File > Preferences > Settings > Terminal > Integrated > Font Family.
+### Statusline displays incorrectly after git operations
+
+Increase refreshInterval if statusline lags git state. Use git status --porcelain for reliable scripting. Verify read access: test -r .git && echo OK. Check git command execution: git status --porcelain (should return empty or file list). Test git branch: git symbolic-ref --short HEAD (should return branch name). If statusline not updating, increase refreshInterval in settings.json: {"refreshInterval": 2000} (2 seconds). Verify git repository: git rev-parse --git-dir (should return .git path, not error).
+### Model name abbreviation too aggressive or unclear
+
+Modify sed patterns to preserve model info. Script shortens 'claude-sonnet-4-5' to 'snnt'. Keep full name by removing: | sed 's/sonnet/snnt/' line. Customize abbreviations: Set environment variables STARSHIP_SONNET_ABBR, STARSHIP_OPUS_ABBR, etc. Test abbreviation: echo 'claude-sonnet-4-5' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//' (should return 'snnt'). Adjust sed patterns: Add more patterns to preserve version numbers or model details. Check current abbreviation: echo "$model" (should show abbreviated name).
+### Token count always showing 0k or incorrect value
+
+Check token extraction: echo '$input' | jq '.cost.total_lines_added' (should return number). Try alternative: echo '$input' | jq '.session.totalTokens'. Verify calculation: token_k=$((tokens / 1000)) (should calculate thousands). Test with sample: tokens=12345; echo $((tokens / 1000)) (should return 12). Check if tokens is zero: echo $tokens (should be > 0). Verify JSON structure: echo '$input' | jq .cost (should show cost object with total_lines_added). If still 0k, JSON structure may have changed - update jq extraction path.
+### Colors not displaying or showing wrong colors
+
+Verify terminal supports ANSI colors: echo -e '\033[36mCyan\033[0m' (should display cyan text). Check color codes: Model (\033[36m cyan), Tokens (\033[35m magenta), Git clean (\033[32m green), Git dirty (\033[33m yellow). Test colors: echo -e '\033[36mCyan \033[35mMagenta \033[32mGreen \033[33mYellow\033[0m'. Verify RESET code: echo -e '\033[0m' (should reset colors). If colors not working, terminal may only support 16 colors - modify color codes to use standard ANSI: \033[36m for cyan, \033[35m for magenta, etc. Check terminal color support: echo $TERM (should show terminal type).
+### Directory change fails or script errors on cd command
+
+Check workspace path: echo '$input' | jq '.workspace.current_dir' (should return valid path). Verify path exists: test -d "$workdir" && echo "Directory exists" || echo "Directory not found". Test cd with error handling: cd "$workdir" 2>/dev/null || cd . (should not error). Check permissions: test -r "$workdir" && echo "Readable" || echo "Not readable". If path is empty or invalid, script defaults to current directory (cd .). Verify workspace extraction: workdir=$(echo '$input' | jq -r '.workspace.current_dir // .workspace.project_dir // .cwd // "."'). Test with sample: cd /tmp 2>/dev/null && echo "Success" || echo "Failed".

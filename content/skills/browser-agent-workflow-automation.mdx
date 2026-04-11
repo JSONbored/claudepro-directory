@@ -1,0 +1,145 @@
+---
+title: Browser Agent Workflow Automation Skill
+slug: browser-agent-workflow-automation
+category: skills
+description: 'Build robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.'
+cardDescription: 'Design production-ready browser agent workflows with reliable selectors, guardrails, and replayable runbooks.'
+seoTitle: Browser Agent Workflow Automation Skill
+seoDescription: 'Reusable skill for AI browser automation with robust selectors, retries, validation checkpoints, and operational safety.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://playwright.dev/docs/best-practices'
+downloadUrl: /downloads/skills/browser-agent-workflow-automation.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation'
+usageSnippet: 'Use this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.'
+copySnippet: |-
+  # Trigger
+  "Apply browser agent workflow automation skill for this task."
+
+  # Required output
+  1) Step-by-step browser plan with checkpoints
+  2) Selector strategy and fallback hierarchy
+  3) Retry and timeout policy
+  4) Safety boundaries for destructive actions
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://playwright.dev/docs/best-practices'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Target web workflow with clear start and success states
+  - Ability to run browser automation in local or CI environment
+  - Access to auth/session strategy if login is required
+tags:
+  - browser-automation
+  - ai-agents
+  - playwright
+  - workflows
+  - reliability
+keywords:
+  - ai-skill
+  - browser-agent
+  - selector-strategy
+  - retries
+  - automation-runbooks
+readingTime: 7
+packageVerified: true
+difficultyScore: 75
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill provides a practical framework for building browser-driven agent workflows that survive real-world UI variability. It prioritizes deterministic automation, explicit checkpoints, and safe failure handling instead of brittle click-recording scripts.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Clearly defined desired outcome and termination condition
+- Stable environment (staging/prod) with acceptable automation policy
+- Credential/session strategy for authenticated steps
+
+## Workflow Blueprint
+
+- Define start state and target success state
+- Use resilient selector hierarchy (semantic selectors first)
+- Add validation checkpoints between major steps
+- Use bounded retries with explicit failure reasons
+
+## How to Use This Skill
+
+### Prompt Pattern
+
+```text
+Apply browser agent workflow automation skill.
+Deliver:
+1) deterministic step plan,
+2) selector map,
+3) retry/timeout policy,
+4) failure recovery playbook.
+```
+
+### Execution Flow
+
+1. Map the workflow into atomic actions and checks.
+2. Choose reliable selectors and alternates.
+3. Add guardrails for destructive actions (confirmations/human gate).
+4. Instrument logs/screenshots for every failed checkpoint.
+5. Run repeatedly to validate stability before shipping.
+
+## Troubleshooting
+
+**Issue:** Flaky failures on dynamic pages  
+**Fix:** replace brittle selectors with role/label/text anchors and add readiness checks.
+
+**Issue:** Infinite retries hide root cause  
+**Fix:** cap retries and emit structured failure reasons after each attempt.
+
+**Issue:** Automation performs unsafe actions  
+**Fix:** require explicit confirmation gates for irreversible operations.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://playwright.dev/docs/best-practices
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

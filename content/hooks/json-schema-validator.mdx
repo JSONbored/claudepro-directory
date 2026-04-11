@@ -1,0 +1,643 @@
+---
+title: JSON Schema Validator - Hooks
+slug: json-schema-validator
+category: hooks
+description: >-
+  Validates JSON files against their schemas when modified to ensure data
+  integrity.
+cardDescription: >-
+  Validates JSON files against their schemas when modified to ensure data
+  integrity.
+seoTitle: JSON Schema Validator - Hooks
+seoDescription: >-
+  Validates JSON files against their schemas when modified to ensure data
+  integrity. This PostToolUse hook provides comprehensive JSON schema validation
+  with c...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/json-schema-validator.sh &&
+  chmod +x .claude/hooks/json-schema-validator.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/json-schema-validator.sh &&
+  chmod +x .claude/hooks/json-schema-validator.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/json-schema-validator.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/json-schema-validator.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a JSON file (exclude schema files)\nif [[ \"$FILE_PATH\" == *.json ]] && [[ \"$FILE_PATH\" != *.schema.json ]] && [[ \"$FILE_PATH\" != *schema*.json ]]; then\n  echo \"\U0001F4CB JSON Schema Validation for: $(basename \"$FILE_PATH\")\" >&2\n  \n  # Initialize validation counters\n  ERRORS=0\n  WARNINGS=0\n  VALIDATIONS_PASSED=0\n  SCHEMA_FOUND=false\n  \n  # Function to report validation results\n  report_validation() {\n    local level=\"$1\"\n    local message=\"$2\"\n    \n    case \"$level\" in\n      \"ERROR\")\n        echo \"❌ ERROR: $message\" >&2\n        ERRORS=$((ERRORS + 1))\n        ;;\n      \"WARNING\")\n        echo \"⚠️ WARNING: $message\" >&2\n        WARNINGS=$((WARNINGS + 1))\n        ;;\n      \"PASS\")\n        echo \"✅ PASS: $message\" >&2\n        VALIDATIONS_PASSED=$((VALIDATIONS_PASSED + 1))\n        ;;\n      \"INFO\")\n        echo \"ℹ️ INFO: $message\" >&2\n        ;;\n    esac\n  }\n  \n  # Check if file exists and is readable\n  if [ ! -f \"$FILE_PATH\" ]; then\n    report_validation \"ERROR\" \"JSON file not found: $FILE_PATH\"\n    exit 1\n  fi\n  \n  if [ ! -r \"$FILE_PATH\" ]; then\n    report_validation \"ERROR\" \"JSON file is not readable: $FILE_PATH\"\n    exit 1\n  fi\n  \n  # Get file information\n  FILE_NAME=\"$(basename \"$FILE_PATH\")\"\n  FILE_DIR=\"$(dirname \"$FILE_PATH\")\"\n  JSON_NAME=\"${FILE_NAME%.json}\"\n  FILE_SIZE=$(wc -c < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  \n  echo \"\U0001F4CA JSON file: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)\" >&2\n  \n  # 1. Basic JSON Syntax Validation\n  echo \"\U0001F50D Checking JSON syntax...\" >&2\n  \n  if command -v jq &> /dev/null; then\n    if jq empty \"$FILE_PATH\" 2>/dev/null; then\n      report_validation \"PASS\" \"Valid JSON syntax\"\n      \n      # Get JSON structure info\n      JSON_TYPE=$(jq -r 'type' \"$FILE_PATH\" 2>/dev/null || echo \"unknown\")\n      echo \"   \U0001F4CA JSON type: $JSON_TYPE\" >&2\n      \n      if [ \"$JSON_TYPE\" = \"object\" ]; then\n        KEY_COUNT=$(jq -r 'keys | length' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n        echo \"   \U0001F511 Object keys: $KEY_COUNT\" >&2\n      elif [ \"$JSON_TYPE\" = \"array\" ]; then\n        ARRAY_LENGTH=$(jq -r 'length' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n        echo \"   \U0001F4CB Array length: $ARRAY_LENGTH\" >&2\n      fi\n      \n    else\n      report_validation \"ERROR\" \"Invalid JSON syntax - file cannot be parsed\"\n      echo \"   \U0001F4DD JSON parsing error details:\" >&2\n      jq empty \"$FILE_PATH\" 2>&1 | head -3 | while read line; do\n        echo \"     $line\" >&2\n      done\n      exit 1\n    fi\n  else\n    # Fallback validation using Python\n    if command -v python3 &> /dev/null; then\n      if python3 -c \"import json; json.load(open('$FILE_PATH'))\" 2>/dev/null; then\n        report_validation \"PASS\" \"Valid JSON syntax (Python validator)\"\n      else\n        report_validation \"ERROR\" \"Invalid JSON syntax detected\"\n        exit 1\n      fi\n    else\n      report_validation \"WARNING\" \"No JSON validators available (jq or python3)\"\n    fi\n  fi\n  \n  # 2. Schema Discovery\n  echo \"\U0001F50D Searching for JSON schema...\" >&2\n  \n  SCHEMA_CANDIDATES=()\n  \n  # Strategy 1: Same directory with .schema.json suffix\n  SCHEMA_CANDIDATES+=(\"$FILE_DIR/${JSON_NAME}.schema.json\")\n  \n  # Strategy 2: Same directory with schema/ subdirectory\n  SCHEMA_CANDIDATES+=(\"$FILE_DIR/schema/${JSON_NAME}.schema.json\")\n  SCHEMA_CANDIDATES+=(\"$FILE_DIR/schemas/${JSON_NAME}.schema.json\")\n  \n  # Strategy 3: Root-level schema directories\n  SCHEMA_CANDIDATES+=(\"./schema/${JSON_NAME}.schema.json\")\n  SCHEMA_CANDIDATES+=(\"./schemas/${JSON_NAME}.schema.json\")\n  SCHEMA_CANDIDATES+=(\"./json-schemas/${JSON_NAME}.schema.json\")\n  \n  # Strategy 4: Common schema file names\n  SCHEMA_CANDIDATES+=(\"$FILE_DIR/${JSON_NAME}-schema.json\")\n  SCHEMA_CANDIDATES+=(\"$FILE_DIR/schema.json\")\n  \n  # Strategy 5: Look for $schema property in JSON\n  if command -v jq &> /dev/null; then\n    EMBEDDED_SCHEMA=$(jq -r '.\"$schema\" // empty' \"$FILE_PATH\" 2>/dev/null)\n    if [ -n \"$EMBEDDED_SCHEMA\" ]; then\n      echo \"   \U0001F517 Found embedded schema reference: $EMBEDDED_SCHEMA\" >&2\n      # If it's a file path, add to candidates\n      if [[ \"$EMBEDDED_SCHEMA\" == ./* ]] || [[ \"$EMBEDDED_SCHEMA\" == /* ]]; then\n        SCHEMA_CANDIDATES+=(\"$EMBEDDED_SCHEMA\")\n      fi\n    fi\n  fi\n  \n  # Find the first existing schema file\n  SCHEMA_FILE=\"\"\n  for candidate in \"${SCHEMA_CANDIDATES[@]}\"; do\n    if [ -f \"$candidate\" ]; then\n      SCHEMA_FILE=\"$candidate\"\n      echo \"   \U0001F4C1 Schema found: $candidate\" >&2\n      SCHEMA_FOUND=true\n      break\n    fi\n  done\n  \n  if [ -z \"$SCHEMA_FILE\" ]; then\n    echo \"   ⚠️ No schema file found. Searched locations:\" >&2\n    for candidate in \"${SCHEMA_CANDIDATES[@]}\"; do\n      echo \"     - $candidate\" >&2\n    done\n    report_validation \"INFO\" \"No schema available - performing syntax-only validation\"\n  fi\n  \n  # 3. Schema Validation (if schema found)\n  if [ \"$SCHEMA_FOUND\" = true ] && [ -f \"$SCHEMA_FILE\" ]; then\n    echo \"\U0001F4CB Validating against schema...\" >&2\n    \n    # Check if schema file is valid JSON\n    if ! jq empty \"$SCHEMA_FILE\" 2>/dev/null; then\n      report_validation \"ERROR\" \"Schema file is not valid JSON: $SCHEMA_FILE\"\n    else\n      echo \"   ✅ Schema file is valid JSON\" >&2\n      \n      # Get schema information\n      SCHEMA_VERSION=$(jq -r '.\"$schema\" // \"draft-07\"' \"$SCHEMA_FILE\" 2>/dev/null)\n      SCHEMA_TITLE=$(jq -r '.title // \"Untitled\"' \"$SCHEMA_FILE\" 2>/dev/null)\n      echo \"   \U0001F4CA Schema: $SCHEMA_TITLE (version: $SCHEMA_VERSION)\" >&2\n      \n      # Try AJV validation first (most comprehensive)\n      if command -v npx &> /dev/null; then\n        echo \"   \U0001F50D Running AJV validation...\" >&2\n        \n        AJV_OUTPUT_FILE=\"/tmp/ajv_output_$$\"\n        if npx ajv validate -s \"$SCHEMA_FILE\" -d \"$FILE_PATH\" > \"$AJV_OUTPUT_FILE\" 2>&1; then\n          report_validation \"PASS\" \"AJV schema validation successful\"\n        else\n          report_validation \"ERROR\" \"AJV schema validation failed\"\n          echo \"   \U0001F4DD Validation errors:\" >&2\n          head -10 \"$AJV_OUTPUT_FILE\" | while read line; do\n            echo \"     $line\" >&2\n          done\n        fi\n        rm -f \"$AJV_OUTPUT_FILE\"\n        \n      # Fallback to basic schema checks\n      else\n        echo \"   ⚠️ AJV not available, performing basic schema checks...\" >&2\n        \n        # Check if required properties exist (simplified)\n        if command -v jq &> /dev/null; then\n          REQUIRED_PROPS=$(jq -r '.required[]? // empty' \"$SCHEMA_FILE\" 2>/dev/null)\n          if [ -n \"$REQUIRED_PROPS\" ]; then\n            echo \"   \U0001F511 Checking required properties...\" >&2\n            MISSING_PROPS=0\n            \n            while read -r prop; do\n              if [ -n \"$prop\" ]; then\n                if jq -e \".\\\"$prop\\\"\" \"$FILE_PATH\" > /dev/null 2>&1; then\n                  echo \"     ✅ Required property exists: $prop\" >&2\n                else\n                  echo \"     ❌ Missing required property: $prop\" >&2\n                  MISSING_PROPS=$((MISSING_PROPS + 1))\n                fi\n              fi\n            done <<< \"$REQUIRED_PROPS\"\n            \n            if [ \"$MISSING_PROPS\" -eq 0 ]; then\n              report_validation \"PASS\" \"All required properties present\"\n            else\n              report_validation \"ERROR\" \"$MISSING_PROPS required properties missing\"\n            fi\n          else\n            echo \"   ℹ️ No required properties defined in schema\" >&2\n          fi\n        fi\n      fi\n    fi\n  fi\n  \n  # 4. JSON Format-Specific Validation\n  echo \"\U0001F50D Checking JSON format specifics...\" >&2\n  \n  # Check for common JSON formats\n  if command -v jq &> /dev/null; then\n    # Check for package.json format\n    if [[ \"$FILE_NAME\" == \"package.json\" ]]; then\n      echo \"   \U0001F4E6 Detected package.json - checking NPM format...\" >&2\n      \n      if jq -e '.name' \"$FILE_PATH\" > /dev/null 2>&1; then\n        PKG_NAME=$(jq -r '.name' \"$FILE_PATH\" 2>/dev/null)\n        PKG_VERSION=$(jq -r '.version // \"no version\"' \"$FILE_PATH\" 2>/dev/null)\n        echo \"     \U0001F4CB Package: $PKG_NAME@$PKG_VERSION\" >&2\n        report_validation \"PASS\" \"Valid package.json structure\"\n      else\n        report_validation \"WARNING\" \"package.json missing required 'name' field\"\n      fi\n      \n    # Check for tsconfig.json format\n    elif [[ \"$FILE_NAME\" == \"tsconfig.json\" ]] || [[ \"$FILE_NAME\" == \"jsconfig.json\" ]]; then\n      echo \"   \U0001F527 Detected TypeScript/JavaScript config - checking format...\" >&2\n      \n      if jq -e '.compilerOptions // .include // .exclude' \"$FILE_PATH\" > /dev/null 2>&1; then\n        report_validation \"PASS\" \"Valid TypeScript/JavaScript config structure\"\n      else\n        report_validation \"WARNING\" \"Config file may be incomplete\"\n      fi\n      \n    # Check for JSON-LD format\n    elif jq -e '.\"@context\"' \"$FILE_PATH\" > /dev/null 2>&1; then\n      echo \"   \U0001F517 Detected JSON-LD format\" >&2\n      CONTEXT_URL=$(jq -r '.\"@context\"' \"$FILE_PATH\" 2>/dev/null)\n      echo \"     \U0001F310 Context: $CONTEXT_URL\" >&2\n      report_validation \"PASS\" \"JSON-LD structure detected\"\n      \n    # Check for GeoJSON format\n    elif jq -e '.type' \"$FILE_PATH\" 2>/dev/null | grep -q '\"Feature\"\\|\"FeatureCollection\"\\|\"Point\"\\|\"LineString\"'; then\n      echo \"   \U0001F5FA️ Detected GeoJSON format\" >&2\n      GEOM_TYPE=$(jq -r '.type' \"$FILE_PATH\" 2>/dev/null)\n      echo \"     \U0001F4CD Geometry type: $GEOM_TYPE\" >&2\n      report_validation \"PASS\" \"GeoJSON structure detected\"\n    fi\n  fi\n  \n  # 5. JSON Security and Best Practices\n  echo \"\U0001F512 Security and best practices check...\" >&2\n  \n  # Check file size (warn for very large files)\n  if [ \"$FILE_SIZE\" -gt 10485760 ]; then  # 10MB\n    report_validation \"WARNING\" \"Large JSON file ($(( FILE_SIZE / 1048576 ))MB) - consider optimization\"\n  fi\n  \n  # Check for potential security issues\n  if command -v jq &> /dev/null; then\n    # Check for potentially sensitive data patterns\n    SENSITIVE_PATTERNS=(\"password\" \"secret\" \"token\" \"key\" \"credential\")\n    SENSITIVE_FOUND=false\n    \n    for pattern in \"${SENSITIVE_PATTERNS[@]}\"; do\n      if jq -r 'paths(scalars) as $p | $p | join(\".\")' \"$FILE_PATH\" 2>/dev/null | grep -i \"$pattern\" >/dev/null; then\n        SENSITIVE_FOUND=true\n        break\n      fi\n    done\n    \n    if [ \"$SENSITIVE_FOUND\" = true ]; then\n      report_validation \"WARNING\" \"Potentially sensitive data detected in JSON structure\"\n    fi\n    \n    # Check for excessive nesting depth\n    MAX_DEPTH=$(jq '[paths | length] | max' \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n    if [ \"$MAX_DEPTH\" -gt 10 ]; then\n      report_validation \"WARNING\" \"Deep nesting detected ($MAX_DEPTH levels) - consider flattening\"\n    fi\n  fi\n  \n  # 6. Generate Validation Summary\n  echo \"\" >&2\n  echo \"\U0001F4CB JSON Schema Validation Summary:\" >&2\n  echo \"=================================\" >&2\n  echo \"   \U0001F4C4 File: $FILE_NAME\" >&2\n  echo \"   \U0001F4CF Size: $(( FILE_SIZE / 1024 ))KB\" >&2\n  echo \"   \U0001F4CB Schema found: $SCHEMA_FOUND\" >&2\n  [ \"$SCHEMA_FOUND\" = true ] && echo \"   \U0001F4C1 Schema file: $(basename \"$SCHEMA_FILE\")\" >&2\n  echo \"   ✅ Validations passed: $VALIDATIONS_PASSED\" >&2\n  echo \"   ⚠️ Warnings: $WARNINGS\" >&2\n  echo \"   ❌ Errors: $ERRORS\" >&2\n  \n  if [ \"$ERRORS\" -eq 0 ]; then\n    if [ \"$WARNINGS\" -eq 0 ]; then\n      echo \"   \U0001F389 Status: EXCELLENT - JSON is valid and well-formed\" >&2\n    else\n      echo \"   ✅ Status: GOOD - JSON is valid with minor recommendations\" >&2\n    fi\n  else\n    echo \"   ❌ Status: ERRORS - JSON has validation issues that must be fixed\" >&2\n  fi\n  \n  echo \"\" >&2\n  echo \"\U0001F4A1 JSON Schema Best Practices:\" >&2\n  echo \"   • Use descriptive schema titles and descriptions\" >&2\n  echo \"   • Define required properties clearly\" >&2\n  echo \"   • Validate data types and formats\" >&2\n  echo \"   • Keep schemas versioned and documented\" >&2\n  echo \"   • Use meaningful property names\" >&2\n  echo \"   • Avoid excessive nesting\" >&2\n  \n  # Exit with error if there are critical validation issues\n  if [ \"$ERRORS\" -gt 0 ]; then\n    echo \"⚠️ JSON validation completed with errors\" >&2\n    exit 1\n  fi\n  \nelse\n  # Not a JSON file or is a schema file, exit silently\n  exit 0\nfi\n\nexit 0"
+trigger: PostToolUse
+tags:
+  - json
+  - schema
+  - validation
+  - data-integrity
+  - api
+keywords:
+  - api
+  - claude
+  - data-integrity
+  - development
+  - hooks
+  - json
+  - schema
+  - tools
+  - validation
+  - validator
+readingTime: 2
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Comprehensive JSON schema validation using AJV (Another JSON Schema Validator) and multiple validators including AJV CLI (npx ajv validate) for command-line validation with comprehensive error reporting, jq for basic JSON syntax validation and structure analysis, Python json module for fallback validation when jq unavailable, and custom validation rule support with extensible validation logic
+- Intelligent schema discovery with multiple search strategies including same directory with .schema.json suffix (${JSON_NAME}.schema.json), schema/ subdirectory search (schema/${JSON_NAME}.schema.json, schemas/${JSON_NAME}.schema.json), root-level schema directories (./schema/, ./schemas/, ./json-schemas/), common schema file names (${JSON_NAME}-schema.json, schema.json), and embedded $schema property detection with file path resolution
+- JSON syntax validation and format verification with jq validation (jq empty) for syntax checking, Python json module fallback (json.load) when jq unavailable, JSON structure analysis (object keys count, array length), JSON type detection (object, array, string, number, boolean, null), and comprehensive error reporting with parsing error details
+- Schema version compatibility checking and migration guidance with JSON Schema draft version detection ($schema property: draft-07, draft-06, draft-04), schema version reporting with version information, compatibility recommendations for different draft versions, and migration guidance for schema version updates
+- Custom validation rule support and error reporting with AJV validation error reporting including detailed error messages, required property checking with jq for property existence validation, detailed error location reporting with property paths, and actionable error messages with suggestions for fixing validation errors
+- JSON-LD and specialized format validation with JSON-LD context detection (@context property detection), GeoJSON format detection (Feature, FeatureCollection, Point, LineString types), package.json format validation (name, version fields), tsconfig.json format validation (compilerOptions, include, exclude), and format-specific validation rules
+- Performance optimization for large JSON files with file size checking (warnings for files >10MB with size reporting in MB), nesting depth analysis (warnings for nesting >10 levels), optimization recommendations for large files, and performance considerations for validation operations
+- Detailed error location and suggestion reporting with line number reporting from validation errors, property path reporting (dot notation paths), actionable error messages with specific suggestions, and comprehensive validation summaries with pass/fail counts and status indicators (EXCELLENT, GOOD, ERRORS)
+
+## Use Cases
+
+- API development with automated JSON payload validation automatically validating API request/response JSON against schemas, detecting schema violations, and ensuring API data integrity for reliable API development workflows
+- Configuration file validation and integrity checking automatically validating configuration files (package.json, tsconfig.json, etc.) against schemas, detecting configuration errors, and ensuring configuration consistency for reliable configuration management
+- Data pipeline quality assurance with schema enforcement automatically validating data pipeline JSON outputs against schemas, detecting data quality issues, and ensuring data integrity throughout pipelines for reliable data processing
+- CI/CD integration with automated JSON validation automatically validating JSON files in CI/CD pipelines, detecting schema violations before deployment, and ensuring data integrity in production environments for reliable CI/CD workflows
+- Multi-environment configuration consistency validation automatically validating configuration files across environments, detecting configuration drift, and ensuring consistency across development, staging, and production environments for reliable multi-environment deployments
+- Development workflow integration seamlessly integrating JSON schema validation into development workflows without manual validation steps or separate validation tools
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/json-schema-validator.sh
+3. Make executable: chmod +x .claude/hooks/json-schema-validator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq (optional, recommended for JSON validation and structure analysis)
+- AJV CLI (optional, recommended for comprehensive schema validation via npx ajv)
+- File system read access for JSON files and schema files, and Node.js 18+ (for AJV CLI via npx) or Python 3.8+ (for json module fallback) depending on validation tool used
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/json-schema-validator.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a JSON file (exclude schema files)
+if [[ "$FILE_PATH" == *.json ]] && [[ "$FILE_PATH" != *.schema.json ]] && [[ "$FILE_PATH" != *schema*.json ]]; then
+  echo "📋 JSON Schema Validation for: $(basename "$FILE_PATH")" >&2
+  
+  # Initialize validation counters
+  ERRORS=0
+  WARNINGS=0
+  VALIDATIONS_PASSED=0
+  SCHEMA_FOUND=false
+  
+  # Function to report validation results
+  report_validation() {
+    local level="$1"
+    local message="$2"
+    
+    case "$level" in
+      "ERROR")
+        echo "❌ ERROR: $message" >&2
+        ERRORS=$((ERRORS + 1))
+        ;;
+      "WARNING")
+        echo "⚠️ WARNING: $message" >&2
+        WARNINGS=$((WARNINGS + 1))
+        ;;
+      "PASS")
+        echo "✅ PASS: $message" >&2
+        VALIDATIONS_PASSED=$((VALIDATIONS_PASSED + 1))
+        ;;
+      "INFO")
+        echo "ℹ️ INFO: $message" >&2
+        ;;
+    esac
+  }
+  
+  # Check if file exists and is readable
+  if [ ! -f "$FILE_PATH" ]; then
+    report_validation "ERROR" "JSON file not found: $FILE_PATH"
+    exit 1
+  fi
+  
+  if [ ! -r "$FILE_PATH" ]; then
+    report_validation "ERROR" "JSON file is not readable: $FILE_PATH"
+    exit 1
+  fi
+  
+  # Get file information
+  FILE_NAME="$(basename "$FILE_PATH")"
+  FILE_DIR="$(dirname "$FILE_PATH")"
+  JSON_NAME="${FILE_NAME%.json}"
+  FILE_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
+  
+  echo "📊 JSON file: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)" >&2
+  
+  # 1. Basic JSON Syntax Validation
+  echo "🔍 Checking JSON syntax..." >&2
+  
+  if command -v jq &> /dev/null; then
+    if jq empty "$FILE_PATH" 2>/dev/null; then
+      report_validation "PASS" "Valid JSON syntax"
+      
+      # Get JSON structure info
+      JSON_TYPE=$(jq -r 'type' "$FILE_PATH" 2>/dev/null || echo "unknown")
+      echo "   📊 JSON type: $JSON_TYPE" >&2
+      
+      if [ "$JSON_TYPE" = "object" ]; then
+        KEY_COUNT=$(jq -r 'keys | length' "$FILE_PATH" 2>/dev/null || echo "0")
+        echo "   🔑 Object keys: $KEY_COUNT" >&2
+      elif [ "$JSON_TYPE" = "array" ]; then
+        ARRAY_LENGTH=$(jq -r 'length' "$FILE_PATH" 2>/dev/null || echo "0")
+        echo "   📋 Array length: $ARRAY_LENGTH" >&2
+      fi
+      
+    else
+      report_validation "ERROR" "Invalid JSON syntax - file cannot be parsed"
+      echo "   📝 JSON parsing error details:" >&2
+      jq empty "$FILE_PATH" 2>&1 | head -3 | while read line; do
+        echo "     $line" >&2
+      done
+      exit 1
+    fi
+  else
+    # Fallback validation using Python
+    if command -v python3 &> /dev/null; then
+      if python3 -c "import json; json.load(open('$FILE_PATH'))" 2>/dev/null; then
+        report_validation "PASS" "Valid JSON syntax (Python validator)"
+      else
+        report_validation "ERROR" "Invalid JSON syntax detected"
+        exit 1
+      fi
+    else
+      report_validation "WARNING" "No JSON validators available (jq or python3)"
+    fi
+  fi
+  
+  # 2. Schema Discovery
+  echo "🔍 Searching for JSON schema..." >&2
+  
+  SCHEMA_CANDIDATES=()
+  
+  # Strategy 1: Same directory with .schema.json suffix
+  SCHEMA_CANDIDATES+=("$FILE_DIR/${JSON_NAME}.schema.json")
+  
+  # Strategy 2: Same directory with schema/ subdirectory
+  SCHEMA_CANDIDATES+=("$FILE_DIR/schema/${JSON_NAME}.schema.json")
+  SCHEMA_CANDIDATES+=("$FILE_DIR/schemas/${JSON_NAME}.schema.json")
+  
+  # Strategy 3: Root-level schema directories
+  SCHEMA_CANDIDATES+=("./schema/${JSON_NAME}.schema.json")
+  SCHEMA_CANDIDATES+=("./schemas/${JSON_NAME}.schema.json")
+  SCHEMA_CANDIDATES+=("./json-schemas/${JSON_NAME}.schema.json")
+  
+  # Strategy 4: Common schema file names
+  SCHEMA_CANDIDATES+=("$FILE_DIR/${JSON_NAME}-schema.json")
+  SCHEMA_CANDIDATES+=("$FILE_DIR/schema.json")
+  
+  # Strategy 5: Look for $schema property in JSON
+  if command -v jq &> /dev/null; then
+    EMBEDDED_SCHEMA=$(jq -r '."$schema" // empty' "$FILE_PATH" 2>/dev/null)
+    if [ -n "$EMBEDDED_SCHEMA" ]; then
+      echo "   🔗 Found embedded schema reference: $EMBEDDED_SCHEMA" >&2
+      # If it's a file path, add to candidates
+      if [[ "$EMBEDDED_SCHEMA" == ./* ]] || [[ "$EMBEDDED_SCHEMA" == /* ]]; then
+        SCHEMA_CANDIDATES+=("$EMBEDDED_SCHEMA")
+      fi
+    fi
+  fi
+  
+  # Find the first existing schema file
+  SCHEMA_FILE=""
+  for candidate in "${SCHEMA_CANDIDATES[@]}"; do
+    if [ -f "$candidate" ]; then
+      SCHEMA_FILE="$candidate"
+      echo "   📁 Schema found: $candidate" >&2
+      SCHEMA_FOUND=true
+      break
+    fi
+  done
+  
+  if [ -z "$SCHEMA_FILE" ]; then
+    echo "   ⚠️ No schema file found. Searched locations:" >&2
+    for candidate in "${SCHEMA_CANDIDATES[@]}"; do
+      echo "     - $candidate" >&2
+    done
+    report_validation "INFO" "No schema available - performing syntax-only validation"
+  fi
+  
+  # 3. Schema Validation (if schema found)
+  if [ "$SCHEMA_FOUND" = true ] && [ -f "$SCHEMA_FILE" ]; then
+    echo "📋 Validating against schema..." >&2
+    
+    # Check if schema file is valid JSON
+    if ! jq empty "$SCHEMA_FILE" 2>/dev/null; then
+      report_validation "ERROR" "Schema file is not valid JSON: $SCHEMA_FILE"
+    else
+      echo "   ✅ Schema file is valid JSON" >&2
+      
+      # Get schema information
+      SCHEMA_VERSION=$(jq -r '."$schema" // "draft-07"' "$SCHEMA_FILE" 2>/dev/null)
+      SCHEMA_TITLE=$(jq -r '.title // "Untitled"' "$SCHEMA_FILE" 2>/dev/null)
+      echo "   📊 Schema: $SCHEMA_TITLE (version: $SCHEMA_VERSION)" >&2
+      
+      # Try AJV validation first (most comprehensive)
+      if command -v npx &> /dev/null; then
+        echo "   🔍 Running AJV validation..." >&2
+        
+        AJV_OUTPUT_FILE="/tmp/ajv_output_$$"
+        if npx ajv validate -s "$SCHEMA_FILE" -d "$FILE_PATH" > "$AJV_OUTPUT_FILE" 2>&1; then
+          report_validation "PASS" "AJV schema validation successful"
+        else
+          report_validation "ERROR" "AJV schema validation failed"
+          echo "   📝 Validation errors:" >&2
+          head -10 "$AJV_OUTPUT_FILE" | while read line; do
+            echo "     $line" >&2
+          done
+        fi
+        rm -f "$AJV_OUTPUT_FILE"
+        
+      # Fallback to basic schema checks
+      else
+        echo "   ⚠️ AJV not available, performing basic schema checks..." >&2
+        
+        # Check if required properties exist (simplified)
+        if command -v jq &> /dev/null; then
+          REQUIRED_PROPS=$(jq -r '.required[]? // empty' "$SCHEMA_FILE" 2>/dev/null)
+          if [ -n "$REQUIRED_PROPS" ]; then
+            echo "   🔑 Checking required properties..." >&2
+            MISSING_PROPS=0
+            
+            while read -r prop; do
+              if [ -n "$prop" ]; then
+                if jq -e ".\"$prop\"" "$FILE_PATH" > /dev/null 2>&1; then
+                  echo "     ✅ Required property exists: $prop" >&2
+                else
+                  echo "     ❌ Missing required property: $prop" >&2
+                  MISSING_PROPS=$((MISSING_PROPS + 1))
+                fi
+              fi
+            done <<< "$REQUIRED_PROPS"
+            
+            if [ "$MISSING_PROPS" -eq 0 ]; then
+              report_validation "PASS" "All required properties present"
+            else
+              report_validation "ERROR" "$MISSING_PROPS required properties missing"
+            fi
+          else
+            echo "   ℹ️ No required properties defined in schema" >&2
+          fi
+        fi
+      fi
+    fi
+  fi
+  
+  # 4. JSON Format-Specific Validation
+  echo "🔍 Checking JSON format specifics..." >&2
+  
+  # Check for common JSON formats
+  if command -v jq &> /dev/null; then
+    # Check for package.json format
+    if [[ "$FILE_NAME" == "package.json" ]]; then
+      echo "   📦 Detected package.json - checking NPM format..." >&2
+      
+      if jq -e '.name' "$FILE_PATH" > /dev/null 2>&1; then
+        PKG_NAME=$(jq -r '.name' "$FILE_PATH" 2>/dev/null)
+        PKG_VERSION=$(jq -r '.version // "no version"' "$FILE_PATH" 2>/dev/null)
+        echo "     📋 Package: $PKG_NAME@$PKG_VERSION" >&2
+        report_validation "PASS" "Valid package.json structure"
+      else
+        report_validation "WARNING" "package.json missing required 'name' field"
+      fi
+      
+    # Check for tsconfig.json format
+    elif [[ "$FILE_NAME" == "tsconfig.json" ]] || [[ "$FILE_NAME" == "jsconfig.json" ]]; then
+      echo "   🔧 Detected TypeScript/JavaScript config - checking format..." >&2
+      
+      if jq -e '.compilerOptions // .include // .exclude' "$FILE_PATH" > /dev/null 2>&1; then
+        report_validation "PASS" "Valid TypeScript/JavaScript config structure"
+      else
+        report_validation "WARNING" "Config file may be incomplete"
+      fi
+      
+    # Check for JSON-LD format
+    elif jq -e '."@context"' "$FILE_PATH" > /dev/null 2>&1; then
+      echo "   🔗 Detected JSON-LD format" >&2
+      CONTEXT_URL=$(jq -r '."@context"' "$FILE_PATH" 2>/dev/null)
+      echo "     🌐 Context: $CONTEXT_URL" >&2
+      report_validation "PASS" "JSON-LD structure detected"
+      
+    # Check for GeoJSON format
+    elif jq -e '.type' "$FILE_PATH" 2>/dev/null | grep -q '"Feature"\|"FeatureCollection"\|"Point"\|"LineString"'; then
+      echo "   🗺️ Detected GeoJSON format" >&2
+      GEOM_TYPE=$(jq -r '.type' "$FILE_PATH" 2>/dev/null)
+      echo "     📍 Geometry type: $GEOM_TYPE" >&2
+      report_validation "PASS" "GeoJSON structure detected"
+    fi
+  fi
+  
+  # 5. JSON Security and Best Practices
+  echo "🔒 Security and best practices check..." >&2
+  
+  # Check file size (warn for very large files)
+  if [ "$FILE_SIZE" -gt 10485760 ]; then  # 10MB
+    report_validation "WARNING" "Large JSON file ($(( FILE_SIZE / 1048576 ))MB) - consider optimization"
+  fi
+  
+  # Check for potential security issues
+  if command -v jq &> /dev/null; then
+    # Check for potentially sensitive data patterns
+    SENSITIVE_PATTERNS=("password" "secret" "token" "key" "credential")
+    SENSITIVE_FOUND=false
+    
+    for pattern in "${SENSITIVE_PATTERNS[@]}"; do
+      if jq -r 'paths(scalars) as $p | $p | join(".")' "$FILE_PATH" 2>/dev/null | grep -i "$pattern" >/dev/null; then
+        SENSITIVE_FOUND=true
+        break
+      fi
+    done
+    
+    if [ "$SENSITIVE_FOUND" = true ]; then
+      report_validation "WARNING" "Potentially sensitive data detected in JSON structure"
+    fi
+    
+    # Check for excessive nesting depth
+    MAX_DEPTH=$(jq '[paths | length] | max' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$MAX_DEPTH" -gt 10 ]; then
+      report_validation "WARNING" "Deep nesting detected ($MAX_DEPTH levels) - consider flattening"
+    fi
+  fi
+  
+  # 6. Generate Validation Summary
+  echo "" >&2
+  echo "📋 JSON Schema Validation Summary:" >&2
+  echo "=================================" >&2
+  echo "   📄 File: $FILE_NAME" >&2
+  echo "   📏 Size: $(( FILE_SIZE / 1024 ))KB" >&2
+  echo "   📋 Schema found: $SCHEMA_FOUND" >&2
+  [ "$SCHEMA_FOUND" = true ] && echo "   📁 Schema file: $(basename "$SCHEMA_FILE")" >&2
+  echo "   ✅ Validations passed: $VALIDATIONS_PASSED" >&2
+  echo "   ⚠️ Warnings: $WARNINGS" >&2
+  echo "   ❌ Errors: $ERRORS" >&2
+  
+  if [ "$ERRORS" -eq 0 ]; then
+    if [ "$WARNINGS" -eq 0 ]; then
+      echo "   🎉 Status: EXCELLENT - JSON is valid and well-formed" >&2
+    else
+      echo "   ✅ Status: GOOD - JSON is valid with minor recommendations" >&2
+    fi
+  else
+    echo "   ❌ Status: ERRORS - JSON has validation issues that must be fixed" >&2
+  fi
+  
+  echo "" >&2
+  echo "💡 JSON Schema Best Practices:" >&2
+  echo "   • Use descriptive schema titles and descriptions" >&2
+  echo "   • Define required properties clearly" >&2
+  echo "   • Validate data types and formats" >&2
+  echo "   • Keep schemas versioned and documented" >&2
+  echo "   • Use meaningful property names" >&2
+  echo "   • Avoid excessive nesting" >&2
+  
+  # Exit with error if there are critical validation issues
+  if [ "$ERRORS" -gt 0 ]; then
+    echo "⚠️ JSON validation completed with errors" >&2
+    exit 1
+  fi
+  
+else
+  # Not a JSON file or is a schema file, exit silently
+  exit 0
+fi
+
+exit 0
+```
+
+## Examples
+### JSON Schema Validator Hook Script
+
+Complete hook script that performs JSON schema validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.json ]] && [[ "$FILE_PATH" != *.schema.json ]]; then
+  echo "📋 JSON Schema Validation for: $(basename "$FILE_PATH")" >&2
+  if jq empty "$FILE_PATH" 2>/dev/null; then
+    echo "✅ Valid JSON syntax" >&2
+  else
+    echo "❌ Invalid JSON syntax" >&2
+    exit 1
+  fi
+  if command -v npx &> /dev/null; then
+    JSON_NAME="${FILE_PATH%.json}"
+    SCHEMA_FILE="${JSON_NAME}.schema.json"
+    if [ -f "$SCHEMA_FILE" ]; then
+      if npx ajv validate -s "$SCHEMA_FILE" -d "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Schema validation successful" >&2
+      else
+        echo "❌ Schema validation failed" >&2
+        exit 1
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable JSON schema validation
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/json-schema-validator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Schema Discovery with Multiple Strategies
+
+Enhanced hook script for intelligent schema discovery with multiple search strategies
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+FILE_DIR="$(dirname "$FILE_PATH")"
+JSON_NAME="${FILE_PATH%.json}"
+SCHEMA_CANDIDATES=(
+  "$FILE_DIR/${JSON_NAME}.schema.json"
+  "$FILE_DIR/schema/${JSON_NAME}.schema.json"
+  "./schema/${JSON_NAME}.schema.json"
+  "./schemas/${JSON_NAME}.schema.json"
+)
+SCHEMA_FILE=""
+for candidate in "${SCHEMA_CANDIDATES[@]}"; do
+  if [ -f "$candidate" ]; then
+    SCHEMA_FILE="$candidate"
+    echo "📁 Schema found: $candidate" >&2
+    break
+  fi
+done
+if [ -n "$SCHEMA_FILE" ]; then
+  if command -v npx &> /dev/null; then
+    npx ajv validate -s "$SCHEMA_FILE" -d "$FILE_PATH"
+  fi
+fi
+exit 0
+```
+### Embedded Schema Detection
+
+Enhanced hook script for detecting and validating against embedded $schema properties
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.json ]]; then
+  if command -v jq &> /dev/null; then
+    EMBEDDED_SCHEMA=$(jq -r '."$schema" // empty' "$FILE_PATH" 2>/dev/null)
+    if [ -n "$EMBEDDED_SCHEMA" ]; then
+      echo "🔗 Found embedded schema reference: $EMBEDDED_SCHEMA" >&2
+      if [[ "$EMBEDDED_SCHEMA" == ./* ]] || [[ "$EMBEDDED_SCHEMA" == /* ]]; then
+        if [ -f "$EMBEDDED_SCHEMA" ]; then
+          echo "📁 Schema file exists: $EMBEDDED_SCHEMA" >&2
+          if command -v npx &> /dev/null; then
+            npx ajv validate -s "$EMBEDDED_SCHEMA" -d "$FILE_PATH"
+          fi
+        fi
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Format-Specific Validation
+
+Enhanced hook script for format-specific validation (package.json, JSON-LD, GeoJSON)
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+FILE_NAME="$(basename "$FILE_PATH")"
+if [[ "$FILE_PATH" == *.json ]]; then
+  if command -v jq &> /dev/null; then
+    if [[ "$FILE_NAME" == "package.json" ]]; then
+      if jq -e '.name' "$FILE_PATH" > /dev/null 2>&1; then
+        PKG_NAME=$(jq -r '.name' "$FILE_PATH" 2>/dev/null)
+        PKG_VERSION=$(jq -r '.version // "no version"' "$FILE_PATH" 2>/dev/null)
+        echo "📦 Package: $PKG_NAME@$PKG_VERSION" >&2
+      fi
+    elif jq -e '."@context"' "$FILE_PATH" > /dev/null 2>&1; then
+      CONTEXT_URL=$(jq -r '."@context"' "$FILE_PATH" 2>/dev/null)
+      echo "🔗 JSON-LD context: $CONTEXT_URL" >&2
+    elif jq -e '.type' "$FILE_PATH" 2>/dev/null | grep -q '"Feature"\|"FeatureCollection"'; then
+      GEOM_TYPE=$(jq -r '.type' "$FILE_PATH" 2>/dev/null)
+      echo "🗺️ GeoJSON type: $GEOM_TYPE" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook runs on schema files causing validation loops
+
+The script excludes *.schema.json and *schema*.json files by default. Ensure your schema files follow this naming convention to prevent recursive validation. Verify file path patterns. Test with various schema file names.
+### AJV validation fails with module not found error
+
+Install AJV globally with 'npm install -g ajv-cli' or ensure npx can access it in your project's node_modules. The hook falls back to basic checks if unavailable. Verify AJV installation: npx ajv --version. Check Node.js/npm availability.
+### Schema discovery fails for custom directory structures
+
+Add a '$schema' property to your JSON file pointing to the schema location, or place schemas in ./schema/, ./schemas/, or ./json-schemas/ directories with .schema.json suffix. Verify schema file locations. Test with various directory structures.
+### Large JSON files cause hook timeout or slowness
+
+For files over 10MB, consider splitting into smaller files or using streaming validation. The hook warns about large files but still validates them with basic syntax checks. Verify file size limits. Test with various file sizes.
+### Validation passes but schema compatibility warnings appear
+
+Check the '$schema' version in your schema file. The hook reports version mismatches. Update schemas to use compatible JSON Schema draft versions (draft-07 recommended). Verify schema version. Test with various draft versions.
+### Required property validation fails even when properties exist
+
+jq property checking may fail with nested properties. Use dot notation paths: jq -e '.parent.child' instead of '.parent["child"]'. Verify property paths. Test with various nested structures. Check for typos in property names.
+### Embedded $schema property points to non-existent file
+
+Hook validates file existence before using embedded schema. Check schema file path resolution. Verify relative vs absolute paths. Ensure schema files are committed to repository. Test with various path formats.
+### Format-specific validation (package.json, JSON-LD) not detected
+
+Format detection relies on specific properties (@context for JSON-LD, name for package.json). Verify file contains expected properties. Check property names match exactly. Test with various format variations.

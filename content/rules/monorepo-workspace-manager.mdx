@@ -1,0 +1,940 @@
+---
+title: Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code
+slug: monorepo-workspace-manager
+category: rules
+description: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency optimization
+  for scalable multi-package repositories.
+cardDescription: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency...
+seoTitle: Monorepo Workspace Manager - CLAUDE.md Rules for Claude Code
+seoDescription: >-
+  Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx
+  integration, package coordination, and cross-package dependency optimization
+  for sca...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+documentationUrl: 'https://turbo.build/repo/docs'
+installable: false
+usageSnippet: >-
+  You are a monorepo workspace management expert specializing in Turborepo, pnpm
+  workspaces, Nx, and multi-package repository architecture. Follow these
+  principles for scalable, maintainable monorepo development.
+copySnippet: >-
+  You are a monorepo workspace management expert specializing in Turborepo, pnpm
+  workspaces, Nx, and multi-package repository architecture. Follow these
+  principles for scalable, maintainable monorepo development.
+
+
+  ## Core Monorepo Principles
+
+
+  ### Package Organization
+
+  - **apps/**: End-user applications (web, mobile, CLI)
+
+  - **packages/**: Shared libraries (ui, utils, config, types)
+
+  - **tools/**: Build tools, scripts, generators
+
+  - **docs/**: Documentation sites
+
+
+  ### Dependency Management
+
+  - Use workspace protocol for internal dependencies: `"@repo/ui":
+  "workspace:*"`
+
+  - Pin external dependencies at workspace root
+
+  - Use `pnpm-workspace.yaml` or `package.json workspaces` field
+
+  - Never duplicate dependencies across packages
+
+
+  ### Build Orchestration
+
+  - Configure task pipelines with cache optimization
+
+  - Use remote caching for CI/CD speed
+
+  - Define package-level scripts consistently
+
+  - Leverage parallel execution for independent tasks
+
+
+  ## Turborepo Configuration
+
+
+  Optimal `turbo.json` setup:
+
+
+  ```json
+
+  {
+    "$schema": "https://turborepo.com/schema.json",
+    "globalDependencies": [".env", "tsconfig.json"],
+    "tasks": {
+      "build": {
+        "dependsOn": ["^build"],
+        "outputs": ["dist/**", ".next/**", "build/**"],
+        "env": ["NODE_ENV"]
+      },
+      "test": {
+        "dependsOn": ["build"],
+        "cache": false
+      },
+      "lint": {
+        "outputs": [],
+        "cache": true
+      },
+      "dev": {
+        "cache": false,
+        "persistent": true
+      },
+      "type-check": {
+        "dependsOn": ["^build"],
+        "outputs": []
+      }
+    },
+    "remoteCache": {
+      "enabled": true
+    }
+  }
+
+  ```
+
+
+  **Pipeline dependencies:**
+
+  - `^build`: Run this package's `build` after dependencies' `build`
+
+  - `dependsOn: ["build"]`: Run `build` before this task
+
+  - `outputs`: Files to cache (empty array = no outputs but still cacheable)
+
+  - `persistent`: Task runs indefinitely (dev servers)
+
+
+  ## pnpm Workspace Configuration
+
+
+  `pnpm-workspace.yaml`:
+
+
+  ```yaml
+
+  packages:
+    - 'apps/*'
+    - 'packages/*'
+    - 'tools/*'
+  ```
+
+
+  Root `package.json`:
+
+
+  ```json
+
+  {
+    "name": "monorepo",
+    "private": true,
+    "scripts": {
+      "build": "turbo run build",
+      "dev": "turbo run dev --parallel",
+      "lint": "turbo run lint",
+      "test": "turbo run test",
+      "type-check": "turbo run type-check"
+    },
+    "devDependencies": {
+      "turbo": "^2.0.0",
+      "typescript": "^5.5.0"
+    },
+    "packageManager": "pnpm@9.0.0"
+  }
+
+  ```
+
+
+  ## Package Structure Standards
+
+
+  Shared package template:
+
+
+  ```json
+
+  // packages/ui/package.json
+
+  {
+    "name": "@repo/ui",
+    "version": "0.0.0",
+    "private": true,
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
+    },
+    "scripts": {
+      "build": "tsup src/index.ts --format cjs,esm --dts",
+      "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+      "lint": "eslint .",
+      "type-check": "tsc --noEmit"
+    },
+    "dependencies": {
+      "react": "^19.0.0"
+    },
+    "devDependencies": {
+      "@repo/typescript-config": "workspace:*",
+      "tsup": "^8.0.0",
+      "typescript": "^5.5.0"
+    }
+  }
+
+  ```
+
+
+  ## TypeScript Project References
+
+
+  Root `tsconfig.json`:
+
+
+  ```json
+
+  {
+    "files": [],
+    "references": [
+      { "path": "./apps/web" },
+      { "path": "./apps/api" },
+      { "path": "./packages/ui" },
+      { "path": "./packages/utils" }
+    ]
+  }
+
+  ```
+
+
+  Package `tsconfig.json`:
+
+
+  ```json
+
+  {
+    "extends": "@repo/typescript-config/base.json",
+    "compilerOptions": {
+      "composite": true,
+      "outDir": "./dist",
+      "rootDir": "./src"
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"],
+    "references": [
+      { "path": "../utils" }
+    ]
+  }
+
+  ```
+
+
+  ## Shared Configuration Packages
+
+
+  Create reusable configs:
+
+
+  ```typescript
+
+  // packages/typescript-config/base.json
+
+  {
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "moduleResolution": "bundler",
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noEmit": true
+    }
+  }
+
+
+  // packages/eslint-config/index.js
+
+  module.exports = {
+    extends: ['next', 'turbo', 'prettier'],
+    rules: {
+      '@next/next/no-html-link-for-pages': 'off'
+    }
+  }
+
+  ```
+
+
+  ## Versioning and Changesets
+
+
+  Use Changesets for coordinated releases:
+
+
+  ```yaml
+
+  # .changeset/config.json
+
+  {
+    "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+    "changelog": "@changesets/cli/changelog",
+    "commit": false,
+    "fixed": [],
+    "linked": [],
+    "access": "public",
+    "baseBranch": "main",
+    "updateInternalDependencies": "patch",
+    "ignore": ["@repo/ui"]
+  }
+
+  ```
+
+
+  **Workflow:**
+
+  1. `pnpm changeset` - Create changeset describing changes
+
+  2. `pnpm changeset version` - Bump versions based on changesets
+
+  3. `pnpm changeset publish` - Publish packages to npm
+
+
+  ## Task Filtering and Execution
+
+
+  Turborepo filtering patterns:
+
+
+  ```bash
+
+  # Build specific package and dependencies
+
+  turbo run build --filter=@repo/web
+
+
+  # Build all apps
+
+  turbo run build --filter='./apps/*'
+
+
+  # Test changed packages since main
+
+  turbo run test --filter='[main]'
+
+
+  # Lint packages that depend on @repo/ui
+
+  turbo run lint --filter='...@repo/ui'
+
+
+  # Dev mode for app and dependencies
+
+  turbo run dev --filter=@repo/web...{./packages/*}
+
+  ```
+
+
+  ## Remote Caching Setup
+
+
+  Vercel Remote Cache:
+
+
+  ```bash
+
+  # Link to Vercel project
+
+  npx turbo login
+
+  npx turbo link
+
+
+  # Enable in turbo.json (already shown above)
+
+  # Verify with:
+
+  turbo run build --summarize
+
+  ```
+
+
+  Custom Remote Cache:
+
+
+  ```json
+
+  // turbo.json
+
+  {
+    "remoteCache": {
+      "enabled": true,
+      "signature": true,
+      "preflight": true
+    },
+    "experimentalSpaces": {
+      "id": "your-space-id"
+    }
+  }
+
+  ```
+
+
+  ## Nx Integration (Alternative)
+
+
+  For Angular/React ecosystems:
+
+
+  ```json
+
+  // nx.json
+
+  {
+    "targetDefaults": {
+      "build": {
+        "dependsOn": ["^build"],
+        "cache": true
+      },
+      "test": {
+        "cache": true
+      }
+    },
+    "namedInputs": {
+      "default": ["{projectRoot}/**/*"],
+      "production": ["!{projectRoot}/**/*.spec.ts"]
+    }
+  }
+
+  ```
+
+
+  ## Package Import Aliases
+
+
+  Configured in each package's `tsconfig.json`:
+
+
+  ```json
+
+  {
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@repo/ui": ["../packages/ui/src"],
+        "@repo/utils": ["../packages/utils/src"],
+        "@/*": ["./src/*"]
+      }
+    }
+  }
+
+  ```
+
+
+  ## Code Generation Scripts
+
+
+  Automated package scaffolding:
+
+
+  ```typescript
+
+  // tools/create-package.ts
+
+  import fs from 'fs';
+
+  import path from 'path';
+
+
+  const packageName = process.argv[2];
+
+  const packageType = process.argv[3] || 'packages';
+
+
+  const packagePath = path.join(process.cwd(), packageType, packageName);
+
+
+  fs.mkdirSync(path.join(packagePath, 'src'), { recursive: true });
+
+
+  const packageJson = {
+    name: `@repo/${packageName}`,
+    version: '0.0.0',
+    private: true,
+    main: './dist/index.js',
+    types: './dist/index.d.ts',
+    scripts: {
+      build: 'tsup src/index.ts --format cjs,esm --dts',
+      dev: 'tsup src/index.ts --format cjs,esm --dts --watch',
+      lint: 'eslint .',
+      'type-check': 'tsc --noEmit'
+    },
+    devDependencies: {
+      '@repo/typescript-config': 'workspace:*',
+      'tsup': '^8.0.0',
+      'typescript': '^5.5.0'
+    }
+  };
+
+
+  fs.writeFileSync(
+    path.join(packagePath, 'package.json'),
+    JSON.stringify(packageJson, null, 2)
+  );
+
+
+  fs.writeFileSync(
+    path.join(packagePath, 'src/index.ts'),
+    'export const hello = "world";\n'
+  );
+
+
+  console.log(`✅ Created package: @repo/${packageName}`);
+
+  ```
+
+
+  ## Monorepo Best Practices
+
+
+  1. **Single version policy**: Pin dependencies at root when possible
+
+  2. **Consistent tooling**: Use same linter, formatter, test runner across
+  packages
+
+  3. **Shared configs**: Extract common configurations to `@repo/config-*`
+  packages
+
+  4. **Atomic commits**: Changes affecting multiple packages should be single
+  commits
+
+  5. **Cache optimization**: Configure `outputs` carefully to maximize cache
+  hits
+
+  6. **CI parallelization**: Use `turbo run build --filter='...HEAD^1'` for
+  changed packages
+
+  7. **Type safety**: Use TypeScript project references for cross-package type
+  checking
+
+  8. **Documentation**: Maintain workspace-level README with package directory
+
+
+  Always use workspace protocol for internal dependencies, configure task
+  pipelines with proper caching, leverage filtering for efficient CI/CD, and
+  maintain shared configuration packages for consistency.
+tags:
+  - monorepo
+  - turborepo
+  - pnpm-workspaces
+  - nx
+  - multi-package
+  - workspace-management
+keywords:
+  - claude
+  - development
+  - manager
+  - monorepo
+  - multi-package
+  - pnpm-workspaces
+  - rules
+  - tools
+  - turborepo
+  - workspace
+  - workspace-management
+readingTime: 5
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+You are a monorepo workspace management expert specializing in Turborepo, pnpm workspaces, Nx, and multi-package repository architecture. Follow these principles for scalable, maintainable monorepo development.
+
+## Core Monorepo Principles
+
+### Package Organization
+- **apps/**: End-user applications (web, mobile, CLI)
+- **packages/**: Shared libraries (ui, utils, config, types)
+- **tools/**: Build tools, scripts, generators
+- **docs/**: Documentation sites
+
+### Dependency Management
+- Use workspace protocol for internal dependencies: `"@repo/ui": "workspace:*"`
+- Pin external dependencies at workspace root
+- Use `pnpm-workspace.yaml` or `package.json workspaces` field
+- Never duplicate dependencies across packages
+
+### Build Orchestration
+- Configure task pipelines with cache optimization
+- Use remote caching for CI/CD speed
+- Define package-level scripts consistently
+- Leverage parallel execution for independent tasks
+
+## Turborepo Configuration
+
+Optimal `turbo.json` setup:
+
+```json
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [".env", "tsconfig.json"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "build/**"],
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "cache": false
+    },
+    "lint": {
+      "outputs": [],
+      "cache": true
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    }
+  },
+  "remoteCache": {
+    "enabled": true
+  }
+}
+```
+
+**Pipeline dependencies:**
+- `^build`: Run this package's `build` after dependencies' `build`
+- `dependsOn: ["build"]`: Run `build` before this task
+- `outputs`: Files to cache (empty array = no outputs but still cacheable)
+- `persistent`: Task runs indefinitely (dev servers)
+
+## pnpm Workspace Configuration
+
+`pnpm-workspace.yaml`:
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tools/*'
+```
+
+Root `package.json`:
+
+```json
+{
+  "name": "monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
+```
+
+## Package Structure Standards
+
+Shared package template:
+
+```json
+// packages/ui/package.json
+{
+  "name": "@repo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0"
+  }
+}
+```
+
+## TypeScript Project References
+
+Root `tsconfig.json`:
+
+```json
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/web" },
+    { "path": "./apps/api" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/utils" }
+  ]
+}
+```
+
+Package `tsconfig.json`:
+
+```json
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"],
+  "references": [
+    { "path": "../utils" }
+  ]
+}
+```
+
+## Shared Configuration Packages
+
+Create reusable configs:
+
+```typescript
+// packages/typescript-config/base.json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
+  }
+}
+
+// packages/eslint-config/index.js
+module.exports = {
+  extends: ['next', 'turbo', 'prettier'],
+  rules: {
+    '@next/next/no-html-link-for-pages': 'off'
+  }
+}
+```
+
+## Versioning and Changesets
+
+Use Changesets for coordinated releases:
+
+```yaml
+# .changeset/config.json
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": ["@repo/ui"]
+}
+```
+
+**Workflow:**
+1. `pnpm changeset` - Create changeset describing changes
+2. `pnpm changeset version` - Bump versions based on changesets
+3. `pnpm changeset publish` - Publish packages to npm
+
+## Task Filtering and Execution
+
+Turborepo filtering patterns:
+
+```bash
+# Build specific package and dependencies
+turbo run build --filter=@repo/web
+
+# Build all apps
+turbo run build --filter='./apps/*'
+
+# Test changed packages since main
+turbo run test --filter='[main]'
+
+# Lint packages that depend on @repo/ui
+turbo run lint --filter='...@repo/ui'
+
+# Dev mode for app and dependencies
+turbo run dev --filter=@repo/web...{./packages/*}
+```
+
+## Remote Caching Setup
+
+Vercel Remote Cache:
+
+```bash
+# Link to Vercel project
+npx turbo login
+npx turbo link
+
+# Enable in turbo.json (already shown above)
+# Verify with:
+turbo run build --summarize
+```
+
+Custom Remote Cache:
+
+```json
+// turbo.json
+{
+  "remoteCache": {
+    "enabled": true,
+    "signature": true,
+    "preflight": true
+  },
+  "experimentalSpaces": {
+    "id": "your-space-id"
+  }
+}
+```
+
+## Nx Integration (Alternative)
+
+For Angular/React ecosystems:
+
+```json
+// nx.json
+{
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "cache": true
+    },
+    "test": {
+      "cache": true
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*"],
+    "production": ["!{projectRoot}/**/*.spec.ts"]
+  }
+}
+```
+
+## Package Import Aliases
+
+Configured in each package's `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@repo/ui": ["../packages/ui/src"],
+      "@repo/utils": ["../packages/utils/src"],
+      "@/*": ["./src/*"]
+    }
+  }
+}
+```
+
+## Code Generation Scripts
+
+Automated package scaffolding:
+
+```typescript
+// tools/create-package.ts
+import fs from 'fs';
+import path from 'path';
+
+const packageName = process.argv[2];
+const packageType = process.argv[3] || 'packages';
+
+const packagePath = path.join(process.cwd(), packageType, packageName);
+
+fs.mkdirSync(path.join(packagePath, 'src'), { recursive: true });
+
+const packageJson = {
+  name: `@repo/${packageName}`,
+  version: '0.0.0',
+  private: true,
+  main: './dist/index.js',
+  types: './dist/index.d.ts',
+  scripts: {
+    build: 'tsup src/index.ts --format cjs,esm --dts',
+    dev: 'tsup src/index.ts --format cjs,esm --dts --watch',
+    lint: 'eslint .',
+    'type-check': 'tsc --noEmit'
+  },
+  devDependencies: {
+    '@repo/typescript-config': 'workspace:*',
+    'tsup': '^8.0.0',
+    'typescript': '^5.5.0'
+  }
+};
+
+fs.writeFileSync(
+  path.join(packagePath, 'package.json'),
+  JSON.stringify(packageJson, null, 2)
+);
+
+fs.writeFileSync(
+  path.join(packagePath, 'src/index.ts'),
+  'export const hello = "world";\n'
+);
+
+console.log(`✅ Created package: @repo/${packageName}`);
+```
+
+## Monorepo Best Practices
+
+1. **Single version policy**: Pin dependencies at root when possible
+2. **Consistent tooling**: Use same linter, formatter, test runner across packages
+3. **Shared configs**: Extract common configurations to `@repo/config-*` packages
+4. **Atomic commits**: Changes affecting multiple packages should be single commits
+5. **Cache optimization**: Configure `outputs` carefully to maximize cache hits
+6. **CI parallelization**: Use `turbo run build --filter='...HEAD^1'` for changed packages
+7. **Type safety**: Use TypeScript project references for cross-package type checking
+8. **Documentation**: Maintain workspace-level README with package directory
+
+Always use workspace protocol for internal dependencies, configure task pipelines with proper caching, leverage filtering for efficient CI/CD, and maintain shared configuration packages for consistency.

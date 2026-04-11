@@ -1,0 +1,396 @@
+---
+title: Dependency Security Audit
+slug: dependency-security-audit-on-stop
+category: hooks
+description: >-
+  Performs a comprehensive security audit of all dependencies when Claude Code
+  session ends using npm audit (npm 10.x+), yarn audit (Yarn 4.x+), pip-audit
+  2.7.x+, safety, bundler-audit, and OWASP dep-scan.
+cardDescription: >-
+  Performs a comprehensive security audit of all dependencies when Claude Code
+  session ends using npm audit (npm 10.x+), yarn audit (Yarn 4...
+seoTitle: Dependency Security Audit
+seoDescription: >-
+  Performs a comprehensive security audit of all dependencies when Claude Code
+  session ends using npm audit (npm 10.x+), yarn audit (Yarn 4.x+), pip-audit
+  2.7....
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch
+  .claude/hooks/dependency-security-audit-on-stop.sh && chmod +x
+  .claude/hooks/dependency-security-audit-on-stop.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch
+  .claude/hooks/dependency-security-audit-on-stop.sh && chmod +x
+  .claude/hooks/dependency-security-audit-on-stop.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/dependency-security-audit-on-stop.sh"
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/dependency-security-audit-on-stop.sh"
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\necho \"\U0001F512 DEPENDENCY SECURITY AUDIT\" >&2\necho \"===========================\" >&2\n\n# Generate timestamp for report\nTIMESTAMP=$(date +%Y%m%d_%H%M%S)\nREPORT_FILE=\"security-audit-$TIMESTAMP.log\"\n\n# Initialize report\necho \"Dependency Security Audit Report - $TIMESTAMP\" > \"$REPORT_FILE\"\necho \"=============================================\" >> \"$REPORT_FILE\"\necho \"\" >> \"$REPORT_FILE\"\n\n# Node.js projects (NPM)\nif [ -f \"package-lock.json\" ]; then\n  echo \"\U0001F4E6 NPM Project Detected - Running audit...\" >&2\n  echo \"NPM AUDIT RESULTS\" >> \"$REPORT_FILE\"\n  echo \"-----------------\" >> \"$REPORT_FILE\"\n  \n  if command -v npm &> /dev/null; then\n    # Run npm audit with detailed output\n    NPM_AUDIT_OUTPUT=$(npm audit --audit-level=moderate 2>&1)\n    \n    if echo \"$NPM_AUDIT_OUTPUT\" | grep -q \"found 0 vulnerabilities\"; then\n      echo \"✅ No vulnerabilities found in NPM dependencies\" >&2\n      echo \"✅ No vulnerabilities found\" >> \"$REPORT_FILE\"\n    else\n      VULN_COUNT=$(echo \"$NPM_AUDIT_OUTPUT\" | grep -o '[0-9]\\+ vulnerabilities' | head -1 || echo \"unknown vulnerabilities\")\n      echo \"⚠️ NPM audit found: $VULN_COUNT\" >&2\n      echo \"$NPM_AUDIT_OUTPUT\" >> \"$REPORT_FILE\"\n    fi\n    \n    echo \"\" >> \"$REPORT_FILE\"\n    echo \"OUTDATED PACKAGES\" >> \"$REPORT_FILE\"\n    echo \"-----------------\" >> \"$REPORT_FILE\"\n    \n    # Check for outdated packages\n    OUTDATED_OUTPUT=$(npm outdated 2>/dev/null || echo \"All packages up to date\")\n    echo \"$OUTDATED_OUTPUT\" >> \"$REPORT_FILE\"\n    \n    if [ \"$OUTDATED_OUTPUT\" = \"All packages up to date\" ]; then\n      echo \"✅ All NPM packages are up to date\" >&2\n    else\n      OUTDATED_COUNT=$(echo \"$OUTDATED_OUTPUT\" | wc -l)\n      echo \"\U0001F4CA Found $OUTDATED_COUNT outdated NPM packages\" >&2\n    fi\n  else\n    echo \"⚠️ npm command not available\" >&2\n  fi\n  \n# Yarn projects\nelif [ -f \"yarn.lock\" ]; then\n  echo \"\U0001F9F6 Yarn Project Detected - Running audit...\" >&2\n  echo \"YARN AUDIT RESULTS\" >> \"$REPORT_FILE\"\n  echo \"------------------\" >> \"$REPORT_FILE\"\n  \n  if command -v yarn &> /dev/null; then\n    YARN_AUDIT_OUTPUT=$(yarn audit --level moderate 2>&1 || echo \"Yarn audit completed\")\n    echo \"$YARN_AUDIT_OUTPUT\" >> \"$REPORT_FILE\"\n    \n    if echo \"$YARN_AUDIT_OUTPUT\" | grep -q \"0 vulnerabilities\"; then\n      echo \"✅ No vulnerabilities found in Yarn dependencies\" >&2\n    else\n      echo \"⚠️ Yarn audit found potential issues\" >&2\n    fi\n  else\n    echo \"⚠️ yarn command not available\" >&2\n  fi\n  \n# Python projects\nelif [ -f \"requirements.txt\" ] || [ -f \"Pipfile\" ] || [ -f \"pyproject.toml\" ]; then\n  echo \"\U0001F40D Python Project Detected - Running security check...\" >&2\n  echo \"PYTHON SECURITY CHECK\" >> \"$REPORT_FILE\"\n  echo \"--------------------\" >> \"$REPORT_FILE\"\n  \n  # Try safety first (recommended for Python security scanning)\n  if command -v safety &> /dev/null; then\n    echo \"\U0001F50D Running Safety security scanner...\" >&2\n    SAFETY_OUTPUT=$(safety check --json 2>/dev/null || safety check 2>/dev/null || echo \"Safety check completed\")\n    echo \"$SAFETY_OUTPUT\" >> \"$REPORT_FILE\"\n    \n    if echo \"$SAFETY_OUTPUT\" | grep -q \"No known security vulnerabilities\"; then\n      echo \"✅ No known security vulnerabilities in Python dependencies\" >&2\n    else\n      echo \"⚠️ Safety scan found potential security issues\" >&2\n    fi\n  else\n    echo \"\U0001F4A1 Install 'safety' for Python security scanning: pip install safety\" >&2\n    echo \"safety not installed - using pip list --outdated\" >> \"$REPORT_FILE\"\n  fi\n  \n  echo \"\" >> \"$REPORT_FILE\"\n  echo \"OUTDATED PYTHON PACKAGES\" >> \"$REPORT_FILE\"\n  echo \"------------------------\" >> \"$REPORT_FILE\"\n  \n  if command -v pip &> /dev/null; then\n    PIP_OUTDATED=$(pip list --outdated 2>/dev/null || echo \"Unable to check outdated packages\")\n    echo \"$PIP_OUTDATED\" >> \"$REPORT_FILE\"\n    \n    OUTDATED_COUNT=$(echo \"$PIP_OUTDATED\" | wc -l)\n    echo \"\U0001F4CA Found $OUTDATED_COUNT potentially outdated Python packages\" >&2\n  fi\n  \n# Ruby projects\nelif [ -f \"Gemfile.lock\" ]; then\n  echo \"\U0001F48E Ruby Project Detected - Running bundle audit...\" >&2\n  echo \"RUBY BUNDLE AUDIT\" >> \"$REPORT_FILE\"\n  echo \"-----------------\" >> \"$REPORT_FILE\"\n  \n  if command -v bundle &> /dev/null; then\n    # Check if bundler-audit is available\n    if bundle exec bundler-audit --version &> /dev/null; then\n      BUNDLE_AUDIT_OUTPUT=$(bundle exec bundler-audit check 2>&1 || echo \"Bundle audit completed\")\n      echo \"$BUNDLE_AUDIT_OUTPUT\" >> \"$REPORT_FILE\"\n      \n      if echo \"$BUNDLE_AUDIT_OUTPUT\" | grep -q \"No vulnerabilities found\"; then\n        echo \"✅ No vulnerabilities found in Ruby gems\" >&2\n      else\n        echo \"⚠️ Bundle audit found potential issues\" >&2\n      fi\n    else\n      echo \"\U0001F4A1 Install bundler-audit: gem install bundler-audit\" >&2\n      echo \"bundler-audit not installed\" >> \"$REPORT_FILE\"\n    fi\n  else\n    echo \"⚠️ bundle command not available\" >&2\n  fi\n  \nelse\n  echo \"\U0001F4C1 No recognized dependency files found\" >&2\n  echo \"No package manager files detected (package.json, requirements.txt, Gemfile, etc.)\" >> \"$REPORT_FILE\"\nfi\n\necho \"\" >> \"$REPORT_FILE\"\necho \"Report generated at: $(date)\" >> \"$REPORT_FILE\"\necho \"===========================\" >&2\necho \"\U0001F4C4 Full security audit report saved to: $REPORT_FILE\" >&2\necho \"\U0001F4A1 Review the report for detailed vulnerability information\" >&2\n\nexit 0"
+trigger: Stop
+tags:
+  - security
+  - dependencies
+  - audit
+  - stop-hook
+  - vulnerabilities
+keywords:
+  - audit
+  - claude
+  - dependencies
+  - dependency
+  - development
+  - hooks
+  - security
+  - stop
+  - stop-hook
+  - tools
+  - vulnerabilities
+readingTime: 1
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Comprehensive security audit for multiple package managers (npm 10.x+, Yarn 4.x+, pnpm, pip-audit 2.7.x+, Poetry, bundler-audit) with automatic detection
+- Support for NPM 10.x+, Yarn 4.x+, Python (pip-audit 2.7.x+, safety), and Ruby (bundler-audit) dependency scanning with cross-platform compatibility
+- Vulnerability detection with severity levels (critical, high, moderate, low) and CVSS scores with detailed vulnerability descriptions
+- Outdated package identification showing current vs latest versions with update recommendations and compatibility checks
+- Detailed audit report generation with timestamped logs, vulnerability details, and remediation suggestions
+- Integration with popular security tools (npm audit, pip-audit, safety, bundler-audit, OWASP dep-scan) with automatic tool selection
+- SBOM (Software Bill of Materials) generation support for compliance and supply chain security tracking
+- Automated remediation suggestions with fix commands and version recommendations for each vulnerability
+
+## Use Cases
+
+- End-of-session security assessment for development projects automatically scanning dependencies when sessions end
+- Automated vulnerability detection in CI/CD pipelines ensuring security checks run on every deployment
+- Regular dependency health monitoring tracking security posture over time with historical reports
+- Security compliance reporting generating audit reports for compliance requirements and security reviews
+- Multi-language project security auditing supporting projects with multiple package managers simultaneously
+- Development workflow optimization providing immediate security feedback as dependencies are added or updated
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/dependency-security-audit-on-stop.sh
+3. Make executable: chmod +x .claude/hooks/dependency-security-audit-on-stop.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Package manager: npm 10.x+, Yarn 4.x+, pip-audit 2.7.x+, safety, or bundler-audit
+- Security tools: npm audit (built-in), pip-audit 2.7.x+, safety, bundler-audit, or OWASP dep-scan
+- Network access to vulnerability databases (npm registry, PyPI Advisory Database, Ruby Advisory Database) for fetching latest vulnerability information and CVSS scores
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/dependency-security-audit-on-stop.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+echo "🔒 DEPENDENCY SECURITY AUDIT" >&2
+echo "===========================" >&2
+
+# Generate timestamp for report
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORT_FILE="security-audit-$TIMESTAMP.log"
+
+# Initialize report
+echo "Dependency Security Audit Report - $TIMESTAMP" > "$REPORT_FILE"
+echo "=============================================" >> "$REPORT_FILE"
+echo "" >> "$REPORT_FILE"
+
+# Node.js projects (NPM)
+if [ -f "package-lock.json" ]; then
+  echo "📦 NPM Project Detected - Running audit..." >&2
+  echo "NPM AUDIT RESULTS" >> "$REPORT_FILE"
+  echo "-----------------" >> "$REPORT_FILE"
+  
+  if command -v npm &> /dev/null; then
+    # Run npm audit with detailed output
+    NPM_AUDIT_OUTPUT=$(npm audit --audit-level=moderate 2>&1)
+    
+    if echo "$NPM_AUDIT_OUTPUT" | grep -q "found 0 vulnerabilities"; then
+      echo "✅ No vulnerabilities found in NPM dependencies" >&2
+      echo "✅ No vulnerabilities found" >> "$REPORT_FILE"
+    else
+      VULN_COUNT=$(echo "$NPM_AUDIT_OUTPUT" | grep -o '[0-9]\+ vulnerabilities' | head -1 || echo "unknown vulnerabilities")
+      echo "⚠️ NPM audit found: $VULN_COUNT" >&2
+      echo "$NPM_AUDIT_OUTPUT" >> "$REPORT_FILE"
+    fi
+    
+    echo "" >> "$REPORT_FILE"
+    echo "OUTDATED PACKAGES" >> "$REPORT_FILE"
+    echo "-----------------" >> "$REPORT_FILE"
+    
+    # Check for outdated packages
+    OUTDATED_OUTPUT=$(npm outdated 2>/dev/null || echo "All packages up to date")
+    echo "$OUTDATED_OUTPUT" >> "$REPORT_FILE"
+    
+    if [ "$OUTDATED_OUTPUT" = "All packages up to date" ]; then
+      echo "✅ All NPM packages are up to date" >&2
+    else
+      OUTDATED_COUNT=$(echo "$OUTDATED_OUTPUT" | wc -l)
+      echo "📊 Found $OUTDATED_COUNT outdated NPM packages" >&2
+    fi
+  else
+    echo "⚠️ npm command not available" >&2
+  fi
+  
+# Yarn projects
+elif [ -f "yarn.lock" ]; then
+  echo "🧶 Yarn Project Detected - Running audit..." >&2
+  echo "YARN AUDIT RESULTS" >> "$REPORT_FILE"
+  echo "------------------" >> "$REPORT_FILE"
+  
+  if command -v yarn &> /dev/null; then
+    YARN_AUDIT_OUTPUT=$(yarn audit --level moderate 2>&1 || echo "Yarn audit completed")
+    echo "$YARN_AUDIT_OUTPUT" >> "$REPORT_FILE"
+    
+    if echo "$YARN_AUDIT_OUTPUT" | grep -q "0 vulnerabilities"; then
+      echo "✅ No vulnerabilities found in Yarn dependencies" >&2
+    else
+      echo "⚠️ Yarn audit found potential issues" >&2
+    fi
+  else
+    echo "⚠️ yarn command not available" >&2
+  fi
+  
+# Python projects
+elif [ -f "requirements.txt" ] || [ -f "Pipfile" ] || [ -f "pyproject.toml" ]; then
+  echo "🐍 Python Project Detected - Running security check..." >&2
+  echo "PYTHON SECURITY CHECK" >> "$REPORT_FILE"
+  echo "--------------------" >> "$REPORT_FILE"
+  
+  # Try safety first (recommended for Python security scanning)
+  if command -v safety &> /dev/null; then
+    echo "🔍 Running Safety security scanner..." >&2
+    SAFETY_OUTPUT=$(safety check --json 2>/dev/null || safety check 2>/dev/null || echo "Safety check completed")
+    echo "$SAFETY_OUTPUT" >> "$REPORT_FILE"
+    
+    if echo "$SAFETY_OUTPUT" | grep -q "No known security vulnerabilities"; then
+      echo "✅ No known security vulnerabilities in Python dependencies" >&2
+    else
+      echo "⚠️ Safety scan found potential security issues" >&2
+    fi
+  else
+    echo "💡 Install 'safety' for Python security scanning: pip install safety" >&2
+    echo "safety not installed - using pip list --outdated" >> "$REPORT_FILE"
+  fi
+  
+  echo "" >> "$REPORT_FILE"
+  echo "OUTDATED PYTHON PACKAGES" >> "$REPORT_FILE"
+  echo "------------------------" >> "$REPORT_FILE"
+  
+  if command -v pip &> /dev/null; then
+    PIP_OUTDATED=$(pip list --outdated 2>/dev/null || echo "Unable to check outdated packages")
+    echo "$PIP_OUTDATED" >> "$REPORT_FILE"
+    
+    OUTDATED_COUNT=$(echo "$PIP_OUTDATED" | wc -l)
+    echo "📊 Found $OUTDATED_COUNT potentially outdated Python packages" >&2
+  fi
+  
+# Ruby projects
+elif [ -f "Gemfile.lock" ]; then
+  echo "💎 Ruby Project Detected - Running bundle audit..." >&2
+  echo "RUBY BUNDLE AUDIT" >> "$REPORT_FILE"
+  echo "-----------------" >> "$REPORT_FILE"
+  
+  if command -v bundle &> /dev/null; then
+    # Check if bundler-audit is available
+    if bundle exec bundler-audit --version &> /dev/null; then
+      BUNDLE_AUDIT_OUTPUT=$(bundle exec bundler-audit check 2>&1 || echo "Bundle audit completed")
+      echo "$BUNDLE_AUDIT_OUTPUT" >> "$REPORT_FILE"
+      
+      if echo "$BUNDLE_AUDIT_OUTPUT" | grep -q "No vulnerabilities found"; then
+        echo "✅ No vulnerabilities found in Ruby gems" >&2
+      else
+        echo "⚠️ Bundle audit found potential issues" >&2
+      fi
+    else
+      echo "💡 Install bundler-audit: gem install bundler-audit" >&2
+      echo "bundler-audit not installed" >> "$REPORT_FILE"
+    fi
+  else
+    echo "⚠️ bundle command not available" >&2
+  fi
+  
+else
+  echo "📁 No recognized dependency files found" >&2
+  echo "No package manager files detected (package.json, requirements.txt, Gemfile, etc.)" >> "$REPORT_FILE"
+fi
+
+echo "" >> "$REPORT_FILE"
+echo "Report generated at: $(date)" >> "$REPORT_FILE"
+echo "===========================" >&2
+echo "📄 Full security audit report saved to: $REPORT_FILE" >&2
+echo "💡 Review the report for detailed vulnerability information" >&2
+
+exit 0
+```
+
+## Examples
+### Dependency Security Audit Hook Script
+
+Complete hook script that performs security audit when session ends
+
+```bash
+#!/usr/bin/env bash
+echo "Dependency Security Audit" >&2
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORT_FILE="security-audit-$TIMESTAMP.log"
+echo "Dependency Security Audit Report - $TIMESTAMP" > "$REPORT_FILE"
+if [ -f "package-lock.json" ]; then
+  if command -v npm &> /dev/null; then
+    echo "NPM Project Detected - Running audit..." >&2
+    NPM_AUDIT_OUTPUT=$(npm audit --audit-level=moderate 2>&1)
+    if echo "$NPM_AUDIT_OUTPUT" | grep -q "found 0 vulnerabilities"; then
+      echo "No vulnerabilities found in NPM dependencies" >&2
+      echo "No vulnerabilities found" >> "$REPORT_FILE"
+    else
+      VULN_COUNT=$(echo "$NPM_AUDIT_OUTPUT" | grep -o '[0-9]\\+ vulnerabilities' | head -1 || echo "unknown vulnerabilities")
+      echo "NPM audit found: $VULN_COUNT" >&2
+      echo "$NPM_AUDIT_OUTPUT" >> "$REPORT_FILE"
+    fi
+  fi
+fi
+echo "Report generated at: $(date)" >> "$REPORT_FILE"
+echo "Full security audit report saved to: $REPORT_FILE" >&2
+exit 0
+```
+### Python Security Audit with pip-audit
+
+Enhanced hook script for Python security auditing using pip-audit or safety
+
+```bash
+#!/usr/bin/env bash
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORT_FILE="security-audit-$TIMESTAMP.log"
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  if command -v pip-audit &> /dev/null; then
+    echo "Running pip-audit for Python security scanning..." >&2
+    pip-audit --format=json 2>/dev/null | jq '.' >> "$REPORT_FILE" || pip-audit >> "$REPORT_FILE"
+  elif command -v safety &> /dev/null; then
+    echo "Running Safety security scanner..." >&2
+    safety check --json 2>/dev/null | jq '.' >> "$REPORT_FILE" || safety check >> "$REPORT_FILE"
+  else
+    echo "Install pip-audit or safety for Python security scanning" >&2
+  fi
+fi
+exit 0
+```
+### Ruby Security Audit with bundler-audit
+
+Enhanced hook script for Ruby security auditing using bundler-audit
+
+```bash
+#!/usr/bin/env bash
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORT_FILE="security-audit-$TIMESTAMP.log"
+if [ -f "Gemfile.lock" ]; then
+  if command -v bundle &> /dev/null; then
+    if bundle exec bundler-audit --version &> /dev/null; then
+      echo "Running bundle audit for Ruby gems..." >&2
+      bundle exec bundler-audit check 2>&1 >> "$REPORT_FILE" || echo "Bundle audit completed" >> "$REPORT_FILE"
+      if grep -q "No vulnerabilities found" "$REPORT_FILE"; then
+        echo "No vulnerabilities found in Ruby gems" >&2
+      else
+        echo "Bundle audit found potential issues" >&2
+      fi
+    else
+      echo "Install bundler-audit: gem install bundler-audit" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Outdated Package Detection
+
+Enhanced hook script for detecting outdated packages across package managers
+
+```bash
+#!/usr/bin/env bash
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+REPORT_FILE="security-audit-$TIMESTAMP.log"
+if [ -f "package.json" ]; then
+  if command -v npm &> /dev/null; then
+    echo "Checking for outdated NPM packages..." >&2
+    OUTDATED_OUTPUT=$(npm outdated 2>/dev/null || echo "All packages up to date")
+    echo "$OUTDATED_OUTPUT" >> "$REPORT_FILE"
+    if [ "$OUTDATED_OUTPUT" != "All packages up to date" ]; then
+      OUTDATED_COUNT=$(echo "$OUTDATED_OUTPUT" | wc -l)
+      echo "Found $OUTDATED_COUNT outdated NPM packages" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Security audit report files accumulate in project root directory
+
+Configure REPORT_FILE path to use dedicated logs directory: .claude/logs/security-audit-$TIMESTAMP.log. Add security-audit-*.log pattern to .gitignore to prevent repository clutter. Implement log rotation to manage report file growth.
+### Stop hook executes before dependencies finish installing or updating
+
+Ensure package manager operations complete before session ends. Hook runs after Claude stops, so install commands in active session will not conflict with audit timing. Wait for package manager processes to complete before session termination.
+### npm audit hangs indefinitely when network connectivity issues occur
+
+Set npm config registry timeout: npm config set timeout 30000. Add timeout wrapper around audit commands: timeout 60 npm audit. Check network connectivity before running audit. Use npm audit --offline for cached vulnerability data.
+### Safety scanner for Python fails with database not found error
+
+Update safety vulnerability database: safety check --update-db. Install latest version: pip install --upgrade safety. Verify safety database is accessible. Consider using pip-audit 2.7.x+ as alternative with better database management.
+### Audit severity level flags not recognized by older package manager versions
+
+Update npm to version 10.x+ for --audit-level flag support. For older versions, remove --audit-level parameter and parse full audit output using grep for severity filtering. Check package manager version: npm --version or yarn --version.
+### pip-audit reports false positives for development dependencies
+
+Configure pip-audit to exclude dev dependencies: pip-audit --exclude-dev. Review pip-audit configuration for project-specific exclusions. Use --skip-editable flag for editable installs. Verify pip-audit 2.7.x+ version for improved accuracy.
+### bundler-audit requires bundle install before running
+
+Run bundle install before audit: bundle install && bundle exec bundler-audit check. Ensure Gemfile.lock is up to date. Verify bundler-audit is installed: gem install bundler-audit. Check Ruby version compatibility.
+### OWASP dep-scan not detected despite installation
+
+Verify OWASP dep-scan installation: dep-scan --version. Check PATH includes dep-scan binary location. Use full path to dep-scan if not in PATH. Verify Python environment has dep-scan installed: pip show dep-scan.

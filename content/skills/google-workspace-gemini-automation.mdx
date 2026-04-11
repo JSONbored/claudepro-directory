@@ -1,0 +1,131 @@
+---
+title: Google Workspace Gemini Automation Skill
+slug: google-workspace-gemini-automation
+category: skills
+description: 'Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.'
+cardDescription: 'Build practical Gemini + Workspace automations with safeguards, auditability, and business-ready output quality.'
+seoTitle: Google Workspace Gemini Automation Skill
+seoDescription: 'Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://ai.google.dev/gemini-api/docs'
+downloadUrl: /downloads/skills/google-workspace-gemini-automation.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation'
+usageSnippet: Use this skill for high-leverage internal productivity automations powered by Gemini and Google Workspace tools.
+copySnippet: |-
+  # Trigger
+  "Apply the Google Workspace Gemini automation skill to this process."
+
+  # Required output
+  1) Automation architecture and data flow
+  2) Prompt/template design with quality checks
+  3) Approval and exception handling
+  4) Monitoring and cost controls
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://ai.google.dev/gemini-api/docs'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Access to Google Workspace resources
+  - Gemini API or platform integration credentials
+  - Target business workflow with measurable success criteria
+tags:
+  - google-workspace
+  - gemini
+  - automation
+  - productivity
+  - ai-agents
+keywords:
+  - gemini workspace automation
+  - google docs ai workflow
+  - sheets automation ai
+  - enterprise ai productivity
+readingTime: 7
+packageVerified: true
+difficultyScore: 71
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill helps AI agents build practical Google Workspace automations using Gemini. It focuses on workflows teams actually run: reporting, triage, routing, summarization, and structured content generation.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Defined source systems and destination artifacts
+- Data classification and privacy constraints
+- Human reviewers for quality-sensitive outputs
+
+## What This Skill Delivers
+
+- Workflow decomposition for Docs/Sheets/Gmail/Drive tasks
+- Prompt and schema patterns for reliable output structure
+- Quality gates and approval loops
+- Monitoring plan for failures, drift, and cost anomalies
+
+## How to Use This Skill
+
+1. Map workflow trigger, inputs, and output destination.
+2. Define target schema for generated content.
+3. Add policy checks for sensitive data.
+4. Add human review for high-impact decisions.
+5. Track execution outcomes and iterate prompts safely.
+
+## Troubleshooting
+
+**Issue:** Output quality varies by run  
+**Fix:** Tighten schema constraints and add post-generation validation checks.
+
+**Issue:** Automation creates noisy or irrelevant docs  
+**Fix:** Refine source filtering and enforce clear acceptance criteria.
+
+**Issue:** Costs rise unexpectedly  
+**Fix:** Add workload bucketing and caching for repeat context segments.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://ai.google.dev/gemini-api/docs
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

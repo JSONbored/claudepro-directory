@@ -1,0 +1,431 @@
+---
+title: Lines Per Minute Tracker - Statuslines
+slug: lines-per-minute-tracker
+category: statuslines
+description: >-
+  Real-time coding velocity monitor tracking lines added/removed per minute with
+  productivity scoring and daily output projection for Claude Code sessions.
+cardDescription: >-
+  Real-time coding velocity monitor tracking lines added/removed per minute with
+  productivity scoring and daily output projection for Claud...
+seoTitle: Lines Per Minute Tracker - Statuslines
+seoDescription: >-
+  Real-time coding velocity monitor tracking lines added/removed per minute with
+  productivity scoring and daily output projection for Claude Code sessions.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+installable: true
+usageSnippet: "\U0001F680 HIGH: 45.3 L/min | +38.2 -7.1 | Net: +150 (growth) | \U0001F4C5 21,600 L/day"
+copySnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/lines-per-minute-tracker.sh",
+      "refreshInterval": 1000
+    }
+  }
+configSnippet: |-
+  {
+    "statusLine": {
+      "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/lines-per-minute-tracker.sh",
+      "refreshInterval": 1000
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Lines Per Minute Productivity Tracker for Claude Code\n# Calculates coding velocity and productivity metrics\n\n# Read JSON from stdin\nread -r input\n\n# Extract values\nlines_added=$(echo \"$input\" | jq -r '.cost.total_lines_added // 0')\nlines_removed=$(echo \"$input\" | jq -r '.cost.total_lines_removed // 0')\ntotal_duration_ms=$(echo \"$input\" | jq -r '.cost.total_duration_ms // 1')\n\n# Calculate duration in minutes (avoid division by zero)\nif [ \"$total_duration_ms\" -gt 0 ]; then\n  duration_minutes=$(echo \"scale=2; $total_duration_ms / 60000\" | bc)\nelse\n  duration_minutes=0.01  # Prevent division by zero\nfi\n\n# Calculate net lines (added - removed)\nnet_lines=$((lines_added - lines_removed))\n\n# Calculate total changed lines (added + removed)\ntotal_changed=$((lines_added + lines_removed))\n\n# Calculate lines per minute\nif (( $(echo \"$duration_minutes > 0\" | bc -l) )); then\n  added_per_min=$(echo \"scale=1; $lines_added / $duration_minutes\" | bc)\n  removed_per_min=$(echo \"scale=1; $lines_removed / $duration_minutes\" | bc)\n  net_per_min=$(echo \"scale=1; $net_lines / $duration_minutes\" | bc)\n  total_per_min=$(echo \"scale=1; $total_changed / $duration_minutes\" | bc)\nelse\n  added_per_min=0\n  removed_per_min=0\n  net_per_min=0\n  total_per_min=0\nfi\n\n# Productivity scoring based on total changes per minute\nif (( $(echo \"$total_per_min > 50\" | bc -l) )); then\n  PROD_COLOR=\"\\033[38;5;46m\"   # Green: High productivity (>50 lines/min)\n  PROD_ICON=\"\U0001F680\"\n  PROD_RATING=\"HIGH\"\nelif (( $(echo \"$total_per_min > 20\" | bc -l) )); then\n  PROD_COLOR=\"\\033[38;5;226m\"  # Yellow: Medium productivity (20-50 lines/min)\n  PROD_ICON=\"\U0001F4DD\"\n  PROD_RATING=\"MED\"\nelse\n  PROD_COLOR=\"\\033[38;5;75m\"   # Blue: Low/steady productivity (<20 lines/min)\n  PROD_ICON=\"✏️\"\n  PROD_RATING=\"LOW\"\nfi\n\n# Project daily output (assuming 8-hour workday = 480 minutes)\nif (( $(echo \"$net_per_min > 0\" | bc -l) )); then\n  daily_projection=$(echo \"scale=0; $net_per_min * 480\" | bc)\nelse\n  daily_projection=0\nfi\n\nRESET=\"\\033[0m\"\n\n# Format output with net lines indicator\nif [ $net_lines -lt 0 ]; then\n  net_display=\"${net_lines}\"\n  net_label=\"(refactoring)\"\nelse\n  net_display=\"+${net_lines}\"\n  net_label=\"(growth)\"\nfi\n\n# Output statusline\necho -e \"${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | \U0001F4C5 ${daily_projection} L/day\""
+prerequisites:
+  - Claude Code CLI installed and configured
+  - Bash shell available (bash 4.0+ recommended for arithmetic operations)
+  - >-
+    jq command-line JSON processor (jq 1.6+ recommended for safe extraction with
+    // defaults)
+  - >-
+    bc calculator (bc 1.07+ required for floating point calculations - script
+    will fail without bc)
+  - >-
+    Terminal with ANSI color code support (256-color mode recommended for
+    color-coded productivity indicators)
+  - "Terminal with Unicode emoji support (for \U0001F680, \U0001F4DD, ✏️, \U0001F4C5 icons, or use ASCII alternatives)"
+tags:
+  - productivity
+  - velocity
+  - coding-speed
+  - lines-per-minute
+  - output-tracking
+keywords:
+  - claude
+  - coding-speed
+  - development
+  - lines
+  - lines-per-minute
+  - minute
+  - output-tracking
+  - per
+  - productivity
+  - statuslines
+  - tools
+  - tracker
+  - velocity
+readingTime: 2
+difficultyScore: 5
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Real-time lines per minute calculation for added, removed, and net changes
+- Productivity scoring based on total change velocity (high >50 L/min, medium 20-50, low <20)
+- Daily output projection assuming 8-hour workday (480 minutes)
+- Refactoring detection (negative net lines indicates cleanup/deletion work)
+- Separate tracking for additions vs removals for code quality insights
+- Color-coded productivity ratings (green high, yellow medium, blue low)
+- Lightweight bash with bc for floating-point calculations
+- Zero external dependencies beyond jq and bc
+
+## Use Cases
+
+- Tracking coding velocity during feature development sprints
+- Measuring productivity impact of different coding sessions
+- Identifying refactoring vs greenfield development patterns
+- Comparing productivity across different time periods
+- Setting personal velocity baselines and improvement goals
+- Billing/time tracking for consulting work based on output metrics
+
+## Requirements
+
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- bc calculator (bc 1.07+ required for floating point calculations - script will fail without bc)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded productivity indicators)
+- Terminal with Unicode emoji support (for 🚀, 📝, ✏️, 📅 icons, or use ASCII alternatives)
+
+## Configuration
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/lines-per-minute-tracker.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Lines Per Minute Tracker with Session History
+Extended version tracking velocity trends across multiple sessions
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Lines Per Minute Tracker with Session History
+
+input=$(cat)
+
+session_id=$(echo "$input" | jq -r '.session_id // ""')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+
+# Session history directory
+HISTORY_DIR="${HOME}/.claude-code-velocity"
+mkdir -p "$HISTORY_DIR"
+
+# Current session file
+SESSION_FILE="${HISTORY_DIR}/${session_id}.velocity"
+
+# Store session metrics
+if [ -n "$session_id" ]; then
+  echo "${lines_added}|${lines_removed}|${total_duration_ms}" >> "$SESSION_FILE"
+fi
+
+# Calculate current session metrics
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "0.01")
+else
+  duration_minutes=0.01
+fi
+
+net_lines=$((lines_added - lines_removed))
+total_changed=$((lines_added + lines_removed))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "0") )); then
+  total_per_min=$(echo "scale=1; $total_changed / $duration_minutes" | bc 2>/dev/null || echo "0")
+  added_per_min=$(echo "scale=1; $lines_added / $duration_minutes" | bc 2>/dev/null || echo "0")
+  removed_per_min=$(echo "scale=1; $lines_removed / $duration_minutes" | bc 2>/dev/null || echo "0")
+  net_per_min=$(echo "scale=1; $net_lines / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  total_per_min=0
+  added_per_min=0
+  removed_per_min=0
+  net_per_min=0
+fi
+
+# Calculate average velocity from history
+if [ -f "$SESSION_FILE" ] && [ -n "$session_id" ]; then
+  avg_total_per_min=$(awk -F'|' '{added+=$1; removed+=$2; dur+=$3} END {if(dur>0) print (added+removed)/(dur/60000); else print 0}' "$SESSION_FILE" 2>/dev/null || echo "0")
+else
+  avg_total_per_min=$total_per_min
+fi
+
+if (( $(echo "$total_per_min > 50" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;46m"
+  PROD_ICON="🚀"
+  PROD_RATING="HIGH"
+elif (( $(echo "$total_per_min > 20" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;226m"
+  PROD_ICON="📝"
+  PROD_RATING="MED"
+else
+  PROD_COLOR="\033[38;5;75m"
+  PROD_ICON="✏️"
+  PROD_RATING="LOW"
+fi
+
+if (( $(echo "$net_per_min > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=0; $net_per_min * 480" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+RESET="\033[0m"
+
+if [ $net_lines -lt 0 ]; then
+  net_display="${net_lines}"
+  net_label="(refactoring)"
+else
+  net_display="+${net_lines}"
+  net_label="(growth)"
+fi
+
+echo -e "${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} (avg: ${avg_total_per_min}) | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | 📅 ${daily_projection} L/day"
+```
+### Lines Per Minute Tracker with Custom Productivity Thresholds
+Configurable productivity thresholds for different coding styles
+```bash
+#!/usr/bin/env bash
+
+# Lines Per Minute Tracker with Custom Productivity Thresholds
+
+# Configurable thresholds (default: HIGH >50, MED 20-50, LOW <20)
+HIGH_THRESHOLD=${LPM_HIGH_THRESHOLD:-50}
+MED_THRESHOLD=${LPM_MED_THRESHOLD:-20}
+
+input=$(cat)
+
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "0.01")
+else
+  duration_minutes=0.01
+fi
+
+net_lines=$((lines_added - lines_removed))
+total_changed=$((lines_added + lines_removed))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "0") )); then
+  total_per_min=$(echo "scale=1; $total_changed / $duration_minutes" | bc 2>/dev/null || echo "0")
+  added_per_min=$(echo "scale=1; $lines_added / $duration_minutes" | bc 2>/dev/null || echo "0")
+  removed_per_min=$(echo "scale=1; $lines_removed / $duration_minutes" | bc 2>/dev/null || echo "0")
+  net_per_min=$(echo "scale=1; $net_lines / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  total_per_min=0
+  added_per_min=0
+  removed_per_min=0
+  net_per_min=0
+fi
+
+# Custom productivity scoring
+if (( $(echo "$total_per_min > $HIGH_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;46m"
+  PROD_ICON="🚀"
+  PROD_RATING="HIGH"
+elif (( $(echo "$total_per_min > $MED_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;226m"
+  PROD_ICON="📝"
+  PROD_RATING="MED"
+else
+  PROD_COLOR="\033[38;5;75m"
+  PROD_ICON="✏️"
+  PROD_RATING="LOW"
+fi
+
+if (( $(echo "$net_per_min > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=0; $net_per_min * 480" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+RESET="\033[0m"
+
+if [ $net_lines -lt 0 ]; then
+  net_display="${net_lines}"
+  net_label="(refactoring)"
+else
+  net_display="+${net_lines}"
+  net_label="(growth)"
+fi
+
+echo -e "${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | 📅 ${daily_projection} L/day"
+```
+### Lines Per Minute Tracker Installation Example
+Complete setup script with bc verification and Unicode character testing
+```bash
+#!/bin/bash
+# Installation script for Lines Per Minute Tracker
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc for floating point calculations..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "Please install bc manually: https://www.gnu.org/software/bc/"
+    fi
+fi
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test bc installation
+if echo '10.5 / 2' | bc &> /dev/null; then
+    echo "bc calculator working correctly"
+else
+    echo "Warning: bc may not be working correctly"
+fi
+
+# Test Unicode characters
+if echo -e '🚀 📝 ✏️ 📅' &> /dev/null; then
+    echo "Unicode characters supported"
+else
+    echo "Warning: Unicode characters may not be supported in your terminal"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/lines-per-minute-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Lines Per Minute Productivity Tracker for Claude Code
+# Calculates coding velocity and productivity metrics
+
+read -r input
+
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "0.01")
+else
+  duration_minutes=0.01
+fi
+
+net_lines=$((lines_added - lines_removed))
+total_changed=$((lines_added + lines_removed))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "0") )); then
+  added_per_min=$(echo "scale=1; $lines_added / $duration_minutes" | bc 2>/dev/null || echo "0")
+  removed_per_min=$(echo "scale=1; $lines_removed / $duration_minutes" | bc 2>/dev/null || echo "0")
+  net_per_min=$(echo "scale=1; $net_lines / $duration_minutes" | bc 2>/dev/null || echo "0")
+  total_per_min=$(echo "scale=1; $total_changed / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  added_per_min=0
+  removed_per_min=0
+  net_per_min=0
+  total_per_min=0
+fi
+
+if (( $(echo "$total_per_min > 50" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;46m"
+  PROD_ICON="🚀"
+  PROD_RATING="HIGH"
+elif (( $(echo "$total_per_min > 20" | bc -l 2>/dev/null || echo "0") )); then
+  PROD_COLOR="\033[38;5;226m"
+  PROD_ICON="📝"
+  PROD_RATING="MED"
+else
+  PROD_COLOR="\033[38;5;75m"
+  PROD_ICON="✏️"
+  PROD_RATING="LOW"
+fi
+
+if (( $(echo "$net_per_min > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=0; $net_per_min * 480" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+RESET="\033[0m"
+
+if [ $net_lines -lt 0 ]; then
+  net_display="${net_lines}"
+  net_label="(refactoring)"
+else
+  net_display="+${net_lines}"
+  net_label="(growth)"
+fi
+
+echo -e "${PROD_ICON} ${PROD_RATING}: ${PROD_COLOR}${total_per_min} L/min${RESET} | +${added_per_min} -${removed_per_min} | Net: ${net_display} ${net_label} | 📅 ${daily_projection} L/day"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/lines-per-minute-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/lines-per-minute-tracker.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/lines-per-minute-tracker.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Lines Per Minute Tracker installed successfully!"
+echo "Note: Productivity thresholds: HIGH >50 L/min, MED 20-50 L/min, LOW <20 L/min"
+echo "Customize thresholds: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25"
+```
+
+## Troubleshooting
+### Lines per minute showing 0 despite active coding
+
+Verify cost.total_lines_added and cost.total_lines_removed fields exist: echo '$input' | jq .cost. Ensure bc is installed: which bc. Check duration_minutes calculation: should be total_duration_ms / 60000. Very short sessions may show 0 until threshold reached. Verify bc is working: echo '10.5 / 2' | bc (should return 5.25).
+### Daily projection seems unrealistically high
+
+Daily projection assumes CONTINUOUS coding at current velocity for 8 hours (480 minutes). This is intentional for productivity goal-setting. Actual daily output will be lower with breaks, meetings, etc. Adjust multiplier from 480 to expected active coding minutes per day. Formula: daily_projection = net_per_min * active_minutes_per_day.
+### Net lines showing negative (refactoring) when expecting growth
+
+Negative net lines means total_lines_removed > total_lines_added. This is EXPECTED for refactoring/cleanup sessions. Script correctly labels as '(refactoring)'. If unexpected, verify you're looking at correct session - multi-file refactors often have more deletions than additions. Check line counts: echo '$input' | jq '.cost | {added: .total_lines_added, removed: .total_lines_removed}'.
+### Productivity rating stuck at LOW despite high activity
+
+Productivity rating is based on TOTAL changes (added + removed), not net lines. Thresholds: <20 L/min = LOW, 20-50 = MED, >50 = HIGH. Check total_per_min calculation: (lines_added + lines_removed) / duration_minutes. Adjust thresholds if your baseline velocity differs: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25. Verify bc comparison works: echo '25 > 20' | bc (should return 1).
+### bc: command not found when calculating velocity
+
+Install bc: brew install bc (macOS), apt install bc (Linux), yum install bc (RHEL/CentOS). Alternative: use integer math with awk: awk -v added=$lines_added -v dur=$duration_minutes 'BEGIN {print added/dur}' - loses decimal precision but works without bc. Verify installation: which bc. Test bc: echo '10.5 / 2' | bc (should return 5.25).
+### Velocity calculations showing incorrect decimal precision
+
+Verify bc scale setting: duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc). Check scale for per-minute calculations: added_per_min=$(echo "scale=1; $lines_added / $duration_minutes" | bc). Ensure bc is using correct precision: echo 'scale=1; 10/3' | bc (should return 3.3). Adjust scale if needed for more/less precision.
+### Productivity thresholds not matching expected ratings
+
+Verify threshold values: HIGH_THRESHOLD=50, MED_THRESHOLD=20. Check bc comparison: echo '45 > 50' | bc (should return 0 for false). Test with known values: total_per_min=45 should be MED (between 20-50). Customize thresholds: export LPM_HIGH_THRESHOLD=60 LPM_MED_THRESHOLD=25. Verify script is using environment variables: echo $LPM_HIGH_THRESHOLD.
+### Statusline not updating or stuck at 0 L/min
+
+Check JSON input is being read: echo '$input' | jq .. Verify cost fields exist: echo '$input' | jq .cost.total_lines_added. Check jq is installed: which jq. Verify duration calculation: duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc). Test with sample JSON: echo '{"cost":{"total_lines_added":100,"total_lines_removed":10,"total_duration_ms":120000}}' | jq -r '.cost.total_lines_added // 0' (should return 100). Check refreshInterval in settings.json is set to 1000ms or lower.

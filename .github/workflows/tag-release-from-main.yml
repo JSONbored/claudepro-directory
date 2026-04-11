@@ -1,0 +1,73 @@
+name: Tag And Publish Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (semver, e.g. 1.0.3 or v1.0.3)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'chore(release):') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Parse version from commit message
+        id: version
+        shell: bash
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          raw="${INPUT_VERSION:-}"
+          if [ -z "$raw" ]; then
+            msg="${COMMIT_MSG:-}"
+            raw="$(printf '%s' "$msg" | sed -E 's/^chore\(release\):[[:space:]]*//')"
+            raw="$(printf '%s' "$raw" | tr -d '[:space:]')"
+          fi
+          if [ -z "$raw" ]; then
+            echo "Release version is empty."
+            exit 1
+          fi
+          if [[ "$raw" == v* ]]; then
+            tag="$raw"
+          else
+            tag="v$raw"
+          fi
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid release version: $raw"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create git tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ steps.version.outputs.tag }}"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists, skipping."
+            exit 0
+          fi
+          git tag -a "$tag" -m "Release $tag"
+          git push origin "$tag"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true

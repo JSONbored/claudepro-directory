@@ -1,0 +1,78 @@
+name: Changelog Release PR
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "CHANGELOG.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  changelog-pr:
+    if: ${{ github.event_name != 'push' || (!startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'docs(changelog):')) }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: changelog-release-pr-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
+        with:
+          fetch-depth: 0
+
+      - name: Compute next version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git tag --list --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)"
+          if [ -z "$latest" ]; then
+            next="v1.0.0"
+          else
+            base="${latest#v}"
+            IFS='.' read -r major minor patch <<< "$base"
+            patch=$((patch + 1))
+            next="v${major}.${minor}.${patch}"
+          fi
+          echo "next=${next}" >> "$GITHUB_OUTPUT"
+          echo "next_no_v=${next#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Generate changelog
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            -v "${PWD}:/repo" \
+            -w /repo \
+            orhunp/git-cliff@sha256:7e7ac04e12af99e941001ecbf7260e6e91b98ed335d3088405a51eba0450c7f7 \
+            --config .git-cliff.toml \
+            --tag "${{ steps.version.outputs.next }}" \
+            --output CHANGELOG.md
+
+      - name: Create release PR
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676
+        with:
+          branch: release/changelog-${{ steps.version.outputs.next }}
+          title: "chore(release): ${{ steps.version.outputs.next_no_v }}"
+          commit-message: "docs(changelog): prepare release ${{ steps.version.outputs.next }}"
+          body: |
+            ## Summary
+            Automated changelog update for `${{ steps.version.outputs.next }}`.
+
+            ## What changed
+            - Regenerated `CHANGELOG.md` using `git-cliff`
+            - Prepared release metadata for next merge-to-main
+
+            ## Notes
+            - Merge this PR to trigger auto-tag/release workflow.
+          labels: |
+            release
+            changelog
+          add-paths: |
+            CHANGELOG.md

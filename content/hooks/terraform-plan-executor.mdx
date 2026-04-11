@@ -1,0 +1,526 @@
+---
+title: Terraform Plan Executor - Hooks
+slug: terraform-plan-executor
+category: hooks
+description: >-
+  Automatically runs terraform plan when .tf files are modified to preview
+  infrastructure changes.
+cardDescription: >-
+  Automatically runs terraform plan when .tf files are modified to preview
+  infrastructure changes.
+seoTitle: Terraform Plan Executor - Hooks
+seoDescription: >-
+  Automatically runs terraform plan when .tf files are modified to preview
+  infrastructure changes. This PostToolUse hook provides comprehensive Terraform
+  infra...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/terraform-plan-executor.sh &&
+  chmod +x .claude/hooks/terraform-plan-executor.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/terraform-plan-executor.sh &&
+  chmod +x .claude/hooks/terraform-plan-executor.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/terraform-plan-executor.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/terraform-plan-executor.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if this is a Terraform file\nif [[ \"$FILE_PATH\" == *.tf ]] || [[ \"$FILE_PATH\" == *.tfvars ]]; then\n    echo \"\U0001F3D7️ Terraform Plan Executor - Analyzing infrastructure changes...\"\n    echo \"\U0001F4C4 File: $FILE_PATH\"\n    \n    # Check if file exists\n    if [ ! -f \"$FILE_PATH\" ]; then\n        echo \"⚠️ Terraform file not found: $FILE_PATH\"\n        exit 1\n    fi\n    \n    # Get the directory containing the Terraform file\n    TF_DIR=$(dirname \"$FILE_PATH\")\n    TF_FILE=$(basename \"$FILE_PATH\")\n    \n    echo \"\U0001F4C1 Working directory: $TF_DIR\"\n    cd \"$TF_DIR\" || exit 1\n    \n    # Check if Terraform is installed\n    if ! command -v terraform >/dev/null 2>&1; then\n        echo \"⚠️ Terraform not found - please install Terraform\"\n        echo \"\U0001F4A1 Install from: https://www.terraform.io/downloads\"\n        exit 1\n    fi\n    \n    # Get Terraform version\n    TF_VERSION=$(terraform version -json 2>/dev/null | jq -r '.terraform_version' 2>/dev/null || terraform version | head -1)\n    echo \"\U0001F4E6 Terraform version: $TF_VERSION\"\n    \n    # Step 1: Format check\n    echo \"\"\n    echo \"\U0001F3A8 Checking Terraform formatting...\"\n    if terraform fmt -check \"$TF_FILE\"; then\n        echo \"✅ Terraform formatting is correct\"\n    else\n        echo \"⚠️ Terraform formatting issues detected\"\n        echo \"\U0001F4A1 Run 'terraform fmt' to fix formatting\"\n        \n        # Auto-fix formatting if requested\n        echo \"\U0001F527 Auto-fixing formatting...\"\n        terraform fmt \"$TF_FILE\"\n        echo \"✅ Formatting applied to $TF_FILE\"\n    fi\n    \n    # Step 2: Validation\n    echo \"\"\n    echo \"\U0001F50D Validating Terraform configuration...\"\n    if terraform validate; then\n        echo \"✅ Terraform configuration is valid\"\n    else\n        echo \"❌ Terraform validation failed\"\n        echo \"\U0001F4A1 Fix validation errors before proceeding\"\n        exit 1\n    fi\n    \n    # Step 3: Initialize if needed\n    if [ ! -d \".terraform\" ]; then\n        echo \"\"\n        echo \"\U0001F504 Initializing Terraform...\"\n        if terraform init; then\n            echo \"✅ Terraform initialized successfully\"\n        else\n            echo \"❌ Terraform initialization failed\"\n            exit 1\n        fi\n    fi\n    \n    # Step 4: Run terraform plan\n    echo \"\"\n    echo \"\U0001F4CB Running Terraform plan...\"\n    \n    PLAN_FILE=\".terraform-plan-$(date +%s)\"\n    \n    if terraform plan -out=\"$PLAN_FILE\" -compact-warnings; then\n        echo \"✅ Terraform plan completed successfully\"\n        \n        # Analyze the plan\n        echo \"\"\n        echo \"\U0001F4CA Plan Analysis:\"\n        \n        # Show plan summary\n        if terraform show -json \"$PLAN_FILE\" >/dev/null 2>&1; then\n            PLAN_JSON=$(terraform show -json \"$PLAN_FILE\" 2>/dev/null)\n            \n            # Count changes\n            RESOURCES_TO_ADD=$(echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"create\") | .address' 2>/dev/null | wc -l)\n            RESOURCES_TO_CHANGE=$(echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"update\") | .address' 2>/dev/null | wc -l)\n            RESOURCES_TO_DESTROY=$(echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"delete\") | .address' 2>/dev/null | wc -l)\n            \n            echo \"  • Resources to add: $RESOURCES_TO_ADD\"\n            echo \"  • Resources to change: $RESOURCES_TO_CHANGE\"\n            echo \"  • Resources to destroy: $RESOURCES_TO_DESTROY\"\n            \n            # Show resource details if any changes\n            if [ \"$RESOURCES_TO_ADD\" -gt 0 ] || [ \"$RESOURCES_TO_CHANGE\" -gt 0 ] || [ \"$RESOURCES_TO_DESTROY\" -gt 0 ]; then\n                echo \"\"\n                echo \"\U0001F50D Detailed Changes:\"\n                \n                if [ \"$RESOURCES_TO_ADD\" -gt 0 ]; then\n                    echo \"  \U0001F4E6 Resources to create:\"\n                    echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"create\") | \"    • \" + .address' 2>/dev/null\n                fi\n                \n                if [ \"$RESOURCES_TO_CHANGE\" -gt 0 ]; then\n                    echo \"  \U0001F504 Resources to modify:\"\n                    echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"update\") | \"    • \" + .address' 2>/dev/null\n                fi\n                \n                if [ \"$RESOURCES_TO_DESTROY\" -gt 0 ]; then\n                    echo \"  \U0001F5D1️ Resources to destroy:\"\n                    echo \"$PLAN_JSON\" | jq -r '.resource_changes[]? | select(.change.actions[]? == \"delete\") | \"    • \" + .address' 2>/dev/null\n                fi\n            else\n                echo \"  ℹ️ No infrastructure changes detected\"\n            fi\n        fi\n        \n        # Clean up plan file\n        rm -f \"$PLAN_FILE\"\n        \n    else\n        echo \"❌ Terraform plan failed\"\n        rm -f \"$PLAN_FILE\"\n        exit 1\n    fi\n    \n    # Additional analysis\n    echo \"\"\n    echo \"\U0001F50D Configuration Analysis:\"\n    \n    # Count resources in current file\n    RESOURCE_COUNT=$(grep -c '^resource ' \"$TF_FILE\" 2>/dev/null || echo 0)\n    DATA_COUNT=$(grep -c '^data ' \"$TF_FILE\" 2>/dev/null || echo 0)\n    VAR_COUNT=$(grep -c '^variable ' \"$TF_FILE\" 2>/dev/null || echo 0)\n    OUTPUT_COUNT=$(grep -c '^output ' \"$TF_FILE\" 2>/dev/null || echo 0)\n    \n    echo \"  • Resources defined: $RESOURCE_COUNT\"\n    echo \"  • Data sources: $DATA_COUNT\"\n    echo \"  • Variables: $VAR_COUNT\"\n    echo \"  • Outputs: $OUTPUT_COUNT\"\n    \n    # Check for common patterns\n    if grep -q 'provider ' \"$TF_FILE\" 2>/dev/null; then\n        echo \"  • \U0001F50C Provider configurations detected\"\n    fi\n    \n    if grep -q 'module ' \"$TF_FILE\" 2>/dev/null; then\n        echo \"  • \U0001F4E6 Module usage detected\"\n    fi\n    \n    if grep -q 'locals ' \"$TF_FILE\" 2>/dev/null; then\n        echo \"  • \U0001F3F7️ Local values defined\"\n    fi\n    \n    # Security and best practices check\n    echo \"\"\n    echo \"\U0001F512 Security Analysis:\"\n    \n    if grep -i 'password\\\\|secret\\\\|key' \"$TF_FILE\" 2>/dev/null | grep -v 'var\\.' | grep -v 'data\\.' >/dev/null; then\n        echo \"  • ⚠️ Potential hardcoded secrets detected - use variables instead\"\n    fi\n    \n    if grep -q '0.0.0.0/0' \"$TF_FILE\" 2>/dev/null; then\n        echo \"  • ⚠️ Open security group rules detected (0.0.0.0/0)\"\n    fi\n    \n    if ! grep -q 'tags\\\\|Tags' \"$TF_FILE\" 2>/dev/null && [ \"$RESOURCE_COUNT\" -gt 0 ]; then\n        echo \"  • \U0001F4A1 Consider adding resource tags for better management\"\n    fi\n    \n    echo \"\"\n    echo \"\U0001F4A1 Terraform Best Practices:\"\n    echo \"  • Use terraform fmt to maintain consistent formatting\"\n    echo \"  • Store sensitive values in variables, not hardcoded\"\n    echo \"  • Use remote state backend for team collaboration\"\n    echo \"  • Implement resource tagging strategy\"\n    echo \"  • Use terraform validate in CI/CD pipelines\"\n    echo \"  • Review plans carefully before applying\"\n    \n    echo \"\"\n    echo \"\U0001F3AF Terraform plan execution complete!\"\n    \nelse\n    echo \"ℹ️ File is not a Terraform file: $FILE_PATH\"\nfi\n\nexit 0"
+trigger: PostToolUse
+tags:
+  - terraform
+  - infrastructure
+  - iac
+  - devops
+  - cloud
+keywords:
+  - claude
+  - cloud
+  - development
+  - devops
+  - executor
+  - hooks
+  - iac
+  - infrastructure
+  - plan
+  - terraform
+  - tools
+readingTime: 4
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Automatic Terraform plan execution on file changes including Terraform plan execution (automatic terraform plan execution on Terraform file changes, Terraform plan generation with plan creation, Terraform plan analysis with plan analysis, Terraform plan reporting with plan status), plan optimization (plan performance with fast plan generation, plan reliability with reliable plan generation, plan efficiency with efficient processing, plan reporting with plan status), plan validation (plan syntax validation with syntax verification, plan configuration validation with configuration checking, plan resource validation with resource verification, plan dependency validation with dependency checking), and plan reporting (plan generation reporting with generation status, plan analysis reporting with analysis status, plan resource reporting with resource status, plan analytics with plan metrics)
+- Configuration syntax validation and formatting including syntax validation (Terraform configuration syntax validation with syntax checking, syntax error detection with error identification, syntax validation with validation checking, syntax reporting with syntax status), formatting (Terraform configuration formatting with format checking, Terraform fmt integration with fmt support, formatting consistency with consistent formatting, formatting reporting with formatting status), validation management (validation configuration with validation settings, validation customization with custom validation, validation filtering with validation filtering, validation updates with validation updates), and validation reporting (syntax validation reporting with syntax status, formatting reporting with formatting status, validation error reporting with error details, validation analytics with validation metrics)
+- Resource change preview and analysis including change detection (Terraform resource change detection with change identification, resource addition detection with addition identification, resource modification detection with modification identification, resource deletion detection with deletion identification), change analysis (resource change analysis with change metrics, change impact analysis with impact measurement, change dependency analysis with dependency checking, change conflict detection with conflict identification), analysis management (change analysis configuration with analysis settings, change analysis customization with custom analysis, change analysis filtering with analysis filtering, change analysis updates with analysis updates), and analysis reporting (change detection reporting with detection status, change analysis reporting with analysis status, change impact reporting with impact status, change analytics with change metrics)
+- Multi-provider support and validation including provider detection (Terraform provider detection with provider identification, provider configuration detection with config detection, provider version validation with version checking, provider compatibility validation with compatibility checking), provider management (provider configuration management with config settings, provider version management with version settings, provider authentication validation with auth checking, provider analytics with provider metrics), provider optimization (provider performance optimization with performance improvement, provider reliability optimization with reliability improvement, provider compatibility optimization with compatibility improvement, provider analytics with provider statistics), and provider reporting (provider detection reporting with detection status, provider configuration reporting with config status, provider validation reporting with validation status, provider analytics with provider statistics)
+- Cost estimation and impact analysis including cost analysis (Terraform cost estimation with cost calculation, resource cost analysis with cost metrics, infrastructure cost analysis with infrastructure costs, cost impact analysis with impact measurement), cost management (cost tracking with cost monitoring, cost optimization suggestions with optimization recommendations, cost reporting with cost status, cost analytics with cost metrics), cost optimization (cost reduction analysis with reduction opportunities, cost optimization suggestions with optimization recommendations, cost impact analysis with impact measurement, cost analytics with cost statistics), and cost reporting (cost estimation reporting with estimation status, cost analysis reporting with analysis status, cost optimization reporting with optimization status, cost analytics with cost statistics)
+- Security and compliance checking including security checking (Terraform security validation with security checking, hardcoded secrets detection with secret identification, security group validation with security checking, security best practices validation with best practices checking), compliance checking (infrastructure compliance validation with compliance checking, policy compliance validation with policy checking, compliance best practices validation with best practices checking, compliance reporting with compliance status), security management (security tracking with security monitoring, security validation with security verification, security improvement with security enhancement, security reporting with security status), and security reporting (security checking reporting with checking status, compliance checking reporting with checking status, security issue reporting with issue status, security analytics with security metrics)
+- Terraform state and backend management including state management (Terraform state file management with state tracking, state locking with state protection, state backup with state preservation, state synchronization with state sync), backend management (Terraform backend configuration with backend settings, backend authentication with backend security, backend validation with backend verification, backend analytics with backend metrics), state optimization (state performance optimization with performance improvement, state reliability optimization with reliability improvement, state consistency optimization with consistency improvement, state analytics with state statistics), and state reporting (state management reporting with management status, backend configuration reporting with config status, state synchronization reporting with sync status, state analytics with state statistics)
+- Development workflow integration including continuous validation (automatic Terraform plan execution on file changes, immediate plan generation on Terraform modifications, automatic infrastructure validation on configuration updates, seamless Terraform integration with development workflow), workflow automation (automated Terraform validation without manual intervention, plan automation with automatic plan generation, infrastructure validation automation with automatic validation), and workflow optimization (infrastructure validation with infrastructure monitoring, plan optimization with optimization, infrastructure quality maintenance with quality checks)
+
+## Use Cases
+
+- Preview infrastructure changes before applying automatically generating Terraform plans, analyzing resource changes, and providing change previews
+- Validate Terraform configuration syntax automatically checking syntax, validating formatting, and detecting configuration errors
+- Check for resource dependencies and conflicts automatically analyzing resource dependencies, detecting conflicts, and providing dependency analysis
+- Estimate costs of proposed infrastructure changes automatically calculating infrastructure costs, analyzing cost impact, and providing cost estimates
+- Ensure compliance with infrastructure policies automatically checking security policies, validating compliance, and providing compliance reports
+- Development workflow integration seamlessly integrating Terraform plan execution into development workflows without manual validation or infrastructure quality checks
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/terraform-plan-executor.sh
+3. Make executable: chmod +x .claude/hooks/terraform-plan-executor.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Terraform installed (terraform command)
+- jq (optional, for JSON parsing of terraform show -json)
+- Git installed (optional, for repository context)
+- Terraform providers configured (for provider-specific validation)
+- Terraform backend configured (optional, for remote state)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/terraform-plan-executor.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Terraform file
+if [[ "$FILE_PATH" == *.tf ]] || [[ "$FILE_PATH" == *.tfvars ]]; then
+    echo "🏗️ Terraform Plan Executor - Analyzing infrastructure changes..."
+    echo "📄 File: $FILE_PATH"
+    
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Terraform file not found: $FILE_PATH"
+        exit 1
+    fi
+    
+    # Get the directory containing the Terraform file
+    TF_DIR=$(dirname "$FILE_PATH")
+    TF_FILE=$(basename "$FILE_PATH")
+    
+    echo "📁 Working directory: $TF_DIR"
+    cd "$TF_DIR" || exit 1
+    
+    # Check if Terraform is installed
+    if ! command -v terraform >/dev/null 2>&1; then
+        echo "⚠️ Terraform not found - please install Terraform"
+        echo "💡 Install from: https://www.terraform.io/downloads"
+        exit 1
+    fi
+    
+    # Get Terraform version
+    TF_VERSION=$(terraform version -json 2>/dev/null | jq -r '.terraform_version' 2>/dev/null || terraform version | head -1)
+    echo "📦 Terraform version: $TF_VERSION"
+    
+    # Step 1: Format check
+    echo ""
+    echo "🎨 Checking Terraform formatting..."
+    if terraform fmt -check "$TF_FILE"; then
+        echo "✅ Terraform formatting is correct"
+    else
+        echo "⚠️ Terraform formatting issues detected"
+        echo "💡 Run 'terraform fmt' to fix formatting"
+        
+        # Auto-fix formatting if requested
+        echo "🔧 Auto-fixing formatting..."
+        terraform fmt "$TF_FILE"
+        echo "✅ Formatting applied to $TF_FILE"
+    fi
+    
+    # Step 2: Validation
+    echo ""
+    echo "🔍 Validating Terraform configuration..."
+    if terraform validate; then
+        echo "✅ Terraform configuration is valid"
+    else
+        echo "❌ Terraform validation failed"
+        echo "💡 Fix validation errors before proceeding"
+        exit 1
+    fi
+    
+    # Step 3: Initialize if needed
+    if [ ! -d ".terraform" ]; then
+        echo ""
+        echo "🔄 Initializing Terraform..."
+        if terraform init; then
+            echo "✅ Terraform initialized successfully"
+        else
+            echo "❌ Terraform initialization failed"
+            exit 1
+        fi
+    fi
+    
+    # Step 4: Run terraform plan
+    echo ""
+    echo "📋 Running Terraform plan..."
+    
+    PLAN_FILE=".terraform-plan-$(date +%s)"
+    
+    if terraform plan -out="$PLAN_FILE" -compact-warnings; then
+        echo "✅ Terraform plan completed successfully"
+        
+        # Analyze the plan
+        echo ""
+        echo "📊 Plan Analysis:"
+        
+        # Show plan summary
+        if terraform show -json "$PLAN_FILE" >/dev/null 2>&1; then
+            PLAN_JSON=$(terraform show -json "$PLAN_FILE" 2>/dev/null)
+            
+            # Count changes
+            RESOURCES_TO_ADD=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "create") | .address' 2>/dev/null | wc -l)
+            RESOURCES_TO_CHANGE=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "update") | .address' 2>/dev/null | wc -l)
+            RESOURCES_TO_DESTROY=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "delete") | .address' 2>/dev/null | wc -l)
+            
+            echo "  • Resources to add: $RESOURCES_TO_ADD"
+            echo "  • Resources to change: $RESOURCES_TO_CHANGE"
+            echo "  • Resources to destroy: $RESOURCES_TO_DESTROY"
+            
+            # Show resource details if any changes
+            if [ "$RESOURCES_TO_ADD" -gt 0 ] || [ "$RESOURCES_TO_CHANGE" -gt 0 ] || [ "$RESOURCES_TO_DESTROY" -gt 0 ]; then
+                echo ""
+                echo "🔍 Detailed Changes:"
+                
+                if [ "$RESOURCES_TO_ADD" -gt 0 ]; then
+                    echo "  📦 Resources to create:"
+                    echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "create") | "    • " + .address' 2>/dev/null
+                fi
+                
+                if [ "$RESOURCES_TO_CHANGE" -gt 0 ]; then
+                    echo "  🔄 Resources to modify:"
+                    echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "update") | "    • " + .address' 2>/dev/null
+                fi
+                
+                if [ "$RESOURCES_TO_DESTROY" -gt 0 ]; then
+                    echo "  🗑️ Resources to destroy:"
+                    echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "delete") | "    • " + .address' 2>/dev/null
+                fi
+            else
+                echo "  ℹ️ No infrastructure changes detected"
+            fi
+        fi
+        
+        # Clean up plan file
+        rm -f "$PLAN_FILE"
+        
+    else
+        echo "❌ Terraform plan failed"
+        rm -f "$PLAN_FILE"
+        exit 1
+    fi
+    
+    # Additional analysis
+    echo ""
+    echo "🔍 Configuration Analysis:"
+    
+    # Count resources in current file
+    RESOURCE_COUNT=$(grep -c '^resource ' "$TF_FILE" 2>/dev/null || echo 0)
+    DATA_COUNT=$(grep -c '^data ' "$TF_FILE" 2>/dev/null || echo 0)
+    VAR_COUNT=$(grep -c '^variable ' "$TF_FILE" 2>/dev/null || echo 0)
+    OUTPUT_COUNT=$(grep -c '^output ' "$TF_FILE" 2>/dev/null || echo 0)
+    
+    echo "  • Resources defined: $RESOURCE_COUNT"
+    echo "  • Data sources: $DATA_COUNT"
+    echo "  • Variables: $VAR_COUNT"
+    echo "  • Outputs: $OUTPUT_COUNT"
+    
+    # Check for common patterns
+    if grep -q 'provider ' "$TF_FILE" 2>/dev/null; then
+        echo "  • 🔌 Provider configurations detected"
+    fi
+    
+    if grep -q 'module ' "$TF_FILE" 2>/dev/null; then
+        echo "  • 📦 Module usage detected"
+    fi
+    
+    if grep -q 'locals ' "$TF_FILE" 2>/dev/null; then
+        echo "  • 🏷️ Local values defined"
+    fi
+    
+    # Security and best practices check
+    echo ""
+    echo "🔒 Security Analysis:"
+    
+    if grep -i 'password\\|secret\\|key' "$TF_FILE" 2>/dev/null | grep -v 'var\.' | grep -v 'data\.' >/dev/null; then
+        echo "  • ⚠️ Potential hardcoded secrets detected - use variables instead"
+    fi
+    
+    if grep -q '0.0.0.0/0' "$TF_FILE" 2>/dev/null; then
+        echo "  • ⚠️ Open security group rules detected (0.0.0.0/0)"
+    fi
+    
+    if ! grep -q 'tags\\|Tags' "$TF_FILE" 2>/dev/null && [ "$RESOURCE_COUNT" -gt 0 ]; then
+        echo "  • 💡 Consider adding resource tags for better management"
+    fi
+    
+    echo ""
+    echo "💡 Terraform Best Practices:"
+    echo "  • Use terraform fmt to maintain consistent formatting"
+    echo "  • Store sensitive values in variables, not hardcoded"
+    echo "  • Use remote state backend for team collaboration"
+    echo "  • Implement resource tagging strategy"
+    echo "  • Use terraform validate in CI/CD pipelines"
+    echo "  • Review plans carefully before applying"
+    
+    echo ""
+    echo "🎯 Terraform plan execution complete!"
+    
+else
+    echo "ℹ️ File is not a Terraform file: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Terraform Plan Executor Hook Script
+
+Complete hook script that runs terraform plan on Terraform file changes
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.tf ]] || [[ "$FILE_PATH" == *.tfvars ]]; then
+  echo "🏗️ Terraform Plan Executor - Analyzing infrastructure changes..."
+  echo "📄 File: $FILE_PATH"
+  TF_DIR=$(dirname "$FILE_PATH")
+  cd "$TF_DIR" || exit 1
+  if ! command -v terraform >/dev/null 2>&1; then
+    echo "⚠️ Terraform not found - please install Terraform"
+    exit 1
+  fi
+  echo "🎨 Checking Terraform formatting..."
+  if ! terraform fmt -check "$(basename "$FILE_PATH")"; then
+    terraform fmt "$(basename "$FILE_PATH")"
+    echo "✅ Formatting applied"
+  fi
+  echo "🔍 Validating Terraform configuration..."
+  if ! terraform validate; then
+    echo "❌ Terraform validation failed"
+    exit 1
+  fi
+  if [ ! -d ".terraform" ]; then
+    echo "🔄 Initializing Terraform..."
+    terraform init
+  fi
+  echo "📋 Running Terraform plan..."
+  PLAN_FILE=".terraform-plan-$(date +%s)"
+  if terraform plan -out="$PLAN_FILE" -compact-warnings; then
+    echo "✅ Terraform plan completed successfully"
+    if terraform show -json "$PLAN_FILE" >/dev/null 2>&1; then
+      PLAN_JSON=$(terraform show -json "$PLAN_FILE" 2>/dev/null)
+      RESOURCES_TO_ADD=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "create") | .address' 2>/dev/null | wc -l)
+      RESOURCES_TO_CHANGE=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "update") | .address' 2>/dev/null | wc -l)
+      RESOURCES_TO_DESTROY=$(echo "$PLAN_JSON" | jq -r '.resource_changes[]? | select(.change.actions[]? == "delete") | .address' 2>/dev/null | wc -l)
+      echo "📊 Plan Analysis:"
+      echo "  • Resources to add: $RESOURCES_TO_ADD"
+      echo "  • Resources to change: $RESOURCES_TO_CHANGE"
+      echo "  • Resources to destroy: $RESOURCES_TO_DESTROY"
+    fi
+    rm -f "$PLAN_FILE"
+  else
+    echo "❌ Terraform plan failed"
+    rm -f "$PLAN_FILE"
+    exit 1
+  fi
+  echo "🎯 Terraform plan execution complete!"
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Terraform plan execution
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/terraform-plan-executor.sh",
+      "matchers": ["write:**/*.tf", "write:**/*.tfvars", "edit:**/*.tf", "edit:**/*.tfvars"]
+    }
+  }
+}
+```
+### Enhanced Terraform Plan with Directory Management
+
+Enhanced hook script with proper directory management and resource change details
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.tf ]] || [[ "$FILE_PATH" == *.tfvars ]]; then
+  ORIG_DIR=$(pwd)
+  TF_DIR=$(dirname "$FILE_PATH")
+  cd "$TF_DIR" || exit 1
+  if ! command -v terraform >/dev/null 2>&1; then
+    exit 1
+  fi
+  terraform fmt -check "$(basename "$FILE_PATH")" || terraform fmt "$(basename "$FILE_PATH")"
+  terraform validate || exit 1
+  [ ! -d ".terraform" ] && terraform init
+  PLAN_FILE=".terraform-plan-$(date +%s)"
+  if terraform plan -out="$PLAN_FILE" -compact-warnings; then
+    if terraform show -json "$PLAN_FILE" >/dev/null 2>&1; then
+      PLAN_JSON=$(terraform show -json "$PLAN_FILE" 2>/dev/null)
+      echo "📊 Resource Changes:"
+      echo "$PLAN_JSON" | jq -r '.resource_changes[]? | "  • " + .address + ": " + (.change.actions | join(", "))' 2>/dev/null
+    fi
+    rm -f "$PLAN_FILE"
+  fi
+  cd "$ORIG_DIR" || exit 1
+fi
+exit 0
+```
+### Terraform Plan with Security Analysis
+
+Enhanced hook script with comprehensive security analysis and best practices checking
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.tf ]]; then
+  TF_FILE=$(basename "$FILE_PATH")
+  echo "🔒 Security Analysis:"
+  if grep -i 'password\|secret\|key' "$TF_FILE" 2>/dev/null | grep -v 'var\.' | grep -v 'data\.' >/dev/null; then
+    echo "  • ⚠️ Potential hardcoded secrets detected - use variables instead"
+  fi
+  if grep -q '0.0.0.0/0' "$TF_FILE" 2>/dev/null; then
+    echo "  • ⚠️ Open security group rules detected (0.0.0.0/0)"
+  fi
+  RESOURCE_COUNT=$(grep -c '^resource ' "$TF_FILE" 2>/dev/null || echo 0)
+  if ! grep -q 'tags\|Tags' "$TF_FILE" 2>/dev/null && [ "$RESOURCE_COUNT" -gt 0 ]; then
+    echo "  • 💡 Consider adding resource tags for better management"
+  fi
+  TF_DIR=$(dirname "$FILE_PATH")
+  cd "$TF_DIR" || exit 1
+  terraform fmt -check "$TF_FILE" || terraform fmt "$TF_FILE"
+  terraform validate || exit 1
+  [ ! -d ".terraform" ] && terraform init
+  terraform plan -compact-warnings
+fi
+exit 0
+```
+### Terraform Plan Executor Configuration Example
+
+Example Terraform plan executor configuration for customizing plan execution behavior
+
+```json
+{
+  "terraform": {
+    "plan_on_save": true,
+    "auto_format": true,
+    "validate_before_plan": true,
+    "auto_init": true,
+    "security_checks": true,
+    "plan_options": {
+      "compact_warnings": true,
+      "out_file": ".terraform-plan-{timestamp}",
+      "refresh": true
+    },
+    "provider_validation": true
+  }
+}
+```
+
+## Troubleshooting
+### terraform init fails with 'backend configuration changed' error
+
+Run terraform init -reconfigure to update backend configuration. Use terraform init -migrate-state to migrate existing state. Check backend {} block in .tf files matches current state location. Verify backend credentials. Test backend connection.
+### Plan execution triggers on .tfvars edits but fails with missing vars
+
+Pass variable file explicitly: terraform plan -var-file="$TF_FILE" if .tfvars file. Add conditional: [[ "$TF_FILE" == *.tfvars ]] && PLAN_ARGS="-var-file=$TF_FILE". Ensure terraform.tfvars is in same directory. Verify variable file format.
+### Hook changes to wrong directory breaking subsequent operations
+
+Save original directory: ORIG_DIR=$(pwd) before cd "$TF_DIR". Always return: cd "$ORIG_DIR" || exit 1 at script end. Use pushd/popd for safer directory stack management. Verify directory changes.
+### terraform validate fails when run from subdirectory with modules
+
+Always run from root module directory. Find root: while [ ! -f .terraform.lock.hcl ] && [ $(pwd) != / ]; do cd ..; done. Run terraform init before validate when .terraform/ missing. Verify module structure.
+### Plan shows destroy actions when only formatting was changed
+
+This indicates state drift or provider version change. Run terraform refresh before plan. Check provider version constraints in required_providers block. Review .terraform.lock.hcl for version updates. Verify state file integrity.
+### Terraform plan execution is slow or times out
+
+Use terraform plan -refresh=false for faster plans when state is current. Limit plan scope with -target flags. Check provider API rate limits. Verify network connectivity. Consider using terraform plan -parallelism=1 for debugging.
+### terraform fmt modifies files unexpectedly
+
+Use terraform fmt -check to verify formatting without modifying files. Review formatting changes before committing. Configure terraform fmt options. Verify .terraform-version file if using tfenv.
+### Provider authentication errors during terraform plan
+
+Verify provider credentials are configured correctly. Check environment variables for provider authentication. Verify provider version compatibility. Test provider authentication separately. Review provider documentation.

@@ -1,0 +1,620 @@
+---
+title: Test Coverage Final Report - Hooks
+slug: test-coverage-final-report
+category: hooks
+description: Generates a comprehensive test coverage report when the coding session ends.
+cardDescription: Generates a comprehensive test coverage report when the coding session ends.
+seoTitle: Test Coverage Final Report - Hooks
+seoDescription: >-
+  Generates a comprehensive test coverage report when the coding session ends.
+  This Stop hook provides comprehensive test coverage analysis with
+  comprehensive ...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/test-coverage-final-report.sh &&
+  chmod +x .claude/hooks/test-coverage-final-report.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/test-coverage-final-report.sh &&
+  chmod +x .claude/hooks/test-coverage-final-report.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/test-coverage-final-report.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "stop": {
+        "script": "./.claude/hooks/test-coverage-final-report.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\necho \"\U0001F9EA Test Coverage Final Report - Analyzing test coverage...\"\necho \"⏰ Session ended: $(date)\"\necho \"═══════════════════════════════════════════════════\"\n\n# Detect project type and testing framework\nPROJECT_TYPE=\"unknown\"\nTEST_FRAMEWORK=\"unknown\"\nCOVERAGE_AVAILABLE=false\n\necho \"\U0001F50D Detecting project type and testing framework...\"\n\n# JavaScript/Node.js project detection\nif [ -f \"package.json\" ]; then\n    PROJECT_TYPE=\"node\"\n    echo \"\U0001F4E6 Node.js project detected\"\n    \n    # Detect testing framework\n    if grep -q '\"jest\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"jest\"\n        echo \"\U0001F0CF Jest testing framework detected\"\n    elif grep -q '\"vitest\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"vitest\"\n        echo \"⚡ Vitest testing framework detected\"\n    elif grep -q '\"mocha\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"mocha\"\n        echo \"☕ Mocha testing framework detected\"\n    elif grep -q '\"karma\"' package.json 2>/dev/null; then\n        TEST_FRAMEWORK=\"karma\"\n        echo \"\U0001F504 Karma testing framework detected\"\n    fi\n    \n# Python project detection\nelif [ -f \"requirements.txt\" ] || [ -f \"setup.py\" ] || [ -f \"pyproject.toml\" ]; then\n    PROJECT_TYPE=\"python\"\n    echo \"\U0001F40D Python project detected\"\n    \n    if command -v pytest >/dev/null 2>&1; then\n        TEST_FRAMEWORK=\"pytest\"\n        echo \"\U0001F9EA Pytest testing framework available\"\n    elif python -c \"import unittest\" 2>/dev/null; then\n        TEST_FRAMEWORK=\"unittest\"\n        echo \"\U0001F52C Unittest framework available\"\n    fi\n    \n# Rust project detection\nelif [ -f \"Cargo.toml\" ]; then\n    PROJECT_TYPE=\"rust\"\n    TEST_FRAMEWORK=\"cargo\"\n    echo \"\U0001F980 Rust project detected\"\n    \n# Go project detection\nelif [ -f \"go.mod\" ]; then\n    PROJECT_TYPE=\"go\"\n    TEST_FRAMEWORK=\"go_test\"\n    echo \"\U0001F439 Go project detected\"\n    \n# Java project detection\nelif [ -f \"pom.xml\" ] || [ -f \"build.gradle\" ]; then\n    PROJECT_TYPE=\"java\"\n    echo \"☕ Java project detected\"\n    \n    if [ -f \"pom.xml\" ]; then\n        TEST_FRAMEWORK=\"maven\"\n        echo \"\U0001F3D7️ Maven build system detected\"\n    else\n        TEST_FRAMEWORK=\"gradle\"\n        echo \"\U0001F418 Gradle build system detected\"\n    fi\nfi\n\necho \"\"\necho \"\U0001F4CA Running coverage analysis for $PROJECT_TYPE project...\"\n\n# Run coverage based on project type\ncase \"$PROJECT_TYPE\" in\n    \"node\")\n        case \"$TEST_FRAMEWORK\" in\n            \"jest\")\n                echo \"\U0001F0CF Running Jest with coverage...\"\n                if npm test -- --coverage --silent 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Jest coverage completed successfully\"\n                elif npm run test:coverage 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Coverage script completed successfully\"\n                else\n                    echo \"⚠️ Jest coverage command failed - check test configuration\"\n                fi\n                ;;\n            \"vitest\")\n                echo \"⚡ Running Vitest with coverage...\"\n                if npx vitest run --coverage 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Vitest coverage completed successfully\"\n                else\n                    echo \"⚠️ Vitest coverage command failed\"\n                fi\n                ;;\n            \"mocha\")\n                echo \"☕ Running Mocha with nyc coverage...\"\n                if npx nyc mocha 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Mocha coverage completed successfully\"\n                else\n                    echo \"⚠️ Mocha coverage requires nyc - install with: npm install --save-dev nyc\"\n                fi\n                ;;\n            *)\n                echo \"⚠️ No recognized testing framework - attempting generic npm test\"\n                if npm test 2>/dev/null; then\n                    echo \"✅ Tests completed (coverage unknown)\"\n                else\n                    echo \"❌ Tests failed or not configured\"\n                fi\n                ;;\n        esac\n        ;;\n    \"python\")\n        case \"$TEST_FRAMEWORK\" in\n            \"pytest\")\n                echo \"\U0001F9EA Running pytest with coverage...\"\n                if pytest --cov=. --cov-report=term-missing --cov-report=html 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Pytest coverage completed successfully\"\n                else\n                    echo \"⚠️ Pytest coverage failed - install with: pip install pytest-cov\"\n                fi\n                ;;\n            \"unittest\")\n                echo \"\U0001F52C Running unittest with coverage...\"\n                if python -m coverage run -m unittest discover 2>/dev/null; then\n                    python -m coverage report 2>/dev/null\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Unittest coverage completed successfully\"\n                else\n                    echo \"⚠️ Coverage.py not available - install with: pip install coverage\"\n                fi\n                ;;\n            *)\n                echo \"⚠️ No Python testing framework detected\"\n                ;;\n        esac\n        ;;\n    \"rust\")\n        echo \"\U0001F980 Running Cargo test with coverage...\"\n        if command -v cargo-tarpaulin >/dev/null 2>&1; then\n            if cargo tarpaulin --out Html 2>/dev/null; then\n                COVERAGE_AVAILABLE=true\n                echo \"✅ Cargo tarpaulin coverage completed successfully\"\n            else\n                echo \"⚠️ Cargo tarpaulin failed\"\n            fi\n        else\n            echo \"⚠️ cargo-tarpaulin not installed - install with: cargo install cargo-tarpaulin\"\n            echo \"\U0001F504 Running basic cargo test...\"\n            cargo test 2>/dev/null && echo \"✅ Tests completed (coverage unavailable)\"\n        fi\n        ;;\n    \"go\")\n        echo \"\U0001F439 Running Go test with coverage...\"\n        if go test -coverprofile=coverage.out ./... 2>/dev/null; then\n            go tool cover -html=coverage.out -o coverage.html 2>/dev/null\n            COVERAGE_AVAILABLE=true\n            echo \"✅ Go coverage completed successfully\"\n        else\n            echo \"⚠️ Go test coverage failed\"\n        fi\n        ;;\n    \"java\")\n        case \"$TEST_FRAMEWORK\" in\n            \"maven\")\n                echo \"\U0001F3D7️ Running Maven test with JaCoCo coverage...\"\n                if mvn test jacoco:report 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Maven JaCoCo coverage completed successfully\"\n                else\n                    echo \"⚠️ Maven coverage failed - ensure JaCoCo plugin is configured\"\n                fi\n                ;;\n            \"gradle\")\n                echo \"\U0001F418 Running Gradle test with JaCoCo coverage...\"\n                if ./gradlew test jacocoTestReport 2>/dev/null; then\n                    COVERAGE_AVAILABLE=true\n                    echo \"✅ Gradle JaCoCo coverage completed successfully\"\n                else\n                    echo \"⚠️ Gradle coverage failed - ensure JaCoCo plugin is configured\"\n                fi\n                ;;\n        esac\n        ;;\n    *)\n        echo \"❓ Unknown project type - cannot generate coverage report\"\n        echo \"\U0001F4A1 Supported: Node.js, Python, Rust, Go, Java\"\n        ;;\nesac\n\necho \"\"\necho \"\U0001F4C8 Coverage Report Summary:\"\necho \"═══════════════════════════\"\n\n# Display coverage results based on available formats\nif [ \"$COVERAGE_AVAILABLE\" = true ]; then\n    case \"$PROJECT_TYPE\" in\n        \"node\")\n            if [ -d \"coverage\" ]; then\n                echo \"\U0001F4CA Coverage files found in coverage/ directory\"\n                \n                # Try to parse coverage summary\n                if [ -f \"coverage/coverage-summary.json\" ]; then\n                    echo \"\U0001F4CB Coverage Summary:\"\n                    cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | \"Lines: \" + (.lines.pct|tostring) + \"% (\" + (.lines.covered|tostring) + \"/\" + (.lines.total|tostring) + \")\", \"Branches: \" + (.branches.pct|tostring) + \"% (\" + (.branches.covered|tostring) + \"/\" + (.branches.total|tostring) + \")\", \"Functions: \" + (.functions.pct|tostring) + \"% (\" + (.functions.covered|tostring) + \"/\" + (.functions.total|tostring) + \")\", \"Statements: \" + (.statements.pct|tostring) + \"% (\" + (.statements.covered|tostring) + \"/\" + (.statements.total|tostring) + \")\"' 2>/dev/null || echo \"Coverage summary parsing failed\"\n                fi\n                \n                echo \"\U0001F310 HTML Report: file://$(pwd)/coverage/index.html\"\n            fi\n            ;;\n        \"python\")\n            if [ -d \"htmlcov\" ]; then\n                echo \"\U0001F310 HTML Report: file://$(pwd)/htmlcov/index.html\"\n            fi\n            ;;\n        \"rust\")\n            if [ -f \"tarpaulin-report.html\" ]; then\n                echo \"\U0001F310 HTML Report: file://$(pwd)/tarpaulin-report.html\"\n            fi\n            ;;\n        \"go\")\n            if [ -f \"coverage.html\" ]; then\n                echo \"\U0001F310 HTML Report: file://$(pwd)/coverage.html\"\n            fi\n            ;;\n        \"java\")\n            if [ -d \"target/site/jacoco\" ]; then\n                echo \"\U0001F310 HTML Report: file://$(pwd)/target/site/jacoco/index.html\"\n            elif [ -d \"build/reports/jacoco/test/html\" ]; then\n                echo \"\U0001F310 HTML Report: file://$(pwd)/build/reports/jacoco/test/html/index.html\"\n            fi\n            ;;\n    esac\nelse\n    echo \"❌ No coverage data available\"\n    echo \"\U0001F4A1 Coverage Setup Tips:\"\n    case \"$PROJECT_TYPE\" in\n        \"node\")\n            echo \"  • For Jest: Add 'collectCoverage: true' to jest.config.js\"\n            echo \"  • For Vitest: Add 'coverage' provider to vite.config.js\"\n            echo \"  • Run: npm install --save-dev @vitest/coverage-c8\"\n            ;;\n        \"python\")\n            echo \"  • Install: pip install pytest-cov coverage\"\n            echo \"  • Run: pytest --cov=your_package\"\n            ;;\n        \"rust\")\n            echo \"  • Install: cargo install cargo-tarpaulin\"\n            echo \"  • Run: cargo tarpaulin --out Html\"\n            ;;\n        \"go\")\n            echo \"  • Built-in: go test -coverprofile=coverage.out\"\n            echo \"  • View: go tool cover -html=coverage.out\"\n            ;;\n        \"java\")\n            echo \"  • Add JaCoCo plugin to Maven/Gradle configuration\"\n            echo \"  • Maven: mvn test jacoco:report\"\n            echo \"  • Gradle: ./gradlew test jacocoTestReport\"\n            ;;\n    esac\nfi\n\necho \"\"\necho \"\U0001F4A1 Coverage Best Practices:\"\necho \"  • Aim for 80%+ line coverage on critical code\"\necho \"  • Focus on testing business logic and edge cases\"\necho \"  • Use coverage to identify untested code, not as a quality metric\"\necho \"  • Write meaningful tests, not just coverage-driven tests\"\necho \"  • Exclude generated code and vendor dependencies\"\necho \"  • Set up coverage thresholds in CI/CD pipelines\"\n\necho \"\"\necho \"\U0001F3AF Test coverage analysis complete!\"\necho \"═══════════════════════════════════════════════════\"\n\nexit 0"
+trigger: Stop
+tags:
+  - testing
+  - coverage
+  - stop-hook
+  - reporting
+  - quality
+keywords:
+  - claude
+  - coverage
+  - development
+  - final
+  - hooks
+  - quality
+  - report
+  - reporting
+  - stop-hook
+  - test
+  - testing
+  - tools
+readingTime: 4
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Comprehensive test coverage analysis including coverage analysis (automatic test coverage analysis on session end, coverage data collection with data gathering, coverage calculation with coverage metrics, coverage reporting with coverage status), analysis optimization (analysis performance with fast analysis, analysis reliability with reliable analysis, analysis efficiency with efficient processing, analysis reporting with analysis status), analysis validation (coverage data validation with data verification, coverage accuracy validation with accuracy checking, coverage completeness validation with completeness checking, coverage consistency validation with consistency verification), and analysis reporting (coverage analysis reporting with analysis status, coverage metrics reporting with metrics status, coverage trends reporting with trend status, coverage analytics with coverage statistics)
+- Multi-language testing framework support including framework detection (testing framework detection with framework identification, language detection with language identification, framework configuration detection with config detection, framework version validation with version checking), framework management (framework configuration management with config settings, framework version management with version settings, framework integration with framework support, framework analytics with framework metrics), framework optimization (framework performance optimization with performance improvement, framework reliability optimization with reliability improvement, framework compatibility optimization with compatibility improvement, framework analytics with framework statistics), and framework reporting (framework detection reporting with detection status, framework configuration reporting with config status, framework validation reporting with validation status, framework analytics with framework statistics)
+- HTML and terminal coverage reports including report generation (HTML coverage report generation with HTML formatting, terminal coverage report generation with terminal formatting, report template generation with template support, report customization with custom formatting), report management (report format management with format settings, report template management with template settings, report customization with custom reports, report updates with report updates), report optimization (report performance optimization with performance improvement, report readability optimization with readability improvement, report accessibility optimization with accessibility improvement, report analytics with report metrics), and report reporting (report generation reporting with generation status, report format reporting with format status, report accessibility reporting with accessibility status, report analytics with report statistics)
+- Coverage threshold validation including threshold validation (coverage threshold validation with threshold checking, threshold configuration with threshold settings, threshold enforcement with threshold enforcement, threshold reporting with threshold status), threshold management (threshold configuration management with config settings, threshold customization with custom thresholds, threshold tracking with threshold monitoring, threshold updates with threshold updates), threshold optimization (threshold performance optimization with performance improvement, threshold accuracy optimization with accuracy improvement, threshold enforcement optimization with enforcement improvement, threshold analytics with threshold statistics), and threshold reporting (threshold validation reporting with validation status, threshold enforcement reporting with enforcement status, threshold compliance reporting with compliance status, threshold analytics with threshold statistics)
+- Uncovered code identification including identification (uncovered code identification with code detection, uncovered line identification with line detection, uncovered function identification with function detection, uncovered branch identification with branch detection), identification management (identification configuration with identification settings, identification customization with custom identification, identification filtering with identification filtering, identification updates with identification updates), identification optimization (identification performance optimization with performance improvement, identification accuracy optimization with accuracy improvement, identification completeness optimization with completeness improvement, identification analytics with identification statistics), and identification reporting (uncovered code reporting with code status, uncovered line reporting with line status, uncovered function reporting with function status, identification analytics with identification statistics)
+- Historical coverage tracking including tracking (historical coverage tracking with coverage history, coverage trend analysis with trend analysis, coverage comparison with historical comparison, coverage evolution tracking with evolution tracking), tracking management (tracking configuration with tracking settings, tracking customization with custom tracking, tracking filtering with tracking filtering, tracking updates with tracking updates), tracking optimization (tracking performance optimization with performance improvement, tracking accuracy optimization with accuracy improvement, tracking completeness optimization with completeness improvement, tracking analytics with tracking statistics), and tracking reporting (historical tracking reporting with tracking status, coverage trend reporting with trend status, coverage comparison reporting with comparison status, tracking analytics with tracking statistics)
+- Coverage metrics and statistics including metrics collection (coverage metrics collection with metrics gathering, line coverage metrics with line metrics, branch coverage metrics with branch metrics, function coverage metrics with function metrics), metrics management (metrics configuration with metrics settings, metrics customization with custom metrics, metrics filtering with metrics filtering, metrics updates with metrics updates), metrics optimization (metrics performance optimization with performance improvement, metrics accuracy optimization with accuracy improvement, metrics completeness optimization with completeness improvement, metrics analytics with metrics statistics), and metrics reporting (metrics collection reporting with collection status, metrics analysis reporting with analysis status, metrics trend reporting with trend status, metrics analytics with metrics statistics)
+- Development workflow integration including continuous coverage (automatic test coverage analysis on session end, immediate coverage report generation on session completion, automatic coverage tracking on session end, seamless coverage integration with development workflow), workflow automation (automated coverage analysis without manual intervention, coverage automation with automatic analysis, test quality automation with automatic quality checks), and workflow optimization (coverage tracking with coverage monitoring, coverage optimization with optimization, test quality maintenance with quality checks)
+
+## Use Cases
+
+- Generate final coverage report at session end automatically analyzing test coverage, generating reports, and providing coverage metrics
+- Identify untested code areas requiring attention automatically detecting uncovered code, identifying gaps, and providing recommendations
+- Track testing progress and coverage improvements automatically tracking coverage history, analyzing trends, and providing progress metrics
+- Validate coverage meets project standards automatically checking coverage thresholds, validating compliance, and providing validation status
+- Generate coverage reports for team review automatically generating HTML and terminal reports, formatting reports, and providing report access
+- Development workflow integration seamlessly integrating test coverage analysis into development workflows without manual coverage checks or test quality validation
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/test-coverage-final-report.sh
+3. Make executable: chmod +x .claude/hooks/test-coverage-final-report.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Testing framework installed (Jest, Vitest, pytest, cargo-tarpaulin, Go test, Maven/Gradle)
+- Coverage tool installed (coverage.py, nyc, @vitest/coverage-c8, cargo-tarpaulin, JaCoCo)
+- jq (optional, for JSON parsing of coverage-summary.json)
+- bc or awk (optional, for threshold calculations)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/test-coverage-final-report.sh",
+      "matchers": [
+        "*"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/bin/bash
+
+echo "🧪 Test Coverage Final Report - Analyzing test coverage..."
+echo "⏰ Session ended: $(date)"
+echo "═══════════════════════════════════════════════════"
+
+# Detect project type and testing framework
+PROJECT_TYPE="unknown"
+TEST_FRAMEWORK="unknown"
+COVERAGE_AVAILABLE=false
+
+echo "🔍 Detecting project type and testing framework..."
+
+# JavaScript/Node.js project detection
+if [ -f "package.json" ]; then
+    PROJECT_TYPE="node"
+    echo "📦 Node.js project detected"
+    
+    # Detect testing framework
+    if grep -q '"jest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="jest"
+        echo "🃏 Jest testing framework detected"
+    elif grep -q '"vitest"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="vitest"
+        echo "⚡ Vitest testing framework detected"
+    elif grep -q '"mocha"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="mocha"
+        echo "☕ Mocha testing framework detected"
+    elif grep -q '"karma"' package.json 2>/dev/null; then
+        TEST_FRAMEWORK="karma"
+        echo "🔄 Karma testing framework detected"
+    fi
+    
+# Python project detection
+elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+    PROJECT_TYPE="python"
+    echo "🐍 Python project detected"
+    
+    if command -v pytest >/dev/null 2>&1; then
+        TEST_FRAMEWORK="pytest"
+        echo "🧪 Pytest testing framework available"
+    elif python -c "import unittest" 2>/dev/null; then
+        TEST_FRAMEWORK="unittest"
+        echo "🔬 Unittest framework available"
+    fi
+    
+# Rust project detection
+elif [ -f "Cargo.toml" ]; then
+    PROJECT_TYPE="rust"
+    TEST_FRAMEWORK="cargo"
+    echo "🦀 Rust project detected"
+    
+# Go project detection
+elif [ -f "go.mod" ]; then
+    PROJECT_TYPE="go"
+    TEST_FRAMEWORK="go_test"
+    echo "🐹 Go project detected"
+    
+# Java project detection
+elif [ -f "pom.xml" ] || [ -f "build.gradle" ]; then
+    PROJECT_TYPE="java"
+    echo "☕ Java project detected"
+    
+    if [ -f "pom.xml" ]; then
+        TEST_FRAMEWORK="maven"
+        echo "🏗️ Maven build system detected"
+    else
+        TEST_FRAMEWORK="gradle"
+        echo "🐘 Gradle build system detected"
+    fi
+fi
+
+echo ""
+echo "📊 Running coverage analysis for $PROJECT_TYPE project..."
+
+# Run coverage based on project type
+case "$PROJECT_TYPE" in
+    "node")
+        case "$TEST_FRAMEWORK" in
+            "jest")
+                echo "🃏 Running Jest with coverage..."
+                if npm test -- --coverage --silent 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Jest coverage completed successfully"
+                elif npm run test:coverage 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Coverage script completed successfully"
+                else
+                    echo "⚠️ Jest coverage command failed - check test configuration"
+                fi
+                ;;
+            "vitest")
+                echo "⚡ Running Vitest with coverage..."
+                if npx vitest run --coverage 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Vitest coverage completed successfully"
+                else
+                    echo "⚠️ Vitest coverage command failed"
+                fi
+                ;;
+            "mocha")
+                echo "☕ Running Mocha with nyc coverage..."
+                if npx nyc mocha 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Mocha coverage completed successfully"
+                else
+                    echo "⚠️ Mocha coverage requires nyc - install with: npm install --save-dev nyc"
+                fi
+                ;;
+            *)
+                echo "⚠️ No recognized testing framework - attempting generic npm test"
+                if npm test 2>/dev/null; then
+                    echo "✅ Tests completed (coverage unknown)"
+                else
+                    echo "❌ Tests failed or not configured"
+                fi
+                ;;
+        esac
+        ;;
+    "python")
+        case "$TEST_FRAMEWORK" in
+            "pytest")
+                echo "🧪 Running pytest with coverage..."
+                if pytest --cov=. --cov-report=term-missing --cov-report=html 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Pytest coverage completed successfully"
+                else
+                    echo "⚠️ Pytest coverage failed - install with: pip install pytest-cov"
+                fi
+                ;;
+            "unittest")
+                echo "🔬 Running unittest with coverage..."
+                if python -m coverage run -m unittest discover 2>/dev/null; then
+                    python -m coverage report 2>/dev/null
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Unittest coverage completed successfully"
+                else
+                    echo "⚠️ Coverage.py not available - install with: pip install coverage"
+                fi
+                ;;
+            *)
+                echo "⚠️ No Python testing framework detected"
+                ;;
+        esac
+        ;;
+    "rust")
+        echo "🦀 Running Cargo test with coverage..."
+        if command -v cargo-tarpaulin >/dev/null 2>&1; then
+            if cargo tarpaulin --out Html 2>/dev/null; then
+                COVERAGE_AVAILABLE=true
+                echo "✅ Cargo tarpaulin coverage completed successfully"
+            else
+                echo "⚠️ Cargo tarpaulin failed"
+            fi
+        else
+            echo "⚠️ cargo-tarpaulin not installed - install with: cargo install cargo-tarpaulin"
+            echo "🔄 Running basic cargo test..."
+            cargo test 2>/dev/null && echo "✅ Tests completed (coverage unavailable)"
+        fi
+        ;;
+    "go")
+        echo "🐹 Running Go test with coverage..."
+        if go test -coverprofile=coverage.out ./... 2>/dev/null; then
+            go tool cover -html=coverage.out -o coverage.html 2>/dev/null
+            COVERAGE_AVAILABLE=true
+            echo "✅ Go coverage completed successfully"
+        else
+            echo "⚠️ Go test coverage failed"
+        fi
+        ;;
+    "java")
+        case "$TEST_FRAMEWORK" in
+            "maven")
+                echo "🏗️ Running Maven test with JaCoCo coverage..."
+                if mvn test jacoco:report 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Maven JaCoCo coverage completed successfully"
+                else
+                    echo "⚠️ Maven coverage failed - ensure JaCoCo plugin is configured"
+                fi
+                ;;
+            "gradle")
+                echo "🐘 Running Gradle test with JaCoCo coverage..."
+                if ./gradlew test jacocoTestReport 2>/dev/null; then
+                    COVERAGE_AVAILABLE=true
+                    echo "✅ Gradle JaCoCo coverage completed successfully"
+                else
+                    echo "⚠️ Gradle coverage failed - ensure JaCoCo plugin is configured"
+                fi
+                ;;
+        esac
+        ;;
+    *)
+        echo "❓ Unknown project type - cannot generate coverage report"
+        echo "💡 Supported: Node.js, Python, Rust, Go, Java"
+        ;;
+esac
+
+echo ""
+echo "📈 Coverage Report Summary:"
+echo "═══════════════════════════"
+
+# Display coverage results based on available formats
+if [ "$COVERAGE_AVAILABLE" = true ]; then
+    case "$PROJECT_TYPE" in
+        "node")
+            if [ -d "coverage" ]; then
+                echo "📊 Coverage files found in coverage/ directory"
+                
+                # Try to parse coverage summary
+                if [ -f "coverage/coverage-summary.json" ]; then
+                    echo "📋 Coverage Summary:"
+                    cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | "Lines: " + (.lines.pct|tostring) + "% (" + (.lines.covered|tostring) + "/" + (.lines.total|tostring) + ")", "Branches: " + (.branches.pct|tostring) + "% (" + (.branches.covered|tostring) + "/" + (.branches.total|tostring) + ")", "Functions: " + (.functions.pct|tostring) + "% (" + (.functions.covered|tostring) + "/" + (.functions.total|tostring) + ")", "Statements: " + (.statements.pct|tostring) + "% (" + (.statements.covered|tostring) + "/" + (.statements.total|tostring) + ")"' 2>/dev/null || echo "Coverage summary parsing failed"
+                fi
+                
+                echo "🌐 HTML Report: file://$(pwd)/coverage/index.html"
+            fi
+            ;;
+        "python")
+            if [ -d "htmlcov" ]; then
+                echo "🌐 HTML Report: file://$(pwd)/htmlcov/index.html"
+            fi
+            ;;
+        "rust")
+            if [ -f "tarpaulin-report.html" ]; then
+                echo "🌐 HTML Report: file://$(pwd)/tarpaulin-report.html"
+            fi
+            ;;
+        "go")
+            if [ -f "coverage.html" ]; then
+                echo "🌐 HTML Report: file://$(pwd)/coverage.html"
+            fi
+            ;;
+        "java")
+            if [ -d "target/site/jacoco" ]; then
+                echo "🌐 HTML Report: file://$(pwd)/target/site/jacoco/index.html"
+            elif [ -d "build/reports/jacoco/test/html" ]; then
+                echo "🌐 HTML Report: file://$(pwd)/build/reports/jacoco/test/html/index.html"
+            fi
+            ;;
+    esac
+else
+    echo "❌ No coverage data available"
+    echo "💡 Coverage Setup Tips:"
+    case "$PROJECT_TYPE" in
+        "node")
+            echo "  • For Jest: Add 'collectCoverage: true' to jest.config.js"
+            echo "  • For Vitest: Add 'coverage' provider to vite.config.js"
+            echo "  • Run: npm install --save-dev @vitest/coverage-c8"
+            ;;
+        "python")
+            echo "  • Install: pip install pytest-cov coverage"
+            echo "  • Run: pytest --cov=your_package"
+            ;;
+        "rust")
+            echo "  • Install: cargo install cargo-tarpaulin"
+            echo "  • Run: cargo tarpaulin --out Html"
+            ;;
+        "go")
+            echo "  • Built-in: go test -coverprofile=coverage.out"
+            echo "  • View: go tool cover -html=coverage.out"
+            ;;
+        "java")
+            echo "  • Add JaCoCo plugin to Maven/Gradle configuration"
+            echo "  • Maven: mvn test jacoco:report"
+            echo "  • Gradle: ./gradlew test jacocoTestReport"
+            ;;
+    esac
+fi
+
+echo ""
+echo "💡 Coverage Best Practices:"
+echo "  • Aim for 80%+ line coverage on critical code"
+echo "  • Focus on testing business logic and edge cases"
+echo "  • Use coverage to identify untested code, not as a quality metric"
+echo "  • Write meaningful tests, not just coverage-driven tests"
+echo "  • Exclude generated code and vendor dependencies"
+echo "  • Set up coverage thresholds in CI/CD pipelines"
+
+echo ""
+echo "🎯 Test coverage analysis complete!"
+echo "═══════════════════════════════════════════════════"
+
+exit 0
+```
+
+## Examples
+### Test Coverage Final Report Hook Script
+
+Complete hook script that generates test coverage reports on session end
+
+```bash
+#!/bin/bash
+echo "🧪 Test Coverage Final Report - Analyzing test coverage..."
+echo "⏰ Session ended: $(date)"
+PROJECT_TYPE="unknown"
+TEST_FRAMEWORK="unknown"
+if [ -f "package.json" ]; then
+  PROJECT_TYPE="node"
+  if grep -q '"jest"' package.json 2>/dev/null; then
+    TEST_FRAMEWORK="jest"
+    echo "🃏 Jest testing framework detected"
+    if npm test -- --coverage --silent 2>/dev/null; then
+      echo "✅ Jest coverage completed successfully"
+      if [ -f "coverage/coverage-summary.json" ]; then
+        echo "📋 Coverage Summary:"
+        cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | "Lines: " + (.lines.pct|tostring) + "%"' 2>/dev/null || echo "Coverage summary parsing failed"
+      fi
+      echo "🌐 HTML Report: file://$(pwd)/coverage/index.html"
+    fi
+  fi
+elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  PROJECT_TYPE="python"
+  if command -v pytest >/dev/null 2>&1; then
+    TEST_FRAMEWORK="pytest"
+    echo "🧪 Pytest testing framework available"
+    if pytest --cov=. --cov-report=term-missing --cov-report=html 2>/dev/null; then
+      echo "✅ Pytest coverage completed successfully"
+      if [ -d "htmlcov" ]; then
+        echo "🌐 HTML Report: file://$(pwd)/htmlcov/index.html"
+      fi
+    fi
+  fi
+fi
+echo "💡 Coverage Best Practices:"
+echo "  • Aim for 80%+ line coverage on critical code"
+echo "  • Focus on testing business logic and edge cases"
+echo "  • Use coverage to identify untested code, not as a quality metric"
+echo "🎯 Test coverage analysis complete!"
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable test coverage reports
+
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/test-coverage-final-report.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+### Enhanced Multi-Language Coverage Analysis
+
+Enhanced hook script with support for Vitest, Rust, and Go coverage tools
+
+```bash
+#!/bin/bash
+echo "🧪 Test Coverage Final Report - Analyzing test coverage..."
+PROJECT_TYPE="unknown"
+if [ -f "package.json" ]; then
+  PROJECT_TYPE="node"
+  if grep -q '"vitest"' package.json 2>/dev/null; then
+    echo "⚡ Vitest testing framework detected"
+    if npx vitest run --coverage 2>/dev/null; then
+      echo "✅ Vitest coverage completed successfully"
+      if [ -d "coverage" ]; then
+        echo "📊 Coverage files found in coverage/ directory"
+        if [ -f "coverage/coverage-summary.json" ]; then
+          echo "📋 Coverage Summary:"
+          cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | "Lines: " + (.lines.pct|tostring) + "% (" + (.lines.covered|tostring) + "/" + (.lines.total|tostring) + ")", "Branches: " + (.branches.pct|tostring) + "% (" + (.branches.covered|tostring) + "/" + (.branches.total|tostring) + ")", "Functions: " + (.functions.pct|tostring) + "% (" + (.functions.covered|tostring) + "/" + (.functions.total|tostring) + ")", "Statements: " + (.statements.pct|tostring) + "% (" + (.statements.covered|tostring) + "/" + (.statements.total|tostring) + ")"' 2>/dev/null || echo "Coverage summary parsing failed"
+        fi
+        echo "🌐 HTML Report: file://$(pwd)/coverage/index.html"
+      fi
+    fi
+  fi
+elif [ -f "Cargo.toml" ]; then
+  PROJECT_TYPE="rust"
+  if command -v cargo-tarpaulin >/dev/null 2>&1; then
+    if cargo tarpaulin --out Html 2>/dev/null; then
+      echo "✅ Cargo tarpaulin coverage completed successfully"
+      if [ -f "tarpaulin-report.html" ]; then
+        echo "🌐 HTML Report: file://$(pwd)/tarpaulin-report.html"
+      fi
+    fi
+  fi
+elif [ -f "go.mod" ]; then
+  PROJECT_TYPE="go"
+  if go test -coverprofile=coverage.out ./... 2>/dev/null; then
+    go tool cover -html=coverage.out -o coverage.html 2>/dev/null
+    echo "✅ Go coverage completed successfully"
+    if [ -f "coverage.html" ]; then
+      echo "🌐 HTML Report: file://$(pwd)/coverage.html"
+    fi
+  fi
+fi
+echo "🎯 Test coverage analysis complete!"
+exit 0
+```
+### Coverage Threshold Validation
+
+Enhanced hook script with coverage threshold validation and enforcement
+
+```bash
+#!/bin/bash
+echo "🧪 Test Coverage Final Report - Analyzing test coverage..."
+PROJECT_TYPE="unknown"
+if [ -f "package.json" ]; then
+  PROJECT_TYPE="node"
+  if grep -q '"jest"' package.json 2>/dev/null; then
+    COVERAGE_THRESHOLD=80
+    if npm test -- --coverage --silent 2>/dev/null; then
+      if [ -f "coverage/coverage-summary.json" ]; then
+        LINE_COVERAGE=$(cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total.lines.pct' 2>/dev/null || echo "0")
+        if (( $(echo "$LINE_COVERAGE >= $COVERAGE_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+          echo "✅ Coverage threshold met: ${LINE_COVERAGE}% >= ${COVERAGE_THRESHOLD}%"
+        else
+          echo "⚠️ Coverage below threshold: ${LINE_COVERAGE}% < ${COVERAGE_THRESHOLD}%"
+        fi
+      fi
+    fi
+  fi
+elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  PROJECT_TYPE="python"
+  if command -v pytest >/dev/null 2>&1; then
+    COVERAGE_THRESHOLD=80
+    if pytest --cov=. --cov-report=term --cov-report=html --cov-fail-under=$COVERAGE_THRESHOLD 2>/dev/null; then
+      echo "✅ Coverage threshold met: >= ${COVERAGE_THRESHOLD}%"
+    else
+      echo "⚠️ Coverage below threshold: < ${COVERAGE_THRESHOLD}%"
+    fi
+  fi
+fi
+echo "🎯 Test coverage analysis complete!"
+exit 0
+```
+### Test Coverage Final Report Configuration Example
+
+Example test coverage final report configuration for customizing coverage analysis behavior
+
+```json
+{
+  "coverage": {
+    "report_on_session_end": true,
+    "html_report": true,
+    "terminal_report": true,
+    "coverage_threshold": 80,
+    "frameworks": {
+      "jest": {
+        "coverage_command": "npm test -- --coverage",
+        "summary_file": "coverage/coverage-summary.json",
+        "html_report": "coverage/index.html"
+      },
+      "pytest": {
+        "coverage_command": "pytest --cov=. --cov-report=html",
+        "html_report": "htmlcov/index.html"
+      },
+      "vitest": {
+        "coverage_command": "npx vitest run --coverage",
+        "summary_file": "coverage/coverage-summary.json"
+      }
+    },
+    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/__pycache__/**"]
+  }
+}
+```
+
+## Troubleshooting
+### Jest coverage reports zero percent despite passing tests
+
+collectCoverage disabled or wrong paths in jest.config.js. Verify: 'collectCoverage: true, collectCoverageFrom: ["src/**/*.{js,ts}"]'. Or force: 'npm test -- --coverage --collectCoverageFrom="src/**"'. Check Jest configuration. Verify test execution.
+### Coverage summary JSON parsing fails with jq errors
+
+coverage-summary.json missing or malformed. Check exists: '[ -f coverage/coverage-summary.json ]' before jq. Generate: add 'coverageReporters: ["json-summary", "html"]' to jest.config.js. Verify JSON format. Test jq parsing separately.
+### Python pytest-cov not found despite pytest installation
+
+Separate package required. Install: 'pip install pytest-cov coverage'. Verify: 'pytest --version' shows cov plugin. Or use coverage.py: 'coverage run -m pytest; coverage report'. Check Python environment. Verify package installation.
+### Rust tarpaulin installation fails with compilation errors
+
+Requires nightly Rust and specific deps. Use Docker: 'docker run --rm -v $PWD:/volume xd009642/tarpaulin cargo tarpaulin'. Or alternative: 'cargo install cargo-llvm-cov' for stable Rust. Check Rust toolchain. Verify dependencies.
+### HTML report links show file:// protocol not opening in browser
+
+Terminal doesn't hyperlink file:// URLs. Add open command: 'echo "Open: coverage/index.html"; open coverage/index.html 2>/dev/null || xdg-open coverage/index.html' auto-launching browser. Verify file path. Test browser opening.
+### Vitest coverage not generating HTML reports
+
+Install coverage provider: 'npm install --save-dev @vitest/coverage-c8' or '@vitest/coverage-v8'. Configure in vite.config.js: 'test: { coverage: { provider: "c8" } }'. Verify Vitest configuration. Test coverage generation.
+### Go coverage shows incorrect percentages
+
+Verify coverage profile generation: 'go test -coverprofile=coverage.out ./...'. Check coverage profile format. Use 'go tool cover -func=coverage.out' for detailed breakdown. Verify Go version. Test coverage calculation.
+### Maven/Gradle JaCoCo reports not found
+
+Ensure JaCoCo plugin is configured in pom.xml or build.gradle. Run: 'mvn test jacoco:report' or './gradlew test jacocoTestReport'. Check plugin configuration. Verify report generation path. Test JaCoCo execution.

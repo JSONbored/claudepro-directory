@@ -1,0 +1,140 @@
+---
+title: Raycast Extension Dev Publish Capability Pack Skill
+slug: raycast-extension-dev-publish-capability-pack
+category: skills
+description: 'Expert Raycast extension capability skill for command design, extension architecture, testing, and store-ready publication workflows.'
+cardDescription: 'Deep Raycast builder skill for creating, validating, and shipping high-quality extensions to the Raycast ecosystem.'
+seoTitle: Raycast Extension Dev Publish Capability Pack Skill
+seoDescription: 'Advanced AI skill for Raycast extension development and publishing, including architecture, quality checks, and store submission readiness.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://developers.raycast.com/'
+downloadUrl: /downloads/skills/raycast-extension-dev-publish-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack'
+usageSnippet: 'Use this skill to build and ship Raycast extensions that are reliable, polished, and publish-ready.'
+copySnippet: |-
+  # Trigger
+  "Apply the Raycast extension dev/publish capability pack to this project."
+
+  # Required output
+  1) Extension command architecture
+  2) API/auth/storage approach
+  3) QA checklist and failure handling
+  4) Store publication readiness report
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://developers.raycast.com/'
+  - 'https://developers.raycast.com/basics/getting-started'
+  - 'https://developers.raycast.com/basics/publish-an-extension'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Raycast extension project setup
+  - Product use case and command plan
+  - API access for external integrations
+tags:
+  - raycast
+  - extensions
+  - developer-tools
+  - publishing
+  - capability-pack
+keywords:
+  - raycast extension development
+  - raycast store publishing
+  - command palette apps
+  - macos productivity tooling
+readingTime: 8
+packageVerified: true
+difficultyScore: 76
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+
+- https://developers.raycast.com/
+- https://developers.raycast.com/basics/getting-started
+- https://developers.raycast.com/basics/publish-an-extension
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+
+This capability pack teaches agents how to design and ship Raycast extensions that are useful in real workflows. It focuses on maintainable architecture and store submission quality.
+
+## Capability Scope
+
+- Command and UX architecture
+- External API integration and auth handling
+- Local state and cache strategy
+- Error/fallback UX patterns
+- Publish and post-release maintenance workflow
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Keep command scope explicit and focused.
+- Protect API tokens and sensitive user data.
+- Design for graceful degradation on API failures.
+- Validate extension behavior on cold and warm starts.
+
+## Troubleshooting
+
+**Issue:** Extension feels slow or brittle  
+**Fix:** Add caching and request timeouts with clear fallback UI states.
+
+**Issue:** Store review rejects submission  
+**Fix:** Audit metadata, permissions, and UX consistency against Raycast guidelines.
+
+**Issue:** External API changes break commands  
+**Fix:** Add schema guards and compatibility adapters for remote responses.
+
+## Output Contract
+
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

@@ -1,0 +1,263 @@
+---
+title: Kubernetes MCP Server - MCP Servers
+slug: kubernetes-mcp-server
+category: mcp
+description: >-
+  Kubernetes cluster management and container orchestration through MCP
+  integration
+cardDescription: >-
+  Kubernetes cluster management and container orchestration through MCP
+  integration
+seoTitle: Kubernetes MCP Server - MCP Servers
+seoDescription: >-
+  Kubernetes cluster management and container orchestration through MCP
+  integration Discover tools for AI development.
+author: feiskyer
+dateAdded: '2025-09-20'
+repoUrl: 'https://github.com/feiskyer/mcp-kubernetes-server'
+documentationUrl: 'https://github.com/feiskyer/mcp-kubernetes-server'
+downloadUrl: /downloads/mcp/kubernetes-mcp-server.mcpb
+packageVerified: true
+installable: true
+installCommand: >-
+  claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx
+  mcp-kubernetes-server && claude mcp list
+usageSnippet: >-
+  claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx
+  mcp-kubernetes-server && claude mcp list
+copySnippet: |-
+  {
+    "kubernetes": {
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+      },
+      "args": [
+        "mcp-kubernetes-server"
+      ],
+      "command": "uvx"
+    }
+  }
+configSnippet: |-
+  {
+    "kubernetes": {
+      "env": {
+        "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+      },
+      "args": [
+        "mcp-kubernetes-server"
+      ],
+      "command": "uvx"
+    }
+  }
+estimatedSetupTime: 3 minutes
+difficulty: intermediate
+prerequisites:
+  - 'Kubernetes cluster access (local, cloud, or remote cluster)'
+  - >-
+    kubectl installed and configured (version within ±1 minor version of
+    cluster)
+  - >-
+    kubeconfig file configured at ~/.kube/config (or custom path via KUBECONFIG
+    environment variable)
+  - >-
+    uvx package manager installed (for uvx installation method) or Docker (for
+    Docker installation method)
+  - >-
+    Appropriate RBAC permissions for desired operations (cluster-admin, view,
+    edit, or custom roles)
+  - Network access to Kubernetes API server endpoint
+  - >-
+    Understanding of Kubernetes concepts (pods, deployments, services,
+    namespaces, ConfigMaps, Secrets)
+  - Claude Desktop 0.7.0+ or Claude Code with MCP support
+  - Understanding of container orchestration and cluster management concepts
+  - >-
+    Optional: Helm installed for Helm chart operations (can be disabled via
+    --disable-helm flag)
+tags:
+  - kubernetes
+  - k8s
+  - container
+  - orchestration
+  - devops
+keywords:
+  - claude
+  - container
+  - development
+  - devops
+  - k8s
+  - kubernetes
+  - mcp
+  - mcp servers
+  - orchestration
+  - server
+  - tools
+readingTime: 1
+difficultyScore: 10
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Content
+
+Streamline your Kubernetes cluster management by connecting Claude to your Kubernetes API. Deploy and manage applications, monitor cluster health, scale workloads, manage secrets and configurations, troubleshoot issues, and automate operations—all through natural language commands. Leverage kubectl and Helm operations seamlessly with RBAC-aware access control.
+
+## Features
+
+- Cluster resource management (pods, deployments, services, ingress)
+- Pod and deployment operations (create, update, scale, delete)
+- Service and ingress configuration (load balancing and routing)
+- Namespace management (create, list, switch contexts)
+- ConfigMap and Secret handling (secure configuration management)
+- Real-time cluster monitoring (resource usage, health checks, logs)
+- Helm chart operations (install, upgrade, uninstall charts - optional)
+- Advanced kubectl operations (port-forward, exec, logs, describe)
+- Advanced Kubernetes cluster and resource management with deployment orchestration, service configuration, and monitoring integration
+- Batch operations support for efficient bulk resource operations, namespace management, and deployment workflows with automatic retry logic
+- Real-time cluster monitoring capabilities with event streaming support for tracking resource lifecycle and triggering automated workflows
+
+## Use Cases
+
+- Deploy and manage containerized applications with natural language commands
+- Monitor cluster health and resource usage in real-time
+- Scale workloads based on demand (horizontal and vertical scaling)
+- Manage secrets and configuration data securely across namespaces
+- Troubleshoot deployment issues with automated log retrieval and diagnostics
+- Automate cluster operations and maintenance tasks
+- Perform advanced debugging with port-forwarding and exec commands
+- Manage Helm releases and chart deployments programmatically
+- Build automated infrastructure management workflows that sync external systems with Kubernetes for real-time cluster management and deployment automation
+
+## Installation
+
+### Claude Code
+
+1. Ensure kubectl is installed and kubeconfig is configured at ~/.kube/config
+2. claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server
+3. Verify installation: claude mcp list
+4. Test connection: claude mcp status kubernetes
+5. Verify cluster access: Ask Claude to list pods in default namespace
+
+### Claude Desktop
+
+1. Ensure kubectl is installed and kubeconfig is configured at ~/.kube/config
+2. Install via uvx: uvx mcp-kubernetes-server
+3. Set KUBECONFIG environment variable to your kubeconfig path
+4. Open your Claude Desktop configuration file (see configPath below)
+5. Add server configuration with KUBECONFIG environment variable
+6. Restart Claude Desktop
+7. Verify cluster access: Ask Claude to list pods in default namespace
+
+## Requirements
+
+- Kubernetes cluster access (local, cloud, or remote cluster)
+- kubectl installed and configured (version within ±1 minor version of cluster)
+- kubeconfig file configured at ~/.kube/config (or custom path via KUBECONFIG environment variable)
+- uvx package manager installed (for uvx installation method) or Docker (for Docker installation method)
+- Appropriate RBAC permissions for desired operations (cluster-admin, view, edit, or custom roles)
+- Network access to Kubernetes API server endpoint
+- Understanding of Kubernetes concepts (pods, deployments, services, namespaces, ConfigMaps, Secrets)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of container orchestration and cluster management concepts
+- Optional: Helm installed for Helm chart operations (can be disabled via --disable-helm flag)
+
+## Configuration
+
+```json
+{
+  "kubernetes": {
+    "env": {
+      "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
+    },
+    "args": [
+      "mcp-kubernetes-server"
+    ],
+    "command": "uvx"
+  }
+}
+```
+
+## Examples
+### List all pods in the default namespace
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "List all pods in the default namespace"
+```
+### Create a new deployment with specified image
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Create a new deployment with specified image"
+```
+### Scale a deployment to 5 replicas
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Scale a deployment to 5 replicas"
+```
+### Get cluster node information and status
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Get cluster node information and status"
+```
+### Deploy Application
+Create a Kubernetes deployment with replica configuration
+```typescript
+// Deploy application to Kubernetes
+const deployment = await k8s.apps.v1.deployments.create({
+  namespace: "default",
+  body: {
+    metadata: { name: "my-app" },
+    spec: {
+      replicas: 3,
+      selector: { matchLabels: { app: "my-app" } },
+      template: {
+        metadata: { labels: { app: "my-app" } },
+        spec: { containers: [{ name: "app", image: "nginx:latest" }] }
+      }
+    }
+  }
+});
+```
+
+## Security
+
+- Uses kubeconfig for authentication (supports multiple authentication methods)
+- Respects existing RBAC permissions (cluster-scoped access controls)
+- Secure kubectl API integration (TLS-encrypted communication)
+- Cluster-scoped access controls (verify permissions before operations)
+- Monitor kubectl operations and review audit logs for security compliance
+- Kubernetes API access grants full cluster control - ensure kubeconfig credentials and service account tokens are securely stored and never exposed in client-side code or public repositories
+- Kubernetes service account tokens and kubeconfig files must be securely managed - use environment variables, secret management systems, and secure credential storage
+- Kubernetes namespace, pod, and deployment names may expose infrastructure architecture and application structure - ensure Kubernetes resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Kubernetes MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Kubernetes webhook configurations and payloads may contain sensitive cluster and resource metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Unauthorized: server has asked for client credentials
+
+Verify kubeconfig file is correctly configured at ~/.kube/config. Check IAM entity is authenticated by cluster. Run `kubectl config view` to verify context and credentials are set properly. Ensure kubeconfig file has valid certificates and hasn't expired. For cloud providers (EKS, GKE, AKS), regenerate kubeconfig using provider-specific commands (e.g., `aws eks update-kubeconfig --name cluster-name`).
+### Connection refused: localhost:8080 error
+
+Set KUBECONFIG environment variable to correct path. Export `KUBECONFIG=~/.kube/config` or specify in MCP server config. Verify kubeconfig file exists and has valid cluster endpoint, not localhost:8080. Check cluster API server URL in kubeconfig matches your actual cluster endpoint. For remote clusters, ensure network connectivity and firewall rules allow access.
+### RBAC permission denied for cluster operations
+
+Verify your user has appropriate RBAC permissions. Check if IAM principal needs system:masters group for admin access. For EKS, use access entries with API or API_AND_CONFIG_MAP authentication mode. Review RoleBinding or ClusterRoleBinding to ensure your user/service account has required permissions. Use `kubectl auth can-i <verb> <resource>` to test permissions.
+### kubectl version incompatibility with cluster
+
+Ensure kubectl version within ±1 minor version of cluster. For Kubernetes 1.29 cluster, use kubectl 1.28-1.30. Run `kubectl version --client` and `kubectl version` to check client and server versions. Update kubectl if needed using official installation methods. Version skew can cause unexpected behavior and API compatibility issues.
+### TLS certificate errors or chain of trust invalid
+
+Check certificate hasn't expired: `kubectl config view --raw`. Verify CA certificate in kubeconfig matches cluster CA. For EKS, regenerate kubeconfig: `aws eks update-kubeconfig --name cluster-name`. For self-signed certificates, ensure CA certificate is properly included in kubeconfig. Check certificate validity dates and renew if expired.
+### Kubernetes MCP server authentication errors with kubeconfig
+
+Verify kubeconfig file is valid and accessible. Check certificate expiration dates. Ensure service account token is valid. For remote clusters, verify network connectivity and TLS certificate configuration.
+### Kubernetes resource creation or update failures
+
+Check resource quotas and limits in namespace. Verify RBAC permissions allow resource creation. Ensure resource specifications are valid. Check cluster capacity and node resources. Review Kubernetes API server logs for detailed errors.
+### Kubernetes MCP server connection timeouts or network errors
+
+Check network connectivity to Kubernetes API server. Verify kubeconfig points to correct cluster endpoint. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
+### Kubernetes pod or deployment failures
+
+Check pod logs for application errors. Verify image pull secrets are configured correctly. Check resource requests and limits. Ensure container images are accessible. Review events using kubectl get events for detailed error information.

@@ -1,0 +1,129 @@
+---
+title: Codex Automations Orchestrator Capability Pack Skill
+slug: codex-automations-orchestrator-capability-pack
+category: skills
+description: 'Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.'
+cardDescription: 'Plan and operate recurring agent automations with deterministic prompts, guardrails, and output contracts.'
+seoTitle: Codex Automations Orchestrator Capability Pack Skill
+seoDescription: 'Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-11'
+documentationUrl: 'https://github.com/openai/codex'
+downloadUrl: /downloads/skills/codex-automations-orchestrator-capability-pack.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack'
+usageSnippet: 'Use this skill to design robust recurring automations with bounded scope, explicit outputs, and low alert fatigue.'
+copySnippet: |-
+  # Trigger
+  "Apply the Codex automations orchestrator capability pack."
+
+  # Required output
+  1) Automation inventory and purpose
+  2) Schedule/risk matrix
+  3) Prompt and output contract per automation
+  4) Alerting and rollback plan
+skillType: capability-pack
+skillLevel: expert
+verificationStatus: validated
+verifiedAt: '2026-04-11'
+retrievalSources:
+  - 'https://github.com/openai/codex'
+  - 'https://spec.modelcontextprotocol.io/specification/'
+  - 'https://www.rfc-editor.org/rfc/rfc5545'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Automation goals and success metrics
+  - Notification channel
+  - Operational owner
+tags:
+  - codex
+  - automation
+  - orchestration
+  - scheduling
+  - capability-pack
+keywords:
+  - codex automations
+  - recurring agent workflows
+  - rrule scheduling
+  - automation governance
+readingTime: 9
+packageVerified: true
+difficultyScore: 85
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Knowledge Freshness
+
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+
+- https://github.com/openai/codex
+- https://spec.modelcontextprotocol.io/specification/
+- https://www.rfc-editor.org/rfc/rfc5545
+
+## Core Workflow
+
+1. Define automation objective and business value.
+2. Set schedule with explicit risk and blast-radius limits.
+3. Write self-sufficient prompt with output contract.
+4. Add observability, alerts, and runbook actions.
+5. Review periodically and retire low-value automations.
+
+## Overview
+
+This skill turns ad-hoc recurring tasks into maintainable automations with clear guardrails and measurable outcomes.
+
+## Capability Scope
+
+- Automation scoping and prioritization
+- Schedule and RRULE governance
+- Prompt reliability for unattended runs
+- Alert routing and escalation design
+- Lifecycle management and cleanup
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+
+- Every automation must declare bounded scope and expected outputs.
+- Alert only on actionable failures to avoid fatigue.
+- Prevent overlapping destructive runs with single-flight controls.
+- Keep runbooks current for pause, rollback, and recovery actions.
+
+## Troubleshooting
+
+**Issue:** Automation output is inconsistent  
+**Fix:** tighten prompt to fixed output schema and acceptance checks.
+
+**Issue:** Too many alerts  
+**Fix:** only notify on actionable failures, not informational events.
+
+**Issue:** Runs overlap and cause drift  
+**Fix:** enforce single-flight behavior and lock window policy.
+
+## Output Contract
+
+1. Automation definition per task.
+2. Schedule + risk controls.
+3. Alert routing and runbook.
+4. Maintenance cadence and retirement triggers.

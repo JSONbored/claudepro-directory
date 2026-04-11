@@ -1,0 +1,144 @@
+---
+title: Prompt Injection Defense Guardrails Skill
+slug: prompt-injection-defense-guardrails
+category: skills
+description: 'Build layered defenses against prompt injection, data exfiltration, and unsafe tool execution in AI agent systems.'
+cardDescription: 'Implement practical prompt injection defenses with policy gates, tool constraints, and adversarial test cases.'
+seoTitle: Prompt Injection Defense Guardrails Skill
+seoDescription: Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests.
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/'
+downloadUrl: /downloads/skills/prompt-injection-defense-guardrails.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails'
+usageSnippet: Use this skill whenever an agent consumes untrusted input or can trigger external tools/actions.
+copySnippet: |-
+  # Trigger
+  "Run the prompt injection defense guardrails skill on this agent flow."
+
+  # Required output
+  1) Injection threat map by input source
+  2) Guardrail architecture (prevent, detect, contain)
+  3) Red-team prompts and expected safe behavior
+  4) Blocking policy and audit log schema
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Agent flow that processes user input or external web/content data
+  - Ability to add policy checks before tool execution
+  - Test harness for adversarial prompt scenarios
+tags:
+  - prompt-injection
+  - guardrails
+  - security
+  - ai-safety
+  - red-teaming
+keywords:
+  - ai-skill
+  - prompt-injection-defense
+  - llm-security
+  - tool-safety
+  - adversarial-testing
+readingTime: 7
+packageVerified: true
+difficultyScore: 80
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill helps you ship agent workflows that can safely handle hostile or manipulative input. It combines policy-based execution controls with concrete adversarial testing so prompt injection becomes an engineering problem with measurable controls, not a vague risk.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Documented tool calls and data boundaries
+- Clear policy on what actions are ever allowed
+- Logging pipeline for security-relevant events
+
+## Guardrail Model
+
+- **Prevent:** strict policy before any tool/action call
+- **Detect:** prompt pattern heuristics + schema violations + anomalous action chains
+- **Contain:** block, downgrade, or require explicit human confirmation for risky operations
+
+## How to Use This Skill
+
+### Prompt Pattern
+
+```text
+Apply prompt injection defense guardrails to this system.
+Output:
+1) attack tree,
+2) policy controls with enforcement points,
+3) adversarial test suite,
+4) release gate criteria.
+```
+
+### Execution Flow
+
+1. Enumerate all untrusted input channels.
+2. Define hard deny policies for sensitive actions.
+3. Add pre-tool policy checks and argument validation.
+4. Build adversarial test prompts and expected outcomes.
+5. Block release if any critical bypass succeeds.
+
+## Troubleshooting
+
+**Issue:** Guardrails over-block normal user requests  
+**Fix:** Tighten policy conditions by action context, not broad keyword filters.
+
+**Issue:** Model still attempts prohibited actions  
+**Fix:** Enforce server-side policy independently of model output.
+
+**Issue:** Red-team set misses real attacks  
+**Fix:** Continuously seed tests from production incidents and near misses.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://genai.owasp.org/llmrisk/llm01-prompt-injection/
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

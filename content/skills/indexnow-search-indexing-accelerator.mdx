@@ -1,0 +1,131 @@
+---
+title: IndexNow Search Indexing Accelerator Skill
+slug: indexnow-search-indexing-accelerator
+category: skills
+description: Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.
+cardDescription: 'SEO operations skill for faster indexing updates using structured publishing, sitemap hygiene, and IndexNow submission patterns.'
+seoTitle: IndexNow Search Indexing Accelerator Skill
+seoDescription: 'Reusable AI skill for improving indexing velocity with IndexNow, sitemap operations, and search-engine-friendly update workflows.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://www.indexnow.org/documentation'
+downloadUrl: /downloads/skills/indexnow-search-indexing-accelerator.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/indexnow-search-indexing-accelerator.zip -o indexnow-search-indexing-accelerator.zip && unzip -o indexnow-search-indexing-accelerator.zip -d ./indexnow-search-indexing-accelerator'
+usageSnippet: Use this skill to standardize indexing signals for newly published or updated pages and reduce crawl lag.
+copySnippet: |-
+  # Trigger
+  "Apply the IndexNow indexing accelerator skill to this publishing pipeline."
+
+  # Required output
+  1) URL submission strategy
+  2) Sitemap and robots consistency checks
+  3) Search console/webmaster verification steps
+  4) Monitoring and retry policy
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://www.indexnow.org/documentation'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Domain control and webmaster access
+  - Sitemap generation workflow
+  - Publishing system that emits changed URL lists
+tags:
+  - indexnow
+  - seo
+  - indexing
+  - sitemap
+  - search
+keywords:
+  - indexnow automation
+  - faster indexing
+  - sitemap workflow
+  - technical seo operations
+readingTime: 6
+packageVerified: true
+difficultyScore: 66
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill helps AI agents implement fast, reliable indexing workflows. It coordinates URL-change detection, IndexNow submission, and consistency checks so search engines receive clear and timely signals.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Canonical URL policy
+- Working sitemap and robots endpoints
+- Alerting path for submission failures
+
+## What This Skill Delivers
+
+- URL-change classification (new, updated, removed)
+- IndexNow submission strategy by batch size and priority
+- Validation checklist for search consistency signals
+- Retry and failure handling logic
+
+## How to Use This Skill
+
+1. Detect changed URLs from publish events.
+2. Validate canonical and sitemap membership.
+3. Submit changes through IndexNow endpoint strategy.
+4. Track acceptance and indexing progress.
+5. Retry failures and escalate persistent errors.
+
+## Troubleshooting
+
+**Issue:** URLs submitted but indexing stays slow  
+**Fix:** Verify canonical tags, crawlability, and no conflicting redirect chains.
+
+**Issue:** Frequent submission failures  
+**Fix:** Add backoff retries and endpoint health checks with alerting.
+
+**Issue:** Duplicate URL variants get indexed  
+**Fix:** Enforce strict canonical and redirect consistency before submission.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://www.indexnow.org/documentation
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

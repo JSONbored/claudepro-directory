@@ -1,0 +1,634 @@
+---
+title: Hooks Generator for Claude Code
+slug: hooks-generator
+category: commands
+description: >-
+  Create automated Claude Code hooks that execute shell commands at specific
+  lifecycle points for deterministic control over formatting, testing, linting,
+  and notifications
+cardDescription: >-
+  Create automated Claude Code hooks that execute shell commands at specific
+  lifecycle points for deterministic control over formatting, te...
+seoTitle: Hooks Generator for Claude Code
+seoDescription: >-
+  Create automated Claude Code hooks that execute shell commands at specific
+  lifecycle points for deterministic control over formatting, testing, linting,
+  and ...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/hooks'
+installable: true
+installCommand: '/hooks-generator [hook-type] [options]'
+usageSnippet: '/hooks-generator [hook-type] [options]'
+copySnippet: '/hooks-generator [hook-type] [options]'
+tags:
+  - hooks
+  - automation
+  - lifecycle
+  - workflow
+  - deterministic
+  - triggers
+keywords:
+  - automation
+  - claude
+  - commands
+  - deterministic
+  - development
+  - generator
+  - hooks
+  - lifecycle
+  - tools
+  - triggers
+  - workflow
+readingTime: 8
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+commandSyntax: '/hooks-generator [hook-type] [options]'
+---
+The `/hooks-generator` command creates automated lifecycle hooks in Claude Code that execute shell commands at specific trigger points, providing deterministic control over development workflows.
+
+## Features
+
+- **Lifecycle Triggers**: Execute commands at PreToolUse, PostToolUse, SessionStart, SessionEnd, Stop
+- **Deterministic Control**: Guaranteed execution vs LLM choosing to run commands
+- **Auto-Formatting**: Run linters/formatters after every file edit
+- **Continuous Testing**: Execute tests automatically after code changes
+- **Notification System**: Alert on task completion, errors, or approval needed
+- **Git Integration**: Auto-stage, commit, or push on specific events
+- **Template Library**: Pre-built hooks for common development workflows
+- **Conditional Execution**: Run hooks only when specific conditions are met
+
+## Usage
+
+```bash
+/hooks-generator [hook-type] [options]
+```
+
+### Hook Types
+
+**Tool Lifecycle:**
+- `--pre-tool` - Execute before Claude runs a tool
+- `--post-tool` - Execute after a tool completes
+- `--tool-error` - Execute when a tool fails
+
+**Session Lifecycle:**
+- `--session-start` - Execute when Claude Code session begins
+- `--session-end` - Execute when session ends
+- `--stop` - Execute when task completes
+
+**File Operations:**
+- `--pre-edit` - Before file is edited
+- `--post-edit` - After file is edited (most common)
+- `--pre-write` - Before new file is written
+- `--post-write` - After new file is written
+
+### Pre-built Templates
+
+- `--auto-format` - Run Biome/Prettier after file edits
+- `--auto-test` - Run tests after code changes
+- `--auto-lint` - Run ESLint/Biome after edits
+- `--auto-typecheck` - Run TypeScript compiler after changes
+- `--notify-completion` - Send notification when tasks complete
+- `--git-stage` - Auto-stage changed files
+
+### Configuration Options
+
+- `--tool=<name>` - Trigger only for specific tool (e.g., edit_file, write_file)
+- `--path=<pattern>` - Trigger only for files matching pattern
+- `--condition=<expr>` - Execute only when condition is true
+- `--async` - Run hook in background (don't block Claude)
+
+## Examples
+
+### Auto-Format Hook (Most Common)
+
+**Command:**
+```bash
+/hooks-generator --auto-format --tool=edit_file
+```
+
+**Generated Hook:**
+```json
+// .claude/hooks/post-edit-format.json
+{
+  "name": "auto-format",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "command": "pnpm biome check --write $FILE_PATH",
+  "async": false,
+  "description": "Automatically format files with Biome after editing"
+}
+```
+
+**Behavior:**
+```bash
+User: "Fix the login function in auth.service.ts"
+
+Claude:
+1. Edits src/services/auth.service.ts
+2. **Hook triggers automatically**
+3. Runs: pnpm biome check --write src/services/auth.service.ts
+4. File is formatted with Biome rules
+5. Claude continues with task
+
+User sees:
+"Fixed login function. File automatically formatted with Biome."
+```
+
+### Auto-Test Hook
+
+**Command:**
+```bash
+/hooks-generator --auto-test --path="src/**/*.ts" --async
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "auto-test",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "pathPattern": "src/**/*.ts",
+  "command": "pnpm test --run --changed",
+  "async": true,
+  "description": "Run tests for changed files in background"
+}
+```
+
+**Workflow:**
+```bash
+User: "Refactor the user service"
+
+Claude:
+1. Edits src/services/user.service.ts
+2. **Hook triggers in background**
+3. Runs: pnpm test --run --changed (async, doesn't block)
+4. Claude continues immediately
+
+Background:
+[Auto-Test Hook] Running tests...
+✓ user.service.test.ts (12 tests)
+✓ All tests passing
+```
+
+### TypeScript Type-Check Hook
+
+**Command:**
+```bash
+/hooks-generator --auto-typecheck --path="**/*.ts" --tool=edit_file,write_file
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "typecheck",
+  "trigger": "PostToolUse",
+  "tools": ["edit_file", "write_file"],
+  "pathPattern": "**/*.ts",
+  "command": "pnpm tsc --noEmit --project tsconfig.json",
+  "async": false,
+  "failOnError": true,
+  "description": "Type-check TypeScript files after modifications"
+}
+```
+
+**Behavior with Errors:**
+```bash
+Claude: Edits src/utils/helpers.ts
+
+[TypeCheck Hook] Running TypeScript compiler...
+
+❌ Type error found:
+src/utils/helpers.ts:15:3
+  Type 'string' is not assignable to type 'number'
+
+Claude: "I found a type error. Let me fix it..."
+*Edits file again to fix type error*
+
+[TypeCheck Hook] Running TypeScript compiler...
+✓ No type errors
+
+Claude: "Type errors resolved."
+```
+
+### Notification Hook (Task Completion)
+
+**Command:**
+```bash
+/hooks-generator --notify-completion --trigger=Stop
+```
+
+**Generated Hook (macOS):**
+```json
+{
+  "name": "notify-complete",
+  "trigger": "Stop",
+  "command": "osascript -e 'display notification \"Task completed\" with title \"Claude Code\"'",
+  "async": true,
+  "description": "Send macOS notification when task completes"
+}
+```
+
+**Generated Hook (Linux):**
+```json
+{
+  "name": "notify-complete",
+  "trigger": "Stop",
+  "command": "notify-send 'Claude Code' 'Task completed'",
+  "async": true
+}
+```
+
+**Workflow:**
+```bash
+User: "Implement the payment processing feature"
+
+Claude: *works for 5 minutes implementing feature*
+
+Claude: "Payment processing feature complete."
+
+**Notification appears:**
+┌─────────────────────┐
+│ Claude Code         │
+│ Task completed      │
+└─────────────────────┘
+```
+
+### Git Auto-Stage Hook
+
+**Command:**
+```bash
+/hooks-generator --git-stage --trigger=PostToolUse --tool=edit_file,write_file
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "git-auto-stage",
+  "trigger": "PostToolUse",
+  "tools": ["edit_file", "write_file"],
+  "command": "git add $FILE_PATH",
+  "async": true,
+  "description": "Automatically stage modified files in git"
+}
+```
+
+**Combined with Stop Hook for Commit:**
+```json
+{
+  "name": "git-auto-commit",
+  "trigger": "Stop",
+  "condition": "git diff --cached --quiet || exit 1",
+  "command": "git commit -m 'feat: $TASK_DESCRIPTION'",
+  "async": false
+}
+```
+
+### Multi-Hook Workflow (Format + Test + TypeCheck)
+
+**Command:**
+```bash
+/hooks-generator --auto-format --auto-test --auto-typecheck
+```
+
+**Generated Hooks:**
+```json
+// .claude/hooks/post-edit-format.json
+{
+  "name": "format",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "priority": 1,
+  "command": "pnpm biome check --write $FILE_PATH"
+}
+
+// .claude/hooks/post-edit-typecheck.json
+{
+  "name": "typecheck",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "priority": 2,
+  "command": "pnpm tsc --noEmit",
+  "failOnError": true
+}
+
+// .claude/hooks/post-edit-test.json
+{
+  "name": "test",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "priority": 3,
+  "command": "pnpm test --run --changed",
+  "async": true
+}
+```
+
+**Execution Order:**
+```bash
+Claude: Edits src/services/payment.service.ts
+
+1. [Priority 1] Format with Biome
+   ✓ Formatted payment.service.ts
+
+2. [Priority 2] TypeScript type-check
+   ✓ No type errors
+
+3. [Priority 3] Run tests (async)
+   ✓ 8 tests passing
+```
+
+### Conditional Hook (Only for Production Files)
+
+**Command:**
+```bash
+/hooks-generator --custom
+```
+
+**Interactive Setup:**
+```
+Claude: "What should this hook do?"
+User: "Run security audit on production files"
+
+Claude: "When should it trigger?"
+User: "After editing files in src/, but not test files"
+
+Claude: "What command should it run?"
+User: "npm audit"
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "security-audit",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "pathPattern": "src/**/*.ts",
+  "excludePattern": "**/*.test.ts",
+  "command": "npm audit --audit-level=high",
+  "async": false,
+  "failOnError": false,
+  "description": "Run security audit after editing production files"
+}
+```
+
+### Session Start Hook (Environment Setup)
+
+**Command:**
+```bash
+/hooks-generator --trigger=SessionStart
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "session-setup",
+  "trigger": "SessionStart",
+  "commands": [
+    "echo '🚀 Claude Code session started'",
+    "git fetch origin",
+    "pnpm install --silent",
+    "pnpm run build:types"
+  ],
+  "async": true,
+  "description": "Setup development environment on session start"
+}
+```
+
+**Execution:**
+```bash
+$ claude
+
+[Session Start Hook] Running setup...
+🚀 Claude Code session started
+Fetching latest from origin...
+Installing dependencies...
+Generating TypeScript types...
+✓ Environment ready
+
+Claude: "Ready to help! What would you like to work on?"
+```
+
+### Pre-Tool Hook (Validation)
+
+**Command:**
+```bash
+/hooks-generator --trigger=PreToolUse --tool=bash
+```
+
+**Generated Hook:**
+```json
+{
+  "name": "bash-validation",
+  "trigger": "PreToolUse",
+  "tool": "bash",
+  "command": "echo 'Executing bash command: $TOOL_ARGS'",
+  "validation": {
+    "dangerousCommands": ["rm -rf", "sudo", "curl | bash"],
+    "requireConfirmation": true
+  },
+  "description": "Validate bash commands before execution"
+}
+```
+
+**Behavior:**
+```bash
+Claude: About to run: rm -rf node_modules
+
+[Pre-Tool Validation]
+⚠️  Dangerous command detected: rm -rf
+Confirm execution? (y/n): y
+
+✓ User confirmed, proceeding...
+```
+
+## Advanced Patterns
+
+### Chained Hooks
+
+```json
+{
+  "name": "build-pipeline",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "pathPattern": "src/**/*",
+  "chain": [
+    {
+      "command": "pnpm biome check --write $FILE_PATH",
+      "description": "Format code"
+    },
+    {
+      "command": "pnpm tsc --noEmit",
+      "description": "Type check",
+      "failOnError": true
+    },
+    {
+      "command": "pnpm test --run --changed",
+      "description": "Run tests",
+      "async": true
+    }
+  ]
+}
+```
+
+### Environment-Specific Hooks
+
+```json
+{
+  "name": "format",
+  "trigger": "PostToolUse",
+  "tool": "edit_file",
+  "command": "pnpm biome check --write $FILE_PATH",
+  "environments": {
+    "development": { "enabled": true },
+    "ci": { "enabled": false },
+    "production": { "enabled": false }
+  }
+}
+```
+
+### Throttled Hooks (Rate Limiting)
+
+```json
+{
+  "name": "expensive-test",
+  "trigger": "PostToolUse",
+  "command": "pnpm test:e2e",
+  "throttle": {
+    "maxExecutions": 1,
+    "period": "5m"
+  },
+  "description": "Run E2E tests max once per 5 minutes"
+}
+```
+
+## Available Variables
+
+### File Operation Variables
+- `$FILE_PATH` - Full path to file being operated on
+- `$FILE_NAME` - Name of file (without path)
+- `$FILE_EXT` - File extension
+- `$FILE_DIR` - Directory containing file
+
+### Tool Variables
+- `$TOOL_NAME` - Name of tool being executed
+- `$TOOL_ARGS` - Arguments passed to tool
+- `$TOOL_RESULT` - Result from tool execution (PostToolUse only)
+
+### Session Variables
+- `$SESSION_ID` - Unique session identifier
+- `$TASK_DESCRIPTION` - User's original task request
+- `$CWD` - Current working directory
+
+### Git Variables
+- `$GIT_BRANCH` - Current git branch
+- `$GIT_COMMIT` - Current commit SHA
+- `$GIT_STATUS` - Git status output
+
+## Hook Configuration
+
+### Project Hooks (Team-Shared)
+```bash
+# Location: .claude/hooks/*.json
+# Committed to git
+# Available to all team members
+```
+
+### User Hooks (Personal)
+```bash
+# Location: ~/.config/claude/hooks/*.json
+# Personal preferences
+# Not shared with team
+```
+
+### Hook Priority
+```json
+{
+  "name": "critical-hook",
+  "priority": 1,  // Lower number = higher priority
+  "trigger": "PostToolUse"
+}
+```
+
+## Debugging Hooks
+
+### Enable Debug Logging
+```bash
+/hooks-generator --debug
+```
+
+**Output:**
+```
+[Hook Debug] Loaded hooks:
+  - auto-format (PostToolUse, edit_file)
+  - auto-test (PostToolUse, edit_file)
+  - typecheck (PostToolUse, edit_file,write_file)
+
+[Hook Execution] auto-format
+  Trigger: PostToolUse (edit_file)
+  File: src/services/auth.service.ts
+  Command: pnpm biome check --write src/services/auth.service.ts
+  Exit Code: 0
+  Duration: 234ms
+```
+
+### Disable All Hooks
+```bash
+/hooks-generator --disable-all
+```
+
+### Disable Specific Hook
+```bash
+/hooks-generator --disable=auto-test
+```
+
+## Best Practices
+
+1. **Keep Hooks Fast**: Use `async: true` for slow commands
+2. **Fail Fast**: Set `failOnError: true` for critical validations
+3. **Path Filtering**: Use `pathPattern` to avoid unnecessary executions
+4. **Priority Order**: Format → TypeCheck → Test
+5. **Team Alignment**: Commit project hooks for consistency
+6. **Personal Preferences**: Use user hooks for notifications, custom scripts
+7. **Test Hooks**: Verify hooks work before committing to git
+8. **Monitor Performance**: Check hook execution times with `--debug`
+
+## Common Workflows
+
+### React/Next.js Project
+```bash
+/hooks-generator \
+  --auto-format \
+  --auto-typecheck \
+  --auto-test \
+  --path="src/**/*.{ts,tsx}"
+```
+
+### Node.js Backend
+```bash
+/hooks-generator \
+  --auto-format \
+  --auto-typecheck \
+  --auto-test \
+  --auto-lint \
+  --path="src/**/*.ts"
+```
+
+### Python Project
+```bash
+/hooks-generator --custom
+# Format: black $FILE_PATH
+# Lint: ruff check $FILE_PATH
+# Test: pytest tests/
+```
+
+### Notification-Heavy Workflow
+```bash
+/hooks-generator \
+  --notify-completion \
+  --trigger=Stop,SessionEnd
+```

@@ -1,0 +1,6 @@
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+
+/_next/static/*
+  Cache-Control: public, max-age=31536000, immutable

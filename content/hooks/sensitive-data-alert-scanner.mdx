@@ -1,0 +1,424 @@
+---
+title: Sensitive Data Alert Scanner - Hooks
+slug: sensitive-data-alert-scanner
+category: hooks
+description: Scans for potential sensitive data exposure and alerts immediately.
+cardDescription: Scans for potential sensitive data exposure and alerts immediately.
+seoTitle: Sensitive Data Alert Scanner - Hooks
+seoDescription: >-
+  Scans for potential sensitive data exposure and alerts immediately. This
+  Notification hook provides comprehensive sensitive data detection with
+  real-time sen...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/sensitive-data-alert-scanner.sh
+  && chmod +x .claude/hooks/sensitive-data-alert-scanner.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/sensitive-data-alert-scanner.sh
+  && chmod +x .claude/hooks/sensitive-data-alert-scanner.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
+        "matchers": [
+          "*"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/bin/bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Only scan for Write and Edit operations\nif [[ \"$TOOL_NAME\" != \"Write\" && \"$TOOL_NAME\" != \"Edit\" ]]; then\n  exit 0\nfi\n\necho \"\U0001F512 Sensitive Data Alert Scanner - Analyzing file for security risks...\"\necho \"\U0001F4C4 File: $FILE_PATH\"\n\n# Check if file exists and is readable\nif [ ! -f \"$FILE_PATH\" ]; then\n    echo \"⚠️ File not found: $FILE_PATH\"\n    exit 0\nfi\n\n# Skip binary files\nif file \"$FILE_PATH\" | grep -q binary; then\n    echo \"ℹ️ Skipping binary file\"\n    exit 0\nfi\n\nSECURITY_ISSUES=0\nWARNINGS=0\n\necho \"\U0001F50D Scanning for sensitive data patterns...\"\n\n# 1. API Keys and Secrets\necho \"\U0001F511 Checking for API keys and secrets...\"\nAPI_PATTERNS=(\n    \"api[_-]?key\\s*[:=]\\s*[\\\"'][^\\\"']{8,}[\\\"']\"\n    \"secret[_-]?key\\s*[:=]\\s*[\\\"'][^\\\"']{8,}[\\\"']\"\n    \"access[_-]?token\\s*[:=]\\s*[\\\"'][^\\\"']{10,}[\\\"']\"\n    \"private[_-]?key\\s*[:=]\\s*[\\\"'][^\\\"']{20,}[\\\"']\"\n    \"client[_-]?secret\\s*[:=]\\s*[\\\"'][^\\\"']{8,}[\\\"']\"\n)\n\nfor pattern in \"${API_PATTERNS[@]}\"; do\n    if grep -iE \"$pattern\" \"$FILE_PATH\" 2>/dev/null | grep -v -iE \"(\\*\\*\\*|example|placeholder|your[_-]|demo|test|fake|dummy)\"; then\n        echo \"\U0001F6A8 SECURITY ALERT: Potential API key/secret detected!\"\n        SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\n    fi\ndone\n\n# 2. Password patterns\necho \"\U0001F510 Checking for password exposure...\"\nPASSWORD_PATTERNS=(\n    \"password\\s*[:=]\\s*[\\\"'][^\\\"']{6,}[\\\"']\"\n    \"passwd\\s*[:=]\\s*[\\\"'][^\\\"']{6,}[\\\"']\"\n    \"pwd\\s*[:=]\\s*[\\\"'][^\\\"']{6,}[\\\"']\"\n)\n\nfor pattern in \"${PASSWORD_PATTERNS[@]}\"; do\n    if grep -iE \"$pattern\" \"$FILE_PATH\" 2>/dev/null | grep -v -iE \"(\\*\\*\\*|example|placeholder|your[_-]|demo|test|123456|password)\"; then\n        echo \"\U0001F6A8 SECURITY ALERT: Potential password detected!\"\n        SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\n    fi\ndone\n\n# 3. Database connection strings\necho \"\U0001F5C4️ Checking for database credentials...\"\nif grep -iE \"(mysql://|postgresql://|mongodb://|redis://).*:.*@\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"\U0001F6A8 SECURITY ALERT: Database connection string with credentials detected!\"\n    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\nfi\n\n# 4. JWT tokens\necho \"\U0001F3AB Checking for JWT tokens...\"\nif grep -E \"eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"\U0001F6A8 SECURITY ALERT: JWT token detected!\"\n    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\nfi\n\n# 5. SSH private keys\necho \"\U0001F511 Checking for SSH private keys...\"\nif grep -q \"BEGIN.*PRIVATE KEY\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"\U0001F6A8 SECURITY ALERT: SSH private key detected!\"\n    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\nfi\n\n# 6. Email addresses (warning, not critical)\necho \"\U0001F4E7 Checking for email addresses...\"\nif grep -E \"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\" \"$FILE_PATH\" 2>/dev/null | head -3; then\n    echo \"⚠️ Email addresses detected - ensure this is intentional\"\n    WARNINGS=$((WARNINGS + 1))\nfi\n\n# 7. Credit card patterns (basic check)\necho \"\U0001F4B3 Checking for credit card numbers...\"\nif grep -E \"[0-9]{4}[\\s-]?[0-9]{4}[\\s-]?[0-9]{4}[\\s-]?[0-9]{4}\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"\U0001F6A8 SECURITY ALERT: Potential credit card number detected!\"\n    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\nfi\n\n# 8. Social Security Numbers (US format)\necho \"\U0001F194 Checking for SSN patterns...\"\nif grep -E \"[0-9]{3}-[0-9]{2}-[0-9]{4}\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"\U0001F6A8 SECURITY ALERT: Potential SSN detected!\"\n    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))\nfi\n\n# 9. Phone numbers\necho \"\U0001F4DE Checking for phone numbers...\"\nif grep -E \"\\+?[1-9][0-9]{1,3}[\\s-]?\\(?[0-9]{3}\\)?[\\s-]?[0-9]{3}[\\s-]?[0-9]{4}\" \"$FILE_PATH\" 2>/dev/null; then\n    echo \"⚠️ Phone numbers detected - verify if intentional\"\n    WARNINGS=$((WARNINGS + 1))\nfi\n\n# Summary\necho \"\"\necho \"\U0001F4CA Security Scan Results:\"\necho \"  • Critical Issues: $SECURITY_ISSUES\"\necho \"  • Warnings: $WARNINGS\"\n\nif [ $SECURITY_ISSUES -gt 0 ]; then\n    echo \"\"\n    echo \"\U0001F6A8 CRITICAL SECURITY ALERT!\"\n    echo \"\U0001F6E1️ Action Required:\"\n    echo \"  • Review detected sensitive data immediately\"\n    echo \"  • Remove or mask sensitive information\"\n    echo \"  • Use environment variables for secrets\"\n    echo \"  • Consider using a secrets management service\"\n    echo \"  • Check if file should be added to .gitignore\"\nfi\n\nif [ $WARNINGS -gt 0 ]; then\n    echo \"\"\n    echo \"⚠️ Security Warnings:\"\n    echo \"  • Review detected information for necessity\"\n    echo \"  • Consider data privacy implications\"\n    echo \"  • Verify compliance with data protection regulations\"\nfi\n\necho \"\"\necho \"\U0001F4A1 Security Best Practices:\"\necho \"  • Use environment variables for sensitive data\"\necho \"  • Implement proper secrets management\"\necho \"  • Add sensitive files to .gitignore\"\necho \"  • Regular security audits of codebase\"\necho \"  • Use code scanning tools in CI/CD\"\n\necho \"\"\necho \"\U0001F3AF Security scan complete!\"\n\nexit 0"
+trigger: Notification
+tags:
+  - security
+  - sensitive-data
+  - notification
+  - scanning
+  - privacy
+keywords:
+  - alert
+  - claude
+  - data
+  - development
+  - hooks
+  - notification
+  - privacy
+  - scanner
+  - scanning
+  - security
+  - sensitive
+  - sensitive-data
+  - tools
+readingTime: 4
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Real-time sensitive data detection including sensitive data detection integration (real-time sensitive data scanning on file changes, immediate security alerts with alert notifications, sensitive data pattern detection with pattern matching, sensitive data validation with data validation), detection optimization (detection performance with fast scanning, detection accuracy with accurate pattern matching, detection efficiency with efficient processing, detection coverage with comprehensive patterns), detection validation (sensitive data validation with data verification, false positive reduction with filtering, sensitive data classification with classification, sensitive data severity assessment with severity levels), and detection reporting (sensitive data detection reporting with detection results, sensitive data location reporting with file locations, sensitive data severity reporting with severity levels, sensitive data remediation reporting with remediation suggestions)
+- API key and token scanning including API key detection (API key pattern detection with comprehensive patterns, API key validation with key verification, API key classification with key classification, API key severity assessment with severity levels), token detection (access token detection with token patterns, refresh token detection with refresh patterns, JWT token detection with JWT patterns, OAuth token detection with OAuth patterns), API key management (API key exclusion configuration with exclusion patterns, API key ignore file configuration with ignore files, API key scanning optimization with optimization, API key scanning performance with performance tuning), and API key reporting (API key detection reporting with detection results, API key location reporting with file locations, API key severity reporting with severity levels, API key remediation reporting with remediation suggestions)
+- Password exposure prevention including password detection (password pattern detection with password patterns, hardcoded password detection with hardcoded patterns, password hash detection with hash patterns, password placeholder detection with placeholder filtering), password validation (password validation with verification, false positive reduction with filtering, password classification with classification, password severity assessment with severity levels), password management (password exclusion configuration with exclusion patterns, password ignore file configuration with ignore files, password scanning optimization with optimization, password scanning performance with performance tuning), and password reporting (password detection reporting with detection results, password location reporting with file locations, password severity reporting with severity levels, password remediation reporting with remediation suggestions)
+- Email address detection including email detection (email address pattern detection with email patterns, email validation with email verification, email classification with email classification, email severity assessment with severity levels), email management (email exclusion configuration with exclusion patterns, email ignore file configuration with ignore files, email scanning optimization with optimization, email scanning performance with performance tuning), and email reporting (email detection reporting with detection results, email location reporting with file locations, email severity reporting with severity levels, email remediation reporting with remediation suggestions)
+- Personal information monitoring including PII detection (personally identifiable information detection with PII patterns, SSN detection with SSN patterns, credit card detection with credit card patterns, phone number detection with phone patterns), PII validation (PII validation with verification, false positive reduction with filtering, PII classification with classification, PII severity assessment with severity levels), PII management (PII exclusion configuration with exclusion patterns, PII ignore file configuration with ignore files, PII scanning optimization with optimization, PII scanning performance with performance tuning), and PII reporting (PII detection reporting with detection results, PII location reporting with file locations, PII severity reporting with severity levels, PII remediation reporting with remediation suggestions)
+- Immediate security alerts including alert generation (immediate security alert generation with real-time alerts, security alert notification with alert notifications, security alert prioritization with alert priorities, security alert routing with alert routing), alert configuration (alert threshold configuration with threshold settings, alert severity configuration with severity levels, alert notification configuration with notification settings, alert routing configuration with routing settings), alert management (alert suppression configuration with suppression rules, alert deduplication with duplicate detection, alert aggregation with alert aggregation, alert escalation with escalation rules), and alert reporting (alert generation reporting with alert status, alert notification reporting with notification status, alert resolution reporting with resolution status, alert statistics with alert metrics)
+- Database and credential scanning including database credential detection (database connection string detection with connection patterns, database credential validation with credential verification, database password detection with password patterns, database URL detection with URL patterns), credential management (credential exclusion configuration with exclusion patterns, credential ignore file configuration with ignore files, credential scanning optimization with optimization, credential scanning performance with performance tuning), and credential reporting (credential detection reporting with detection results, credential location reporting with file locations, credential severity reporting with severity levels, credential remediation reporting with remediation suggestions)
+- Development workflow integration including continuous monitoring (real-time sensitive data monitoring on file changes, immediate security alerts on data exposure, automatic data detection on file modifications, seamless security integration with development workflow), workflow automation (automated sensitive data detection without manual intervention, detection automation with automatic detection, alert automation with automatic alerts), and workflow optimization (sensitive data change detection with change tracking, detection optimization with optimization, sensitive data consistency maintenance with consistency checks)
+
+## Use Cases
+
+- Prevent accidental commits of API keys and secrets automatically detecting API keys and secrets in code, alerting immediately, and preventing sensitive data exposure
+- Detect exposed passwords in code files automatically scanning for password patterns, detecting hardcoded passwords, and alerting on password exposure
+- Monitor for personal information leaks automatically detecting PII patterns (SSN, credit cards, phone numbers), alerting on PII exposure, and maintaining privacy compliance
+- Alert on potential security vulnerabilities automatically detecting security-sensitive patterns, providing immediate alerts, and preventing security issues
+- Scan for hardcoded credentials automatically detecting hardcoded credentials, database connection strings, and authentication tokens, and alerting on credential exposure
+- Development workflow integration seamlessly integrating sensitive data detection into development workflows without manual security checks or data scanning
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/sensitive-data-alert-scanner.sh
+3. Make executable: chmod +x .claude/hooks/sensitive-data-alert-scanner.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- grep command (standard Unix tool)
+- jq (optional, for JSON parsing)
+- file command (optional, for binary file detection)
+- awk (optional, for comment filtering)
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
+      "matchers": [
+        "*"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Only scan for Write and Edit operations
+if [[ "$TOOL_NAME" != "Write" && "$TOOL_NAME" != "Edit" ]]; then
+  exit 0
+fi
+
+echo "🔒 Sensitive Data Alert Scanner - Analyzing file for security risks..."
+echo "📄 File: $FILE_PATH"
+
+# Check if file exists and is readable
+if [ ! -f "$FILE_PATH" ]; then
+    echo "⚠️ File not found: $FILE_PATH"
+    exit 0
+fi
+
+# Skip binary files
+if file "$FILE_PATH" | grep -q binary; then
+    echo "ℹ️ Skipping binary file"
+    exit 0
+fi
+
+SECURITY_ISSUES=0
+WARNINGS=0
+
+echo "🔍 Scanning for sensitive data patterns..."
+
+# 1. API Keys and Secrets
+echo "🔑 Checking for API keys and secrets..."
+API_PATTERNS=(
+    "api[_-]?key\s*[:=]\s*[\"'][^\"']{8,}[\"']"
+    "secret[_-]?key\s*[:=]\s*[\"'][^\"']{8,}[\"']"
+    "access[_-]?token\s*[:=]\s*[\"'][^\"']{10,}[\"']"
+    "private[_-]?key\s*[:=]\s*[\"'][^\"']{20,}[\"']"
+    "client[_-]?secret\s*[:=]\s*[\"'][^\"']{8,}[\"']"
+)
+
+for pattern in "${API_PATTERNS[@]}"; do
+    if grep -iE "$pattern" "$FILE_PATH" 2>/dev/null | grep -v -iE "(\*\*\*|example|placeholder|your[_-]|demo|test|fake|dummy)"; then
+        echo "🚨 SECURITY ALERT: Potential API key/secret detected!"
+        SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+    fi
+done
+
+# 2. Password patterns
+echo "🔐 Checking for password exposure..."
+PASSWORD_PATTERNS=(
+    "password\s*[:=]\s*[\"'][^\"']{6,}[\"']"
+    "passwd\s*[:=]\s*[\"'][^\"']{6,}[\"']"
+    "pwd\s*[:=]\s*[\"'][^\"']{6,}[\"']"
+)
+
+for pattern in "${PASSWORD_PATTERNS[@]}"; do
+    if grep -iE "$pattern" "$FILE_PATH" 2>/dev/null | grep -v -iE "(\*\*\*|example|placeholder|your[_-]|demo|test|123456|password)"; then
+        echo "🚨 SECURITY ALERT: Potential password detected!"
+        SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+    fi
+done
+
+# 3. Database connection strings
+echo "🗄️ Checking for database credentials..."
+if grep -iE "(mysql://|postgresql://|mongodb://|redis://).*:.*@" "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 SECURITY ALERT: Database connection string with credentials detected!"
+    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+
+# 4. JWT tokens
+echo "🎫 Checking for JWT tokens..."
+if grep -E "eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+" "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 SECURITY ALERT: JWT token detected!"
+    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+
+# 5. SSH private keys
+echo "🔑 Checking for SSH private keys..."
+if grep -q "BEGIN.*PRIVATE KEY" "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 SECURITY ALERT: SSH private key detected!"
+    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+
+# 6. Email addresses (warning, not critical)
+echo "📧 Checking for email addresses..."
+if grep -E "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}" "$FILE_PATH" 2>/dev/null | head -3; then
+    echo "⚠️ Email addresses detected - ensure this is intentional"
+    WARNINGS=$((WARNINGS + 1))
+fi
+
+# 7. Credit card patterns (basic check)
+echo "💳 Checking for credit card numbers..."
+if grep -E "[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}" "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 SECURITY ALERT: Potential credit card number detected!"
+    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+
+# 8. Social Security Numbers (US format)
+echo "🆔 Checking for SSN patterns..."
+if grep -E "[0-9]{3}-[0-9]{2}-[0-9]{4}" "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 SECURITY ALERT: Potential SSN detected!"
+    SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+
+# 9. Phone numbers
+echo "📞 Checking for phone numbers..."
+if grep -E "\+?[1-9][0-9]{1,3}[\s-]?\(?[0-9]{3}\)?[\s-]?[0-9]{3}[\s-]?[0-9]{4}" "$FILE_PATH" 2>/dev/null; then
+    echo "⚠️ Phone numbers detected - verify if intentional"
+    WARNINGS=$((WARNINGS + 1))
+fi
+
+# Summary
+echo ""
+echo "📊 Security Scan Results:"
+echo "  • Critical Issues: $SECURITY_ISSUES"
+echo "  • Warnings: $WARNINGS"
+
+if [ $SECURITY_ISSUES -gt 0 ]; then
+    echo ""
+    echo "🚨 CRITICAL SECURITY ALERT!"
+    echo "🛡️ Action Required:"
+    echo "  • Review detected sensitive data immediately"
+    echo "  • Remove or mask sensitive information"
+    echo "  • Use environment variables for secrets"
+    echo "  • Consider using a secrets management service"
+    echo "  • Check if file should be added to .gitignore"
+fi
+
+if [ $WARNINGS -gt 0 ]; then
+    echo ""
+    echo "⚠️ Security Warnings:"
+    echo "  • Review detected information for necessity"
+    echo "  • Consider data privacy implications"
+    echo "  • Verify compliance with data protection regulations"
+fi
+
+echo ""
+echo "💡 Security Best Practices:"
+echo "  • Use environment variables for sensitive data"
+echo "  • Implement proper secrets management"
+echo "  • Add sensitive files to .gitignore"
+echo "  • Regular security audits of codebase"
+echo "  • Use code scanning tools in CI/CD"
+
+echo ""
+echo "🎯 Security scan complete!"
+
+exit 0
+```
+
+## Examples
+### Sensitive Data Alert Scanner Hook Script
+
+Complete hook script that scans for sensitive data and alerts immediately
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.test.* ]] || [[ "$FILE_PATH" == *fixture* ]]; then
+  exit 0
+fi
+SECURITY_ISSUES=0
+if grep -iE "api[_-]?key\s*[:=]\s*[\"'][^\"']{8,}[\"']" "$FILE_PATH" 2>/dev/null | grep -v -iE "(example|placeholder|your[_-]|demo|test)"; then
+  echo "🚨 SECURITY ALERT: Potential API key detected!"
+  SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+if [ $SECURITY_ISSUES -gt 0 ]; then
+  exit 1
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable sensitive data scanning
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
+      "matchers": ["*"]
+    }
+  }
+}
+```
+### Enhanced Scanner with File Wait and Ignore Support
+
+Enhanced hook script with file wait retry loop and .securityignore file support
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -f ".securityignore" ] && grep -qF "$FILE_PATH" .securityignore; then
+  exit 0
+fi
+for i in {1..5}; do
+  [ -f "$FILE_PATH" ] && break
+  sleep 0.1
+done
+if [ ! -f "$FILE_PATH" ]; then
+  exit 0
+fi
+SECURITY_ISSUES=0
+if grep -iE "password\s*[:=]\s*[\"'][^\"']{6,}[\"']" "$FILE_PATH" 2>/dev/null | grep -v -iE "(example|placeholder|your[_-]|demo|test|123456|password)"; then
+  echo "🚨 SECURITY ALERT: Potential password detected!"
+  SECURITY_ISSUES=$((SECURITY_ISSUES + 1))
+fi
+if [ $SECURITY_ISSUES -gt 0 ]; then
+  exit 1
+fi
+exit 0
+```
+### Comment-Aware Sensitive Data Scanning
+
+Enhanced hook script that filters out commented lines before scanning for sensitive data
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if grep -qE "^\s*[#/]" "$FILE_PATH" 2>/dev/null; then
+  CONTENT=$(awk '!/^\s*[#/]/' "$FILE_PATH" 2>/dev/null)
+else
+  CONTENT=$(cat "$FILE_PATH" 2>/dev/null)
+fi
+if echo "$CONTENT" | grep -iE "api[_-]?key\s*[:=]\s*[\"'][^\"']{8,}[\"']" | grep -v -iE "(example|placeholder|your[_-]|demo|test)"; then
+  echo "🚨 SECURITY ALERT: Potential API key detected!"
+  exit 1
+fi
+exit 0
+```
+### Sensitive Data Scanner Configuration Example
+
+Example sensitive data scanner configuration for customizing scan behavior
+
+```json
+{
+  "sensitive_data": {
+    "exclude_patterns": ["test/**", "**/fixtures/*", "*.test.*"],
+    "ignore_file": ".securityignore",
+    "alert_threshold": "high",
+    "patterns": {
+      "api_keys": true,
+      "passwords": true,
+      "tokens": true,
+      "credentials": true,
+      "pii": true
+    }
+  }
+}
+```
+
+## Troubleshooting
+### False positives on example code and test fixtures with dummy keys
+
+Exclusion patterns filter common placeholders but miss context-specific ones. Add .securityignore file and check: grep -qF "$FILE_PATH" .securityignore && exit 0 to whitelist specific files or patterns. Verify exclusion patterns. Test with various test file configurations.
+### Notification hook timing runs before file write completes causing empty scans
+
+Notification hooks fire during operation, not after. File may not exist yet. Add retry loop: for i in {1..5}; do [ -f "$FILE_PATH" ] && break; sleep 0.1; done before scanning to ensure file availability. Verify file existence. Test with various file write scenarios.
+### Notification hook receives different INPUT schema than PostToolUse
+
+Notification hooks fire mid-operation with partial data. Input may lack file_path or use alternative fields. Extend jq filter: '.file_path // .tool_input.file_path // .path // ""' to handle schema variations across hook types. Verify input schema. Test with various hook types.
+### Grep patterns match commented-out secrets in code documentation
+
+Current regex doesn't exclude comments. Add language-aware filtering: grep -v '^\s*[#/]' for basic comment detection, or use awk to skip comment blocks before pattern matching for comprehensive filtering. Verify comment filtering. Test with various comment styles.
+### Security scan exits zero even when critical issues detected
+
+Script always exits 0 regardless of SECURITY_ISSUES count. Change final exit: [ $SECURITY_ISSUES -gt 0 ] && exit 1 || exit 0 to fail hook on findings, forcing Claude to acknowledge security alerts before proceeding. Verify exit codes. Test with various security issue scenarios.
+### Pattern matching is too broad and flags legitimate code
+
+Refine regex patterns to be more specific. Add context-aware filtering: check for surrounding code context, variable names, or function signatures. Use negative lookahead patterns to exclude common false positives. Verify pattern specificity. Test with various code patterns.
+### Binary files cause grep errors or false positives
+
+Add binary file detection: if file "$FILE_PATH" | grep -q binary; then exit 0; fi before scanning. Use file command to detect binary files and skip them. Verify binary detection. Test with various file types.
+### Multiple sensitive data patterns detected but only one alert shown
+
+Script may exit early on first match. Remove early exits and collect all matches before reporting. Use array to store all findings, then report all at once. Verify match collection. Test with multiple pattern matches.

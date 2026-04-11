@@ -1,0 +1,147 @@
+---
+title: MCP Server Security Hardening Skill
+slug: mcp-server-security-hardening
+category: skills
+description: 'Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.'
+cardDescription: 'Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk.'
+seoTitle: MCP Server Security Hardening Skill for AI Engineers
+seoDescription: 'Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://modelcontextprotocol.io/specification/2025-06-18'
+downloadUrl: /downloads/skills/mcp-server-security-hardening.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening'
+usageSnippet: Apply this skill before exposing any MCP server to third-party clients or shared environments.
+copySnippet: |-
+  # Trigger
+  "Run the MCP server security hardening skill against this MCP implementation."
+
+  # Required output
+  1) Threat model (auth, tool abuse, prompt injection, supply chain)
+  2) Concrete hardening patch plan
+  3) Logging and alerting requirements
+  4) Deployment gate checklist
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://modelcontextprotocol.io/specification/2025-06-18'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Existing MCP server implementation (local or remote)
+  - 'Access to server config, dependency manifest, and deployment settings'
+  - Ability to run integration tests after hardening
+tags:
+  - mcp
+  - security
+  - hardening
+  - auth
+  - ai-infrastructure
+keywords:
+  - ai-skill
+  - mcp-security
+  - tool-safety
+  - prompt-injection
+  - server-hardening
+  - security-checklist
+readingTime: 8
+packageVerified: true
+difficultyScore: 82
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill provides a production security baseline for MCP servers. It focuses on the practical risks that matter most in real deployments: over-permissive tools, weak authentication, unsafe input handling, dependency drift, and missing audit trails.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- MCP server code and runtime configuration
+- Tool manifest and permission model
+- Deployment target constraints (local, cloud, or edge)
+
+## Hardening Scope
+
+- Strict auth and identity verification
+- Least-privilege tool exposure
+- Input schema validation and sanitization
+- Output filtering for sensitive data
+- Request tracing, audit logs, and abuse detection
+
+## How to Use This Skill
+
+### Prompt Pattern
+
+```text
+Apply the MCP server security hardening skill.
+Deliver:
+1) Critical risks (P0/P1/P2),
+2) Exact config/code changes,
+3) Validation tests for each control,
+4) Rollout plan with rollback criteria.
+```
+
+### Execution Flow
+
+1. Enumerate all exposed tools and classify risk.
+2. Define trusted client model and auth strategy.
+3. Enforce schemas on all tool inputs and outputs.
+4. Add request IDs, structured logs, and alert hooks.
+5. Re-test normal and adversarial flows before release.
+
+## Troubleshooting
+
+**Issue:** Hardening breaks legitimate tool calls  
+**Fix:** Add explicit allowlist exceptions per trusted client scope, not global relaxations.
+
+**Issue:** Prompt injection still causes unsafe tool chains  
+**Fix:** Separate model instructions from executable tool policy and enforce server-side policy checks.
+
+**Issue:** Logs are too noisy to be actionable  
+**Fix:** Keep high-signal events (auth failures, denied tools, schema violations, repeated abuse IP/client IDs).
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://modelcontextprotocol.io/specification/2025-06-18
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

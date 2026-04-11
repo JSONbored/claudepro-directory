@@ -1,0 +1,476 @@
+---
+title: Documentation Coverage Checker - Hooks
+slug: documentation-coverage-checker
+category: hooks
+description: >-
+  Automated documentation coverage analysis with missing docstring detection,
+  API documentation validation, and completeness scoring. This PostToolUse hook
+  automatically checks documentation coverage when code files are modified,
+  providing real-time documentation quality validation during development.
+cardDescription: >-
+  Automated documentation coverage analysis with missing docstring detection,
+  API documentation validation, and completeness scoring.
+seoTitle: Documentation Coverage Checker - Hooks
+seoDescription: >-
+  Automated documentation coverage analysis with missing docstring detection,
+  API documentation validation, and completeness scoring. This PostToolUse hook
+  aut...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-19'
+documentationUrl: 'https://jsdoc.app/'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch
+  .claude/hooks/documentation-coverage-checker.sh && chmod +x
+  .claude/hooks/documentation-coverage-checker.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch
+  .claude/hooks/documentation-coverage-checker.sh && chmod +x
+  .claude/hooks/documentation-coverage-checker.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/documentation-coverage-checker.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "postToolUse": {
+        "script": "./.claude/hooks/documentation-coverage-checker.sh",
+        "matchers": [
+          "write",
+          "edit"
+        ]
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Configuration\nREPORT_FILE=\".claude/reports/docs-coverage-$(date +%Y%m%d).txt\"\nMIN_COVERAGE=${DOC_COVERAGE_THRESHOLD:-70}\n\nmkdir -p \"$(dirname \"$REPORT_FILE\")\"\n\n# Function to check if file needs documentation review\nneeds_doc_check() {\n  local file=$1\n  \n  case \"$file\" in\n    *.js|*.jsx|*.ts|*.tsx|*.py|*.go|*.rs|*.java|*.rb)\n      return 0\n      ;;\n    *)\n      return 1\n      ;;\n  esac\n}\n\n# Function to check JavaScript/TypeScript documentation\ncheck_js_ts_docs() {\n  local file=$1\n  \n  echo \"\U0001F4DD Checking JS/TS documentation: $file\" >&2\n  \n  # Count functions\n  local total_functions=$(grep -cE \"^\\s*(export\\s+)?(async\\s+)?function\\s+\\w+|^\\s*const\\s+\\w+\\s*=\\s*(async\\s+)?\\(|^\\s*\\w+\\s*\\(.*\\)\\s*\\{\" \"$file\" 2>/dev/null || echo \"0\")\n  \n  # Count documented functions (with JSDoc /** */)\n  local documented=$(grep -B1 -cE \"^\\s*\\/\\*\\*\" \"$file\" 2>/dev/null || echo \"0\")\n  \n  if [ \"$total_functions\" -gt 0 ]; then\n    local coverage=$((documented * 100 / total_functions))\n    \n    echo \"\" >> \"$REPORT_FILE\"\n    echo \"JavaScript/TypeScript Documentation - $file\" >> \"$REPORT_FILE\"\n    echo \"Total functions: $total_functions\" >> \"$REPORT_FILE\"\n    echo \"Documented: $documented\" >> \"$REPORT_FILE\"\n    echo \"Coverage: ${coverage}%\" >> \"$REPORT_FILE\"\n    \n    if [ \"$coverage\" -lt \"$MIN_COVERAGE\" ]; then\n      echo \"⚠️ Documentation coverage ${coverage}% below threshold ${MIN_COVERAGE}%\" >&2\n      echo \"\U0001F4A1 Add JSDoc comments to exported functions\" >&2\n    else\n      echo \"✅ Documentation coverage: ${coverage}%\" >&2\n    fi\n  fi\n  \n  # Check for exported items without docs\n  if grep -E \"^export (class|function|const|interface|type)\" \"$file\" >/dev/null 2>&1; then\n    echo \"\U0001F4E6 Exported items detected - ensure public API is documented\" >&2\n  fi\n}\n\n# Function to check Python documentation\ncheck_python_docs() {\n  local file=$1\n  \n  echo \"\U0001F40D Checking Python documentation: $file\" >&2\n  \n  # Use interrogate if available\n  if command -v interrogate &> /dev/null; then\n    echo \"\" >> \"$REPORT_FILE\"\n    echo \"Python Docstring Coverage - $file\" >> \"$REPORT_FILE\"\n    \n    local coverage_output=$(interrogate -v \"$file\" 2>/dev/null)\n    echo \"$coverage_output\" >> \"$REPORT_FILE\"\n    \n    # Extract coverage percentage\n    local coverage=$(echo \"$coverage_output\" | grep -oE '[0-9]+\\.[0-9]+%' | head -1 | tr -d '%')\n    \n    if [ -n \"$coverage\" ]; then\n      if (( $(echo \"$coverage < $MIN_COVERAGE\" | bc -l) )); then\n        echo \"⚠️ Docstring coverage ${coverage}% below threshold ${MIN_COVERAGE}%\" >&2\n      else\n        echo \"✅ Docstring coverage: ${coverage}%\" >&2\n      fi\n    fi\n  else\n    # Manual check for docstrings\n    local total_defs=$(grep -cE \"^\\s*def\\s+\\w+|^\\s*class\\s+\\w+\" \"$file\" 2>/dev/null || echo \"0\")\n    local documented=$(grep -A1 -cE \"^\\s*def\\s+\\w+|^\\s*class\\s+\\w+\" \"$file\" | grep -c '\"\"\"' || echo \"0\")\n    \n    if [ \"$total_defs\" -gt 0 ]; then\n      local coverage=$((documented * 100 / total_defs))\n      echo \"⚠️ Estimated docstring coverage: ${coverage}%\" >&2\n      echo \"\U0001F4A1 Install interrogate for accurate analysis: pip install interrogate\" >&2\n    fi\n  fi\n}\n\n# Function to check Go documentation\ncheck_go_docs() {\n  local file=$1\n  \n  echo \"\U0001F439 Checking Go documentation: $file\" >&2\n  \n  if command -v go &> /dev/null; then\n    # Use go doc if available\n    if go doc -all 2>/dev/null | grep -q \"$file\"; then\n      echo \"✅ Go documentation present\" >&2\n    else\n      echo \"\U0001F4A1 Add godoc comments to exported functions/types\" >&2\n    fi\n  fi\n  \n  # Check for exported items without comments\n  local undocumented=$(grep -E \"^func [A-Z]|^type [A-Z]\" \"$file\" | \\\n    while read -r line; do\n      grep -B1 \"$line\" \"$file\" | head -1 | grep -q \"^//\" || echo \"$line\"\n    done | wc -l)\n  \n  if [ \"$undocumented\" -gt 0 ]; then\n    echo \"⚠️ Found $undocumented undocumented exported items\" >&2\n  fi\n}\n\n# Function to check README freshness\ncheck_readme_freshness() {\n  if [ -f \"README.md\" ]; then\n    local readme_age=$(($(date +%s) - $(stat -f%m \"README.md\" 2>/dev/null || stat -c%Y \"README.md\" 2>/dev/null || echo \"0\")))\n    local days_old=$((readme_age / 86400))\n    \n    if [ \"$days_old\" -gt 90 ]; then\n      echo \"\U0001F4CB README.md is $days_old days old - consider updating\" >&2\n    fi\n  else\n    echo \"⚠️ No README.md found - create project documentation\" >&2\n  fi\n}\n\n# Function to check API documentation\ncheck_api_docs() {\n  local file=$1\n  \n  # Check for API route definitions\n  if grep -iE \"@(get|post|put|delete|patch)|router\\.(get|post|put|delete|patch)|app\\.(get|post|put|delete|patch)\" \"$file\" >/dev/null 2>&1; then\n    echo \"\U0001F310 API endpoint detected in: $file\" >&2\n    \n    # Check for OpenAPI/Swagger comments\n    if ! grep -E \"@swagger|@openapi|@api\" \"$file\" >/dev/null 2>&1; then\n      echo \"\U0001F4A1 Consider adding OpenAPI/Swagger documentation for API endpoints\" >&2\n    fi\n    \n    # Check for request/response documentation\n    if ! grep -E \"@param|@returns|@request|@response\" \"$file\" >/dev/null 2>&1; then\n      echo \"\U0001F4A1 Document request parameters and response types\" >&2\n    fi\n  fi\n}\n\n# Main execution\nif needs_doc_check \"$FILE_PATH\"; then\n  echo \"\U0001F4DA Documentation check triggered: $FILE_PATH\" >&2\n  \n  # Language-specific checks\n  case \"$FILE_PATH\" in\n    *.js|*.jsx|*.ts|*.tsx)\n      check_js_ts_docs \"$FILE_PATH\"\n      check_api_docs \"$FILE_PATH\"\n      ;;\n    *.py)\n      check_python_docs \"$FILE_PATH\"\n      check_api_docs \"$FILE_PATH\"\n      ;;\n    *.go)\n      check_go_docs \"$FILE_PATH\"\n      ;;\n  esac\n  \n  # General documentation checks\n  check_readme_freshness\n  \n  # Documentation best practices\n  echo \"\" >&2\n  echo \"\U0001F4D6 Documentation Best Practices:\" >&2\n  echo \"   • Document all public APIs and exported functions\" >&2\n  echo \"   • Include parameter types and return values\" >&2\n  echo \"   • Add usage examples for complex functions\" >&2\n  echo \"   • Keep README.md up-to-date with recent changes\" >&2\n  echo \"   • Use consistent documentation format (JSDoc/TSDoc/etc)\" >&2\n  \n  if [ -s \"$REPORT_FILE\" ]; then\n    echo \"\" >&2\n    echo \"\U0001F4C4 Documentation report: $REPORT_FILE\" >&2\n  fi\nelif [[ \"$FILE_PATH\" == *README* ]] || [[ \"$FILE_PATH\" == *CHANGELOG* ]]; then\n  echo \"\U0001F4DD Documentation file updated: $(basename \"$FILE_PATH\")\" >&2\n  echo \"✅ Keep documentation current with code changes\" >&2\nfi\n\nexit 0"
+trigger: PostToolUse
+tags:
+  - documentation
+  - code-quality
+  - analysis
+  - automation
+  - best-practices
+keywords:
+  - analysis
+  - automation
+  - best-practices
+  - checker
+  - claude
+  - code-quality
+  - coverage
+  - development
+  - documentation
+  - hooks
+  - tools
+readingTime: 1
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Automatic detection of undocumented functions and classes with real-time coverage analysis when code files are modified during active development
+- JSDoc 4.0.0+, TSDoc (Microsoft specification), and Python docstring validation with interrogate for comprehensive multi-language documentation coverage checking
+- API endpoint documentation completeness checking with OpenAPI/Swagger validation and request/response parameter documentation verification
+- Documentation coverage metrics and reporting with configurable threshold enforcement (default 70%) and detailed coverage reports
+- README and changelog freshness validation with automatic age detection and update recommendations for stale documentation
+- Support for multiple languages and documentation formats including JavaScript, TypeScript, Python, Go, Rust, and Java with language-specific validation rules
+- Exported/public API documentation enforcement ensuring all public APIs are properly documented with parameter types and return values
+- Documentation best practices validation with automatic recommendations for consistent documentation format and comprehensive API documentation
+
+## Use Cases
+
+- Automated documentation quality enforcement in development providing real-time documentation coverage validation when code files are modified during active development
+- API documentation completeness validation ensuring all API endpoints are properly documented with OpenAPI/Swagger specifications and request/response documentation
+- Code review preparation with documentation checks providing documentation coverage reports before code reviews to ensure documentation standards are met
+- Open source project documentation standards maintaining high documentation quality standards for open source projects with automated coverage checking
+- Technical debt tracking for missing documentation identifying undocumented code and tracking documentation technical debt over time
+- Development workflow integration seamlessly integrating documentation coverage checking into development workflows without manual intervention
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/documentation-coverage-checker.sh
+3. Make executable: chmod +x .claude/hooks/documentation-coverage-checker.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Documentation coverage tool: interrogate (Python, optional but recommended), JSDoc 4.0.0+ or TSDoc validator (JavaScript/TypeScript, optional)
+- jq JSON processor for parsing hook input (optional but recommended)
+- Runtime environment: Node.js 18+ and npm/yarn/pnpm (for JSDoc/TSDoc) or Python 3.8+ and pip (for interrogate) depending on project language
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/documentation-coverage-checker.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Configuration
+REPORT_FILE=".claude/reports/docs-coverage-$(date +%Y%m%d).txt"
+MIN_COVERAGE=${DOC_COVERAGE_THRESHOLD:-70}
+
+mkdir -p "$(dirname "$REPORT_FILE")"
+
+# Function to check if file needs documentation review
+needs_doc_check() {
+  local file=$1
+  
+  case "$file" in
+    *.js|*.jsx|*.ts|*.tsx|*.py|*.go|*.rs|*.java|*.rb)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Function to check JavaScript/TypeScript documentation
+check_js_ts_docs() {
+  local file=$1
+  
+  echo "📝 Checking JS/TS documentation: $file" >&2
+  
+  # Count functions
+  local total_functions=$(grep -cE "^\s*(export\s+)?(async\s+)?function\s+\w+|^\s*const\s+\w+\s*=\s*(async\s+)?\(|^\s*\w+\s*\(.*\)\s*\{" "$file" 2>/dev/null || echo "0")
+  
+  # Count documented functions (with JSDoc /** */)
+  local documented=$(grep -B1 -cE "^\s*\/\*\*" "$file" 2>/dev/null || echo "0")
+  
+  if [ "$total_functions" -gt 0 ]; then
+    local coverage=$((documented * 100 / total_functions))
+    
+    echo "" >> "$REPORT_FILE"
+    echo "JavaScript/TypeScript Documentation - $file" >> "$REPORT_FILE"
+    echo "Total functions: $total_functions" >> "$REPORT_FILE"
+    echo "Documented: $documented" >> "$REPORT_FILE"
+    echo "Coverage: ${coverage}%" >> "$REPORT_FILE"
+    
+    if [ "$coverage" -lt "$MIN_COVERAGE" ]; then
+      echo "⚠️ Documentation coverage ${coverage}% below threshold ${MIN_COVERAGE}%" >&2
+      echo "💡 Add JSDoc comments to exported functions" >&2
+    else
+      echo "✅ Documentation coverage: ${coverage}%" >&2
+    fi
+  fi
+  
+  # Check for exported items without docs
+  if grep -E "^export (class|function|const|interface|type)" "$file" >/dev/null 2>&1; then
+    echo "📦 Exported items detected - ensure public API is documented" >&2
+  fi
+}
+
+# Function to check Python documentation
+check_python_docs() {
+  local file=$1
+  
+  echo "🐍 Checking Python documentation: $file" >&2
+  
+  # Use interrogate if available
+  if command -v interrogate &> /dev/null; then
+    echo "" >> "$REPORT_FILE"
+    echo "Python Docstring Coverage - $file" >> "$REPORT_FILE"
+    
+    local coverage_output=$(interrogate -v "$file" 2>/dev/null)
+    echo "$coverage_output" >> "$REPORT_FILE"
+    
+    # Extract coverage percentage
+    local coverage=$(echo "$coverage_output" | grep -oE '[0-9]+\.[0-9]+%' | head -1 | tr -d '%')
+    
+    if [ -n "$coverage" ]; then
+      if (( $(echo "$coverage < $MIN_COVERAGE" | bc -l) )); then
+        echo "⚠️ Docstring coverage ${coverage}% below threshold ${MIN_COVERAGE}%" >&2
+      else
+        echo "✅ Docstring coverage: ${coverage}%" >&2
+      fi
+    fi
+  else
+    # Manual check for docstrings
+    local total_defs=$(grep -cE "^\s*def\s+\w+|^\s*class\s+\w+" "$file" 2>/dev/null || echo "0")
+    local documented=$(grep -A1 -cE "^\s*def\s+\w+|^\s*class\s+\w+" "$file" | grep -c '"""' || echo "0")
+    
+    if [ "$total_defs" -gt 0 ]; then
+      local coverage=$((documented * 100 / total_defs))
+      echo "⚠️ Estimated docstring coverage: ${coverage}%" >&2
+      echo "💡 Install interrogate for accurate analysis: pip install interrogate" >&2
+    fi
+  fi
+}
+
+# Function to check Go documentation
+check_go_docs() {
+  local file=$1
+  
+  echo "🐹 Checking Go documentation: $file" >&2
+  
+  if command -v go &> /dev/null; then
+    # Use go doc if available
+    if go doc -all 2>/dev/null | grep -q "$file"; then
+      echo "✅ Go documentation present" >&2
+    else
+      echo "💡 Add godoc comments to exported functions/types" >&2
+    fi
+  fi
+  
+  # Check for exported items without comments
+  local undocumented=$(grep -E "^func [A-Z]|^type [A-Z]" "$file" | \
+    while read -r line; do
+      grep -B1 "$line" "$file" | head -1 | grep -q "^//" || echo "$line"
+    done | wc -l)
+  
+  if [ "$undocumented" -gt 0 ]; then
+    echo "⚠️ Found $undocumented undocumented exported items" >&2
+  fi
+}
+
+# Function to check README freshness
+check_readme_freshness() {
+  if [ -f "README.md" ]; then
+    local readme_age=$(($(date +%s) - $(stat -f%m "README.md" 2>/dev/null || stat -c%Y "README.md" 2>/dev/null || echo "0")))
+    local days_old=$((readme_age / 86400))
+    
+    if [ "$days_old" -gt 90 ]; then
+      echo "📋 README.md is $days_old days old - consider updating" >&2
+    fi
+  else
+    echo "⚠️ No README.md found - create project documentation" >&2
+  fi
+}
+
+# Function to check API documentation
+check_api_docs() {
+  local file=$1
+  
+  # Check for API route definitions
+  if grep -iE "@(get|post|put|delete|patch)|router\.(get|post|put|delete|patch)|app\.(get|post|put|delete|patch)" "$file" >/dev/null 2>&1; then
+    echo "🌐 API endpoint detected in: $file" >&2
+    
+    # Check for OpenAPI/Swagger comments
+    if ! grep -E "@swagger|@openapi|@api" "$file" >/dev/null 2>&1; then
+      echo "💡 Consider adding OpenAPI/Swagger documentation for API endpoints" >&2
+    fi
+    
+    # Check for request/response documentation
+    if ! grep -E "@param|@returns|@request|@response" "$file" >/dev/null 2>&1; then
+      echo "💡 Document request parameters and response types" >&2
+    fi
+  fi
+}
+
+# Main execution
+if needs_doc_check "$FILE_PATH"; then
+  echo "📚 Documentation check triggered: $FILE_PATH" >&2
+  
+  # Language-specific checks
+  case "$FILE_PATH" in
+    *.js|*.jsx|*.ts|*.tsx)
+      check_js_ts_docs "$FILE_PATH"
+      check_api_docs "$FILE_PATH"
+      ;;
+    *.py)
+      check_python_docs "$FILE_PATH"
+      check_api_docs "$FILE_PATH"
+      ;;
+    *.go)
+      check_go_docs "$FILE_PATH"
+      ;;
+  esac
+  
+  # General documentation checks
+  check_readme_freshness
+  
+  # Documentation best practices
+  echo "" >&2
+  echo "📖 Documentation Best Practices:" >&2
+  echo "   • Document all public APIs and exported functions" >&2
+  echo "   • Include parameter types and return values" >&2
+  echo "   • Add usage examples for complex functions" >&2
+  echo "   • Keep README.md up-to-date with recent changes" >&2
+  echo "   • Use consistent documentation format (JSDoc/TSDoc/etc)" >&2
+  
+  if [ -s "$REPORT_FILE" ]; then
+    echo "" >&2
+    echo "📄 Documentation report: $REPORT_FILE" >&2
+  fi
+elif [[ "$FILE_PATH" == *README* ]] || [[ "$FILE_PATH" == *CHANGELOG* ]]; then
+  echo "📝 Documentation file updated: $(basename "$FILE_PATH")" >&2
+  echo "✅ Keep documentation current with code changes" >&2
+fi
+
+exit 0
+```
+
+## Examples
+### Documentation Coverage Checker Hook Script
+
+Complete hook script that performs documentation coverage checking when code files are modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+REPORT_FILE=".claude/reports/docs-coverage-$(date +%Y%m%d).txt"
+MIN_COVERAGE=${DOC_COVERAGE_THRESHOLD:-70}
+mkdir -p "$(dirname "$REPORT_FILE")"
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  total_functions=$(grep -cE "^\s*(export\s+)?(async\s+)?function\s+\w+" "$FILE_PATH" 2>/dev/null || echo "0")
+  documented=$(grep -B1 -cE "^\s*/\*\*" "$FILE_PATH" 2>/dev/null || echo "0")
+  if [ "$total_functions" -gt 0 ]; then
+    coverage=$((documented * 100 / total_functions))
+    echo "JavaScript/TypeScript Documentation - $FILE_PATH" >> "$REPORT_FILE"
+    echo "Coverage: ${coverage}%" >> "$REPORT_FILE"
+    if [ "$coverage" -lt "$MIN_COVERAGE" ]; then
+      echo "Documentation coverage ${coverage}% below threshold ${MIN_COVERAGE}%" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable documentation coverage checking
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/documentation-coverage-checker.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Python Documentation Coverage with interrogate
+
+Enhanced hook script using interrogate for Python docstring coverage analysis
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v interrogate &> /dev/null; then
+    echo "Checking Python documentation with interrogate..." >&2
+    interrogate -v "$FILE_PATH" 2>/dev/null | grep -E "coverage|missing" || interrogate "$FILE_PATH"
+  else
+    echo "Install interrogate for Python docstring coverage: pip install interrogate" >&2
+  fi
+fi
+exit 0
+```
+### API Endpoint Documentation Validation
+
+Enhanced hook script for API endpoint documentation validation with OpenAPI/Swagger checking
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+  if grep -iE "@(get|post|put|delete|patch)" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "API endpoint detected in: $FILE_PATH" >&2
+    if ! grep -E "@swagger|@openapi|@api" "$FILE_PATH" >/dev/null 2>&1; then
+      echo "Consider adding OpenAPI/Swagger documentation for API endpoints" >&2
+    fi
+    if ! grep -E "@param|@returns|@request|@response" "$FILE_PATH" >/dev/null 2>&1; then
+      echo "Document request parameters and response types" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### README Freshness Validation
+
+Enhanced hook script for README freshness validation with automatic age detection
+
+```bash
+#!/usr/bin/env bash
+if [ -f "README.md" ]; then
+  readme_age=$(($(date +%s) - $(stat -f%m "README.md" 2>/dev/null || stat -c%Y "README.md" 2>/dev/null || echo "0")))
+  days_old=$((readme_age / 86400))
+  if [ "$days_old" -gt 90 ]; then
+    echo "README.md is $days_old days old - consider updating" >&2
+  fi
+else
+  echo "No README.md found - create project documentation" >&2
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook reports low coverage but functions have inline comments
+
+Hook detects structured docstrings (JSDoc/TSDoc) not inline comments. Convert // comments to /** */ JSDoc format. Use @param and @returns tags for proper documentation detection. Verify TSDoc specification compliance for TypeScript projects.
+### Python interrogate not found but installed in virtualenv
+
+Activate virtualenv before hook runs: source venv/bin/activate in shell config. Use absolute path to interrogate binary. Add virtualenv bin directory to PATH in hook script. Verify interrogate installation: pip show interrogate.
+### False positives on private/internal functions flagged as undocumented
+
+Hook checks all functions regardless of visibility. Use naming conventions (_private in Python, _method in JavaScript). Configure threshold lower for internal files. Add @internal JSDoc tag to suppress warnings. Exclude test files from coverage checking.
+### Coverage threshold environment variable not applied
+
+Export DOC_COVERAGE_THRESHOLD before hook execution. Check bash environment in hook context. Set in .clauderc or shell profile. Verify with echo $DOC_COVERAGE_THRESHOLD in hook script. Use default value of 70% if not set.
+### API endpoint detection triggers on test files with mock routes
+
+Hook matches route patterns without context awareness. Exclude test directories from matchers: ! [[ $FILE_PATH == *test* ]]. Add separate threshold for test documentation. Use file path filtering to exclude test files from API documentation checks.
+### TSDoc validation not working for TypeScript projects
+
+Verify TSDoc specification compliance. Use /** */ style comments with @param, @returns, @example tags. Check TSDoc parser configuration. Ensure TypeScript project uses TSDoc-compliant documentation format. Install TSDoc validator if needed.
+### Coverage calculation incorrect for multi-line function definitions
+
+Hook uses simple grep patterns that may miss multi-line definitions. Use more sophisticated parsing with AST tools. Consider using language-specific parsers (eslint-plugin-jsdoc, pylint) for accurate coverage calculation. Verify function detection patterns match code style.
+### README freshness check fails on different file systems
+
+Use portable stat commands: stat -c%Y for Linux, stat -f%m for macOS. Check file system timestamp format. Verify date command compatibility. Use fallback timestamp detection methods. Test on target file system before deployment.

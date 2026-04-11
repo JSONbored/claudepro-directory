@@ -1,0 +1,527 @@
+---
+title: Plan Mode & Extended Thinking for Claude Code
+slug: plan-mode
+category: commands
+description: >-
+  Activate Claude's extended thinking mode with multi-level planning depth from
+  'think' to 'ultrathink' for comprehensive strategy creation before
+  implementation
+cardDescription: >-
+  Activate Claude's extended thinking mode with multi-level planning depth from
+  'think' to 'ultrathink' for comprehensive strategy creation...
+seoTitle: Plan Mode & Extended Thinking for Claude Code
+seoDescription: >-
+  Activate Claude's extended thinking mode with multi-level planning depth from
+  'think' to 'ultrathink' for comprehensive strategy creation before
+  implementation
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-25'
+documentationUrl: 'https://docs.claude.com/en/docs/claude-code/extended-thinking'
+installable: true
+installCommand: '/plan-mode [task] [depth]'
+usageSnippet: '/plan-mode [task] [depth]'
+copySnippet: '/plan-mode [task] [depth]'
+tags:
+  - plan-mode
+  - extended-thinking
+  - strategy
+  - architecture
+  - deep-reasoning
+  - ultrathink
+keywords:
+  - architecture
+  - claude
+  - commands
+  - deep-reasoning
+  - development
+  - extended-thinking
+  - mode
+  - plan
+  - plan-mode
+  - strategy
+  - tools
+  - ultrathink
+readingTime: 9
+difficultyScore: 100
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+commandSyntax: '/plan-mode [task] [depth]'
+---
+The `/plan-mode` command activates Claude's extended thinking capabilities with progressive depth levels to create comprehensive strategies before jumping into implementation.
+
+## Features
+
+- **Multi-Level Thinking**: Progressive depth from 'think' < 'think hard' < 'think harder' < 'ultrathink'
+- **128K Token Output**: Extended thinking mode supports up to 128,000 token outputs
+- **96.5% Accuracy**: Achieves 96.5% accuracy on complex physics and coding problems
+- **Self-Reflection**: Claude evaluates alternatives before committing to solutions
+- **Architecture Planning**: Design system architecture before writing code
+- **Thought Visibility**: View Claude's reasoning process in real-time
+- **Interrupt Capability**: Press ESC to correct path during planning
+- **Research-First**: Forces research and planning before implementation
+
+## Usage
+
+```bash
+/plan-mode [task] [depth]
+```
+
+### Depth Levels
+
+- `--think` - Basic extended thinking (~30s planning)
+- `--think-hard` - Medium depth analysis (~60-90s planning)
+- `--think-harder` - Deep analysis (~2-3min planning)
+- `--ultrathink` - Maximum depth analysis (~5-10min planning)
+
+### Planning Scope
+
+- `--architecture` - System architecture and design
+- `--implementation` - Step-by-step implementation strategy
+- `--refactor` - Refactoring approach and migration path
+- `--debug` - Debugging strategy and root cause analysis
+- `--research` - Research and analysis plan
+
+### Options
+
+- `--show-thinking` - Display Claude's thought process (default: true)
+- `--no-implement` - Plan only, do NOT implement
+- `--approve-first` - Require approval before proceeding to implementation
+
+## Examples
+
+### Basic Planning (think)
+
+**Command:**
+```bash
+/plan-mode "Add user authentication" --think --architecture
+```
+
+**Claude's Planning:**
+```
+[Extended Thinking Mode: think]
+
+Analyzing requirements...
+- Need secure authentication
+- Consider session management
+- Evaluate auth methods
+
+Evaluating approaches:
+1. JWT tokens (stateless, scalable)
+2. Session cookies (stateful, simple)
+3. OAuth2 (third-party, complex)
+
+Selected: JWT tokens
+Reasoning: Stateless design scales better, mobile-friendly
+
+Architecture Plan:
+
+1. Database Schema:
+   - users table (id, email, password_hash, created_at)
+   - refresh_tokens table (user_id, token, expires_at)
+
+2. API Endpoints:
+   POST /api/auth/register
+   POST /api/auth/login
+   POST /api/auth/refresh
+   POST /api/auth/logout
+
+3. Middleware:
+   - Authentication middleware (verify JWT)
+   - Rate limiting (prevent brute force)
+
+4. Security:
+   - bcrypt for password hashing (cost: 12)
+   - JWT expiry: 15min access, 7d refresh
+   - HTTPS only
+
+Ready to implement? (y/n)
+```
+
+### Deep Planning (think harder)
+
+**Command:**
+```bash
+/plan-mode "Migrate from REST to GraphQL" --think-harder --refactor
+```
+
+**Claude's Deep Analysis:**
+```
+[Extended Thinking Mode: think harder]
+
+Analyzing current state...
+- 45 REST endpoints across 8 resources
+- Mixed response formats (some paginated, some not)
+- Over-fetching in 12 endpoints
+- Under-fetching requiring 3+ requests in 8 workflows
+
+Evaluating migration strategies:
+
+1. Big Bang Migration:
+   Pros: Clean break, no dual maintenance
+   Cons: High risk, long freeze
+   Risk: HIGH
+
+2. Gradual Migration (selected):
+   Pros: Low risk, incremental value
+   Cons: Dual maintenance period
+   Risk: LOW
+
+3. Parallel Systems:
+   Pros: Safe rollback
+   Cons: Infrastructure cost
+   Risk: MEDIUM
+
+Selected: Gradual Migration
+Reasoning: Minimize risk, maintain velocity
+
+Migration Plan (8-week timeline):
+
+Week 1-2: Foundation
+- Install Apollo Server
+- Design GraphQL schema
+- Setup type generation
+- Create resolver boilerplate
+
+Week 3-4: Core Resources (Priority: High)
+- Migrate User queries/mutations
+- Migrate Post queries/mutations
+- Add DataLoader for N+1 prevention
+- Write integration tests
+
+Week 5-6: Secondary Resources
+- Migrate Comments
+- Migrate Tags
+- Migrate Categories
+- Performance benchmarking
+
+Week 7: Optimization
+- Query complexity limiting
+- Persisted queries
+- APQ (Automatic Persisted Queries)
+- Caching strategy
+
+Week 8: Cutover
+- Feature flag rollout (10% → 50% → 100%)
+- Monitor error rates
+- Deprecate REST endpoints
+- Documentation update
+
+Dependencies:
+- GraphQL code generator
+- Apollo Server 4.x
+- DataLoader
+- GraphQL Tools
+
+Risks & Mitigation:
+1. Schema design issues
+   → Weekly schema reviews
+2. Performance regressions
+   → Load testing before each phase
+3. Breaking changes for clients
+   → Maintain REST parallel for 3 months
+
+Success Metrics:
+- Reduce API calls by 40%
+- Improve response times by 25%
+- Client satisfaction > 8/10
+
+Ready to proceed with Week 1-2? (y/n)
+```
+
+### Maximum Depth (ultrathink)
+
+**Command:**
+```bash
+/plan-mode "Design scalable microservices architecture" --ultrathink --architecture
+```
+
+**Claude's Comprehensive Analysis:**
+```
+[Extended Thinking Mode: ultrathink]
+[This may take 5-10 minutes for thorough analysis]
+
+Phase 1: Requirements Analysis
+
+Current System:
+- Monolithic architecture (250K LOC)
+- PostgreSQL database (2TB)
+- Peak load: 10K req/s
+- Team: 20 developers
+- Deployment: Weekly releases
+
+Pain Points:
+- Deployment requires full system downtime
+- Database bottleneck at peak load
+- Slow feature velocity (conflicting changes)
+- Scaling inefficient (must scale entire monolith)
+
+Goals:
+- Zero-downtime deployments
+- Independent service scaling
+- Faster feature delivery
+- Improved fault isolation
+
+Phase 2: Service Decomposition Strategy
+
+Boundary Identification:
+
+1. User Service
+   - Domain: Identity, authentication
+   - Data: 5M users, 100MB
+   - Load: 2K req/s
+   - Team: 3 developers
+
+2. Product Service
+   - Domain: Catalog, inventory
+   - Data: 1M products, 50GB
+   - Load: 5K req/s
+   - Team: 5 developers
+
+3. Order Service
+   - Domain: Transactions, fulfillment
+   - Data: 10M orders, 500GB
+   - Load: 1K req/s
+   - Team: 4 developers
+
+4. Payment Service
+   - Domain: Billing, subscriptions
+   - Data: 8M transactions, 200GB
+   - Load: 800 req/s
+   - Team: 3 developers
+
+5. Notification Service
+   - Domain: Email, SMS, push
+   - Data: Events only
+   - Load: 3K req/s
+   - Team: 2 developers
+
+Phase 3: Technology Stack
+
+```yaml
+Services:
+  user-service:
+    runtime: Node.js (Fast user queries)
+    database: PostgreSQL (ACID for users)
+    cache: Redis (Session storage)
+    
+  product-service:
+    runtime: Node.js (Heavy read workload)
+    database: PostgreSQL (Primary)
+    cache: Redis (Product catalog)
+    search: Elasticsearch (Full-text search)
+    
+  order-service:
+    runtime: Node.js (Transaction handling)
+    database: PostgreSQL (Strong consistency)
+    message-queue: RabbitMQ (Order processing)
+    
+  payment-service:
+    runtime: Node.js (PCI compliance)
+    database: PostgreSQL (Financial data)
+    encryption: At-rest and in-transit
+    
+  notification-service:
+    runtime: Node.js (I/O heavy)
+    queue: RabbitMQ (Async delivery)
+    providers: SendGrid, Twilio, FCM
+```
+
+Phase 4: Communication Patterns
+
+Synchronous (REST/GraphQL):
+- User → Product (Browse catalog)
+- Order → Payment (Process transaction)
+
+Asynchronous (Event-Driven):
+- Order Created → Notification (Send confirmation)
+- Payment Success → Order (Update status)
+- Product Updated → Search (Index update)
+
+Phase 5: Data Management
+
+Database Per Service:
+- User Service: users DB
+- Product Service: products DB
+- Order Service: orders DB
+- Payment Service: payments DB
+
+Shared Data Access Patterns:
+1. API calls (preferred)
+2. Event sourcing (eventual consistency)
+3. CQRS (read replicas)
+
+Phase 6: Migration Strategy (12 months)
+
+Quarter 1: Foundation
+- Week 1-4: Setup Kubernetes cluster
+- Week 5-8: Implement API gateway
+- Week 9-12: Extract User Service (lowest risk)
+
+Quarter 2: Core Services
+- Week 13-18: Extract Product Service
+- Week 19-24: Extract Order Service
+
+Quarter 3: Financial Systems
+- Week 25-32: Extract Payment Service (highest risk)
+- Week 33-36: Audit and compliance
+
+Quarter 4: Supporting Services
+- Week 37-42: Extract Notification Service
+- Week 43-48: Decommission monolith
+- Week 49-52: Optimization and monitoring
+
+Phase 7: Infrastructure
+
+```yaml
+Kubernetes:
+  nodes: 20 (auto-scaling 10-50)
+  namespaces: dev, staging, production
+  
+Service Mesh (Istio):
+  - Traffic management
+  - Circuit breaking
+  - Mutual TLS
+  - Observability
+  
+Monitoring:
+  - Prometheus (metrics)
+  - Grafana (dashboards)
+  - Jaeger (distributed tracing)
+  - ELK Stack (logging)
+  
+CI/CD:
+  - GitHub Actions
+  - ArgoCD (GitOps)
+  - Canary deployments
+```
+
+Phase 8: Risk Assessment
+
+High Risk:
+1. Data consistency during migration
+   Mitigation: Dual-write pattern, verify before cutover
+   
+2. Service discovery failures
+   Mitigation: Health checks, circuit breakers
+   
+3. Distributed transaction complexity
+   Mitigation: Saga pattern, compensating transactions
+
+Medium Risk:
+1. Team skill gaps
+   Mitigation: Training program, pair programming
+   
+2. Infrastructure costs increase
+   Mitigation: Right-sizing, spot instances
+
+Low Risk:
+1. Monitoring gaps
+   Mitigation: Observability-first design
+
+Phase 9: Success Metrics
+
+Technical:
+- Deployment frequency: 1/week → 10/day
+- Lead time: 2 weeks → 2 days
+- MTTR: 4 hours → 30 minutes
+- Service uptime: 99.5% → 99.95%
+
+Business:
+- Feature velocity: +200%
+- Cost per transaction: -30%
+- Customer satisfaction: +15%
+
+Phase 10: Go/No-Go Decision
+
+Recommendation: PROCEED
+
+Reasoning:
+- Clear business case (velocity + uptime)
+- Manageable risk with mitigation plan
+- Team buy-in confirmed
+- Budget approved
+
+Next Steps:
+1. Form migration team (5 engineers)
+2. Setup Kubernetes cluster (Week 1)
+3. Begin User Service extraction (Week 5)
+
+Estimated Total Cost: $450K (infrastructure + developer time)
+ROI Timeline: 18 months
+
+Approve architecture plan? (y/n)
+```
+
+## Thinking Levels Comparison
+
+| Level | Time | Depth | Use Case |
+|-------|------|-------|----------|
+| think | 30s | Surface analysis | Quick decisions, simple tasks |
+| think hard | 60-90s | Multiple alternatives | Feature planning, moderate complexity |
+| think harder | 2-3min | Deep analysis, risks | Refactoring, architecture changes |
+| ultrathink | 5-10min | Comprehensive strategy | System design, migrations |
+
+## When to Use Each Level
+
+### --think (Quick Planning)
+- Adding a new API endpoint
+- Fixing a known bug
+- Writing a simple feature
+- Code refactoring (small scope)
+
+### --think-hard (Moderate Planning)
+- Designing a new feature
+- Database schema changes
+- Integration with third-party service
+- Performance optimization
+
+### --think-harder (Deep Planning)
+- Large refactoring projects
+- Migration strategies
+- Architecture improvements
+- Complex debugging
+
+### --ultrathink (Maximum Planning)
+- Microservices architecture
+- System-wide migrations
+- Technology stack changes
+- Multi-month projects
+
+## Best Practices
+
+1. **Plan Before Code**: Use `/plan-mode` before implementing complex features
+2. **Interrupt When Needed**: Press ESC if Claude's plan goes off track
+3. **Approve Before Proceeding**: Use `--approve-first` for critical changes
+4. **Match Depth to Complexity**: Don't use ultrathink for simple tasks
+5. **Review Alternatives**: Extended thinking evaluates multiple approaches
+6. **Document Plans**: Plans serve as architecture documentation
+7. **Iterate on Feedback**: Refine plan based on team input
+
+## Integration with Other Commands
+
+### Plan → TDD Workflow
+```bash
+/plan-mode "Add payment processing" --think-hard --no-implement
+# Review plan
+/tdd-workflow "Implement payment processing per plan" --unit
+```
+
+### Plan → Subagents
+```bash
+/plan-mode "Refactor auth system" --think-harder --no-implement
+# Review plan
+/subagent-create --architect --code-reviewer --test-engineer
+# Implement with specialist subagents
+```
+
+### Plan → Checkpoints
+```bash
+/plan-mode "Database migration" --ultrathink
+# Create checkpoint before proceeding
+# Implement migration
+# Rewind if issues arise
+```

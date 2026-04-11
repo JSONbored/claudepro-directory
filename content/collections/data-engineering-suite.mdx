@@ -1,0 +1,156 @@
+---
+title: Data Engineering Suite
+slug: data-engineering-suite
+category: collections
+description: >-
+  Comprehensive toolkit for data engineers working with databases, ETL
+  pipelines, and data infrastructure. Includes database design, optimization,
+  and cloud services integration.
+cardDescription: >-
+  Comprehensive toolkit for data engineers working with databases, ETL
+  pipelines, and data infrastructure.
+seoTitle: Data Engineering Suite
+seoDescription: >-
+  Comprehensive toolkit for data engineers working with databases, ETL
+  pipelines, and data infrastructure. Includes database design, optimization,
+  and cloud se...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-10-02'
+installable: false
+usageSnippet: >-
+  Start with `database-specialist-agent` → `database-expert` →
+  `aws-services-mcp-server`
+items:
+  - slug: database-specialist-agent
+    category: agents
+  - slug: aws-services-mcp-server
+    category: mcp
+  - slug: airtable-mcp-server
+    category: mcp
+  - slug: database-expert
+    category: rules
+  - slug: optimize
+    category: commands
+  - slug: debug
+    category: commands
+installationOrder:
+  - database-specialist-agent
+  - database-expert
+  - aws-services-mcp-server
+  - airtable-mcp-server
+  - optimize
+  - debug
+estimatedSetupTime: 30 minutes
+difficulty: intermediate
+prerequisites:
+  - Basic SQL knowledge
+  - AWS account (for AWS services integration)
+  - Understanding of database concepts
+tags:
+  - data
+  - database
+  - etl
+  - sql
+  - cloud
+  - engineering
+keywords:
+  - claude
+  - cloud
+  - collections
+  - data
+  - database
+  - development
+  - engineering
+  - etl
+  - sql
+  - suite
+  - tools
+readingTime: 1
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.
+
+## Features
+
+- Database design and optimization tools
+- Cloud data services integration
+- SQL query optimization and debugging
+- Data pipeline automation
+
+## Use Cases
+
+- Building and optimizing data pipelines
+- Managing cloud-based data infrastructure
+- Database performance tuning
+- Migrating data systems to the cloud
+
+## TL;DR
+
+A comprehensive data engineering toolkit for ETL pipelines, data warehousing, analytics, and machine learning workflows. Build robust data infrastructure with Claude-powered automation.
+
+- ETL/ELT pipeline templates for common data sources
+- Data warehouse schemas (Snowflake, BigQuery, Redshift)
+- Apache Airflow, dbt, and orchestration patterns
+- Data quality, testing, and monitoring workflows
+
+Build scalable data infrastructure with this collection of ETL patterns, warehouse schemas, orchestration workflows, and Claude-optimized data transformation scripts.
+
+## Collection Overview
+
+**Collection Type:** Data Infrastructure
+**Focus Area:** ETL & Data Warehousing
+**Skill Level:** Intermediate to Advanced
+**Time Saving:** 60-80% reduction in pipeline development time
+
+## What's Included
+
+## Collection Contents
+
+Complete data engineering infrastructure
+
+- **Pipeline Templates** (ETL): Airflow DAGs, dbt projects, and data transformation scripts for common ingestion patterns.
+- **Data Modeling** (Warehouse): Star schemas, snowflake patterns, and dimensional modeling for analytics warehouses.
+- **Data Testing** (Quality): Great Expectations configs, dbt tests, and data quality monitoring with Claude analysis.
+- **BI Integration** (Analytics): Tableau, Looker, and Metabase integrations with semantic layers and metrics definitions.
+
+## Quick Start
+
+Start with ETL templates for your data sources, then build warehouse schemas and add orchestration. Each component is modular and can be adapted to your stack.
+
+## Prerequisites
+
+- Basic SQL knowledge
+- AWS account (for AWS services integration)
+- Understanding of database concepts
+
+## Recommended Order
+
+1. `database-specialist-agent`
+2. `database-expert`
+3. `aws-services-mcp-server`
+4. `airtable-mcp-server`
+5. `optimize`
+6. `debug`
+
+## Troubleshooting
+### AWS MCP server auth conflicts with Airtable MCP credentials
+
+Configure separate credential stores for each MCP server. Use AWS_PROFILE env var for aws-services-mcp-server, AIRTABLE_API_KEY for airtable-mcp-server. Keep credentials in different config files.
+### Database agent and rules provide contradicting optimization advice
+
+Install database-expert rules before database-specialist-agent. Agent will defer to rules for best practices. Update rules file to match your database engine (PostgreSQL, MySQL, etc.).
+### MCP servers fail to initialize due to missing AWS SDK dependencies
+
+Install AWS SDK before MCP servers: npm install @aws-sdk/client-rds @aws-sdk/client-dynamodb @aws-sdk/client-s3. Then reinstall aws-services-mcp-server to detect installed SDKs.
+### Optimize command incompatible with database agent's schema format
+
+Ensure database-specialist-agent and optimize command use same schema definition format. Install agent first to establish format, then install optimize command to inherit conventions.
+### Collection setup fails without proper AWS region configuration
+
+Set AWS_REGION environment variable before installing MCP servers: export AWS_REGION=us-east-1. Configure region in Claude Code settings under MCP server preferences. Restart Claude after setting.

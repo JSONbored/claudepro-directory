@@ -1,0 +1,131 @@
+---
+title: Docker Compose Production Blueprints Skill
+slug: docker-compose-production-blueprints
+category: skills
+description: 'Create production-grade Docker Compose stacks with healthchecks, secrets handling, network isolation, and safe rollout patterns.'
+cardDescription: Opinionated Docker Compose patterns for reliable production deployments and maintainable operations.
+seoTitle: Docker Compose Production Blueprints Skill
+seoDescription: 'Reusable AI skill for designing secure, resilient Docker Compose deployments with healthchecks, profiles, and operational guardrails.'
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2026-04-10'
+documentationUrl: 'https://docs.docker.com/compose/'
+downloadUrl: /downloads/skills/docker-compose-production-blueprints.zip
+installable: true
+installCommand: 'curl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints'
+usageSnippet: 'Use this skill when you need Docker Compose environments that are stable, secure, and easy to operate.'
+copySnippet: |-
+  # Trigger
+  "Apply the Docker Compose production blueprints skill to this stack."
+
+  # Required output
+  1) Compose service topology
+  2) Security and secret handling plan
+  3) Healthcheck and startup dependency map
+  4) Update/rollback procedure
+skillType: general
+skillLevel: advanced
+verificationStatus: draft
+verifiedAt: '2026-04-10'
+retrievalSources:
+  - 'https://docs.docker.com/compose/'
+testedPlatforms:
+  - Claude
+  - Codex
+  - OpenClaw
+  - Cursor
+  - Windsurf
+  - Gemini
+prerequisites:
+  - Service inventory and dependency map
+  - 'Runtime constraints (CPU, memory, storage, ports)'
+  - Existing Compose file or desired target architecture
+tags:
+  - docker
+  - docker-compose
+  - devops
+  - deployment
+  - reliability
+keywords:
+  - docker compose production
+  - compose hardening
+  - container operations
+  - compose blueprints
+readingTime: 7
+packageVerified: true
+difficultyScore: 72
+hasTroubleshooting: true
+hasPrerequisites: true
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+This skill provides consistent production patterns for Docker Compose stacks. It helps AI agents avoid common anti-patterns and produce deployment configs that are safer to run and easier to maintain.
+
+## Compatibility
+
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+
+- Clear service boundaries and ownership
+- Persistent data strategy
+- Operational SLO targets
+
+## What This Skill Delivers
+
+- Compose architecture with profile-aware services
+- Network and privilege minimization guidance
+- Healthchecks, restart policy, and dependency sequencing
+- Safe change rollout and rollback checklist
+
+## How to Use This Skill
+
+1. Model service topology and stateful dependencies.
+2. Define secret strategy and avoid plaintext in repo.
+3. Add healthchecks and startup ordering guards.
+4. Constrain network exposure and privileges.
+5. Validate with restart, failover, and upgrade simulations.
+
+## Troubleshooting
+
+**Issue:** Services start but fail shortly after  
+**Fix:** Add robust healthchecks and delay dependent services until healthy.
+
+**Issue:** Compose changes break unrelated services  
+**Fix:** Use profiles and explicit dependency contracts to scope blast radius.
+
+**Issue:** Secrets leak into logs or env dumps  
+**Fix:** Move sensitive values to secrets manager or runtime-injected env.
+
+## Knowledge Freshness
+
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+
+- https://docs.docker.com/compose/
+
+## Output Contract
+
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

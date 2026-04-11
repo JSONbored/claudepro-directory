@@ -1,0 +1,36 @@
+import type { Metadata } from "next";
+
+import { BrowseDirectory } from "@/components/browse-directory";
+import { getDirectoryEntries } from "@/lib/content";
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Browse the HeyClaude directory",
+  description:
+    "Search and filter across Claude agents, MCP servers, skills, commands, hooks, rules, guides, and collections.",
+  path: "/browse",
+  keywords: ["browse claude tools", "claude directory", "mcp server directory", "ai workflow library"]
+});
+
+type BrowsePageProps = {
+  searchParams?: Promise<{ q?: string }>;
+};
+
+export default async function BrowsePage({ searchParams }: BrowsePageProps) {
+  const directoryEntries = await getDirectoryEntries();
+  const params = searchParams ? await searchParams : undefined;
+
+  return (
+    <div className="container-shell max-w-[52rem] space-y-8 py-12">
+      <div className="space-y-4 border-b border-border/80 pb-8">
+        <span className="eyebrow">Browse</span>
+        <h1 className="section-title">Browse the full directory.</h1>
+        <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
+          Search across agents, MCP servers, skills, rules, commands, hooks,
+          guides, collections, and statuslines.
+        </p>
+      </div>
+      <BrowseDirectory entries={directoryEntries} initialQuery={params?.q ?? ""} />
+    </div>
+  );
+}

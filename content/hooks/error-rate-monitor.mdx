@@ -1,0 +1,500 @@
+---
+title: Error Rate Monitor - Hooks
+slug: error-rate-monitor
+category: hooks
+description: >-
+  Tracks error patterns and alerts when error rates spike. This Notification
+  hook provides comprehensive error rate monitoring across log files, Docker
+  containers, and application logs, automatically detecting error patterns and
+  alerting when error rates exceed configurable thresholds.
+cardDescription: Tracks error patterns and alerts when error rates spike.
+seoTitle: Error Rate Monitor - Hooks
+seoDescription: >-
+  Tracks error patterns and alerts when error rates spike. This Notification
+  hook provides comprehensive error rate monitoring across log files, Docker
+  contain...
+author: JSONbored
+authorProfileUrl: 'https://github.com/JSONbored'
+dateAdded: '2025-09-19'
+installable: true
+installCommand: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/error-rate-monitor.sh && chmod
+  +x .claude/hooks/error-rate-monitor.sh
+usageSnippet: >-
+  mkdir -p .claude/hooks && touch .claude/hooks/error-rate-monitor.sh && chmod
+  +x .claude/hooks/error-rate-monitor.sh
+copySnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/error-rate-monitor.sh"
+      }
+    }
+  }
+configSnippet: |-
+  {
+    "hooks": {
+      "notification": {
+        "script": "./.claude/hooks/error-rate-monitor.sh"
+      }
+    }
+  }
+scriptLanguage: bash
+scriptBody: "#!/usr/bin/env bash\n\necho \"\U0001F50D Monitoring error rates across log files...\" >&2\n\n# Configurable thresholds (can be overridden by environment variables)\nERROR_THRESHOLD_PER_FILE=${ERROR_THRESHOLD_PER_FILE:-5}\nTOTAL_ERROR_THRESHOLD=${TOTAL_ERROR_THRESHOLD:-10}\nLOG_LINES_TO_CHECK=${LOG_LINES_TO_CHECK:-100}\nMAX_SAMPLE_ERRORS=${MAX_SAMPLE_ERRORS:-3}\n\n# Initialize counters\nTOTAL_ERRORS=0\nFILES_WITH_ERRORS=0\nCRITICAL_FILES=()\nERROR_SAMPLES=()\n\n# Define error patterns with severity levels\nFATAL_PATTERNS=(\"fatal\" \"critical\" \"panic\" \"abort\" \"segfault\")\nERROR_PATTERNS=(\"error\" \"exception\" \"failed\" \"failure\" \"timeout\")\nWARNING_PATTERNS=(\"warning\" \"warn\" \"deprecated\" \"notice\")\n\n# Function to count errors by severity\ncount_errors_by_severity() {\n  local log_file=\"$1\"\n  local fatal_count=0\n  local error_count=0\n  local warning_count=0\n  \n  if [ ! -f \"$log_file\" ]; then\n    return\n  fi\n  \n  # Check last N lines of the log file\n  local recent_logs=$(tail -\"$LOG_LINES_TO_CHECK\" \"$log_file\" 2>/dev/null || echo \"\")\n  \n  if [ -z \"$recent_logs\" ]; then\n    return\n  fi\n  \n  # Count fatal errors\n  for pattern in \"${FATAL_PATTERNS[@]}\"; do\n    fatal_count=$((fatal_count + $(echo \"$recent_logs\" | grep -icE \"\\\\b$pattern\\\\b\" || echo \"0\")))\n  done\n  \n  # Count errors (excluding fatals already counted)\n  for pattern in \"${ERROR_PATTERNS[@]}\"; do\n    error_count=$((error_count + $(echo \"$recent_logs\" | grep -icE \"\\\\b$pattern\\\\b\" || echo \"0\")))\n  done\n  \n  # Count warnings\n  for pattern in \"${WARNING_PATTERNS[@]}\"; do\n    warning_count=$((warning_count + $(echo \"$recent_logs\" | grep -icE \"\\\\b$pattern\\\\b\" || echo \"0\")))\n  done\n  \n  echo \"$fatal_count $error_count $warning_count\"\n}\n\n# Function to extract error samples\nextract_error_samples() {\n  local log_file=\"$1\"\n  local sample_count=\"$2\"\n  \n  if [ ! -f \"$log_file\" ]; then\n    return\n  fi\n  \n  # Get recent error lines with timestamps if available\n  tail -\"$LOG_LINES_TO_CHECK\" \"$log_file\" 2>/dev/null | \\\n    grep -iE '(fatal|critical|error|exception|failed)' | \\\n    head -\"$sample_count\" | \\\n    while IFS= read -r line; do\n      # Truncate very long lines\n      if [ ${#line} -gt 120 ]; then\n        echo \"${line:0:120}...\"\n      else\n        echo \"$line\"\n      fi\n    done\n}\n\n# Function to check log files in a directory\ncheck_log_directory() {\n  local dir=\"$1\"\n  local pattern=\"$2\"\n  \n  if [ ! -d \"$dir\" ]; then\n    return\n  fi\n  \n  find \"$dir\" -name \"$pattern\" -type f 2>/dev/null | while read -r log_file; do\n    echo \"$log_file\"\n  done\n}\n\n# Collect all log files to check\nLOG_FILES=()\n\n# Standard log locations\nfor pattern in \"*.log\" \"*.out\" \"*.err\"; do\n  while IFS= read -r -d '' file; do\n    LOG_FILES+=(\"$file\")\n  done < <(find . -maxdepth 1 -name \"$pattern\" -type f -print0 2>/dev/null)\ndone\n\n# Common log directories\nLOG_DIRS=(\"logs\" \"log\" \"var/log\" \".logs\" \"tmp/logs\")\nfor log_dir in \"${LOG_DIRS[@]}\"; do\n  if [ -d \"$log_dir\" ]; then\n    while IFS= read -r -d '' file; do\n      LOG_FILES+=(\"$file\")\n    done < <(find \"$log_dir\" -name \"*.log\" -o -name \"*.out\" -o -name \"*.err\" -type f -print0 2>/dev/null)\n  fi\ndone\n\n# Framework-specific log locations\nif [ -f \"package.json\" ]; then\n  # Node.js specific logs\n  for pattern in \"npm-debug.log\" \"yarn-error.log\" \"pnpm-debug.log\"; do\n    [ -f \"$pattern\" ] && LOG_FILES+=(\"$pattern\")\n  done\n  \n  # Next.js logs\n  [ -d \".next\" ] && find .next -name \"*.log\" -type f 2>/dev/null | while read -r file; do\n    LOG_FILES+=(\"$file\")\n  done\nfi\n\n# Python specific logs\nif [ -f \"requirements.txt\" ] || [ -f \"pyproject.toml\" ]; then\n  for pattern in \"django.log\" \"flask.log\" \"celery.log\" \"pytest.log\"; do\n    [ -f \"$pattern\" ] && LOG_FILES+=(\"$pattern\")\n  done\nfi\n\n# Docker logs if Docker is available\nif command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then\n  # Check for recent container logs with errors\n  CONTAINERS=$(docker ps --format \"{{.Names}}\" 2>/dev/null | head -5)\n  for container in $CONTAINERS; do\n    if [ -n \"$container\" ]; then\n      ERROR_COUNT=$(docker logs \"$container\" --since=10m 2>&1 | grep -icE '(fatal|critical|error|exception)' || echo \"0\")\n      if [ \"$ERROR_COUNT\" -gt 0 ]; then\n        echo \"\U0001F433 Container '$container' has $ERROR_COUNT recent errors\" >&2\n        TOTAL_ERRORS=$((TOTAL_ERRORS + ERROR_COUNT))\n        \n        # Get error samples from container logs\n        CONTAINER_ERRORS=$(docker logs \"$container\" --since=10m 2>&1 | grep -iE '(fatal|critical|error|exception)' | head -2)\n        if [ -n \"$CONTAINER_ERRORS\" ]; then\n          echo \"\U0001F4DD Sample from $container:\" >&2\n          echo \"$CONTAINER_ERRORS\" | head -1 >&2\n        fi\n      fi\n    fi\n  done\nfi\n\n# Remove duplicates from LOG_FILES array\nreadarray -t UNIQUE_LOG_FILES < <(printf '%s\\n' \"${LOG_FILES[@]}\" | sort -u)\n\necho \"\U0001F4CA Checking ${#UNIQUE_LOG_FILES[@]} log files for error patterns...\" >&2\n\n# Check each log file\nfor log_file in \"${UNIQUE_LOG_FILES[@]}\"; do\n  if [ ! -f \"$log_file\" ]; then\n    continue\n  fi\n  \n  # Get error counts by severity\n  read -r fatal_count error_count warning_count <<< \"$(count_errors_by_severity \"$log_file\")\"\n  \n  file_total_errors=$((fatal_count + error_count))\n  TOTAL_ERRORS=$((TOTAL_ERRORS + file_total_errors))\n  \n  if [ \"$file_total_errors\" -gt 0 ]; then\n    FILES_WITH_ERRORS=$((FILES_WITH_ERRORS + 1))\n    \n    log_basename=$(basename \"$log_file\")\n    \n    # Report file-level errors\n    if [ \"$fatal_count\" -gt 0 ]; then\n      echo \"\U0001F6A8 CRITICAL: $log_basename has $fatal_count fatal errors\" >&2\n      CRITICAL_FILES+=(\"$log_file\")\n    fi\n    \n    if [ \"$file_total_errors\" -gt \"$ERROR_THRESHOLD_PER_FILE\" ]; then\n      echo \"⚠️ ERROR SPIKE: $log_basename has $file_total_errors errors (fatal: $fatal_count, error: $error_count)\" >&2\n      \n      # Extract error samples\n      echo \"\U0001F4DD Recent error samples from $log_basename:\" >&2\n      extract_error_samples \"$log_file\" \"$MAX_SAMPLE_ERRORS\" | while IFS= read -r sample; do\n        echo \"  → $sample\" >&2\n      done\n    elif [ \"$file_total_errors\" -gt 0 ]; then\n      echo \"ℹ️ $log_basename: $file_total_errors errors detected\" >&2\n    fi\n    \n    if [ \"$warning_count\" -gt 0 ]; then\n      echo \"⚠️ $log_basename: $warning_count warnings\" >&2\n    fi\n  fi\ndone\n\n# Overall error rate analysis\necho \"\" >&2\necho \"\U0001F4CB Error Rate Summary:\" >&2\necho \"  \U0001F4C1 Files checked: ${#UNIQUE_LOG_FILES[@]}\" >&2\necho \"  \U0001F4C4 Files with errors: $FILES_WITH_ERRORS\" >&2\necho \"  \U0001F522 Total errors: $TOTAL_ERRORS\" >&2\necho \"  \U0001F6A8 Critical files: ${#CRITICAL_FILES[@]}\" >&2\n\n# Alert on high error rates\nif [ \"$TOTAL_ERRORS\" -gt \"$TOTAL_ERROR_THRESHOLD\" ]; then\n  echo \"\" >&2\n  echo \"\U0001F6A8 HIGH ERROR RATE DETECTED!\" >&2\n  echo \"⚠️ Total errors ($TOTAL_ERRORS) exceed threshold ($TOTAL_ERROR_THRESHOLD)\" >&2\n  \n  if [ ${#CRITICAL_FILES[@]} -gt 0 ]; then\n    echo \"\U0001F525 Critical files requiring immediate attention:\" >&2\n    for critical_file in \"${CRITICAL_FILES[@]}\"; do\n      echo \"  → $(basename \"$critical_file\")\" >&2\n    done\n  fi\n  \nelif [ \"$TOTAL_ERRORS\" -gt 0 ]; then\n  echo \"ℹ️ Errors detected but within acceptable threshold\" >&2\nelse\n  echo \"✅ No errors detected in monitored log files\" >&2\nfi\n\n# Performance recommendations\nif [ ${#UNIQUE_LOG_FILES[@]} -gt 20 ]; then\n  echo \"\" >&2\n  echo \"\U0001F4A1 Performance tip: Consider log rotation or filtering for faster monitoring\" >&2\nfi\n\necho \"\" >&2\necho \"\U0001F527 Monitoring Configuration:\" >&2\necho \"  • Error threshold per file: $ERROR_THRESHOLD_PER_FILE\" >&2\necho \"  • Total error threshold: $TOTAL_ERROR_THRESHOLD\" >&2\necho \"  • Lines checked per file: $LOG_LINES_TO_CHECK\" >&2\necho \"\" >&2\necho \"\U0001F4A1 Customize thresholds with environment variables:\" >&2\necho \"  export ERROR_THRESHOLD_PER_FILE=10\" >&2\necho \"  export TOTAL_ERROR_THRESHOLD=25\" >&2\n\nexit 0"
+trigger: Notification
+tags:
+  - errors
+  - monitoring
+  - notification
+  - debugging
+  - alerts
+keywords:
+  - alerts
+  - claude
+  - debugging
+  - development
+  - error
+  - errors
+  - hooks
+  - monitor
+  - monitoring
+  - notification
+  - rate
+  - tools
+readingTime: 1
+difficultyScore: 0
+hasTroubleshooting: true
+hasPrerequisites: false
+hasBreakingChanges: false
+robotsIndex: true
+robotsFollow: true
+---
+## Features
+
+- Real-time error pattern detection in log files with automatic log file discovery across standard locations (logs/, var/log/, .logs/) and framework-specific locations (Next.js .next/, Node.js npm-debug.log, Python django.log)
+- Configurable error rate thresholds and alerting with environment variable configuration (ERROR_THRESHOLD_PER_FILE, TOTAL_ERROR_THRESHOLD) and customizable alert levels
+- Multi-log file monitoring (*.log, logs/*, custom paths) with recursive directory scanning and support for multiple log file formats (*.log, *.out, *.err)
+- Error severity classification (fatal, error, warning) with pattern-based severity detection including fatal patterns (fatal, critical, panic, abort, segfault), error patterns (error, exception, failed, failure, timeout), and warning patterns (warning, warn, deprecated, notice)
+- Recent error sample display for quick debugging with truncated error messages (120 character limit) and configurable sample count (MAX_SAMPLE_ERRORS)
+- Time-based error rate calculations with configurable time windows (LOG_LINES_TO_CHECK) and Docker container log monitoring with --since time window support
+- Framework-specific error pattern recognition for Node.js (npm-debug.log, yarn-error.log, pnpm-debug.log), Python (django.log, flask.log, celery.log), Next.js (.next/logs), and Docker container logs
+- Docker container log monitoring with Docker Engine 24.0+ support including automatic container discovery, recent error detection (--since=10m), and container-specific error sampling
+
+## Use Cases
+
+- Real-time error monitoring during development providing immediate feedback when errors occur in log files or Docker containers during active development
+- Automated error rate alerting for CI/CD pipelines automatically detecting error spikes in build logs and test outputs to prevent deployment of broken code
+- Multi-service application error tracking monitoring errors across multiple services and containers in microservices architectures with centralized error reporting
+- Docker container log monitoring automatically monitoring Docker container logs for errors and providing container-specific error samples for debugging
+- Framework-specific error pattern detection automatically recognizing framework-specific error patterns in Node.js, Python, Next.js, and other application frameworks
+- Development workflow integration seamlessly integrating error monitoring into development workflows without manual log file inspection or separate monitoring tools
+
+## Installation
+
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/error-rate-monitor.sh
+3. Make executable: chmod +x .claude/hooks/error-rate-monitor.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Docker Engine 24.0+ (optional, for Docker container log monitoring)
+- grep and find utilities (standard Unix tools)
+- File system read access for log files in project directories (logs/, var/log/, .logs/, .next/logs/) and Docker container log access when Docker is available
+
+## Hook Configuration
+
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/error-rate-monitor.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+
+```bash
+#!/usr/bin/env bash
+
+echo "🔍 Monitoring error rates across log files..." >&2
+
+# Configurable thresholds (can be overridden by environment variables)
+ERROR_THRESHOLD_PER_FILE=${ERROR_THRESHOLD_PER_FILE:-5}
+TOTAL_ERROR_THRESHOLD=${TOTAL_ERROR_THRESHOLD:-10}
+LOG_LINES_TO_CHECK=${LOG_LINES_TO_CHECK:-100}
+MAX_SAMPLE_ERRORS=${MAX_SAMPLE_ERRORS:-3}
+
+# Initialize counters
+TOTAL_ERRORS=0
+FILES_WITH_ERRORS=0
+CRITICAL_FILES=()
+ERROR_SAMPLES=()
+
+# Define error patterns with severity levels
+FATAL_PATTERNS=("fatal" "critical" "panic" "abort" "segfault")
+ERROR_PATTERNS=("error" "exception" "failed" "failure" "timeout")
+WARNING_PATTERNS=("warning" "warn" "deprecated" "notice")
+
+# Function to count errors by severity
+count_errors_by_severity() {
+  local log_file="$1"
+  local fatal_count=0
+  local error_count=0
+  local warning_count=0
+  
+  if [ ! -f "$log_file" ]; then
+    return
+  fi
+  
+  # Check last N lines of the log file
+  local recent_logs=$(tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null || echo "")
+  
+  if [ -z "$recent_logs" ]; then
+    return
+  fi
+  
+  # Count fatal errors
+  for pattern in "${FATAL_PATTERNS[@]}"; do
+    fatal_count=$((fatal_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
+  done
+  
+  # Count errors (excluding fatals already counted)
+  for pattern in "${ERROR_PATTERNS[@]}"; do
+    error_count=$((error_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
+  done
+  
+  # Count warnings
+  for pattern in "${WARNING_PATTERNS[@]}"; do
+    warning_count=$((warning_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
+  done
+  
+  echo "$fatal_count $error_count $warning_count"
+}
+
+# Function to extract error samples
+extract_error_samples() {
+  local log_file="$1"
+  local sample_count="$2"
+  
+  if [ ! -f "$log_file" ]; then
+    return
+  fi
+  
+  # Get recent error lines with timestamps if available
+  tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null | \
+    grep -iE '(fatal|critical|error|exception|failed)' | \
+    head -"$sample_count" | \
+    while IFS= read -r line; do
+      # Truncate very long lines
+      if [ ${#line} -gt 120 ]; then
+        echo "${line:0:120}..."
+      else
+        echo "$line"
+      fi
+    done
+}
+
+# Function to check log files in a directory
+check_log_directory() {
+  local dir="$1"
+  local pattern="$2"
+  
+  if [ ! -d "$dir" ]; then
+    return
+  fi
+  
+  find "$dir" -name "$pattern" -type f 2>/dev/null | while read -r log_file; do
+    echo "$log_file"
+  done
+}
+
+# Collect all log files to check
+LOG_FILES=()
+
+# Standard log locations
+for pattern in "*.log" "*.out" "*.err"; do
+  while IFS= read -r -d '' file; do
+    LOG_FILES+=("$file")
+  done < <(find . -maxdepth 1 -name "$pattern" -type f -print0 2>/dev/null)
+done
+
+# Common log directories
+LOG_DIRS=("logs" "log" "var/log" ".logs" "tmp/logs")
+for log_dir in "${LOG_DIRS[@]}"; do
+  if [ -d "$log_dir" ]; then
+    while IFS= read -r -d '' file; do
+      LOG_FILES+=("$file")
+    done < <(find "$log_dir" -name "*.log" -o -name "*.out" -o -name "*.err" -type f -print0 2>/dev/null)
+  fi
+done
+
+# Framework-specific log locations
+if [ -f "package.json" ]; then
+  # Node.js specific logs
+  for pattern in "npm-debug.log" "yarn-error.log" "pnpm-debug.log"; do
+    [ -f "$pattern" ] && LOG_FILES+=("$pattern")
+  done
+  
+  # Next.js logs
+  [ -d ".next" ] && find .next -name "*.log" -type f 2>/dev/null | while read -r file; do
+    LOG_FILES+=("$file")
+  done
+fi
+
+# Python specific logs
+if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+  for pattern in "django.log" "flask.log" "celery.log" "pytest.log"; do
+    [ -f "$pattern" ] && LOG_FILES+=("$pattern")
+  done
+fi
+
+# Docker logs if Docker is available
+if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+  # Check for recent container logs with errors
+  CONTAINERS=$(docker ps --format "{{.Names}}" 2>/dev/null | head -5)
+  for container in $CONTAINERS; do
+    if [ -n "$container" ]; then
+      ERROR_COUNT=$(docker logs "$container" --since=10m 2>&1 | grep -icE '(fatal|critical|error|exception)' || echo "0")
+      if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "🐳 Container '$container' has $ERROR_COUNT recent errors" >&2
+        TOTAL_ERRORS=$((TOTAL_ERRORS + ERROR_COUNT))
+        
+        # Get error samples from container logs
+        CONTAINER_ERRORS=$(docker logs "$container" --since=10m 2>&1 | grep -iE '(fatal|critical|error|exception)' | head -2)
+        if [ -n "$CONTAINER_ERRORS" ]; then
+          echo "📝 Sample from $container:" >&2
+          echo "$CONTAINER_ERRORS" | head -1 >&2
+        fi
+      fi
+    fi
+  done
+fi
+
+# Remove duplicates from LOG_FILES array
+readarray -t UNIQUE_LOG_FILES < <(printf '%s\n' "${LOG_FILES[@]}" | sort -u)
+
+echo "📊 Checking ${#UNIQUE_LOG_FILES[@]} log files for error patterns..." >&2
+
+# Check each log file
+for log_file in "${UNIQUE_LOG_FILES[@]}"; do
+  if [ ! -f "$log_file" ]; then
+    continue
+  fi
+  
+  # Get error counts by severity
+  read -r fatal_count error_count warning_count <<< "$(count_errors_by_severity "$log_file")"
+  
+  file_total_errors=$((fatal_count + error_count))
+  TOTAL_ERRORS=$((TOTAL_ERRORS + file_total_errors))
+  
+  if [ "$file_total_errors" -gt 0 ]; then
+    FILES_WITH_ERRORS=$((FILES_WITH_ERRORS + 1))
+    
+    log_basename=$(basename "$log_file")
+    
+    # Report file-level errors
+    if [ "$fatal_count" -gt 0 ]; then
+      echo "🚨 CRITICAL: $log_basename has $fatal_count fatal errors" >&2
+      CRITICAL_FILES+=("$log_file")
+    fi
+    
+    if [ "$file_total_errors" -gt "$ERROR_THRESHOLD_PER_FILE" ]; then
+      echo "⚠️ ERROR SPIKE: $log_basename has $file_total_errors errors (fatal: $fatal_count, error: $error_count)" >&2
+      
+      # Extract error samples
+      echo "📝 Recent error samples from $log_basename:" >&2
+      extract_error_samples "$log_file" "$MAX_SAMPLE_ERRORS" | while IFS= read -r sample; do
+        echo "  → $sample" >&2
+      done
+    elif [ "$file_total_errors" -gt 0 ]; then
+      echo "ℹ️ $log_basename: $file_total_errors errors detected" >&2
+    fi
+    
+    if [ "$warning_count" -gt 0 ]; then
+      echo "⚠️ $log_basename: $warning_count warnings" >&2
+    fi
+  fi
+done
+
+# Overall error rate analysis
+echo "" >&2
+echo "📋 Error Rate Summary:" >&2
+echo "  📁 Files checked: ${#UNIQUE_LOG_FILES[@]}" >&2
+echo "  📄 Files with errors: $FILES_WITH_ERRORS" >&2
+echo "  🔢 Total errors: $TOTAL_ERRORS" >&2
+echo "  🚨 Critical files: ${#CRITICAL_FILES[@]}" >&2
+
+# Alert on high error rates
+if [ "$TOTAL_ERRORS" -gt "$TOTAL_ERROR_THRESHOLD" ]; then
+  echo "" >&2
+  echo "🚨 HIGH ERROR RATE DETECTED!" >&2
+  echo "⚠️ Total errors ($TOTAL_ERRORS) exceed threshold ($TOTAL_ERROR_THRESHOLD)" >&2
+  
+  if [ ${#CRITICAL_FILES[@]} -gt 0 ]; then
+    echo "🔥 Critical files requiring immediate attention:" >&2
+    for critical_file in "${CRITICAL_FILES[@]}"; do
+      echo "  → $(basename "$critical_file")" >&2
+    done
+  fi
+  
+elif [ "$TOTAL_ERRORS" -gt 0 ]; then
+  echo "ℹ️ Errors detected but within acceptable threshold" >&2
+else
+  echo "✅ No errors detected in monitored log files" >&2
+fi
+
+# Performance recommendations
+if [ ${#UNIQUE_LOG_FILES[@]} -gt 20 ]; then
+  echo "" >&2
+  echo "💡 Performance tip: Consider log rotation or filtering for faster monitoring" >&2
+fi
+
+echo "" >&2
+echo "🔧 Monitoring Configuration:" >&2
+echo "  • Error threshold per file: $ERROR_THRESHOLD_PER_FILE" >&2
+echo "  • Total error threshold: $TOTAL_ERROR_THRESHOLD" >&2
+echo "  • Lines checked per file: $LOG_LINES_TO_CHECK" >&2
+echo "" >&2
+echo "💡 Customize thresholds with environment variables:" >&2
+echo "  export ERROR_THRESHOLD_PER_FILE=10" >&2
+echo "  export TOTAL_ERROR_THRESHOLD=25" >&2
+
+exit 0
+```
+
+## Examples
+### Error Rate Monitor Hook Script
+
+Complete hook script that performs error rate monitoring across log files
+
+```bash
+#!/usr/bin/env bash
+echo "Monitoring error rates across log files..." >&2
+ERROR_THRESHOLD_PER_FILE=${ERROR_THRESHOLD_PER_FILE:-5}
+TOTAL_ERROR_THRESHOLD=${TOTAL_ERROR_THRESHOLD:-10}
+LOG_LINES_TO_CHECK=${LOG_LINES_TO_CHECK:-100}
+TOTAL_ERRORS=0
+for log_file in *.log logs/*.log 2>/dev/null; do
+  if [ -f "$log_file" ]; then
+    ERROR_COUNT=$(tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null | grep -icE '(fatal|critical|error|exception)' || echo "0")
+    TOTAL_ERRORS=$((TOTAL_ERRORS + ERROR_COUNT))
+    if [ "$ERROR_COUNT" -gt "$ERROR_THRESHOLD_PER_FILE" ]; then
+      echo "ERROR SPIKE: $log_file has $ERROR_COUNT errors" >&2
+    fi
+  fi
+done
+if [ "$TOTAL_ERRORS" -gt "$TOTAL_ERROR_THRESHOLD" ]; then
+  echo "HIGH ERROR RATE DETECTED: $TOTAL_ERRORS errors" >&2
+fi
+exit 0
+```
+### Docker Container Error Monitoring
+
+Enhanced hook script for Docker container error monitoring with Docker Engine 24.0+ support
+
+```bash
+#!/usr/bin/env bash
+if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+  CONTAINERS=$(docker ps --format "{{.Names}}" 2>/dev/null | head -5)
+  for container in $CONTAINERS; do
+    if [ -n "$container" ]; then
+      ERROR_COUNT=$(docker logs "$container" --since=10m 2>&1 | grep -icE '(fatal|critical|error|exception)' || echo "0")
+      if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "Container '$container' has $ERROR_COUNT recent errors" >&2
+        docker logs "$container" --since=10m 2>&1 | grep -iE '(fatal|critical|error|exception)' | head -2 >&2
+      fi
+    fi
+  done
+fi
+exit 0
+```
+### Error Severity Classification
+
+Enhanced hook script for error severity classification with fatal, error, and warning pattern detection
+
+```bash
+#!/usr/bin/env bash
+ERROR_THRESHOLD_PER_FILE=${ERROR_THRESHOLD_PER_FILE:-5}
+LOG_LINES_TO_CHECK=${LOG_LINES_TO_CHECK:-100}
+FATAL_PATTERNS=("fatal" "critical" "panic" "abort" "segfault")
+ERROR_PATTERNS=("error" "exception" "failed" "failure" "timeout")
+for log_file in *.log logs/*.log 2>/dev/null; do
+  if [ -f "$log_file" ]; then
+    recent_logs=$(tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null || echo "")
+    fatal_count=0
+    error_count=0
+    for pattern in "${FATAL_PATTERNS[@]}"; do
+      fatal_count=$((fatal_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
+    done
+    for pattern in "${ERROR_PATTERNS[@]}"; do
+      error_count=$((error_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
+    done
+    file_total_errors=$((fatal_count + error_count))
+    if [ "$fatal_count" -gt 0 ]; then
+      echo "CRITICAL: $log_file has $fatal_count fatal errors" >&2
+    fi
+    if [ "$file_total_errors" -gt "$ERROR_THRESHOLD_PER_FILE" ]; then
+      echo "ERROR SPIKE: $log_file has $file_total_errors errors (fatal: $fatal_count, error: $error_count)" >&2
+    fi
+  fi
+done
+exit 0
+```
+### Framework-Specific Log Monitoring
+
+Enhanced hook script for framework-specific log monitoring including Next.js, Node.js, and Python logs
+
+```bash
+#!/usr/bin/env bash
+LOG_DIRS=("logs" "log" "var/log" ".logs" "tmp/logs")
+if [ -f "package.json" ]; then
+  if [ -d ".next" ]; then
+    find .next -name "*.log" -type f 2>/dev/null | while read -r file; do
+      ERROR_COUNT=$(tail -100 "$file" 2>/dev/null | grep -icE '(fatal|critical|error|exception)' || echo "0")
+      if [ "$ERROR_COUNT" -gt 0 ]; then
+        echo "Next.js log $file has $ERROR_COUNT errors" >&2
+      fi
+    done
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook runs continuously causing terminal spam
+
+Add sleep interval or debounce logic to notification hook: sleep 60 between checks. Reduce LOG_LINES_TO_CHECK to 50 for faster processing with less output. Use notification hook throttling to limit execution frequency. Consider using file modification time checks to skip unchanged log files.
+### Docker container log checks fail with permission denied
+
+Ensure user is in docker group: sudo usermod -aG docker $USER and restart session. Alternatively, skip Docker checks: remove docker logs section from script. Verify Docker Engine 24.0+ is installed and daemon is running: docker info. Check Docker daemon socket permissions.
+### Log file pattern matching misses framework-specific logs
+
+Add custom log paths to LOG_DIRS array: LOG_DIRS+=('build/logs' '.next/logs'). Extend file patterns: find with -name '*.out' -o -name 'app*.log' for comprehensive coverage. Check framework-specific log locations (Next.js .next/, Django logs/, Flask app.log). Use recursive find with appropriate depth limits.
+### Error rate threshold alerts for normal warning messages
+
+Separate ERROR_PATTERNS from WARNING_PATTERNS in severity classification. Only count fatal+error toward threshold, exclude warnings: TOTAL_ERRORS=$((fatal_count + error_count)). Use severity-based thresholds: FATAL_THRESHOLD and ERROR_THRESHOLD separately. Configure warning-only monitoring separately from error monitoring.
+### Hook performance degrades with many large log files
+
+Limit file search depth: find . -maxdepth 2 instead of recursive. Increase LOG_LINES_TO_CHECK interval but reduce file count: head -5 on find results for performance. Use file size checks to skip very large log files. Consider log rotation or archiving old log files. Set timeout limits for log file processing.
+### Error samples show truncated or incomplete error messages
+
+Increase MAX_SAMPLE_ERRORS to show more error samples. Adjust line truncation limit (default 120 characters) for longer error messages. Use tail with larger line count: tail -200 for more context. Consider showing error context lines: grep -A 2 -B 2 for error context.
+### Docker container log monitoring misses errors in stopped containers
+
+Check both running and stopped containers: docker ps -a --format '{{.Names}}'. Use docker logs with container ID for stopped containers. Consider monitoring container exit codes: docker ps -a --format '{{.Names}} {{.Status}}'. Add stopped container log checking with appropriate time windows.
+### Time-based error rate calculations don't account for log rotation
+
+Use log file modification time to detect log rotation: stat -c %Y logfile. Check for multiple log files with rotation patterns: *.log, *.log.1, *.log.2. Use log file timestamps instead of line counts for time-based calculations. Consider using log rotation detection: check for log file size changes or new log files.

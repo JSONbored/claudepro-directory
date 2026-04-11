@@ -1,0 +1,117 @@
+name: Submission Issue Validation
+
+on:
+  issues:
+    types:
+      - opened
+      - edited
+      - reopened
+      - labeled
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  validate-submission:
+    if: contains(github.event.issue.labels.*.name, 'submission')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: submission-issue-${{ github.event.issue.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write issue payload
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+            fs.mkdirSync(".github/tmp", { recursive: true });
+            fs.writeFileSync(
+              ".github/tmp/issue.json",
+              JSON.stringify(context.payload.issue, null, 2),
+              "utf8"
+            );
+
+      - name: Validate submission issue
+        id: validate
+        run: |
+          node scripts/validate-submission-issue.mjs \
+            --issue-json .github/tmp/issue.json \
+            --output .github/tmp/submission-validation.json
+
+      - name: Ensure validation report exists
+        run: |
+          test -f .github/tmp/submission-validation.json
+
+      - name: Post validation report comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("node:fs");
+            const reportPath = ".github/tmp/submission-validation.json";
+            if (!fs.existsSync(reportPath)) return;
+
+            const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+            if (report.skipped) return;
+
+            const marker = "<!-- submission-validation-report -->";
+            const heading = report.ok
+              ? "## Submission validation: passed"
+              : "## Submission validation: failed";
+
+            const lines = [
+              marker,
+              heading,
+              "",
+              `- Category: \`${report.category || "unknown"}\``,
+              report.errors?.length ? `- Errors: ${report.errors.length}` : "- Errors: 0",
+              report.warnings?.length ? `- Warnings: ${report.warnings.length}` : "- Warnings: 0"
+            ];
+
+            if (report.errors?.length) {
+              lines.push("", "### Errors");
+              for (const error of report.errors) lines.push(`- ${error}`);
+            }
+
+            if (report.warnings?.length) {
+              lines.push("", "### Warnings");
+              for (const warning of report.warnings) lines.push(`- ${warning}`);
+            }
+
+            const body = lines.join("\n");
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100
+            });
+
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body
+              });
+            }
+
+      - name: Fail when submission issue is invalid
+        run: |
+          node scripts/ci/fail-invalid-submission-report.mjs
