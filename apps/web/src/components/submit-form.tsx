@@ -131,8 +131,6 @@ export function SubmitForm() {
   ]);
 
   const categoryNeedsAsset = categoriesRequiringAssetContent.has(category);
-  const categoryNeedsTrigger = category === "hooks";
-  const categoryNeedsCommandSyntax = category === "commands";
   const categoryNeedsSkillMetadata = category === "skills";
 
   const isReady = Boolean(category);
