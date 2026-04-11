@@ -6,6 +6,7 @@ on:
       - main
     paths-ignore:
       - "CHANGELOG.md"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,7 +14,7 @@ permissions:
 
 jobs:
   changelog-pr:
-    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'docs(changelog):') }}
+    if: ${{ github.event_name != 'push' || (!startsWith(github.event.head_commit.message, 'chore(release):') && !startsWith(github.event.head_commit.message, 'docs(changelog):')) }}
     runs-on: ubuntu-latest
 
     steps:
@@ -72,4 +73,3 @@ jobs:
             changelog
           add-paths: |
             CHANGELOG.md
-

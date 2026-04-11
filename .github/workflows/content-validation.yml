@@ -9,16 +9,7 @@ on:
       - ".github/workflows/content-validation.yml"
       - "package.json"
       - "pnpm-lock.yaml"
-  push:
-    branches:
-      - main
-    paths:
-      - "content/**"
-      - "scripts/**"
-      - "examples/content/**"
-      - ".github/workflows/content-validation.yml"
-      - "package.json"
-      - "pnpm-lock.yaml"
+  workflow_dispatch:
 
 permissions:
   contents: read
