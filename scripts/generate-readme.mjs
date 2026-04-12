@@ -72,13 +72,19 @@ const total = categoryOrder.reduce(
   0
 );
 
-const readme = `# HeyClaude
+const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
+
+<div align="center">
+
+# HeyClaude
 
 **Discover and share the best Claude configurations**
 ${total}+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
 Formerly Claude Pro Directory.
 
-[🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
+[🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
+
+</div>
 
 ---
 
@@ -126,6 +132,32 @@ Option C (advanced): commit content files directly.
 ## Content Catalog
 
 ${sections}
+
+---
+
+<div align="center">
+
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JSONbored/claudepro-directory&type=Date)](https://www.star-history.com/#JSONbored/claudepro-directory&Date)
+
+## 📊 Activity
+
+![RepoBeats Analytics](https://repobeats.axiom.co/api/embed/c2b1b7e36103fba7a650c6d7f2777cba7338a1f7.svg "Repobeats analytics image")
+
+## 👥 Contributors
+
+Thanks to everyone who has contributed to making HeyClaude better.
+
+<a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
+</a>
+
+---
+
+[Website](https://heyclau.de) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq) • [Twitter](https://x.com/jsonbored) • [License](LICENSE)
+
+</div>
 `;
 
 fs.writeFileSync(readmePath, readme);

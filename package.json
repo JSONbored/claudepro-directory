@@ -1,17 +1,17 @@
 {
   "name": "heyclaude",
   "private": true,
-  "packageManager": "pnpm@10.17.1",
+  "packageManager": "pnpm@10.33.0",
   "dependencies": {
-    "gray-matter": "^4.0.3",
-    "marked": "^18.0.0"
+    "gray-matter": "4.0.3",
+    "marked": "18.0.0"
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "deploy:dev": "pnpm --filter web run deploy -- --env dev",
-    "deploy:prod": "pnpm --filter web run deploy -- --env \"\"",
+    "deploy:prod": "pnpm --filter web run deploy",
     "type-check": "pnpm --filter web type-check",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:content:strict": "node scripts/validate-content.mjs --strict-recommended",
@@ -33,8 +33,8 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
-    "husky": "^9.1.7"
+    "@commitlint/cli": "20.5.0",
+    "@commitlint/config-conventional": "20.5.0",
+    "husky": "9.1.7"
   }
 }

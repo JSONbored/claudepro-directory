@@ -23,28 +23,28 @@
     "deploy:prod": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
   },
   "dependencies": {
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "geist": "^1.7.0",
-    "lucide-react": "^1.8.0",
-    "marked": "^18.0.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "geist": "1.7.0",
+    "lucide-react": "1.8.0",
+    "marked": "18.0.0",
     "next": "16.2.3",
-    "radix-ui": "^1.4.3",
+    "radix-ui": "1.4.3",
     "react": "19.2.5",
     "react-dom": "19.2.5",
-    "server-only": "^0.0.1",
-    "svix": "^1.90.0",
-    "tailwind-merge": "^3.3.1"
+    "server-only": "0.0.1",
+    "svix": "1.90.0",
+    "tailwind-merge": "3.5.0"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1.18.1",
-    "@tailwindcss/postcss": "^4.1.12",
-    "@types/node": "^25.5.2",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.12",
+    "@opennextjs/cloudflare": "1.19.1",
+    "@tailwindcss/postcss": "4.2.2",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "postcss": "8.5.9",
+    "tailwindcss": "4.2.2",
     "typescript": "6.0.2",
-    "wrangler": "4.81.0"
+    "wrangler": "4.81.1"
   }
 }
