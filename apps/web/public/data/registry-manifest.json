@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-04-25T00:00:00.000Z",
+  "totalEntries": 326,
+  "categoryOrder": [
+    "agents",
+    "mcp",
+    "skills",
+    "rules",
+    "commands",
+    "hooks",
+    "guides",
+    "collections",
+    "statuslines"
+  ],
+  "categories": {
+    "agents": {
+      "count": 39,
+      "label": "Agents"
+    },
+    "mcp": {
+      "count": 44,
+      "label": "MCP Servers"
+    },
+    "skills": {
+      "count": 66,
+      "label": "Skills"
+    },
+    "rules": {
+      "count": 29,
+      "label": "Rules"
+    },
+    "commands": {
+      "count": 27,
+      "label": "Commands"
+    },
+    "hooks": {
+      "count": 66,
+      "label": "Hooks"
+    },
+    "guides": {
+      "count": 19,
+      "label": "Guides"
+    },
+    "collections": {
+      "count": 10,
+      "label": "Collections"
+    },
+    "statuslines": {
+      "count": 26,
+      "label": "Statuslines"
+    }
+  },
+  "artifacts": {
+    "content": "/data/content-index.json",
+    "directory": "/data/directory-index.json",
+    "search": "/data/search-index.json",
+    "raycast": "/data/raycast-index.json"
+  }
+}

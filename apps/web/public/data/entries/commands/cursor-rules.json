@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:cursor-rules",
   "entry": {
     "category": "commands",
     "slug": "cursor-rules",

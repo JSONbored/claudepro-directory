@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:graphql-schema-validator",
   "entry": {
     "category": "hooks",
     "slug": "graphql-schema-validator",

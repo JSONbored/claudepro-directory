@@ -7,6 +7,7 @@ import matter from "gray-matter";
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
 const seedPath = path.join(repoRoot, "content/data/legacy-vote-seed.json");
+const d1Binding = process.env.SITE_D1_BINDING || "SITE_DB";
 
 const modeArg = process.argv.find((arg) => arg.startsWith("--mode=")) ?? "--mode=both";
 const mode = modeArg.split("=")[1] ?? "both";
@@ -77,7 +78,7 @@ function applyMode(runMode) {
     const args = [
       "d1",
       "execute",
-      "VOTES_DB",
+      d1Binding,
       runMode === "remote" ? "--remote" : "--local",
       "--command",
       chunk

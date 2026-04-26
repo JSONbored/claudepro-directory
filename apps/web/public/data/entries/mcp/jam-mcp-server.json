@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:jam-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "jam-mcp-server",

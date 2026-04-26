@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "collections:backend-development-suite",
   "entry": {
     "category": "collections",
     "slug": "backend-development-suite",

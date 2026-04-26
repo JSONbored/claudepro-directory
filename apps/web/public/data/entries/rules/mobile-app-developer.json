@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:mobile-app-developer",
   "entry": {
     "category": "rules",
     "slug": "mobile-app-developer",

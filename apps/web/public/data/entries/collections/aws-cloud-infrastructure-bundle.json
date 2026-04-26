@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "collections:aws-cloud-infrastructure-bundle",
   "entry": {
     "category": "collections",
     "slug": "aws-cloud-infrastructure-bundle",

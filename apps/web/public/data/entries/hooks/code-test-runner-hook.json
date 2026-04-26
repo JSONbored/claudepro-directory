@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:code-test-runner-hook",
   "entry": {
     "category": "hooks",
     "slug": "code-test-runner-hook",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:kubernetes-manifest-validator",
   "entry": {
     "category": "hooks",
     "slug": "kubernetes-manifest-validator",

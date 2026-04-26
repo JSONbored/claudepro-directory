@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:dependency-security-scanner",
   "entry": {
     "category": "hooks",
     "slug": "dependency-security-scanner",

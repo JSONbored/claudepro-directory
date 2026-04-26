@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:terraform-infrastructure-architect",
   "entry": {
     "category": "rules",
     "slug": "terraform-infrastructure-architect",

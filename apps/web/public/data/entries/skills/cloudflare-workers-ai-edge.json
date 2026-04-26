@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:cloudflare-workers-ai-edge",
   "entry": {
     "category": "skills",
     "slug": "cloudflare-workers-ai-edge",

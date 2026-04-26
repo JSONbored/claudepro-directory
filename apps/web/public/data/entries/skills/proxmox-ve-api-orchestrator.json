@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:proxmox-ve-api-orchestrator",
   "entry": {
     "category": "skills",
     "slug": "proxmox-ve-api-orchestrator",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:css-unused-selector-detector",
   "entry": {
     "category": "hooks",
     "slug": "css-unused-selector-detector",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:cloudflare-workers-d1-kv-r2-capability-pack",
   "entry": {
     "category": "skills",
     "slug": "cloudflare-workers-d1-kv-r2-capability-pack",

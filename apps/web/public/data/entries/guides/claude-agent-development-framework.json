@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:claude-agent-development-framework",
   "entry": {
     "category": "guides",
     "slug": "claude-agent-development-framework",

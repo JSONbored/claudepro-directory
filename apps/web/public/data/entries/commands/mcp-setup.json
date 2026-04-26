@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:mcp-setup",
   "entry": {
     "category": "commands",
     "slug": "mcp-setup",

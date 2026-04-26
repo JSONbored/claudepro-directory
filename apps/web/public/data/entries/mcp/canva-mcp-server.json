@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:canva-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "canva-mcp-server",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:test-coverage-final-report",
   "entry": {
     "category": "hooks",
     "slug": "test-coverage-final-report",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:github-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "github-mcp-server",

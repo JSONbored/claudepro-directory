@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:performance-impact-monitor",
   "entry": {
     "category": "hooks",
     "slug": "performance-impact-monitor",

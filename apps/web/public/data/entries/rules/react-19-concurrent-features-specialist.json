@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:react-19-concurrent-features-specialist",
   "entry": {
     "category": "rules",
     "slug": "react-19-concurrent-features-specialist",

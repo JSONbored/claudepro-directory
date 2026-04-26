@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:python-rich-statusline",
   "entry": {
     "category": "statuslines",
     "slug": "python-rich-statusline",

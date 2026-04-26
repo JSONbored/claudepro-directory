@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:vercel-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "vercel-mcp-server",

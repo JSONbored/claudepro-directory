@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:prisma-schema-sync",
   "entry": {
     "category": "hooks",
     "slug": "prisma-schema-sync",

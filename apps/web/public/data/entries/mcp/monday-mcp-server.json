@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:monday-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "monday-mcp-server",

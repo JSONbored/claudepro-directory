@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
-    "gray-matter": "4.0.3",
-    "marked": "18.0.0"
+    "@heyclaude/registry": "workspace:*",
+    "gray-matter": "4.0.3"
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
@@ -18,6 +18,7 @@
     "validate:category-spec": "node scripts/validate-category-spec.mjs",
     "validate:packages": "node scripts/validate-download-packages.mjs",
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
+    "test:registry-artifacts": "node scripts/test-registry-artifacts.mjs",
     "validate:submission-issue": "node scripts/validate-submission-issue.mjs",
     "test:submission-intake": "node scripts/test-submission-intake.mjs",
     "refresh:github-stats": "ENABLE_GITHUB_REPO_STATS=1 node scripts/build-content-index.mjs",

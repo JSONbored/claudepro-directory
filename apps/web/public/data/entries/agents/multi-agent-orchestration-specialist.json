@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:multi-agent-orchestration-specialist",
   "entry": {
     "category": "agents",
     "slug": "multi-agent-orchestration-specialist",

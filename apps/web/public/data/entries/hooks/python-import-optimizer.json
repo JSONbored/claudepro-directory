@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:python-import-optimizer",
   "entry": {
     "category": "hooks",
     "slug": "python-import-optimizer",

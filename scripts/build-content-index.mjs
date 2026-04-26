@@ -4,17 +4,24 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import matter from "gray-matter";
-import { marked } from "marked";
-import categorySpec from "../content/category-spec.json" with { type: "json" };
+import {
+  buildArtifactEnvelope,
+  buildDirectoryEntries,
+  buildEntryDetail,
+  buildRaycastDetail,
+  buildRaycastEnvelope,
+  buildRegistryManifest,
+  buildSearchEntries,
+  categorySpec,
+} from "@heyclaude/registry";
 import {
   extractCodeBlocks,
   extractHeadings,
   extractSections,
-  headingId,
   inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
-} from "./content-schema.mjs";
+} from "@heyclaude/registry/content-schema";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
@@ -23,6 +30,8 @@ const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const publicDataDir = path.join(repoRoot, "apps/web/public/data");
 const outputFile = path.join(publicDataDir, "content-index.json");
 const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
+const searchOutputFile = path.join(publicDataDir, "search-index.json");
+const registryManifestOutputFile = path.join(publicDataDir, "registry-manifest.json");
 const raycastOutputFile = path.join(publicDataDir, "raycast-index.json");
 const entryDataDir = path.join(publicDataDir, "entries");
 const raycastDetailDir = path.join(publicDataDir, "raycast");
@@ -42,28 +51,10 @@ const skillsDownloadsDir = path.join(
 );
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
-const SITE_URL = "https://heyclau.de";
-const ENTRY_SCHEMA_VERSION = 1;
-const RAYCAST_SCHEMA_VERSION = 1;
 const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
 const categories = categorySpec.categoryOrder.filter((category) =>
   fs.existsSync(path.join(contentRoot, category)),
 );
-
-marked.setOptions({
-  gfm: true,
-  breaks: false,
-});
-
-const renderer = new marked.Renderer();
-renderer.heading = ({ tokens, depth }) => {
-  const text = tokens
-    .map((token) => token.raw)
-    .join("")
-    .trim();
-  const id = headingId(text);
-  return `<h${depth} id="${id}">${text}</h${depth}>`;
-};
 
 function buildGitHubUrl(filePath) {
   const relative = path.relative(repoRoot, filePath).replaceAll(path.sep, "/");
@@ -232,222 +223,6 @@ function copyFileIfChanged(sourcePath, destPath) {
 
   fs.writeFileSync(destPath, source);
   return true;
-}
-
-function appendLabeledBlock(lines, label, value) {
-  const normalized = String(value || "").trim();
-  if (!normalized) return;
-  if (lines.length) lines.push("");
-  lines.push(`${label}:`);
-  lines.push(normalized);
-}
-
-function buildCopyText(entry) {
-  const body = String(entry.body || "").trim();
-
-  if (entry.category === "agents" || entry.category === "rules") {
-    return body || entry.copySnippet || entry.usageSnippet || entry.description;
-  }
-
-  if (entry.category === "hooks") {
-    const lines = [];
-    appendLabeledBlock(lines, "Trigger", entry.trigger);
-    appendLabeledBlock(lines, "Install", entry.installCommand);
-    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
-    appendLabeledBlock(
-      lines,
-      "Hook script",
-      entry.scriptBody || entry.copySnippet,
-    );
-    appendLabeledBlock(lines, "Reference", body);
-    return lines.join("\n");
-  }
-
-  if (entry.category === "mcp") {
-    const lines = [];
-    appendLabeledBlock(
-      lines,
-      "Install",
-      entry.installCommand || entry.commandSyntax,
-    );
-    appendLabeledBlock(lines, "Config", entry.configSnippet);
-    appendLabeledBlock(
-      lines,
-      "Usage",
-      entry.copySnippet || entry.usageSnippet || body,
-    );
-    return (
-      lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title
-    );
-  }
-
-  if (entry.category === "skills" || entry.category === "statuslines") {
-    const lines = [];
-    appendLabeledBlock(lines, "Install", entry.installCommand);
-    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
-    appendLabeledBlock(lines, "Usage", entry.usageSnippet);
-    appendLabeledBlock(
-      lines,
-      "Asset",
-      entry.scriptBody || entry.copySnippet || body,
-    );
-    return lines.join("\n");
-  }
-
-  if (entry.category === "commands") {
-    return (
-      entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body
-    );
-  }
-
-  if (entry.category === "collections") {
-    const lines = [];
-    appendLabeledBlock(lines, "Quick start", entry.usageSnippet);
-    if (Array.isArray(entry.items) && entry.items.length) {
-      appendLabeledBlock(
-        lines,
-        "Included items",
-        entry.items.map((item) => `${item.category}/${item.slug}`).join("\n"),
-      );
-    }
-    appendLabeledBlock(lines, "Reference", body);
-    return lines.join("\n") || entry.description;
-  }
-
-  if (entry.category === "guides") {
-    return body || entry.copySnippet || entry.usageSnippet || entry.description;
-  }
-
-  if (entry.copySnippet) return entry.copySnippet;
-  if (entry.installCommand) return entry.installCommand;
-  if (entry.usageSnippet) return entry.usageSnippet;
-  const firstCodeBlock = entry.codeBlocks?.[0]?.code?.trim();
-  if (firstCodeBlock) return firstCodeBlock;
-  if (body) return body;
-  if (entry.documentationUrl) return entry.documentationUrl;
-  if (entry.githubUrl) return entry.githubUrl;
-  return `${entry.title}\n${SITE_URL}/${entry.category}/${entry.slug}`;
-}
-
-function truncateText(value, maxLength) {
-  const normalized = String(value || "").trim();
-  if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength - 3).trimEnd()}...`;
-}
-
-function codeBlock(language, value) {
-  const normalized = String(value || "").trim();
-  if (!normalized) return "";
-  return `\`\`\`${language}\n${normalized}\n\`\`\``;
-}
-
-function buildRaycastDetailMarkdown(entry) {
-  const lines = [
-    `# ${entry.title}`,
-    "",
-    entry.description,
-    "",
-    `**Category:** ${entry.category}`,
-    entry.author ? `**Author:** ${entry.author}` : "",
-    entry.verificationStatus
-      ? `**Verification:** ${entry.verificationStatus}`
-      : "",
-    entry.downloadTrust ? `**Download trust:** ${entry.downloadTrust}` : "",
-    entry.tags?.length
-      ? `**Tags:** ${entry.tags.map((tag) => `\`${tag}\``).join(" ")}`
-      : "",
-  ].filter(Boolean);
-
-  if (entry.installCommand || entry.commandSyntax) {
-    lines.push(
-      "",
-      "## Install",
-      codeBlock("bash", entry.installCommand || entry.commandSyntax),
-    );
-  }
-
-  if (entry.configSnippet) {
-    lines.push("", "## Config", codeBlock("json", entry.configSnippet));
-  }
-
-  if (entry.usageSnippet) {
-    lines.push("", "## Usage", entry.usageSnippet);
-  }
-
-  const links = [
-    `${SITE_URL}/${entry.category}/${entry.slug}`,
-    entry.documentationUrl,
-    entry.repoUrl,
-  ].filter(Boolean);
-
-  if (links.length) {
-    lines.push("", "## Links", ...links.map((link) => `- ${link}`));
-  }
-
-  return truncateText(lines.join("\n"), 6000);
-}
-
-function generatedAtForEntries(entries) {
-  const latestDate = entries
-    .map((entry) => String(entry.dateAdded || "").slice(0, 10))
-    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value))
-    .sort()
-    .at(-1);
-
-  return latestDate ? `${latestDate}T00:00:00.000Z` : "1970-01-01T00:00:00.000Z";
-}
-
-function dataUrl(...segments) {
-  return `/data/${segments.map((segment) => encodeURIComponent(String(segment))).join("/")}`;
-}
-
-function buildRaycastEntries(entries) {
-  return entries.map((entry) => {
-    const copyText = buildCopyText(entry);
-
-    return {
-      category: entry.category,
-      slug: entry.slug,
-      title: entry.title,
-      description: entry.cardDescription || entry.description,
-      tags: entry.tags,
-      installCommand: entry.installCommand || "",
-      configSnippet: entry.configSnippet || "",
-      copyText: truncateText(copyText, 20000),
-      copyTextLength: copyText.length,
-      copyTextTruncated: copyText.length > 20000,
-      detailMarkdown: buildRaycastDetailMarkdown(entry),
-      detailUrl: dataUrl("raycast", entry.category, `${entry.slug}.json`),
-      webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
-      repoUrl: entry.repoUrl || "",
-      documentationUrl: entry.documentationUrl || "",
-      downloadTrust: entry.downloadTrust,
-      verificationStatus: entry.verificationStatus || "",
-    };
-  });
-}
-
-function buildRaycastDetail(entry) {
-  return {
-    schemaVersion: RAYCAST_SCHEMA_VERSION,
-    key: `${entry.category}:${entry.slug}`,
-    category: entry.category,
-    slug: entry.slug,
-    title: entry.title,
-    copyText: buildCopyText(entry),
-    detailMarkdown: buildRaycastDetailMarkdown(entry),
-    webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
-    repoUrl: entry.repoUrl || "",
-    documentationUrl: entry.documentationUrl || "",
-  };
-}
-
-function buildRaycastEnvelope(entries) {
-  return {
-    schemaVersion: RAYCAST_SCHEMA_VERSION,
-    generatedAt: generatedAtForEntries(entries),
-    entries: buildRaycastEntries(entries),
-  };
 }
 
 ensureDir(generatedDir);
@@ -664,17 +439,8 @@ async function main() {
 
   entries.sort((left, right) => left.title.localeCompare(right.title));
 
-  const directoryEntries = entries.map((entry) => {
-    const {
-      body: _body,
-      sections: _sections,
-      headings: _headings,
-      codeBlocks: _codeBlocks,
-      scriptBody: _scriptBody,
-      ...directoryEntry
-    } = entry;
-    return directoryEntry;
-  });
+  const directoryEntries = buildDirectoryEntries(entries);
+  const searchEntries = buildSearchEntries(entries);
 
   resetGeneratedJsonDir(entryDataDir);
   resetGeneratedJsonDir(raycastDetailDir);
@@ -682,13 +448,9 @@ async function main() {
   let raycastDetailCount = 0;
 
   for (const entry of entries) {
-    const entryDetail = {
-      schemaVersion: ENTRY_SCHEMA_VERSION,
-      entry,
-    };
     writeJsonFile(
       path.join(entryDataDir, entry.category, `${entry.slug}.json`),
-      entryDetail,
+      buildEntryDetail(entry),
     );
     writeJsonFile(
       path.join(raycastDetailDir, entry.category, `${entry.slug}.json`),
@@ -698,17 +460,24 @@ async function main() {
     raycastDetailCount += 1;
   }
 
-  const payload = `${JSON.stringify(entries, null, 2)}\n`;
+  const payload = `${JSON.stringify(buildArtifactEnvelope("content-index", entries), null, 2)}\n`;
   const wroteContentIndex = writeFileIfChanged(outputFile, payload);
-  const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
+  const directoryPayload = `${JSON.stringify(buildArtifactEnvelope("directory-index", directoryEntries), null, 2)}\n`;
   const wroteDirectoryIndex = writeFileIfChanged(
     directoryOutputFile,
     directoryPayload,
   );
+  const searchPayload = `${JSON.stringify(buildArtifactEnvelope("search-index", searchEntries), null, 2)}\n`;
+  const wroteSearchIndex = writeFileIfChanged(searchOutputFile, searchPayload);
   const raycastPayload = `${JSON.stringify(buildRaycastEnvelope(entries), null, 2)}\n`;
   const wroteRaycastIndex = writeFileIfChanged(
     raycastOutputFile,
     raycastPayload,
+  );
+  const registryManifestPayload = `${JSON.stringify(buildRegistryManifest(entries), null, 2)}\n`;
+  const wroteRegistryManifest = writeFileIfChanged(
+    registryManifestOutputFile,
+    registryManifestPayload,
   );
 
   const directoryStats = directoryRepo
@@ -750,7 +519,13 @@ async function main() {
     `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`,
   );
   console.log(
+    `${wroteSearchIndex ? "Wrote" : "Unchanged"} ${searchEntries.length} entries to ${path.relative(repoRoot, searchOutputFile)}`,
+  );
+  console.log(
     `${wroteRaycastIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, raycastOutputFile)}`,
+  );
+  console.log(
+    `${wroteRegistryManifest ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, registryManifestOutputFile)}`,
   );
   console.log(
     `Wrote ${entryDetailCount} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,

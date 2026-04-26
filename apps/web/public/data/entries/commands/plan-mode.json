@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:plan-mode",
   "entry": {
     "category": "commands",
     "slug": "plan-mode",

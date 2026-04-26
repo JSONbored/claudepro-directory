@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:react-server-components-expert",
   "entry": {
     "category": "rules",
     "slug": "react-server-components-expert",

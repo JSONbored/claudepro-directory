@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import categorySpec from "../content/category-spec.json" with { type: "json" };
+import categorySpec from "@heyclaude/registry/category-spec";
 
 const repoRoot = process.cwd();
 const templateRoot = path.join(repoRoot, ".github/ISSUE_TEMPLATE");
 const contentRoot = path.join(repoRoot, "content");
+const compatibilitySpecPath = path.join(contentRoot, "category-spec.json");
 const failures = [];
 
 function fail(message) {
@@ -42,11 +43,32 @@ for (const category of categorySpec.categoryOrder) {
   if (!template.includes("content-submission")) {
     fail(`${category}: issue template must include content-submission label`);
   }
+
+  if (templatePath.endsWith(".yml") || templatePath.endsWith(".yaml")) {
+    const requiredFields = [
+      ...categorySpec.commonIssueRequiredFields,
+      ...(spec.submissionRequired ?? []),
+    ];
+    for (const field of requiredFields) {
+      if (!template.includes(`id: ${field}`)) {
+        fail(`${category}: issue template missing required field id ${field}`);
+      }
+    }
+  }
 }
 
 for (const [alias, target] of Object.entries(categorySpec.aliases ?? {})) {
   if (!categorySpec.categoryOrder.includes(target)) {
     fail(`Alias ${alias} points to unknown category ${target}`);
+  }
+}
+
+if (fs.existsSync(compatibilitySpecPath)) {
+  const compatibilitySpec = JSON.parse(fs.readFileSync(compatibilitySpecPath, "utf8"));
+  const canonical = JSON.stringify(categorySpec);
+  const compatibility = JSON.stringify(compatibilitySpec);
+  if (canonical !== compatibility) {
+    fail("content/category-spec.json must match @heyclaude/registry/category-spec.json");
   }
 }
 

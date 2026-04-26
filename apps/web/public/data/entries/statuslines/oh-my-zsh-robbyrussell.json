@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:oh-my-zsh-robbyrussell",
   "entry": {
     "category": "statuslines",
     "slug": "oh-my-zsh-robbyrussell",

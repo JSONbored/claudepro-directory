@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "collections:api-development-starter-kit",
   "entry": {
     "category": "collections",
     "slug": "api-development-starter-kit",

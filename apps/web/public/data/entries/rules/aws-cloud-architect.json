@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:aws-cloud-architect",
   "entry": {
     "category": "rules",
     "slug": "aws-cloud-architect",

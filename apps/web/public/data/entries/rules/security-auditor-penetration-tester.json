@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:security-auditor-penetration-tester",
   "entry": {
     "category": "rules",
     "slug": "security-auditor-penetration-tester",

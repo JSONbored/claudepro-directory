@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:python-linter-integration",
   "entry": {
     "category": "hooks",
     "slug": "python-linter-integration",

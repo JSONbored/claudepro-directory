@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:security-auditor",
   "entry": {
     "category": "rules",
     "slug": "security-auditor",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:golang-expert",
   "entry": {
     "category": "rules",
     "slug": "golang-expert",

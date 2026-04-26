@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:domain-specialist-ai-agents",
   "entry": {
     "category": "agents",
     "slug": "domain-specialist-ai-agents",

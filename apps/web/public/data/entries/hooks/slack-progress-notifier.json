@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:slack-progress-notifier",
   "entry": {
     "category": "hooks",
     "slug": "slack-progress-notifier",

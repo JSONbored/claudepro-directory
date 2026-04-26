@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:fix-memory-leak-performance",
   "entry": {
     "category": "guides",
     "slug": "fix-memory-leak-performance",

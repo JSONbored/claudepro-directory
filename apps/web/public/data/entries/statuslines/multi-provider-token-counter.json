@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:multi-provider-token-counter",
   "entry": {
     "category": "statuslines",
     "slug": "multi-provider-token-counter",

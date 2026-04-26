@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:accessibility-checker",
   "entry": {
     "category": "hooks",
     "slug": "accessibility-checker",

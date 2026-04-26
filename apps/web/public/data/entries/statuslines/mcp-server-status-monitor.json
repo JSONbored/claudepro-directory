@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:mcp-server-status-monitor",
   "entry": {
     "category": "statuslines",
     "slug": "mcp-server-status-monitor",

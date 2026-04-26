@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:kubernetes-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "kubernetes-mcp-server",

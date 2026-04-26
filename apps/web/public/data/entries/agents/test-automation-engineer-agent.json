@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:test-automation-engineer-agent",
   "entry": {
     "category": "agents",
     "slug": "test-automation-engineer-agent",

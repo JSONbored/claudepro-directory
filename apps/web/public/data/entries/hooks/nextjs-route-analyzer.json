@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:nextjs-route-analyzer",
   "entry": {
     "category": "hooks",
     "slug": "nextjs-route-analyzer",

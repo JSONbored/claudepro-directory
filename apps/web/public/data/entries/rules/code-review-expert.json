@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:code-review-expert",
   "entry": {
     "category": "rules",
     "slug": "code-review-expert",

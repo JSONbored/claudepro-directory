@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:github-actions-ai-cicd",
   "entry": {
     "category": "skills",
     "slug": "github-actions-ai-cicd",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:dependency-security-audit-on-stop",
   "entry": {
     "category": "hooks",
     "slug": "dependency-security-audit-on-stop",

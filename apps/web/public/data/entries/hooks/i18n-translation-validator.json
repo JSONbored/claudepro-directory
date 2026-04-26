@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:i18n-translation-validator",
   "entry": {
     "category": "hooks",
     "slug": "i18n-translation-validator",

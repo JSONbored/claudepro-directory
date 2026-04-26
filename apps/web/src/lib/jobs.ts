@@ -1,14 +1,4 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-
-type D1PreparedStatement = {
-  bind: (...values: unknown[]) => {
-    all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>;
-  };
-};
-
-type D1DatabaseLike = {
-  prepare: (query: string) => D1PreparedStatement;
-};
+import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
 export type JobTier = "standard" | "featured" | "sponsored";
 export type JobStatus = "draft" | "pending_review" | "active" | "closed" | "archived";
@@ -151,12 +141,7 @@ function toJobListing(row: JobListingRow): JobListing {
 }
 
 function getJobsDb(): D1DatabaseLike | null {
-  try {
-    const { env } = getCloudflareContext();
-    return (env.VOTES_DB as D1DatabaseLike | undefined) ?? null;
-  } catch {
-    return null;
-  }
+  return getSiteDb();
 }
 
 export async function getJobs(): Promise<JobListing[]> {

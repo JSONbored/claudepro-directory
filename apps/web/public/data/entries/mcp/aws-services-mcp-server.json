@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:aws-services-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "aws-services-mcp-server",

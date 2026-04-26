@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:playwright-test-runner",
   "entry": {
     "category": "hooks",
     "slug": "playwright-test-runner",

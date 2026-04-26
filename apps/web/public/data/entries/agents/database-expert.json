@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:database-expert",
   "entry": {
     "category": "agents",
     "slug": "database-expert",

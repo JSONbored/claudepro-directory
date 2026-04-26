@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
-import categorySpec from "../content/category-spec.json" with { type: "json" };
+import categorySpec from "@heyclaude/registry/category-spec";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -100,13 +100,16 @@ Option B (direct): open a category issue form in GitHub under \`.github/ISSUE_TE
 Option C (advanced): commit content files directly.
 
 1. Add or update a file under \`content/<category>/\`
-2. Run \`pnpm generate:readme\`
-3. Run \`pnpm validate:content\` and \`pnpm audit:content\`
-4. Commit the README alongside your content changes
+2. Run \`pnpm --filter web run prebuild\`
+3. Run \`pnpm validate:content:strict\`, \`pnpm audit:content\`, and \`pnpm test:registry-artifacts\`
+4. Run \`pnpm generate:readme\`
+5. Commit the README and generated registry artifacts alongside your content changes
 
 ### Schema references
 
 - Examples: [examples/content/README.md](examples/content/README.md)
+- Registry schema: [content/SCHEMA.md](content/SCHEMA.md)
+- Registry package: [packages/registry](packages/registry)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 

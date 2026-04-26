@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:wsl-setup-guide",
   "entry": {
     "category": "guides",
     "slug": "wsl-setup-guide",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:google-workspace-gemini-automation",
   "entry": {
     "category": "skills",
     "slug": "google-workspace-gemini-automation",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:webassembly-module-development",
   "entry": {
     "category": "skills",
     "slug": "webassembly-module-development",

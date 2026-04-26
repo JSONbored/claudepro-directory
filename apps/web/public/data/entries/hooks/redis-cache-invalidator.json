@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:redis-cache-invalidator",
   "entry": {
     "category": "hooks",
     "slug": "redis-cache-invalidator",

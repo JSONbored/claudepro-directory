@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:unraid-api-automation-operator",
   "entry": {
     "category": "skills",
     "slug": "unraid-api-automation-operator",

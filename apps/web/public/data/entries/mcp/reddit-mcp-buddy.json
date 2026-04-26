@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:reddit-mcp-buddy",
   "entry": {
     "category": "mcp",
     "slug": "reddit-mcp-buddy",

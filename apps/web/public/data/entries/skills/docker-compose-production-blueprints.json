@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:docker-compose-production-blueprints",
   "entry": {
     "category": "skills",
     "slug": "docker-compose-production-blueprints",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:mcp-tool-contract-testing",
   "entry": {
     "category": "skills",
     "slug": "mcp-tool-contract-testing",

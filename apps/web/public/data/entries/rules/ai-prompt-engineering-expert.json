@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:ai-prompt-engineering-expert",
   "entry": {
     "category": "rules",
     "slug": "ai-prompt-engineering-expert",

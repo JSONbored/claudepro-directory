@@ -2,6 +2,8 @@
 
 HeyClaude content is file-backed MDX under `content/<category>/`.
 
+The canonical registry implementation lives in `packages/registry`. Content files remain the editorial source of truth, while the registry package owns category definitions, validation helpers, derived fields, copy text, submission parsing, and public artifact builders.
+
 ## Shared fields
 
 Every entry should include:
@@ -49,5 +51,7 @@ Use these when applicable:
 
 1. Run `pnpm migrate:content`
 2. Run `pnpm audit:content`
-3. Fix missing fields and semantic audit issues
-4. Regenerate the README with `pnpm generate:readme`
+3. Run `pnpm --filter web run prebuild` to regenerate registry artifacts
+4. Run `pnpm test:registry-artifacts`
+5. Fix missing fields and semantic audit issues
+6. Regenerate the README with `pnpm generate:readme`

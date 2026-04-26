@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:netlify-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "netlify-mcp-server",

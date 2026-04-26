@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:image-ocr-table-extraction",
   "entry": {
     "category": "skills",
     "slug": "image-ocr-table-extraction",

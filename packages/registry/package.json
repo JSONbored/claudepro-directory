@@ -1,0 +1,35 @@
+{
+  "name": "@heyclaude/registry",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./category-spec": {
+      "types": "./src/index.d.ts",
+      "default": "./src/category-spec.js"
+    },
+    "./content-schema": {
+      "types": "./src/index.d.ts",
+      "default": "./src/content-schema.js"
+    },
+    "./presentation": {
+      "types": "./src/index.d.ts",
+      "default": "./src/presentation.js"
+    },
+    "./submission": {
+      "types": "./src/index.d.ts",
+      "default": "./src/submission.js"
+    },
+    "./artifacts": {
+      "types": "./src/index.d.ts",
+      "default": "./src/artifacts.js"
+    },
+    "./category-spec.json": "./src/category-spec.json"
+  }
+}

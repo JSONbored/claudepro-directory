@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:monorepo-workspace-manager",
   "entry": {
     "category": "rules",
     "slug": "monorepo-workspace-manager",

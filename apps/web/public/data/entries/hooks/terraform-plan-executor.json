@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:terraform-plan-executor",
   "entry": {
     "category": "hooks",
     "slug": "terraform-plan-executor",

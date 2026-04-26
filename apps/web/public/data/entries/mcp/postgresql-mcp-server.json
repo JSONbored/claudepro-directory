@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:postgresql-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "postgresql-mcp-server",

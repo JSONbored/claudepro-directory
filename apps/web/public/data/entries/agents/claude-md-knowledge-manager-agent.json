@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:claude-md-knowledge-manager-agent",
   "entry": {
     "category": "agents",
     "slug": "claude-md-knowledge-manager-agent",

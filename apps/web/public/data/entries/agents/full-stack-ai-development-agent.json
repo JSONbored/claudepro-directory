@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:full-stack-ai-development-agent",
   "entry": {
     "category": "agents",
     "slug": "full-stack-ai-development-agent",

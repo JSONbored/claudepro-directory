@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:sensitive-data-alert-scanner",
   "entry": {
     "category": "hooks",
     "slug": "sensitive-data-alert-scanner",

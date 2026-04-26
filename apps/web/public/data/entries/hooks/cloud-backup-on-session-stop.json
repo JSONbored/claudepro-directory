@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:cloud-backup-on-session-stop",
   "entry": {
     "category": "hooks",
     "slug": "cloud-backup-on-session-stop",

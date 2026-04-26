@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:python-data-science",
   "entry": {
     "category": "rules",
     "slug": "python-data-science",

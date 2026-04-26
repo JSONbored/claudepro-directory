@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:code-complexity-alert-monitor",
   "entry": {
     "category": "hooks",
     "slug": "code-complexity-alert-monitor",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:fix-installation-errors",
   "entry": {
     "category": "guides",
     "slug": "fix-installation-errors",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:socket-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "socket-mcp-server",

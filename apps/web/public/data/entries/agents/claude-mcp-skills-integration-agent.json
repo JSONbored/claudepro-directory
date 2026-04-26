@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:claude-mcp-skills-integration-agent",
   "entry": {
     "category": "agents",
     "slug": "claude-mcp-skills-integration-agent",

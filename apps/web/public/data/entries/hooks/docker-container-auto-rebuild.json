@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:docker-container-auto-rebuild",
   "entry": {
     "category": "hooks",
     "slug": "docker-container-auto-rebuild",

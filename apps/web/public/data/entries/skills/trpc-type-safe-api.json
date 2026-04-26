@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:trpc-type-safe-api",
   "entry": {
     "category": "skills",
     "slug": "trpc-type-safe-api",

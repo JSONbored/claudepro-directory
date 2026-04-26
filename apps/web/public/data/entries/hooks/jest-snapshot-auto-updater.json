@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:jest-snapshot-auto-updater",
   "entry": {
     "category": "hooks",
     "slug": "jest-snapshot-auto-updater",

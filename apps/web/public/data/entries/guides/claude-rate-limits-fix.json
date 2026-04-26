@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:claude-rate-limits-fix",
   "entry": {
     "category": "guides",
     "slug": "claude-rate-limits-fix",

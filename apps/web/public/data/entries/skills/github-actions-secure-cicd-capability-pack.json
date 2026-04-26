@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:github-actions-secure-cicd-capability-pack",
   "entry": {
     "category": "skills",
     "slug": "github-actions-secure-cicd-capability-pack",

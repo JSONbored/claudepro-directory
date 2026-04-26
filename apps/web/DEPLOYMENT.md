@@ -11,7 +11,8 @@
 
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
-- `VOTES_DB` (D1) for durable upvotes and private jobs listings.
+- `SITE_DB` (D1) for durable upvotes, private jobs listings, and future dynamic site state.
+- `VOTES_DB` remains configured as a backward-compatible alias for the same database.
 - Shared between `prod` and `dev` environments in the current setup.
 
 ## D1 setup
@@ -22,7 +23,7 @@ Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 pnpm --filter web exec wrangler d1 create heyclaude-votes
 ```
 
-2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) under `d1_databases[0]`.
+2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for both `SITE_DB` and the backward-compatible `VOTES_DB` alias.
 
 3. Apply migrations:
 

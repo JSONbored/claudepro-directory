@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:bun-runtime-modern-javascript",
   "entry": {
     "category": "skills",
     "slug": "bun-runtime-modern-javascript",

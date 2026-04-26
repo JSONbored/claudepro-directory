@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:dependency-update-checker",
   "entry": {
     "category": "hooks",
     "slug": "dependency-update-checker",

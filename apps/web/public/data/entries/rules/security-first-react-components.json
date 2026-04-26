@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:security-first-react-components",
   "entry": {
     "category": "rules",
     "slug": "security-first-react-components",

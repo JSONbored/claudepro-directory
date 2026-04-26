@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:docker-health-statusline",
   "entry": {
     "category": "statuslines",
     "slug": "docker-health-statusline",

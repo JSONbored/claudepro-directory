@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:git-branch-protection",
   "entry": {
     "category": "hooks",
     "slug": "git-branch-protection",

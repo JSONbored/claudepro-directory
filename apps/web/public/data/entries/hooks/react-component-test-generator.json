@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:react-component-test-generator",
   "entry": {
     "category": "hooks",
     "slug": "react-component-test-generator",

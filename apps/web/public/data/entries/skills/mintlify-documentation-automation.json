@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:mintlify-documentation-automation",
   "entry": {
     "category": "skills",
     "slug": "mintlify-documentation-automation",

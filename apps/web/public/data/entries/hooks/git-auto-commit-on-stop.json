@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:git-auto-commit-on-stop",
   "entry": {
     "category": "hooks",
     "slug": "git-auto-commit-on-stop",

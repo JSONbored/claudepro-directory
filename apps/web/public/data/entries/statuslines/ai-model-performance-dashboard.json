@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:ai-model-performance-dashboard",
   "entry": {
     "category": "statuslines",
     "slug": "ai-model-performance-dashboard",

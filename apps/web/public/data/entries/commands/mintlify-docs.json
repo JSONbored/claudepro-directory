@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:mintlify-docs",
   "entry": {
     "category": "commands",
     "slug": "mintlify-docs",

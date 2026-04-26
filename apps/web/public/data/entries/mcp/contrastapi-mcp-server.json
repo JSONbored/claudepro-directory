@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:contrastapi-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "contrastapi-mcp-server",

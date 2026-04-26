@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:invideo-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "invideo-mcp-server",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:hugging-face-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "hugging-face-mcp-server",

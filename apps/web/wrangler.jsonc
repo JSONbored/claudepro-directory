@@ -42,6 +42,12 @@
   },
   "d1_databases": [
     {
+      "binding": "SITE_DB",
+      "database_name": "heyclaude-votes",
+      "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
+      "migrations_dir": "migrations"
+    },
+    {
       "binding": "VOTES_DB",
       "database_name": "heyclaude-votes",
       "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
@@ -65,6 +71,12 @@
         }
       ],
       "d1_databases": [
+        {
+          "binding": "SITE_DB",
+          "database_name": "heyclaude-votes",
+          "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
+          "migrations_dir": "migrations"
+        },
         {
           "binding": "VOTES_DB",
           "database_name": "heyclaude-votes",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:database-migration-runner",
   "entry": {
     "category": "hooks",
     "slug": "database-migration-runner",

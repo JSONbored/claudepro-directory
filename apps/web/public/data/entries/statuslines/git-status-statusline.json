@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:git-status-statusline",
   "entry": {
     "category": "statuslines",
     "slug": "git-status-statusline",

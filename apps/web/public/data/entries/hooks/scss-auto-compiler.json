@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:scss-auto-compiler",
   "entry": {
     "category": "hooks",
     "slug": "scss-auto-compiler",

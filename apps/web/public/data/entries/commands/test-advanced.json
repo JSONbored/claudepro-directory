@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:test-advanced",
   "entry": {
     "category": "commands",
     "slug": "test-advanced",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:github-copilot-interop-bridge",
   "entry": {
     "category": "agents",
     "slug": "github-copilot-interop-bridge",

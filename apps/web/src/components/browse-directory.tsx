@@ -40,6 +40,12 @@ const utilityFilterOptions = [
 ] as const;
 const sortModeOptions = ["popular", "newest", "title"] as const;
 
+type DirectoryEntriesPayload =
+  | DirectoryEntry[]
+  | {
+      entries?: DirectoryEntry[];
+    };
+
 function normalizeCategory(value?: string) {
   const normalized = String(value || "").trim().toLowerCase();
   if (normalized === "all") return "all";
@@ -145,10 +151,11 @@ export function BrowseDirectory({
       });
       if (!response.ok) return;
 
-      const payload = (await response.json()) as DirectoryEntry[];
-      if (!Array.isArray(payload) || payload.length === 0) return;
+      const payload = (await response.json()) as DirectoryEntriesPayload;
+      const nextEntries = Array.isArray(payload) ? payload : payload.entries;
+      if (!Array.isArray(nextEntries) || nextEntries.length === 0) return;
 
-      setAllEntries(payload);
+      setAllEntries(nextEntries);
       setHasLoadedFullEntries(true);
     } catch {
       // Keep initial entries on fetch failure.

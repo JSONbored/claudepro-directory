@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:agent-skills-framework-engineer",
   "entry": {
     "category": "agents",
     "slug": "agent-skills-framework-engineer",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:build-mcp-server",
   "entry": {
     "category": "guides",
     "slug": "build-mcp-server",

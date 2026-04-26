@@ -46,6 +46,9 @@ jobs:
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
 
+      - name: Test registry artifact contracts
+        run: pnpm test:registry-artifacts
+
       - name: Install Raycast dependencies
         working-directory: integrations/raycast
         run: npm ci

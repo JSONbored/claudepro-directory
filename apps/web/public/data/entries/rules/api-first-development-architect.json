@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:api-first-development-architect",
   "entry": {
     "category": "rules",
     "slug": "api-first-development-architect",

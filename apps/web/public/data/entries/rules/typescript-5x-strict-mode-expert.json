@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:typescript-5x-strict-mode-expert",
   "entry": {
     "category": "rules",
     "slug": "typescript-5x-strict-mode-expert",

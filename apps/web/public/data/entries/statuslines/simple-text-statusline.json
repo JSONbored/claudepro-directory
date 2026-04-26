@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:simple-text-statusline",
   "entry": {
     "category": "statuslines",
     "slug": "simple-text-statusline",

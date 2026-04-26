@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:accessibility-first-statusline",
   "entry": {
     "category": "statuslines",
     "slug": "accessibility-first-statusline",

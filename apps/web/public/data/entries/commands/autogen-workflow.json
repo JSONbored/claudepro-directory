@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:autogen-workflow",
   "entry": {
     "category": "commands",
     "slug": "autogen-workflow",

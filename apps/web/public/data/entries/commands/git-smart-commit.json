@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:git-smart-commit",
   "entry": {
     "category": "commands",
     "slug": "git-smart-commit",

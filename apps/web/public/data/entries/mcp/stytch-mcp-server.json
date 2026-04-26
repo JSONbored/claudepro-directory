@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:stytch-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "stytch-mcp-server",

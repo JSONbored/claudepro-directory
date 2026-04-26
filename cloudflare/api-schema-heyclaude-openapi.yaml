@@ -172,6 +172,57 @@ paths:
           description: Not found
         "429":
           description: Rate limited
+  /api/registry/search:
+    get:
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+            maxLength: 120
+        - in: query
+          name: category
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        "200":
+          description: Search succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  schemaVersion:
+                    type: integer
+                  query:
+                    type: string
+                  category:
+                    type: string
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                required:
+                  - schemaVersion
+                  - query
+                  - category
+                  - count
+                  - results
+        "403":
+          description: Forbidden origin
+        "429":
+          description: Rate limited
   /api/github-stats:
     get:
       responses:

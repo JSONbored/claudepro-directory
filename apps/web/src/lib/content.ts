@@ -4,108 +4,16 @@ import { cache } from "react";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type {
+  CategorySummary,
+  ContentEntry,
+  DirectoryEntry,
+  RegistryEnvelope,
+} from "@heyclaude/registry";
 
 import { categoryDescriptions, categoryLabels, siteConfig } from "@/lib/site";
 
-export type ContentCodeBlock = {
-  language: string;
-  code: string;
-};
-
-export type ContentSection = {
-  title: string;
-  id: string;
-  markdown: string;
-  codeBlocks: ContentCodeBlock[];
-};
-
-export type ContentHeading = {
-  depth: number;
-  text: string;
-  id: string;
-};
-
-export type ContentCollectionItem = {
-  slug: string;
-  category: string;
-};
-
-export type ContentEntry = {
-  category: string;
-  slug: string;
-  title: string;
-  description: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  author?: string;
-  authorProfileUrl?: string;
-  dateAdded?: string;
-  tags: string[];
-  keywords: string[];
-  readingTime?: number;
-  difficultyScore?: number;
-  documentationUrl?: string;
-  cardDescription?: string;
-  installable?: boolean;
-  installCommand?: string;
-  usageSnippet?: string;
-  copySnippet?: string;
-  configSnippet?: string;
-  commandSyntax?: string;
-  argumentHint?: string;
-  allowedTools?: string[];
-  scriptLanguage?: string;
-  scriptBody?: string;
-  trigger?: string;
-  items?: ContentCollectionItem[];
-  installationOrder?: string[];
-  estimatedSetupTime?: string;
-  difficulty?: string;
-  skillType?: "general" | "capability-pack";
-  skillLevel?: "foundational" | "advanced" | "expert";
-  verificationStatus?: "draft" | "validated" | "production";
-  verifiedAt?: string;
-  retrievalSources?: string[];
-  testedPlatforms?: string[];
-  prerequisites?: string[];
-  hasPrerequisites?: boolean;
-  hasTroubleshooting?: boolean;
-  hasBreakingChanges?: boolean;
-  robotsIndex?: boolean;
-  robotsFollow?: boolean;
-  packageVerified?: boolean;
-  downloadUrl?: string;
-  downloadTrust?: "first-party" | "external" | null;
-  downloadSha256?: string | null;
-  body: string;
-  sections: ContentSection[];
-  headings: ContentHeading[];
-  codeBlocks: ContentCodeBlock[];
-  filePath?: string;
-  githubUrl?: string;
-  repoUrl?: string | null;
-  githubStars?: number | null;
-  githubForks?: number | null;
-  repoUpdatedAt?: string | null;
-};
-
-export type CategorySummary = {
-  category: string;
-  label: string;
-  count: number;
-  description: string;
-};
-
-export type DirectoryEntry = Omit<
-  ContentEntry,
-  "body" | "sections" | "headings" | "codeBlocks" | "scriptBody"
-> & {
-  body?: string;
-  sections?: ContentSection[];
-  headings?: ContentHeading[];
-  codeBlocks?: ContentCodeBlock[];
-  scriptBody?: string;
-};
+export type { CategorySummary, ContentEntry, DirectoryEntry };
 
 const DATA_ORIGIN = "https://heyclau.de";
 let contentIndexPromise: Promise<ContentEntry[]> | null = null;
@@ -132,14 +40,23 @@ async function loadJsonDataFile<T>(fileName: string): Promise<T> {
 }
 
 const loadContentIndex = cache(async (): Promise<ContentEntry[]> => {
-  contentIndexPromise ??= loadJsonDataFile<ContentEntry[]>("content-index.json");
+  contentIndexPromise ??= loadJsonDataFile<ContentEntry[] | RegistryEnvelope<ContentEntry>>("content-index.json").then(
+    normalizeRegistryEntries
+  );
   return contentIndexPromise;
 });
 
 const loadDirectoryIndex = cache(async (): Promise<DirectoryEntry[]> => {
-  directoryIndexPromise ??= loadJsonDataFile<DirectoryEntry[]>("directory-index.json");
+  directoryIndexPromise ??= loadJsonDataFile<DirectoryEntry[] | RegistryEnvelope<DirectoryEntry>>(
+    "directory-index.json"
+  ).then(normalizeRegistryEntries);
   return directoryIndexPromise;
 });
+
+function normalizeRegistryEntries<T>(payload: T[] | RegistryEnvelope<T>): T[] {
+  if (Array.isArray(payload)) return payload;
+  return Array.isArray(payload?.entries) ? payload.entries : [];
+}
 
 function isSafeContentPathPart(value: string) {
   return /^[a-z0-9-]+$/.test(value);

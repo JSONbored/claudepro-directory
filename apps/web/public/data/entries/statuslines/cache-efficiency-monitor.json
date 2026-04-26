@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:cache-efficiency-monitor",
   "entry": {
     "category": "statuslines",
     "slug": "cache-efficiency-monitor",

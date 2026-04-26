@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:postgresql-query-optimization",
   "entry": {
     "category": "skills",
     "slug": "postgresql-query-optimization",

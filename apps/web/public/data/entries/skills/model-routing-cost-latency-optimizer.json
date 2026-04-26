@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:model-routing-cost-latency-optimizer",
   "entry": {
     "category": "skills",
     "slug": "model-routing-cost-latency-optimizer",

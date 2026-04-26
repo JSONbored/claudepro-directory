@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:database-connection-cleanup",
   "entry": {
     "category": "hooks",
     "slug": "database-connection-cleanup",

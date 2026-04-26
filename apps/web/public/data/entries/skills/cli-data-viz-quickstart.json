@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:cli-data-viz-quickstart",
   "entry": {
     "category": "skills",
     "slug": "cli-data-viz-quickstart",

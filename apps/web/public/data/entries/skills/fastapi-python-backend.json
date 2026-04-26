@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:fastapi-python-backend",
   "entry": {
     "category": "skills",
     "slug": "fastapi-python-backend",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "collections:production-readiness-toolkit",
   "entry": {
     "category": "collections",
     "slug": "production-readiness-toolkit",

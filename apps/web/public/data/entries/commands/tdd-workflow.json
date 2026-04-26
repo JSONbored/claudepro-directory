@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:tdd-workflow",
   "entry": {
     "category": "commands",
     "slug": "tdd-workflow",

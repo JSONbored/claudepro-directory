@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:daily-usage-percentage-tracker",
   "entry": {
     "category": "statuslines",
     "slug": "daily-usage-percentage-tracker",

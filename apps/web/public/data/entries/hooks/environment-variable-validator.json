@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:environment-variable-validator",
   "entry": {
     "category": "hooks",
     "slug": "environment-variable-validator",

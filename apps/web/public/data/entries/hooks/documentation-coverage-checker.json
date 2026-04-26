@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:documentation-coverage-checker",
   "entry": {
     "category": "hooks",
     "slug": "documentation-coverage-checker",

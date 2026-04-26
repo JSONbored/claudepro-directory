@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:claude-haiku-45-speed-optimizer-agent",
   "entry": {
     "category": "agents",
     "slug": "claude-haiku-45-speed-optimizer-agent",

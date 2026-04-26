@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:square-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "square-mcp-server",

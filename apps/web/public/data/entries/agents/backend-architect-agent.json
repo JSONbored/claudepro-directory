@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:backend-architect-agent",
   "entry": {
     "category": "agents",
     "slug": "backend-architect-agent",

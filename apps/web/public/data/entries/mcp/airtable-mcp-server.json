@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:airtable-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "airtable-mcp-server",

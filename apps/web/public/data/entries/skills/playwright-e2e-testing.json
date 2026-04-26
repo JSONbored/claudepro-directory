@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:playwright-e2e-testing",
   "entry": {
     "category": "skills",
     "slug": "playwright-e2e-testing",

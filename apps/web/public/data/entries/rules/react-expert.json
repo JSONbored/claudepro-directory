@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:react-expert",
   "entry": {
     "category": "rules",
     "slug": "react-expert",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:slash-command-orchestrator-agent",
   "entry": {
     "category": "agents",
     "slug": "slash-command-orchestrator-agent",

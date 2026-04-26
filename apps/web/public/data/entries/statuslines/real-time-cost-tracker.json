@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:real-time-cost-tracker",
   "entry": {
     "category": "statuslines",
     "slug": "real-time-cost-tracker",

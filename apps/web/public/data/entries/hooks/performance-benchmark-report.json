@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:performance-benchmark-report",
   "entry": {
     "category": "hooks",
     "slug": "performance-benchmark-report",

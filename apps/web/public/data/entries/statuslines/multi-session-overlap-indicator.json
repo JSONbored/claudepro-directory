@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:multi-session-overlap-indicator",
   "entry": {
     "category": "statuslines",
     "slug": "multi-session-overlap-indicator",

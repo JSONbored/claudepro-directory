@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:workspace-project-depth-indicator",
   "entry": {
     "category": "statuslines",
     "slug": "workspace-project-depth-indicator",

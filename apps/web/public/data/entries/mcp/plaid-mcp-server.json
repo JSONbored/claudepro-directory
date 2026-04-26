@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "mcp:plaid-mcp-server",
   "entry": {
     "category": "mcp",
     "slug": "plaid-mcp-server",

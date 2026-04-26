@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:real-time-activity-tracker",
   "entry": {
     "category": "hooks",
     "slug": "real-time-activity-tracker",

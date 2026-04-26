@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:v0-generate",
   "entry": {
     "category": "commands",
     "slug": "v0-generate",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:vue-composition-api-linter",
   "entry": {
     "category": "hooks",
     "slug": "vue-composition-api-linter",

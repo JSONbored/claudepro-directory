@@ -7,6 +7,7 @@ import matter from "gray-matter";
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
 const seedPath = path.join(repoRoot, "content/data/legacy-vote-seed.json");
+const d1Binding = process.env.SITE_D1_BINDING || "SITE_DB";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
   .filter((entry) => entry.isDirectory() && entry.name !== "data")
@@ -56,7 +57,7 @@ function getRows(runMode) {
     "wrangler",
     "d1",
     "execute",
-    "VOTES_DB",
+    d1Binding,
     runMode === "remote" ? "--remote" : "--local",
     "--command",
     "SELECT entry_key, upvote_count FROM votes_entries;"

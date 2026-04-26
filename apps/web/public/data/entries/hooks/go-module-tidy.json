@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:go-module-tidy",
   "entry": {
     "category": "hooks",
     "slug": "go-module-tidy",

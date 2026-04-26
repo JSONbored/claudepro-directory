@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:minimal-powerline",
   "entry": {
     "category": "statuslines",
     "slug": "minimal-powerline",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:audio-transcription-summarization",
   "entry": {
     "category": "skills",
     "slug": "audio-transcription-summarization",

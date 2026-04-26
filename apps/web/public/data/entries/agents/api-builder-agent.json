@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:api-builder-agent",
   "entry": {
     "category": "agents",
     "slug": "api-builder-agent",

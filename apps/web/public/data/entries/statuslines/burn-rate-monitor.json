@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:burn-rate-monitor",
   "entry": {
     "category": "statuslines",
     "slug": "burn-rate-monitor",

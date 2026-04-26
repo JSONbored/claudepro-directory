@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:discord-activity-notifier",
   "entry": {
     "category": "hooks",
     "slug": "discord-activity-notifier",

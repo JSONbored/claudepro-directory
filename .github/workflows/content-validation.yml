@@ -48,8 +48,17 @@ jobs:
       - name: Validate downloadable packages
         run: pnpm validate:packages
 
+      - name: Build registry artifacts
+        run: pnpm --filter web run prebuild
+
+      - name: Test registry artifact contracts
+        run: pnpm test:registry-artifacts
+
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
+
+      - name: Verify generated registry artifacts are current
+        run: git diff --exit-code apps/web/public/data apps/web/src/generated
 
       - name: Audit content report
         run: pnpm audit:content

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:security-scanner-hook",
   "entry": {
     "category": "hooks",
     "slug": "security-scanner-hook",

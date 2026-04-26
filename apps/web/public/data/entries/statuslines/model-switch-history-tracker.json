@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "statuslines:model-switch-history-tracker",
   "entry": {
     "category": "statuslines",
     "slug": "model-switch-history-tracker",

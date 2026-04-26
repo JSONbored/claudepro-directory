@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:parallel-subagent-distributor",
   "entry": {
     "category": "agents",
     "slug": "parallel-subagent-distributor",

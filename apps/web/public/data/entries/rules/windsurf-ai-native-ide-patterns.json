@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:windsurf-ai-native-ide-patterns",
   "entry": {
     "category": "rules",
     "slug": "windsurf-ai-native-ide-patterns",

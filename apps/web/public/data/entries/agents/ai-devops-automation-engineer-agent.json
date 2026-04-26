@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "agents:ai-devops-automation-engineer-agent",
   "entry": {
     "category": "agents",
     "slug": "ai-devops-automation-engineer-agent",

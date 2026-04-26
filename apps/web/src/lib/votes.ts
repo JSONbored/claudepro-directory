@@ -1,24 +1,5 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import legacyVoteSeed from "@/generated/legacy-vote-seed.json";
-
-type D1RunResult = {
-  success?: boolean;
-  meta?: {
-    changes?: number;
-  };
-};
-
-type D1PreparedStatement = {
-  bind: (...values: unknown[]) => {
-    first: <T = Record<string, unknown>>() => Promise<T | null>;
-    run: () => Promise<D1RunResult>;
-    all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>;
-  };
-};
-
-type D1DatabaseLike = {
-  prepare: (query: string) => D1PreparedStatement;
-};
+import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
 const D1_SAFE_VARIABLE_BATCH_SIZE = 25;
 
@@ -27,12 +8,7 @@ export function isValidEntryKey(key: string) {
 }
 
 export function getVotesDb(): D1DatabaseLike | null {
-  try {
-    const { env } = getCloudflareContext();
-    return (env.VOTES_DB as D1DatabaseLike | undefined) ?? null;
-  } catch {
-    return null;
-  }
+  return getSiteDb();
 }
 
 function getSeedCount(entryKey: string) {

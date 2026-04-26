@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:svelte-sveltekit-fullstack",
   "entry": {
     "category": "skills",
     "slug": "svelte-sveltekit-fullstack",

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:log-parsing-incident-timeline",
   "entry": {
     "category": "skills",
     "slug": "log-parsing-incident-timeline",

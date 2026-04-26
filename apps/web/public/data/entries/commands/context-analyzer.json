@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "commands:context-analyzer",
   "entry": {
     "category": "commands",
     "slug": "context-analyzer",

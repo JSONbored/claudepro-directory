@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "guides:multi-directory-setup",
   "entry": {
     "category": "guides",
     "slug": "multi-directory-setup",

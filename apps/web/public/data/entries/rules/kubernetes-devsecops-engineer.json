@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "rules:kubernetes-devsecops-engineer",
   "entry": {
     "category": "rules",
     "slug": "kubernetes-devsecops-engineer",

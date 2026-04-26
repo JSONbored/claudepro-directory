@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "hooks:auto-save-backup",
   "entry": {
     "category": "hooks",
     "slug": "auto-save-backup",

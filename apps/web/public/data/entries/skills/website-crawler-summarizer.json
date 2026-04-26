@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "key": "skills:website-crawler-summarizer",
   "entry": {
     "category": "skills",
     "slug": "website-crawler-summarizer",
