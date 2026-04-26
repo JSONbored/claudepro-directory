@@ -6,8 +6,15 @@ import {
   isAllowedOrigin,
   isRateLimited
 } from "@/lib/api-security";
-import { logApiError, logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
-import { getVotesDb, isValidEntryKey, queryVoteCounts, queryVotesByClient } from "@/lib/votes";
+import { logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
+import {
+  getFallbackClientVotes,
+  getFallbackVoteCounts,
+  getVotesDb,
+  isValidEntryKey,
+  queryVoteCounts,
+  queryVotesByClient
+} from "@/lib/votes";
 
 type QueryPayload = {
   keys?: string[];
@@ -58,13 +65,11 @@ export async function POST(request: Request) {
 
   const db = getVotesDb();
   if (!db) {
-    const counts: Record<string, number> = {};
-    const voted: Record<string, boolean> = {};
-    for (const key of keys) {
-      counts[key] = 0;
-      voted[key] = false;
-    }
-    return NextResponse.json({ counts, voted, available: false });
+    return NextResponse.json({
+      counts: getFallbackVoteCounts(keys),
+      voted: getFallbackClientVotes(keys),
+      available: false
+    });
   }
 
   try {
@@ -89,15 +94,13 @@ export async function POST(request: Request) {
       }
     );
   } catch {
-    logApiError(request, "votes.query.internal_error", { keyCount: keys.length });
-    const counts: Record<string, number> = {};
-    const voted: Record<string, boolean> = {};
-    for (const key of keys) {
-      counts[key] = 0;
-      voted[key] = false;
-    }
+    logApiWarn(request, "votes.query.unavailable", { keyCount: keys.length });
     return NextResponse.json(
-      { counts, voted, available: false },
+      {
+        counts: getFallbackVoteCounts(keys),
+        voted: getFallbackClientVotes(keys),
+        available: false
+      },
       {
         headers: {
           "cache-control": "no-store"

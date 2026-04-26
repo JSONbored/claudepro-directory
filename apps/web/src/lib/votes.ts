@@ -41,6 +41,18 @@ function getSeedCount(entryKey: string) {
   return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 0;
 }
 
+export function getFallbackVoteCounts(keys: string[]) {
+  const counts: Record<string, number> = {};
+  for (const key of keys) counts[key] = getSeedCount(key);
+  return counts;
+}
+
+export function getFallbackClientVotes(keys: string[]) {
+  const voted: Record<string, boolean> = {};
+  for (const key of keys) voted[key] = false;
+  return voted;
+}
+
 async function ensureEntry(db: D1DatabaseLike, entryKey: string) {
   const baseline = getSeedCount(entryKey);
   await db

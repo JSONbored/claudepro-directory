@@ -13,3 +13,7 @@ docs/jobs-listings-private-flow.md
 # Ensure first-party package assets remain tracked even if a global ignore has *.zip
 !content/skills/*.zip
 !content/mcp/*.mcpb
+
+# D1 schema migrations must stay tracked even if a global ignore has *.sql
+!apps/web/migrations/
+!apps/web/migrations/*.sql
