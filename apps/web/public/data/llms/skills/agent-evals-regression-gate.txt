@@ -1,0 +1,97 @@
+# Agent Evals Regression Gate Skill
+URL: https://heyclau.de/skills/agent-evals-regression-gate
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://openai.com/index/new-tools-and-features-in-the-responses-api/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx
+Download: /downloads/skills/agent-evals-regression-gate.zip
+## Summary
+Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.
+## Tags
+- evals
+- regression
+- ai-agents
+- qa
+- quality-gate
+## Content
+## Overview
+This skill helps you turn subjective "looks good" checks into measurable, repeatable quality gates for AI agent behavior. It is built for teams shipping agent workflows to production and needing confidence that model, prompt, or tool changes do not silently degrade outcomes.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Baseline behavior snapshot from current stable version
+- Candidate branch or prompt/tool change to evaluate
+- Evaluation tasks that reflect real production use
+
+## What This Skill Delivers
+- Task matrix across happy-path, edge-case, and failure scenarios
+- Deterministic scoring rubric and weighted pass/fail thresholds
+- Regression report with severity and root-cause candidates
+- Release recommendation for merge, patch, or rollback
+
+## How to Use This Skill
+### Prompt Pattern
+
+```text
+Apply the agent evals regression gate skill to this workflow.
+Generate:
+1) Eval set (minimum 30 cases),
+2) Rubric and scoring model,
+3) Baseline vs candidate score delta report,
+4) Merge decision with blocking issues.
+```
+
+### Execution Flow
+
+1. Define scope and quality goals (accuracy, safety, latency, format compliance).
+2. Build or refresh eval dataset from production-like tasks.
+3. Run baseline and candidate under identical conditions.
+4. Compute deltas and classify regressions by impact.
+5. Block merge when thresholds fail; output remediation actions.
+```text
+Apply the agent evals regression gate skill to this workflow.
+Generate:
+1) Eval set (minimum 30 cases),
+2) Rubric and scoring model,
+3) Baseline vs candidate score delta report,
+4) Merge decision with blocking issues.
+```
+
+## Troubleshooting
+**Issue:** Scores fluctuate heavily between runs  
+**Fix:** Reduce nondeterminism (temperature controls, fixed seeds where possible, stable tool mocks).
+
+**Issue:** Eval passes but production still degrades  
+**Fix:** Expand dataset with real production transcripts and failure exemplars.
+
+**Issue:** Teams disagree on pass criteria  
+**Fix:** Move rubric to explicit weighted dimensions and threshold contracts.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://openai.com/index/new-tools-and-features-in-the-responses-api/
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

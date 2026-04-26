@@ -1,0 +1,572 @@
+# Git Status Statusline - Statuslines
+URL: https://heyclau.de/statuslines/git-status-statusline
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-01
+Documentation: https://git-scm.com/docs/git-status
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/git-status-statusline.mdx
+## Summary
+Git-focused statusline showing branch, dirty status, ahead/behind indicators, and stash count alongside Claude session info
+## Tags
+- git
+- version-control
+- developer
+- bash
+- powerline
+- status-indicators
+## Content
+## Features
+- Git branch name with 🌿 icon
+- Dirty working directory indicator (✗)
+- Ahead/behind remote branch tracking (↑↓)
+- Stash count display when stashes exist
+- Model and token count in compact format
+- Color-coded status (green=clean, yellow=dirty, red=conflict)
+- Graceful fallback when not in git repository
+- Commit count display for current branch
+
+## Use Cases
+- Active development with frequent git operations
+- Working across multiple branches simultaneously
+- Monitoring uncommitted changes during AI pair programming
+- Tracking sync status with remote repository
+- Quick visual feedback for git workflow state
+- Code review preparation with branch status awareness
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations and string manipulation)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- Git installed and accessible in PATH (git 2.0+ recommended for symbolic-ref and rev-list commands)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded git status indicators)
+- Terminal with Unicode character support (for ✓, ✗, ↑, ↓, ⚑ icons, or use ASCII alternatives)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Git Status Statusline with Conflict Detection
+Extended version detecting merge conflicts and showing conflict count
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Git Status Statusline with Conflict Detection
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  # Check for merge conflicts
+  conflict_count=$(git diff --name-only --diff-filter=U 2>/dev/null | wc -l | tr -d ' ')
+  
+  # Check working directory status
+  if [ "$conflict_count" -gt 0 ]; then
+    status_icon="⚠"
+    status_color="\033[31m"  # Red for conflicts
+  elif [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"  # Green
+  else
+    status_icon="✗"
+    status_color="\033[33m"  # Yellow
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  conflict_info=""
+  if [ "$conflict_count" -gt 0 ]; then
+    conflict_info=" ⚠$conflict_count"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info}${conflict_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+```
+### Git Status Statusline with Remote Status
+Version showing remote repository name and URL
+```bash
+#!/usr/bin/env bash
+
+# Git Status Statusline with Remote Status
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  # Get remote name
+  remote=$(git config --get branch.${branch}.remote 2>/dev/null || echo "origin")
+  remote_url=$(git config --get remote.${remote}.url 2>/dev/null | sed 's/.*\/\([^/]*\)\.git$/\1/')
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"
+  else
+    status_icon="✗"
+    status_color="\033[33m"
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  remote_info=""
+  if [ -n "$remote_url" ]; then
+    remote_info=" @${remote_url}"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info}${remote_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+```
+### Git Status Statusline Installation Example
+Complete setup script with Git verification and Unicode character testing
+```bash
+#!/bin/bash
+# Installation script for Git Status Statusline
+
+# Check if Git is installed
+if ! command -v git &> /dev/null; then
+    echo "Error: Git is not installed or not in PATH"
+    echo "Install Git: https://git-scm.com/downloads"
+    exit 1
+fi
+
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test Unicode characters
+if echo -e '✓ ✗ ↑ ↓ ⚑' &> /dev/null; then
+    echo "Unicode characters supported"
+else
+    echo "Warning: Unicode characters may not be supported in your terminal"
+    echo "Consider installing a Nerd Font for better icon support"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/git-status-statusline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Git-Focused Statusline for Claude Code
+# Emphasizes git status with visual indicators
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"
+  else
+    status_icon="✗"
+    status_color="\033[33m"
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/git-status-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Git Status Statusline installed successfully!"
+echo "Note: Ensure you're in a Git repository for git status to display"
+echo "Set upstream branch for ahead/behind tracking: git branch --set-upstream-to=origin/main main"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Git Status Statusline with Conflict Detection
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  # Check for merge conflicts
+  conflict_count=$(git diff --name-only --diff-filter=U 2>/dev/null | wc -l | tr -d ' ')
+  
+  # Check working directory status
+  if [ "$conflict_count" -gt 0 ]; then
+    status_icon="⚠"
+    status_color="\033[31m"  # Red for conflicts
+  elif [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"  # Green
+  else
+    status_icon="✗"
+    status_color="\033[33m"  # Yellow
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  conflict_info=""
+  if [ "$conflict_count" -gt 0 ]; then
+    conflict_info=" ⚠$conflict_count"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info}${conflict_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+```
+```bash
+#!/usr/bin/env bash
+
+# Git Status Statusline with Remote Status
+
+input=$(cat)
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  # Get remote name
+  remote=$(git config --get branch.${branch}.remote 2>/dev/null || echo "origin")
+  remote_url=$(git config --get remote.${remote}.url 2>/dev/null | sed 's/.*\/\([^/]*\)\.git$/\1/')
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"
+  else
+    status_icon="✗"
+    status_color="\033[33m"
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  remote_info=""
+  if [ -n "$remote_url" ]; then
+    remote_info=" @${remote_url}"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info}${remote_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+```
+```bash
+#!/bin/bash
+# Installation script for Git Status Statusline
+
+# Check if Git is installed
+if ! command -v git &> /dev/null; then
+    echo "Error: Git is not installed or not in PATH"
+    echo "Install Git: https://git-scm.com/downloads"
+    exit 1
+fi
+
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Test Unicode characters
+if echo -e '✓ ✗ ↑ ↓ ⚑' &> /dev/null; then
+    echo "Unicode characters supported"
+else
+    echo "Warning: Unicode characters may not be supported in your terminal"
+    echo "Consider installing a Nerd Font for better icon support"
+fi
+
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/git-status-statusline.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Git-Focused Statusline for Claude Code
+# Emphasizes git status with visual indicators
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.display_name // .model.id // "unknown"' | sed 's/claude-//')
+tokens=$(echo "$input" | jq -r '.cost.total_tokens // .session.totalTokens // 0')
+workdir=$(echo "$input" | jq -r '.workspace.current_dir // .workspace.project_dir // "."')
+
+cd "$workdir" 2>/dev/null || cd .
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
+  
+  if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+    status_icon="✓"
+    status_color="\033[32m"
+  else
+    status_icon="✗"
+    status_color="\033[33m"
+  fi
+  
+  ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
+  tracking=""
+  if [ -n "$ahead_behind" ]; then
+    ahead=$(echo "$ahead_behind" | cut -f1)
+    behind=$(echo "$ahead_behind" | cut -f2)
+    if [ "$ahead" -gt 0 ]; then
+      tracking="↑$ahead"
+    fi
+    if [ "$behind" -gt 0 ]; then
+      tracking="${tracking}↓$behind"
+    fi
+  fi
+  
+  stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
+  stash_info=""
+  if [ "$stash_count" -gt 0 ]; then
+    stash_info=" ⚑$stash_count"
+  fi
+  
+  git_info=" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\033[0m"
+else
+  git_info=""
+fi
+
+if [ "$tokens" -gt 1000 ]; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo $tokens)
+else
+  tokens_formatted=$tokens
+fi
+
+echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/git-status-statusline.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/git-status-statusline.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Git Status Statusline installed successfully!"
+echo "Note: Ensure you're in a Git repository for git status to display"
+echo "Set upstream branch for ahead/behind tracking: git branch --set-upstream-to=origin/main main"
+```
+
+## Troubleshooting
+### Git branch not showing or shows '(detached)'
+
+Ensure you're on a proper branch: git checkout main. Detached HEAD state is normal when checking out specific commits. Verify branch exists: git branch. Check symbolic-ref command: git symbolic-ref --short HEAD. If in detached state, create new branch: git checkout -b new-branch-name.
+### Ahead/behind indicators (↑↓) not appearing
+
+This requires an upstream branch to be set. Run: git branch --set-upstream-to=origin/main main (adjust branch name as needed). Verify upstream is set: git branch -vv. Check remote exists: git remote -v. Ensure remote branch exists: git ls-remote origin main. If remote doesn't exist, push branch first: git push -u origin main.
+### Status always shows dirty (✗) even after commit
+
+Check git status for untracked files or changes. The statusline reflects actual git state. Run git status -s to see what's detected. Check for untracked files: git status --porcelain. Verify all changes are committed: git diff HEAD. Check for ignored files that might be tracked: git ls-files.
+### Unicode icons showing as boxes
+
+Install a Nerd Font or ensure terminal has Unicode support. Test with: echo '✓ ✗ ↑ ↓ ⚑'. Check terminal encoding: locale charmap (should be UTF-8). Set terminal to UTF-8: export LANG=en_US.UTF-8. Install Nerd Font: https://www.nerdfonts.com/. If Unicode not supported, modify script to use ASCII alternatives: + for clean, * for dirty, ^ for ahead, v for behind.
+### Stash count not showing or incorrect
+
+Verify stashes exist: git stash list. Check stash count calculation: git stash list | wc -l. Ensure git stash command works: git stash list 2>/dev/null. If stashes exist but not showing, check script logic for stash_count variable. Verify wc and tr commands are available: which wc tr.
+### Token count not displaying or showing 0
+
+Check JSON input structure: echo '$input' | jq .. Verify cost.total_tokens exists: echo '$input' | jq .cost.total_tokens. Check alternative field: echo '$input' | jq .session.totalTokens. Verify jq is installed: which jq. Test with sample JSON: echo '{"cost":{"total_tokens":1234}}' | jq -r '.cost.total_tokens // 0' (should return 1234).
+### Model name not displaying correctly
+
+Check JSON input: echo '$input' | jq .model. Verify model.display_name exists: echo '$input' | jq .model.display_name. Check alternative: echo '$input' | jq .model.id. Verify sed command works: echo 'claude-sonnet-4.5' | sed 's/claude-//' (should return sonnet-4.5). Check model field structure in Claude Code JSON output.
+### Git statusline not appearing when not in git repository
+
+This is expected behavior - script gracefully handles non-git directories. Verify git repository check: git rev-parse --git-dir (should return .git path or error). If you want git info in non-git directories, modify script to show 'no-git' indicator. Check workspace path: echo '$input' | jq .workspace.current_dir.

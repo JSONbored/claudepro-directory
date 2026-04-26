@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "search-index",
   "generatedAt": "2026-04-25T00:00:00.000Z",
   "count": 326,
@@ -9,13 +9,7 @@
       "slug": "cursor-rules",
       "title": "/cursor-rules - Cursor Rules Generator for Claude Code",
       "description": "Generate .cursorrules files for AI-native development with project-specific patterns, coding standards, and intelligent context awareness",
-      "tags": [
-        "cursor",
-        "ai-rules",
-        "code-standards",
-        "context",
-        "ai-ide"
-      ],
+      "tags": ["cursor", "ai-rules", "code-standards", "context", "ai-ide"],
       "keywords": [
         "ai-ide",
         "ai-rules",
@@ -75,13 +69,7 @@
       "slug": "docs",
       "title": "/docs - Docs Generator Command for Claude Code",
       "description": "Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides",
-      "tags": [
-        "documentation",
-        "api-docs",
-        "tutorials",
-        "guides",
-        "markdown"
-      ],
+      "tags": ["documentation", "api-docs", "tutorials", "guides", "markdown"],
       "keywords": [
         "api-docs",
         "claude",
@@ -241,13 +229,7 @@
       "slug": "review",
       "title": "/review - Code Review Command for Claude Code",
       "description": "Comprehensive code review with security analysis, performance optimization, and best practices validation",
-      "tags": [
-        "code-review",
-        "security",
-        "performance",
-        "quality",
-        "analysis"
-      ],
+      "tags": ["code-review", "security", "performance", "quality", "analysis"],
       "keywords": [
         "analysis",
         "claude",
@@ -427,13 +409,7 @@
       "slug": "accessibility-checker",
       "title": "Accessibility Checker - Claude Code Hooks",
       "description": "Automated accessibility testing and compliance checking for web applications following WCAG 2.1 and WCAG 2.2 guidelines.",
-      "tags": [
-        "accessibility",
-        "a11y",
-        "wcag",
-        "testing",
-        "compliance"
-      ],
+      "tags": ["accessibility", "a11y", "wcag", "testing", "compliance"],
       "keywords": [
         "a11y",
         "accessibility",
@@ -496,13 +472,7 @@
       "slug": "agent-evals-regression-gate",
       "title": "Agent Evals Regression Gate Skill",
       "description": "Create a practical eval harness with golden sets, rubric scoring, and release gates for agentic workflows.",
-      "tags": [
-        "evals",
-        "regression",
-        "ai-agents",
-        "qa",
-        "quality-gate"
-      ],
+      "tags": ["evals", "regression", "ai-agents", "qa", "quality-gate"],
       "keywords": [
         "ai-skill",
         "agent-evals",
@@ -713,13 +683,7 @@
       "slug": "ai-devops-automation-engineer-agent",
       "title": "AI DevOps Engineer Agent - Automate Infrastructure & CI/CD",
       "description": "Deploy AI-powered DevOps automation with predictive analytics, self-healing systems, and intelligent CI/CD optimization for modern infras...",
-      "tags": [
-        "devops",
-        "automation",
-        "ai",
-        "ci-cd",
-        "infrastructure"
-      ],
+      "tags": ["devops", "automation", "ai", "ci-cd", "infrastructure"],
       "keywords": [
         "agent",
         "agents",
@@ -783,13 +747,7 @@
       "slug": "ai-prompt-engineering-expert",
       "title": "AI Prompt Engineering Expert for Claude",
       "description": "Expert in AI prompt engineering for Claude Code and Claude Desktop, focusing on coding tasks, test-driven development patterns, iterative...",
-      "tags": [
-        "ai",
-        "prompt-engineering",
-        "claude",
-        "copilot",
-        "llm"
-      ],
+      "tags": ["ai", "prompt-engineering", "claude", "copilot", "llm"],
       "keywords": [
         "claude",
         "copilot",
@@ -816,13 +774,7 @@
       "slug": "ai-search-ranking-content-cluster-strategy",
       "title": "AI Search Ranking Content Cluster Strategy Skill",
       "description": "Content strategy skill for ranking and growth using intent mapping, cluster architecture, and structured publishing workflows.",
-      "tags": [
-        "seo",
-        "content-strategy",
-        "growth",
-        "ranking",
-        "publishing"
-      ],
+      "tags": ["seo", "content-strategy", "growth", "ranking", "publishing"],
       "keywords": [
         "ai seo skill",
         "content cluster strategy",
@@ -843,13 +795,7 @@
       "slug": "airtable-mcp-server",
       "title": "Airtable MCP Server for Claude",
       "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
-      "tags": [
-        "database",
-        "airtable",
-        "data-management",
-        "crud",
-        "tables"
-      ],
+      "tags": ["database", "airtable", "data-management", "crud", "tables"],
       "keywords": [
         "airtable",
         "claude",
@@ -913,14 +859,7 @@
       "slug": "api-design-expert",
       "title": "API Design Expert for Claude - CLAUDE.md Rules for Claude Code",
       "description": "Transform Claude into a comprehensive API design specialist focused on RESTful APIs, GraphQL, OpenAPI, and modern API architecture patterns",
-      "tags": [
-        "api",
-        "rest",
-        "graphql",
-        "openapi",
-        "design",
-        "architecture"
-      ],
+      "tags": ["api", "rest", "graphql", "openapi", "design", "architecture"],
       "keywords": [
         "api",
         "architecture",
@@ -983,13 +922,7 @@
       "slug": "api-endpoint-documentation-generator",
       "title": "API Doc Generator",
       "description": "Automatically generates or updates API documentation when endpoint files are modified, supporting OpenAPI 3.1.0, Swagger 2.0, and AsyncAP...",
-      "tags": [
-        "api",
-        "documentation",
-        "openapi",
-        "swagger",
-        "automation"
-      ],
+      "tags": ["api", "documentation", "openapi", "swagger", "automation"],
       "keywords": [
         "api",
         "automation",
@@ -1125,12 +1058,7 @@
       "slug": "audio-transcription-summarization",
       "title": "Audio Transcription + Summarization Skill",
       "description": "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom...",
-      "tags": [
-        "audio",
-        "transcription",
-        "whisper",
-        "ffmpeg"
-      ],
+      "tags": ["audio", "transcription", "whisper", "ffmpeg"],
       "keywords": [
         "and",
         "audio",
@@ -1157,13 +1085,7 @@
       "slug": "auto-code-formatter-hook",
       "title": "Auto Code Formatter Hook - Claude Code Hooks",
       "description": "Automatically formats code files after Claude writes or edits them using industry-standard formatters including Prettier 3.6.2+ (JavaScri...",
-      "tags": [
-        "formatting",
-        "prettier",
-        "black",
-        "code-quality",
-        "automation"
-      ],
+      "tags": ["formatting", "prettier", "black", "code-quality", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -1193,12 +1115,7 @@
       "slug": "auto-save-backup",
       "title": "Auto Save Backup - Hooks",
       "description": "Automatically creates timestamped backups of files before modification to prevent data loss.",
-      "tags": [
-        "backup",
-        "safety",
-        "file-management",
-        "data-protection"
-      ],
+      "tags": ["backup", "safety", "file-management", "data-protection"],
       "keywords": [
         "auto",
         "backup",
@@ -1260,13 +1177,7 @@
       "slug": "autogen-workflow",
       "title": "AutoGen Multi-Agent Workflow for Claude",
       "description": "Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative...",
-      "tags": [
-        "autogen",
-        "multi-agent",
-        "workflow",
-        "orchestration",
-        "ai"
-      ],
+      "tags": ["autogen", "multi-agent", "workflow", "orchestration", "ai"],
       "keywords": [
         "autogen",
         "claude",
@@ -1291,13 +1202,7 @@
       "slug": "aws-cloud-architect",
       "title": "AWS Cloud Architect - CLAUDE.md Rules for Claude Code",
       "description": "Expert AWS architect with deep knowledge of cloud services, best practices, and Well-Architected Framework",
-      "tags": [
-        "aws",
-        "cloud",
-        "architecture",
-        "serverless",
-        "infrastructure"
-      ],
+      "tags": ["aws", "cloud", "architecture", "serverless", "infrastructure"],
       "keywords": [
         "architect",
         "architecture",
@@ -1392,13 +1297,7 @@
       "slug": "aws-services-mcp-server",
       "title": "AWS Services MCP Server - MCP Servers",
       "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
-      "tags": [
-        "aws",
-        "cloud",
-        "infrastructure",
-        "deployment",
-        "monitoring"
-      ],
+      "tags": ["aws", "cloud", "infrastructure", "deployment", "monitoring"],
       "keywords": [
         "aws",
         "claude",
@@ -1496,13 +1395,7 @@
       "slug": "base-l2-smart-contract-launchpad",
       "title": "Base L2 Smart Contract Launchpad Skill",
       "description": "Practical launch workflow for Base contracts from local build to verified deployment and post-launch operations.",
-      "tags": [
-        "base",
-        "layer2",
-        "smart-contracts",
-        "deployment",
-        "web3"
-      ],
+      "tags": ["base", "layer2", "smart-contracts", "deployment", "web3"],
       "keywords": [
         "base l2 contract deployment",
         "base smart contracts",
@@ -1685,13 +1578,7 @@
       "slug": "bun-runtime-modern-javascript",
       "title": "Bun JavaScript Runtime Development Skill",
       "description": "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js.",
-      "tags": [
-        "bun",
-        "runtime",
-        "javascript",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["bun", "runtime", "javascript", "typescript", "performance"],
       "keywords": [
         "bun",
         "claude",
@@ -1788,13 +1675,7 @@
       "slug": "canva-mcp-server",
       "title": "Canva MCP Server for Claude",
       "description": "Browse, summarize, and generate Canva designs directly from Claude",
-      "tags": [
-        "design",
-        "canva",
-        "graphics",
-        "templates",
-        "creative"
-      ],
+      "tags": ["design", "canva", "graphics", "templates", "creative"],
       "keywords": [
         "canva",
         "claude",
@@ -1856,12 +1737,7 @@
       "slug": "chatgpt-migration-guide",
       "title": "ChatGPT to Claude Migration",
       "description": "Switch from ChatGPT to Claude in 30 minutes.",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "migration",
-        "api"
-      ],
+      "tags": ["tutorial", "intermediate", "migration", "api"],
       "keywords": [
         "chatgpt to claude",
         "claude migration",
@@ -1944,12 +1820,7 @@
       "slug": "claude-agent-development-framework",
       "title": "Claude Agent Development",
       "description": "Build Claude autonomous agents with 90.2% better performance.",
-      "tags": [
-        "tutorial",
-        "advanced",
-        "agent-development",
-        "multi-agent"
-      ],
+      "tags": ["tutorial", "advanced", "agent-development", "multi-agent"],
       "keywords": [
         "claude agent framework",
         "agent development",
@@ -2036,12 +1907,7 @@
       "slug": "multi-directory-setup",
       "title": "Claude Code Multi-Directory Setup Enterprise Workflow 2025",
       "description": "Master Claude Code multi-directory enterprise workflow.",
-      "tags": [
-        "workflow",
-        "enterprise development",
-        "advanced",
-        "automation"
-      ],
+      "tags": ["workflow", "enterprise development", "advanced", "automation"],
       "keywords": [
         "claude multi directory",
         "multi project claude setup",
@@ -2088,12 +1954,7 @@
       "slug": "wsl-setup-guide",
       "title": "Claude Code WSL Setup 2025",
       "description": "Complete Claude Code WSL2 installation tutorial in 30 minutes.",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "wsl",
-        "windows"
-      ],
+      "tags": ["tutorial", "intermediate", "wsl", "windows"],
       "keywords": [
         "claude wsl setup",
         "windows claude code",
@@ -2114,12 +1975,7 @@
       "slug": "desktop-mcp-setup",
       "title": "Claude Desktop MCP Setup",
       "description": "Master Claude Desktop MCP server setup in 20 minutes.",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "configuration",
-        "mcp-servers"
-      ],
+      "tags": ["tutorial", "intermediate", "configuration", "mcp-servers"],
       "keywords": [
         "2025",
         "claude",
@@ -2152,12 +2008,7 @@
       "slug": "financial-services-guide",
       "title": "Claude for Financial Services Enterprise Implementation 2025",
       "description": "Transform financial operations with Claude.",
-      "tags": [
-        "use-case",
-        "financial-services",
-        "enterprise",
-        "advanced"
-      ],
+      "tags": ["use-case", "financial-services", "enterprise", "advanced"],
       "keywords": [
         "claude financial services",
         "ai finance workflows",
@@ -2277,12 +2128,7 @@
       "slug": "business-process-automation",
       "title": "Claude Process Automation",
       "description": "Deploy Claude AI agents for enterprise business process automation.",
-      "tags": [
-        "use-case",
-        "enterprise",
-        "automation",
-        "advanced"
-      ],
+      "tags": ["use-case", "enterprise", "automation", "advanced"],
       "keywords": [
         "claude automation",
         "business process automation",
@@ -2303,12 +2149,7 @@
       "slug": "claude-rate-limits-fix",
       "title": "Claude Rate Limits Fix: Complete Optimization Guide 2025",
       "description": "Fix Claude 429 errors and usage limits with proven solutions reducing token consumption by 70%.",
-      "tags": [
-        "tutorial",
-        "advanced",
-        "rate-limits",
-        "429-errors"
-      ],
+      "tags": ["tutorial", "advanced", "rate-limits", "429-errors"],
       "keywords": [
         "claude rate limits",
         "fix claude rate limit",
@@ -2329,12 +2170,7 @@
       "slug": "claude-vs-codewhisperer-gemini",
       "title": "Claude vs Amazon Q Developer vs Gemini Code AWS Guide 2025",
       "description": "Compare Claude vs Amazon Q Developer vs Gemini Code for AWS cloud development.",
-      "tags": [
-        "comparison",
-        "cloud-development",
-        "aws",
-        "evaluation"
-      ],
+      "tags": ["comparison", "cloud-development", "aws", "evaluation"],
       "keywords": [
         "claude vs gemini",
         "claude vs codewhisperer",
@@ -2455,12 +2291,7 @@
       "slug": "cli-data-viz-quickstart",
       "title": "CLI Data Visualization Quickstart Skill",
       "description": "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega...",
-      "tags": [
-        "visualization",
-        "charts",
-        "python",
-        "vega"
-      ],
+      "tags": ["visualization", "charts", "python", "vega"],
       "keywords": [
         "charts",
         "claude",
@@ -2523,13 +2354,7 @@
       "slug": "cloud-backup-on-session-stop",
       "title": "Cloud Backup On Session Stop - Hooks",
       "description": "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for uni...",
-      "tags": [
-        "backup",
-        "cloud",
-        "stop-hook",
-        "aws",
-        "safety"
-      ],
+      "tags": ["backup", "cloud", "stop-hook", "aws", "safety"],
       "keywords": [
         "aws",
         "backup",
@@ -2593,13 +2418,7 @@
       "slug": "cloudflare-mcp-server",
       "title": "Cloudflare MCP Server - MCP Servers",
       "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
-      "tags": [
-        "cloudflare",
-        "cdn",
-        "security",
-        "dns",
-        "infrastructure"
-      ],
+      "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
       "keywords": [
         "cdn",
         "claude",
@@ -2627,13 +2446,7 @@
       "slug": "cloudflare-workers-ai-edge",
       "title": "Cloudflare Workers AI Edge Functions Skill",
       "description": "Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share.",
-      "tags": [
-        "cloudflare",
-        "edge-computing",
-        "ai",
-        "serverless",
-        "workers"
-      ],
+      "tags": ["cloudflare", "edge-computing", "ai", "serverless", "workers"],
       "keywords": [
         "claude",
         "cloudflare",
@@ -2660,13 +2473,7 @@
       "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
       "title": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
       "description": "Deep data-layer architecture skill for Cloudflare Workers using D1, KV, and R2 in production-safe patterns.",
-      "tags": [
-        "cloudflare",
-        "workers",
-        "d1",
-        "kv",
-        "r2"
-      ],
+      "tags": ["cloudflare", "workers", "d1", "kv", "r2"],
       "keywords": [
         "cloudflare d1 kv r2",
         "edge data architecture",
@@ -2687,13 +2494,7 @@
       "slug": "cloudinary-mcp-server",
       "title": "Cloudinary MCP Server - MCP Servers",
       "description": "Upload, manage, transform, and analyze media assets in the cloud",
-      "tags": [
-        "media",
-        "cloudinary",
-        "images",
-        "video",
-        "asset-management"
-      ],
+      "tags": ["media", "cloudinary", "images", "video", "asset-management"],
       "keywords": [
         "asset-management",
         "claude",
@@ -2818,12 +2619,7 @@
       "slug": "code-review-expert",
       "title": "Code Review Expert for Claude",
       "description": "Comprehensive code review rules for thorough analysis and constructive feedback",
-      "tags": [
-        "code-review",
-        "best-practices",
-        "quality",
-        "development"
-      ],
+      "tags": ["code-review", "best-practices", "quality", "development"],
       "keywords": [
         "best-practices",
         "claude",
@@ -2885,13 +2681,7 @@
       "slug": "code-test-runner-hook",
       "title": "Code Test Runner Hook - Hooks",
       "description": "Automatically run relevant tests when code changes are detected using intelligent test selection, parallel execution, and multi-framework...",
-      "tags": [
-        "testing",
-        "automation",
-        "ci-cd",
-        "watch",
-        "parallel"
-      ],
+      "tags": ["testing", "automation", "ci-cd", "watch", "parallel"],
       "keywords": [
         "automation",
         "ci-cd",
@@ -3013,12 +2803,7 @@
       "slug": "migration-workflow-guide",
       "title": "Complete Claude Migration Playbook from ChatGPT & Copilot",
       "description": "Complete migration workflow from ChatGPT, Gemini, and Copilot to Claude 4.",
-      "tags": [
-        "workflow",
-        "migration",
-        "enterprise",
-        "automation"
-      ],
+      "tags": ["workflow", "migration", "enterprise", "automation"],
       "keywords": [
         "claude migration workflow",
         "chatgpt to claude",
@@ -3178,13 +2963,7 @@
       "slug": "css-unused-selector-detector",
       "title": "CSS Unused Selector Detector - Hooks",
       "description": "Detects unused CSS selectors when stylesheets are modified to keep CSS lean using PurgeCSS, PostCSS, and content analysis.",
-      "tags": [
-        "css",
-        "optimization",
-        "cleanup",
-        "performance",
-        "purge"
-      ],
+      "tags": ["css", "optimization", "cleanup", "performance", "purge"],
       "keywords": [
         "claude",
         "cleanup",
@@ -3213,13 +2992,7 @@
       "slug": "csv-excel-data-wrangler",
       "title": "CSV/Excel Data Wrangler Skill",
       "description": "Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps.",
-      "tags": [
-        "csv",
-        "xlsx",
-        "data-cleaning",
-        "pandas",
-        "python"
-      ],
+      "tags": ["csv", "xlsx", "data-cleaning", "pandas", "python"],
       "keywords": [
         "claude",
         "csv",
@@ -3248,13 +3021,7 @@
       "slug": "cursor-windsurf-ai-ide-setup",
       "title": "Cursor Windsurf AI Code Editor Skill - Claude Code Skills",
       "description": "Configure and optimize Cursor and Windsurf AI code editors for maximum productivity.",
-      "tags": [
-        "cursor",
-        "windsurf",
-        "ide",
-        "ai-coding",
-        "editor"
-      ],
+      "tags": ["cursor", "windsurf", "ide", "ai-coding", "editor"],
       "keywords": [
         "ai-coding",
         "claude",
@@ -3353,14 +3120,7 @@
       "slug": "data-engineering-suite",
       "title": "Data Engineering Suite",
       "description": "Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure.",
-      "tags": [
-        "data",
-        "database",
-        "etl",
-        "sql",
-        "cloud",
-        "engineering"
-      ],
+      "tags": ["data", "database", "etl", "sql", "cloud", "engineering"],
       "keywords": [
         "claude",
         "cloud",
@@ -3426,13 +3186,7 @@
       "slug": "database-connection-cleanup",
       "title": "Database Connection Cleanup - Hooks",
       "description": "Closes all database connections and cleans up resources when Claude Code session ends using PostgreSQL pg_terminate_backend, MySQL KILL,...",
-      "tags": [
-        "database",
-        "cleanup",
-        "stop-hook",
-        "connections",
-        "resources"
-      ],
+      "tags": ["database", "cleanup", "stop-hook", "connections", "resources"],
       "keywords": [
         "claude",
         "cleanup",
@@ -3496,13 +3250,7 @@
       "slug": "database-migration-runner",
       "title": "Database Migration Runner - Hooks",
       "description": "Automated database migration management with rollback capabilities, validation, and multi-environment support using Knex 3.x, Sequelize 6...",
-      "tags": [
-        "database",
-        "migration",
-        "automation",
-        "deployment",
-        "sql"
-      ],
+      "tags": ["database", "migration", "automation", "deployment", "sql"],
       "keywords": [
         "automation",
         "claude",
@@ -3837,13 +3585,7 @@
       "slug": "discord-activity-notifier",
       "title": "Discord Activity Notifier - Hooks",
       "description": "Sends development activity updates to Discord channel for team collaboration.",
-      "tags": [
-        "discord",
-        "notification",
-        "collaboration",
-        "webhooks",
-        "team"
-      ],
+      "tags": ["discord", "notification", "collaboration", "webhooks", "team"],
       "keywords": [
         "activity",
         "claude",
@@ -3871,13 +3613,7 @@
       "slug": "discord-mcp-server",
       "title": "Discord MCP Server for Claude",
       "description": "Discord bot integration for community management, moderation, and server automation",
-      "tags": [
-        "discord",
-        "bot",
-        "community",
-        "moderation",
-        "social"
-      ],
+      "tags": ["discord", "bot", "community", "moderation", "social"],
       "keywords": [
         "bot",
         "claude",
@@ -3905,13 +3641,7 @@
       "slug": "documentation-auto-generator-on-stop",
       "title": "Doc Auto Generator",
       "description": "Automatically generates or updates project documentation when session ends.",
-      "tags": [
-        "documentation",
-        "stop-hook",
-        "automation",
-        "markdown",
-        "jsdoc"
-      ],
+      "tags": ["documentation", "stop-hook", "automation", "markdown", "jsdoc"],
       "keywords": [
         "auto",
         "automation",
@@ -3967,12 +3697,7 @@
       "slug": "docker-container-auto-rebuild",
       "title": "Docker Container Auto Rebuild - Hooks",
       "description": "Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified.",
-      "tags": [
-        "docker",
-        "containers",
-        "devops",
-        "automation"
-      ],
+      "tags": ["docker", "containers", "devops", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -4000,13 +3725,7 @@
       "slug": "docker-image-security-scanner",
       "title": "Docker Image Security Scanner - Hooks",
       "description": "Comprehensive Docker image vulnerability scanning with layer analysis, base image recommendations, and security best practices enforcement.",
-      "tags": [
-        "docker",
-        "security",
-        "containers",
-        "vulnerability",
-        "devops"
-      ],
+      "tags": ["docker", "security", "containers", "vulnerability", "devops"],
       "keywords": [
         "claude",
         "containers",
@@ -4034,13 +3753,7 @@
       "slug": "docker-mcp-server",
       "title": "Docker MCP Server for Claude",
       "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
-      "tags": [
-        "docker",
-        "containers",
-        "devops",
-        "orchestration",
-        "deployment"
-      ],
+      "tags": ["docker", "containers", "devops", "orchestration", "deployment"],
       "keywords": [
         "claude",
         "containers",
@@ -4102,13 +3815,7 @@
       "slug": "documentation-generator",
       "title": "Documentation Generator - Hooks",
       "description": "Automatically generates and updates project documentation from code comments, README files, and API definitions.",
-      "tags": [
-        "documentation",
-        "automation",
-        "api",
-        "markdown",
-        "jsdoc"
-      ],
+      "tags": ["documentation", "automation", "api", "markdown", "jsdoc"],
       "keywords": [
         "api",
         "automation",
@@ -4135,12 +3842,7 @@
       "slug": "docx-report-generator",
       "title": "DOCX Report Generator Skill",
       "description": "Fill templated DOCX with data to produce reports, invoices, and formatted documents.",
-      "tags": [
-        "docx",
-        "reports",
-        "templating",
-        "python"
-      ],
+      "tags": ["docx", "reports", "templating", "python"],
       "keywords": [
         "claude",
         "development",
@@ -4269,13 +3971,7 @@
       "slug": "error-rate-monitor",
       "title": "Error Rate Monitor - Hooks",
       "description": "Tracks error patterns and alerts when error rates spike.",
-      "tags": [
-        "errors",
-        "monitoring",
-        "notification",
-        "debugging",
-        "alerts"
-      ],
+      "tags": ["errors", "monitoring", "notification", "debugging", "alerts"],
       "keywords": [
         "alerts",
         "claude",
@@ -4304,13 +4000,7 @@
       "slug": "ethereum-base-smart-contract-security-capability-pack",
       "title": "Ethereum Base Smart Contract Security Capability Pack Skill",
       "description": "Deep smart contract security skill covering Solidity design, test rigor, deployment hygiene, and post-launch risk controls.",
-      "tags": [
-        "ethereum",
-        "base",
-        "solidity",
-        "security",
-        "capability-pack"
-      ],
+      "tags": ["ethereum", "base", "solidity", "security", "capability-pack"],
       "keywords": [
         "solidity security skill",
         "base smart contract security",
@@ -4393,13 +4083,7 @@
       "slug": "fastapi-python-backend",
       "title": "FastAPI Python API Development Skill",
       "description": "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework.",
-      "tags": [
-        "fastapi",
-        "python",
-        "api",
-        "async",
-        "pydantic"
-      ],
+      "tags": ["fastapi", "python", "api", "async", "pydantic"],
       "keywords": [
         "api",
         "async",
@@ -4427,13 +4111,7 @@
       "slug": "figma-mcp-server",
       "title": "Figma MCP Server for Claude",
       "description": "Access designs, export assets, and interact with Figma files through Claude",
-      "tags": [
-        "design",
-        "figma",
-        "ui-ux",
-        "assets",
-        "graphics"
-      ],
+      "tags": ["design", "figma", "ui-ux", "assets", "graphics"],
       "keywords": [
         "assets",
         "claude",
@@ -4497,13 +4175,7 @@
       "slug": "filesystem-mcp-server",
       "title": "Filesystem MCP Server - MCP Servers",
       "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
-      "tags": [
-        "filesystem",
-        "files",
-        "directories",
-        "official",
-        "anthropic"
-      ],
+      "tags": ["filesystem", "files", "directories", "official", "anthropic"],
       "keywords": [
         "anthropic",
         "claude",
@@ -4665,12 +4337,7 @@
       "slug": "fix-installation-errors",
       "title": "Fix Claude Code npm Errors",
       "description": "Install Claude Code correctly in 15-25 minutes.",
-      "tags": [
-        "tutorial",
-        "beginner",
-        "installation",
-        "troubleshooting"
-      ],
+      "tags": ["tutorial", "beginner", "installation", "troubleshooting"],
       "keywords": [
         "claude installation errors",
         "fix claude setup",
@@ -4745,13 +4412,7 @@
       "slug": "frontend-specialist-agent",
       "title": "Frontend Specialist Agent - Agents",
       "description": "Expert frontend developer specializing in modern JavaScript frameworks, UI/UX implementation, and performance optimization",
-      "tags": [
-        "frontend",
-        "react",
-        "typescript",
-        "ui-ux",
-        "performance"
-      ],
+      "tags": ["frontend", "react", "typescript", "ui-ux", "performance"],
       "keywords": [
         "agent",
         "agents",
@@ -4849,13 +4510,7 @@
       "slug": "git-auto-commit-on-stop",
       "title": "Git Auto Commit On Stop - Hooks",
       "description": "Automatically commits all changes with a summary when Claude Code session ends.",
-      "tags": [
-        "git",
-        "version-control",
-        "stop-hook",
-        "automation",
-        "commit"
-      ],
+      "tags": ["git", "version-control", "stop-hook", "automation", "commit"],
       "keywords": [
         "auto",
         "automation",
@@ -4883,12 +4538,7 @@
       "slug": "git-branch-protection",
       "title": "Git Branch Protection - Hooks",
       "description": "Prevents direct edits to protected branches like main or master, enforcing PR-based workflows.",
-      "tags": [
-        "git",
-        "branch-protection",
-        "workflow",
-        "safety"
-      ],
+      "tags": ["git", "branch-protection", "workflow", "safety"],
       "keywords": [
         "branch",
         "branch-protection",
@@ -4949,13 +4599,7 @@
       "slug": "git-pre-commit-validator",
       "title": "Git Pre Commit Validator - Hooks",
       "description": "Comprehensive pre-commit hook that validates code quality, runs tests, and enforces standards.",
-      "tags": [
-        "git",
-        "validation",
-        "code-quality",
-        "testing",
-        "automation"
-      ],
+      "tags": ["git", "validation", "code-quality", "testing", "automation"],
       "keywords": [
         "automation",
         "claude",
@@ -4984,12 +4628,7 @@
       "slug": "git-smart-commit",
       "title": "Git Smart Commit for Claude Code",
       "description": "Analyze staged changes and generate a clean conventional commit message.",
-      "tags": [
-        "git",
-        "commit",
-        "version-control",
-        "conventional-commits"
-      ],
+      "tags": ["git", "commit", "version-control", "conventional-commits"],
       "keywords": [
         "claude",
         "commands",
@@ -5078,13 +4717,7 @@
       "slug": "github-actions-ai-cicd",
       "title": "GitHub Actions AI-Powered CI/CD Automation Skill",
       "description": "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.",
-      "tags": [
-        "github-actions",
-        "ci-cd",
-        "automation",
-        "devops",
-        "ai"
-      ],
+      "tags": ["github-actions", "ci-cd", "automation", "devops", "ai"],
       "keywords": [
         "actions",
         "automation",
@@ -5140,13 +4773,7 @@
       "slug": "github-actions-workflow-validator",
       "title": "GitHub Actions Validator",
       "description": "Validates GitHub Actions workflow files for syntax errors and best practices.",
-      "tags": [
-        "github-actions",
-        "ci-cd",
-        "workflows",
-        "validation",
-        "yaml"
-      ],
+      "tags": ["github-actions", "ci-cd", "workflows", "validation", "yaml"],
       "keywords": [
         "actions",
         "ci-cd",
@@ -5212,13 +4839,7 @@
       "slug": "github-mcp-server",
       "title": "GitHub MCP Server for Claude",
       "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
-      "tags": [
-        "github",
-        "git",
-        "repositories",
-        "api",
-        "official"
-      ],
+      "tags": ["github", "git", "repositories", "api", "official"],
       "keywords": [
         "api",
         "claude",
@@ -5246,13 +4867,7 @@
       "slug": "go-golang-expert",
       "title": "Go Golang Expert - CLAUDE.md Rules for Claude Code",
       "description": "Transform Claude into a Go language expert with deep knowledge of concurrency, performance optimization, and idiomatic Go",
-      "tags": [
-        "golang",
-        "go",
-        "concurrency",
-        "backend",
-        "microservices"
-      ],
+      "tags": ["golang", "go", "concurrency", "backend", "microservices"],
       "keywords": [
         "backend",
         "claude",
@@ -5314,13 +4929,7 @@
       "slug": "go-module-tidy",
       "title": "Go Module Tidy - Hooks",
       "description": "Automatically runs go mod tidy when Go files or go.mod are modified to keep dependencies clean.",
-      "tags": [
-        "go",
-        "golang",
-        "modules",
-        "dependencies",
-        "cleanup"
-      ],
+      "tags": ["go", "golang", "modules", "dependencies", "cleanup"],
       "keywords": [
         "claude",
         "cleanup",
@@ -5374,13 +4983,7 @@
       "slug": "graphql-federation-specialist",
       "title": "GraphQL Federation Specialist for Claude",
       "description": "Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph...",
-      "tags": [
-        "graphql",
-        "federation",
-        "microservices",
-        "apollo",
-        "schema"
-      ],
+      "tags": ["graphql", "federation", "microservices", "apollo", "schema"],
       "keywords": [
         "apollo",
         "claude",
@@ -5407,13 +5010,7 @@
       "slug": "graphql-schema-validator",
       "title": "GraphQL Schema Validator - Hooks",
       "description": "Validates GraphQL schema files and checks for breaking changes when modified.",
-      "tags": [
-        "graphql",
-        "api",
-        "schema",
-        "validation",
-        "breaking-changes"
-      ],
+      "tags": ["graphql", "api", "schema", "validation", "breaking-changes"],
       "keywords": [
         "api",
         "breaking-changes",
@@ -5515,13 +5112,7 @@
       "slug": "hubspot-mcp-server",
       "title": "Hubspot MCP Server for Claude",
       "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
-      "tags": [
-        "crm",
-        "hubspot",
-        "sales",
-        "marketing",
-        "customer-data"
-      ],
+      "tags": ["crm", "hubspot", "sales", "marketing", "customer-data"],
       "keywords": [
         "claude",
         "crm",
@@ -5549,13 +5140,7 @@
       "slug": "hugging-face-mcp-server",
       "title": "Hugging Face MCP Server - MCP Servers",
       "description": "Access Hugging Face Hub and Gradio AI applications",
-      "tags": [
-        "ai",
-        "hugging-face",
-        "machine-learning",
-        "models",
-        "datasets"
-      ],
+      "tags": ["ai", "hugging-face", "machine-learning", "models", "datasets"],
       "keywords": [
         "claude",
         "datasets",
@@ -5644,13 +5229,7 @@
       "slug": "image-ocr-table-extraction",
       "title": "Image OCR + Table Extraction Skill",
       "description": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing.",
-      "tags": [
-        "ocr",
-        "image",
-        "pytesseract",
-        "opencv",
-        "tables"
-      ],
+      "tags": ["ocr", "image", "pytesseract", "opencv", "tables"],
       "keywords": [
         "and",
         "claude",
@@ -5679,13 +5258,7 @@
       "slug": "indexnow-search-indexing-accelerator",
       "title": "IndexNow Search Indexing Accelerator Skill",
       "description": "SEO operations skill for faster indexing updates using structured publishing, sitemap hygiene, and IndexNow submission patterns.",
-      "tags": [
-        "indexnow",
-        "seo",
-        "indexing",
-        "sitemap",
-        "search"
-      ],
+      "tags": ["indexnow", "seo", "indexing", "sitemap", "search"],
       "keywords": [
         "indexnow automation",
         "faster indexing",
@@ -5706,13 +5279,7 @@
       "slug": "intercom-mcp-server",
       "title": "Intercom MCP Server for Claude",
       "description": "Access customer conversations, tickets, and user data in real-time",
-      "tags": [
-        "customer-support",
-        "intercom",
-        "chat",
-        "helpdesk",
-        "crm"
-      ],
+      "tags": ["customer-support", "intercom", "chat", "helpdesk", "crm"],
       "keywords": [
         "chat",
         "claude",
@@ -5740,13 +5307,7 @@
       "slug": "invideo-mcp-server",
       "title": "Invideo MCP Server for Claude",
       "description": "Build video creation capabilities into your applications",
-      "tags": [
-        "video",
-        "invideo",
-        "media",
-        "content-creation",
-        "ai-video"
-      ],
+      "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
       "keywords": [
         "ai-video",
         "claude",
@@ -5808,13 +5369,7 @@
       "slug": "jest-snapshot-auto-updater",
       "title": "Jest Snapshot Auto Updater - Hooks",
       "description": "Automatically updates Jest snapshots when component files are modified significantly.",
-      "tags": [
-        "jest",
-        "testing",
-        "snapshots",
-        "react",
-        "automation"
-      ],
+      "tags": ["jest", "testing", "snapshots", "react", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -5877,13 +5432,7 @@
       "slug": "json-schema-validation-transformation",
       "title": "JSON Schema Validate + Transform Skill",
       "description": "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and trans...",
-      "tags": [
-        "json",
-        "schema",
-        "validation",
-        "ajv",
-        "zod"
-      ],
+      "tags": ["json", "schema", "validation", "ajv", "zod"],
       "keywords": [
         "ajv",
         "and",
@@ -5911,13 +5460,7 @@
       "slug": "json-schema-validator",
       "title": "JSON Schema Validator - Hooks",
       "description": "Validates JSON files against their schemas when modified to ensure data integrity.",
-      "tags": [
-        "json",
-        "schema",
-        "validation",
-        "data-integrity",
-        "api"
-      ],
+      "tags": ["json", "schema", "validation", "data-integrity", "api"],
       "keywords": [
         "api",
         "claude",
@@ -5944,13 +5487,7 @@
       "slug": "kubernetes-devsecops-engineer",
       "title": "Kubernetes DevSecOps Engineer for Claude",
       "description": "Expert in Kubernetes DevSecOps with GitOps workflows, pod security standards, RBAC, secret management, and automated security scanning fo...",
-      "tags": [
-        "kubernetes",
-        "devsecops",
-        "security",
-        "gitops",
-        "rbac"
-      ],
+      "tags": ["kubernetes", "devsecops", "security", "gitops", "rbac"],
       "keywords": [
         "claude",
         "development",
@@ -5977,13 +5514,7 @@
       "slug": "kubernetes-manifest-validator",
       "title": "Kubernetes Manifest Validator - Hooks",
       "description": "Validates Kubernetes YAML manifests for syntax and best practices when modified.",
-      "tags": [
-        "kubernetes",
-        "k8s",
-        "yaml",
-        "validation",
-        "devops"
-      ],
+      "tags": ["kubernetes", "k8s", "yaml", "validation", "devops"],
       "keywords": [
         "claude",
         "development",
@@ -6011,13 +5542,7 @@
       "slug": "kubernetes-mcp-server",
       "title": "Kubernetes MCP Server - MCP Servers",
       "description": "Kubernetes cluster management and container orchestration through MCP integration",
-      "tags": [
-        "kubernetes",
-        "k8s",
-        "container",
-        "orchestration",
-        "devops"
-      ],
+      "tags": ["kubernetes", "k8s", "container", "orchestration", "devops"],
       "keywords": [
         "claude",
         "container",
@@ -6081,13 +5606,7 @@
       "slug": "linear-mcp-server",
       "title": "Linear MCP Server for Claude",
       "description": "Integrate with Linear's issue tracking and project management system",
-      "tags": [
-        "project-management",
-        "linear",
-        "issues",
-        "tasks",
-        "agile"
-      ],
+      "tags": ["project-management", "linear", "issues", "tasks", "agile"],
       "keywords": [
         "agile",
         "claude",
@@ -6151,12 +5670,7 @@
       "slug": "log-parsing-incident-timeline",
       "title": "Log Parsing + Incident Timeline Skill",
       "description": "Parse web, application, and system logs into structured incidents and timelines with anomaly detection.",
-      "tags": [
-        "logs",
-        "observability",
-        "ripgrep",
-        "bash"
-      ],
+      "tags": ["logs", "observability", "ripgrep", "bash"],
       "keywords": [
         "and",
         "bash",
@@ -6186,12 +5700,7 @@
       "slug": "markdown-knowledge-base-composer",
       "title": "Markdown Knowledge Base Composer Skill",
       "description": "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting...",
-      "tags": [
-        "markdown",
-        "docs",
-        "remark",
-        "node"
-      ],
+      "tags": ["markdown", "docs", "remark", "node"],
       "keywords": [
         "base",
         "claude",
@@ -6280,13 +5789,7 @@
       "slug": "mcp-server-security-hardening",
       "title": "MCP Server Security Hardening Skill",
       "description": "Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk.",
-      "tags": [
-        "mcp",
-        "security",
-        "hardening",
-        "auth",
-        "ai-infrastructure"
-      ],
+      "tags": ["mcp", "security", "hardening", "auth", "ai-infrastructure"],
       "keywords": [
         "ai-skill",
         "mcp-security",
@@ -6342,13 +5845,7 @@
       "slug": "mcp-server-status-monitor",
       "title": "MCP Server Status Monitor - Statuslines",
       "description": "Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration",
-      "tags": [
-        "mcp",
-        "monitoring",
-        "servers",
-        "tools",
-        "performance"
-      ],
+      "tags": ["mcp", "monitoring", "servers", "tools", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -6376,13 +5873,7 @@
       "slug": "mcp-tool-contract-testing",
       "title": "MCP Tool Contract Testing Skill",
       "description": "Test-first MCP tool validation for safer integrations, stronger reliability, and lower breakage risk.",
-      "tags": [
-        "mcp",
-        "testing",
-        "contracts",
-        "reliability",
-        "api"
-      ],
+      "tags": ["mcp", "testing", "contracts", "reliability", "api"],
       "keywords": [
         "mcp testing",
         "tool contract validation",
@@ -6437,13 +5928,7 @@
       "slug": "minimal-powerline",
       "title": "Minimal Powerline - Statuslines",
       "description": "Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count",
-      "tags": [
-        "powerline",
-        "minimal",
-        "performance",
-        "bash",
-        "lightweight"
-      ],
+      "tags": ["powerline", "minimal", "performance", "bash", "lightweight"],
       "keywords": [
         "bash",
         "claude",
@@ -6469,13 +5954,7 @@
       "slug": "mintlify-documentation-automation",
       "title": "Mintlify AI Documentation Automation Skill",
       "description": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.",
-      "tags": [
-        "mintlify",
-        "documentation",
-        "mdx",
-        "api-docs",
-        "automation"
-      ],
+      "tags": ["mintlify", "documentation", "mdx", "api-docs", "automation"],
       "keywords": [
         "api-docs",
         "automation",
@@ -6501,13 +5980,7 @@
       "slug": "mintlify-docs",
       "title": "Mintlify Documentation Generator for Claude",
       "description": "Generate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components",
-      "tags": [
-        "mintlify",
-        "documentation",
-        "mdx",
-        "api-docs",
-        "ai"
-      ],
+      "tags": ["mintlify", "documentation", "mdx", "api-docs", "ai"],
       "keywords": [
         "api-docs",
         "claude",
@@ -6886,13 +6359,7 @@
       "slug": "n8n-ai-agent-workflow-architect",
       "title": "n8n AI Agent Workflow Architect Skill",
       "description": "Build high-value n8n workflows that automate real business tasks with robust guardrails, retries, and handoff logic.",
-      "tags": [
-        "n8n",
-        "ai-automation",
-        "workflows",
-        "no-code",
-        "operations"
-      ],
+      "tags": ["n8n", "ai-automation", "workflows", "no-code", "operations"],
       "keywords": [
         "n8n ai workflows",
         "ai automation skill",
@@ -7036,13 +6503,7 @@
       "slug": "nextjs-route-analyzer",
       "title": "Nextjs Route Analyzer - Hooks",
       "description": "Analyzes Next.js page routes and generates a route map when pages are added or modified.",
-      "tags": [
-        "nextjs",
-        "routing",
-        "pages",
-        "analysis",
-        "documentation"
-      ],
+      "tags": ["nextjs", "routing", "pages", "analysis", "documentation"],
       "keywords": [
         "analysis",
         "analyzer",
@@ -7070,13 +6531,7 @@
       "slug": "notion-mcp-server",
       "title": "Notion MCP Server for Claude",
       "description": "Read docs, update pages, and manage tasks in Notion workspaces",
-      "tags": [
-        "documentation",
-        "notion",
-        "wiki",
-        "notes",
-        "knowledge-base"
-      ],
+      "tags": ["documentation", "notion", "wiki", "notes", "knowledge-base"],
       "keywords": [
         "claude",
         "development",
@@ -7138,13 +6593,7 @@
       "slug": "openclaw-agent-ops-hardening",
       "title": "OpenClaw Agent Ops Hardening Skill",
       "description": "Production hardening for OpenClaw deployments, including permissions, network segmentation, and abuse-resistant agent controls.",
-      "tags": [
-        "openclaw",
-        "ai-agents",
-        "security",
-        "hardening",
-        "operations"
-      ],
+      "tags": ["openclaw", "ai-agents", "security", "hardening", "operations"],
       "keywords": [
         "openclaw security",
         "agent hardening",
@@ -7247,13 +6696,7 @@
       "slug": "package-vulnerability-scanner",
       "title": "Package Vulnerability Scanner - Hooks",
       "description": "Scans for security vulnerabilities when package.json or requirements.txt files are modified.",
-      "tags": [
-        "security",
-        "vulnerabilities",
-        "dependencies",
-        "npm",
-        "pip"
-      ],
+      "tags": ["security", "vulnerabilities", "dependencies", "npm", "pip"],
       "keywords": [
         "claude",
         "dependencies",
@@ -7350,13 +6793,7 @@
       "slug": "paypal-mcp-server",
       "title": "Paypal MCP Server for Claude",
       "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
-      "tags": [
-        "payments",
-        "paypal",
-        "commerce",
-        "transactions",
-        "financial"
-      ],
+      "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
       "keywords": [
         "claude",
         "commerce",
@@ -7589,13 +7026,7 @@
       "slug": "playwright-e2e-testing",
       "title": "Playwright E2E Testing Automation Skill",
       "description": "Automate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a...",
-      "tags": [
-        "testing",
-        "playwright",
-        "e2e",
-        "automation",
-        "ai"
-      ],
+      "tags": ["testing", "playwright", "e2e", "automation", "ai"],
       "keywords": [
         "automation",
         "claude",
@@ -7647,13 +7078,7 @@
       "slug": "playwright-test-runner",
       "title": "Playwright Test Runner - Hooks",
       "description": "Automatically runs Playwright E2E tests when test files or page components are modified.",
-      "tags": [
-        "playwright",
-        "e2e",
-        "testing",
-        "automation",
-        "browser-testing"
-      ],
+      "tags": ["playwright", "e2e", "testing", "automation", "browser-testing"],
       "keywords": [
         "automation",
         "browser-testing",
@@ -7716,13 +7141,7 @@
       "slug": "postgresql-mcp-server",
       "title": "Postgresql MCP Server - MCP Servers",
       "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
-      "tags": [
-        "postgresql",
-        "database",
-        "sql",
-        "official",
-        "anthropic"
-      ],
+      "tags": ["postgresql", "database", "sql", "official", "anthropic"],
       "keywords": [
         "anthropic",
         "claude",
@@ -7750,13 +7169,7 @@
       "slug": "postgresql-query-optimization",
       "title": "PostgreSQL Query Optimization Skill",
       "description": "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and executi...",
-      "tags": [
-        "postgresql",
-        "database",
-        "optimization",
-        "performance",
-        "sql"
-      ],
+      "tags": ["postgresql", "database", "optimization", "performance", "sql"],
       "keywords": [
         "claude",
         "database",
@@ -7783,13 +7196,7 @@
       "slug": "prisma-schema-sync",
       "title": "Prisma Schema Sync - Hooks",
       "description": "Automatically generates Prisma client and creates migrations when schema.prisma is modified.",
-      "tags": [
-        "prisma",
-        "database",
-        "orm",
-        "schema",
-        "migrations"
-      ],
+      "tags": ["prisma", "database", "orm", "schema", "migrations"],
       "keywords": [
         "claude",
         "database",
@@ -8117,13 +7524,7 @@
       "slug": "proxmox-ve-api-orchestrator",
       "title": "Proxmox VE API Orchestrator Skill",
       "description": "Proxmox automation skill for repeatable VM/LXC operations, backups, and cluster-safe workflows.",
-      "tags": [
-        "proxmox",
-        "virtualization",
-        "infrastructure",
-        "api",
-        "homelab"
-      ],
+      "tags": ["proxmox", "virtualization", "infrastructure", "api", "homelab"],
       "keywords": [
         "proxmox automation",
         "vm orchestration",
@@ -8217,13 +7618,7 @@
       "slug": "python-import-optimizer",
       "title": "Python Import Optimizer - Hooks",
       "description": "Automatically sorts and optimizes Python imports using isort when Python files are modified.",
-      "tags": [
-        "python",
-        "imports",
-        "formatting",
-        "optimization",
-        "isort"
-      ],
+      "tags": ["python", "imports", "formatting", "optimization", "isort"],
       "keywords": [
         "claude",
         "development",
@@ -8251,12 +7646,7 @@
       "slug": "python-linter-integration",
       "title": "Python Linter Integration - Hooks",
       "description": "Automatically runs pylint on Python files after editing to enforce code quality standards.",
-      "tags": [
-        "python",
-        "linting",
-        "code-quality",
-        "pylint"
-      ],
+      "tags": ["python", "linting", "code-quality", "pylint"],
       "keywords": [
         "claude",
         "code-quality",
@@ -8380,13 +7770,7 @@
       "slug": "react-expert",
       "title": "React Expert - CLAUDE.md Rules for Claude Code",
       "description": "Transform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices",
-      "tags": [
-        "react",
-        "nextjs",
-        "frontend",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["react", "nextjs", "frontend", "typescript", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -8413,13 +7797,7 @@
       "slug": "react-next-js-expert",
       "title": "React Next.js Expert - CLAUDE.md Rules for Claude Code",
       "description": "Transform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices",
-      "tags": [
-        "react",
-        "nextjs",
-        "frontend",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["react", "nextjs", "frontend", "typescript", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -8447,13 +7825,7 @@
       "slug": "react-server-components-expert",
       "title": "React Server Components Expert for Claude",
       "description": "Expert in React Server Components (RSC) with React 19 and Next.js 15, specializing in server-first rendering patterns, data fetching stra...",
-      "tags": [
-        "react",
-        "rsc",
-        "server-components",
-        "next-js",
-        "react-19"
-      ],
+      "tags": ["react", "rsc", "server-components", "next-js", "react-19"],
       "keywords": [
         "claude",
         "components",
@@ -8482,13 +7854,7 @@
       "slug": "react-component-test-generator",
       "title": "React Test Generator",
       "description": "Automatically creates or updates test files when React components are modified.",
-      "tags": [
-        "react",
-        "testing",
-        "jest",
-        "components",
-        "automation"
-      ],
+      "tags": ["react", "testing", "jest", "components", "automation"],
       "keywords": [
         "automation",
         "claude",
@@ -8553,13 +7919,7 @@
       "slug": "real-time-cost-tracker",
       "title": "Real Time Cost Tracker - Statuslines",
       "description": "Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts",
-      "tags": [
-        "cost",
-        "pricing",
-        "budget",
-        "analytics",
-        "monitoring"
-      ],
+      "tags": ["cost", "pricing", "budget", "analytics", "monitoring"],
       "keywords": [
         "analytics",
         "budget",
@@ -8588,13 +7948,7 @@
       "slug": "reddit-mcp-buddy",
       "title": "Reddit MCP Buddy for Claude",
       "description": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
-      "tags": [
-        "reddit",
-        "social-media",
-        "search",
-        "analytics",
-        "community"
-      ],
+      "tags": ["reddit", "social-media", "search", "analytics", "community"],
       "keywords": [
         "analytics",
         "buddy",
@@ -8622,13 +7976,7 @@
       "slug": "redis-cache-invalidator",
       "title": "Redis Cache Invalidator - Hooks",
       "description": "Automatically clears relevant Redis cache keys when data model files are modified.",
-      "tags": [
-        "redis",
-        "cache",
-        "performance",
-        "data-models",
-        "invalidation"
-      ],
+      "tags": ["redis", "cache", "performance", "data-models", "invalidation"],
       "keywords": [
         "cache",
         "claude",
@@ -8655,13 +8003,7 @@
       "slug": "redis-mcp-server",
       "title": "Redis MCP Server for Claude",
       "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
-      "tags": [
-        "redis",
-        "cache",
-        "database",
-        "nosql",
-        "official"
-      ],
+      "tags": ["redis", "cache", "database", "nosql", "official"],
       "keywords": [
         "cache",
         "claude",
@@ -8689,13 +8031,7 @@
       "slug": "rest-api-client-harness",
       "title": "REST API Client Harness Skill",
       "description": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagi...",
-      "tags": [
-        "rest",
-        "http",
-        "api",
-        "curl",
-        "node"
-      ],
+      "tags": ["rest", "http", "api", "curl", "node"],
       "keywords": [
         "api",
         "claude",
@@ -8723,13 +8059,7 @@
       "slug": "rust-cargo-check",
       "title": "Rust Cargo Check - Hooks",
       "description": "Automatically runs cargo check and clippy when Rust files are modified.",
-      "tags": [
-        "rust",
-        "cargo",
-        "clippy",
-        "linting",
-        "compilation"
-      ],
+      "tags": ["rust", "cargo", "clippy", "linting", "compilation"],
       "keywords": [
         "cargo",
         "check",
@@ -8756,13 +8086,7 @@
       "slug": "saas-pricing-experimentation-engine",
       "title": "SaaS Pricing Experimentation Engine Skill",
       "description": "Revenue optimization skill for designing and evaluating pricing experiments without corrupting core business metrics.",
-      "tags": [
-        "saas",
-        "pricing",
-        "experimentation",
-        "revenue",
-        "product"
-      ],
+      "tags": ["saas", "pricing", "experimentation", "revenue", "product"],
       "keywords": [
         "saas pricing tests",
         "pricing optimization",
@@ -8783,13 +8107,7 @@
       "slug": "scss-auto-compiler",
       "title": "SCSS Auto Compiler - Hooks",
       "description": "Automatically compiles SCSS/Sass files to CSS when they are modified.",
-      "tags": [
-        "scss",
-        "sass",
-        "css",
-        "styling",
-        "compilation"
-      ],
+      "tags": ["scss", "sass", "css", "styling", "compilation"],
       "keywords": [
         "auto",
         "claude",
@@ -8919,13 +8237,7 @@
       "slug": "security-first-react-components",
       "title": "Security-First React Components for Claude",
       "description": "Security-first React component architect with XSS prevention, CSP integration, input sanitization, and OWASP Top 10 mitigation patterns",
-      "tags": [
-        "security",
-        "react",
-        "xss",
-        "csp",
-        "owasp"
-      ],
+      "tags": ["security", "react", "xss", "csp", "owasp"],
       "keywords": [
         "claude",
         "components",
@@ -9026,13 +8338,7 @@
       "slug": "sentry-mcp-server",
       "title": "Sentry MCP Server for Claude",
       "description": "Monitor errors, debug production issues, and track application health",
-      "tags": [
-        "monitoring",
-        "sentry",
-        "debugging",
-        "errors",
-        "devops"
-      ],
+      "tags": ["monitoring", "sentry", "debugging", "errors", "devops"],
       "keywords": [
         "claude",
         "debugging",
@@ -9201,13 +8507,7 @@
       "slug": "slack-progress-notifier",
       "title": "Slack Progress Notifier - Hooks",
       "description": "Sends progress updates to Slack channel for team visibility on Claude activities.",
-      "tags": [
-        "slack",
-        "notifications",
-        "team",
-        "collaboration",
-        "monitoring"
-      ],
+      "tags": ["slack", "notifications", "team", "collaboration", "monitoring"],
       "keywords": [
         "claude",
         "collaboration",
@@ -9345,13 +8645,7 @@
       "slug": "square-mcp-server",
       "title": "Square MCP Server for Claude",
       "description": "Build on Square APIs for payments, inventory, and order management",
-      "tags": [
-        "payments",
-        "square",
-        "pos",
-        "inventory",
-        "commerce"
-      ],
+      "tags": ["payments", "square", "pos", "inventory", "commerce"],
       "keywords": [
         "claude",
         "commerce",
@@ -9379,13 +8673,7 @@
       "slug": "starship-powerline-theme",
       "title": "Starship Powerline Theme - Statuslines",
       "description": "Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code",
-      "tags": [
-        "starship",
-        "powerline",
-        "nerd-fonts",
-        "git",
-        "theme"
-      ],
+      "tags": ["starship", "powerline", "nerd-fonts", "git", "theme"],
       "keywords": [
         "claude",
         "development",
@@ -9411,13 +8699,7 @@
       "slug": "stripe-mcp-server",
       "title": "Stripe MCP Server for Claude",
       "description": "Payment processing, subscription management, and financial transaction handling",
-      "tags": [
-        "payments",
-        "stripe",
-        "billing",
-        "subscriptions",
-        "commerce"
-      ],
+      "tags": ["payments", "stripe", "billing", "subscriptions", "commerce"],
       "keywords": [
         "billing",
         "claude",
@@ -9445,13 +8727,7 @@
       "slug": "stytch-mcp-server",
       "title": "Stytch MCP Server for Claude",
       "description": "Configure and manage Stytch authentication services and workspace settings",
-      "tags": [
-        "authentication",
-        "stytch",
-        "identity",
-        "security",
-        "auth"
-      ],
+      "tags": ["authentication", "stytch", "identity", "security", "auth"],
       "keywords": [
         "auth",
         "authentication",
@@ -9552,13 +8828,7 @@
       "slug": "supabase-realtime-database",
       "title": "Supabase Realtime Database Builder Skill",
       "description": "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ develo...",
-      "tags": [
-        "supabase",
-        "postgres",
-        "realtime",
-        "backend",
-        "database"
-      ],
+      "tags": ["supabase", "postgres", "realtime", "backend", "database"],
       "keywords": [
         "backend",
         "builder",
@@ -9585,13 +8855,7 @@
       "slug": "svelte-component-compiler",
       "title": "Svelte Component Compiler - Hooks",
       "description": "Automatically compiles and validates Svelte components when they are modified.",
-      "tags": [
-        "svelte",
-        "components",
-        "compilation",
-        "validation",
-        "frontend"
-      ],
+      "tags": ["svelte", "components", "compilation", "validation", "frontend"],
       "keywords": [
         "claude",
         "compilation",
@@ -9619,13 +8883,7 @@
       "slug": "svelte-sveltekit-fullstack",
       "title": "Svelte SvelteKit Full-Stack Development Skill",
       "description": "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering.",
-      "tags": [
-        "svelte",
-        "sveltekit",
-        "frontend",
-        "full-stack",
-        "reactive"
-      ],
+      "tags": ["svelte", "sveltekit", "frontend", "full-stack", "reactive"],
       "keywords": [
         "claude",
         "developer",
@@ -9690,13 +8948,7 @@
       "slug": "team-summary-email-generator",
       "title": "Team Summary Email Generator - Hooks",
       "description": "Generates and sends a comprehensive summary email to the team when session ends.",
-      "tags": [
-        "email",
-        "team",
-        "stop-hook",
-        "summary",
-        "communication"
-      ],
+      "tags": ["email", "team", "stop-hook", "summary", "communication"],
       "keywords": [
         "claude",
         "communication",
@@ -9756,13 +9008,7 @@
       "slug": "terraform-infrastructure-architect",
       "title": "Terraform Infrastructure Architect for Claude",
       "description": "Expert in Terraform infrastructure as code with AI-assisted generation, modular patterns, state management, and multi-cloud deployments",
-      "tags": [
-        "terraform",
-        "iac",
-        "infrastructure",
-        "cloud",
-        "devops"
-      ],
+      "tags": ["terraform", "iac", "infrastructure", "cloud", "devops"],
       "keywords": [
         "architect",
         "claude",
@@ -9789,13 +9035,7 @@
       "slug": "terraform-plan-executor",
       "title": "Terraform Plan Executor - Hooks",
       "description": "Automatically runs terraform plan when .tf files are modified to preview infrastructure changes.",
-      "tags": [
-        "terraform",
-        "infrastructure",
-        "iac",
-        "devops",
-        "cloud"
-      ],
+      "tags": ["terraform", "infrastructure", "iac", "devops", "cloud"],
       "keywords": [
         "claude",
         "cloud",
@@ -9823,13 +9063,7 @@
       "slug": "test-automation-engineer-agent",
       "title": "Test Automation Engineer",
       "description": "Expert in automated testing strategies, test frameworks, and quality assurance across unit, integration, and end-to-end testing",
-      "tags": [
-        "testing",
-        "automation",
-        "qa",
-        "tdd",
-        "bdd"
-      ],
+      "tags": ["testing", "automation", "qa", "tdd", "bdd"],
       "keywords": [
         "agent",
         "agents",
@@ -9857,13 +9091,7 @@
       "slug": "test-coverage-final-report",
       "title": "Test Coverage Final Report - Hooks",
       "description": "Generates a comprehensive test coverage report when the coding session ends.",
-      "tags": [
-        "testing",
-        "coverage",
-        "stop-hook",
-        "reporting",
-        "quality"
-      ],
+      "tags": ["testing", "coverage", "stop-hook", "reporting", "quality"],
       "keywords": [
         "claude",
         "coverage",
@@ -9892,13 +9120,7 @@
       "slug": "test-runner-hook",
       "title": "Test Runner Hook - Hooks",
       "description": "Automatically run relevant tests when code changes are detected, with intelligent test selection and parallel execution.",
-      "tags": [
-        "testing",
-        "automation",
-        "ci-cd",
-        "watch",
-        "parallel"
-      ],
+      "tags": ["testing", "automation", "ci-cd", "watch", "parallel"],
       "keywords": [
         "automation",
         "ci-cd",
@@ -10000,13 +9222,7 @@
       "slug": "trpc-type-safe-api",
       "title": "tRPC Type-Safe API Builder Skill",
       "description": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.",
-      "tags": [
-        "trpc",
-        "typescript",
-        "api",
-        "type-safety",
-        "t3-stack"
-      ],
+      "tags": ["trpc", "typescript", "api", "type-safety", "t3-stack"],
       "keywords": [
         "api",
         "builder",
@@ -10070,12 +9286,7 @@
       "slug": "typescript-compilation-checker",
       "title": "TypeScript Checker",
       "description": "Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early.",
-      "tags": [
-        "typescript",
-        "validation",
-        "type-safety",
-        "compilation"
-      ],
+      "tags": ["typescript", "validation", "type-safety", "compilation"],
       "keywords": [
         "checker",
         "claude",
@@ -10101,13 +9312,7 @@
       "slug": "ui-ux-design-expert-agent",
       "title": "UI UX Design Expert Agent - Agents",
       "description": "Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences",
-      "tags": [
-        "ui",
-        "ux",
-        "design",
-        "user-experience",
-        "interface"
-      ],
+      "tags": ["ui", "ux", "design", "user-experience", "interface"],
       "keywords": [
         "agent",
         "agents",
@@ -10133,13 +9338,7 @@
       "slug": "unraid-api-automation-operator",
       "title": "Unraid API Automation Operator Skill",
       "description": "Unraid-focused automation skill for agent-driven maintenance, observability, and repeatable operations.",
-      "tags": [
-        "unraid",
-        "homelab",
-        "automation",
-        "api",
-        "operations"
-      ],
+      "tags": ["unraid", "homelab", "automation", "api", "operations"],
       "keywords": [
         "unraid api automation",
         "homelab ai skill",
@@ -10160,13 +9359,7 @@
       "slug": "unraid-api-v2-capability-pack",
       "title": "Unraid API v2 Capability Pack Skill",
       "description": "Expert Unraid API skill with endpoint behavior, auth flows, error patterns, and production-safe automation guardrails.",
-      "tags": [
-        "unraid",
-        "api",
-        "homelab",
-        "automation",
-        "capability-pack"
-      ],
+      "tags": ["unraid", "api", "homelab", "automation", "capability-pack"],
       "keywords": [
         "unraid api v2",
         "unraid automation",
@@ -10214,13 +9407,7 @@
       "slug": "v0-generate",
       "title": "V0 Component Generator for Claude",
       "description": "Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript",
-      "tags": [
-        "v0",
-        "ui-generation",
-        "shadcn",
-        "react",
-        "tailwind"
-      ],
+      "tags": ["v0", "ui-generation", "shadcn", "react", "tailwind"],
       "keywords": [
         "claude",
         "commands",
@@ -10246,13 +9433,7 @@
       "slug": "v0-rapid-prototyping",
       "title": "V0 Rapid UI Prototyping Workflow Skill",
       "description": "Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integrat...",
-      "tags": [
-        "v0",
-        "prototyping",
-        "ui",
-        "shadcn",
-        "react"
-      ],
+      "tags": ["v0", "prototyping", "ui", "shadcn", "react"],
       "keywords": [
         "claude",
         "development",
@@ -10278,13 +9459,7 @@
       "slug": "vercel-mcp-server",
       "title": "Vercel MCP Server for Claude",
       "description": "Manage deployments, analyze logs, and control Vercel projects",
-      "tags": [
-        "deployment",
-        "vercel",
-        "hosting",
-        "devops",
-        "infrastructure"
-      ],
+      "tags": ["deployment", "vercel", "hosting", "devops", "infrastructure"],
       "keywords": [
         "claude",
         "deployment",
@@ -10312,13 +9487,7 @@
       "slug": "vite-build-optimization",
       "title": "Vite Frontend Build Performance Optimization Skill",
       "description": "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking.",
-      "tags": [
-        "vite",
-        "build-tools",
-        "webpack",
-        "performance",
-        "frontend"
-      ],
+      "tags": ["vite", "build-tools", "webpack", "performance", "frontend"],
       "keywords": [
         "build",
         "build-tools",
@@ -10347,13 +9516,7 @@
       "slug": "vue-composition-api-linter",
       "title": "Vue Composition API Linter - Hooks",
       "description": "Lints Vue 3 components for Composition API best practices and common issues.",
-      "tags": [
-        "vue",
-        "vue3",
-        "composition-api",
-        "linting",
-        "best-practices"
-      ],
+      "tags": ["vue", "vue3", "composition-api", "linting", "best-practices"],
       "keywords": [
         "api",
         "best-practices",
@@ -10382,13 +9545,7 @@
       "slug": "wcag-accessibility-auditor",
       "title": "WCAG 2.2 Accessibility Auditor for Claude",
       "description": "Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications",
-      "tags": [
-        "accessibility",
-        "wcag",
-        "a11y",
-        "aria",
-        "inclusive-design"
-      ],
+      "tags": ["accessibility", "wcag", "a11y", "aria", "inclusive-design"],
       "keywords": [
         "a11y",
         "accessibility",
@@ -10451,13 +9608,7 @@
       "slug": "webassembly-module-development",
       "title": "WebAssembly WASM Module Development Skill",
       "description": "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, a...",
-      "tags": [
-        "webassembly",
-        "wasm",
-        "rust",
-        "performance",
-        "wasi"
-      ],
+      "tags": ["webassembly", "wasm", "rust", "performance", "wasi"],
       "keywords": [
         "claude",
         "development",
@@ -10484,13 +9635,7 @@
       "slug": "webpack-bundle-analyzer",
       "title": "Webpack Bundle Analyzer - Hooks",
       "description": "Analyzes webpack bundle size when webpack config or entry files are modified.",
-      "tags": [
-        "webpack",
-        "bundle",
-        "performance",
-        "optimization",
-        "analysis"
-      ],
+      "tags": ["webpack", "bundle", "performance", "optimization", "analysis"],
       "keywords": [
         "analysis",
         "analyzer",
@@ -10517,12 +9662,7 @@
       "slug": "website-crawler-summarizer",
       "title": "Website Crawler + Summarizer Skill",
       "description": "Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries.",
-      "tags": [
-        "crawler",
-        "scraping",
-        "summarization",
-        "readability"
-      ],
+      "tags": ["crawler", "scraping", "summarization", "readability"],
       "keywords": [
         "and",
         "claude",
@@ -10551,13 +9691,7 @@
       "slug": "windsurf-collaborative-development",
       "title": "Windsurf AI-Native Collaborative Development Skill",
       "description": "Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team wor...",
-      "tags": [
-        "windsurf",
-        "collaboration",
-        "cascade",
-        "ai-ide",
-        "workflow"
-      ],
+      "tags": ["windsurf", "collaboration", "cascade", "ai-ide", "workflow"],
       "keywords": [
         "ai-ide",
         "cascade",
@@ -10585,13 +9719,7 @@
       "slug": "windsurf-ai-native-ide-patterns",
       "title": "Windsurf AI-Native IDE Patterns for Claude",
       "description": "Windsurf AI-native IDE specialist with Cascade AI, multi-file context awareness, and Flow collaboration patterns for Claude integration",
-      "tags": [
-        "windsurf",
-        "ai-ide",
-        "cascade",
-        "flow",
-        "collaboration"
-      ],
+      "tags": ["windsurf", "ai-ide", "cascade", "flow", "collaboration"],
       "keywords": [
         "ai-ide",
         "cascade",
@@ -10620,13 +9748,7 @@
       "slug": "workato-mcp-server",
       "title": "Workato MCP Server for Claude",
       "description": "Access any application, workflows, or data via Workato's integration platform",
-      "tags": [
-        "automation",
-        "workato",
-        "integration",
-        "workflow",
-        "iPaaS"
-      ],
+      "tags": ["automation", "workato", "integration", "workflow", "iPaaS"],
       "keywords": [
         "automation",
         "claude",
@@ -10654,13 +9776,7 @@
       "slug": "workflow-completion-report",
       "title": "Workflow Completion Report - Hooks",
       "description": "Generates a comprehensive report when Claude Code workflow stops, including files modified, tests run, and git status.",
-      "tags": [
-        "reporting",
-        "workflow",
-        "analytics",
-        "summary",
-        "stop-hook"
-      ],
+      "tags": ["reporting", "workflow", "analytics", "summary", "stop-hook"],
       "keywords": [
         "analytics",
         "claude",
@@ -10724,13 +9840,7 @@
       "slug": "zapier-mcp-server",
       "title": "Zapier MCP Server for Claude",
       "description": "Connect to nearly 8,000 apps through Zapier's automation platform",
-      "tags": [
-        "automation",
-        "zapier",
-        "integration",
-        "workflow",
-        "no-code"
-      ],
+      "tags": ["automation", "zapier", "integration", "workflow", "no-code"],
       "keywords": [
         "automation",
         "claude",
@@ -10785,13 +9895,7 @@
       "slug": "zod-schema-validator",
       "title": "Zod Schema Validation Skill",
       "description": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type infer...",
-      "tags": [
-        "zod",
-        "validation",
-        "typescript",
-        "type-safety",
-        "schema"
-      ],
+      "tags": ["zod", "validation", "typescript", "type-safety", "schema"],
       "keywords": [
         "claude",
         "development",

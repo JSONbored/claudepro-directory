@@ -1,0 +1,73 @@
+# Unraid CA Template Authoring Capability Pack Skill
+URL: https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-11
+Documentation: https://forums.unraid.net/forum/64-docker-engine/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx
+Download: /downloads/skills/unraid-ca-template-authoring-capability-pack.zip
+## Summary
+Expert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.
+## Tags
+- unraid
+- community-apps
+- docker
+- templates
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to sources verified on **2026-04-11**.
+
+## Retrieval Sources
+- https://forums.unraid.net/
+- https://github.com/bergware/dynamix
+- https://docs.unraid.net/
+
+## Core Workflow
+1. Define intended user profile and operational constraints.
+2. Draft CA XML with complete metadata and accurate support references.
+3. Validate defaults for first-boot safety and recovery behavior.
+4. Add caveats for resource, security, and maintenance tradeoffs.
+5. Complete submission checklist and review pass.
+
+## Overview
+This skill helps agents produce community-ready Unraid templates that are practical for beginners and maintainable for operators.
+
+## Capability Scope
+- CA XML metadata completeness
+- Beginner-safe defaults and caveats
+- Support/docs linkage quality
+- Operational tradeoff transparency
+- Submission readiness review
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Maintain accurate CA metadata and reachable support links.
+- Keep defaults beginner-safe with explicit tradeoff notes.
+- Validate networking, storage, and permission assumptions.
+- Treat template updates as user-impacting changes with clear notes.
+
+## Troubleshooting
+**Issue:** Template rejected for weak metadata  
+**Fix:** complete Project, Support, TemplateURL, Icon, and Overview fields.
+
+**Issue:** New users fail first boot  
+**Fix:** tighten defaults and add explicit setup prerequisites.
+
+**Issue:** Support load spikes after release  
+**Fix:** publish FAQ + known limitations before submission.
+
+## Output Contract
+1. Production-ready CA template metadata.
+2. Safe default config and caveat notes.
+3. Review checklist with unresolved gaps.
+4. Submission package summary.

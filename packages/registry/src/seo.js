@@ -13,29 +13,76 @@ export function buildOrganizationJsonLd(params = {}) {
     "@id": `${siteUrl.replace(/\/$/, "")}/#organization`,
     name: params.name || "HeyClaude",
     url: siteUrl,
-    sameAs: [params.githubUrl, params.twitterUrl, params.discordUrl].filter(Boolean),
+    sameAs: [params.githubUrl, params.twitterUrl, params.discordUrl].filter(
+      Boolean,
+    ),
   };
 }
 
 export function buildWebsiteJsonLd(params = {}) {
   const siteUrl = params.siteUrl || "https://heyclau.de";
+  const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": `${siteUrl.replace(/\/$/, "")}/#website`,
+    "@id": `${normalizedSiteUrl}/#website`,
     name: params.name || "HeyClaude",
     url: siteUrl,
-    description: params.description || "A directory for Claude resources and tools.",
+    description:
+      params.description || "A directory for Claude resources and tools.",
     publisher: {
-      "@id": `${siteUrl.replace(/\/$/, "")}/#organization`,
+      "@id": `${normalizedSiteUrl}/#organization`,
     },
+    potentialAction: buildSearchActionJsonLd({ siteUrl: normalizedSiteUrl }),
   };
+}
+
+export function buildSearchActionJsonLd(params = {}) {
+  const siteUrl = params.siteUrl || "https://heyclau.de";
+  const normalizedSiteUrl = siteUrl.replace(/\/$/, "");
+  return {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${normalizedSiteUrl}/browse?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  };
+}
+
+export function buildWebPageJsonLd(params = {}) {
+  const siteUrl = params.siteUrl || "https://heyclau.de";
+  const url = absoluteSiteUrl(siteUrl, params.path || "/");
+  return {
+    "@context": "https://schema.org",
+    "@type": params.type || "WebPage",
+    "@id": `${url}#webpage`,
+    name: params.name,
+    description: params.description,
+    url,
+    isPartOf: {
+      "@id": `${siteUrl.replace(/\/$/, "")}/#website`,
+    },
+    breadcrumb: params.breadcrumbId
+      ? {
+          "@id": params.breadcrumbId,
+        }
+      : undefined,
+  };
+}
+
+export function buildCollectionPageJsonLd(params = {}) {
+  return buildWebPageJsonLd({
+    ...params,
+    type: "CollectionPage",
+  });
 }
 
 export function buildBreadcrumbJsonLd(items = []) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
+    "@id": items.at(-1)?.url ? `${items.at(-1).url}#breadcrumb` : undefined,
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
@@ -64,7 +111,8 @@ export function buildItemListJsonLd(items = [], params = {}) {
 export function buildEntryJsonLd(entry, params = {}) {
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const url = absoluteSiteUrl(siteUrl, `/${entry.category}/${entry.slug}`);
-  const label = categorySpec.categories?.[entry.category]?.label || entry.category;
+  const label =
+    categorySpec.categories?.[entry.category]?.label || entry.category;
 
   return {
     "@context": "https://schema.org",
@@ -76,7 +124,9 @@ export function buildEntryJsonLd(entry, params = {}) {
     url,
     datePublished: entry.dateAdded,
     dateModified: entry.repoUpdatedAt || entry.dateAdded,
-    keywords: [...(entry.keywords || []), ...(entry.tags || [])].filter(Boolean).join(", "),
+    keywords: [...(entry.keywords || []), ...(entry.tags || [])]
+      .filter(Boolean)
+      .join(", "),
     genre: label,
     author: entry.author
       ? {
@@ -100,6 +150,23 @@ export function buildToolSoftwareApplicationJsonLd(tool, params = {}) {
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const url = absoluteSiteUrl(siteUrl, `/tools/${tool.slug}`);
   const disclosure = normalizeDisclosure(tool.disclosure);
+  const pricingModel = String(tool.pricingModel || "")
+    .trim()
+    .toLowerCase();
+  const hasRequiredVisibleFields = Boolean(
+    tool.title &&
+    tool.description &&
+    tool.websiteUrl &&
+    tool.applicationCategory &&
+    tool.operatingSystem &&
+    pricingModel,
+  );
+
+  if (!hasRequiredVisibleFields) {
+    return null;
+  }
+
+  const freeLike = pricingModel === "free" || pricingModel === "open-source";
 
   return {
     "@context": "https://schema.org",
@@ -110,14 +177,14 @@ export function buildToolSoftwareApplicationJsonLd(tool, params = {}) {
     url: tool.websiteUrl || url,
     applicationCategory: tool.applicationCategory || "DeveloperApplication",
     operatingSystem: tool.operatingSystem || "Web",
-    offers: tool.pricingModel
-      ? {
-          "@type": "Offer",
-          category: tool.pricingModel,
-          availability: "https://schema.org/InStock",
-          url: tool.websiteUrl || url,
-        }
-      : undefined,
+    offers: {
+      "@type": "Offer",
+      price: freeLike ? "0" : undefined,
+      priceCurrency: freeLike ? "USD" : undefined,
+      category: pricingModel,
+      availability: "https://schema.org/InStock",
+      url: tool.websiteUrl || url,
+    },
     isPartOf: {
       "@id": `${siteUrl.replace(/\/$/, "")}/#website`,
     },
@@ -167,5 +234,35 @@ export function buildJobPostingJsonLd(job, params = {}) {
         },
     url,
     directApply: Boolean(job.applyUrl),
+  };
+}
+
+export function buildEntryJsonLdSnapshot(entry, params = {}) {
+  const siteUrl = params.siteUrl || "https://heyclau.de";
+  const label =
+    categorySpec.categories?.[entry.category]?.label || entry.category;
+  const url = absoluteSiteUrl(siteUrl, `/${entry.category}/${entry.slug}`);
+  const breadcrumb = buildBreadcrumbJsonLd([
+    { name: "Home", url: siteUrl },
+    { name: label, url: absoluteSiteUrl(siteUrl, `/${entry.category}`) },
+    { name: entry.title, url },
+  ]);
+
+  return {
+    key: `${entry.category}:${entry.slug}`,
+    category: entry.category,
+    slug: entry.slug,
+    url,
+    documents: [
+      breadcrumb,
+      buildWebPageJsonLd({
+        siteUrl,
+        path: `/${entry.category}/${entry.slug}`,
+        name: entry.title,
+        description: entry.seoDescription || entry.description,
+        breadcrumbId: `${url}#breadcrumb`,
+      }),
+      buildEntryJsonLd(entry, params),
+    ],
   };
 }

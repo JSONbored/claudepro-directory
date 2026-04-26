@@ -1,0 +1,77 @@
+# OpenClaw Agent Ops Hardening Skill
+URL: https://heyclau.de/skills/openclaw-agent-ops-hardening
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://github.com/openclaw/openclaw
+Repository: https://github.com/openclaw/openclaw
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-agent-ops-hardening.mdx
+Download: /downloads/skills/openclaw-agent-ops-hardening.zip
+## Summary
+Harden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.
+## Tags
+- openclaw
+- ai-agents
+- security
+- hardening
+- operations
+## Content
+## Overview
+This skill provides a practical hardening framework for OpenClaw deployments. It focuses on reducing attack surface while preserving developer velocity: least privilege, clear approval paths, and observable failure handling.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Tool and connector inventory
+- Environment separation plan (dev/staging/prod)
+- Centralized logs and alert destination
+
+## What This Skill Delivers
+- Threat model tailored to agentic execution
+- Permission and approval policy per tool class
+- Runtime hardening checklist (secrets, network, filesystem, egress)
+- Incident handling runbook for abuse, drift, and data exposure
+
+## How to Use This Skill
+1. Identify data classes and protected operations.
+2. Map tools to minimal required permissions.
+3. Add explicit policy checks for sensitive actions.
+4. Add audit logs with correlation IDs.
+5. Validate with adversarial prompts and abuse scenarios.
+
+## Troubleshooting
+**Issue:** Agent can execute risky actions too broadly  
+**Fix:** Split capabilities into scoped tools and add approval for privileged operations.
+
+**Issue:** Difficult to trace harmful outputs  
+**Fix:** Add structured logging for prompt, tool call, decision, and result lifecycle.
+
+**Issue:** Secrets exposed in generated output  
+**Fix:** Add redaction middleware and blocklist checks before response emission.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://github.com/openclaw/openclaw
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

@@ -1,13 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, Building2, CalendarDays, MapPin, Wallet } from "lucide-react";
+import {
+  ArrowUpRight,
+  Building2,
+  CalendarDays,
+  MapPin,
+  Wallet,
+} from "lucide-react";
 
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
 import { getJobBySlug } from "@/lib/jobs";
 import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
-import { buildBreadcrumbJsonLd, buildJobPostingJsonLd } from "@heyclaude/registry/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildJobPostingJsonLd,
+  buildWebPageJsonLd,
+} from "@heyclaude/registry/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +26,9 @@ type JobDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: JobDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: JobDetailPageProps): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
 
@@ -24,7 +37,7 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
       title: "Job listing not found",
       description: "The requested job listing could not be found.",
       path: `/jobs/${slug}`,
-      robots: { index: false, follow: false }
+      robots: { index: false, follow: false },
     });
   }
 
@@ -33,14 +46,14 @@ export async function generateMetadata({ params }: JobDetailPageProps): Promise<
     "ai jobs",
     job.company,
     job.location,
-    job.type
+    job.type,
   ].filter((value): value is string => Boolean(value));
 
   return buildPageMetadata({
     title: `${job.title} at ${job.company}`,
     description: job.description,
     path: `/jobs/${job.slug}`,
-    keywords
+    keywords,
   });
 }
 
@@ -51,7 +64,7 @@ function formatDate(value?: string) {
   return parsed.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric"
+    year: "numeric",
   });
 }
 
@@ -63,8 +76,18 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
       { name: "Jobs", url: `${siteConfig.url}/jobs` },
-      { name: `${job.title} at ${job.company}`, url: `${siteConfig.url}/jobs/${job.slug}` },
+      {
+        name: `${job.title} at ${job.company}`,
+        url: `${siteConfig.url}/jobs/${job.slug}`,
+      },
     ]),
+    buildWebPageJsonLd({
+      siteUrl: siteConfig.url,
+      path: `/jobs/${job.slug}`,
+      name: `${job.title} at ${job.company}`,
+      description: job.description,
+      breadcrumbId: `${siteConfig.url}/jobs/${job.slug}#breadcrumb`,
+    }),
     buildJobPostingJsonLd(job, { siteUrl: siteConfig.url }),
   ];
 
@@ -72,6 +95,13 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
     <div className="container-shell space-y-8 py-12">
       <JsonLd data={jsonLd} />
       <div className="space-y-4 border-b border-border/80 pb-8">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: "Jobs", href: "/jobs" },
+            { label: `${job.title} at ${job.company}` },
+          ]}
+        />
         <Link href="/jobs" className="eyebrow">
           Jobs
         </Link>
@@ -101,14 +131,21 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       </div>
 
       <article className="surface-panel space-y-6 p-6">
-        <p className="text-sm leading-7 text-muted-foreground">{job.description}</p>
+        <p className="text-sm leading-7 text-muted-foreground">
+          {job.description}
+        </p>
 
         {job.responsibilities?.length ? (
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Responsibilities</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Responsibilities
+            </h2>
             <ul className="space-y-2 text-sm leading-7 text-muted-foreground">
               {job.responsibilities.map((item) => (
-                <li key={item} className="rounded-xl border border-border/80 bg-background/80 px-3 py-2">
+                <li
+                  key={item}
+                  className="rounded-xl border border-border/80 bg-background/80 px-3 py-2"
+                >
                   {item}
                 </li>
               ))}
@@ -118,10 +155,15 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
 
         {job.requirements?.length ? (
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">Requirements</h2>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Requirements
+            </h2>
             <ul className="space-y-2 text-sm leading-7 text-muted-foreground">
               {job.requirements.map((item) => (
-                <li key={item} className="rounded-xl border border-border/80 bg-background/80 px-3 py-2">
+                <li
+                  key={item}
+                  className="rounded-xl border border-border/80 bg-background/80 px-3 py-2"
+                >
                   {item}
                 </li>
               ))}

@@ -1,0 +1,54 @@
+# Agent Operator Growth Master Pack
+URL: https://heyclau.de/collections/agent-operator-growth-master-pack
+Category: collections
+Author: JSONbored
+Date added: 2026-04-11
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx
+## Summary
+High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.
+## Tags
+- ai-operators
+- growth
+- automation
+- production
+- collections
+## Content
+## Overview
+High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.
+
+## Features
+- Practical release and commit governance
+- Local-first quality and security guardrails
+- Deterministic automation orchestration
+- Skill and plugin authoring workflows
+- Lean launch and growth execution
+
+## Use Cases
+- Solo builders shipping weekly without quality collapse
+- Small teams reducing CI noise and release risk
+- Operators combining technical and growth execution
+
+## Recommended Order
+1. `coderabbit-lite-pr-review-capability-pack`
+2. `git-cliff-release-changelog-capability-pack`
+3. `husky-commit-governance-capability-pack`
+4. `codex-automations-orchestrator-capability-pack`
+5. `codex-plugin-creator-capability-pack`
+6. `openclaw-skill-authoring-factory-capability-pack`
+7. `n8n-operations-resilience-capability-pack`
+8. `unraid-ca-template-authoring-capability-pack`
+9. `ai-business-idea-validation-capability-pack`
+10. `zero-budget-saas-launch-capability-pack`
+
+## Troubleshooting
+### Too many parallel process changes at once
+
+Adopt the first three governance skills first, then layer automation and growth skills.
+
+### Team pushback on guardrails
+
+Start with fast local hooks and deterministic release notes to show immediate productivity gains.
+
+### Launch still feels unfocused
+
+Use the business-validation and zero-budget launch skills to cut nonessential scope.

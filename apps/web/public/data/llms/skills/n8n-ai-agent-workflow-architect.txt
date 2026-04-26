@@ -1,0 +1,97 @@
+# n8n AI Agent Workflow Architect Skill
+URL: https://heyclau.de/skills/n8n-ai-agent-workflow-architect
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.n8n.io/advanced-ai/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-ai-agent-workflow-architect.mdx
+Download: /downloads/skills/n8n-ai-agent-workflow-architect.zip
+## Summary
+Design production-safe n8n automations with AI agents, retries, human approval gates, and observable error handling.
+## Tags
+- n8n
+- ai-automation
+- workflows
+- no-code
+- operations
+## Content
+## Overview
+This skill helps AI agents design and maintain n8n workflows that are useful in production, not just demos. It prioritizes reliability, traceability, and controlled side effects while still moving quickly.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Stable trigger definition (webhook, schedule, event queue, inbox)
+- Clear success criteria and expected outputs
+- Error budget and escalation target
+
+## What This Skill Delivers
+- n8n workflow architecture with explicit control flow
+- Safe AI usage pattern (classification, extraction, summarization, routing)
+- Retry, dead-letter, and human-review branches
+- Logging and alerting checklist for post-launch operations
+
+## How to Use This Skill
+### Prompt Pattern
+
+```text
+Use the n8n AI workflow architect skill for <business process>.
+Produce:
+1) node-by-node workflow design,
+2) failure handling policy,
+3) human approval criteria,
+4) deployment checklist.
+```
+
+### Execution Flow
+
+1. Map trigger, inputs, and downstream systems.
+2. Separate deterministic transforms from probabilistic AI steps.
+3. Add approval gates before irreversible actions.
+4. Add retries, timeouts, and dead-letter path.
+5. Define observability: run IDs, error labels, and incident routing.
+```text
+Use the n8n AI workflow architect skill for <business process>.
+Produce:
+1) node-by-node workflow design,
+2) failure handling policy,
+3) human approval criteria,
+4) deployment checklist.
+```
+
+## Troubleshooting
+**Issue:** Workflow loops or duplicates records  
+**Fix:** Enforce idempotency keys and persistence checks before write operations.
+
+**Issue:** AI node output is inconsistent  
+**Fix:** Use strict output schemas and validation before branching decisions.
+
+**Issue:** Failures are discovered too late  
+**Fix:** Add per-path alerts for retry exhaustion and dead-letter queue growth.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://docs.n8n.io/advanced-ai/
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

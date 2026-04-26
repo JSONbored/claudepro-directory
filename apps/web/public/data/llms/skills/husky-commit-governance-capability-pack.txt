@@ -1,0 +1,73 @@
+# Husky Commit Governance Capability Pack Skill
+URL: https://heyclau.de/skills/husky-commit-governance-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-11
+Documentation: https://typicode.github.io/husky/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx
+Download: /downloads/skills/husky-commit-governance-capability-pack.zip
+## Summary
+Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.
+## Tags
+- husky
+- git-hooks
+- commitlint
+- developer-experience
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+- https://typicode.github.io/husky/
+- https://www.conventionalcommits.org/en/v1.0.0/
+- https://commitlint.js.org/
+
+## Core Workflow
+1. Define minimum local gate set for the repository type.
+2. Keep hooks fast and deterministic to avoid bypass behavior.
+3. Enforce commit message standard with clear error messages.
+4. Align local checks with CI checks to prevent drift.
+5. Document safe bypass conditions for emergency workflows.
+
+## Overview
+This skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.
+
+## Capability Scope
+- Hook design and prioritization
+- Runtime/latency optimization
+- Commit message policy enforcement
+- Contributor ergonomics and onboarding
+- Governance drift controls
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Keep pre-commit checks fast enough to avoid bypass patterns.
+- Use the same underlying scripts for local hooks and CI.
+- Document approved bypass conditions for emergency fixes only.
+- Treat commit-msg enforcement as required for changelog quality.
+
+## Troubleshooting
+**Issue:** Hooks are too slow and developers bypass them  
+**Fix:** keep pre-commit to staged-file checks only.
+
+**Issue:** Hook failures differ from CI failures  
+**Fix:** use shared scripts for local and CI paths.
+
+**Issue:** Commit message confusion  
+**Fix:** provide examples in failing output and contributor docs.
+
+## Output Contract
+1. Minimal hook policy with justifications.
+2. Exact script wiring in package manager config.
+3. Failure UX recommendations.
+4. Maintenance checklist for future contributors.

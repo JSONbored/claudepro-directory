@@ -8,6 +8,10 @@ import {
   buildArtifactEnvelope,
   buildDirectoryEntries,
   buildEntryDetail,
+  buildEntryLlmsArtifact,
+  buildContentQualityArtifact,
+  buildCorpusLlmsArtifact,
+  buildJsonLdSnapshots,
   buildRaycastDetail,
   buildRaycastEnvelope,
   buildRegistryManifest,
@@ -31,9 +35,22 @@ const publicDataDir = path.join(repoRoot, "apps/web/public/data");
 const outputFile = path.join(publicDataDir, "content-index.json");
 const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
 const searchOutputFile = path.join(publicDataDir, "search-index.json");
-const registryManifestOutputFile = path.join(publicDataDir, "registry-manifest.json");
+const registryManifestOutputFile = path.join(
+  publicDataDir,
+  "registry-manifest.json",
+);
+const contentQualityOutputFile = path.join(
+  publicDataDir,
+  "content-quality-report.json",
+);
+const jsonLdSnapshotsOutputFile = path.join(
+  publicDataDir,
+  "jsonld-snapshots.json",
+);
+const llmsFullOutputFile = path.join(publicDataDir, "llms-full.txt");
 const raycastOutputFile = path.join(publicDataDir, "raycast-index.json");
 const entryDataDir = path.join(publicDataDir, "entries");
+const entryLlmsDir = path.join(publicDataDir, "llms");
 const raycastDetailDir = path.join(publicDataDir, "raycast");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
 const generatedCategorySpecFile = path.join(
@@ -209,6 +226,14 @@ function writeJsonFile(filePath, value) {
   return writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function writeTextFile(filePath, value) {
+  ensureDir(path.dirname(filePath));
+  return writeFileIfChanged(
+    filePath,
+    value.endsWith("\n") ? value : `${value}\n`,
+  );
+}
+
 function copyFileIfChanged(sourcePath, destPath) {
   const source = fs.readFileSync(sourcePath);
   if (fs.existsSync(destPath)) {
@@ -322,7 +347,9 @@ async function main() {
         applicationCategory: data.applicationCategory
           ? String(data.applicationCategory)
           : undefined,
-        operatingSystem: data.operatingSystem ? String(data.operatingSystem) : undefined,
+        operatingSystem: data.operatingSystem
+          ? String(data.operatingSystem)
+          : undefined,
         cardDescription: inferred.cardDescription || undefined,
         installable: inferred.installable,
         installCommand: inferred.installCommand || undefined,
@@ -445,8 +472,10 @@ async function main() {
   const searchEntries = buildSearchEntries(entries);
 
   resetGeneratedJsonDir(entryDataDir);
+  resetGeneratedJsonDir(entryLlmsDir);
   resetGeneratedJsonDir(raycastDetailDir);
   let entryDetailCount = 0;
+  let entryLlmsCount = 0;
   let raycastDetailCount = 0;
 
   for (const entry of entries) {
@@ -454,11 +483,16 @@ async function main() {
       path.join(entryDataDir, entry.category, `${entry.slug}.json`),
       buildEntryDetail(entry),
     );
+    writeTextFile(
+      path.join(entryLlmsDir, entry.category, `${entry.slug}.txt`),
+      buildEntryLlmsArtifact(entry, { siteUrl: "https://heyclau.de" }),
+    );
     writeJsonFile(
       path.join(raycastDetailDir, entry.category, `${entry.slug}.json`),
       buildRaycastDetail(entry),
     );
     entryDetailCount += 1;
+    entryLlmsCount += 1;
     raycastDetailCount += 1;
   }
 
@@ -480,6 +514,32 @@ async function main() {
   const wroteRegistryManifest = writeFileIfChanged(
     registryManifestOutputFile,
     registryManifestPayload,
+  );
+  const contentQualityPayload = `${JSON.stringify(buildContentQualityArtifact(entries), null, 2)}\n`;
+  const wroteContentQuality = writeFileIfChanged(
+    contentQualityOutputFile,
+    contentQualityPayload,
+  );
+  const jsonLdSnapshotsPayload = `${JSON.stringify(
+    buildJsonLdSnapshots(entries, {
+      siteUrl: "https://heyclau.de",
+      siteName: "HeyClaude",
+    }),
+    null,
+    2,
+  )}\n`;
+  const wroteJsonLdSnapshots = writeFileIfChanged(
+    jsonLdSnapshotsOutputFile,
+    jsonLdSnapshotsPayload,
+  );
+  const wroteLlmsFull = writeTextFile(
+    llmsFullOutputFile,
+    buildCorpusLlmsArtifact(entries, {
+      siteUrl: "https://heyclau.de",
+      siteName: "HeyClaude",
+      siteDescription:
+        "The Claude directory for agents, MCP servers, skills, commands, hooks, rules, guides, collections, and statuslines.",
+    }),
   );
 
   const directoryStats = directoryRepo
@@ -516,7 +576,19 @@ async function main() {
     `${wroteRegistryManifest ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, registryManifestOutputFile)}`,
   );
   console.log(
+    `${wroteContentQuality ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, contentQualityOutputFile)}`,
+  );
+  console.log(
+    `${wroteJsonLdSnapshots ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, jsonLdSnapshotsOutputFile)}`,
+  );
+  console.log(
+    `${wroteLlmsFull ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, llmsFullOutputFile)}`,
+  );
+  console.log(
     `Wrote ${entryDetailCount} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,
+  );
+  console.log(
+    `Wrote ${entryLlmsCount} entry LLM files to ${path.relative(repoRoot, entryLlmsDir)}`,
   );
   console.log(
     `Wrote ${raycastDetailCount} Raycast detail files to ${path.relative(repoRoot, raycastDetailDir)}`,

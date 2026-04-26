@@ -1,0 +1,76 @@
+# Base L2 Smart Contract Launchpad Skill
+URL: https://heyclau.de/skills/base-l2-smart-contract-launchpad
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.base.org/get-started/deploy-smart-contracts
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/base-l2-smart-contract-launchpad.mdx
+Download: /downloads/skills/base-l2-smart-contract-launchpad.zip
+## Summary
+Ship smart contracts on Base with secure deployment, verification, environment management, and production-readiness checklists.
+## Tags
+- base
+- layer2
+- smart-contracts
+- deployment
+- web3
+## Content
+## Overview
+This skill helps AI agents execute Base contract launches with clear operational discipline. It emphasizes secure key handling, staged rollout, verifiable artifacts, and post-launch incident readiness.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Chain-specific deployment config
+- Funding and gas strategy
+- Security review outcomes and acceptance criteria
+
+## What This Skill Delivers
+- Environment and release checklist for Base deployments
+- Validation and verification flow for deployed contracts
+- Operational controls (pause/recovery/admin governance)
+- Launch runbook with rollback contingencies
+
+## How to Use This Skill
+1. Validate contract readiness and security assumptions.
+2. Stage deployment on testnet with full verification.
+3. Promote to mainnet with explicit confirmation gates.
+4. Verify source and publish metadata.
+5. Monitor post-launch behavior and key metrics.
+
+## Troubleshooting
+**Issue:** Deployment succeeds but verification fails  
+**Fix:** Confirm compiler version, optimizer settings, and constructor args alignment.
+
+**Issue:** Admin key risk is too high  
+**Fix:** Move to multisig ownership and delayed privileged actions.
+
+**Issue:** Release process is hard to repeat  
+**Fix:** Encode deployment steps in scripts and enforce release checklists in CI.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://docs.base.org/get-started/deploy-smart-contracts
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

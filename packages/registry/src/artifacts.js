@@ -1,9 +1,12 @@
 import { getCopyText } from "./presentation.js";
 import categorySpec from "./category-spec.json" with { type: "json" };
+import { buildContentQualityReport } from "./quality.js";
+import { renderCorpusLlms, renderEntryLlms } from "./llms.js";
+import { buildEntryJsonLdSnapshot } from "./seo.js";
 
 export const ENTRY_SCHEMA_VERSION = 1;
 export const RAYCAST_SCHEMA_VERSION = 1;
-export const REGISTRY_ARTIFACT_SCHEMA_VERSION = 1;
+export const REGISTRY_ARTIFACT_SCHEMA_VERSION = 2;
 export const SITE_URL = "https://heyclau.de";
 
 export function truncateText(value, maxLength) {
@@ -26,13 +29,21 @@ export function buildRaycastDetailMarkdown(entry) {
     "",
     `**Category:** ${entry.category}`,
     entry.author ? `**Author:** ${entry.author}` : "",
-    entry.verificationStatus ? `**Verification:** ${entry.verificationStatus}` : "",
+    entry.verificationStatus
+      ? `**Verification:** ${entry.verificationStatus}`
+      : "",
     entry.downloadTrust ? `**Download trust:** ${entry.downloadTrust}` : "",
-    entry.tags?.length ? `**Tags:** ${entry.tags.map((tag) => `\`${tag}\``).join(" ")}` : "",
+    entry.tags?.length
+      ? `**Tags:** ${entry.tags.map((tag) => `\`${tag}\``).join(" ")}`
+      : "",
   ].filter(Boolean);
 
   if (entry.installCommand || entry.commandSyntax) {
-    lines.push("", "## Install", codeBlock("bash", entry.installCommand || entry.commandSyntax));
+    lines.push(
+      "",
+      "## Install",
+      codeBlock("bash", entry.installCommand || entry.commandSyntax),
+    );
   }
 
   if (entry.configSnippet) {
@@ -63,7 +74,9 @@ export function generatedAtForEntries(entries) {
     .sort()
     .at(-1);
 
-  return latestDate ? `${latestDate}T00:00:00.000Z` : "1970-01-01T00:00:00.000Z";
+  return latestDate
+    ? `${latestDate}T00:00:00.000Z`
+    : "1970-01-01T00:00:00.000Z";
 }
 
 export function dataUrl(...segments) {
@@ -94,7 +107,9 @@ export function buildSearchEntries(entries) {
     keywords: entry.keywords ?? [],
     author: entry.author || "",
     dateAdded: entry.dateAdded || "",
-    installable: Boolean(entry.installable || entry.installCommand || entry.downloadUrl),
+    installable: Boolean(
+      entry.installable || entry.installCommand || entry.downloadUrl,
+    ),
     downloadTrust: entry.downloadTrust ?? null,
     verificationStatus: entry.verificationStatus || "",
     documentationUrl: entry.documentationUrl || "",
@@ -163,6 +178,15 @@ export function buildArtifactEnvelope(kind, entries, extra = {}) {
   };
 }
 
+export function buildEnvelopeEntries(payload) {
+  if (!payload || !Array.isArray(payload.entries)) {
+    throw new TypeError(
+      "Registry artifacts must use an envelope with an entries array.",
+    );
+  }
+  return payload.entries;
+}
+
 export function buildRaycastEnvelope(entries) {
   return {
     schemaVersion: RAYCAST_SCHEMA_VERSION,
@@ -174,7 +198,9 @@ export function buildRaycastEnvelope(entries) {
 export function buildRegistryManifest(entries) {
   const categories = {};
   for (const category of categorySpec.categoryOrder) {
-    const categoryEntries = entries.filter((entry) => entry.category === category);
+    const categoryEntries = entries.filter(
+      (entry) => entry.category === category,
+    );
     categories[category] = {
       count: categoryEntries.length,
       label: categorySpec.categories[category]?.label ?? category,
@@ -192,6 +218,39 @@ export function buildRegistryManifest(entries) {
       directory: dataUrl("directory-index.json"),
       search: dataUrl("search-index.json"),
       raycast: dataUrl("raycast-index.json"),
+      registryManifest: dataUrl("registry-manifest.json"),
+      contentQuality: dataUrl("content-quality-report.json"),
+      jsonLdSnapshots: dataUrl("jsonld-snapshots.json"),
+      llmsFull: dataUrl("llms-full.txt"),
+      entryDetails: dataUrl("entries"),
+      entryLlms: dataUrl("llms"),
+      raycastDetails: dataUrl("raycast"),
     },
   };
+}
+
+export function buildArtifactManifestV2(entries, extra = {}) {
+  return buildRegistryManifest(entries, extra);
+}
+
+export function buildContentQualityArtifact(entries) {
+  return buildContentQualityReport(entries);
+}
+
+export function buildJsonLdSnapshots(entries, params = {}) {
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "jsonld-snapshots",
+    generatedAt: generatedAtForEntries(entries),
+    count: entries.length,
+    entries: entries.map((entry) => buildEntryJsonLdSnapshot(entry, params)),
+  };
+}
+
+export function buildEntryLlmsArtifact(entry, params = {}) {
+  return renderEntryLlms(entry, params);
+}
+
+export function buildCorpusLlmsArtifact(entries, params = {}) {
+  return renderCorpusLlms(entries, params);
 }

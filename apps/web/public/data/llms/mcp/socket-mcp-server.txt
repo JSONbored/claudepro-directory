@@ -1,0 +1,180 @@
+# Socket MCP Server for Claude
+URL: https://heyclau.de/mcp/socket-mcp-server
+Category: mcp
+Author: Socket
+Date added: 2025-09-18
+Documentation: https://github.com/SocketDev/socket-mcp
+Repository: https://github.com/SocketDev/socket-mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx
+Download: /downloads/mcp/socket-mcp-server.mcpb
+## Summary
+Security analysis and vulnerability scanning for dependencies
+## Tags
+- security
+- dependencies
+- vulnerability-scanning
+- npm
+- supply-chain
+## Content
+## Content
+Analyze dependency security and supply chain risks with Socket's comprehensive vulnerability detection. Scan dependencies for known vulnerabilities, analyze security scores, detect supply chain attacks, monitor package health, generate detailed security reports, export SBOMs, manage license policies, and support multiple package managers (npm, PyPI, Go, Maven, Packagist)—all through natural language commands. Supports OAuth authentication for MCP access and API key authentication for Socket API calls.
+
+## Features
+- Scan dependencies for known vulnerabilities (CVE database integration)
+- Analyze security scores for packages (risk assessment metrics)
+- Detect supply chain attacks and risks (malicious package detection)
+- Monitor package health metrics (maintenance and popularity indicators)
+- Generate detailed security reports (comprehensive vulnerability analysis)
+- SBOM export capabilities (Software Bill of Materials generation)
+- License policy management (compliance and license risk assessment)
+- Multi-package manager support (npm, PyPI, Go, Maven, Packagist)
+- Advanced Socket.io real-time communication with room management, event broadcasting, and connection monitoring
+- Batch operations support for efficient bulk message operations, room management, and event handling with automatic error handling
+- Real-time connection monitoring capabilities with connection pooling support for tracking Socket.io performance and triggering automated workflows
+
+## Use Cases
+- Audit project dependencies for vulnerabilities (comprehensive security audit)
+- Check security before adding new packages (pre-installation validation)
+- Monitor supply chain security risks (continuous threat monitoring)
+- Validate package updates are safe (update security verification)
+- Generate security compliance reports (regulatory compliance documentation)
+- Track security scores across projects (organization-wide security metrics)
+- Detect malicious packages and typosquatting (supply chain attack prevention)
+- Manage license compliance and policies (open source license governance)
+- Build automated real-time communication workflows that sync external systems with Socket.io for live messaging and event broadcasting
+
+## Installation
+### Claude Code
+
+1. Run: claude mcp add --transport http socket https://mcp.socket.dev/
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status socket
+4. Authenticate with your Socket account (OAuth flow)
+5. Grant required permissions for dependency scanning
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file (see configPath below)
+2. Add the Socket server configuration with HTTP transport and URL
+3. Restart Claude Desktop
+4. Authenticate with your Socket account (OAuth flow)
+5. Grant required permissions for dependency scanning
+6. Verify connection in Claude Desktop
+
+## Requirements
+- Socket account (free or paid plan)
+- OAuth authentication setup (for mcp.socket.dev MCP connection)
+- Socket API key (for Socket API access, available in Socket Dashboard)
+- Network access to mcp.socket.dev (HTTPS required)
+- Understanding of dependency security concepts (vulnerabilities, supply chain risks)
+- Package manager files (package.json, requirements.txt, go.mod, pom.xml, composer.json)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of SBOM (Software Bill of Materials) concepts
+- Understanding of Socket rate limits (600 requests/minute, 10 req/second average)
+- Optional: Organization access for team-based security policies
+
+## Configuration
+```json
+{
+  "socket": {
+    "url": "https://mcp.socket.dev/",
+    "transport": "http"
+  }
+}
+```
+```json
+{
+  "socket": {
+    "url": "https://mcp.socket.dev/",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Scan my package.json for vulnerabilities
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Scan my package.json for vulnerabilities"
+```
+### Check the security score of lodash
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Check the security score of lodash"
+```
+### Find risky dependencies in my project
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Find risky dependencies in my project"
+```
+### Generate a security report
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate a security report"
+```
+### Emit Event to Room
+Broadcast a message to all clients in a Socket.io room
+```typescript
+// Emit event to Socket.io room
+io.to("room-id").emit("message", {
+  text: "Hello, room!",
+  timestamp: Date.now()
+});
+```
+```plaintext
+Ask Claude: "Scan my package.json for vulnerabilities"
+```
+```plaintext
+Ask Claude: "Check the security score of lodash"
+```
+```plaintext
+Ask Claude: "Find risky dependencies in my project"
+```
+```plaintext
+Ask Claude: "Generate a security report"
+```
+```typescript
+// Emit event to Socket.io room
+io.to("room-id").emit("message", {
+  text: "Hello, room!",
+  timestamp: Date.now()
+});
+```
+
+## Security
+- OAuth authentication required for MCP server access (secure token-based auth)
+- Socket API key authentication for API calls (stored securely, managed in Dashboard)
+- Regular security scans recommended (continuous dependency monitoring)
+- Monitor critical security alerts (vulnerability notifications)
+- Review and apply suggested fixes (automated remediation guidance)
+- Socket.io connection URLs and authentication tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Socket.io authentication should be used for all connections to prevent unauthorized access - implement proper token validation and connection authorization
+- Socket.io room names and event data may expose application structure and user information - ensure Socket.io resource identifiers are kept private and not shared in public configurations
+- Rate limiting and connection management are critical for Socket.io MCP servers - implement proper connection pooling, message throttling, and resource monitoring to prevent service disruption
+- Socket.io event payloads and room data may contain sensitive information - ensure event data is properly secured and access-controlled according to data privacy requirements
+
+## Troubleshooting
+### Rate limit exceeded - 429 Too Many Requests error
+
+Socket API rate limit is 600 requests/minute (average 10 requests/second). Implement random exponential backoff for retries (wait time increases with each retry). Space out API calls to stay under the 10 req/second average. Monitor rate limit headers in API responses. Batch multiple package scans when possible. Cache scan results to avoid redundant requests. Contact support@socket.dev to request rate limit increase for your organization. Consider upgrading to a plan with higher rate limits.
+### Authentication failed or API key invalid
+
+Socket API uses API key authentication. Provide API token via HTTP Basic auth (token as username, blank password) or use `Authorization: Bearer YOUR_API_KEY` header format. Verify API key in Socket Dashboard settings (Settings > API Keys). Generate new key if expired or compromised. Ensure API key has required permissions for the operations you're performing. For MCP server connection, ensure OAuth authentication is completed at https://mcp.socket.dev/. Check token not revoked or disabled in dashboard.
+### Package scan failed or unsupported package manager
+
+Socket supports npm (package.json, package-lock.json), PyPI (requirements.txt), Go modules (go.mod), Maven (pom.xml), and Packagist (composer.json). Verify package file format is valid JSON or proper dependency format. Check package exists in the registry (npm, PyPI, Maven Central, etc.). Ensure package file paths are correct and accessible. Review scan output for specific error messages. For npm, ensure package-lock.json is present for accurate dependency resolution. Check package manager version compatibility.
+### SBOM export or security report generation errors
+
+Verify account has access to SBOM export features (may require paid plan). Check report snapshot hash authentication (SHA2) is correct. Ensure sufficient permissions for license policy management in organization settings. Review API response for specific error details. Verify organization membership and access level. Check if report ID exists and hasn't expired. Ensure file paths in report creation are valid and accessible. For license policy errors, verify organization has license policy management enabled.
+### Socket.io MCP server connection errors with authentication
+
+Verify authentication token is valid. Check Socket.io server authentication middleware. Ensure token format is correct. For JWT authentication, verify token signature and expiration. Check CORS configuration allows connections.
+### Socket.io connection failures or disconnections
+
+Check network connectivity to Socket.io server. Verify server is running and accessible. Check firewall rules allow WebSocket connections. Verify Socket.io version compatibility between client and server. Check connection timeout settings.
+### Socket.io event delivery failures or message loss
+
+Check room membership and event authorization. Verify event names match between client and server. Check message acknowledgment if using acknowledgments. Monitor connection state and implement reconnection logic. Verify event payload size limits.
+### Socket.io MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Socket.io server endpoints are accessible. Increase connection timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

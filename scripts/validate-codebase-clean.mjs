@@ -10,6 +10,7 @@ const forbiddenPaths = [
   "scripts/content-schema.mjs",
   "scripts/export-legacy-vote-seed.mjs",
   "scripts/migrate-content.mjs",
+  "scripts/normalize-skills-cross-platform.mjs",
   "scripts/remove-legacy-counters.mjs",
   "scripts/restore-collections-from-history.mjs",
   "scripts/restore-hooks-from-history.mjs",
@@ -60,6 +61,10 @@ const forbiddenPatterns = [
     pattern: /\[Script content from first example\]/,
     label: "placeholder script marker",
   },
+  {
+    pattern: /Array\.isArray\(payload\)\s*\?\s*payload/,
+    label: "legacy array registry artifact reader",
+  },
 ];
 
 const failures = [];
@@ -73,7 +78,8 @@ for (const relativePath of forbiddenPaths) {
 function shouldIgnore(relativePath) {
   if (ignoredFiles.has(relativePath)) return true;
   if (relativePath.startsWith("apps/web/public/data/")) return true;
-  if (relativePath.startsWith("integrations/raycast/node_modules/")) return true;
+  if (relativePath.startsWith("integrations/raycast/node_modules/"))
+    return true;
   return relativePath.split(path.sep).some((part) => ignoredDirs.has(part));
 }
 
@@ -92,7 +98,20 @@ function walk(dir) {
     const ext = path.extname(item.name).toLowerCase();
     const searchable =
       !ext ||
-      [".css", ".js", ".json", ".md", ".mdx", ".mjs", ".sql", ".ts", ".tsx", ".txt", ".yml", ".yaml"].includes(ext);
+      [
+        ".css",
+        ".js",
+        ".json",
+        ".md",
+        ".mdx",
+        ".mjs",
+        ".sql",
+        ".ts",
+        ".tsx",
+        ".txt",
+        ".yml",
+        ".yaml",
+      ].includes(ext);
     if (!searchable) continue;
 
     const source = fs.readFileSync(fullPath, "utf8");
@@ -104,10 +123,44 @@ function walk(dir) {
 
 walk(repoRoot);
 
+const trunkConfig = path.join(repoRoot, ".trunk", "trunk.yaml");
+if (!fs.existsSync(trunkConfig)) {
+  failures.push("Tracked Trunk config is missing: .trunk/trunk.yaml");
+}
+
+const openApiSchema = fs.existsSync(
+  path.join(repoRoot, "cloudflare/api-schema-heyclaude-openapi.yaml"),
+)
+  ? fs.readFileSync(
+      path.join(repoRoot, "cloudflare/api-schema-heyclaude-openapi.yaml"),
+      "utf8",
+    )
+  : "";
+if (!openApiSchema.includes("/api/listing-leads:")) {
+  failures.push("OpenAPI schema is missing /api/listing-leads");
+}
+
+const deploymentDocs = fs.existsSync(
+  path.join(repoRoot, "apps/web/DEPLOYMENT.md"),
+)
+  ? fs.readFileSync(path.join(repoRoot, "apps/web/DEPLOYMENT.md"), "utf8")
+  : "";
+const migrationsDir = path.join(repoRoot, "apps/web/migrations");
+if (fs.existsSync(migrationsDir)) {
+  for (const migration of fs
+    .readdirSync(migrationsDir)
+    .filter((fileName) => fileName.endsWith(".sql"))) {
+    if (!deploymentDocs.includes(migration)) {
+      failures.push(`Deployment docs do not mention migration: ${migration}`);
+    }
+  }
+}
+
 if (failures.length) {
   console.error("Codebase cleanup validation failed:");
   for (const failure of failures.slice(0, 100)) console.error(`- ${failure}`);
-  if (failures.length > 100) console.error(`...and ${failures.length - 100} more failures`);
+  if (failures.length > 100)
+    console.error(`...and ${failures.length - 100} more failures`);
   process.exit(1);
 }
 

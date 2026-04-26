@@ -4,6 +4,32 @@ import {
   parseIssueFormBody,
   validateSubmission,
 } from "@heyclaude/registry/submission";
+import {
+  buildIssueTemplateSpec,
+  buildSubmissionFieldModel,
+} from "@heyclaude/registry/submission-spec";
+
+{
+  const model = buildSubmissionFieldModel("skills");
+  assert.ok(model, "skills submission model must exist");
+  assert.ok(
+    model.fields.some((field) => field.id === "skill_type" && field.required),
+  );
+  assert.ok(
+    model.fields.some(
+      (field) => field.id === "download_url" && !field.required,
+    ),
+  );
+
+  const issueTemplate = buildIssueTemplateSpec("mcp");
+  assert.ok(issueTemplate, "mcp issue template spec must exist");
+  assert.ok(issueTemplate.labels.includes("content-submission"));
+  assert.ok(
+    issueTemplate.fields.some(
+      (field) => field.id === "install_command" && field.required,
+    ),
+  );
+}
 
 function issue(body, labels = ["content-submission"]) {
   return { body, labels: labels.map((name) => ({ name })) };

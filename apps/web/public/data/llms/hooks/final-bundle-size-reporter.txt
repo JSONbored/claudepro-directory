@@ -1,0 +1,815 @@
+# Final Bundle Size Reporter - Hooks
+URL: https://heyclau.de/hooks/final-bundle-size-reporter
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/final-bundle-size-reporter.mdx
+## Summary
+Analyzes and reports final bundle sizes when the development session ends.
+## Tags
+- bundle-size
+- performance
+- stop-hook
+- optimization
+- reporting
+## Content
+## Features
+- Comprehensive bundle size analysis for multiple build tools (Webpack, Vite, Rollup, Next.js, Rust) with automatic build output detection across common directories (dist, build, out, .next, public, www, target/release) and framework-specific configuration detection
+- Asset size breakdown by file type (JavaScript, CSS, images, fonts) with detailed file type analysis including .js, .mjs, .ts for JavaScript, .css for stylesheets, and image formats (.png, .jpg, .jpeg, .gif, .svg, .webp) with largest file identification
+- Performance impact assessment with size thresholds (5MB high impact, 1MB moderate impact) and actionable recommendations including code splitting suggestions for large JavaScript bundles and performance budget monitoring
+- Build output detection for various frameworks including automatic detection of Webpack, Vite, Next.js, and Rollup configurations with framework-specific build script execution and build output analysis
+- Timestamped bundle reports with historical tracking including detailed report generation with timestamp, project name, total size, file type breakdown, largest files list, and optimization recommendations saved to bundle-report-*.txt files
+- Bundle optimization recommendations including gzip/brotli compression suggestions, code splitting for large JavaScript bundles, image optimization with modern formats (WebP, AVIF), unused CSS and JavaScript removal, and dynamic imports for non-critical code
+- Gzip and Brotli compression analysis with compression ratio calculations using gzip command for text files (.js, .css, .html, .json) with estimated compression savings and compression ratio percentages
+- Tree-shaking effectiveness measurement with bundle size analysis to identify opportunities for removing unused code and measuring the effectiveness of tree-shaking optimizations in build output
+
+## Use Cases
+- End-of-session bundle size analysis and tracking providing comprehensive bundle size reports when development sessions end with historical tracking and performance trend analysis
+- Performance budget monitoring for web applications automatically detecting bundle sizes that exceed performance budgets and providing actionable recommendations for optimization
+- Build optimization impact measurement tracking bundle size changes before and after optimization efforts to measure the effectiveness of code splitting, tree-shaking, and compression strategies
+- CI/CD pipeline bundle size validation automatically validating bundle sizes in CI/CD pipelines to prevent deployment of oversized bundles that could impact production performance
+- Framework-agnostic build output analysis supporting multiple build tools (Webpack, Vite, Rollup, Next.js, Rust) with automatic framework detection and build output analysis
+- Development workflow integration seamlessly integrating bundle size monitoring into development workflows without manual bundle size inspection or separate analysis tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/final-bundle-size-reporter.sh
+3. Make executable: chmod +x .claude/hooks/final-bundle-size-reporter.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Build tool installed (npm, yarn, pnpm, cargo, etc.)
+- gzip command (optional, for compression analysis)
+- bc command (optional, for compression ratio calculations)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/final-bundle-size-reporter.sh"
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "stop": {
+      "script": "./.claude/hooks/final-bundle-size-reporter.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+echo "📦 FINAL BUNDLE SIZE REPORT" >&2
+echo "===========================================" >&2
+
+# Initialize variables
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+REPORT_FILE="bundle-report-$(date +%Y%m%d_%H%M%S).txt"
+BUILD_DETECTED=false
+TOTAL_SIZE=0
+JS_SIZE=0
+CSS_SIZE=0
+IMAGE_SIZE=0
+OTHER_SIZE=0
+
+# Function to convert bytes to human readable
+format_bytes() {
+  local bytes=$1
+  if [ $bytes -ge 1073741824 ]; then
+    echo "$(echo "scale=2; $bytes/1073741824" | bc 2>/dev/null || echo $((bytes/1073741824)))GB"
+  elif [ $bytes -ge 1048576 ]; then
+    echo "$(echo "scale=2; $bytes/1048576" | bc 2>/dev/null || echo $((bytes/1048576)))MB"
+  elif [ $bytes -ge 1024 ]; then
+    echo "$(echo "scale=2; $bytes/1024" | bc 2>/dev/null || echo $((bytes/1024)))KB"
+  else
+    echo "${bytes}B"
+  fi
+}
+
+# Function to analyze directory
+analyze_directory() {
+  local dir="$1"
+  local label="$2"
+  
+  if [ ! -d "$dir" ]; then
+    return
+  fi
+  
+  echo "📁 Analyzing $label: $dir" >&2
+  BUILD_DETECTED=true
+  
+  # Calculate total directory size
+  DIR_SIZE=$(du -sb "$dir" 2>/dev/null | cut -f1 || echo "0")
+  TOTAL_SIZE=$((TOTAL_SIZE + DIR_SIZE))
+  
+  echo "   Total size: $(format_bytes $DIR_SIZE)" >&2
+  
+  # Analyze by file types
+  echo "   📊 File type breakdown:" >&2
+  
+  # JavaScript files
+  if find "$dir" -name "*.js" -o -name "*.mjs" -o -name "*.ts" 2>/dev/null | head -1 > /dev/null; then
+    JS_FILES_SIZE=$(find "$dir" \( -name "*.js" -o -name "*.mjs" -o -name "*.ts" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    JS_SIZE=$((JS_SIZE + JS_FILES_SIZE))
+    echo "      JavaScript: $(format_bytes $JS_FILES_SIZE)" >&2
+  fi
+  
+  # CSS files
+  if find "$dir" -name "*.css" 2>/dev/null | head -1 > /dev/null; then
+    CSS_FILES_SIZE=$(find "$dir" -name "*.css" -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    CSS_SIZE=$((CSS_SIZE + CSS_FILES_SIZE))
+    echo "      CSS: $(format_bytes $CSS_FILES_SIZE)" >&2
+  fi
+  
+  # Images
+  if find "$dir" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) 2>/dev/null | head -1 > /dev/null; then
+    IMG_FILES_SIZE=$(find "$dir" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    IMAGE_SIZE=$((IMAGE_SIZE + IMG_FILES_SIZE))
+    echo "      Images: $(format_bytes $IMG_FILES_SIZE)" >&2
+  fi
+  
+  # Show largest files in this directory
+  echo "   🔍 Largest files:" >&2
+  find "$dir" -type f -exec du -b {} + 2>/dev/null | sort -rn | head -5 | while read size file; do
+    echo "      $(format_bytes $size) - $(basename "$file")" >&2
+  done
+  
+  # Gzip analysis for text files
+  GZIPPABLE_SIZE=$(find "$dir" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  if [ "$GZIPPABLE_SIZE" -gt 0 ] && command -v gzip &> /dev/null; then
+    # Estimate gzip compression
+    TEMP_DIR=$(mktemp -d)
+    find "$dir" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec cp {} "$TEMP_DIR/" \; 2>/dev/null
+    
+    if [ "$(ls -A "$TEMP_DIR" 2>/dev/null)" ]; then
+      cd "$TEMP_DIR" && gzip *.* 2>/dev/null && GZIPPED_SIZE=$(du -cb *.gz 2>/dev/null | tail -1 | cut -f1 || echo "0") && cd - > /dev/null
+      
+      if [ "$GZIPPED_SIZE" -gt 0 ]; then
+        COMPRESSION_RATIO=$(echo "scale=1; ($GZIPPABLE_SIZE - $GZIPPED_SIZE) * 100 / $GZIPPABLE_SIZE" | bc 2>/dev/null || echo "N/A")
+        echo "   📦 Gzip compression potential: $(format_bytes $GZIPPED_SIZE) (-${COMPRESSION_RATIO}%)" >&2
+      fi
+    fi
+    
+    rm -rf "$TEMP_DIR" 2>/dev/null
+  fi
+  
+  echo "" >&2
+}
+
+# Start report
+echo "Starting bundle analysis at $TIMESTAMP" >&2
+echo "" >&2
+
+# Check if this is a Node.js project
+if [ -f "package.json" ]; then
+  echo "🟢 Node.js project detected" >&2
+  
+  PROJECT_NAME=$(grep '"name"' package.json | head -1 | cut -d'"' -f4 2>/dev/null || echo "Unknown")
+  echo "📋 Project: $PROJECT_NAME" >&2
+  
+  # Try to build the project
+  echo "🔨 Attempting to build project..." >&2
+  
+  # Check for common build scripts
+  BUILD_SCRIPT=""
+  if grep -q '"build"' package.json; then
+    BUILD_SCRIPT="npm run build"
+  elif grep -q '"build:prod"' package.json; then
+    BUILD_SCRIPT="npm run build:prod"
+  elif grep -q '"dist"' package.json; then
+    BUILD_SCRIPT="npm run dist"
+  fi
+  
+  if [ -n "$BUILD_SCRIPT" ]; then
+    echo "   Running: $BUILD_SCRIPT" >&2
+    if $BUILD_SCRIPT > /tmp/build_output.log 2>&1; then
+      echo "   ✅ Build completed successfully" >&2
+    else
+      echo "   ⚠️ Build failed or incomplete - analyzing existing output" >&2
+      echo "   📝 Build log: /tmp/build_output.log" >&2
+    fi
+  else
+    echo "   ℹ️ No build script found - analyzing existing files" >&2
+  fi
+  
+  echo "" >&2
+fi
+
+# Common build output directories
+BUILD_DIRS=("dist" "build" "out" ".next" "public" "www" "target/release")
+
+# Analyze each potential build directory
+for dir in "${BUILD_DIRS[@]}"; do
+  if [ -d "$dir" ]; then
+    case "$dir" in
+      "dist")
+        analyze_directory "$dir" "Distribution Build"
+        ;;
+      "build")
+        analyze_directory "$dir" "Production Build"
+        ;;
+      "out")
+        analyze_directory "$dir" "Output Build"
+        ;;
+      ".next")
+        analyze_directory "$dir" "Next.js Build"
+        ;;
+      "public")
+        # Only analyze if it looks like a build output
+        if [ -f "$dir/index.html" ] || [ -f "$dir/main.js" ]; then
+          analyze_directory "$dir" "Public Assets"
+        fi
+        ;;
+      "www")
+        analyze_directory "$dir" "Web Assets"
+        ;;
+      "target/release")
+        analyze_directory "$dir" "Rust Release Build"
+        ;;
+    esac
+  fi
+done
+
+# Framework-specific analysis
+if [ -f "webpack.config.js" ] || [ -f "webpack.config.ts" ]; then
+  echo "⚙️ Webpack configuration detected" >&2
+  
+  # Look for webpack-bundle-analyzer output
+  if [ -f "bundle-analyzer-report.html" ]; then
+    echo "   📊 Bundle analyzer report available: bundle-analyzer-report.html" >&2
+  fi
+fi
+
+if [ -f "vite.config.js" ] || [ -f "vite.config.ts" ]; then
+  echo "⚡ Vite configuration detected" >&2
+fi
+
+if [ -f "next.config.js" ] || [ -f "next.config.ts" ]; then
+  echo "▲ Next.js configuration detected" >&2
+fi
+
+if [ -f "rollup.config.js" ]; then
+  echo "📦 Rollup configuration detected" >&2
+fi
+
+# Generate summary
+echo "" >&2
+echo "📋 BUNDLE SIZE SUMMARY" >&2
+echo "=====================================" >&2
+
+if [ "$BUILD_DETECTED" = true ]; then
+  echo "📊 Total bundle size: $(format_bytes $TOTAL_SIZE)" >&2
+  echo "" >&2
+  echo "📈 Breakdown by type:" >&2
+  [ "$JS_SIZE" -gt 0 ] && echo "   JavaScript: $(format_bytes $JS_SIZE)" >&2
+  [ "$CSS_SIZE" -gt 0 ] && echo "   CSS: $(format_bytes $CSS_SIZE)" >&2
+  [ "$IMAGE_SIZE" -gt 0 ] && echo "   Images: $(format_bytes $IMAGE_SIZE)" >&2
+  
+  echo "" >&2
+  echo "🎯 Performance Assessment:" >&2
+  
+  # Performance thresholds
+  if [ "$TOTAL_SIZE" -gt 5242880 ]; then  # 5MB
+    echo "   🔴 Large bundle size - may impact load times significantly" >&2
+  elif [ "$TOTAL_SIZE" -gt 1048576 ]; then  # 1MB
+    echo "   🟡 Moderate bundle size - consider optimization" >&2
+  else
+    echo "   🟢 Good bundle size - within performance budget" >&2
+  fi
+  
+  if [ "$JS_SIZE" -gt 1048576 ]; then  # 1MB JS
+    echo "   ⚠️ JavaScript bundle is large - consider code splitting" >&2
+  fi
+  
+  echo "" >&2
+  echo "💡 Optimization Recommendations:" >&2
+  echo "   • Enable gzip/brotli compression on your server" >&2
+  echo "   • Consider code splitting for large JavaScript bundles" >&2
+  echo "   • Optimize images with modern formats (WebP, AVIF)" >&2
+  echo "   • Remove unused CSS and JavaScript code" >&2
+  echo "   • Use dynamic imports for non-critical code" >&2
+  
+else
+  echo "ℹ️ No build output detected in common directories" >&2
+  echo "   Searched: ${BUILD_DIRS[*]}" >&2
+  echo "   Consider running a build command first" >&2
+fi
+
+echo "" >&2
+echo "📄 Report timestamp: $TIMESTAMP" >&2
+echo "💾 Full report saved to: $REPORT_FILE" >&2
+
+# Save detailed report to file
+{
+  echo "BUNDLE SIZE REPORT"
+  echo "Generated: $TIMESTAMP"
+  echo "Project: $(basename "$(pwd)")"
+  echo ""
+  
+  if [ "$BUILD_DETECTED" = true ]; then
+    echo "SUMMARY"
+    echo "======="
+    echo "Total Size: $(format_bytes $TOTAL_SIZE)"
+    echo "JavaScript: $(format_bytes $JS_SIZE)"
+    echo "CSS: $(format_bytes $CSS_SIZE)"
+    echo "Images: $(format_bytes $IMAGE_SIZE)"
+    echo ""
+    
+    echo "DETAILED ANALYSIS"
+    echo "================="
+    for dir in "${BUILD_DIRS[@]}"; do
+      if [ -d "$dir" ]; then
+        echo "$dir directory:"
+        find "$dir" -type f -exec du -b {} + 2>/dev/null | sort -rn | head -10 | while read size file; do
+          echo "  $(format_bytes $size) - $file"
+        done
+        echo ""
+      fi
+    done
+  else
+    echo "No build output detected"
+  fi
+} > "$REPORT_FILE"
+
+echo "=====================================" >&2
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+echo "📦 FINAL BUNDLE SIZE REPORT" >&2
+echo "===========================================" >&2
+
+# Initialize variables
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+REPORT_FILE="bundle-report-$(date +%Y%m%d_%H%M%S).txt"
+BUILD_DETECTED=false
+TOTAL_SIZE=0
+JS_SIZE=0
+CSS_SIZE=0
+IMAGE_SIZE=0
+OTHER_SIZE=0
+
+# Function to convert bytes to human readable
+format_bytes() {
+  local bytes=$1
+  if [ $bytes -ge 1073741824 ]; then
+    echo "$(echo "scale=2; $bytes/1073741824" | bc 2>/dev/null || echo $((bytes/1073741824)))GB"
+  elif [ $bytes -ge 1048576 ]; then
+    echo "$(echo "scale=2; $bytes/1048576" | bc 2>/dev/null || echo $((bytes/1048576)))MB"
+  elif [ $bytes -ge 1024 ]; then
+    echo "$(echo "scale=2; $bytes/1024" | bc 2>/dev/null || echo $((bytes/1024)))KB"
+  else
+    echo "${bytes}B"
+  fi
+}
+
+# Function to analyze directory
+analyze_directory() {
+  local dir="$1"
+  local label="$2"
+  
+  if [ ! -d "$dir" ]; then
+    return
+  fi
+  
+  echo "📁 Analyzing $label: $dir" >&2
+  BUILD_DETECTED=true
+  
+  # Calculate total directory size
+  DIR_SIZE=$(du -sb "$dir" 2>/dev/null | cut -f1 || echo "0")
+  TOTAL_SIZE=$((TOTAL_SIZE + DIR_SIZE))
+  
+  echo "   Total size: $(format_bytes $DIR_SIZE)" >&2
+  
+  # Analyze by file types
+  echo "   📊 File type breakdown:" >&2
+  
+  # JavaScript files
+  if find "$dir" -name "*.js" -o -name "*.mjs" -o -name "*.ts" 2>/dev/null | head -1 > /dev/null; then
+    JS_FILES_SIZE=$(find "$dir" \( -name "*.js" -o -name "*.mjs" -o -name "*.ts" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    JS_SIZE=$((JS_SIZE + JS_FILES_SIZE))
+    echo "      JavaScript: $(format_bytes $JS_FILES_SIZE)" >&2
+  fi
+  
+  # CSS files
+  if find "$dir" -name "*.css" 2>/dev/null | head -1 > /dev/null; then
+    CSS_FILES_SIZE=$(find "$dir" -name "*.css" -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    CSS_SIZE=$((CSS_SIZE + CSS_FILES_SIZE))
+    echo "      CSS: $(format_bytes $CSS_FILES_SIZE)" >&2
+  fi
+  
+  # Images
+  if find "$dir" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) 2>/dev/null | head -1 > /dev/null; then
+    IMG_FILES_SIZE=$(find "$dir" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+    IMAGE_SIZE=$((IMAGE_SIZE + IMG_FILES_SIZE))
+    echo "      Images: $(format_bytes $IMG_FILES_SIZE)" >&2
+  fi
+  
+  # Show largest files in this directory
+  echo "   🔍 Largest files:" >&2
+  find "$dir" -type f -exec du -b {} + 2>/dev/null | sort -rn | head -5 | while read size file; do
+    echo "      $(format_bytes $size) - $(basename "$file")" >&2
+  done
+  
+  # Gzip analysis for text files
+  GZIPPABLE_SIZE=$(find "$dir" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  if [ "$GZIPPABLE_SIZE" -gt 0 ] && command -v gzip &> /dev/null; then
+    # Estimate gzip compression
+    TEMP_DIR=$(mktemp -d)
+    find "$dir" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec cp {} "$TEMP_DIR/" \; 2>/dev/null
+    
+    if [ "$(ls -A "$TEMP_DIR" 2>/dev/null)" ]; then
+      cd "$TEMP_DIR" && gzip *.* 2>/dev/null && GZIPPED_SIZE=$(du -cb *.gz 2>/dev/null | tail -1 | cut -f1 || echo "0") && cd - > /dev/null
+      
+      if [ "$GZIPPED_SIZE" -gt 0 ]; then
+        COMPRESSION_RATIO=$(echo "scale=1; ($GZIPPABLE_SIZE - $GZIPPED_SIZE) * 100 / $GZIPPABLE_SIZE" | bc 2>/dev/null || echo "N/A")
+        echo "   📦 Gzip compression potential: $(format_bytes $GZIPPED_SIZE) (-${COMPRESSION_RATIO}%)" >&2
+      fi
+    fi
+    
+    rm -rf "$TEMP_DIR" 2>/dev/null
+  fi
+  
+  echo "" >&2
+}
+
+# Start report
+echo "Starting bundle analysis at $TIMESTAMP" >&2
+echo "" >&2
+
+# Check if this is a Node.js project
+if [ -f "package.json" ]; then
+  echo "🟢 Node.js project detected" >&2
+  
+  PROJECT_NAME=$(grep '"name"' package.json | head -1 | cut -d'"' -f4 2>/dev/null || echo "Unknown")
+  echo "📋 Project: $PROJECT_NAME" >&2
+  
+  # Try to build the project
+  echo "🔨 Attempting to build project..." >&2
+  
+  # Check for common build scripts
+  BUILD_SCRIPT=""
+  if grep -q '"build"' package.json; then
+    BUILD_SCRIPT="npm run build"
+  elif grep -q '"build:prod"' package.json; then
+    BUILD_SCRIPT="npm run build:prod"
+  elif grep -q '"dist"' package.json; then
+    BUILD_SCRIPT="npm run dist"
+  fi
+  
+  if [ -n "$BUILD_SCRIPT" ]; then
+    echo "   Running: $BUILD_SCRIPT" >&2
+    if $BUILD_SCRIPT > /tmp/build_output.log 2>&1; then
+      echo "   ✅ Build completed successfully" >&2
+    else
+      echo "   ⚠️ Build failed or incomplete - analyzing existing output" >&2
+      echo "   📝 Build log: /tmp/build_output.log" >&2
+    fi
+  else
+    echo "   ℹ️ No build script found - analyzing existing files" >&2
+  fi
+  
+  echo "" >&2
+fi
+
+# Common build output directories
+BUILD_DIRS=("dist" "build" "out" ".next" "public" "www" "target/release")
+
+# Analyze each potential build directory
+for dir in "${BUILD_DIRS[@]}"; do
+  if [ -d "$dir" ]; then
+    case "$dir" in
+      "dist")
+        analyze_directory "$dir" "Distribution Build"
+        ;;
+      "build")
+        analyze_directory "$dir" "Production Build"
+        ;;
+      "out")
+        analyze_directory "$dir" "Output Build"
+        ;;
+      ".next")
+        analyze_directory "$dir" "Next.js Build"
+        ;;
+      "public")
+        # Only analyze if it looks like a build output
+        if [ -f "$dir/index.html" ] || [ -f "$dir/main.js" ]; then
+          analyze_directory "$dir" "Public Assets"
+        fi
+        ;;
+      "www")
+        analyze_directory "$dir" "Web Assets"
+        ;;
+      "target/release")
+        analyze_directory "$dir" "Rust Release Build"
+        ;;
+    esac
+  fi
+done
+
+# Framework-specific analysis
+if [ -f "webpack.config.js" ] || [ -f "webpack.config.ts" ]; then
+  echo "⚙️ Webpack configuration detected" >&2
+  
+  # Look for webpack-bundle-analyzer output
+  if [ -f "bundle-analyzer-report.html" ]; then
+    echo "   📊 Bundle analyzer report available: bundle-analyzer-report.html" >&2
+  fi
+fi
+
+if [ -f "vite.config.js" ] || [ -f "vite.config.ts" ]; then
+  echo "⚡ Vite configuration detected" >&2
+fi
+
+if [ -f "next.config.js" ] || [ -f "next.config.ts" ]; then
+  echo "▲ Next.js configuration detected" >&2
+fi
+
+if [ -f "rollup.config.js" ]; then
+  echo "📦 Rollup configuration detected" >&2
+fi
+
+# Generate summary
+echo "" >&2
+echo "📋 BUNDLE SIZE SUMMARY" >&2
+echo "=====================================" >&2
+
+if [ "$BUILD_DETECTED" = true ]; then
+  echo "📊 Total bundle size: $(format_bytes $TOTAL_SIZE)" >&2
+  echo "" >&2
+  echo "📈 Breakdown by type:" >&2
+  [ "$JS_SIZE" -gt 0 ] && echo "   JavaScript: $(format_bytes $JS_SIZE)" >&2
+  [ "$CSS_SIZE" -gt 0 ] && echo "   CSS: $(format_bytes $CSS_SIZE)" >&2
+  [ "$IMAGE_SIZE" -gt 0 ] && echo "   Images: $(format_bytes $IMAGE_SIZE)" >&2
+  
+  echo "" >&2
+  echo "🎯 Performance Assessment:" >&2
+  
+  # Performance thresholds
+  if [ "$TOTAL_SIZE" -gt 5242880 ]; then  # 5MB
+    echo "   🔴 Large bundle size - may impact load times significantly" >&2
+  elif [ "$TOTAL_SIZE" -gt 1048576 ]; then  # 1MB
+    echo "   🟡 Moderate bundle size - consider optimization" >&2
+  else
+    echo "   🟢 Good bundle size - within performance budget" >&2
+  fi
+  
+  if [ "$JS_SIZE" -gt 1048576 ]; then  # 1MB JS
+    echo "   ⚠️ JavaScript bundle is large - consider code splitting" >&2
+  fi
+  
+  echo "" >&2
+  echo "💡 Optimization Recommendations:" >&2
+  echo "   • Enable gzip/brotli compression on your server" >&2
+  echo "   • Consider code splitting for large JavaScript bundles" >&2
+  echo "   • Optimize images with modern formats (WebP, AVIF)" >&2
+  echo "   • Remove unused CSS and JavaScript code" >&2
+  echo "   • Use dynamic imports for non-critical code" >&2
+  
+else
+  echo "ℹ️ No build output detected in common directories" >&2
+  echo "   Searched: ${BUILD_DIRS[*]}" >&2
+  echo "   Consider running a build command first" >&2
+fi
+
+echo "" >&2
+echo "📄 Report timestamp: $TIMESTAMP" >&2
+echo "💾 Full report saved to: $REPORT_FILE" >&2
+
+# Save detailed report to file
+{
+  echo "BUNDLE SIZE REPORT"
+  echo "Generated: $TIMESTAMP"
+  echo "Project: $(basename "$(pwd)")"
+  echo ""
+  
+  if [ "$BUILD_DETECTED" = true ]; then
+    echo "SUMMARY"
+    echo "======="
+    echo "Total Size: $(format_bytes $TOTAL_SIZE)"
+    echo "JavaScript: $(format_bytes $JS_SIZE)"
+    echo "CSS: $(format_bytes $CSS_SIZE)"
+    echo "Images: $(format_bytes $IMAGE_SIZE)"
+    echo ""
+    
+    echo "DETAILED ANALYSIS"
+    echo "================="
+    for dir in "${BUILD_DIRS[@]}"; do
+      if [ -d "$dir" ]; then
+        echo "$dir directory:"
+        find "$dir" -type f -exec du -b {} + 2>/dev/null | sort -rn | head -10 | while read size file; do
+          echo "  $(format_bytes $size) - $file"
+        done
+        echo ""
+      fi
+    done
+  else
+    echo "No build output detected"
+  fi
+} > "$REPORT_FILE"
+
+echo "=====================================" >&2
+
+exit 0
+```
+
+## Examples
+### Final Bundle Size Reporter Hook Script
+
+Complete hook script that performs bundle size analysis when development session ends
+
+```bash
+#!/usr/bin/env bash
+echo "📦 FINAL BUNDLE SIZE REPORT" >&2
+echo "===========================================" >&2
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+TOTAL_SIZE=0
+if [ -d "dist" ]; then
+  DIR_SIZE=$(du -sb "dist" 2>/dev/null | cut -f1 || echo "0")
+  TOTAL_SIZE=$((TOTAL_SIZE + DIR_SIZE))
+  echo "📁 Distribution Build: dist" >&2
+  echo "   Total size: $(du -sh dist | cut -f1)" >&2
+fi
+echo "📊 Total bundle size: $(du -sh dist | cut -f1)" >&2
+echo "📄 Report timestamp: $TIMESTAMP" >&2
+exit 0
+```
+### Automatic Build Execution
+
+Enhanced hook script for automatic build execution before bundle analysis
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+if [ -f "package.json" ]; then
+  BUILD_SCRIPT=""
+  if grep -q '"build"' package.json; then
+    BUILD_SCRIPT="npm run build"
+  elif grep -q '"build:prod"' package.json; then
+    BUILD_SCRIPT="npm run build:prod"
+  fi
+  if [ -n "$BUILD_SCRIPT" ]; then
+    echo "🔨 Running: $BUILD_SCRIPT" >&2
+    if $BUILD_SCRIPT > /tmp/build_output.log 2>&1; then
+      echo "✅ Build completed successfully" >&2
+    else
+      echo "⚠️ Build failed - analyzing existing output" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### File Type Breakdown Analysis
+
+Enhanced hook script for detailed file type breakdown analysis
+
+```bash
+#!/usr/bin/env bash
+if [ -d "dist" ]; then
+  JS_FILES_SIZE=$(find "dist" \( -name "*.js" -o -name "*.mjs" -o -name "*.ts" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  CSS_FILES_SIZE=$(find "dist" -name "*.css" -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  IMG_FILES_SIZE=$(find "dist" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  echo "📈 Breakdown by type:" >&2
+  echo "   JavaScript: $(du -sh dist/*.js 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+  echo "   CSS: $(du -sh dist/*.css 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+  echo "   Images: $(du -sh dist/*.{png,jpg,jpeg,gif,svg,webp} 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+fi
+exit 0
+```
+### Gzip Compression Analysis
+
+Enhanced hook script for Gzip compression analysis with compression ratio calculations
+
+```bash
+#!/usr/bin/env bash
+if [ -d "dist" ] && command -v gzip &> /dev/null; then
+  GZIPPABLE_SIZE=$(find "dist" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  if [ "$GZIPPABLE_SIZE" -gt 0 ]; then
+    TEMP_DIR=$(mktemp -d)
+    find "dist" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec cp {} "$TEMP_DIR/" \; 2>/dev/null
+    if [ "$(ls -A $TEMP_DIR 2>/dev/null)" ]; then
+      cd "$TEMP_DIR" && gzip *.* 2>/dev/null && GZIPPED_SIZE=$(du -cb *.gz 2>/dev/null | tail -1 | cut -f1 || echo "0") && cd - > /dev/null
+      if [ "$GZIPPED_SIZE" -gt 0 ]; then
+        COMPRESSION_RATIO=$(echo "scale=1; ($GZIPPABLE_SIZE - $GZIPPED_SIZE) * 100 / $GZIPPABLE_SIZE" | bc 2>/dev/null || echo "N/A")
+        echo "📦 Gzip compression potential: $(du -sh $TEMP_DIR/*.gz 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB") (-${COMPRESSION_RATIO}%)" >&2
+      fi
+    fi
+    rm -rf "$TEMP_DIR" 2>/dev/null
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+echo "📦 FINAL BUNDLE SIZE REPORT" >&2
+echo "===========================================" >&2
+TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
+TOTAL_SIZE=0
+if [ -d "dist" ]; then
+  DIR_SIZE=$(du -sb "dist" 2>/dev/null | cut -f1 || echo "0")
+  TOTAL_SIZE=$((TOTAL_SIZE + DIR_SIZE))
+  echo "📁 Distribution Build: dist" >&2
+  echo "   Total size: $(du -sh dist | cut -f1)" >&2
+fi
+echo "📊 Total bundle size: $(du -sh dist | cut -f1)" >&2
+echo "📄 Report timestamp: $TIMESTAMP" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+if [ -f "package.json" ]; then
+  BUILD_SCRIPT=""
+  if grep -q '"build"' package.json; then
+    BUILD_SCRIPT="npm run build"
+  elif grep -q '"build:prod"' package.json; then
+    BUILD_SCRIPT="npm run build:prod"
+  fi
+  if [ -n "$BUILD_SCRIPT" ]; then
+    echo "🔨 Running: $BUILD_SCRIPT" >&2
+    if $BUILD_SCRIPT > /tmp/build_output.log 2>&1; then
+      echo "✅ Build completed successfully" >&2
+    else
+      echo "⚠️ Build failed - analyzing existing output" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+if [ -d "dist" ]; then
+  JS_FILES_SIZE=$(find "dist" \( -name "*.js" -o -name "*.mjs" -o -name "*.ts" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  CSS_FILES_SIZE=$(find "dist" -name "*.css" -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  IMG_FILES_SIZE=$(find "dist" \( -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" -o -name "*.gif" -o -name "*.svg" -o -name "*.webp" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  echo "📈 Breakdown by type:" >&2
+  echo "   JavaScript: $(du -sh dist/*.js 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+  echo "   CSS: $(du -sh dist/*.css 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+  echo "   Images: $(du -sh dist/*.{png,jpg,jpeg,gif,svg,webp} 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB")" >&2
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+if [ -d "dist" ] && command -v gzip &> /dev/null; then
+  GZIPPABLE_SIZE=$(find "dist" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec du -cb {} + 2>/dev/null | tail -1 | cut -f1 || echo "0")
+  if [ "$GZIPPABLE_SIZE" -gt 0 ]; then
+    TEMP_DIR=$(mktemp -d)
+    find "dist" \( -name "*.js" -o -name "*.css" -o -name "*.html" -o -name "*.json" \) -exec cp {} "$TEMP_DIR/" \; 2>/dev/null
+    if [ "$(ls -A $TEMP_DIR 2>/dev/null)" ]; then
+      cd "$TEMP_DIR" && gzip *.* 2>/dev/null && GZIPPED_SIZE=$(du -cb *.gz 2>/dev/null | tail -1 | cut -f1 || echo "0") && cd - > /dev/null
+      if [ "$GZIPPED_SIZE" -gt 0 ]; then
+        COMPRESSION_RATIO=$(echo "scale=1; ($GZIPPABLE_SIZE - $GZIPPED_SIZE) * 100 / $GZIPPABLE_SIZE" | bc 2>/dev/null || echo "N/A")
+        echo "📦 Gzip compression potential: $(du -sh $TEMP_DIR/*.gz 2>/dev/null | awk '{sum+=$1} END {print sum}' || echo "0KB") (-${COMPRESSION_RATIO}%)" >&2
+      fi
+    fi
+    rm -rf "$TEMP_DIR" 2>/dev/null
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### No build output detected even after running build
+
+Hook searches standard directories (dist, build, out, .next). Check your build output location in package.json or framework config and add custom directory to BUILD_DIRS array in hook script. Verify build script actually creates output files. Check for build errors in /tmp/build_output.log.
+### Build command runs but fails silently in hook
+
+Check /tmp/build_output.log for error details. Ensure build script in package.json doesn't require interactive prompts. Add --no-interactive or CI=true environment variable to build command. Verify build dependencies are installed. Check for missing environment variables required by build process.
+### Bundle size calculation includes development files
+
+Hook analyzes build output directories only. Ensure your build process excludes source maps, test files, and dev dependencies. Check if framework outputs dev builds to different directory. Verify build configuration excludes development-only files. Use production build mode for accurate bundle size analysis.
+### Gzip compression analysis shows N/A or fails
+
+Install bc command for compression ratio calculation (brew install bc on macOS, apt-get install bc on Linux). Ensure gzip is available in PATH. Large bundles may timeout in compression analysis, skip for files over 100MB. Check disk space for temporary compression files. Verify file permissions for temporary directory creation.
+### Bundle size report doesn't match actual deployment size
+
+Hook analyzes uncompressed bundle sizes. Actual deployment sizes will be smaller with gzip/brotli compression. Consider compression ratios when comparing. Verify build output matches production build configuration. Check for environment-specific build differences.
+### Framework-specific build detection fails
+
+Hook detects frameworks by configuration file presence (webpack.config.js, vite.config.js, next.config.js). Verify configuration files exist in project root. Add custom framework detection logic if using non-standard configuration locations. Check for framework-specific build output patterns.
+### Bundle size analysis is slow for large projects
+
+Large projects with many files may slow down analysis. Consider excluding large asset directories from analysis. Use find command with -maxdepth option to limit directory traversal. Set timeout limits for bundle analysis. Consider analyzing only critical bundle files.
+### Performance thresholds don't match project requirements
+
+Hook uses default thresholds (5MB high impact, 1MB moderate impact). Adjust thresholds in hook script based on project requirements. Use environment variables to configure custom thresholds. Consider project type (SPA, MPA, library) when setting thresholds. Add project-specific performance budget configuration.

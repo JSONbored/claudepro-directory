@@ -1,0 +1,87 @@
+# AWS Infra Bundle
+URL: https://heyclau.de/collections/aws-cloud-infrastructure-bundle
+Category: collections
+Author: JSONbored
+Date added: 2025-10-02
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/aws-cloud-infrastructure-bundle.mdx
+## Summary
+Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.
+## Tags
+- aws
+- cloud
+- infrastructure
+- devops
+- cloudformation
+- serverless
+## Content
+## Overview
+Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.
+
+## Features
+- AWS architecture design and planning
+- CloudFormation template validation
+- Multi-service AWS integration
+- DevOps and SRE best practices
+
+## Use Cases
+- Building cloud-native applications on AWS
+- Managing AWS infrastructure as code
+- Migrating applications to AWS
+- Implementing DevOps practices on AWS
+
+## TL;DR
+A comprehensive collection of AWS infrastructure tools, MCP servers, and Claude configurations for cloud deployment, monitoring, and management. Perfect for teams building and scaling on Amazon Web Services.
+
+- Complete AWS infrastructure setup and management suite
+- MCP servers for AWS services integration
+- CloudFormation, CDK, and Terraform templates
+- Monitoring, logging, and security best practices
+
+Streamline your AWS cloud operations with this curated collection of infrastructure-as-code templates, MCP servers for AWS API access, and Claude-optimized workflows for deployment automation.
+
+## Collection Overview
+**Collection Type:** Cloud Infrastructure
+**Focus Area:** AWS Services & DevOps
+**Skill Level:** Intermediate to Advanced
+**Time Saving:** 50-70% reduction in infrastructure setup time
+
+## Collection Contents
+Essential AWS tools for cloud infrastructure
+
+- **AWS MCP Servers** (Infrastructure): Direct Claude integration with AWS APIs for EC2, S3, Lambda, RDS, and more core services.
+- **IaC Templates** (Deployment): CloudFormation, CDK, and Terraform templates for common AWS architectures and deployment patterns.
+- **Observability Stack** (Monitoring): CloudWatch integration, logging aggregation, and custom metrics with Claude-powered analysis.
+- **Security & Compliance** (Security): IAM policies, security groups, VPC configs, and compliance checking with Claude assistance.
+
+## Quick Start
+Browse the collection items below to find the specific AWS resources you need. Each item includes detailed setup instructions and can be combined to build complete cloud solutions.
+
+## Prerequisites
+- AWS account with appropriate permissions
+- Basic understanding of cloud computing concepts
+- AWS CLI configured locally
+- CloudFormation or infrastructure-as-code experience
+
+## Recommended Order
+1. `aws-cloud-architect`
+2. `devops-sre-expert`
+3. `backend-architect-agent`
+4. `aws-services-mcp-server`
+5. `aws-cloudformation-validator`
+
+## Troubleshooting
+### AWS MCP server fails: 'Credentials not configured' error
+
+Run aws configure to set credentials. Ensure AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY are in environment or ~/.aws/credentials file.
+### CloudFormation validator conflicts with AWS services MCP
+
+Install validator hook after AWS MCP server. Update config order: MCP servers first, then hooks. Restart to reinitialize hook dependency chain.
+### Backend architect agent and AWS rules give contradictory advice
+
+Prioritize AWS cloud architect rule for AWS-specific patterns. Use backend architect for general design. Set rule precedence in config hierarchy.
+### AWS CLI version 1.x incompatible with MCP server features
+
+Upgrade to AWS CLI v2: curl https://awscli.amazonaws.com/install | bash. Verify with aws --version. MCP server requires CLI v2.0+ for SSO support.
+### Permission errors when validator checks CloudFormation templates
+
+Grant IAM permissions: cloudformation:ValidateTemplate and cloudformation:DescribeStacks. Add to AWS user/role policy, then restart validator hook.

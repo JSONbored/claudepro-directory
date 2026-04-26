@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "kind": "directory-index",
   "generatedAt": "2026-04-25T00:00:00.000Z",
   "count": 326,
@@ -14,13 +14,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "cursor",
-        "ai-rules",
-        "code-standards",
-        "context",
-        "ai-ide"
-      ],
+      "tags": ["cursor", "ai-rules", "code-standards", "context", "ai-ide"],
       "keywords": [
         "ai-ide",
         "ai-rules",
@@ -121,13 +115,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "documentation",
-        "api-docs",
-        "tutorials",
-        "guides",
-        "markdown"
-      ],
+      "tags": ["documentation", "api-docs", "tutorials", "guides", "markdown"],
       "keywords": [
         "api-docs",
         "claude",
@@ -389,13 +377,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "code-review",
-        "security",
-        "performance",
-        "quality",
-        "analysis"
-      ],
+      "tags": ["code-review", "security", "performance", "quality", "analysis"],
       "keywords": [
         "analysis",
         "claude",
@@ -688,13 +670,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "accessibility",
-        "a11y",
-        "wcag",
-        "testing",
-        "compliance"
-      ],
+      "tags": ["accessibility", "a11y", "wcag", "testing", "compliance"],
       "keywords": [
         "a11y",
         "accessibility",
@@ -807,13 +783,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "evals",
-        "regression",
-        "ai-agents",
-        "qa",
-        "quality-gate"
-      ],
+      "tags": ["evals", "regression", "ai-agents", "qa", "quality-gate"],
       "keywords": [
         "ai-skill",
         "agent-evals",
@@ -1116,9 +1086,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://opentelemetry.io/docs/"
-      ],
+      "retrievalSources": ["https://opentelemetry.io/docs/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -1279,13 +1247,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "devops",
-        "automation",
-        "ai",
-        "ci-cd",
-        "infrastructure"
-      ],
+      "tags": ["devops", "automation", "ai", "ci-cd", "infrastructure"],
       "keywords": [
         "agent",
         "agents",
@@ -1395,13 +1357,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "ai",
-        "prompt-engineering",
-        "claude",
-        "copilot",
-        "llm"
-      ],
+      "tags": ["ai", "prompt-engineering", "claude", "copilot", "llm"],
       "keywords": [
         "claude",
         "copilot",
@@ -1446,13 +1402,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "seo",
-        "content-strategy",
-        "growth",
-        "ranking",
-        "publishing"
-      ],
+      "tags": ["seo", "content-strategy", "growth", "ranking", "publishing"],
       "keywords": [
         "ai seo skill",
         "content cluster strategy",
@@ -1471,9 +1421,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://developers.google.com/search/docs"
-      ],
+      "retrievalSources": ["https://developers.google.com/search/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -1512,13 +1460,7 @@
       "seoDescription": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development.",
       "author": "domdomegg",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "database",
-        "airtable",
-        "data-management",
-        "crud",
-        "tables"
-      ],
+      "tags": ["database", "airtable", "data-management", "crud", "tables"],
       "keywords": [
         "airtable",
         "claude",
@@ -1634,14 +1576,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "api",
-        "rest",
-        "graphql",
-        "openapi",
-        "design",
-        "architecture"
-      ],
+      "tags": ["api", "rest", "graphql", "openapi", "design", "architecture"],
       "keywords": [
         "api",
         "architecture",
@@ -1769,13 +1704,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "api",
-        "documentation",
-        "openapi",
-        "swagger",
-        "automation"
-      ],
+      "tags": ["api", "documentation", "openapi", "swagger", "automation"],
       "keywords": [
         "api",
         "automation",
@@ -2014,12 +1943,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "audio",
-        "transcription",
-        "whisper",
-        "ffmpeg"
-      ],
+      "tags": ["audio", "transcription", "whisper", "ffmpeg"],
       "keywords": [
         "and",
         "audio",
@@ -2044,9 +1968,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://github.com/openai/whisper"
-      ],
+      "retrievalSources": ["https://github.com/openai/whisper"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -2089,13 +2011,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "formatting",
-        "prettier",
-        "black",
-        "code-quality",
-        "automation"
-      ],
+      "tags": ["formatting", "prettier", "black", "code-quality", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -2147,12 +2063,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "backup",
-        "safety",
-        "file-management",
-        "data-protection"
-      ],
+      "tags": ["backup", "safety", "file-management", "data-protection"],
       "keywords": [
         "auto",
         "backup",
@@ -2252,13 +2163,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "autogen",
-        "multi-agent",
-        "workflow",
-        "orchestration",
-        "ai"
-      ],
+      "tags": ["autogen", "multi-agent", "workflow", "orchestration", "ai"],
       "keywords": [
         "autogen",
         "claude",
@@ -2304,13 +2209,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "aws",
-        "cloud",
-        "architecture",
-        "serverless",
-        "infrastructure"
-      ],
+      "tags": ["aws", "cloud", "architecture", "serverless", "infrastructure"],
       "keywords": [
         "architect",
         "architecture",
@@ -2497,13 +2396,7 @@
       "seoDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring Discover tools for AI development.",
       "author": "AWS Labs",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "aws",
-        "cloud",
-        "infrastructure",
-        "deployment",
-        "monitoring"
-      ],
+      "tags": ["aws", "cloud", "infrastructure", "deployment", "monitoring"],
       "keywords": [
         "aws",
         "claude",
@@ -2702,13 +2595,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "base",
-        "layer2",
-        "smart-contracts",
-        "deployment",
-        "web3"
-      ],
+      "tags": ["base", "layer2", "smart-contracts", "deployment", "web3"],
       "keywords": [
         "base l2 contract deployment",
         "base smart contracts",
@@ -2981,9 +2868,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://playwright.dev/docs/best-practices"
-      ],
+      "retrievalSources": ["https://playwright.dev/docs/best-practices"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -3067,13 +2952,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "tags": [
-        "bun",
-        "runtime",
-        "javascript",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["bun", "runtime", "javascript", "typescript", "performance"],
       "keywords": [
         "bun",
         "claude",
@@ -3098,9 +2977,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-23",
-      "retrievalSources": [
-        "https://bun.sh/docs"
-      ],
+      "retrievalSources": ["https://bun.sh/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -3268,13 +3145,7 @@
       "seoDescription": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development.",
       "author": "Canva",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "design",
-        "canva",
-        "graphics",
-        "templates",
-        "creative"
-      ],
+      "tags": ["design", "canva", "graphics", "templates", "creative"],
       "keywords": [
         "canva",
         "claude",
@@ -3399,12 +3270,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "migration",
-        "api"
-      ],
+      "tags": ["tutorial", "intermediate", "migration", "api"],
       "keywords": [
         "chatgpt to claude",
         "claude migration",
@@ -3539,12 +3405,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "advanced",
-        "agent-development",
-        "multi-agent"
-      ],
+      "tags": ["tutorial", "advanced", "agent-development", "multi-agent"],
       "keywords": [
         "claude agent framework",
         "agent development",
@@ -3691,12 +3552,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "workflow",
-        "enterprise development",
-        "advanced",
-        "automation"
-      ],
+      "tags": ["workflow", "enterprise development", "advanced", "automation"],
       "keywords": [
         "claude multi directory",
         "multi project claude setup",
@@ -3775,12 +3631,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "wsl",
-        "windows"
-      ],
+      "tags": ["tutorial", "intermediate", "wsl", "windows"],
       "keywords": [
         "claude wsl setup",
         "windows claude code",
@@ -3817,12 +3668,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "intermediate",
-        "configuration",
-        "mcp-servers"
-      ],
+      "tags": ["tutorial", "intermediate", "configuration", "mcp-servers"],
       "keywords": [
         "2025",
         "claude",
@@ -3889,12 +3735,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "use-case",
-        "financial-services",
-        "enterprise",
-        "advanced"
-      ],
+      "tags": ["use-case", "financial-services", "enterprise", "advanced"],
       "keywords": [
         "claude financial services",
         "ai finance workflows",
@@ -4082,12 +3923,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "use-case",
-        "enterprise",
-        "automation",
-        "advanced"
-      ],
+      "tags": ["use-case", "enterprise", "automation", "advanced"],
       "keywords": [
         "claude automation",
         "business process automation",
@@ -4124,12 +3960,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "advanced",
-        "rate-limits",
-        "429-errors"
-      ],
+      "tags": ["tutorial", "advanced", "rate-limits", "429-errors"],
       "keywords": [
         "claude rate limits",
         "fix claude rate limit",
@@ -4166,12 +3997,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "comparison",
-        "cloud-development",
-        "aws",
-        "evaluation"
-      ],
+      "tags": ["comparison", "cloud-development", "aws", "evaluation"],
       "keywords": [
         "claude vs gemini",
         "claude vs codewhisperer",
@@ -4364,12 +4190,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "visualization",
-        "charts",
-        "python",
-        "vega"
-      ],
+      "tags": ["visualization", "charts", "python", "vega"],
       "keywords": [
         "charts",
         "claude",
@@ -4396,9 +4217,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://matplotlib.org/"
-      ],
+      "retrievalSources": ["https://matplotlib.org/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -4509,13 +4328,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "backup",
-        "cloud",
-        "stop-hook",
-        "aws",
-        "safety"
-      ],
+      "tags": ["backup", "cloud", "stop-hook", "aws", "safety"],
       "keywords": [
         "aws",
         "backup",
@@ -4617,13 +4430,7 @@
       "seoDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development.",
       "author": "Cloudflare",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "cloudflare",
-        "cdn",
-        "security",
-        "dns",
-        "infrastructure"
-      ],
+      "tags": ["cloudflare", "cdn", "security", "dns", "infrastructure"],
       "keywords": [
         "cdn",
         "claude",
@@ -4686,13 +4493,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "cloudflare",
-        "edge-computing",
-        "ai",
-        "serverless",
-        "workers"
-      ],
+      "tags": ["cloudflare", "edge-computing", "ai", "serverless", "workers"],
       "keywords": [
         "claude",
         "cloudflare",
@@ -4717,9 +4518,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://developers.cloudflare.com/workers-ai/"
-      ],
+      "retrievalSources": ["https://developers.cloudflare.com/workers-ai/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -4762,13 +4561,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "cloudflare",
-        "workers",
-        "d1",
-        "kv",
-        "r2"
-      ],
+      "tags": ["cloudflare", "workers", "d1", "kv", "r2"],
       "keywords": [
         "cloudflare d1 kv r2",
         "edge data architecture",
@@ -4831,13 +4624,7 @@
       "seoDescription": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development.",
       "author": "Cloudinary",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "media",
-        "cloudinary",
-        "images",
-        "video",
-        "asset-management"
-      ],
+      "tags": ["media", "cloudinary", "images", "video", "asset-management"],
       "keywords": [
         "asset-management",
         "claude",
@@ -4996,11 +4783,7 @@
           "category": "commands"
         }
       ],
-      "installationOrder": [
-        "code-reviewer-agent",
-        "generate-tests",
-        "explain"
-      ],
+      "installationOrder": ["code-reviewer-agent", "generate-tests", "explain"],
       "estimatedSetupTime": "15 minutes",
       "difficulty": "intermediate",
       "prerequisites": [
@@ -5102,12 +4885,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "code-review",
-        "best-practices",
-        "quality",
-        "development"
-      ],
+      "tags": ["code-review", "best-practices", "quality", "development"],
       "keywords": [
         "best-practices",
         "claude",
@@ -5205,13 +4983,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "testing",
-        "automation",
-        "ci-cd",
-        "watch",
-        "parallel"
-      ],
+      "tags": ["testing", "automation", "ci-cd", "watch", "parallel"],
       "keywords": [
         "automation",
         "ci-cd",
@@ -5458,12 +5230,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "workflow",
-        "migration",
-        "enterprise",
-        "automation"
-      ],
+      "tags": ["workflow", "migration", "enterprise", "automation"],
       "keywords": [
         "claude migration workflow",
         "chatgpt to claude",
@@ -5743,13 +5510,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "css",
-        "optimization",
-        "cleanup",
-        "performance",
-        "purge"
-      ],
+      "tags": ["css", "optimization", "cleanup", "performance", "purge"],
       "keywords": [
         "claude",
         "cleanup",
@@ -5799,13 +5560,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "csv",
-        "xlsx",
-        "data-cleaning",
-        "pandas",
-        "python"
-      ],
+      "tags": ["csv", "xlsx", "data-cleaning", "pandas", "python"],
       "keywords": [
         "claude",
         "csv",
@@ -5832,9 +5587,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://pandas.pydata.org/"
-      ],
+      "retrievalSources": ["https://pandas.pydata.org/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -5877,13 +5630,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "tags": [
-        "cursor",
-        "windsurf",
-        "ide",
-        "ai-coding",
-        "editor"
-      ],
+      "tags": ["cursor", "windsurf", "ide", "ai-coding", "editor"],
       "keywords": [
         "ai-coding",
         "claude",
@@ -5910,9 +5657,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-23",
-      "retrievalSources": [
-        "https://cursor.sh/docs"
-      ],
+      "retrievalSources": ["https://cursor.sh/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -6087,14 +5832,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
-      "tags": [
-        "data",
-        "database",
-        "etl",
-        "sql",
-        "cloud",
-        "engineering"
-      ],
+      "tags": ["data", "database", "etl", "sql", "cloud", "engineering"],
       "keywords": [
         "claude",
         "cloud",
@@ -6235,13 +5973,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "database",
-        "cleanup",
-        "stop-hook",
-        "connections",
-        "resources"
-      ],
+      "tags": ["database", "cleanup", "stop-hook", "connections", "resources"],
       "keywords": [
         "claude",
         "cleanup",
@@ -6344,13 +6076,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "database",
-        "migration",
-        "automation",
-        "deployment",
-        "sql"
-      ],
+      "tags": ["database", "migration", "automation", "deployment", "sql"],
       "keywords": [
         "automation",
         "claude",
@@ -6602,11 +6328,7 @@
           "category": "commands"
         }
       ],
-      "installationOrder": [
-        "debugging-assistant-agent",
-        "debug",
-        "explain"
-      ],
+      "installationOrder": ["debugging-assistant-agent", "debug", "explain"],
       "estimatedSetupTime": "10 minutes",
       "difficulty": "intermediate",
       "prerequisites": [
@@ -6911,13 +6633,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "discord",
-        "notification",
-        "collaboration",
-        "webhooks",
-        "team"
-      ],
+      "tags": ["discord", "notification", "collaboration", "webhooks", "team"],
       "keywords": [
         "activity",
         "claude",
@@ -6966,13 +6682,7 @@
       "seoDescription": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development.",
       "author": "saseq",
       "dateAdded": "2025-09-20",
-      "tags": [
-        "discord",
-        "bot",
-        "community",
-        "moderation",
-        "social"
-      ],
+      "tags": ["discord", "bot", "community", "moderation", "social"],
       "keywords": [
         "bot",
         "claude",
@@ -7035,13 +6745,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "documentation",
-        "stop-hook",
-        "automation",
-        "markdown",
-        "jsdoc"
-      ],
+      "tags": ["documentation", "stop-hook", "automation", "markdown", "jsdoc"],
       "keywords": [
         "auto",
         "automation",
@@ -7116,9 +6820,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://docs.docker.com/compose/"
-      ],
+      "retrievalSources": ["https://docs.docker.com/compose/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -7158,12 +6860,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "docker",
-        "containers",
-        "devops",
-        "automation"
-      ],
+      "tags": ["docker", "containers", "devops", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -7213,13 +6910,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
-      "tags": [
-        "docker",
-        "security",
-        "containers",
-        "vulnerability",
-        "devops"
-      ],
+      "tags": ["docker", "security", "containers", "vulnerability", "devops"],
       "keywords": [
         "claude",
         "containers",
@@ -7269,13 +6960,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "docker",
-        "containers",
-        "devops",
-        "orchestration",
-        "deployment"
-      ],
+      "tags": ["docker", "containers", "devops", "orchestration", "deployment"],
       "keywords": [
         "claude",
         "containers",
@@ -7394,13 +7079,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "documentation",
-        "automation",
-        "api",
-        "markdown",
-        "jsdoc"
-      ],
+      "tags": ["documentation", "automation", "api", "markdown", "jsdoc"],
       "keywords": [
         "api",
         "automation",
@@ -7449,12 +7128,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "docx",
-        "reports",
-        "templating",
-        "python"
-      ],
+      "tags": ["docx", "reports", "templating", "python"],
       "keywords": [
         "claude",
         "development",
@@ -7479,9 +7153,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://docxtpl.readthedocs.io/"
-      ],
+      "retrievalSources": ["https://docxtpl.readthedocs.io/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -7686,13 +7358,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "errors",
-        "monitoring",
-        "notification",
-        "debugging",
-        "alerts"
-      ],
+      "tags": ["errors", "monitoring", "notification", "debugging", "alerts"],
       "keywords": [
         "alerts",
         "claude",
@@ -7742,13 +7408,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "ethereum",
-        "base",
-        "solidity",
-        "security",
-        "capability-pack"
-      ],
+      "tags": ["ethereum", "base", "solidity", "security", "capability-pack"],
       "keywords": [
         "solidity security skill",
         "base smart contract security",
@@ -7837,9 +7497,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://ethereum.org/developers/docs/"
-      ],
+      "retrievalSources": ["https://ethereum.org/developers/docs/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -7931,13 +7589,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "tags": [
-        "fastapi",
-        "python",
-        "api",
-        "async",
-        "pydantic"
-      ],
+      "tags": ["fastapi", "python", "api", "async", "pydantic"],
       "keywords": [
         "api",
         "async",
@@ -7963,9 +7615,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-23",
-      "retrievalSources": [
-        "https://fastapi.tiangolo.com/"
-      ],
+      "retrievalSources": ["https://fastapi.tiangolo.com/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -8007,13 +7657,7 @@
       "seoDescription": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development.",
       "author": "Figma",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "design",
-        "figma",
-        "ui-ux",
-        "assets",
-        "graphics"
-      ],
+      "tags": ["design", "figma", "ui-ux", "assets", "graphics"],
       "keywords": [
         "assets",
         "claude",
@@ -8132,13 +7776,7 @@
       "seoDescription": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-15",
-      "tags": [
-        "filesystem",
-        "files",
-        "directories",
-        "official",
-        "anthropic"
-      ],
+      "tags": ["filesystem", "files", "directories", "official", "anthropic"],
       "keywords": [
         "anthropic",
         "claude",
@@ -8434,12 +8072,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "tags": [
-        "tutorial",
-        "beginner",
-        "installation",
-        "troubleshooting"
-      ],
+      "tags": ["tutorial", "beginner", "installation", "troubleshooting"],
       "keywords": [
         "claude installation errors",
         "fix claude setup",
@@ -8562,13 +8195,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "frontend",
-        "react",
-        "typescript",
-        "ui-ux",
-        "performance"
-      ],
+      "tags": ["frontend", "react", "typescript", "ui-ux", "performance"],
       "keywords": [
         "agent",
         "agents",
@@ -8723,13 +8350,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "git",
-        "version-control",
-        "stop-hook",
-        "automation",
-        "commit"
-      ],
+      "tags": ["git", "version-control", "stop-hook", "automation", "commit"],
       "keywords": [
         "auto",
         "automation",
@@ -8778,12 +8399,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "git",
-        "branch-protection",
-        "workflow",
-        "safety"
-      ],
+      "tags": ["git", "branch-protection", "workflow", "safety"],
       "keywords": [
         "branch",
         "branch-protection",
@@ -8899,13 +8515,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "git",
-        "validation",
-        "code-quality",
-        "testing",
-        "automation"
-      ],
+      "tags": ["git", "validation", "code-quality", "testing", "automation"],
       "keywords": [
         "automation",
         "claude",
@@ -8956,12 +8566,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "tags": [
-        "git",
-        "commit",
-        "version-control",
-        "conventional-commits"
-      ],
+      "tags": ["git", "commit", "version-control", "conventional-commits"],
       "keywords": [
         "claude",
         "commands",
@@ -9146,13 +8751,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "github-actions",
-        "ci-cd",
-        "automation",
-        "devops",
-        "ai"
-      ],
+      "tags": ["github-actions", "ci-cd", "automation", "devops", "ai"],
       "keywords": [
         "actions",
         "automation",
@@ -9179,9 +8778,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://docs.github.com/en/actions"
-      ],
+      "retrievalSources": ["https://docs.github.com/en/actions"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -9293,13 +8890,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "github-actions",
-        "ci-cd",
-        "workflows",
-        "validation",
-        "yaml"
-      ],
+      "tags": ["github-actions", "ci-cd", "workflows", "validation", "yaml"],
       "keywords": [
         "actions",
         "ci-cd",
@@ -9404,13 +8995,7 @@
       "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
       "author": "GitHub",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "github",
-        "git",
-        "repositories",
-        "api",
-        "official"
-      ],
+      "tags": ["github", "git", "repositories", "api", "official"],
       "keywords": [
         "api",
         "claude",
@@ -9473,13 +9058,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "golang",
-        "go",
-        "concurrency",
-        "backend",
-        "microservices"
-      ],
+      "tags": ["golang", "go", "concurrency", "backend", "microservices"],
       "keywords": [
         "backend",
         "claude",
@@ -9577,13 +9156,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "go",
-        "golang",
-        "modules",
-        "dependencies",
-        "cleanup"
-      ],
+      "tags": ["go", "golang", "modules", "dependencies", "cleanup"],
       "keywords": [
         "claude",
         "cleanup",
@@ -9656,9 +9229,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://ai.google.dev/gemini-api/docs"
-      ],
+      "retrievalSources": ["https://ai.google.dev/gemini-api/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -9698,13 +9269,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "graphql",
-        "federation",
-        "microservices",
-        "apollo",
-        "schema"
-      ],
+      "tags": ["graphql", "federation", "microservices", "apollo", "schema"],
       "keywords": [
         "apollo",
         "claude",
@@ -9749,13 +9314,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "graphql",
-        "api",
-        "schema",
-        "validation",
-        "breaking-changes"
-      ],
+      "tags": ["graphql", "api", "schema", "validation", "breaking-changes"],
       "keywords": [
         "api",
         "breaking-changes",
@@ -9932,13 +9491,7 @@
       "seoDescription": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development.",
       "author": "HubSpot",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "crm",
-        "hubspot",
-        "sales",
-        "marketing",
-        "customer-data"
-      ],
+      "tags": ["crm", "hubspot", "sales", "marketing", "customer-data"],
       "keywords": [
         "claude",
         "crm",
@@ -10000,13 +9553,7 @@
       "seoDescription": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development.",
       "author": "Hugging Face",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "ai",
-        "hugging-face",
-        "machine-learning",
-        "models",
-        "datasets"
-      ],
+      "tags": ["ai", "hugging-face", "machine-learning", "models", "datasets"],
       "keywords": [
         "claude",
         "datasets",
@@ -10193,13 +9740,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "ocr",
-        "image",
-        "pytesseract",
-        "opencv",
-        "tables"
-      ],
+      "tags": ["ocr", "image", "pytesseract", "opencv", "tables"],
       "keywords": [
         "and",
         "claude",
@@ -10226,9 +9767,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://tesseract-ocr.github.io/"
-      ],
+      "retrievalSources": ["https://tesseract-ocr.github.io/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -10271,13 +9810,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "indexnow",
-        "seo",
-        "indexing",
-        "sitemap",
-        "search"
-      ],
+      "tags": ["indexnow", "seo", "indexing", "sitemap", "search"],
       "keywords": [
         "indexnow automation",
         "faster indexing",
@@ -10296,9 +9829,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://www.indexnow.org/documentation"
-      ],
+      "retrievalSources": ["https://www.indexnow.org/documentation"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -10337,13 +9868,7 @@
       "seoDescription": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development.",
       "author": "Intercom",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "customer-support",
-        "intercom",
-        "chat",
-        "helpdesk",
-        "crm"
-      ],
+      "tags": ["customer-support", "intercom", "chat", "helpdesk", "crm"],
       "keywords": [
         "chat",
         "claude",
@@ -10405,13 +9930,7 @@
       "seoDescription": "Build video creation capabilities into your applications Discover tools for AI development.",
       "author": "invideo",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "video",
-        "invideo",
-        "media",
-        "content-creation",
-        "ai-video"
-      ],
+      "tags": ["video", "invideo", "media", "content-creation", "ai-video"],
       "keywords": [
         "ai-video",
         "claude",
@@ -10542,13 +10061,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "jest",
-        "testing",
-        "snapshots",
-        "react",
-        "automation"
-      ],
+      "tags": ["jest", "testing", "snapshots", "react", "automation"],
       "keywords": [
         "auto",
         "automation",
@@ -10666,13 +10179,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "json",
-        "schema",
-        "validation",
-        "ajv",
-        "zod"
-      ],
+      "tags": ["json", "schema", "validation", "ajv", "zod"],
       "keywords": [
         "ajv",
         "and",
@@ -10698,9 +10205,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://ajv.js.org/"
-      ],
+      "retrievalSources": ["https://ajv.js.org/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -10743,13 +10248,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "json",
-        "schema",
-        "validation",
-        "data-integrity",
-        "api"
-      ],
+      "tags": ["json", "schema", "validation", "data-integrity", "api"],
       "keywords": [
         "api",
         "claude",
@@ -10797,13 +10296,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "kubernetes",
-        "devsecops",
-        "security",
-        "gitops",
-        "rbac"
-      ],
+      "tags": ["kubernetes", "devsecops", "security", "gitops", "rbac"],
       "keywords": [
         "claude",
         "development",
@@ -10848,13 +10341,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "kubernetes",
-        "k8s",
-        "yaml",
-        "validation",
-        "devops"
-      ],
+      "tags": ["kubernetes", "k8s", "yaml", "validation", "devops"],
       "keywords": [
         "claude",
         "development",
@@ -10902,13 +10389,7 @@
       "seoDescription": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development.",
       "author": "feiskyer",
       "dateAdded": "2025-09-20",
-      "tags": [
-        "kubernetes",
-        "k8s",
-        "container",
-        "orchestration",
-        "devops"
-      ],
+      "tags": ["kubernetes", "k8s", "container", "orchestration", "devops"],
       "keywords": [
         "claude",
         "container",
@@ -11023,13 +10504,7 @@
       "seoDescription": "Integrate with Linear's issue tracking and project management system Discover tools for AI development.",
       "author": "Linear",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "project-management",
-        "linear",
-        "issues",
-        "tasks",
-        "agile"
-      ],
+      "tags": ["project-management", "linear", "issues", "tasks", "agile"],
       "keywords": [
         "agile",
         "claude",
@@ -11156,12 +10631,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "logs",
-        "observability",
-        "ripgrep",
-        "bash"
-      ],
+      "tags": ["logs", "observability", "ripgrep", "bash"],
       "keywords": [
         "and",
         "bash",
@@ -11189,9 +10659,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://github.com/BurntSushi/ripgrep"
-      ],
+      "retrievalSources": ["https://github.com/BurntSushi/ripgrep"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -11234,12 +10702,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "markdown",
-        "docs",
-        "remark",
-        "node"
-      ],
+      "tags": ["markdown", "docs", "remark", "node"],
       "keywords": [
         "base",
         "claude",
@@ -11265,9 +10728,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://github.com/remarkjs/remark"
-      ],
+      "retrievalSources": ["https://github.com/remarkjs/remark"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -11434,13 +10895,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "mcp",
-        "security",
-        "hardening",
-        "auth",
-        "ai-infrastructure"
-      ],
+      "tags": ["mcp", "security", "hardening", "auth", "ai-infrastructure"],
       "keywords": [
         "ai-skill",
         "mcp-security",
@@ -11556,13 +11011,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "mcp",
-        "monitoring",
-        "servers",
-        "tools",
-        "performance"
-      ],
+      "tags": ["mcp", "monitoring", "servers", "tools", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -11617,13 +11066,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "mcp",
-        "testing",
-        "contracts",
-        "reliability",
-        "api"
-      ],
+      "tags": ["mcp", "testing", "contracts", "reliability", "api"],
       "keywords": [
         "mcp testing",
         "tool contract validation",
@@ -11739,13 +11182,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
-      "tags": [
-        "powerline",
-        "minimal",
-        "performance",
-        "bash",
-        "lightweight"
-      ],
+      "tags": ["powerline", "minimal", "performance", "bash", "lightweight"],
       "keywords": [
         "bash",
         "claude",
@@ -11799,13 +11236,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "mintlify",
-        "documentation",
-        "mdx",
-        "api-docs",
-        "automation"
-      ],
+      "tags": ["mintlify", "documentation", "mdx", "api-docs", "automation"],
       "keywords": [
         "api-docs",
         "automation",
@@ -11829,9 +11260,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://mintlify.com/docs"
-      ],
+      "retrievalSources": ["https://mintlify.com/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -11874,13 +11303,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "mintlify",
-        "documentation",
-        "mdx",
-        "api-docs",
-        "ai"
-      ],
+      "tags": ["mintlify", "documentation", "mdx", "api-docs", "ai"],
       "keywords": [
         "api-docs",
         "claude",
@@ -12536,13 +11959,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "n8n",
-        "ai-automation",
-        "workflows",
-        "no-code",
-        "operations"
-      ],
+      "tags": ["n8n", "ai-automation", "workflows", "no-code", "operations"],
       "keywords": [
         "n8n ai workflows",
         "ai automation skill",
@@ -12562,9 +11979,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://docs.n8n.io/advanced-ai/"
-      ],
+      "retrievalSources": ["https://docs.n8n.io/advanced-ai/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -12863,13 +12278,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "nextjs",
-        "routing",
-        "pages",
-        "analysis",
-        "documentation"
-      ],
+      "tags": ["nextjs", "routing", "pages", "analysis", "documentation"],
       "keywords": [
         "analysis",
         "analyzer",
@@ -12917,13 +12326,7 @@
       "seoDescription": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development.",
       "author": "Notion",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "documentation",
-        "notion",
-        "wiki",
-        "notes",
-        "knowledge-base"
-      ],
+      "tags": ["documentation", "notion", "wiki", "notes", "knowledge-base"],
       "keywords": [
         "claude",
         "development",
@@ -13048,13 +12451,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "openclaw",
-        "ai-agents",
-        "security",
-        "hardening",
-        "operations"
-      ],
+      "tags": ["openclaw", "ai-agents", "security", "hardening", "operations"],
       "keywords": [
         "openclaw security",
         "agent hardening",
@@ -13074,9 +12471,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://github.com/openclaw/openclaw"
-      ],
+      "retrievalSources": ["https://github.com/openclaw/openclaw"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -13323,13 +12718,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "security",
-        "vulnerabilities",
-        "dependencies",
-        "npm",
-        "pip"
-      ],
+      "tags": ["security", "vulnerabilities", "dependencies", "npm", "pip"],
       "keywords": [
         "claude",
         "dependencies",
@@ -13410,9 +12799,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://web.dev/articles/vitals"
-      ],
+      "retrievalSources": ["https://web.dev/articles/vitals"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -13505,13 +12892,7 @@
       "seoDescription": "Integrate PayPal commerce capabilities, payment processing, and transaction management Discover tools for AI development.",
       "author": "PayPal",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "payments",
-        "paypal",
-        "commerce",
-        "transactions",
-        "financial"
-      ],
+      "tags": ["payments", "paypal", "commerce", "transactions", "financial"],
       "keywords": [
         "claude",
         "commerce",
@@ -13915,13 +13296,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "testing",
-        "playwright",
-        "e2e",
-        "automation",
-        "ai"
-      ],
+      "tags": ["testing", "playwright", "e2e", "automation", "ai"],
       "keywords": [
         "automation",
         "claude",
@@ -13944,9 +13319,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://playwright.dev/"
-      ],
+      "retrievalSources": ["https://playwright.dev/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -14014,9 +13387,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://playwright.dev/docs/getting-started-mcp"
-      ],
+      "retrievalSources": ["https://playwright.dev/docs/getting-started-mcp"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -14056,13 +13427,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "playwright",
-        "e2e",
-        "testing",
-        "automation",
-        "browser-testing"
-      ],
+      "tags": ["playwright", "e2e", "testing", "automation", "browser-testing"],
       "keywords": [
         "automation",
         "browser-testing",
@@ -14163,13 +13528,7 @@
       "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "postgresql",
-        "database",
-        "sql",
-        "official",
-        "anthropic"
-      ],
+      "tags": ["postgresql", "database", "sql", "official", "anthropic"],
       "keywords": [
         "anthropic",
         "claude",
@@ -14232,13 +13591,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "postgresql",
-        "database",
-        "optimization",
-        "performance",
-        "sql"
-      ],
+      "tags": ["postgresql", "database", "optimization", "performance", "sql"],
       "keywords": [
         "claude",
         "database",
@@ -14308,13 +13661,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "prisma",
-        "database",
-        "orm",
-        "schema",
-        "migrations"
-      ],
+      "tags": ["prisma", "database", "orm", "schema", "migrations"],
       "keywords": [
         "claude",
         "database",
@@ -14944,13 +14291,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "proxmox",
-        "virtualization",
-        "infrastructure",
-        "api",
-        "homelab"
-      ],
+      "tags": ["proxmox", "virtualization", "infrastructure", "api", "homelab"],
       "keywords": [
         "proxmox automation",
         "vm orchestration",
@@ -15120,13 +14461,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "python",
-        "imports",
-        "formatting",
-        "optimization",
-        "isort"
-      ],
+      "tags": ["python", "imports", "formatting", "optimization", "isort"],
       "keywords": [
         "claude",
         "development",
@@ -15175,12 +14510,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "python",
-        "linting",
-        "code-quality",
-        "pylint"
-      ],
+      "tags": ["python", "linting", "code-quality", "pylint"],
       "keywords": [
         "claude",
         "code-quality",
@@ -15414,13 +14744,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "tags": [
-        "react",
-        "nextjs",
-        "frontend",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["react", "nextjs", "frontend", "typescript", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -15465,13 +14789,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "tags": [
-        "react",
-        "nextjs",
-        "frontend",
-        "typescript",
-        "performance"
-      ],
+      "tags": ["react", "nextjs", "frontend", "typescript", "performance"],
       "keywords": [
         "claude",
         "development",
@@ -15517,13 +14835,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "react",
-        "rsc",
-        "server-components",
-        "next-js",
-        "react-19"
-      ],
+      "tags": ["react", "rsc", "server-components", "next-js", "react-19"],
       "keywords": [
         "claude",
         "components",
@@ -15571,13 +14883,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "react",
-        "testing",
-        "jest",
-        "components",
-        "automation"
-      ],
+      "tags": ["react", "testing", "jest", "components", "automation"],
       "keywords": [
         "automation",
         "claude",
@@ -15684,13 +14990,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "cost",
-        "pricing",
-        "budget",
-        "analytics",
-        "monitoring"
-      ],
+      "tags": ["cost", "pricing", "budget", "analytics", "monitoring"],
       "keywords": [
         "analytics",
         "budget",
@@ -15746,13 +15046,7 @@
       "author": "karanb192",
       "authorProfileUrl": "https://github.com/karanb192",
       "dateAdded": "2025-09-27",
-      "tags": [
-        "reddit",
-        "social-media",
-        "search",
-        "analytics",
-        "community"
-      ],
+      "tags": ["reddit", "social-media", "search", "analytics", "community"],
       "keywords": [
         "analytics",
         "buddy",
@@ -15815,13 +15109,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "redis",
-        "cache",
-        "performance",
-        "data-models",
-        "invalidation"
-      ],
+      "tags": ["redis", "cache", "performance", "data-models", "invalidation"],
       "keywords": [
         "cache",
         "claude",
@@ -15869,13 +15157,7 @@
       "author": "Redis",
       "authorProfileUrl": "https://redis.io/",
       "dateAdded": "2025-09-20",
-      "tags": [
-        "redis",
-        "cache",
-        "database",
-        "nosql",
-        "official"
-      ],
+      "tags": ["redis", "cache", "database", "nosql", "official"],
       "keywords": [
         "cache",
         "claude",
@@ -15938,13 +15220,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "rest",
-        "http",
-        "api",
-        "curl",
-        "node"
-      ],
+      "tags": ["rest", "http", "api", "curl", "node"],
       "keywords": [
         "api",
         "claude",
@@ -16015,13 +15291,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "rust",
-        "cargo",
-        "clippy",
-        "linting",
-        "compilation"
-      ],
+      "tags": ["rust", "cargo", "clippy", "linting", "compilation"],
       "keywords": [
         "cargo",
         "check",
@@ -16069,13 +15339,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "saas",
-        "pricing",
-        "experimentation",
-        "revenue",
-        "product"
-      ],
+      "tags": ["saas", "pricing", "experimentation", "revenue", "product"],
       "keywords": [
         "saas pricing tests",
         "pricing optimization",
@@ -16094,9 +15358,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://stripe.com/docs"
-      ],
+      "retrievalSources": ["https://stripe.com/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -16136,13 +15398,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "scss",
-        "sass",
-        "css",
-        "styling",
-        "compilation"
-      ],
+      "tags": ["scss", "sass", "css", "styling", "compilation"],
       "keywords": [
         "auto",
         "claude",
@@ -16351,13 +15607,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "security",
-        "react",
-        "xss",
-        "csp",
-        "owasp"
-      ],
+      "tags": ["security", "react", "xss", "csp", "owasp"],
       "keywords": [
         "claude",
         "components",
@@ -16515,13 +15765,7 @@
       "author": "Sentry",
       "authorProfileUrl": "https://sentry.io/",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "monitoring",
-        "sentry",
-        "debugging",
-        "errors",
-        "devops"
-      ],
+      "tags": ["monitoring", "sentry", "debugging", "errors", "devops"],
       "keywords": [
         "claude",
         "debugging",
@@ -16828,13 +16072,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "slack",
-        "notifications",
-        "team",
-        "collaboration",
-        "monitoring"
-      ],
+      "tags": ["slack", "notifications", "team", "collaboration", "monitoring"],
       "keywords": [
         "claude",
         "collaboration",
@@ -17064,13 +16302,7 @@
       "seoDescription": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development.",
       "author": "Square",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "payments",
-        "square",
-        "pos",
-        "inventory",
-        "commerce"
-      ],
+      "tags": ["payments", "square", "pos", "inventory", "commerce"],
       "keywords": [
         "claude",
         "commerce",
@@ -17133,13 +16365,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "starship",
-        "powerline",
-        "nerd-fonts",
-        "git",
-        "theme"
-      ],
+      "tags": ["starship", "powerline", "nerd-fonts", "git", "theme"],
       "keywords": [
         "claude",
         "development",
@@ -17191,13 +16417,7 @@
       "seoDescription": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development.",
       "author": "Stripe",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "payments",
-        "stripe",
-        "billing",
-        "subscriptions",
-        "commerce"
-      ],
+      "tags": ["payments", "stripe", "billing", "subscriptions", "commerce"],
       "keywords": [
         "billing",
         "claude",
@@ -17259,13 +16479,7 @@
       "seoDescription": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development.",
       "author": "Stytch",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "authentication",
-        "stytch",
-        "identity",
-        "security",
-        "auth"
-      ],
+      "tags": ["authentication", "stytch", "identity", "security", "auth"],
       "keywords": [
         "auth",
         "authentication",
@@ -17439,13 +16653,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "supabase",
-        "postgres",
-        "realtime",
-        "backend",
-        "database"
-      ],
+      "tags": ["supabase", "postgres", "realtime", "backend", "database"],
       "keywords": [
         "backend",
         "builder",
@@ -17470,9 +16678,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://supabase.com/docs"
-      ],
+      "retrievalSources": ["https://supabase.com/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -17515,13 +16721,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "svelte",
-        "components",
-        "compilation",
-        "validation",
-        "frontend"
-      ],
+      "tags": ["svelte", "components", "compilation", "validation", "frontend"],
       "keywords": [
         "claude",
         "compilation",
@@ -17570,13 +16770,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "tags": [
-        "svelte",
-        "sveltekit",
-        "frontend",
-        "full-stack",
-        "reactive"
-      ],
+      "tags": ["svelte", "sveltekit", "frontend", "full-stack", "reactive"],
       "keywords": [
         "claude",
         "developer",
@@ -17604,9 +16798,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-23",
-      "retrievalSources": [
-        "https://kit.svelte.dev/"
-      ],
+      "retrievalSources": ["https://kit.svelte.dev/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -17704,13 +16896,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "email",
-        "team",
-        "stop-hook",
-        "summary",
-        "communication"
-      ],
+      "tags": ["email", "team", "stop-hook", "summary", "communication"],
       "keywords": [
         "claude",
         "communication",
@@ -17808,13 +16994,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "terraform",
-        "iac",
-        "infrastructure",
-        "cloud",
-        "devops"
-      ],
+      "tags": ["terraform", "iac", "infrastructure", "cloud", "devops"],
       "keywords": [
         "architect",
         "claude",
@@ -17859,13 +17039,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "terraform",
-        "infrastructure",
-        "iac",
-        "devops",
-        "cloud"
-      ],
+      "tags": ["terraform", "infrastructure", "iac", "devops", "cloud"],
       "keywords": [
         "claude",
         "cloud",
@@ -17914,13 +17088,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "testing",
-        "automation",
-        "qa",
-        "tdd",
-        "bdd"
-      ],
+      "tags": ["testing", "automation", "qa", "tdd", "bdd"],
       "keywords": [
         "agent",
         "agents",
@@ -17967,13 +17135,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "testing",
-        "coverage",
-        "stop-hook",
-        "reporting",
-        "quality"
-      ],
+      "tags": ["testing", "coverage", "stop-hook", "reporting", "quality"],
       "keywords": [
         "claude",
         "coverage",
@@ -18023,13 +17185,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "tags": [
-        "testing",
-        "automation",
-        "ci-cd",
-        "watch",
-        "parallel"
-      ],
+      "tags": ["testing", "automation", "ci-cd", "watch", "parallel"],
       "keywords": [
         "automation",
         "ci-cd",
@@ -18190,13 +17346,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "trpc",
-        "typescript",
-        "api",
-        "type-safety",
-        "t3-stack"
-      ],
+      "tags": ["trpc", "typescript", "api", "type-safety", "t3-stack"],
       "keywords": [
         "api",
         "builder",
@@ -18223,9 +17373,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://trpc.io/docs/"
-      ],
+      "retrievalSources": ["https://trpc.io/docs/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -18321,12 +17469,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "typescript",
-        "validation",
-        "type-safety",
-        "compilation"
-      ],
+      "tags": ["typescript", "validation", "type-safety", "compilation"],
       "keywords": [
         "checker",
         "claude",
@@ -18373,13 +17516,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
-      "tags": [
-        "ui",
-        "ux",
-        "design",
-        "user-experience",
-        "interface"
-      ],
+      "tags": ["ui", "ux", "design", "user-experience", "interface"],
       "keywords": [
         "agent",
         "agents",
@@ -18422,13 +17559,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "unraid",
-        "homelab",
-        "automation",
-        "api",
-        "operations"
-      ],
+      "tags": ["unraid", "homelab", "automation", "api", "operations"],
       "keywords": [
         "unraid api automation",
         "homelab ai skill",
@@ -18447,9 +17578,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2026-04-10",
-      "retrievalSources": [
-        "https://docs.unraid.net/API/"
-      ],
+      "retrievalSources": ["https://docs.unraid.net/API/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -18489,13 +17618,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
-      "tags": [
-        "unraid",
-        "api",
-        "homelab",
-        "automation",
-        "capability-pack"
-      ],
+      "tags": ["unraid", "api", "homelab", "automation", "capability-pack"],
       "keywords": [
         "unraid api v2",
         "unraid automation",
@@ -18627,13 +17750,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "v0",
-        "ui-generation",
-        "shadcn",
-        "react",
-        "tailwind"
-      ],
+      "tags": ["v0", "ui-generation", "shadcn", "react", "tailwind"],
       "keywords": [
         "claude",
         "commands",
@@ -18680,13 +17797,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "v0",
-        "prototyping",
-        "ui",
-        "shadcn",
-        "react"
-      ],
+      "tags": ["v0", "prototyping", "ui", "shadcn", "react"],
       "keywords": [
         "claude",
         "development",
@@ -18710,9 +17821,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://v0.dev/docs"
-      ],
+      "retrievalSources": ["https://v0.dev/docs"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -18754,13 +17863,7 @@
       "seoDescription": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development.",
       "author": "Vercel",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "deployment",
-        "vercel",
-        "hosting",
-        "devops",
-        "infrastructure"
-      ],
+      "tags": ["deployment", "vercel", "hosting", "devops", "infrastructure"],
       "keywords": [
         "claude",
         "deployment",
@@ -18823,13 +17926,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
-      "tags": [
-        "vite",
-        "build-tools",
-        "webpack",
-        "performance",
-        "frontend"
-      ],
+      "tags": ["vite", "build-tools", "webpack", "performance", "frontend"],
       "keywords": [
         "build",
         "build-tools",
@@ -18856,9 +17953,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-23",
-      "retrievalSources": [
-        "https://vitejs.dev/"
-      ],
+      "retrievalSources": ["https://vitejs.dev/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -18901,13 +17996,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "vue",
-        "vue3",
-        "composition-api",
-        "linting",
-        "best-practices"
-      ],
+      "tags": ["vue", "vue3", "composition-api", "linting", "best-practices"],
       "keywords": [
         "api",
         "best-practices",
@@ -18957,13 +18046,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "accessibility",
-        "wcag",
-        "a11y",
-        "aria",
-        "inclusive-design"
-      ],
+      "tags": ["accessibility", "wcag", "a11y", "aria", "inclusive-design"],
       "keywords": [
         "a11y",
         "accessibility",
@@ -19062,13 +18145,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "webassembly",
-        "wasm",
-        "rust",
-        "performance",
-        "wasi"
-      ],
+      "tags": ["webassembly", "wasm", "rust", "performance", "wasi"],
       "keywords": [
         "claude",
         "development",
@@ -19093,9 +18170,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://webassembly.org/"
-      ],
+      "retrievalSources": ["https://webassembly.org/"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -19138,13 +18213,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "webpack",
-        "bundle",
-        "performance",
-        "optimization",
-        "analysis"
-      ],
+      "tags": ["webpack", "bundle", "performance", "optimization", "analysis"],
       "keywords": [
         "analysis",
         "analyzer",
@@ -19192,12 +18261,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
-      "tags": [
-        "crawler",
-        "scraping",
-        "summarization",
-        "readability"
-      ],
+      "tags": ["crawler", "scraping", "summarization", "readability"],
       "keywords": [
         "and",
         "claude",
@@ -19224,9 +18288,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-15",
-      "retrievalSources": [
-        "https://github.com/mozilla/readability"
-      ],
+      "retrievalSources": ["https://github.com/mozilla/readability"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -19269,13 +18331,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "windsurf",
-        "collaboration",
-        "cascade",
-        "ai-ide",
-        "workflow"
-      ],
+      "tags": ["windsurf", "collaboration", "cascade", "ai-ide", "workflow"],
       "keywords": [
         "ai-ide",
         "cascade",
@@ -19301,9 +18357,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://docs.codeium.com/windsurf"
-      ],
+      "retrievalSources": ["https://docs.codeium.com/windsurf"],
       "testedPlatforms": [
         "Claude",
         "Codex",
@@ -19346,13 +18400,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "windsurf",
-        "ai-ide",
-        "cascade",
-        "flow",
-        "collaboration"
-      ],
+      "tags": ["windsurf", "ai-ide", "cascade", "flow", "collaboration"],
       "keywords": [
         "ai-ide",
         "cascade",
@@ -19399,13 +18447,7 @@
       "seoDescription": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development.",
       "author": "Workato",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "automation",
-        "workato",
-        "integration",
-        "workflow",
-        "iPaaS"
-      ],
+      "tags": ["automation", "workato", "integration", "workflow", "iPaaS"],
       "keywords": [
         "automation",
         "claude",
@@ -19468,13 +18510,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
-      "tags": [
-        "reporting",
-        "workflow",
-        "analytics",
-        "summary",
-        "stop-hook"
-      ],
+      "tags": ["reporting", "workflow", "analytics", "summary", "stop-hook"],
       "keywords": [
         "analytics",
         "claude",
@@ -19586,13 +18622,7 @@
       "seoDescription": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development.",
       "author": "Zapier",
       "dateAdded": "2025-09-18",
-      "tags": [
-        "automation",
-        "zapier",
-        "integration",
-        "workflow",
-        "no-code"
-      ],
+      "tags": ["automation", "zapier", "integration", "workflow", "no-code"],
       "keywords": [
         "automation",
         "claude",
@@ -19724,13 +18754,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
-      "tags": [
-        "zod",
-        "validation",
-        "typescript",
-        "type-safety",
-        "schema"
-      ],
+      "tags": ["zod", "validation", "typescript", "type-safety", "schema"],
       "keywords": [
         "claude",
         "development",
@@ -19755,9 +18779,7 @@
       "skillLevel": "advanced",
       "verificationStatus": "draft",
       "verifiedAt": "2025-10-16",
-      "retrievalSources": [
-        "https://zod.dev/"
-      ],
+      "retrievalSources": ["https://zod.dev/"],
       "testedPlatforms": [
         "Claude",
         "Codex",

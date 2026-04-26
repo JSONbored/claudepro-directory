@@ -1,0 +1,662 @@
+# Svelte Component Compiler - Hooks
+URL: https://heyclau.de/hooks/svelte-component-compiler
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/svelte-component-compiler.mdx
+## Summary
+Automatically compiles and validates Svelte components when they are modified.
+## Tags
+- svelte
+- components
+- compilation
+- validation
+- frontend
+## Content
+## Features
+- Automatic Svelte component compilation and validation including Svelte compilation (automatic Svelte component compilation on file changes, Svelte syntax validation with syntax checking, Svelte type checking with TypeScript support, Svelte component validation with component verification), compilation optimization (compilation performance with fast compilation, compilation reliability with error handling, compilation efficiency with efficient processing, compilation reporting with compilation status), compilation validation (compilation syntax validation with syntax verification, compilation type validation with type checking, compilation component validation with component verification, compilation dependency validation with dependency checking), and compilation reporting (compilation status reporting with compilation status, compilation error reporting with error details, compilation statistics with compilation metrics, compilation analytics with compilation analytics)
+- Real-time syntax and type checking including syntax checking (real-time Svelte syntax validation with syntax detection, syntax error detection with error identification, syntax validation with validation checking, syntax reporting with syntax status), type checking (TypeScript type checking in Svelte components with type validation, type error detection with error identification, type validation with validation checking, type reporting with type status), checking optimization (checking performance with fast checking, checking reliability with reliable checking, checking efficiency with efficient checking, checking reporting with checking status), and checking reporting (syntax checking reporting with syntax status, type checking reporting with type status, checking error reporting with error details, checking analytics with checking metrics)
+- SvelteKit project integration including SvelteKit detection (SvelteKit project detection with project identification, SvelteKit configuration detection with config detection, SvelteKit integration with SvelteKit support, SvelteKit validation with SvelteKit verification), SvelteKit configuration (SvelteKit config management with config settings, SvelteKit routing validation with routing checking, SvelteKit SSR validation with SSR checking, SvelteKit adapter validation with adapter checking), SvelteKit management (SvelteKit project management with project settings, SvelteKit build validation with build checking, SvelteKit deployment validation with deployment checking, SvelteKit analytics with SvelteKit metrics), and SvelteKit reporting (SvelteKit detection reporting with detection status, SvelteKit configuration reporting with config status, SvelteKit validation reporting with validation status, SvelteKit analytics with SvelteKit statistics)
+- Component dependency analysis including dependency detection (component dependency detection with dependency identification, component import analysis with import checking, component store analysis with store checking, component module analysis with module checking), dependency management (dependency tracking with dependency monitoring, dependency validation with dependency verification, dependency optimization with dependency improvement, dependency reporting with dependency status), dependency analysis (dependency graph analysis with graph visualization, dependency cycle detection with cycle identification, dependency optimization suggestions with optimization recommendations, dependency analytics with dependency metrics), and dependency reporting (dependency detection reporting with detection status, dependency analysis reporting with analysis status, dependency optimization reporting with optimization status, dependency analytics with dependency statistics)
+- Performance optimization suggestions including performance analysis (component performance analysis with performance metrics, component bundle size analysis with bundle checking, component render performance with render metrics, component optimization suggestions with optimization recommendations), optimization management (optimization tracking with optimization monitoring, optimization validation with optimization verification, optimization implementation with optimization deployment, optimization reporting with optimization status), optimization analysis (performance bottleneck identification with bottleneck detection, optimization opportunity detection with opportunity identification, optimization impact analysis with impact measurement, optimization analytics with optimization metrics), and optimization reporting (performance analysis reporting with performance status, optimization suggestion reporting with suggestion status, optimization impact reporting with impact status, optimization analytics with optimization statistics)
+- Accessibility validation for components including accessibility checking (component accessibility validation with accessibility checking, ARIA attribute validation with ARIA checking, semantic HTML validation with semantic checking, keyboard navigation validation with keyboard checking), accessibility management (accessibility tracking with accessibility monitoring, accessibility validation with accessibility verification, accessibility improvement with accessibility enhancement, accessibility reporting with accessibility status), accessibility analysis (accessibility issue detection with issue identification, accessibility best practices validation with best practices checking, accessibility compliance checking with compliance verification, accessibility analytics with accessibility metrics), and accessibility reporting (accessibility checking reporting with checking status, accessibility issue reporting with issue status, accessibility compliance reporting with compliance status, accessibility analytics with accessibility statistics)
+- Component pattern analysis and best practices including pattern detection (Svelte component pattern detection with pattern identification, component structure analysis with structure checking, component composition analysis with composition checking, component best practices validation with best practices checking), pattern management (pattern tracking with pattern monitoring, pattern validation with pattern verification, pattern optimization with pattern improvement, pattern reporting with pattern status), pattern analysis (component pattern analysis with pattern metrics, best practices compliance checking with compliance verification, component structure optimization with structure improvement, pattern analytics with pattern metrics), and pattern reporting (pattern detection reporting with detection status, pattern analysis reporting with analysis status, pattern optimization reporting with optimization status, pattern analytics with pattern statistics)
+- Development workflow integration including continuous validation (real-time Svelte component validation on file changes, immediate validation on component modifications, automatic validation on component updates, seamless Svelte integration with development workflow), workflow automation (automated Svelte validation without manual intervention, validation automation with automatic checking, component quality automation with automatic quality checks), and workflow optimization (component validation with component monitoring, validation optimization with optimization, component quality maintenance with quality checks)
+
+## Use Cases
+- Validate Svelte component syntax after editing automatically checking Svelte syntax, detecting syntax errors, and providing syntax validation
+- Ensure components compile without errors automatically validating component compilation, detecting compilation errors, and providing compilation status
+- Check for Svelte best practices compliance automatically analyzing component patterns, detecting best practices violations, and providing compliance recommendations
+- Detect accessibility issues in components automatically checking accessibility attributes, detecting accessibility issues, and providing accessibility recommendations
+- Analyze component dependencies and optimize performance automatically analyzing component dependencies, detecting performance issues, and providing optimization suggestions
+- Development workflow integration seamlessly integrating Svelte component validation into development workflows without manual validation or component quality checks
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/svelte-component-compiler.sh
+3. Make executable: chmod +x .claude/hooks/svelte-component-compiler.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Node.js and npm installed (for svelte-check)
+- @sveltejs/language-server and svelte-check (npm install -D @sveltejs/language-server svelte-check)
+- Svelte project (package.json with svelte dependency)
+- SvelteKit project (optional, for SvelteKit-specific validation)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/svelte-component-compiler.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/svelte-component-compiler.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Svelte component file
+if [[ "$FILE_PATH" == *.svelte ]]; then
+    echo "🔥 Svelte Component Compiler - Validating Svelte component..."
+    echo "📄 Component: $FILE_PATH"
+    
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Component file not found: $FILE_PATH"
+        exit 1
+    fi
+    
+    # Check if this is a SvelteKit project
+    SVELTEKIT_PROJECT=false
+    if [ -f "svelte.config.js" ] || [ -f "vite.config.js" ] && grep -q "@sveltejs/kit" package.json 2>/dev/null; then
+        echo "🎯 SvelteKit project detected"
+        SVELTEKIT_PROJECT=true
+    elif [ -f "package.json" ] && grep -q "svelte" package.json 2>/dev/null; then
+        echo "⚡ Svelte project detected"
+    else
+        echo "ℹ️ No Svelte project configuration found"
+    fi
+    
+    # Check for required tools
+    echo "🔍 Checking Svelte toolchain..."
+    
+    SVELTE_CHECK_AVAILABLE=false
+    if command -v npx >/dev/null 2>&1 && npx svelte-check --version >/dev/null 2>&1; then
+        SVELTE_CHECK_AVAILABLE=true
+        SVELTE_CHECK_VERSION=$(npx svelte-check --version 2>/dev/null)
+        echo "✅ svelte-check available: $SVELTE_CHECK_VERSION"
+    else
+        echo "⚠️ svelte-check not available - install with: npm install -D @sveltejs/language-server svelte-check"
+    fi
+    
+    # Component syntax validation
+    echo ""
+    echo "🔍 Validating component syntax..."
+    
+    # Basic syntax validation
+    if grep -q '<script' "$FILE_PATH" && grep -q '</script>' "$FILE_PATH"; then
+        echo "✅ Script block found"
+        
+        # Check for TypeScript
+        if grep -q '<script lang=["']ts["']>' "$FILE_PATH"; then
+            echo "📘 TypeScript detected in component"
+        fi
+    fi
+    
+    if grep -q '<style' "$FILE_PATH" && grep -q '</style>' "$FILE_PATH"; then
+        echo "✅ Style block found"
+        
+        # Check for scoped styles
+        if grep -q '<style.*scoped' "$FILE_PATH"; then
+            echo "🎯 Scoped styles detected"
+        fi
+    fi
+    
+    # Run svelte-check if available
+    if [ "$SVELTE_CHECK_AVAILABLE" = true ]; then
+        echo ""
+        echo "🔍 Running svelte-check validation..."
+        
+        if npx svelte-check --output human --no-tsconfig 2>&1; then
+            echo "✅ Svelte component validation passed"
+        else
+            echo "❌ Svelte component validation failed"
+            echo "💡 Check the errors above and fix component issues"
+        fi
+    fi
+    
+    # Component analysis
+    echo ""
+    echo "📊 Component Analysis:"
+    
+    # Count component features
+    PROPS_COUNT=$(grep -c 'export let' "$FILE_PATH" 2>/dev/null || echo 0)
+    REACTIVE_COUNT=$(grep -c '\$:' "$FILE_PATH" 2>/dev/null || echo 0)
+    STORES_COUNT=$(grep -c 'import.*from.*svelte/store' "$FILE_PATH" 2>/dev/null || echo 0)
+    
+    echo "  • Props: $PROPS_COUNT"
+    echo "  • Reactive statements: $REACTIVE_COUNT"
+    echo "  • Store imports: $STORES_COUNT"
+    
+    # Check for common patterns
+    if grep -q 'on:click' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🖱️ Click handlers detected"
+    fi
+    
+    if grep -q 'bind:' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔗 Data binding detected"
+    fi
+    
+    if grep -q '{#if' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔀 Conditional rendering detected"
+    fi
+    
+    if grep -q '{#each' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔁 List rendering detected"
+    fi
+    
+    # Accessibility checks
+    echo ""
+    echo "♿ Accessibility Analysis:"
+    
+    if grep -q 'alt=' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ Image alt attributes found"
+    fi
+    
+    if grep -q 'aria-' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ ARIA attributes detected"
+    fi
+    
+    if grep -q 'role=' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ Role attributes found"
+    fi
+    
+    # Performance suggestions
+    echo ""
+    echo "⚡ Performance Tips:"
+    
+    if grep -q 'import.*from.*svelte/transition' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🎬 Transitions detected - ensure they're necessary"
+    fi
+    
+    if [ "$REACTIVE_COUNT" -gt 5 ]; then
+        echo "  • ⚠️ Many reactive statements - consider component splitting"
+    fi
+    
+    echo ""
+    echo "💡 Svelte Best Practices:"
+    echo "  • Use 'export let' for component props"
+    echo "  • Prefer reactive statements over complex logic in templates"
+    echo "  • Use stores for shared state between components"
+    echo "  • Implement proper accessibility attributes"
+    echo "  • Use SvelteKit for full-stack applications"
+    echo "  • Consider component composition over large single components"
+    
+    echo ""
+    echo "🎯 Svelte component validation complete!"
+    
+else
+    echo "ℹ️ File is not a Svelte component: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a Svelte component file
+if [[ "$FILE_PATH" == *.svelte ]]; then
+    echo "🔥 Svelte Component Compiler - Validating Svelte component..."
+    echo "📄 Component: $FILE_PATH"
+    
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ Component file not found: $FILE_PATH"
+        exit 1
+    fi
+    
+    # Check if this is a SvelteKit project
+    SVELTEKIT_PROJECT=false
+    if [ -f "svelte.config.js" ] || [ -f "vite.config.js" ] && grep -q "@sveltejs/kit" package.json 2>/dev/null; then
+        echo "🎯 SvelteKit project detected"
+        SVELTEKIT_PROJECT=true
+    elif [ -f "package.json" ] && grep -q "svelte" package.json 2>/dev/null; then
+        echo "⚡ Svelte project detected"
+    else
+        echo "ℹ️ No Svelte project configuration found"
+    fi
+    
+    # Check for required tools
+    echo "🔍 Checking Svelte toolchain..."
+    
+    SVELTE_CHECK_AVAILABLE=false
+    if command -v npx >/dev/null 2>&1 && npx svelte-check --version >/dev/null 2>&1; then
+        SVELTE_CHECK_AVAILABLE=true
+        SVELTE_CHECK_VERSION=$(npx svelte-check --version 2>/dev/null)
+        echo "✅ svelte-check available: $SVELTE_CHECK_VERSION"
+    else
+        echo "⚠️ svelte-check not available - install with: npm install -D @sveltejs/language-server svelte-check"
+    fi
+    
+    # Component syntax validation
+    echo ""
+    echo "🔍 Validating component syntax..."
+    
+    # Basic syntax validation
+    if grep -q '<script' "$FILE_PATH" && grep -q '</script>' "$FILE_PATH"; then
+        echo "✅ Script block found"
+        
+        # Check for TypeScript
+        if grep -q '<script lang=["']ts["']>' "$FILE_PATH"; then
+            echo "📘 TypeScript detected in component"
+        fi
+    fi
+    
+    if grep -q '<style' "$FILE_PATH" && grep -q '</style>' "$FILE_PATH"; then
+        echo "✅ Style block found"
+        
+        # Check for scoped styles
+        if grep -q '<style.*scoped' "$FILE_PATH"; then
+            echo "🎯 Scoped styles detected"
+        fi
+    fi
+    
+    # Run svelte-check if available
+    if [ "$SVELTE_CHECK_AVAILABLE" = true ]; then
+        echo ""
+        echo "🔍 Running svelte-check validation..."
+        
+        if npx svelte-check --output human --no-tsconfig 2>&1; then
+            echo "✅ Svelte component validation passed"
+        else
+            echo "❌ Svelte component validation failed"
+            echo "💡 Check the errors above and fix component issues"
+        fi
+    fi
+    
+    # Component analysis
+    echo ""
+    echo "📊 Component Analysis:"
+    
+    # Count component features
+    PROPS_COUNT=$(grep -c 'export let' "$FILE_PATH" 2>/dev/null || echo 0)
+    REACTIVE_COUNT=$(grep -c '\$:' "$FILE_PATH" 2>/dev/null || echo 0)
+    STORES_COUNT=$(grep -c 'import.*from.*svelte/store' "$FILE_PATH" 2>/dev/null || echo 0)
+    
+    echo "  • Props: $PROPS_COUNT"
+    echo "  • Reactive statements: $REACTIVE_COUNT"
+    echo "  • Store imports: $STORES_COUNT"
+    
+    # Check for common patterns
+    if grep -q 'on:click' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🖱️ Click handlers detected"
+    fi
+    
+    if grep -q 'bind:' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔗 Data binding detected"
+    fi
+    
+    if grep -q '{#if' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔀 Conditional rendering detected"
+    fi
+    
+    if grep -q '{#each' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🔁 List rendering detected"
+    fi
+    
+    # Accessibility checks
+    echo ""
+    echo "♿ Accessibility Analysis:"
+    
+    if grep -q 'alt=' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ Image alt attributes found"
+    fi
+    
+    if grep -q 'aria-' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ ARIA attributes detected"
+    fi
+    
+    if grep -q 'role=' "$FILE_PATH" 2>/dev/null; then
+        echo "  • ✅ Role attributes found"
+    fi
+    
+    # Performance suggestions
+    echo ""
+    echo "⚡ Performance Tips:"
+    
+    if grep -q 'import.*from.*svelte/transition' "$FILE_PATH" 2>/dev/null; then
+        echo "  • 🎬 Transitions detected - ensure they're necessary"
+    fi
+    
+    if [ "$REACTIVE_COUNT" -gt 5 ]; then
+        echo "  • ⚠️ Many reactive statements - consider component splitting"
+    fi
+    
+    echo ""
+    echo "💡 Svelte Best Practices:"
+    echo "  • Use 'export let' for component props"
+    echo "  • Prefer reactive statements over complex logic in templates"
+    echo "  • Use stores for shared state between components"
+    echo "  • Implement proper accessibility attributes"
+    echo "  • Use SvelteKit for full-stack applications"
+    echo "  • Consider component composition over large single components"
+    
+    echo ""
+    echo "🎯 Svelte component validation complete!"
+    
+else
+    echo "ℹ️ File is not a Svelte component: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### Svelte Component Compiler Hook Script
+
+Complete hook script that validates Svelte components on file changes
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  echo "🔥 Svelte Component Compiler - Validating Svelte component..."
+  echo "📄 Component: $FILE_PATH"
+  if [ ! -f "$FILE_PATH" ]; then
+    echo "⚠️ Component file not found: $FILE_PATH"
+    exit 1
+  fi
+  if command -v npx >/dev/null 2>&1 && npx svelte-check --version >/dev/null 2>&1; then
+    echo "🔍 Running svelte-check validation..."
+    npx svelte-check --output human --no-tsconfig 2>&1
+  else
+    echo "⚠️ svelte-check not available - install with: npm install -D @sveltejs/language-server svelte-check"
+  fi
+  echo "🎯 Svelte component validation complete!"
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Svelte component validation
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/svelte-component-compiler.sh",
+      "matchers": ["write:**/*.svelte", "edit:**/*.svelte"]
+    }
+  }
+}
+```
+### Enhanced Svelte Component Analysis
+
+Enhanced hook script with component analysis and SvelteKit detection
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  SVELTEKIT_PROJECT=false
+  if [ -f "svelte.config.js" ] && grep -q "@sveltejs/kit" package.json 2>/dev/null; then
+    SVELTEKIT_PROJECT=true
+    echo "🎯 SvelteKit project detected"
+  fi
+  PROPS_COUNT=$(grep -c 'export let' "$FILE_PATH" 2>/dev/null || echo 0)
+  REACTIVE_COUNT=$(grep -v '<style' "$FILE_PATH" | grep -c '\$:' 2>/dev/null || echo 0)
+  STORES_COUNT=$(grep -c 'import.*from.*svelte/store' "$FILE_PATH" 2>/dev/null || echo 0)
+  echo "📊 Component Analysis:"
+  echo "  • Props: $PROPS_COUNT"
+  echo "  • Reactive statements: $REACTIVE_COUNT"
+  echo "  • Store imports: $STORES_COUNT"
+  if [ "$REACTIVE_COUNT" -gt 5 ]; then
+    echo "  • ⚠️ Many reactive statements - consider component splitting"
+  fi
+  if command -v npx >/dev/null 2>&1; then
+    npx svelte-check --output human --no-tsconfig 2>&1
+  fi
+fi
+exit 0
+```
+### Svelte Component Accessibility Validation
+
+Enhanced hook script with comprehensive accessibility validation
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  echo "♿ Accessibility Analysis:"
+  if grep -q 'alt=' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ Image alt attributes found"
+  else
+    echo "  • ⚠️ Missing image alt attributes"
+  fi
+  if grep -q 'aria-' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ ARIA attributes detected"
+  else
+    echo "  • ⚠️ Consider adding ARIA attributes for accessibility"
+  fi
+  if grep -q 'role=' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ Role attributes found"
+  fi
+  if ! grep -q 'on:keydown\|on:keyup' "$FILE_PATH" 2>/dev/null && grep -q 'on:click' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ⚠️ Click handlers should have keyboard equivalents"
+  fi
+  if command -v npx >/dev/null 2>&1; then
+    npx svelte-check --output human --no-tsconfig 2>&1
+  fi
+fi
+exit 0
+```
+### Svelte Component Compiler Configuration Example
+
+Example Svelte component compiler configuration for customizing validation behavior
+
+```json
+{
+  "svelte": {
+    "check_on_save": true,
+    "sveltekit_detection": true,
+    "accessibility_checks": true,
+    "performance_analysis": true,
+    "dependency_analysis": true,
+    "svelte_check_options": {
+      "output": "human",
+      "no_tsconfig": false,
+      "workspace": "src/components"
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  echo "🔥 Svelte Component Compiler - Validating Svelte component..."
+  echo "📄 Component: $FILE_PATH"
+  if [ ! -f "$FILE_PATH" ]; then
+    echo "⚠️ Component file not found: $FILE_PATH"
+    exit 1
+  fi
+  if command -v npx >/dev/null 2>&1 && npx svelte-check --version >/dev/null 2>&1; then
+    echo "🔍 Running svelte-check validation..."
+    npx svelte-check --output human --no-tsconfig 2>&1
+  else
+    echo "⚠️ svelte-check not available - install with: npm install -D @sveltejs/language-server svelte-check"
+  fi
+  echo "🎯 Svelte component validation complete!"
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/svelte-component-compiler.sh",
+      "matchers": ["write:**/*.svelte", "edit:**/*.svelte"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  SVELTEKIT_PROJECT=false
+  if [ -f "svelte.config.js" ] && grep -q "@sveltejs/kit" package.json 2>/dev/null; then
+    SVELTEKIT_PROJECT=true
+    echo "🎯 SvelteKit project detected"
+  fi
+  PROPS_COUNT=$(grep -c 'export let' "$FILE_PATH" 2>/dev/null || echo 0)
+  REACTIVE_COUNT=$(grep -v '<style' "$FILE_PATH" | grep -c '\$:' 2>/dev/null || echo 0)
+  STORES_COUNT=$(grep -c 'import.*from.*svelte/store' "$FILE_PATH" 2>/dev/null || echo 0)
+  echo "📊 Component Analysis:"
+  echo "  • Props: $PROPS_COUNT"
+  echo "  • Reactive statements: $REACTIVE_COUNT"
+  echo "  • Store imports: $STORES_COUNT"
+  if [ "$REACTIVE_COUNT" -gt 5 ]; then
+    echo "  • ⚠️ Many reactive statements - consider component splitting"
+  fi
+  if command -v npx >/dev/null 2>&1; then
+    npx svelte-check --output human --no-tsconfig 2>&1
+  fi
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.svelte ]]; then
+  echo "♿ Accessibility Analysis:"
+  if grep -q 'alt=' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ Image alt attributes found"
+  else
+    echo "  • ⚠️ Missing image alt attributes"
+  fi
+  if grep -q 'aria-' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ ARIA attributes detected"
+  else
+    echo "  • ⚠️ Consider adding ARIA attributes for accessibility"
+  fi
+  if grep -q 'role=' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ✅ Role attributes found"
+  fi
+  if ! grep -q 'on:keydown\|on:keyup' "$FILE_PATH" 2>/dev/null && grep -q 'on:click' "$FILE_PATH" 2>/dev/null; then
+    echo "  • ⚠️ Click handlers should have keyboard equivalents"
+  fi
+  if command -v npx >/dev/null 2>&1; then
+    npx svelte-check --output human --no-tsconfig 2>&1
+  fi
+fi
+exit 0
+```
+```json
+{
+  "svelte": {
+    "check_on_save": true,
+    "sveltekit_detection": true,
+    "accessibility_checks": true,
+    "performance_analysis": true,
+    "dependency_analysis": true,
+    "svelte_check_options": {
+      "output": "human",
+      "no_tsconfig": false,
+      "workspace": "src/components"
+    }
+  }
+}
+```
+
+## Troubleshooting
+### svelte-check reports 'Cannot find module' errors for valid imports
+
+Missing @types or incorrect tsconfig paths. Install: npm install --save-dev @sveltejs/vite-plugin-svelte @types/node. Add to tsconfig: "types": ["svelte", "vite/client"] enabling Svelte module resolution. Verify tsconfig.json paths. Check import paths.
+### Hook runs validation on every file save not just .svelte files
+
+Matchers too broad catching all writes/edits. Restrict: 'matchers': ['write:**/*.svelte', 'edit:**/*.svelte'] targeting Svelte components only. Prevents unnecessary checks on JS/TS files. Verify matcher patterns. Test with various file types.
+### SvelteKit detection fails despite valid svelte.config.js present
+
+Config check requires both svelte.config.js AND @sveltejs/kit in package.json. Verify: grep @sveltejs/kit package.json. Or simplify: if [ -f "svelte.config.js" ]; then SVELTEKIT_PROJECT=true; fi. Check package.json. Verify SvelteKit installation.
+### Reactive statement count includes CSS variables with $ prefix
+
+grep '\$:' matches CSS custom properties in <style>. Refine: grep -v '<style' file.svelte | grep -c '\$:' excluding style blocks. Or target: grep '<script' -A 100 | grep -c '\$:'. Verify pattern matching. Test with various component structures.
+### npx svelte-check slow taking 30+ seconds per component validation
+
+Checks entire project not single file. Remove --no-tsconfig: run full project check on session end not per-file. Or use '--workspace' limiting scope: svelte-check --workspace src/components. Consider caching. Optimize validation scope.
+### TypeScript errors in Svelte components not detected
+
+Ensure tsconfig.json includes Svelte types. Add "types": ["svelte", "vite/client"] to tsconfig.json. Install @types/node. Verify TypeScript configuration. Check svelte-check TypeScript support.
+### Component validation fails with 'svelte-check not found'
+
+Install svelte-check: npm install -D @sveltejs/language-server svelte-check. Verify npx availability. Check npm installation. Verify package.json dependencies. Test with npx svelte-check --version.
+### Accessibility checks miss keyboard navigation requirements
+
+Enhance accessibility pattern matching. Check for on:keydown/on:keyup alongside on:click. Verify ARIA attributes. Check semantic HTML usage. Test with various component patterns. Consider using accessibility linting tools.

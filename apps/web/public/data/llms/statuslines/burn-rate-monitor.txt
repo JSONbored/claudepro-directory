@@ -1,0 +1,403 @@
+# Burn Rate Monitor - Statuslines
+URL: https://heyclau.de/statuslines/burn-rate-monitor
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/statusline
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx
+## Summary
+Real-time burn rate monitor showing cost per minute, tokens per minute, and projected daily spend to prevent budget overruns during Claude Code sessions.
+## Tags
+- burn-rate
+- cost-tracking
+- budget
+- monitoring
+- real-time
+## Content
+## Features
+- Real-time cost per minute calculation from session data
+- Tokens per minute estimation based on lines added/removed
+- Projected daily spend at current burn rate (24-hour projection)
+- Color-coded burn rate alerts (green <$0.05/min, yellow $0.05-$0.10/min, red >$0.10/min)
+- Prevents budget overruns with live spending visibility
+- Lightweight bash script with bc for floating-point math
+- Works with any Claude Code model (Opus, Sonnet, Haiku)
+- Zero external dependencies beyond jq and bc
+
+## Use Cases
+- Budget-conscious developers tracking spending in real-time
+- Teams with daily/monthly Claude Code budget limits
+- Freelancers billing clients for AI-assisted development time
+- Identifying expensive sessions before costs spiral
+- Optimizing model selection based on burn rate feedback
+- Production environments monitoring AI cost efficiency
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for arithmetic operations)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- bc calculator (bc 1.07+ required for floating point calculations - script will fail without bc)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded burn rate alerts)
+- System clock accuracy (NTP sync recommended for accurate duration calculations)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh",
+    "refreshInterval": 500
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh",
+    "refreshInterval": 500
+  }
+}
+```
+
+## Examples
+### Enhanced Burn Rate Monitor with Budget Alerts
+Extended version with daily budget threshold warnings
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Burn Rate Monitor with Budget Alerts
+
+DAILY_BUDGET=${DAILY_BUDGET_USD:-50.00}
+
+input=$(cat)
+
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "$((total_duration_ms / 60000))")
+else
+  duration_minutes=0.01
+fi
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  cost_per_minute=0
+fi
+
+total_tokens=$(( (lines_added + lines_removed) * 10 ))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  tokens_per_minute=$(echo "scale=0; $total_tokens / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  tokens_per_minute=0
+fi
+
+if (( $(echo "$cost_per_minute > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=2; $cost_per_minute * 1440" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+# Budget alert color
+if (( $(echo "$daily_projection > $DAILY_BUDGET" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+  BUDGET_ALERT=" ⚠ OVER BUDGET"
+elif (( $(echo "$cost_per_minute > 0.10" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+  BUDGET_ALERT=""
+elif (( $(echo "$cost_per_minute > 0.05" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;226m"
+  BUDGET_ALERT=""
+else
+  BURN_COLOR="\033[38;5;46m"
+  BUDGET_ALERT=""
+fi
+
+RESET="\033[0m"
+
+echo -e "${BURN_COLOR}🔥 Burn: $${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: $${daily_projection}${BUDGET_ALERT}${RESET}"
+
+# Budget warning (stderr)
+if (( $(echo "$daily_projection > $DAILY_BUDGET" | bc -l 2>/dev/null || echo "0") )); then
+  echo "⚠ BUDGET ALERT: Projected daily spend ($${daily_projection}) exceeds budget ($${DAILY_BUDGET})" >&2
+fi
+```
+### Burn Rate Monitor with Custom Thresholds
+Configurable burn rate thresholds for different budget scenarios
+```bash
+#!/usr/bin/env bash
+
+# Burn Rate Monitor with Custom Thresholds
+
+HIGH_THRESHOLD=${BURN_RATE_HIGH:-0.10}
+MEDIUM_THRESHOLD=${BURN_RATE_MEDIUM:-0.05}
+
+input=$(cat)
+
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "$((total_duration_ms / 60000))")
+else
+  duration_minutes=0.01
+fi
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  cost_per_minute=0
+fi
+
+total_tokens=$(( (lines_added + lines_removed) * 10 ))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  tokens_per_minute=$(echo "scale=0; $total_tokens / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  tokens_per_minute=0
+fi
+
+if (( $(echo "$cost_per_minute > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=2; $cost_per_minute * 1440" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+# Custom thresholds
+if (( $(echo "$cost_per_minute > $HIGH_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+elif (( $(echo "$cost_per_minute > $MEDIUM_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;226m"
+else
+  BURN_COLOR="\033[38;5;46m"
+fi
+
+RESET="\033[0m"
+
+echo -e "${BURN_COLOR}🔥 Burn: $${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: $${daily_projection}"
+```
+### Burn Rate Monitor Installation Example
+Complete setup script with bc installation check
+```bash
+#!/bin/bash
+# Installation script for Burn Rate Monitor
+
+mkdir -p .claude/statuslines
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+  echo "Installing bc for floating point calculations..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install bc
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get install -y bc || sudo yum install -y bc
+  else
+    echo "Please install bc manually: https://www.gnu.org/software/bc/"
+  fi
+fi
+
+cat > .claude/statuslines/burn-rate-monitor.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# Paste the full statusline script from the primary example above before running this installer.
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/burn-rate-monitor.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh","refreshInterval":500}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Burn Rate Monitor installed successfully!"
+echo "Note: bc is required for floating point calculations. Script refreshes every 500ms for real-time monitoring."
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Burn Rate Monitor with Budget Alerts
+
+DAILY_BUDGET=${DAILY_BUDGET_USD:-50.00}
+
+input=$(cat)
+
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "$((total_duration_ms / 60000))")
+else
+  duration_minutes=0.01
+fi
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  cost_per_minute=0
+fi
+
+total_tokens=$(( (lines_added + lines_removed) * 10 ))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  tokens_per_minute=$(echo "scale=0; $total_tokens / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  tokens_per_minute=0
+fi
+
+if (( $(echo "$cost_per_minute > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=2; $cost_per_minute * 1440" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+# Budget alert color
+if (( $(echo "$daily_projection > $DAILY_BUDGET" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+  BUDGET_ALERT=" ⚠ OVER BUDGET"
+elif (( $(echo "$cost_per_minute > 0.10" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+  BUDGET_ALERT=""
+elif (( $(echo "$cost_per_minute > 0.05" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;226m"
+  BUDGET_ALERT=""
+else
+  BURN_COLOR="\033[38;5;46m"
+  BUDGET_ALERT=""
+fi
+
+RESET="\033[0m"
+
+echo -e "${BURN_COLOR}🔥 Burn: $${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: $${daily_projection}${BUDGET_ALERT}${RESET}"
+
+# Budget warning (stderr)
+if (( $(echo "$daily_projection > $DAILY_BUDGET" | bc -l 2>/dev/null || echo "0") )); then
+  echo "⚠ BUDGET ALERT: Projected daily spend ($${daily_projection}) exceeds budget ($${DAILY_BUDGET})" >&2
+fi
+```
+```bash
+#!/usr/bin/env bash
+
+# Burn Rate Monitor with Custom Thresholds
+
+HIGH_THRESHOLD=${BURN_RATE_HIGH:-0.10}
+MEDIUM_THRESHOLD=${BURN_RATE_MEDIUM:-0.05}
+
+input=$(cat)
+
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+total_duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 1')
+lines_added=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
+
+if [ "$total_duration_ms" -gt 0 ]; then
+  duration_minutes=$(echo "scale=2; $total_duration_ms / 60000" | bc 2>/dev/null || echo "$((total_duration_ms / 60000))")
+else
+  duration_minutes=0.01
+fi
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  cost_per_minute=$(echo "scale=4; $total_cost / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  cost_per_minute=0
+fi
+
+total_tokens=$(( (lines_added + lines_removed) * 10 ))
+
+if (( $(echo "$duration_minutes > 0" | bc -l 2>/dev/null || echo "1") )); then
+  tokens_per_minute=$(echo "scale=0; $total_tokens / $duration_minutes" | bc 2>/dev/null || echo "0")
+else
+  tokens_per_minute=0
+fi
+
+if (( $(echo "$cost_per_minute > 0" | bc -l 2>/dev/null || echo "0") )); then
+  daily_projection=$(echo "scale=2; $cost_per_minute * 1440" | bc 2>/dev/null || echo "0")
+else
+  daily_projection=0
+fi
+
+# Custom thresholds
+if (( $(echo "$cost_per_minute > $HIGH_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;196m"
+elif (( $(echo "$cost_per_minute > $MEDIUM_THRESHOLD" | bc -l 2>/dev/null || echo "0") )); then
+  BURN_COLOR="\033[38;5;226m"
+else
+  BURN_COLOR="\033[38;5;46m"
+fi
+
+RESET="\033[0m"
+
+echo -e "${BURN_COLOR}🔥 Burn: $${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: $${daily_projection}"
+```
+```bash
+#!/bin/bash
+# Installation script for Burn Rate Monitor
+
+mkdir -p .claude/statuslines
+
+# Check for bc (required for floating point calculations)
+if ! command -v bc &> /dev/null; then
+  echo "Installing bc for floating point calculations..."
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    brew install bc
+  elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    sudo apt-get install -y bc || sudo yum install -y bc
+  else
+    echo "Please install bc manually: https://www.gnu.org/software/bc/"
+  fi
+fi
+
+cat > .claude/statuslines/burn-rate-monitor.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+# Paste the full statusline script from the primary example above before running this installer.
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/burn-rate-monitor.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+  echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh","refreshInterval":500}}' > .claude/settings.json
+else
+  jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/burn-rate-monitor.sh","refreshInterval":500}' .claude/settings.json > .claude/settings.json.tmp
+  mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Burn Rate Monitor installed successfully!"
+echo "Note: bc is required for floating point calculations. Script refreshes every 500ms for real-time monitoring."
+```
+
+## Troubleshooting
+### Burn rate showing 0 or incorrect values despite active session
+
+Verify cost.total_cost_usd and cost.total_duration_ms fields exist in JSON: echo '$input' | jq .cost. Ensure bc is installed: which bc. Check division by zero protection is working for very short sessions. Test calculations: echo 'scale=4; 0.05 / 1.5' | bc (should return 0.0333). Verify duration_minutes calculation: duration_minutes=$((total_duration_ms / 60000)).
+### bc command not found error when running script
+
+Install bc calculator: brew install bc (macOS), apt install bc (Linux), or download from https://www.gnu.org/software/bc/. Alternative: use awk for calculations if bc unavailable: awk -v cost=$total_cost -v dur=$duration_minutes 'BEGIN {print cost/dur}'. Verify bc installation: bc --version. Check PATH includes bc location.
+### Daily projection seems unrealistically high
+
+Daily projection assumes CONTINUOUS usage at current burn rate for 24 hours. This is intentional for worst-case budgeting. Actual daily cost will be lower if you don't use Claude Code 24/7. Adjust multiplier from 1440 to expected active minutes. Formula: daily_projection = cost_per_minute * active_minutes_per_day. For 8-hour workday: cost_per_minute * 480.
+### Token per minute calculation inaccurate
+
+Script estimates 10 tokens per line (conservative average). Actual token count varies by language/verbosity. For precise tracking, integrate with Claude API token counting if exposed in future JSON fields. Current estimate is sufficient for burn rate trend monitoring. Adjust multiplier: total_tokens=$(( (lines_added + lines_removed) * 15 )) for more verbose code (15 tokens/line).
+### Color coding not displaying or showing escape codes as text
+
+Ensure terminal supports ANSI colors. Test: echo -e '\033[38;5;196mRED\033[0m' (should show red text). Verify statusline script outputs to stdout not stderr. Check Claude Code settings.json has correct command path. Verify echo -e flag is used for escape sequence interpretation. Check terminal emulator color support settings.
+### Floating point calculations showing as integers or zero
+
+This indicates bc is not working or fallback to integer math is active. Check bc installation: bc --version. Verify bc command in script: echo 'scale=4; 0.05 / 1.5' | bc (should return 0.0333). If bc fails, script uses integer division which truncates decimals. Install bc for decimal precision. Check bc syntax: bc -l enables math library for comparisons.
+### Burn rate color always showing green even with high costs
+
+Verify bc comparison is working: echo '0.15 > 0.10' | bc -l (should return 1). Check cost_per_minute calculation is correct: echo 'scale=4; $total_cost / $duration_minutes' | bc. Ensure thresholds are correct: HIGH_THRESHOLD=0.10, MEDIUM_THRESHOLD=0.05. Test color logic: if (( $(echo "$cost_per_minute > 0.10" | bc -l) )); then echo "RED"; fi.
+### Tokens per minute showing 0 or extremely high numbers
+
+Check lines_added and lines_removed are being extracted correctly: echo '$input' | jq '.cost.total_lines_added, .cost.total_lines_removed'. Verify token estimation: total_tokens=$(( (lines_added + lines_removed) * 10 )). Test calculation: lines=100; tokens=$((lines * 10)); echo $tokens (should be 1000). Check duration_minutes > 0 before division. Verify bc division: echo 'scale=0; 1000 / 5' | bc (should return 200).

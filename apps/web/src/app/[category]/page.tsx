@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BrowseDirectory } from "@/components/browse-directory";
 import { JsonLd } from "@/components/json-ld";
 import { getDirectoryEntriesByCategory } from "@/lib/content";
@@ -10,9 +11,13 @@ import {
   categoryLabels,
   categoryQuickstarts,
   categoryUsageHints,
-  siteConfig
+  siteConfig,
 } from "@/lib/site";
-import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@heyclaude/registry/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+  buildItemListJsonLd,
+} from "@heyclaude/registry/seo";
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
@@ -20,7 +25,9 @@ type CategoryPageProps = {
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CategoryPageProps): Promise<Metadata> {
   const { category } = await params;
   const label = categoryLabels[category];
   const description = categoryDescriptions[category];
@@ -30,7 +37,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
       title: "Category not found",
       description: "The requested category could not be found.",
       path: `/${category}`,
-      robots: { index: false, follow: false }
+      robots: { index: false, follow: false },
     });
   }
 
@@ -38,7 +45,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
     title: `${label} directory`,
     description,
     path: `/${category}`,
-    keywords: [label.toLowerCase(), "claude", "directory", "heyclaude"]
+    keywords: [label.toLowerCase(), "claude", "directory", "heyclaude"],
   });
 }
 
@@ -55,6 +62,13 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       { name: "Home", url: siteConfig.url },
       { name: categoryLabels[category] ?? category, url: categoryUrl },
     ]),
+    buildCollectionPageJsonLd({
+      siteUrl: siteConfig.url,
+      path: `/${category}`,
+      name: `${categoryLabels[category] ?? category} directory`,
+      description: categoryDescriptions[category],
+      breadcrumbId: `${categoryUrl}#breadcrumb`,
+    }),
     buildItemListJsonLd(
       directoryEntries.slice(0, 100).map((entry) => ({
         name: entry.title,
@@ -71,14 +85,23 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     <div className="container-shell space-y-8 py-12">
       <JsonLd data={jsonLd} />
       <div className="space-y-5 border-b border-border/80 pb-8">
+        <Breadcrumbs
+          items={[
+            { label: "Home", href: "/" },
+            { label: categoryLabels[category] ?? category },
+          ]}
+        />
         <span className="eyebrow">{categoryLabels[category] ?? category}</span>
-        <h1 className="section-title">{categoryLabels[category] ?? category}</h1>
+        <h1 className="section-title">
+          {categoryLabels[category] ?? category}
+        </h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
           {categoryDescriptions[category]}
         </p>
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_12rem]">
           <div className="rounded-2xl border border-border bg-card/80 px-4 py-4 text-sm leading-7 text-muted-foreground">
-            {categoryUsageHints[category] ?? "Browse the best entries in this category."}
+            {categoryUsageHints[category] ??
+              "Browse the best entries in this category."}
           </div>
           <div className="rounded-2xl border border-border bg-card/80 px-4 py-4">
             <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">

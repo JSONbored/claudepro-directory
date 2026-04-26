@@ -11,7 +11,7 @@
 
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
-- `SITE_DB` (D1) for durable upvotes, private jobs listings, and future dynamic site state.
+- `SITE_DB` (D1) for durable upvotes, private jobs listings, listing leads, commercial placements, and future dynamic site state.
 - `VOTES_DB` remains configured as a backward-compatible alias for the same database.
 - Shared between `prod` and `dev` environments in the current setup.
 
@@ -23,7 +23,7 @@ Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 pnpm --filter web exec wrangler d1 create heyclaude-votes
 ```
 
-2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for both `SITE_DB` and the backward-compatible `VOTES_DB` alias.
+2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for `SITE_DB`. `VOTES_DB` is currently kept as a backward-compatible alias for the same database while app code moves to site-wide dynamic-state naming.
 
 3. Apply migrations:
 
@@ -38,8 +38,10 @@ pnpm --filter web db:migrate:local
 ```
 
 Current migrations include:
+
 - `0001_votes.sql` for upvotes
 - `0002_jobs.sql` for private jobs listing records
+- `0003_commercial_leads.sql` for job/tool listing leads and commercial placement windows
 
 ## OpenNext build/deploy commands
 
@@ -50,6 +52,7 @@ pnpm --filter web deploy
 ```
 
 That command runs:
+
 1. content index generation
 2. `opennextjs-cloudflare build`
 3. `opennextjs-cloudflare deploy`

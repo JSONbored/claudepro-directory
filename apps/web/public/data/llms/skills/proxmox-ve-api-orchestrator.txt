@@ -1,0 +1,76 @@
+# Proxmox VE API Orchestrator Skill
+URL: https://heyclau.de/skills/proxmox-ve-api-orchestrator
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-orchestrator.mdx
+Download: /downloads/skills/proxmox-ve-api-orchestrator.zip
+## Summary
+Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.
+## Tags
+- proxmox
+- virtualization
+- infrastructure
+- api
+- homelab
+## Content
+## Overview
+This skill helps AI agents orchestrate Proxmox operations in a way that is safe for real infrastructure. It emphasizes pre-flight validation, explicit sequencing, and validation after each change.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Inventory of target nodes, VMs, and LXCs
+- Maintenance window and rollback criteria
+- Backup/snapshot policy for stateful workloads
+
+## What This Skill Delivers
+- Operation plans for create/update/migrate/backup/restore
+- Cluster-safe sequencing and lock awareness
+- Capacity and health validation checks
+- Change reporting with verification evidence
+
+## How to Use This Skill
+1. Gather current cluster state and constraints.
+2. Build deterministic operation graph.
+3. Gate risky operations behind approvals.
+4. Execute with bounded retries and timeout limits.
+5. Validate final state and produce run report.
+
+## Troubleshooting
+**Issue:** Migration operations fail mid-flight  
+**Fix:** Add pre-flight checks for storage/network/node health and fallback target node.
+
+**Issue:** API token works but operation is denied  
+**Fix:** Review token role scopes and map required privileges per endpoint.
+
+**Issue:** Post-change drift appears hours later  
+**Fix:** Add delayed verification checks for resource pressure and service health.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

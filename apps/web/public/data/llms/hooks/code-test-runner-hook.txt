@@ -1,0 +1,420 @@
+# Code Test Runner Hook - Hooks
+URL: https://heyclau.de/hooks/code-test-runner-hook
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-16
+Documentation: https://jestjs.io/docs/getting-started
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-test-runner-hook.mdx
+## Summary
+Automatically run relevant tests when code changes are detected using intelligent test selection, parallel execution, and multi-framework support.
+## Tags
+- testing
+- automation
+- ci-cd
+- watch
+- parallel
+## Content
+## Features
+- Intelligent test selection based on code changes using Jest --findRelatedTests for dependency graph analysis, Vitest test selection patterns, and pytest test discovery
+- Parallel test execution for faster feedback using Jest worker threads (--maxWorkers), Vitest concurrent tests (test.concurrent), and pytest-xdist for distributed testing
+- Support for multiple testing frameworks including Jest v29.7.0+, Vitest v4.0.7+, pytest 9.0.0+, Go testing, Maven, and Gradle with automatic framework detection
+- Fail-fast mode for quick feedback stopping test execution on first failure using --bail in Jest, --bail in Vitest, and -x in pytest
+- Smart retry for flaky tests with configurable retry counts using Jest --maxWorkers retry logic, Vitest retry configuration, and pytest-rerunfailures plugin
+- Impact analysis and dependency mapping to find tests affected by code changes using Jest dependency graph, Vitest test dependencies, and pytest test collection
+- Test file pattern matching to automatically detect test files (*.test.js, *.spec.js, test_*.py) and skip running tests when editing test files themselves
+- Integration with CI/CD pipelines for automated testing workflows supporting GitHub Actions, GitLab CI, Jenkins, and other CI/CD platforms
+
+## Use Cases
+- Automated testing in CI/CD pipelines automatically running relevant tests on code changes before merge or deployment
+- Real-time test feedback during development providing immediate validation when code is modified
+- Intelligent test selection for large codebases running only tests affected by changes instead of entire test suite
+- Parallel test execution for faster builds reducing test execution time through concurrent test runs
+- Pre-commit test validation ensuring code changes pass tests before committing to version control
+- Test-driven development workflow automatically running tests when source files are modified to validate TDD cycles
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/code-test-runner-hook.sh
+3. Make executable: chmod +x .claude/hooks/code-test-runner-hook.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq installed (for JSON parsing from stdin)
+- Testing framework: Jest ^29.7.0 (npm install -D jest) for JavaScript/TypeScript, Vitest ^4.0.7 (npm install -D vitest) for Vite projects, pytest ^9.0.0 (pip install pytest) for Python, Go testing (built-in), Maven/Gradle for Java
+- Runtime environment: Node.js 18+ and npm/yarn/pnpm (for Jest/Vitest) or Python 3.8+ and pip (for pytest) or Go toolchain (for Go tests) or Java JDK and build tool (for Maven/Gradle)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/code-test-runner-hook.sh",
+      "matchers": [
+        "write",
+        "edit",
+        "multiedit"
+      ]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/code-test-runner-hook.sh",
+      "matchers": [
+        "write",
+        "edit",
+        "multiedit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "🧪 Running tests for $FILE_PATH..."
+
+# Get file extension and directory
+EXT="${FILE_PATH##*.}"
+DIR=$(dirname "$FILE_PATH")
+
+# Find and run relevant tests based on file type
+case "$EXT" in
+  js|jsx|ts|tsx)
+    # JavaScript/TypeScript files
+    if [ -f "package.json" ]; then
+      if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+        echo "Running Jest tests..."
+        npm test -- --testPathPattern="$FILE_PATH" --passWithNoTests 2>/dev/null
+      elif command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+        echo "Running Vitest tests..."
+        npx vitest run "$FILE_PATH" 2>/dev/null
+      fi
+    fi
+    ;;
+  py)
+    # Python files
+    if command -v pytest &> /dev/null; then
+      echo "Running pytest..."
+      pytest "${FILE_PATH%.*}_test.py" "${DIR}/test_*.py" 2>/dev/null || echo "No Python tests found"
+    elif command -v python &> /dev/null; then
+      echo "Running Python unittest..."
+      python -m unittest discover -s "$DIR" -p "*test*.py" 2>/dev/null || echo "No Python tests found"
+    fi
+    ;;
+  go)
+    # Go files
+    if command -v go &> /dev/null; then
+      echo "Running Go tests..."
+      go test "${DIR}/..." 2>/dev/null || echo "No Go tests found"
+    fi
+    ;;
+  java)
+    # Java files
+    if command -v mvn &> /dev/null && [ -f "pom.xml" ]; then
+      echo "Running Maven tests..."
+      mvn test 2>/dev/null
+    elif command -v gradle &> /dev/null && [ -f "build.gradle" ]; then
+      echo "Running Gradle tests..."
+      gradle test 2>/dev/null
+    fi
+    ;;
+esac
+
+echo "✅ Test execution completed for $FILE_PATH" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+echo "🧪 Running tests for $FILE_PATH..."
+
+# Get file extension and directory
+EXT="${FILE_PATH##*.}"
+DIR=$(dirname "$FILE_PATH")
+
+# Find and run relevant tests based on file type
+case "$EXT" in
+  js|jsx|ts|tsx)
+    # JavaScript/TypeScript files
+    if [ -f "package.json" ]; then
+      if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+        echo "Running Jest tests..."
+        npm test -- --testPathPattern="$FILE_PATH" --passWithNoTests 2>/dev/null
+      elif command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+        echo "Running Vitest tests..."
+        npx vitest run "$FILE_PATH" 2>/dev/null
+      fi
+    fi
+    ;;
+  py)
+    # Python files
+    if command -v pytest &> /dev/null; then
+      echo "Running pytest..."
+      pytest "${FILE_PATH%.*}_test.py" "${DIR}/test_*.py" 2>/dev/null || echo "No Python tests found"
+    elif command -v python &> /dev/null; then
+      echo "Running Python unittest..."
+      python -m unittest discover -s "$DIR" -p "*test*.py" 2>/dev/null || echo "No Python tests found"
+    fi
+    ;;
+  go)
+    # Go files
+    if command -v go &> /dev/null; then
+      echo "Running Go tests..."
+      go test "${DIR}/..." 2>/dev/null || echo "No Go tests found"
+    fi
+    ;;
+  java)
+    # Java files
+    if command -v mvn &> /dev/null && [ -f "pom.xml" ]; then
+      echo "Running Maven tests..."
+      mvn test 2>/dev/null
+    elif command -v gradle &> /dev/null && [ -f "build.gradle" ]; then
+      echo "Running Gradle tests..."
+      gradle test 2>/dev/null
+    fi
+    ;;
+esac
+
+echo "✅ Test execution completed for $FILE_PATH" >&2
+exit 0
+```
+
+## Examples
+### Code Test Runner Hook Script
+
+Complete hook script that automatically runs relevant tests when code changes are detected
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r ".tool_name")
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *spec* ]]; then exit 0; fi
+EXT="${FILE_PATH##*.}"
+if [[ "$EXT" == "js" ]] || [[ "$EXT" == "ts" ]]; then
+  if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+    npm test -- --findRelatedTests "$FILE_PATH" --passWithNoTests 2>/dev/null
+  elif command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+    npx vitest run "$FILE_PATH" 2>/dev/null
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic test execution on file changes
+
+```json
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/code-test-runner-hook.sh",
+            "matchers": ["write", "edit", "multiedit"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+### Python Test Runner with Fail-Fast
+
+Enhanced hook script using pytest with fail-fast mode for quick feedback
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ] || [[ "$FILE_PATH" == *test* ]]; then exit 0; fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pytest &> /dev/null; then
+    pytest "$FILE_PATH" --maxfail=1 -x 2>/dev/null || echo "Tests failed" >&2
+  fi
+fi
+exit 0
+```
+### Parallel Test Execution with Workers
+
+Enhanced hook script with parallel test execution using worker threads for faster feedback
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ] || [[ "$FILE_PATH" == *test* ]]; then exit 0; fi
+if [[ "$FILE_PATH" == *.{js,jsx,ts,tsx} ]]; then
+  if command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+    npx vitest run "$FILE_PATH" --reporter=verbose --max-workers=4 2>/dev/null
+  elif command -v npm &> /dev/null && npm list jest &> /dev/null; then
+    npm test -- --findRelatedTests "$FILE_PATH" --maxWorkers=4 --bail 2>/dev/null
+  fi
+fi
+exit 0
+```
+### Multiedit Support for Multiple Files
+
+Enhanced hook script that handles multiple file changes in a single operation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATHS=$(echo "$INPUT" | jq -r ".tool_input.file_paths[]? // .tool_input.paths[]? // \"\"")
+if [ -z "$FILE_PATHS" ]; then
+  FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+  FILE_PATHS="$FILE_PATH"
+fi
+if [ -z "$FILE_PATHS" ]; then exit 0; fi
+for FILE_PATH in $FILE_PATHS; do
+  if [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *spec* ]]; then continue; fi
+  if [[ "$FILE_PATH" == *.{js,jsx,ts,tsx} ]]; then
+    if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+      npm test -- --findRelatedTests "$FILE_PATH" --passWithNoTests 2>/dev/null
+    fi
+  fi
+done
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r ".tool_name")
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ]; then exit 0; fi
+if [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *spec* ]]; then exit 0; fi
+EXT="${FILE_PATH##*.}"
+if [[ "$EXT" == "js" ]] || [[ "$EXT" == "ts" ]]; then
+  if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+    npm test -- --findRelatedTests "$FILE_PATH" --passWithNoTests 2>/dev/null
+  elif command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+    npx vitest run "$FILE_PATH" 2>/dev/null
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./.claude/hooks/code-test-runner-hook.sh",
+            "matchers": ["write", "edit", "multiedit"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ] || [[ "$FILE_PATH" == *test* ]]; then exit 0; fi
+if [[ "$FILE_PATH" == *.py ]]; then
+  if command -v pytest &> /dev/null; then
+    pytest "$FILE_PATH" --maxfail=1 -x 2>/dev/null || echo "Tests failed" >&2
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+if [ -z "$FILE_PATH" ] || [[ "$FILE_PATH" == *test* ]]; then exit 0; fi
+if [[ "$FILE_PATH" == *.{js,jsx,ts,tsx} ]]; then
+  if command -v npm &> /dev/null && npm list vitest &> /dev/null; then
+    npx vitest run "$FILE_PATH" --reporter=verbose --max-workers=4 2>/dev/null
+  elif command -v npm &> /dev/null && npm list jest &> /dev/null; then
+    npm test -- --findRelatedTests "$FILE_PATH" --maxWorkers=4 --bail 2>/dev/null
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATHS=$(echo "$INPUT" | jq -r ".tool_input.file_paths[]? // .tool_input.paths[]? // \"\"")
+if [ -z "$FILE_PATHS" ]; then
+  FILE_PATH=$(echo "$INPUT" | jq -r ".tool_input.file_path // .tool_input.path // \"\"")
+  FILE_PATHS="$FILE_PATH"
+fi
+if [ -z "$FILE_PATHS" ]; then exit 0; fi
+for FILE_PATH in $FILE_PATHS; do
+  if [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *spec* ]]; then continue; fi
+  if [[ "$FILE_PATH" == *.{js,jsx,ts,tsx} ]]; then
+    if command -v npm &> /dev/null && npm list jest &> /dev/null; then
+      npm test -- --findRelatedTests "$FILE_PATH" --passWithNoTests 2>/dev/null
+    fi
+  fi
+done
+exit 0
+```
+
+## Troubleshooting
+### Tests run on every file save slowing down development
+
+Add file extension filter or test file detection: if [[ "$FILE_PATH" == *test* ]] || [[ "$FILE_PATH" == *spec* ]]; then exit 0; fi to skip running tests when editing test files themselves. Add delay: sleep 1 before test execution. Use test file pattern matching to exclude test files from triggering test runs.
+### Jest testPathPattern not finding related tests
+
+Pattern matches test file paths not source. Use --findRelatedTests instead: npm test -- --findRelatedTests "$FILE_PATH" which finds tests importing the changed file through dependency graph. Verify Jest version: upgrade to Jest ^29.7.0 for latest features. Check dependency graph: ensure imports are correctly resolved.
+### Hook runs tests twice with both Jest and Vitest
+
+Detection uses npm list jest which may find both. Add explicit priority: if npm list jest &> /dev/null; then run_jest; exit 0; elif npm list vitest ... to prevent fallthrough. Check package.json: verify only one testing framework is listed. Use explicit framework selection via environment variable.
+### Python tests fail to locate test directory
+
+Hook looks for test files using patterns. For pytest, use explicit discovery: pytest --collect-only "$DIR" 2>/dev/null | grep "test session starts" to verify test detection. Use pytest test discovery: pytest "$DIR" -k "test_" for better test finding. Check pytest version: upgrade to pytest ^9.0.0 for latest features.
+### Go tests timeout on large module changes
+
+Add timeout flag and scope: go test -timeout 30s "${DIR}" 2>/dev/null instead of ${DIR}/... which tests all subpackages. Or use go test -short for quick tests only during development. Limit test scope: go test "${DIR}" -run "TestSpecific" for targeted testing.
+### Test execution is too slow for large test suites
+
+Use parallel execution: Jest --maxWorkers=4, Vitest --max-workers=4, pytest -n auto with pytest-xdist. Limit test scope: only run tests related to changed files using --findRelatedTests. Add timeout: timeout 60s test-command. Use test caching: Jest --cache, Vitest --cache, pytest --cache-clear then --cache-show.
+### Vitest not detecting test files correctly
+
+Verify Vitest configuration: check vitest.config.ts for test file patterns. Use explicit test file selection: npx vitest run "$FILE_PATH" with full path. Check Vitest version: upgrade to Vitest ^4.0.7 for latest features. Test manually: npx vitest run to verify test discovery.
+### Tests fail in hook but pass when run manually
+
+Check environment variables: ensure test environment matches manual execution. Verify working directory: cd to project root before running tests. Check test isolation: some tests may depend on previous test state. Use test isolation: Jest --clearCache, Vitest --no-cache, pytest --cache-clear. Verify test framework version compatibility.

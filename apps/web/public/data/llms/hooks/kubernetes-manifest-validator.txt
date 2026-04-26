@@ -1,0 +1,1050 @@
+# Kubernetes Manifest Validator - Hooks
+URL: https://heyclau.de/hooks/kubernetes-manifest-validator
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/kubernetes-manifest-validator.mdx
+## Summary
+Validates Kubernetes YAML manifests for syntax and best practices when modified.
+## Tags
+- kubernetes
+- k8s
+- yaml
+- validation
+- devops
+## Content
+## Features
+- Comprehensive Kubernetes manifest validation using kubectl dry-run with --dry-run=client for validation without cluster connection (no network required), --dry-run=server for server-side validation when cluster available (requires cluster connection), kubectl apply dry-run for resource validation, and connection error handling with graceful fallback when cluster unavailable
+- Multi-tool validation support (kubeval, kube-score, polaris) with kubeval for JSON Schema validation of Kubernetes manifests (schema validation against Kubernetes API schemas), kube-score for best practices scoring (security, reliability, scalability checks), polaris for security and reliability checks (security policy enforcement, resource optimization), and tool availability detection with graceful fallback when tools unavailable
+- Security policy enforcement and best practices checking including security context validation (runAsNonRoot, runAsUser detection), privileged container detection (privileged: true warnings), host network/PID access detection (hostNetwork, hostPID warnings), image tag validation (latest tag warnings with recommendations for specific version tags), and security best practices reporting
+- Resource quota and limits validation with resource limits/requests checking (CPU and memory limits/requests validation), resource quota compliance checking, resource allocation recommendations, and production-ready resource configuration validation
+- API version compatibility and deprecation warnings with API version detection (apiVersion field extraction), deprecation warnings for deprecated API versions (extensions/v1beta1, apps/v1beta1, etc.), compatibility recommendations for current API versions, and migration guidance for deprecated APIs
+- Network policy and RBAC configuration validation with network policy rules validation (ingress/egress rules checking), RBAC role and rolebinding validation (role, rolebinding, clusterrole, clusterrolebinding), service account validation (serviceAccountName checking), and access control best practices
+- Multi-cluster context support and environment-specific validation with kubectl context detection (kubectl config current-context), environment-specific validation rules (development, staging, production), multi-cluster manifest validation, and context-aware validation recommendations
+- Helm chart and Kustomize manifest validation with Helm chart structure validation (Chart.yaml, values.yaml), Kustomize overlay validation (kustomization.yaml), multi-environment configuration validation, and template rendering validation
+
+## Use Cases
+- DevOps pipeline integration with automated manifest validation automatically validating Kubernetes manifests in CI/CD pipelines, detecting configuration errors before deployment, and ensuring manifest correctness for reliable Kubernetes deployments
+- Kubernetes cluster deployment safety and configuration verification automatically validating manifests before applying to clusters, detecting security issues, and ensuring configuration correctness for safe cluster operations
+- Multi-environment deployment validation and consistency checking automatically validating manifests across environments (development, staging, production), detecting configuration drift, and ensuring consistency across environments for reliable multi-environment deployments
+- Security policy enforcement and compliance validation automatically validating security policies, detecting security misconfigurations, and ensuring compliance with security best practices for secure Kubernetes deployments
+- Infrastructure as Code quality assurance and best practices automatically validating Infrastructure as Code manifests, detecting best practice violations, and ensuring quality standards for maintainable infrastructure code
+- Development workflow integration seamlessly integrating Kubernetes manifest validation into development workflows without manual validation steps or separate validation tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/kubernetes-manifest-validator.sh
+3. Make executable: chmod +x .claude/hooks/kubernetes-manifest-validator.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- kubectl (optional, recommended for comprehensive validation)
+- Python 3 (optional, for YAML syntax validation)
+- kubeval (optional, for schema validation)
+- kube-score (optional, for best practices scoring)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/kubernetes-manifest-validator.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/kubernetes-manifest-validator.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a YAML file that might be a Kubernetes manifest
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  # Check if it's a Kubernetes manifest by looking for apiVersion and kind
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    echo "☸️ Kubernetes Manifest Validation for: $(basename "$FILE_PATH")" >&2
+    
+    # Initialize validation counters
+    ERRORS=0
+    WARNINGS=0
+    VALIDATIONS_PASSED=0
+    KUBECTL_AVAILABLE=false
+    
+    # Function to report validation results
+    report_validation() {
+      local level="$1"
+      local message="$2"
+      
+      case "$level" in
+        "ERROR")
+          echo "❌ ERROR: $message" >&2
+          ERRORS=$((ERRORS + 1))
+          ;;
+        "WARNING")
+          echo "⚠️ WARNING: $message" >&2
+          WARNINGS=$((WARNINGS + 1))
+          ;;
+        "PASS")
+          echo "✅ PASS: $message" >&2
+          VALIDATIONS_PASSED=$((VALIDATIONS_PASSED + 1))
+          ;;
+        "INFO")
+          echo "ℹ️ INFO: $message" >&2
+          ;;
+      esac
+    }
+    
+    # Check if file exists and is readable
+    if [ ! -f "$FILE_PATH" ]; then
+      report_validation "ERROR" "Manifest file not found: $FILE_PATH"
+      exit 1
+    fi
+    
+    if [ ! -r "$FILE_PATH" ]; then
+      report_validation "ERROR" "Manifest file is not readable: $FILE_PATH"
+      exit 1
+    fi
+    
+    # Get file information
+    FILE_NAME="$(basename "$FILE_PATH")"
+    FILE_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
+    
+    echo "📊 Kubernetes manifest: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)" >&2
+    
+    # 1. Basic YAML Syntax Validation
+    echo "📋 Checking YAML syntax..." >&2
+    
+    # Use Python YAML parser for syntax validation
+    if command -v python3 &> /dev/null; then
+      if python3 -c "import yaml; yaml.safe_load_all(open('$FILE_PATH'))" 2>/dev/null; then
+        report_validation "PASS" "Valid YAML syntax"
+      else
+        report_validation "ERROR" "Invalid YAML syntax detected"
+        python3 -c "import yaml; yaml.safe_load_all(open('$FILE_PATH'))" 2>&1 | head -3 >&2
+        exit 1
+      fi
+    else
+      report_validation "WARNING" "Python not available for YAML validation"
+    fi
+    
+    # 2. Kubernetes Manifest Structure Analysis
+    echo "🔍 Analyzing Kubernetes manifest structure..." >&2
+    
+    # Extract resource information
+    API_VERSION=$(grep '^apiVersion:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    RESOURCE_NAME=$(grep 'name:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unnamed")
+    NAMESPACE=$(grep 'namespace:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "default")
+    
+    echo "   📊 Resource: $KIND/$RESOURCE_NAME" >&2
+    echo "   🔧 API Version: $API_VERSION" >&2
+    echo "   📁 Namespace: $NAMESPACE" >&2
+    
+    # Check for multiple resources in single file
+    RESOURCE_COUNT=$(grep -c '^apiVersion:' "$FILE_PATH" 2>/dev/null || echo "1")
+    if [ "$RESOURCE_COUNT" -gt 1 ]; then
+      echo "   📋 Multi-resource file: $RESOURCE_COUNT resources" >&2
+    fi
+    
+    # 3. kubectl Validation (if available)
+    echo "☸️ Running kubectl validation..." >&2
+    
+    if command -v kubectl &> /dev/null; then
+      KUBECTL_AVAILABLE=true
+      echo "   🔧 kubectl found - running dry-run validation" >&2
+      
+      # Check kubectl connection (but don't fail if no cluster)
+      KUBECTL_OUTPUT_FILE="/tmp/kubectl_output_$$"
+      if kubectl apply --dry-run=client -f "$FILE_PATH" > "$KUBECTL_OUTPUT_FILE" 2>&1; then
+        report_validation "PASS" "kubectl dry-run validation successful"
+        
+        # Show what would be created/updated
+        grep -E 'created|configured|unchanged' "$KUBECTL_OUTPUT_FILE" 2>/dev/null | head -3 | while read line; do
+          echo "     $line" >&2
+        done
+        
+      else
+        # Check if it's a connection error or manifest error
+        if grep -q 'connection refused\|unable to connect' "$KUBECTL_OUTPUT_FILE" 2>/dev/null; then
+          report_validation "WARNING" "kubectl validation skipped - no cluster connection"
+        else
+          report_validation "ERROR" "kubectl dry-run validation failed"
+          echo "   📝 kubectl error details:" >&2
+          head -5 "$KUBECTL_OUTPUT_FILE" | while read line; do
+            echo "     $line" >&2
+          done
+        fi
+      fi
+      
+      rm -f "$KUBECTL_OUTPUT_FILE"
+    else
+      report_validation "WARNING" "kubectl not available - install for comprehensive validation"
+    fi
+    
+    # 4. Additional Validation Tools
+    echo "🔍 Running additional validation tools..." >&2
+    
+    # kubeval validation
+    if command -v kubeval &> /dev/null; then
+      echo "   🔍 Running kubeval validation..." >&2
+      
+      KUBEVAL_OUTPUT_FILE="/tmp/kubeval_output_$$"
+      if kubeval "$FILE_PATH" > "$KUBEVAL_OUTPUT_FILE" 2>&1; then
+        report_validation "PASS" "kubeval validation successful"
+      else
+        report_validation "WARNING" "kubeval found issues"
+        head -5 "$KUBEVAL_OUTPUT_FILE" | while read line; do
+          echo "     $line" >&2
+        done
+      fi
+      rm -f "$KUBEVAL_OUTPUT_FILE"
+    else
+      echo "   💡 kubeval not installed - consider installing for schema validation" >&2
+    fi
+    
+    # kube-score validation (best practices)
+    if command -v kube-score &> /dev/null; then
+      echo "   📊 Running kube-score best practices check..." >&2
+      
+      KUBESCORE_OUTPUT_FILE="/tmp/kubescore_output_$$"
+      if kube-score score "$FILE_PATH" > "$KUBESCORE_OUTPUT_FILE" 2>&1; then
+        # kube-score shows recommendations, not just pass/fail
+        CRITICAL_COUNT=$(grep -c 'CRITICAL' "$KUBESCORE_OUTPUT_FILE" 2>/dev/null || echo "0")
+        WARNING_COUNT=$(grep -c 'WARNING' "$KUBESCORE_OUTPUT_FILE" 2>/dev/null || echo "0")
+        
+        if [ "$CRITICAL_COUNT" -eq 0 ]; then
+          report_validation "PASS" "kube-score validation passed (no critical issues)"
+        else
+          report_validation "WARNING" "kube-score found $CRITICAL_COUNT critical issues"
+        fi
+        
+        if [ "$WARNING_COUNT" -gt 0 ]; then
+          echo "   ⚠️ kube-score warnings: $WARNING_COUNT" >&2
+        fi
+      fi
+      rm -f "$KUBESCORE_OUTPUT_FILE"
+    else
+      echo "   💡 kube-score not installed - consider installing for best practices validation" >&2
+    fi
+    
+    # 5. Resource-Specific Validation
+    echo "🔧 Performing resource-specific validation..." >&2
+    
+    case "$KIND" in
+      "Deployment")
+        echo "   🚀 Deployment-specific checks..." >&2
+        
+        # Check for resource limits
+        if grep -q 'resources:' "$FILE_PATH" 2>/dev/null; then
+          if grep -q 'limits:\|requests:' "$FILE_PATH" 2>/dev/null; then
+            report_validation "PASS" "Resource limits/requests defined"
+          else
+            report_validation "WARNING" "Resource limits/requests not fully specified"
+          fi
+        else
+          report_validation "WARNING" "No resource limits defined - consider adding for production"
+        fi
+        
+        # Check for replicas
+        REPLICAS=$(grep 'replicas:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "1")
+        if [ "$REPLICAS" -eq 1 ]; then
+          report_validation "WARNING" "Single replica deployment - consider multiple replicas for HA"
+        else
+          echo "   📊 Replicas: $REPLICAS" >&2
+        fi
+        
+        # Check for readiness/liveness probes
+        if grep -q 'livenessProbe:\|readinessProbe:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Health probes configured"
+        else
+          report_validation "WARNING" "No health probes defined - consider adding for reliability"
+        fi
+        ;;
+        
+      "Service")
+        echo "   🌐 Service-specific checks..." >&2
+        
+        # Check service type
+        SERVICE_TYPE=$(grep 'type:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "ClusterIP")
+        echo "   🔧 Service type: $SERVICE_TYPE" >&2
+        
+        if [ "$SERVICE_TYPE" = "LoadBalancer" ]; then
+          report_validation "WARNING" "LoadBalancer service - ensure cloud provider support"
+        fi
+        
+        # Check for selector
+        if grep -q 'selector:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Service selector defined"
+        else
+          report_validation "ERROR" "Service missing selector - will not route traffic"
+        fi
+        ;;
+        
+      "ConfigMap"|"Secret")
+        echo "   🔐 Configuration resource checks..." >&2
+        
+        # Check for data section
+        if grep -q 'data:' "$FILE_PATH" 2>/dev/null; then
+          DATA_KEYS=$(grep -A 10 'data:' "$FILE_PATH" | grep -c '^  [^:]*:' || echo "0")
+          echo "   📊 Data keys: $DATA_KEYS" >&2
+          report_validation "PASS" "Configuration data present"
+        else
+          report_validation "WARNING" "No data section found in $KIND"
+        fi
+        ;;
+        
+      "Ingress")
+        echo "   🌍 Ingress-specific checks..." >&2
+        
+        # Check for rules
+        if grep -q 'rules:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Ingress rules defined"
+        else
+          report_validation "ERROR" "Ingress missing rules section"
+        fi
+        
+        # Check for TLS
+        if grep -q 'tls:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "TLS configuration present"
+        else
+          report_validation "WARNING" "No TLS configuration - consider HTTPS"
+        fi
+        ;;
+    esac
+    
+    # 6. Security and Best Practices
+    echo "🔒 Security and best practices check..." >&2
+    
+    # Check for security context
+    if grep -q 'securityContext:' "$FILE_PATH" 2>/dev/null; then
+      report_validation "PASS" "Security context defined"
+      
+      # Check for non-root user
+      if grep -q 'runAsNonRoot: true\|runAsUser:' "$FILE_PATH" 2>/dev/null; then
+        report_validation "PASS" "Non-root security configuration"
+      else
+        report_validation "WARNING" "Consider running as non-root user"
+      fi
+    else
+      report_validation "WARNING" "No security context defined - consider adding for security"
+    fi
+    
+    # Check for privileged containers
+    if grep -q 'privileged: true' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Privileged container detected - security risk"
+    fi
+    
+    # Check for host network/PID
+    if grep -q 'hostNetwork: true\|hostPID: true' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Host network/PID access detected - security risk"
+    fi
+    
+    # Check for latest tag usage
+    if grep -q 'image:.*:latest' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Using 'latest' tag - consider specific version tags"
+    fi
+    
+    # 7. Generate Validation Summary
+    echo "" >&2
+    echo "📋 Kubernetes Manifest Validation Summary:" >&2
+    echo "==========================================" >&2
+    echo "   📄 File: $FILE_NAME" >&2
+    echo "   ☸️ Resource: $KIND/$RESOURCE_NAME" >&2
+    echo "   🔧 API Version: $API_VERSION" >&2
+    echo "   📁 Namespace: $NAMESPACE" >&2
+    echo "   ✅ Validations passed: $VALIDATIONS_PASSED" >&2
+    echo "   ⚠️ Warnings: $WARNINGS" >&2
+    echo "   ❌ Errors: $ERRORS" >&2
+    
+    if [ "$ERRORS" -eq 0 ]; then
+      if [ "$WARNINGS" -eq 0 ]; then
+        echo "   🎉 Status: EXCELLENT - Manifest is valid and follows best practices" >&2
+      else
+        echo "   ✅ Status: GOOD - Manifest is valid with minor recommendations" >&2
+      fi
+    else
+      echo "   ❌ Status: ERRORS - Manifest has critical issues that must be fixed" >&2
+    fi
+    
+    echo "" >&2
+    echo "💡 Kubernetes Best Practices:" >&2
+    echo "   • Use specific image tags instead of 'latest'" >&2
+    echo "   • Define resource limits and requests" >&2
+    echo "   • Configure health probes for applications" >&2
+    echo "   • Use security contexts and non-root users" >&2
+    echo "   • Implement RBAC for access control" >&2
+    echo "   • Use multiple replicas for high availability" >&2
+    
+    # Exit with error if there are critical validation issues
+    if [ "$ERRORS" -gt 0 ]; then
+      echo "⚠️ Kubernetes manifest validation completed with errors" >&2
+      exit 1
+    fi
+    
+  else
+    # YAML file but not a Kubernetes manifest
+    exit 0
+  fi
+else
+  # Not a YAML file
+  exit 0
+fi
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a YAML file that might be a Kubernetes manifest
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  # Check if it's a Kubernetes manifest by looking for apiVersion and kind
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    echo "☸️ Kubernetes Manifest Validation for: $(basename "$FILE_PATH")" >&2
+    
+    # Initialize validation counters
+    ERRORS=0
+    WARNINGS=0
+    VALIDATIONS_PASSED=0
+    KUBECTL_AVAILABLE=false
+    
+    # Function to report validation results
+    report_validation() {
+      local level="$1"
+      local message="$2"
+      
+      case "$level" in
+        "ERROR")
+          echo "❌ ERROR: $message" >&2
+          ERRORS=$((ERRORS + 1))
+          ;;
+        "WARNING")
+          echo "⚠️ WARNING: $message" >&2
+          WARNINGS=$((WARNINGS + 1))
+          ;;
+        "PASS")
+          echo "✅ PASS: $message" >&2
+          VALIDATIONS_PASSED=$((VALIDATIONS_PASSED + 1))
+          ;;
+        "INFO")
+          echo "ℹ️ INFO: $message" >&2
+          ;;
+      esac
+    }
+    
+    # Check if file exists and is readable
+    if [ ! -f "$FILE_PATH" ]; then
+      report_validation "ERROR" "Manifest file not found: $FILE_PATH"
+      exit 1
+    fi
+    
+    if [ ! -r "$FILE_PATH" ]; then
+      report_validation "ERROR" "Manifest file is not readable: $FILE_PATH"
+      exit 1
+    fi
+    
+    # Get file information
+    FILE_NAME="$(basename "$FILE_PATH")"
+    FILE_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
+    
+    echo "📊 Kubernetes manifest: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)" >&2
+    
+    # 1. Basic YAML Syntax Validation
+    echo "📋 Checking YAML syntax..." >&2
+    
+    # Use Python YAML parser for syntax validation
+    if command -v python3 &> /dev/null; then
+      if python3 -c "import yaml; yaml.safe_load_all(open('$FILE_PATH'))" 2>/dev/null; then
+        report_validation "PASS" "Valid YAML syntax"
+      else
+        report_validation "ERROR" "Invalid YAML syntax detected"
+        python3 -c "import yaml; yaml.safe_load_all(open('$FILE_PATH'))" 2>&1 | head -3 >&2
+        exit 1
+      fi
+    else
+      report_validation "WARNING" "Python not available for YAML validation"
+    fi
+    
+    # 2. Kubernetes Manifest Structure Analysis
+    echo "🔍 Analyzing Kubernetes manifest structure..." >&2
+    
+    # Extract resource information
+    API_VERSION=$(grep '^apiVersion:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    RESOURCE_NAME=$(grep 'name:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unnamed")
+    NAMESPACE=$(grep 'namespace:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "default")
+    
+    echo "   📊 Resource: $KIND/$RESOURCE_NAME" >&2
+    echo "   🔧 API Version: $API_VERSION" >&2
+    echo "   📁 Namespace: $NAMESPACE" >&2
+    
+    # Check for multiple resources in single file
+    RESOURCE_COUNT=$(grep -c '^apiVersion:' "$FILE_PATH" 2>/dev/null || echo "1")
+    if [ "$RESOURCE_COUNT" -gt 1 ]; then
+      echo "   📋 Multi-resource file: $RESOURCE_COUNT resources" >&2
+    fi
+    
+    # 3. kubectl Validation (if available)
+    echo "☸️ Running kubectl validation..." >&2
+    
+    if command -v kubectl &> /dev/null; then
+      KUBECTL_AVAILABLE=true
+      echo "   🔧 kubectl found - running dry-run validation" >&2
+      
+      # Check kubectl connection (but don't fail if no cluster)
+      KUBECTL_OUTPUT_FILE="/tmp/kubectl_output_$$"
+      if kubectl apply --dry-run=client -f "$FILE_PATH" > "$KUBECTL_OUTPUT_FILE" 2>&1; then
+        report_validation "PASS" "kubectl dry-run validation successful"
+        
+        # Show what would be created/updated
+        grep -E 'created|configured|unchanged' "$KUBECTL_OUTPUT_FILE" 2>/dev/null | head -3 | while read line; do
+          echo "     $line" >&2
+        done
+        
+      else
+        # Check if it's a connection error or manifest error
+        if grep -q 'connection refused\|unable to connect' "$KUBECTL_OUTPUT_FILE" 2>/dev/null; then
+          report_validation "WARNING" "kubectl validation skipped - no cluster connection"
+        else
+          report_validation "ERROR" "kubectl dry-run validation failed"
+          echo "   📝 kubectl error details:" >&2
+          head -5 "$KUBECTL_OUTPUT_FILE" | while read line; do
+            echo "     $line" >&2
+          done
+        fi
+      fi
+      
+      rm -f "$KUBECTL_OUTPUT_FILE"
+    else
+      report_validation "WARNING" "kubectl not available - install for comprehensive validation"
+    fi
+    
+    # 4. Additional Validation Tools
+    echo "🔍 Running additional validation tools..." >&2
+    
+    # kubeval validation
+    if command -v kubeval &> /dev/null; then
+      echo "   🔍 Running kubeval validation..." >&2
+      
+      KUBEVAL_OUTPUT_FILE="/tmp/kubeval_output_$$"
+      if kubeval "$FILE_PATH" > "$KUBEVAL_OUTPUT_FILE" 2>&1; then
+        report_validation "PASS" "kubeval validation successful"
+      else
+        report_validation "WARNING" "kubeval found issues"
+        head -5 "$KUBEVAL_OUTPUT_FILE" | while read line; do
+          echo "     $line" >&2
+        done
+      fi
+      rm -f "$KUBEVAL_OUTPUT_FILE"
+    else
+      echo "   💡 kubeval not installed - consider installing for schema validation" >&2
+    fi
+    
+    # kube-score validation (best practices)
+    if command -v kube-score &> /dev/null; then
+      echo "   📊 Running kube-score best practices check..." >&2
+      
+      KUBESCORE_OUTPUT_FILE="/tmp/kubescore_output_$$"
+      if kube-score score "$FILE_PATH" > "$KUBESCORE_OUTPUT_FILE" 2>&1; then
+        # kube-score shows recommendations, not just pass/fail
+        CRITICAL_COUNT=$(grep -c 'CRITICAL' "$KUBESCORE_OUTPUT_FILE" 2>/dev/null || echo "0")
+        WARNING_COUNT=$(grep -c 'WARNING' "$KUBESCORE_OUTPUT_FILE" 2>/dev/null || echo "0")
+        
+        if [ "$CRITICAL_COUNT" -eq 0 ]; then
+          report_validation "PASS" "kube-score validation passed (no critical issues)"
+        else
+          report_validation "WARNING" "kube-score found $CRITICAL_COUNT critical issues"
+        fi
+        
+        if [ "$WARNING_COUNT" -gt 0 ]; then
+          echo "   ⚠️ kube-score warnings: $WARNING_COUNT" >&2
+        fi
+      fi
+      rm -f "$KUBESCORE_OUTPUT_FILE"
+    else
+      echo "   💡 kube-score not installed - consider installing for best practices validation" >&2
+    fi
+    
+    # 5. Resource-Specific Validation
+    echo "🔧 Performing resource-specific validation..." >&2
+    
+    case "$KIND" in
+      "Deployment")
+        echo "   🚀 Deployment-specific checks..." >&2
+        
+        # Check for resource limits
+        if grep -q 'resources:' "$FILE_PATH" 2>/dev/null; then
+          if grep -q 'limits:\|requests:' "$FILE_PATH" 2>/dev/null; then
+            report_validation "PASS" "Resource limits/requests defined"
+          else
+            report_validation "WARNING" "Resource limits/requests not fully specified"
+          fi
+        else
+          report_validation "WARNING" "No resource limits defined - consider adding for production"
+        fi
+        
+        # Check for replicas
+        REPLICAS=$(grep 'replicas:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "1")
+        if [ "$REPLICAS" -eq 1 ]; then
+          report_validation "WARNING" "Single replica deployment - consider multiple replicas for HA"
+        else
+          echo "   📊 Replicas: $REPLICAS" >&2
+        fi
+        
+        # Check for readiness/liveness probes
+        if grep -q 'livenessProbe:\|readinessProbe:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Health probes configured"
+        else
+          report_validation "WARNING" "No health probes defined - consider adding for reliability"
+        fi
+        ;;
+        
+      "Service")
+        echo "   🌐 Service-specific checks..." >&2
+        
+        # Check service type
+        SERVICE_TYPE=$(grep 'type:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "ClusterIP")
+        echo "   🔧 Service type: $SERVICE_TYPE" >&2
+        
+        if [ "$SERVICE_TYPE" = "LoadBalancer" ]; then
+          report_validation "WARNING" "LoadBalancer service - ensure cloud provider support"
+        fi
+        
+        # Check for selector
+        if grep -q 'selector:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Service selector defined"
+        else
+          report_validation "ERROR" "Service missing selector - will not route traffic"
+        fi
+        ;;
+        
+      "ConfigMap"|"Secret")
+        echo "   🔐 Configuration resource checks..." >&2
+        
+        # Check for data section
+        if grep -q 'data:' "$FILE_PATH" 2>/dev/null; then
+          DATA_KEYS=$(grep -A 10 'data:' "$FILE_PATH" | grep -c '^  [^:]*:' || echo "0")
+          echo "   📊 Data keys: $DATA_KEYS" >&2
+          report_validation "PASS" "Configuration data present"
+        else
+          report_validation "WARNING" "No data section found in $KIND"
+        fi
+        ;;
+        
+      "Ingress")
+        echo "   🌍 Ingress-specific checks..." >&2
+        
+        # Check for rules
+        if grep -q 'rules:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "Ingress rules defined"
+        else
+          report_validation "ERROR" "Ingress missing rules section"
+        fi
+        
+        # Check for TLS
+        if grep -q 'tls:' "$FILE_PATH" 2>/dev/null; then
+          report_validation "PASS" "TLS configuration present"
+        else
+          report_validation "WARNING" "No TLS configuration - consider HTTPS"
+        fi
+        ;;
+    esac
+    
+    # 6. Security and Best Practices
+    echo "🔒 Security and best practices check..." >&2
+    
+    # Check for security context
+    if grep -q 'securityContext:' "$FILE_PATH" 2>/dev/null; then
+      report_validation "PASS" "Security context defined"
+      
+      # Check for non-root user
+      if grep -q 'runAsNonRoot: true\|runAsUser:' "$FILE_PATH" 2>/dev/null; then
+        report_validation "PASS" "Non-root security configuration"
+      else
+        report_validation "WARNING" "Consider running as non-root user"
+      fi
+    else
+      report_validation "WARNING" "No security context defined - consider adding for security"
+    fi
+    
+    # Check for privileged containers
+    if grep -q 'privileged: true' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Privileged container detected - security risk"
+    fi
+    
+    # Check for host network/PID
+    if grep -q 'hostNetwork: true\|hostPID: true' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Host network/PID access detected - security risk"
+    fi
+    
+    # Check for latest tag usage
+    if grep -q 'image:.*:latest' "$FILE_PATH" 2>/dev/null; then
+      report_validation "WARNING" "Using 'latest' tag - consider specific version tags"
+    fi
+    
+    # 7. Generate Validation Summary
+    echo "" >&2
+    echo "📋 Kubernetes Manifest Validation Summary:" >&2
+    echo "==========================================" >&2
+    echo "   📄 File: $FILE_NAME" >&2
+    echo "   ☸️ Resource: $KIND/$RESOURCE_NAME" >&2
+    echo "   🔧 API Version: $API_VERSION" >&2
+    echo "   📁 Namespace: $NAMESPACE" >&2
+    echo "   ✅ Validations passed: $VALIDATIONS_PASSED" >&2
+    echo "   ⚠️ Warnings: $WARNINGS" >&2
+    echo "   ❌ Errors: $ERRORS" >&2
+    
+    if [ "$ERRORS" -eq 0 ]; then
+      if [ "$WARNINGS" -eq 0 ]; then
+        echo "   🎉 Status: EXCELLENT - Manifest is valid and follows best practices" >&2
+      else
+        echo "   ✅ Status: GOOD - Manifest is valid with minor recommendations" >&2
+      fi
+    else
+      echo "   ❌ Status: ERRORS - Manifest has critical issues that must be fixed" >&2
+    fi
+    
+    echo "" >&2
+    echo "💡 Kubernetes Best Practices:" >&2
+    echo "   • Use specific image tags instead of 'latest'" >&2
+    echo "   • Define resource limits and requests" >&2
+    echo "   • Configure health probes for applications" >&2
+    echo "   • Use security contexts and non-root users" >&2
+    echo "   • Implement RBAC for access control" >&2
+    echo "   • Use multiple replicas for high availability" >&2
+    
+    # Exit with error if there are critical validation issues
+    if [ "$ERRORS" -gt 0 ]; then
+      echo "⚠️ Kubernetes manifest validation completed with errors" >&2
+      exit 1
+    fi
+    
+  else
+    # YAML file but not a Kubernetes manifest
+    exit 0
+  fi
+else
+  # Not a YAML file
+  exit 0
+fi
+
+exit 0
+```
+
+## Examples
+### Kubernetes Manifest Validator Hook Script
+
+Complete hook script that performs Kubernetes manifest validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    echo "☸️ Kubernetes Manifest Validation for: $(basename "$FILE_PATH")" >&2
+    if command -v kubectl &> /dev/null; then
+      if kubectl apply --dry-run=client -f "$FILE_PATH" 2>/dev/null; then
+        echo "✅ kubectl dry-run validation successful" >&2
+      else
+        echo "❌ kubectl validation failed" >&2
+        exit 1
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Kubernetes manifest validation
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/kubernetes-manifest-validator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### API Version and Schema Validation
+
+Enhanced hook script for API version detection and kubeval schema validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    API_VERSION=$(grep '^apiVersion:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    echo "📊 Resource: $KIND/$API_VERSION" >&2
+    if [[ "$API_VERSION" == *v1beta1* ]] || [[ "$API_VERSION" == *extensions/v1beta1* ]]; then
+      echo "⚠️ Deprecated API version detected: $API_VERSION" >&2
+    fi
+    if command -v kubeval &> /dev/null; then
+      kubeval "$FILE_PATH"
+    fi
+  fi
+fi
+exit 0
+```
+### Security and Best Practices Validation
+
+Enhanced hook script for security context and best practices validation
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    if grep -q 'privileged: true' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Privileged container detected - security risk" >&2
+    fi
+    if grep -q 'hostNetwork: true\|hostPID: true' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Host network/PID access detected - security risk" >&2
+    fi
+    if grep -q 'image:.*:latest' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Using 'latest' tag - consider specific version tags" >&2
+    fi
+    if grep -q 'securityContext:' "$FILE_PATH" 2>/dev/null; then
+      if grep -q 'runAsNonRoot: true\|runAsUser:' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Non-root security configuration" >&2
+      else
+        echo "⚠️ Consider running as non-root user" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Resource-Specific Validation
+
+Enhanced hook script for resource-specific validation (Deployment, Service)
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    case "$KIND" in
+      Deployment)
+        if grep -q 'resources:' "$FILE_PATH" 2>/dev/null; then
+          if grep -q 'limits:\|requests:' "$FILE_PATH" 2>/dev/null; then
+            echo "✅ Resource limits/requests defined" >&2
+          else
+            echo "⚠️ Resource limits/requests not fully specified" >&2
+          fi
+        else
+          echo "⚠️ No resource limits defined - consider adding for production" >&2
+        fi
+        if grep -q 'livenessProbe:\|readinessProbe:' "$FILE_PATH" 2>/dev/null; then
+          echo "✅ Health probes configured" >&2
+        else
+          echo "⚠️ No health probes defined - consider adding for reliability" >&2
+        fi
+        ;;
+      Service)
+        if grep -q 'selector:' "$FILE_PATH" 2>/dev/null; then
+          echo "✅ Service selector defined" >&2
+        else
+          echo "❌ Service missing selector - will not route traffic" >&2
+        fi
+        ;;
+    esac
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    echo "☸️ Kubernetes Manifest Validation for: $(basename "$FILE_PATH")" >&2
+    if command -v kubectl &> /dev/null; then
+      if kubectl apply --dry-run=client -f "$FILE_PATH" 2>/dev/null; then
+        echo "✅ kubectl dry-run validation successful" >&2
+      else
+        echo "❌ kubectl validation failed" >&2
+        exit 1
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/kubernetes-manifest-validator.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    API_VERSION=$(grep '^apiVersion:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    echo "📊 Resource: $KIND/$API_VERSION" >&2
+    if [[ "$API_VERSION" == *v1beta1* ]] || [[ "$API_VERSION" == *extensions/v1beta1* ]]; then
+      echo "⚠️ Deprecated API version detected: $API_VERSION" >&2
+    fi
+    if command -v kubeval &> /dev/null; then
+      kubeval "$FILE_PATH"
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    if grep -q 'privileged: true' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Privileged container detected - security risk" >&2
+    fi
+    if grep -q 'hostNetwork: true\|hostPID: true' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Host network/PID access detected - security risk" >&2
+    fi
+    if grep -q 'image:.*:latest' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ Using 'latest' tag - consider specific version tags" >&2
+    fi
+    if grep -q 'securityContext:' "$FILE_PATH" 2>/dev/null; then
+      if grep -q 'runAsNonRoot: true\|runAsUser:' "$FILE_PATH" 2>/dev/null; then
+        echo "✅ Non-root security configuration" >&2
+      else
+        echo "⚠️ Consider running as non-root user" >&2
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.yaml ]] || [[ "$FILE_PATH" == *.yml ]]; then
+  if grep -q 'apiVersion:\|kind:' "$FILE_PATH" 2>/dev/null; then
+    KIND=$(grep '^kind:' "$FILE_PATH" | head -1 | cut -d':' -f2 | xargs 2>/dev/null || echo "unknown")
+    case "$KIND" in
+      Deployment)
+        if grep -q 'resources:' "$FILE_PATH" 2>/dev/null; then
+          if grep -q 'limits:\|requests:' "$FILE_PATH" 2>/dev/null; then
+            echo "✅ Resource limits/requests defined" >&2
+          else
+            echo "⚠️ Resource limits/requests not fully specified" >&2
+          fi
+        else
+          echo "⚠️ No resource limits defined - consider adding for production" >&2
+        fi
+        if grep -q 'livenessProbe:\|readinessProbe:' "$FILE_PATH" 2>/dev/null; then
+          echo "✅ Health probes configured" >&2
+        else
+          echo "⚠️ No health probes defined - consider adding for reliability" >&2
+        fi
+        ;;
+      Service)
+        if grep -q 'selector:' "$FILE_PATH" 2>/dev/null; then
+          echo "✅ Service selector defined" >&2
+        else
+          echo "❌ Service missing selector - will not route traffic" >&2
+        fi
+        ;;
+    esac
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### kubectl dry-run fails with 'no configuration found' error
+
+Check kubectl context: kubectl config current-context. Set context if missing: kubectl config use-context <context-name>. For validation without cluster, use --dry-run=client instead of --dry-run=server. Verify kubectl configuration. Test with various contexts.
+### Validation detects Kubernetes manifest in non-k8s YAML files
+
+Strengthen detection logic: grep -q '^apiVersion:.*v1' && grep -q '^kind: (Pod|Deployment|Service)'. Skip YAML files in non-k8s directories: [[ "$FILE_PATH" =~ /k8s/|/manifests/|/deploy/ ]] || exit 0. Verify file path patterns. Test with various YAML files.
+### Multi-document YAML causes validation to check only first resource
+
+Use kubectl apply --dry-run for all documents. Split YAML: csplit -z "$FILE_PATH" '/^---$/' '{*}' && for f in xx*; do kubectl apply --dry-run=client -f $f; done. Handle --- document separators properly. Verify multi-document handling. Test with various YAML structures.
+### Security context warnings trigger on valid init containers
+
+Check container type before warning: grep -A5 'initContainers:' to identify init containers. Init containers may legitimately need privileged access. Add context-aware checks for runAsNonRoot based on container type. Verify container types. Test with various container configurations.
+### Hook exits with error preventing further operations after validation
+
+Change exit strategy: collect validation errors but exit 0 for warnings. Use: [ "$ERRORS" -gt 0 ] && echo 'Validation errors' >&2 || exit 0. Only fail on critical errors, warn on best practices. Verify exit codes. Test with various validation results.
+### kubeval validation fails with schema not found errors
+
+Update kubeval schemas: kubeval --download-schemas. Verify Kubernetes version compatibility. Check schema cache location. Ensure kubeval has access to schema files. Test with various Kubernetes versions.
+### kube-score validation shows false positives for development environments
+
+kube-score checks production best practices. For development, use environment-specific rules or skip kube-score for dev manifests. Configure kube-score with --ignore-test flags. Verify environment detection. Test with various environments.
+### Helm chart validation fails on template rendering
+
+Helm templates require values.yaml for rendering. Use helm template command: helm template . --values values.yaml | kubectl apply --dry-run=client -f -. Verify Helm chart structure. Check template syntax. Test with various Helm charts.

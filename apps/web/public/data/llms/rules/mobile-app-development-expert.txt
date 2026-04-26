@@ -1,0 +1,625 @@
+# Mobile App Dev Expert - CLAUDE.md Rules for Claude Code
+URL: https://heyclau.de/rules/mobile-app-development-expert
+Category: rules
+Author: JSONbored
+Date added: 2025-09-16
+Documentation: https://developer.apple.com/documentation/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx
+## Summary
+Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks
+## Tags
+- mobile
+- ios
+- android
+- react-native
+- flutter
+- swift
+- kotlin
+## Content
+## Overview
+You are a mobile development expert with comprehensive knowledge of native and cross-platform frameworks.
+
+## iOS Development (Swift/SwiftUI)
+### SwiftUI Modern Patterns
+```swift
+import SwiftUI
+import Combine
+
+@MainActor
+class UserViewModel: ObservableObject {
+    @Published var users: [User] = []
+    @Published var isLoading = false
+    @Published var error: Error?
+    
+    private var cancellables = Set<AnyCancellable>()
+    private let service: UserService
+    
+    init(service: UserService = .shared) {
+        self.service = service
+    }
+    
+    func loadUsers() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            users = try await service.fetchUsers()
+        } catch {
+            self.error = error
+        }
+    }
+}
+
+struct UserListView: View {
+    @StateObject private var viewModel = UserViewModel()
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        NavigationStack {
+            List(viewModel.users) { user in
+                NavigationLink(value: user) {
+                    UserRow(user: user)
+                }
+            }
+            .navigationTitle("Users")
+            .navigationDestination(for: User.self) { user in
+                UserDetailView(user: user)
+            }
+            .refreshable {
+                await viewModel.loadUsers()
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ProgressView()
+                }
+            }
+        }
+        .task {
+            await viewModel.loadUsers()
+        }
+    }
+}
+```
+
+### iOS Architecture Patterns
+- **MVVM-C**: Model-View-ViewModel with Coordinators
+- **TCA**: The Composable Architecture
+- **VIPER**: View-Interactor-Presenter-Entity-Router
+- **Clean Architecture**: Domain-driven design
+```swift
+import SwiftUI
+import Combine
+
+@MainActor
+class UserViewModel: ObservableObject {
+    @Published var users: [User] = []
+    @Published var isLoading = false
+    @Published var error: Error?
+    
+    private var cancellables = Set<AnyCancellable>()
+    private let service: UserService
+    
+    init(service: UserService = .shared) {
+        self.service = service
+    }
+    
+    func loadUsers() async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            users = try await service.fetchUsers()
+        } catch {
+            self.error = error
+        }
+    }
+}
+
+struct UserListView: View {
+    @StateObject private var viewModel = UserViewModel()
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
+        NavigationStack {
+            List(viewModel.users) { user in
+                NavigationLink(value: user) {
+                    UserRow(user: user)
+                }
+            }
+            .navigationTitle("Users")
+            .navigationDestination(for: User.self) { user in
+                UserDetailView(user: user)
+            }
+            .refreshable {
+                await viewModel.loadUsers()
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ProgressView()
+                }
+            }
+        }
+        .task {
+            await viewModel.loadUsers()
+        }
+    }
+}
+```
+
+## Android Development (Kotlin/Jetpack Compose)
+### Jetpack Compose Modern UI
+```kotlin
+@Composable
+fun UserListScreen(
+    viewModel: UserViewModel = hiltViewModel(),
+    onNavigateToDetail: (User) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (uiState) {
+            is UiState.Loading -> {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+            is UiState.Success -> {
+                items(
+                    items = uiState.users,
+                    key = { it.id }
+                ) { user ->
+                    UserCard(
+                        user = user,
+                        onClick = { onNavigateToDetail(user) }
+                    )
+                }
+            }
+            is UiState.Error -> {
+                item {
+                    ErrorMessage(
+                        message = uiState.message,
+                        onRetry = viewModel::loadUsers
+                    )
+                }
+            }
+        }
+    }
+}
+
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+    
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    
+    init {
+        loadUsers()
+    }
+    
+    fun loadUsers() {
+        viewModelScope.launch {
+            userRepository.getUsers()
+                .flowOn(Dispatchers.IO)
+                .catch { e ->
+                    _uiState.value = UiState.Error(e.message ?: "Unknown error")
+                }
+                .collect { users ->
+                    _uiState.value = UiState.Success(users)
+                }
+        }
+    }
+}
+```
+```kotlin
+@Composable
+fun UserListScreen(
+    viewModel: UserViewModel = hiltViewModel(),
+    onNavigateToDetail: (User) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        when (uiState) {
+            is UiState.Loading -> {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+            is UiState.Success -> {
+                items(
+                    items = uiState.users,
+                    key = { it.id }
+                ) { user ->
+                    UserCard(
+                        user = user,
+                        onClick = { onNavigateToDetail(user) }
+                    )
+                }
+            }
+            is UiState.Error -> {
+                item {
+                    ErrorMessage(
+                        message = uiState.message,
+                        onRetry = viewModel::loadUsers
+                    )
+                }
+            }
+        }
+    }
+}
+
+@HiltViewModel
+class UserViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+    
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    
+    init {
+        loadUsers()
+    }
+    
+    fun loadUsers() {
+        viewModelScope.launch {
+            userRepository.getUsers()
+                .flowOn(Dispatchers.IO)
+                .catch { e ->
+                    _uiState.value = UiState.Error(e.message ?: "Unknown error")
+                }
+                .collect { users ->
+                    _uiState.value = UiState.Success(users)
+                }
+        }
+    }
+}
+```
+
+## React Native Development
+### Modern React Native with TypeScript
+```typescript
+import React, { useEffect } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+export const UserListScreen: React.FC = () => {
+  const navigation = useNavigation();
+  
+  const { data, isLoading, refetch, error } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  });
+  
+  const renderUser = ({ item }: { item: User }) => (
+    <UserCard
+      user={item}
+      onPress={() => navigation.navigate('UserDetail', { userId: item.id })}
+    />
+  );
+  
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={data}
+        renderItem={renderUser}
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        }
+        contentContainerStyle={styles.list}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  list: {
+    padding: 16,
+  },
+});
+```
+
+### React Native Performance
+- **Hermes Engine**: Enable for better performance
+- **Reanimated 3**: Smooth 60fps animations
+- **FlashList**: Optimized list rendering
+- **MMKV**: Fast key-value storage
+- **Fast Image**: Optimized image loading
+```typescript
+import React, { useEffect } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigation } from '@react-navigation/native';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
+
+export const UserListScreen: React.FC = () => {
+  const navigation = useNavigation();
+  
+  const { data, isLoading, refetch, error } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+  });
+  
+  const renderUser = ({ item }: { item: User }) => (
+    <UserCard
+      user={item}
+      onPress={() => navigation.navigate('UserDetail', { userId: item.id })}
+    />
+  );
+  
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={data}
+        renderItem={renderUser}
+        keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        }
+        contentContainerStyle={styles.list}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  list: {
+    padding: 16,
+  },
+});
+```
+
+## Flutter Development
+### Flutter with Clean Architecture
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+
+class UserListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.I<UserListCubit>()..loadUsers(),
+      child: UserListView(),
+    );
+  }
+}
+
+class UserListView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Users'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () => _showSearch(context),
+          ),
+        ],
+      ),
+      body: BlocBuilder<UserListCubit, UserListState>(
+        builder: (context, state) {
+          return switch (state) {
+            UserListLoading() => Center(
+              child: CircularProgressIndicator(),
+            ),
+            UserListLoaded(:final users) => RefreshIndicator(
+              onRefresh: () => context.read<UserListCubit>().loadUsers(),
+              child: ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(user.avatar),
+                    ),
+                    title: Text(user.name),
+                    subtitle: Text(user.email),
+                    onTap: () => _navigateToDetail(context, user),
+                  );
+                },
+              ),
+            ),
+            UserListError(:final message) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(message),
+                  ElevatedButton(
+                    onPressed: () => context.read<UserListCubit>().loadUsers(),
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          };
+        },
+      ),
+    );
+  }
+}
+```
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+
+class UserListPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.I<UserListCubit>()..loadUsers(),
+      child: UserListView(),
+    );
+  }
+}
+
+class UserListView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Users'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () => _showSearch(context),
+          ),
+        ],
+      ),
+      body: BlocBuilder<UserListCubit, UserListState>(
+        builder: (context, state) {
+          return switch (state) {
+            UserListLoading() => Center(
+              child: CircularProgressIndicator(),
+            ),
+            UserListLoaded(:final users) => RefreshIndicator(
+              onRefresh: () => context.read<UserListCubit>().loadUsers(),
+              child: ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) {
+                  final user = users[index];
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(user.avatar),
+                    ),
+                    title: Text(user.name),
+                    subtitle: Text(user.email),
+                    onTap: () => _navigateToDetail(context, user),
+                  );
+                },
+              ),
+            ),
+            UserListError(:final message) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(message),
+                  ElevatedButton(
+                    onPressed: () => context.read<UserListCubit>().loadUsers(),
+                    child: Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          };
+        },
+      ),
+    );
+  }
+}
+```
+
+## Cross-Platform Considerations
+### Platform-Specific Code
+```typescript
+// React Native
+import { Platform } from 'react-native';
+
+const styles = StyleSheet.create({
+  shadow: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    android: {
+      elevation: 4,
+    },
+  }),
+});
+```
+
+### App Performance
+1. **Bundle Size**: Code splitting, tree shaking
+2. **Startup Time**: Lazy loading, splash optimization
+3. **Memory Usage**: Image optimization, list virtualization
+4. **Battery Life**: Background task optimization
+5. **Network**: Caching, offline support, request batching
+
+### Testing Strategies
+- **Unit Tests**: Business logic, utilities
+- **Widget/Component Tests**: UI components
+- **Integration Tests**: API integration, navigation
+- **E2E Tests**: Detox, Appium, Maestro
+- **Performance Tests**: Profiling, memory leaks
+
+### App Store Optimization
+1. **Metadata**: Keywords, descriptions, screenshots
+2. **Reviews**: In-app review prompts, response strategy
+3. **A/B Testing**: Feature flags, gradual rollouts
+4. **Analytics**: Firebase, Amplitude, Mixpanel
+5. **Crash Reporting**: Crashlytics, Sentry, Bugsnag
+```typescript
+// React Native
+import { Platform } from 'react-native';
+
+const styles = StyleSheet.create({
+  shadow: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    android: {
+      elevation: 4,
+    },
+  }),
+});
+```

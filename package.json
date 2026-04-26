@@ -19,6 +19,7 @@
     "validate:packages": "node scripts/validate-download-packages.mjs",
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
+    "test": "node scripts/test-all.mjs",
     "test:seo-jsonld": "node scripts/test-seo-jsonld.mjs",
     "test:commercial-intake": "node scripts/test-commercial-intake.mjs",
     "test:registry-artifacts": "node scripts/test-registry-artifacts.mjs",

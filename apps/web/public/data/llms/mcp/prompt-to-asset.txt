@@ -1,0 +1,24 @@
+# Prompt-to-asset
+URL: https://heyclau.de/mcp/prompt-to-asset
+Category: mcp
+Author: MohamedAbdallah-14
+Date added: 2026-04-25
+Documentation: https://github.com/MohamedAbdallah-14/prompt-to-asset#readme
+Repository: https://github.com/MohamedAbdallah-14/prompt-to-asset
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx
+## Summary
+MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.
+## Tags
+- mcp
+- image-generation
+- design-tools
+- visual-assets
+- icons
+- favicons
+- og-images
+## Content
+## Overview
+MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.
+
+## Usage
+claude mcp add prompt-to-asset -- npx -y prompt-to-asset

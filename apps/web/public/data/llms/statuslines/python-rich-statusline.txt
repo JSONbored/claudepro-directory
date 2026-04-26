@@ -1,0 +1,738 @@
+# Python Rich Statusline - Statuslines
+URL: https://heyclau.de/statuslines/python-rich-statusline
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-01
+Documentation: https://rich.readthedocs.io/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx
+## Summary
+Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking
+## Tags
+- python
+- rich
+- advanced
+- cost-tracking
+- progress
+- colorful
+## Content
+## Features
+- Rich library for beautiful terminal formatting
+- Real-time token cost calculation and display
+- Progress bar showing session token usage
+- Git branch and status indicators
+- Emoji support for visual feedback
+- Dynamic color schemes based on cost thresholds
+- JSON parsing with error handling
+- Customizable Rich table layouts for multi-metric display
+
+## Use Cases
+- Track token costs in real-time during long sessions
+- Monitor git branch when working across multiple projects
+- Visual feedback for budget-conscious API usage
+- Enhanced aesthetics for presentation or streaming
+- Python developers leveraging Rich library ecosystem
+- Data visualization enthusiasts wanting rich terminal output
+
+## Requirements
+- Claude Code CLI installed and configured
+- Python 3.7+ installed and available in PATH (python3 command)
+- Rich library installed (pip3 install rich or python3 -m pip install rich)
+- Terminal with UTF-8 encoding support (required for Unicode emojis: 🤖 📁 🎯 💰)
+- Terminal with truecolor support (24-bit color, recommended for best Rich rendering - set COLORTERM=truecolor)
+- Git command (optional, for Git branch display - statusline works without Git)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py",
+    "refreshInterval": 1000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Python Rich Statusline with Progress Bar
+Extended version with Rich progress bar showing token usage percentage
+```python
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+from rich.progress import BarColumn, Progress
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+# Token limit (adjust based on model)
+if 'sonnet' in model.lower() or 'opus' in model.lower():
+    token_limit = 1000000
+else:
+    token_limit = 200000
+
+token_percentage = min((tokens / token_limit) * 100, 100)
+
+# Git branch
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style="bold cyan")
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style="yellow")
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style="magenta")
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = "green" if token_percentage < 50 else "yellow" if token_percentage < 80 else "red"
+status.append(f"{tokens:,}", style=token_style)
+status.append(f" ({token_percentage:.1f}%)", style="dim")
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_color = "green" if cost < 0.10 else "yellow" if cost < 1.0 else "red"
+    status.append(f"${cost:.3f}", style=cost_color)
+
+console.print(status)
+```
+### Python Rich Statusline with Custom Themes
+Version with configurable color themes via environment variables
+```python
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+# Theme configuration (via environment variables)
+theme = os.environ.get('RICH_STATUSLINE_THEME', 'default')
+
+themes = {
+    'default': {
+        'model': 'bold cyan',
+        'directory': 'yellow',
+        'git': 'magenta',
+        'token_low': 'green',
+        'token_med': 'yellow',
+        'token_high': 'red',
+        'cost_low': 'green',
+        'cost_med': 'yellow',
+        'cost_high': 'red'
+    },
+    'dark': {
+        'model': 'bold white',
+        'directory': 'bright_white',
+        'git': 'bright_magenta',
+        'token_low': 'bright_green',
+        'token_med': 'bright_yellow',
+        'token_high': 'bright_red',
+        'cost_low': 'bright_green',
+        'cost_med': 'bright_yellow',
+        'cost_high': 'bright_red'
+    },
+    'minimal': {
+        'model': 'cyan',
+        'directory': 'white',
+        'git': 'white',
+        'token_low': 'white',
+        'token_med': 'white',
+        'token_high': 'white',
+        'cost_low': 'white',
+        'cost_med': 'white',
+        'cost_high': 'white'
+    }
+}
+
+colors = themes.get(theme, themes['default'])
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style=colors['model'])
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style=colors['directory'])
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style=colors['git'])
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = colors['token_low'] if tokens < 100000 else colors['token_med'] if tokens < 500000 else colors['token_high']
+status.append(f"{tokens:,}", style=token_style)
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_style = colors['cost_low'] if cost < 0.10 else colors['cost_med'] if cost < 1.0 else colors['cost_high']
+    status.append(f"${cost:.3f}", style=cost_style)
+
+console.print(status)
+```
+### Python Rich Statusline Installation Example
+Complete setup script with Rich library installation and Python version verification
+```bash
+#!/bin/bash
+# Installation script for Python Rich Statusline
+
+# Check Python version
+if ! command -v python3 &> /dev/null; then
+    echo "Python 3 is required but not installed"
+    echo "Install Python 3: macOS (brew install python3), Linux (sudo apt-get install python3 or sudo yum install python3)"
+    exit 1
+fi
+
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo "Python version: $PYTHON_VERSION"
+
+# Check if Rich is installed
+if ! python3 -c "import rich" 2>/dev/null; then
+    echo "Installing Rich library..."
+    python3 -m pip install rich --user || python3 -m pip install rich
+    echo "Rich library installed"
+else
+    echo "Rich library already installed"
+fi
+
+# Verify Rich installation
+if python3 -c "import rich" 2>/dev/null; then
+    RICH_VERSION=$(python3 -c "import rich; print(rich.__version__)" 2>/dev/null || echo "unknown")
+    echo "Rich version: $RICH_VERSION"
+else
+    echo "Error: Rich library installation failed"
+    exit 1
+fi
+
+# Test emoji support
+if python3 -c "print('🤖 📁 🎯 💰')" &> /dev/null; then
+    echo "Emoji support verified: 🤖 📁 🎯 💰"
+else
+    echo "Warning: Emoji support may not be available"
+fi
+
+# Test Rich console
+if python3 -c "from rich.console import Console; Console().print('[bold green]Test[/bold green]')" &> /dev/null; then
+    echo "Rich console working"
+else
+    echo "Warning: Rich console test failed"
+fi
+
+# Check for truecolor support
+if [ -n "$COLORTERM" ] && [ "$COLORTERM" = "truecolor" ]; then
+    echo "Truecolor support enabled"
+else
+    echo "Note: Set COLORTERM=truecolor for best color support"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/python-rich-statusline.py << 'SCRIPT_EOF'
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style="bold cyan")
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style="yellow")
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style="magenta")
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = "green" if tokens < 100000 else "yellow" if tokens < 500000 else "red"
+status.append(f"{tokens:,}", style=token_style)
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_color = "green" if cost < 0.10 else "yellow" if cost < 1.0 else "red"
+    status.append(f"${cost:.3f}", style=cost_color)
+
+console.print(status)
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/python-rich-statusline.py
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Python Rich Statusline installed successfully!"
+echo "Note: Ensure terminal supports truecolor for best color rendering"
+echo "Set with: export COLORTERM=truecolor"
+```
+```python
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+from rich.progress import BarColumn, Progress
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+# Token limit (adjust based on model)
+if 'sonnet' in model.lower() or 'opus' in model.lower():
+    token_limit = 1000000
+else:
+    token_limit = 200000
+
+token_percentage = min((tokens / token_limit) * 100, 100)
+
+# Git branch
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style="bold cyan")
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style="yellow")
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style="magenta")
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = "green" if token_percentage < 50 else "yellow" if token_percentage < 80 else "red"
+status.append(f"{tokens:,}", style=token_style)
+status.append(f" ({token_percentage:.1f}%)", style="dim")
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_color = "green" if cost < 0.10 else "yellow" if cost < 1.0 else "red"
+    status.append(f"${cost:.3f}", style=cost_color)
+
+console.print(status)
+```
+```python
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+# Theme configuration (via environment variables)
+theme = os.environ.get('RICH_STATUSLINE_THEME', 'default')
+
+themes = {
+    'default': {
+        'model': 'bold cyan',
+        'directory': 'yellow',
+        'git': 'magenta',
+        'token_low': 'green',
+        'token_med': 'yellow',
+        'token_high': 'red',
+        'cost_low': 'green',
+        'cost_med': 'yellow',
+        'cost_high': 'red'
+    },
+    'dark': {
+        'model': 'bold white',
+        'directory': 'bright_white',
+        'git': 'bright_magenta',
+        'token_low': 'bright_green',
+        'token_med': 'bright_yellow',
+        'token_high': 'bright_red',
+        'cost_low': 'bright_green',
+        'cost_med': 'bright_yellow',
+        'cost_high': 'bright_red'
+    },
+    'minimal': {
+        'model': 'cyan',
+        'directory': 'white',
+        'git': 'white',
+        'token_low': 'white',
+        'token_med': 'white',
+        'token_high': 'white',
+        'cost_low': 'white',
+        'cost_med': 'white',
+        'cost_high': 'white'
+    }
+}
+
+colors = themes.get(theme, themes['default'])
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style=colors['model'])
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style=colors['directory'])
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style=colors['git'])
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = colors['token_low'] if tokens < 100000 else colors['token_med'] if tokens < 500000 else colors['token_high']
+status.append(f"{tokens:,}", style=token_style)
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_style = colors['cost_low'] if cost < 0.10 else colors['cost_med'] if cost < 1.0 else colors['cost_high']
+    status.append(f"${cost:.3f}", style=cost_style)
+
+console.print(status)
+```
+```bash
+#!/bin/bash
+# Installation script for Python Rich Statusline
+
+# Check Python version
+if ! command -v python3 &> /dev/null; then
+    echo "Python 3 is required but not installed"
+    echo "Install Python 3: macOS (brew install python3), Linux (sudo apt-get install python3 or sudo yum install python3)"
+    exit 1
+fi
+
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo "Python version: $PYTHON_VERSION"
+
+# Check if Rich is installed
+if ! python3 -c "import rich" 2>/dev/null; then
+    echo "Installing Rich library..."
+    python3 -m pip install rich --user || python3 -m pip install rich
+    echo "Rich library installed"
+else
+    echo "Rich library already installed"
+fi
+
+# Verify Rich installation
+if python3 -c "import rich" 2>/dev/null; then
+    RICH_VERSION=$(python3 -c "import rich; print(rich.__version__)" 2>/dev/null || echo "unknown")
+    echo "Rich version: $RICH_VERSION"
+else
+    echo "Error: Rich library installation failed"
+    exit 1
+fi
+
+# Test emoji support
+if python3 -c "print('🤖 📁 🎯 💰')" &> /dev/null; then
+    echo "Emoji support verified: 🤖 📁 🎯 💰"
+else
+    echo "Warning: Emoji support may not be available"
+fi
+
+# Test Rich console
+if python3 -c "from rich.console import Console; Console().print('[bold green]Test[/bold green]')" &> /dev/null; then
+    echo "Rich console working"
+else
+    echo "Warning: Rich console test failed"
+fi
+
+# Check for truecolor support
+if [ -n "$COLORTERM" ] && [ "$COLORTERM" = "truecolor" ]; then
+    echo "Truecolor support enabled"
+else
+    echo "Note: Set COLORTERM=truecolor for best color support"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/python-rich-statusline.py << 'SCRIPT_EOF'
+#!/usr/bin/env python3
+
+import sys
+import json
+import os
+from rich.console import Console
+from rich.text import Text
+
+console = Console()
+
+try:
+    data = json.load(sys.stdin)
+except json.JSONDecodeError:
+    console.print("[red]Error: Invalid JSON input[/red]")
+    sys.exit(1)
+
+model = data.get('model', {}).get('display_name') or data.get('model', {}).get('id') or 'unknown'
+workspace_path = data.get('workspace', {}).get('current_dir') or data.get('workspace', {}).get('path') or data.get('cwd', '~')
+workspace = workspace_path.replace(os.path.expanduser('~'), '~')
+workspace = os.path.basename(workspace)
+
+tokens = data.get('cost', {}).get('total_lines_added') or data.get('session', {}).get('totalTokens', 0)
+cost = data.get('cost', {}).get('total_cost_usd') or data.get('session', {}).get('estimatedCost', 0.0)
+
+git_branch = None
+if os.path.exists('.git'):
+    try:
+        import subprocess
+        result = subprocess.run(
+            ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            git_branch = result.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
+status = Text()
+
+status.append("🤖 ", style="bold")
+status.append(f"{model}", style="bold cyan")
+status.append(" │ ", style="dim")
+
+status.append("📁 ", style="bold")
+status.append(f"{workspace}", style="yellow")
+
+if git_branch:
+    status.append(" │ ", style="dim")
+    status.append(f"{git_branch}", style="magenta")
+
+status.append(" │ ", style="dim")
+status.append("🎯 ", style="bold")
+token_style = "green" if tokens < 100000 else "yellow" if tokens < 500000 else "red"
+status.append(f"{tokens:,}", style=token_style)
+
+if cost > 0:
+    status.append(" │ ", style="dim")
+    status.append("💰 ", style="bold")
+    cost_color = "green" if cost < 0.10 else "yellow" if cost < 1.0 else "red"
+    status.append(f"${cost:.3f}", style=cost_color)
+
+console.print(status)
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/python-rich-statusline.py
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/python-rich-statusline.py","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Python Rich Statusline installed successfully!"
+echo "Note: Ensure terminal supports truecolor for best color rendering"
+echo "Set with: export COLORTERM=truecolor"
+```
+
+## Troubleshooting
+### ModuleNotFoundError: No module named 'rich'
+
+Install the Rich library: pip3 install rich or python3 -m pip install rich. Verify installation: python3 -c 'import rich'. Check Python path: python3 -c 'import sys; print(sys.path)'. If using virtual environment, activate it first. For user installation: python3 -m pip install --user rich. Verify Rich version: python3 -c 'import rich; print(rich.__version__)'.
+### Emojis displaying as boxes or not rendering
+
+Ensure terminal supports Unicode emojis. Use iTerm2, Kitty, or Windows Terminal. Test with: python3 -c 'print("🤖 Test")'. Verify terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Check font supports emojis: Install emoji-capable font (e.g., Noto Color Emoji). Test emoji rendering: python3 -c "from rich.console import Console; Console().print('🤖 📁 🎯 💰')".
+### Colors look washed out or incorrect
+
+Enable truecolor support. Set COLORTERM=truecolor environment variable or use a terminal that supports 24-bit color. Verify truecolor: python3 -c "from rich.console import Console; c = Console(); print(c.is_terminal, c.color_system)". Check terminal: iTerm2, Kitty, Windows Terminal support truecolor. Test colors: python3 -c "from rich.console import Console; Console().print('[bold red]Red[/bold red] [bold green]Green[/bold green]')". If still issues, check terminal color settings.
+### Script execution too slow
+
+Rich has some startup overhead. Consider increasing refreshInterval to 2000-3000ms or use the minimal-powerline statusline instead. Check Python startup time: time python3 -c 'import rich'. Optimize imports: Only import what's needed (from rich.console import Console, from rich.text import Text). Consider using faster alternatives: Use bash statusline for better performance. Profile script: python3 -m cProfile script.py to identify bottlenecks.
+### Python version error or incompatible
+
+Rich requires Python 3.7+. Check Python version: python3 --version (should be 3.7+). Verify Python 3: which python3 (should return path). If Python 3.6 or older, upgrade: macOS (brew install python3), Linux (sudo apt-get install python3.8 or newer). Check if python3 points to correct version: python3 -c 'import sys; print(sys.version)'.
+### Git branch not detected despite being in repository
+
+Check Git installed: git --version. Verify subprocess works: python3 -c "import subprocess; print(subprocess.run(['git', '--version'], capture_output=True, text=True).stdout)". Check timeout: Script uses 1 second timeout - increase if Git is slow. Verify Git command: python3 -c "import subprocess; result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], capture_output=True, text=True, timeout=1); print(result.stdout)". Check .git directory: os.path.exists('.git') should return True.
+### JSON parsing errors or invalid input
+
+Verify JSON input: echo '$input' | python3 -m json.tool (should parse without errors). Check JSON structure: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print(data.keys())". Verify stdin: Script reads from sys.stdin - ensure JSON is piped correctly. Test with sample JSON: echo '{"model":{"display_name":"test"}}' | python3 script.py. Check error handling: Script should print error message and exit gracefully on invalid JSON.
+### Token count or cost showing as 0 or incorrect values
+
+Check JSON field names: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print(data.get('cost', {}).get('total_cost_usd'))". Verify field extraction: Script checks multiple field names (cost.total_cost_usd, session.estimatedCost). Check if fields exist: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print('cost' in data, 'session' in data)". Verify data structure: Some Claude Code versions may use different field names. Update script to check additional field names if needed.

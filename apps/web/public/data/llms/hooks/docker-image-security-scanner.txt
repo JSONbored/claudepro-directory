@@ -1,0 +1,712 @@
+# Docker Image Security Scanner - Hooks
+URL: https://heyclau.de/hooks/docker-image-security-scanner
+Category: hooks
+Author: JSONbored
+Date added: 2025-10-19
+Documentation: https://aquasecurity.github.io/trivy/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-image-security-scanner.mdx
+## Summary
+Comprehensive Docker image vulnerability scanning with layer analysis, base image recommendations, and security best practices enforcement. This PostToolUse hook automatically scans Docker images for vulnerabilities when Dockerfiles are modified, providing real-time security validation during development.
+## Tags
+- docker
+- security
+- containers
+- vulnerability
+- devops
+## Content
+## Features
+- Automated vulnerability scanning on Dockerfile changes with real-time security validation using Trivy 0.52.0+, Grype, and Docker Scout when Dockerfiles are modified
+- Docker image layer-by-layer security analysis with detailed vulnerability reporting, CVSS scores, and remediation recommendations for each detected vulnerability
+- Base image vulnerability detection and recommendations with alternative base image suggestions (alpine, distroless) and version pinning enforcement
+- Malware and rootkit scanning in container images using Trivy secret scanning and Grype for comprehensive security coverage
+- Security best practices validation (non-root user, minimal layers, version pinning, secrets detection, HEALTHCHECK) with automated Dockerfile analysis
+- Integration with Trivy 0.52.0+, Grype, and Docker Scout (Docker Desktop 4.17+) for comprehensive vulnerability coverage with multiple vulnerability databases
+- SBOM (Software Bill of Materials) generation support for supply chain security tracking and compliance requirements
+- VEX (Vulnerability Exploitability eXchange) support for vulnerability suppression and exploitability assessment with Trivy VEX integration
+
+## Use Cases
+- Automated container security validation in development providing real-time vulnerability scanning when Dockerfiles are modified during active development
+- CI/CD pipeline integration for image vulnerability scanning ensuring all container images are scanned for vulnerabilities before deployment
+- Compliance enforcement for containerized applications meeting security compliance requirements with detailed vulnerability reports and remediation guidance
+- Supply chain security for base image verification ensuring base images are secure and up-to-date before building application images
+- Production readiness checks before deployment validating container images meet security standards before production deployment
+- Development workflow optimization providing immediate security feedback on Dockerfile changes and base image vulnerabilities during active development
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/docker-image-security-scanner.sh
+3. Make executable: chmod +x .claude/hooks/docker-image-security-scanner.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Docker Engine 24.0+ installed and running
+- Security scanner: Trivy 0.52.0+, Grype, or Docker Scout (Docker Desktop 4.17+)
+- jq JSON processor for parsing scan output (optional but recommended)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/docker-image-security-scanner.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/docker-image-security-scanner.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Configuration
+SECURITY_REPORT=".claude/reports/docker-security-$(date +%Y%m%d).txt"
+SEVERITY_THRESHOLD=${DOCKER_SCAN_SEVERITY:-HIGH}
+SCAN_ENABLED=${DOCKER_SECURITY_SCAN:-true}
+
+mkdir -p "$(dirname "$SECURITY_REPORT")"
+
+# Function to check if file is a Dockerfile
+is_dockerfile() {
+  local file=$1
+  [[ "$file" == *Dockerfile* ]] || [[ "$file" == *.dockerfile ]]
+}
+
+# Function to analyze Dockerfile for security issues
+analyze_dockerfile_security() {
+  local dockerfile=$1
+  
+  echo "🔍 Analyzing Dockerfile security practices: $dockerfile" >&2
+  echo "" >> "$SECURITY_REPORT"
+  echo "Dockerfile Security Analysis - $(date)" >> "$SECURITY_REPORT"
+  echo "========================================" >> "$SECURITY_REPORT"
+  echo "File: $dockerfile" >> "$SECURITY_REPORT"
+  echo "" >> "$SECURITY_REPORT"
+  
+  local issues_found=0
+  
+  # Check for non-root user
+  if ! grep -i "^USER" "$dockerfile" >/dev/null 2>&1; then
+    echo "⚠️ WARNING: No USER directive found (running as root)" >&2
+    echo "[SECURITY] Missing USER directive - container runs as root" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for version pinning
+  if grep -i "^FROM.*:latest" "$dockerfile" >/dev/null 2>&1; then
+    echo "⚠️ WARNING: Using :latest tag (not reproducible)" >&2
+    echo "[SECURITY] Base image uses :latest tag instead of pinned version" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for COPY with broad wildcards
+  if grep -i "COPY . " "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: COPY . detected - ensure .dockerignore excludes secrets" >&2
+    echo "[INFO] Broad COPY directive - verify .dockerignore configuration" >> "$SECURITY_REPORT"
+  fi
+  
+  # Check for hardcoded secrets
+  if grep -iE "PASSWORD|SECRET|TOKEN|KEY.*=" "$dockerfile" >/dev/null 2>&1; then
+    echo "🚨 CRITICAL: Potential hardcoded secrets detected!" >&2
+    echo "[CRITICAL] Hardcoded credentials found - use build args or secrets" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for HEALTHCHECK
+  if ! grep -i "^HEALTHCHECK" "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: No HEALTHCHECK directive (recommended for production)" >&2
+    echo "[INFO] Missing HEALTHCHECK - consider adding for production readiness" >> "$SECURITY_REPORT"
+  fi
+  
+  # Check for minimal base images
+  if grep -iE "FROM.*ubuntu|FROM.*debian" "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: Consider using alpine or distroless for smaller attack surface" >&2
+    echo "[INFO] Full OS base image - consider alpine or distroless alternatives" >> "$SECURITY_REPORT"
+  fi
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Issues found: $issues_found" >> "$SECURITY_REPORT"
+  
+  return $issues_found
+}
+
+# Function to scan image with Trivy
+scan_with_trivy() {
+  local image=$1
+  
+  if ! command -v trivy &> /dev/null; then
+    echo "💡 Install Trivy for comprehensive vulnerability scanning" >&2
+    echo "   brew install trivy (macOS)" >&2
+    echo "   apt install trivy (Debian/Ubuntu)" >&2
+    return
+  fi
+  
+  echo "🔒 Scanning image with Trivy: $image" >&2
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Trivy Vulnerability Scan" >> "$SECURITY_REPORT"
+  echo "========================" >> "$SECURITY_REPORT"
+  
+  # Run Trivy scan
+  trivy image --severity "$SEVERITY_THRESHOLD",CRITICAL \
+    --format json "$image" 2>/dev/null | \
+    jq -r '.Results[]? | .Vulnerabilities[]? | "\(.VulnerabilityID): \(.Severity) - \(.Title)"' 2>/dev/null | \
+    head -20 >> "$SECURITY_REPORT" || \
+    echo "✅ No vulnerabilities found at $SEVERITY_THRESHOLD or higher severity" >> "$SECURITY_REPORT"
+  
+  # Get summary
+  local vuln_count=$(trivy image --severity CRITICAL,HIGH --format json "$image" 2>/dev/null | \
+    jq '[.Results[]?.Vulnerabilities[]?] | length' 2>/dev/null || echo "0")
+  
+  if [ "$vuln_count" -gt 0 ]; then
+    echo "" >&2
+    echo "🚨 Found $vuln_count HIGH/CRITICAL vulnerabilities in $image" >&2
+    echo "💡 Review full report: $SECURITY_REPORT" >&2
+  else
+    echo "✅ No critical vulnerabilities detected" >&2
+  fi
+}
+
+# Function to scan with Docker Scout
+scan_with_docker_scout() {
+  local image=$1
+  
+  if ! docker scout version &> /dev/null 2>&1; then
+    echo "💡 Docker Scout available in Docker Desktop 4.17+" >&2
+    return
+  fi
+  
+  echo "🔍 Scanning with Docker Scout: $image" >&2
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Docker Scout Analysis" >> "$SECURITY_REPORT"
+  echo "=====================" >> "$SECURITY_REPORT"
+  
+  docker scout cves "$image" --format json 2>/dev/null | \
+    jq -r '.vulnerabilities[] | "\(.id): \(.severity) - \(.packageName)"' 2>/dev/null | \
+    head -15 >> "$SECURITY_REPORT" || \
+    echo "✅ Scout scan complete" >> "$SECURITY_REPORT"
+}
+
+# Main execution
+if is_dockerfile "$FILE_PATH"; then
+  echo "🐳 Dockerfile detected: $FILE_PATH" >&2
+  
+  if [ "$SCAN_ENABLED" != "true" ]; then
+    echo "ℹ️ Security scanning disabled (DOCKER_SECURITY_SCAN=false)" >&2
+    exit 0
+  fi
+  
+  # Analyze Dockerfile best practices
+  analyze_dockerfile_security "$FILE_PATH"
+  
+  # Try to determine image name
+  IMAGE_NAME=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+  
+  if [ -n "$IMAGE_NAME" ]; then
+    echo "📦 Base image: $IMAGE_NAME" >&2
+    
+    # Check if Docker is available and daemon is running
+    if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+      # Pull image if not present
+      if ! docker image inspect "$IMAGE_NAME" &> /dev/null; then
+        echo "📥 Pulling base image for scanning..." >&2
+        docker pull "$IMAGE_NAME" >&2 2>/dev/null || \
+          echo "⚠️ Could not pull image for scanning" >&2
+      fi
+      
+      # Run security scans
+      scan_with_trivy "$IMAGE_NAME"
+      scan_with_docker_scout "$IMAGE_NAME"
+    else
+      echo "⚠️ Docker daemon not running - cannot scan images" >&2
+    fi
+  fi
+  
+  # Display security best practices
+  echo "" >&2
+  echo "🛡️ Docker Security Best Practices:" >&2
+  echo "   • Use specific version tags, not :latest" >&2
+  echo "   • Run containers as non-root user (USER directive)" >&2
+  echo "   • Use multi-stage builds to minimize image size" >&2
+  echo "   • Scan images regularly with Trivy or Docker Scout" >&2
+  echo "   • Keep base images updated and prefer minimal bases" >&2
+  echo "   • Never include secrets in images (use build secrets)" >&2
+  
+  if [ -s "$SECURITY_REPORT" ]; then
+    echo "" >&2
+    echo "📄 Full security report: $SECURITY_REPORT" >&2
+  fi
+fi
+
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Configuration
+SECURITY_REPORT=".claude/reports/docker-security-$(date +%Y%m%d).txt"
+SEVERITY_THRESHOLD=${DOCKER_SCAN_SEVERITY:-HIGH}
+SCAN_ENABLED=${DOCKER_SECURITY_SCAN:-true}
+
+mkdir -p "$(dirname "$SECURITY_REPORT")"
+
+# Function to check if file is a Dockerfile
+is_dockerfile() {
+  local file=$1
+  [[ "$file" == *Dockerfile* ]] || [[ "$file" == *.dockerfile ]]
+}
+
+# Function to analyze Dockerfile for security issues
+analyze_dockerfile_security() {
+  local dockerfile=$1
+  
+  echo "🔍 Analyzing Dockerfile security practices: $dockerfile" >&2
+  echo "" >> "$SECURITY_REPORT"
+  echo "Dockerfile Security Analysis - $(date)" >> "$SECURITY_REPORT"
+  echo "========================================" >> "$SECURITY_REPORT"
+  echo "File: $dockerfile" >> "$SECURITY_REPORT"
+  echo "" >> "$SECURITY_REPORT"
+  
+  local issues_found=0
+  
+  # Check for non-root user
+  if ! grep -i "^USER" "$dockerfile" >/dev/null 2>&1; then
+    echo "⚠️ WARNING: No USER directive found (running as root)" >&2
+    echo "[SECURITY] Missing USER directive - container runs as root" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for version pinning
+  if grep -i "^FROM.*:latest" "$dockerfile" >/dev/null 2>&1; then
+    echo "⚠️ WARNING: Using :latest tag (not reproducible)" >&2
+    echo "[SECURITY] Base image uses :latest tag instead of pinned version" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for COPY with broad wildcards
+  if grep -i "COPY . " "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: COPY . detected - ensure .dockerignore excludes secrets" >&2
+    echo "[INFO] Broad COPY directive - verify .dockerignore configuration" >> "$SECURITY_REPORT"
+  fi
+  
+  # Check for hardcoded secrets
+  if grep -iE "PASSWORD|SECRET|TOKEN|KEY.*=" "$dockerfile" >/dev/null 2>&1; then
+    echo "🚨 CRITICAL: Potential hardcoded secrets detected!" >&2
+    echo "[CRITICAL] Hardcoded credentials found - use build args or secrets" >> "$SECURITY_REPORT"
+    issues_found=$((issues_found + 1))
+  fi
+  
+  # Check for HEALTHCHECK
+  if ! grep -i "^HEALTHCHECK" "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: No HEALTHCHECK directive (recommended for production)" >&2
+    echo "[INFO] Missing HEALTHCHECK - consider adding for production readiness" >> "$SECURITY_REPORT"
+  fi
+  
+  # Check for minimal base images
+  if grep -iE "FROM.*ubuntu|FROM.*debian" "$dockerfile" >/dev/null 2>&1; then
+    echo "💡 INFO: Consider using alpine or distroless for smaller attack surface" >&2
+    echo "[INFO] Full OS base image - consider alpine or distroless alternatives" >> "$SECURITY_REPORT"
+  fi
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Issues found: $issues_found" >> "$SECURITY_REPORT"
+  
+  return $issues_found
+}
+
+# Function to scan image with Trivy
+scan_with_trivy() {
+  local image=$1
+  
+  if ! command -v trivy &> /dev/null; then
+    echo "💡 Install Trivy for comprehensive vulnerability scanning" >&2
+    echo "   brew install trivy (macOS)" >&2
+    echo "   apt install trivy (Debian/Ubuntu)" >&2
+    return
+  fi
+  
+  echo "🔒 Scanning image with Trivy: $image" >&2
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Trivy Vulnerability Scan" >> "$SECURITY_REPORT"
+  echo "========================" >> "$SECURITY_REPORT"
+  
+  # Run Trivy scan
+  trivy image --severity "$SEVERITY_THRESHOLD",CRITICAL \
+    --format json "$image" 2>/dev/null | \
+    jq -r '.Results[]? | .Vulnerabilities[]? | "\(.VulnerabilityID): \(.Severity) - \(.Title)"' 2>/dev/null | \
+    head -20 >> "$SECURITY_REPORT" || \
+    echo "✅ No vulnerabilities found at $SEVERITY_THRESHOLD or higher severity" >> "$SECURITY_REPORT"
+  
+  # Get summary
+  local vuln_count=$(trivy image --severity CRITICAL,HIGH --format json "$image" 2>/dev/null | \
+    jq '[.Results[]?.Vulnerabilities[]?] | length' 2>/dev/null || echo "0")
+  
+  if [ "$vuln_count" -gt 0 ]; then
+    echo "" >&2
+    echo "🚨 Found $vuln_count HIGH/CRITICAL vulnerabilities in $image" >&2
+    echo "💡 Review full report: $SECURITY_REPORT" >&2
+  else
+    echo "✅ No critical vulnerabilities detected" >&2
+  fi
+}
+
+# Function to scan with Docker Scout
+scan_with_docker_scout() {
+  local image=$1
+  
+  if ! docker scout version &> /dev/null 2>&1; then
+    echo "💡 Docker Scout available in Docker Desktop 4.17+" >&2
+    return
+  fi
+  
+  echo "🔍 Scanning with Docker Scout: $image" >&2
+  
+  echo "" >> "$SECURITY_REPORT"
+  echo "Docker Scout Analysis" >> "$SECURITY_REPORT"
+  echo "=====================" >> "$SECURITY_REPORT"
+  
+  docker scout cves "$image" --format json 2>/dev/null | \
+    jq -r '.vulnerabilities[] | "\(.id): \(.severity) - \(.packageName)"' 2>/dev/null | \
+    head -15 >> "$SECURITY_REPORT" || \
+    echo "✅ Scout scan complete" >> "$SECURITY_REPORT"
+}
+
+# Main execution
+if is_dockerfile "$FILE_PATH"; then
+  echo "🐳 Dockerfile detected: $FILE_PATH" >&2
+  
+  if [ "$SCAN_ENABLED" != "true" ]; then
+    echo "ℹ️ Security scanning disabled (DOCKER_SECURITY_SCAN=false)" >&2
+    exit 0
+  fi
+  
+  # Analyze Dockerfile best practices
+  analyze_dockerfile_security "$FILE_PATH"
+  
+  # Try to determine image name
+  IMAGE_NAME=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+  
+  if [ -n "$IMAGE_NAME" ]; then
+    echo "📦 Base image: $IMAGE_NAME" >&2
+    
+    # Check if Docker is available and daemon is running
+    if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+      # Pull image if not present
+      if ! docker image inspect "$IMAGE_NAME" &> /dev/null; then
+        echo "📥 Pulling base image for scanning..." >&2
+        docker pull "$IMAGE_NAME" >&2 2>/dev/null || \
+          echo "⚠️ Could not pull image for scanning" >&2
+      fi
+      
+      # Run security scans
+      scan_with_trivy "$IMAGE_NAME"
+      scan_with_docker_scout "$IMAGE_NAME"
+    else
+      echo "⚠️ Docker daemon not running - cannot scan images" >&2
+    fi
+  fi
+  
+  # Display security best practices
+  echo "" >&2
+  echo "🛡️ Docker Security Best Practices:" >&2
+  echo "   • Use specific version tags, not :latest" >&2
+  echo "   • Run containers as non-root user (USER directive)" >&2
+  echo "   • Use multi-stage builds to minimize image size" >&2
+  echo "   • Scan images regularly with Trivy or Docker Scout" >&2
+  echo "   • Keep base images updated and prefer minimal bases" >&2
+  echo "   • Never include secrets in images (use build secrets)" >&2
+  
+  if [ -s "$SECURITY_REPORT" ]; then
+    echo "" >&2
+    echo "📄 Full security report: $SECURITY_REPORT" >&2
+  fi
+fi
+
+exit 0
+```
+
+## Examples
+### Docker Image Security Scanner Hook Script
+
+Complete hook script that performs Docker image security scanning when Dockerfiles are modified
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  echo "Dockerfile detected: $FILE_PATH" >&2
+  if ! command -v trivy &> /dev/null; then
+    echo "Install Trivy for vulnerability scanning" >&2
+    exit 0
+  fi
+  BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+  if [ -n "$BASE_IMAGE" ]; then
+    echo "Scanning base image: $BASE_IMAGE" >&2
+    if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+      docker pull "$BASE_IMAGE" >&2 2>/dev/null || echo "Could not pull image" >&2
+      trivy image --severity HIGH,CRITICAL --format json "$BASE_IMAGE" 2>/dev/null | jq '.' || trivy image "$BASE_IMAGE"
+    fi
+  fi
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable Docker image security scanning
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/docker-image-security-scanner.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Trivy Security Scanning with JSON Output
+
+Enhanced hook script using Trivy 0.52.0+ with JSON output and jq parsing
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  if command -v trivy &> /dev/null; then
+    BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+    if [ -n "$BASE_IMAGE" ]; then
+      echo "Scanning with Trivy: $BASE_IMAGE" >&2
+      if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+        docker pull "$BASE_IMAGE" >&2 2>/dev/null
+        trivy image --severity HIGH,CRITICAL --format json "$BASE_IMAGE" 2>/dev/null | jq -r '.Results[]? | .Vulnerabilities[]? | "\(.VulnerabilityID): \(.Severity) - \(.Title)"' | head -20
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Grype Security Scanning
+
+Enhanced hook script using Grype for Docker image vulnerability scanning
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  if command -v grype &> /dev/null; then
+    BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+    if [ -n "$BASE_IMAGE" ]; then
+      echo "Scanning with Grype: $BASE_IMAGE" >&2
+      if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+        docker pull "$BASE_IMAGE" >&2 2>/dev/null
+        grype "$BASE_IMAGE" --output json 2>/dev/null | jq '.' || grype "$BASE_IMAGE"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+### Dockerfile Security Best Practices Analysis
+
+Enhanced hook script for analyzing Dockerfile security best practices
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  issues_found=0
+  if ! grep -i "^USER" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "WARNING: No USER directive found (running as root)" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if grep -i "^FROM.*:latest" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "WARNING: Using :latest tag (not reproducible)" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if grep -iE "PASSWORD|SECRET|TOKEN|KEY.*=" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "CRITICAL: Potential hardcoded secrets detected!" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if [ "$issues_found" -gt 0 ]; then
+    echo "Found $issues_found security issues in Dockerfile" >&2
+  else
+    echo "No security issues detected in Dockerfile" >&2
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  echo "Dockerfile detected: $FILE_PATH" >&2
+  if ! command -v trivy &> /dev/null; then
+    echo "Install Trivy for vulnerability scanning" >&2
+    exit 0
+  fi
+  BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+  if [ -n "$BASE_IMAGE" ]; then
+    echo "Scanning base image: $BASE_IMAGE" >&2
+    if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+      docker pull "$BASE_IMAGE" >&2 2>/dev/null || echo "Could not pull image" >&2
+      trivy image --severity HIGH,CRITICAL --format json "$BASE_IMAGE" 2>/dev/null | jq '.' || trivy image "$BASE_IMAGE"
+    fi
+  fi
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/docker-image-security-scanner.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  if command -v trivy &> /dev/null; then
+    BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+    if [ -n "$BASE_IMAGE" ]; then
+      echo "Scanning with Trivy: $BASE_IMAGE" >&2
+      if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+        docker pull "$BASE_IMAGE" >&2 2>/dev/null
+        trivy image --severity HIGH,CRITICAL --format json "$BASE_IMAGE" 2>/dev/null | jq -r '.Results[]? | .Vulnerabilities[]? | "\(.VulnerabilityID): \(.Severity) - \(.Title)"' | head -20
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  if command -v grype &> /dev/null; then
+    BASE_IMAGE=$(grep -i "^FROM" "$FILE_PATH" | tail -1 | awk '{print $2}')
+    if [ -n "$BASE_IMAGE" ]; then
+      echo "Scanning with Grype: $BASE_IMAGE" >&2
+      if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
+        docker pull "$BASE_IMAGE" >&2 2>/dev/null
+        grype "$BASE_IMAGE" --output json 2>/dev/null | jq '.' || grype "$BASE_IMAGE"
+      fi
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *Dockerfile* ]]; then
+  issues_found=0
+  if ! grep -i "^USER" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "WARNING: No USER directive found (running as root)" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if grep -i "^FROM.*:latest" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "WARNING: Using :latest tag (not reproducible)" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if grep -iE "PASSWORD|SECRET|TOKEN|KEY.*=" "$FILE_PATH" >/dev/null 2>&1; then
+    echo "CRITICAL: Potential hardcoded secrets detected!" >&2
+    issues_found=$((issues_found + 1))
+  fi
+  if [ "$issues_found" -gt 0 ]; then
+    echo "Found $issues_found security issues in Dockerfile" >&2
+  else
+    echo "No security issues detected in Dockerfile" >&2
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Trivy scan fails with database update errors
+
+Update Trivy vulnerability DB: trivy image --download-db-only. Check network connectivity to ghcr.io registry. Use offline mode with cached DB: trivy --skip-update. Clear cache: rm -rf ~/.cache/trivy. Verify Trivy version is 0.52.0+ for latest database format support.
+### Hook detects Dockerfile but Docker daemon not accessible
+
+Start Docker Desktop or dockerd service. Check DOCKER_HOST environment variable. Verify user permissions: sudo usermod -aG docker $USER. Test with docker info before running hook. Ensure Docker daemon is running: docker ps.
+### False positive warnings for multi-stage builds with root
+
+Hook checks final stage only if multiple USER directives. Add USER in final stage even if earlier stages use root. Use comments to document why root needed in build stages. Verify final stage has non-root user: grep -i "^USER" Dockerfile | tail -1.
+### Base image pull fails behind corporate proxy or firewall
+
+Configure Docker proxy in daemon.json. Use internal registry mirror. Pre-pull images: docker pull before hook runs. Skip image scanning: DOCKER_SECURITY_SCAN=false. Configure Docker registry mirrors for internal networks.
+### Docker Scout shows different results than Trivy
+
+Different vulnerability databases and update frequencies. Scout uses Docker curated database. Trivy uses multiple sources (NVD, OSV, GitHub Advisory Database). Cross-reference both for comprehensive coverage. Check scan timestamps. Use both tools for complete vulnerability assessment.
+### Grype not found despite installation
+
+Install Grype: brew install grype on macOS, or download from GitHub releases. Verify installation: grype version. Check PATH includes Grype binary location. Use full path to grype if not in PATH. Verify Grype database is up to date: grype db update.
+### Trivy scan takes too long for large images
+
+Use Trivy with SBOM sources for faster scans: trivy image --sbom-sources oci. Enable Trivy cache: export TRIVY_CACHE_DIR=.trivycache. Use severity filtering: trivy image --severity HIGH,CRITICAL. Consider scanning only base image instead of full application image.
+### VEX (Vulnerability Exploitability eXchange) support not working
+
+Ensure Trivy version is 0.52.0+ for VEX support. Use VEX repository: trivy image --vex repo. Use VEX OCI attestations: trivy image --vex oci. Verify VEX documents are available in configured repositories. Check Trivy VEX configuration in trivy.yaml.

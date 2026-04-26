@@ -1,0 +1,799 @@
+# Checkpoint Manager for Claude Code
+URL: https://heyclau.de/commands/checkpoint-manager
+Category: commands
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/checkpointing
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/checkpoint-manager.mdx
+## Summary
+Manage Claude Code checkpoints to safely rewind code changes, restore conversation states, and explore alternatives without fear using ESC+ESC or /rewind commands
+## Tags
+- checkpoints
+- rewind
+- undo
+- version-control
+- session-recovery
+- safety
+## Content
+## Overview
+The `/checkpoint-manager` command helps you manage Claude Code's automatic checkpointing system to safely rewind changes, explore alternatives, and code without fear.
+
+## Features
+- **Automatic Checkpoints**: Snapshots saved before every Claude-driven file edit
+- **Quick Rewind**: Press ESC+ESC or use `/rewind` to access checkpoint menu
+- **Selective Restore**: Restore code only, conversation only, or both
+- **Change Preview**: See exactly what will be reverted before confirming
+- **Session-Level Recovery**: Checkpoints tracked within current session
+- **Manual Checkpoints**: Create named checkpoints at critical points
+- **Checkpoint History**: View all checkpoints with timestamps and descriptions
+- **Safe Exploration**: Try risky changes knowing you can rewind
+
+## Usage
+```bash
+/checkpoint-manager [action] [options]
+```
+
+### Actions
+
+- `--rewind` - Open checkpoint menu to restore previous state
+- `--create` - Manually create named checkpoint
+- `--list` - Show all checkpoints in current session
+- `--preview` - Preview changes that will be reverted
+- `--auto-checkpoint` - Configure automatic checkpoint settings
+
+### Restore Options
+
+- `--code-only` - Revert file changes, keep conversation
+- `--conversation-only` - Rewind conversation, keep code changes
+- `--both` - Restore both code and conversation (default)
+
+### Checkpoint Settings
+
+- `--enable-auto` - Enable automatic checkpointing (default: true)
+- `--disable-auto` - Disable automatic checkpointing
+- `--interval=<n>` - Create checkpoint every N file edits
+```bash
+/checkpoint-manager [action] [options]
+```
+
+## Quick Access
+### ESC+ESC Method (Fastest)
+```bash
+# During any Claude Code session:
+# Press ESC twice quickly
+
+[Checkpoint Menu]
+┌─────────────────────────────────────────────┐
+│ Rewind to Previous State                    │
+├─────────────────────────────────────────────┤
+│ 1. [2 min ago] Added user authentication    │
+│    Files: auth.service.ts, user.model.ts    │
+│                                             │
+│ 2. [5 min ago] Fixed login validation      │
+│    Files: auth.service.ts                   │
+│                                             │
+│ 3. [12 min ago] Created auth endpoint       │
+│    Files: routes/auth.ts                    │
+├─────────────────────────────────────────────┤
+│ [R] Restore Code Only                       │
+│ [C] Restore Conversation Only               │
+│ [B] Restore Both                            │
+│ [ESC] Cancel                                │
+└─────────────────────────────────────────────┘
+```
+
+### /rewind Command Method
+```bash
+/rewind
+
+# Opens same checkpoint menu
+# Select checkpoint by number
+# Choose restore type
+```
+```bash
+# During any Claude Code session:
+# Press ESC twice quickly
+
+[Checkpoint Menu]
+┌─────────────────────────────────────────────┐
+│ Rewind to Previous State                    │
+├─────────────────────────────────────────────┤
+│ 1. [2 min ago] Added user authentication    │
+│    Files: auth.service.ts, user.model.ts    │
+│                                             │
+│ 2. [5 min ago] Fixed login validation      │
+│    Files: auth.service.ts                   │
+│                                             │
+│ 3. [12 min ago] Created auth endpoint       │
+│    Files: routes/auth.ts                    │
+├─────────────────────────────────────────────┤
+│ [R] Restore Code Only                       │
+│ [C] Restore Conversation Only               │
+│ [B] Restore Both                            │
+│ [ESC] Cancel                                │
+└─────────────────────────────────────────────┘
+```
+```bash
+/rewind
+
+# Opens same checkpoint menu
+# Select checkpoint by number
+# Choose restore type
+```
+
+## Examples
+### Basic Rewind Workflow
+
+**Scenario: Risky refactoring went wrong**
+
+```bash
+User: "Refactor the payment service to use async/await"
+
+Claude: *refactors 15 files*
+
+[Automatic Checkpoint Created]
+Snapshot: Before payment service refactor
+Files: 15 modified
+
+User: *tests application*
+User: "The payment flow is broken now"
+
+# Press ESC+ESC
+
+[Checkpoint Menu]
+1. [1 min ago] Refactored payment service
+   Files: payment.service.ts, payment.controller.ts, ...
+
+Select: 1
+Restore: [B] Both code and conversation
+
+✓ Restored to checkpoint
+✓ 15 files reverted
+✓ Conversation rewound to before refactor
+
+Claude: "Reverted to before payment service refactor. Would you like to try a different approach?"
+```
+
+### Code-Only Restore (Keep Conversation)
+
+**Scenario: Want to keep discussion but undo code changes**
+
+```bash
+Claude: *implements feature with extensive discussion*
+
+User: "Actually, I prefer the old implementation"
+
+/rewind
+
+[Select Checkpoint]
+1. [5 min ago] Implemented notification system
+   Files: notification.service.ts, email.template.ts
+
+Select: 1
+Restore: [R] Code Only
+
+✓ Code reverted to checkpoint
+✓ Conversation preserved
+
+Claude: "I've reverted the code changes but kept our discussion. Based on our conversation, would you like me to implement it differently?"
+```
+
+### Conversation-Only Restore
+
+**Scenario: Code is good, but conversation went off track**
+
+```bash
+Claude: *correct implementation but confusing discussion*
+
+User: "The code is fine, but let's restart the conversation"
+
+/rewind
+
+Select: 2. [10 min ago] Started authentication implementation
+Restore: [C] Conversation Only
+
+✓ Conversation rewound
+✓ Code changes preserved
+
+Claude: "Let's start fresh. What would you like to work on?"
+```
+
+### Manual Checkpoint Creation
+
+**Scenario: Before making risky database migration**
+
+```bash
+User: "I'm about to migrate the database schema"
+
+/checkpoint-manager --create "Before database migration"
+
+✓ Manual checkpoint created
+  Name: Before database migration
+  Files: 0 (pre-change snapshot)
+  Time: 2025-10-25 14:30:00
+
+User: "Proceed with migration"
+
+Claude: *performs migration*
+
+# If issues occur:
+/rewind
+
+[Checkpoints]
+1. [Manual] Before database migration
+2. [Auto] Previous changes...
+
+Select: 1 (Manual checkpoint)
+✓ Restored to pre-migration state
+```
+
+### Preview Changes Before Rewind
+
+```bash
+/checkpoint-manager --preview
+
+[Checkpoint Preview]
+Restoring to: [5 min ago] Implemented caching layer
+
+Files to be reverted:
+  src/services/cache.service.ts
+    - 45 lines added will be removed
+    - 12 lines modified will be restored
+  
+  src/config/redis.config.ts
+    - File will be deleted (was created in this session)
+  
+  tests/cache.service.test.ts
+    - File will be deleted (was created in this session)
+
+Conversation:
+  - Last 8 messages will be removed
+  - Rewind to: "Let's add a caching layer"
+
+Proceed with rewind? (y/n): y
+
+✓ Checkpoint restored
+```
+
+### List All Checkpoints
+
+```bash
+/checkpoint-manager --list
+
+[Session Checkpoints]
+
+📍 Manual Checkpoints:
+1. Before database migration (14:30:00)
+   Files: Initial state preserved
+
+⚡ Auto Checkpoints:
+2. Implemented user authentication (14:25:12)
+   Files: auth.service.ts, user.model.ts, routes/auth.ts
+   
+3. Fixed login validation (14:20:45)
+   Files: auth.service.ts
+   
+4. Created auth endpoint (14:15:33)
+   Files: routes/auth.ts
+   
+5. Added password hashing (14:10:22)
+   Files: auth.service.ts, user.model.ts
+
+Total: 5 checkpoints (1 manual, 4 auto)
+Session duration: 25 minutes
+```
+```bash
+User: "Refactor the payment service to use async/await"
+
+Claude: *refactors 15 files*
+
+[Automatic Checkpoint Created]
+Snapshot: Before payment service refactor
+Files: 15 modified
+
+User: *tests application*
+User: "The payment flow is broken now"
+
+# Press ESC+ESC
+
+[Checkpoint Menu]
+1. [1 min ago] Refactored payment service
+   Files: payment.service.ts, payment.controller.ts, ...
+
+Select: 1
+Restore: [B] Both code and conversation
+
+✓ Restored to checkpoint
+✓ 15 files reverted
+✓ Conversation rewound to before refactor
+
+Claude: "Reverted to before payment service refactor. Would you like to try a different approach?"
+```
+```bash
+Claude: *implements feature with extensive discussion*
+
+User: "Actually, I prefer the old implementation"
+
+/rewind
+
+[Select Checkpoint]
+1. [5 min ago] Implemented notification system
+   Files: notification.service.ts, email.template.ts
+
+Select: 1
+Restore: [R] Code Only
+
+✓ Code reverted to checkpoint
+✓ Conversation preserved
+
+Claude: "I've reverted the code changes but kept our discussion. Based on our conversation, would you like me to implement it differently?"
+```
+```bash
+Claude: *correct implementation but confusing discussion*
+
+User: "The code is fine, but let's restart the conversation"
+
+/rewind
+
+Select: 2. [10 min ago] Started authentication implementation
+Restore: [C] Conversation Only
+
+✓ Conversation rewound
+✓ Code changes preserved
+
+Claude: "Let's start fresh. What would you like to work on?"
+```
+```bash
+User: "I'm about to migrate the database schema"
+
+/checkpoint-manager --create "Before database migration"
+
+✓ Manual checkpoint created
+  Name: Before database migration
+  Files: 0 (pre-change snapshot)
+  Time: 2025-10-25 14:30:00
+
+User: "Proceed with migration"
+
+Claude: *performs migration*
+
+# If issues occur:
+/rewind
+
+[Checkpoints]
+1. [Manual] Before database migration
+2. [Auto] Previous changes...
+
+Select: 1 (Manual checkpoint)
+✓ Restored to pre-migration state
+```
+```bash
+/checkpoint-manager --preview
+
+[Checkpoint Preview]
+Restoring to: [5 min ago] Implemented caching layer
+
+Files to be reverted:
+  src/services/cache.service.ts
+    - 45 lines added will be removed
+    - 12 lines modified will be restored
+  
+  src/config/redis.config.ts
+    - File will be deleted (was created in this session)
+  
+  tests/cache.service.test.ts
+    - File will be deleted (was created in this session)
+
+Conversation:
+  - Last 8 messages will be removed
+  - Rewind to: "Let's add a caching layer"
+
+Proceed with rewind? (y/n): y
+
+✓ Checkpoint restored
+```
+```bash
+/checkpoint-manager --list
+
+[Session Checkpoints]
+
+📍 Manual Checkpoints:
+1. Before database migration (14:30:00)
+   Files: Initial state preserved
+
+⚡ Auto Checkpoints:
+2. Implemented user authentication (14:25:12)
+   Files: auth.service.ts, user.model.ts, routes/auth.ts
+   
+3. Fixed login validation (14:20:45)
+   Files: auth.service.ts
+   
+4. Created auth endpoint (14:15:33)
+   Files: routes/auth.ts
+   
+5. Added password hashing (14:10:22)
+   Files: auth.service.ts, user.model.ts
+
+Total: 5 checkpoints (1 manual, 4 auto)
+Session duration: 25 minutes
+```
+
+## Checkpoint Limitations
+### What Checkpoints DO Track
+✅ File edits made by Claude Code tools (edit_file, write_file)
+✅ File content at time of snapshot
+✅ Conversation history and context
+✅ File metadata (permissions, timestamps)
+
+### What Checkpoints DON'T Track
+❌ Bash command side effects (files created by shell commands)
+❌ Manual edits made outside Claude Code
+❌ git operations (commits, pushes, merges)
+❌ Database changes
+❌ External API calls
+
+### Example: Bash Limitations
+```bash
+User: "Create a backup directory"
+
+Claude: *runs bash command*
+$ mkdir backup && cp -r src backup/
+
+✓ Directory created
+
+# Later, rewind checkpoint
+/rewind
+
+⚠️  Warning: Checkpoint cannot revert bash command side effects
+    The 'backup' directory will remain
+    You may need to manually clean up:
+    $ rm -rf backup
+```
+```bash
+User: "Create a backup directory"
+
+Claude: *runs bash command*
+$ mkdir backup && cp -r src backup/
+
+✓ Directory created
+
+# Later, rewind checkpoint
+/rewind
+
+⚠️  Warning: Checkpoint cannot revert bash command side effects
+    The 'backup' directory will remain
+    You may need to manually clean up:
+    $ rm -rf backup
+```
+
+## Integration with Git
+### Checkpoints vs Git Commits
+
+**Checkpoints:**
+- Session-level (temporary)
+- Automatic, no manual intervention
+- Fast rewind (instant)
+- Lost after session ends
+
+**Git Commits:**
+- Permanent version control
+- Manual commit process
+- Can share with team
+- Persistent across sessions
+
+### Recommended Workflow
+```bash
+1. Checkpoints for exploration:
+   - Try risky changes
+   - Rewind if doesn't work
+   - Iterate until satisfied
+
+2. Git commits for milestones:
+   - Commit when checkpoint result is good
+   - Permanent record
+   - Share with team
+```
+
+### Example: Checkpoint + Git Workflow
+```bash
+User: "Try refactoring the auth system"
+
+Claude: *refactors*
+
+[Auto Checkpoint: Before auth refactor]
+
+User: *tests*
+User: "Works great! Commit this"
+
+/git-smart-commit "Refactor auth system for better separation of concerns"
+
+✓ Committed to git
+✓ Checkpoint becomes permanent
+```
+```bash
+1. Checkpoints for exploration:
+   - Try risky changes
+   - Rewind if doesn't work
+   - Iterate until satisfied
+
+2. Git commits for milestones:
+   - Commit when checkpoint result is good
+   - Permanent record
+   - Share with team
+```
+```bash
+User: "Try refactoring the auth system"
+
+Claude: *refactors*
+
+[Auto Checkpoint: Before auth refactor]
+
+User: *tests*
+User: "Works great! Commit this"
+
+/git-smart-commit "Refactor auth system for better separation of concerns"
+
+✓ Committed to git
+✓ Checkpoint becomes permanent
+```
+
+## Advanced Patterns
+### Exploratory Coding Pattern
+```bash
+1. Manual checkpoint before exploration
+   /checkpoint-manager --create "Before experiment"
+
+2. Try Approach A
+   - Implement
+   - Test
+   - Not ideal? Rewind
+
+3. Try Approach B
+   - Implement
+   - Test
+   - Better? Keep it
+
+4. Commit successful approach
+   git commit -m "Implemented approach B"
+```
+
+### Refactoring Safety Net
+```bash
+# Before large refactor:
+/checkpoint-manager --create "Before refactor: Working state"
+
+# Refactor incrementally:
+1. Refactor module A
+2. Test
+3. If broken, rewind
+4. If working, continue
+5. Refactor module B
+6. Repeat
+
+# Final: Commit all changes
+git commit -m "Refactored modules A-E"
+```
+
+### Debugging with Checkpoints
+```bash
+User: "The app broke, not sure when"
+
+/checkpoint-manager --list
+
+[Checkpoints]
+1. [5 min ago] Added caching
+2. [10 min ago] Optimized queries  
+3. [15 min ago] Updated dependencies
+4. [20 min ago] Fixed validation
+
+# Binary search for breaking change:
+Restore to checkpoint 2
+  → Still broken
+Restore to checkpoint 3  
+  → Works!
+  
+Conclusion: "Optimized queries" (checkpoint 2) broke the app
+
+# Fix the query optimization:
+User: "The query optimization broke it. Let's fix that specific change"
+```
+```bash
+1. Manual checkpoint before exploration
+   /checkpoint-manager --create "Before experiment"
+
+2. Try Approach A
+   - Implement
+   - Test
+   - Not ideal? Rewind
+
+3. Try Approach B
+   - Implement
+   - Test
+   - Better? Keep it
+
+4. Commit successful approach
+   git commit -m "Implemented approach B"
+```
+```bash
+# Before large refactor:
+/checkpoint-manager --create "Before refactor: Working state"
+
+# Refactor incrementally:
+1. Refactor module A
+2. Test
+3. If broken, rewind
+4. If working, continue
+5. Refactor module B
+6. Repeat
+
+# Final: Commit all changes
+git commit -m "Refactored modules A-E"
+```
+```bash
+User: "The app broke, not sure when"
+
+/checkpoint-manager --list
+
+[Checkpoints]
+1. [5 min ago] Added caching
+2. [10 min ago] Optimized queries  
+3. [15 min ago] Updated dependencies
+4. [20 min ago] Fixed validation
+
+# Binary search for breaking change:
+Restore to checkpoint 2
+  → Still broken
+Restore to checkpoint 3  
+  → Works!
+  
+Conclusion: "Optimized queries" (checkpoint 2) broke the app
+
+# Fix the query optimization:
+User: "The query optimization broke it. Let's fix that specific change"
+```
+
+## Configuration
+### Auto-Checkpoint Settings
+```json
+// .claude/checkpoint.config.json
+{
+  "autoCheckpoint": {
+    "enabled": true,
+    "interval": 1,  // Every N file edits
+    "maxCheckpoints": 50,  // Keep last 50 checkpoints
+    "includeTests": false  // Don't checkpoint test file changes
+  },
+  "rewindDefaults": {
+    "restoreMode": "both",  // code-only, conversation-only, both
+    "confirmBeforeRestore": true,
+    "showPreview": true
+  }
+}
+```
+
+### Disable Auto-Checkpoints
+```bash
+/checkpoint-manager --disable-auto
+
+⚠️  Auto-checkpoints disabled
+    You can still create manual checkpoints with:
+    /checkpoint-manager --create "checkpoint name"
+```
+
+### Custom Checkpoint Intervals
+```bash
+/checkpoint-manager --interval=5
+
+✓ Auto-checkpoints will be created every 5 file edits
+```
+```json
+// .claude/checkpoint.config.json
+{
+  "autoCheckpoint": {
+    "enabled": true,
+    "interval": 1,  // Every N file edits
+    "maxCheckpoints": 50,  // Keep last 50 checkpoints
+    "includeTests": false  // Don't checkpoint test file changes
+  },
+  "rewindDefaults": {
+    "restoreMode": "both",  // code-only, conversation-only, both
+    "confirmBeforeRestore": true,
+    "showPreview": true
+  }
+}
+```
+```bash
+/checkpoint-manager --disable-auto
+
+⚠️  Auto-checkpoints disabled
+    You can still create manual checkpoints with:
+    /checkpoint-manager --create "checkpoint name"
+```
+```bash
+/checkpoint-manager --interval=5
+
+✓ Auto-checkpoints will be created every 5 file edits
+```
+
+## Best Practices
+1. **Create Manual Checkpoints Before Risk**
+   - Database migrations
+   - Large refactors
+   - Experimental approaches
+
+2. **Use Code-Only Restore for Discussion Preservation**
+   - Valuable context in conversation
+   - Only code needs reverting
+
+3. **Preview Before Rewind**
+   - Verify what will be reverted
+   - Avoid accidental loss of good changes
+
+4. **Commit Good Checkpoints to Git**
+   - Checkpoints are temporary (session-only)
+   - Git commits are permanent
+
+5. **Don't Rely on Checkpoints for Bash Commands**
+   - Checkpoints don't track shell side effects
+   - Use git for permanent backups
+
+6. **Regular Manual Checkpoints for Long Sessions**
+   - Every 30-60 minutes
+   - Before context switches
+
+7. **Clean Up After Bash Reverts**
+   - Manually remove directories/files created by shell
+   - Checkpoints will warn about bash limitations
+
+## Troubleshooting
+### "No checkpoints available"
+```
+Cause: Session just started, no changes made yet
+Solution: Make some changes first, checkpoints auto-create
+```
+
+### "Cannot rewind bash command changes"
+```
+Cause: Bash commands create files outside checkpoint tracking
+Solution: Manually clean up with reverse commands
+  Created directory: rm -rf directory
+  Modified external files: restore from git
+```
+
+### "Checkpoint restored but issue persists"
+```
+Cause: Issue may be in database, environment, or external state
+Solution: Check non-code factors:
+  - Database state
+  - Environment variables
+  - External service configuration
+```
+
+### "Lost conversation context after rewind"
+```
+Cause: Restored "both" which includes conversation
+Solution: Use "code-only" restore to preserve discussion
+  /rewind → Select checkpoint → [R] Code Only
+```
+```text
+Cause: Session just started, no changes made yet
+Solution: Make some changes first, checkpoints auto-create
+```
+```text
+Cause: Bash commands create files outside checkpoint tracking
+Solution: Manually clean up with reverse commands
+  Created directory: rm -rf directory
+  Modified external files: restore from git
+```
+```text
+Cause: Issue may be in database, environment, or external state
+Solution: Check non-code factors:
+  - Database state
+  - Environment variables
+  - External service configuration
+```
+```text
+Cause: Restored "both" which includes conversation
+Solution: Use "code-only" restore to preserve discussion
+  /rewind → Select checkpoint → [R] Code Only
+```

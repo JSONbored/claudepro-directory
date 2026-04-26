@@ -1,0 +1,170 @@
+# Daloopa MCP Server for Claude
+URL: https://heyclau.de/mcp/daloopa-mcp-server
+Category: mcp
+Author: Daloopa
+Date added: 2025-09-18
+Documentation: https://docs.daloopa.com/docs/daloopa-mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx
+Download: /downloads/mcp/daloopa-mcp-server.mcpb
+## Summary
+Access high-quality fundamental financial data from SEC filings and investor presentations
+## Tags
+- finance
+- daloopa
+- sec-filings
+- financial-data
+- investor-relations
+## Content
+## Content
+Access comprehensive financial data and SEC filing information through Daloopa's curated database.
+
+## Features
+- Access SEC filing data and documents
+- Retrieve financial statements and metrics
+- Query investor presentations
+- Analyze historical financial data
+- Compare company metrics across periods
+- Advanced Daloopa data extraction and automation with intelligent document parsing, spreadsheet analysis, and workflow automation
+- Batch operations support for efficient bulk data extraction, processing, and transformation with automatic rate limit handling and retry logic
+- Real-time data synchronization capabilities with webhook integration support for monitoring extraction jobs and triggering automated workflows
+
+## Use Cases
+- Analyze quarterly earnings data
+- Compare financial metrics across companies
+- Build financial models with accurate data
+- Track KPI trends over time
+- Research investment opportunities
+- Build automated data extraction workflows that sync external systems with Daloopa for real-time document processing and data transformation
+
+## Installation
+### Claude Code
+
+1. claude mcp add --transport http daloopa https://mcp.daloopa.com/server/mcp
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status daloopa
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file
+2. Add the Daloopa server configuration with HTTP transport
+3. Restart Claude Desktop
+4. Authenticate with your Daloopa account
+
+## Requirements
+- Daloopa account with active subscription
+- Daloopa API key (obtained from Daloopa sales team - contact sales@daloopa.com)
+- Internet connection for accessing Daloopa MCP server (https://mcp.daloopa.com/server/mcp)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of SEC filings, financial statements, and financial metrics
+- Knowledge of ticker symbols and company identifiers (e.g., AAPL, MSFT)
+- Understanding of financial data formats (quarterly/annual periods, e.g., Q1 2024)
+- HTTP transport support (remote MCP server, not local stdio)
+- Awareness of subscription tier limitations (coverage universe, data availability dates)
+- Understanding of pagination for large datasets and payload optimization
+
+## Configuration
+```json
+{
+  "daloopa": {
+    "url": "https://mcp.daloopa.com/server/mcp",
+    "transport": "http"
+  }
+}
+```
+```json
+{
+  "daloopa": {
+    "url": "https://mcp.daloopa.com/server/mcp",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Get Apple's latest 10-K filing data
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Get Apple's latest 10-K filing data"
+```
+### Compare revenue growth across tech companies
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Compare revenue growth across tech companies"
+```
+### Extract key metrics from investor presentation
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Extract key metrics from investor presentation"
+```
+### Show historical EBITDA margins
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show historical EBITDA margins"
+```
+### Extract Data from Document
+Extract structured data from a document using Daloopa extraction templates
+```typescript
+// Extract data from document using Daloopa
+const result = await daloopa.extract({
+  document_url: "https://example.com/document.pdf",
+  extraction_template: "invoice",
+  fields: ["invoice_number", "date", "amount", "vendor"]
+});
+```
+```plaintext
+Ask Claude: "Get Apple's latest 10-K filing data"
+```
+```plaintext
+Ask Claude: "Compare revenue growth across tech companies"
+```
+```plaintext
+Ask Claude: "Extract key metrics from investor presentation"
+```
+```plaintext
+Ask Claude: "Show historical EBITDA margins"
+```
+```typescript
+// Extract data from document using Daloopa
+const result = await daloopa.extract({
+  document_url: "https://example.com/document.pdf",
+  extraction_template: "invoice",
+  fields: ["invoice_number", "date", "amount", "vendor"]
+});
+```
+
+## Security
+- OAuth authentication for access
+- Respect data licensing agreements
+- Monitor API usage limits
+- Cache frequently accessed data
+- Daloopa API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Daloopa document URLs and extraction templates may expose data sources and extraction patterns - ensure Daloopa resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Daloopa MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Daloopa webhook configurations and payloads may contain sensitive document data and extraction results - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+- Daloopa extraction results may contain sensitive business data - ensure extraction results are properly secured and access-controlled according to data privacy requirements
+
+## Troubleshooting
+### Authentication error: API key invalid or missing
+
+Add Authorization header with your API key to all requests. Contact Daloopa sales team to obtain or regenerate API key. Verify key is copied correctly without extra spaces or line breaks.
+### Company data not found or unavailable
+
+Verify ticker symbol is correct and company is in Daloopa coverage universe. Check your subscription tier includes access to requested company data. Contact Daloopa support for coverage questions.
+### Financial metrics missing for specific periods
+
+Confirm company has filed SEC documents for requested period. Check data availability dates for your subscription tier. Verify quarter/year format matches API requirements (e.g., Q1 2024).
+### API requests timing out or running slowly
+
+Reduce payload size by limiting fields returned in response. Implement pagination for large datasets. Check network connectivity and consider caching frequently accessed data locally.
+### Daloopa MCP server authentication errors with API keys
+
+Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). Regenerate API key from Daloopa dashboard if needed.
+### Daloopa extraction job failures or timeouts
+
+Check document format is supported (PDF, Excel, Word, etc.). Verify document is accessible and not password-protected. Ensure network connectivity is stable. For large documents, use chunked processing with resumable extraction support.
+### Daloopa MCP server rate limiting or throttling errors
+
+Implement exponential backoff retry logic with jitter. Use Daloopa API rate limit headers to monitor usage. Reduce concurrent extraction requests. Cache frequently accessed extraction templates. Request rate limit increases from Daloopa support if needed.
+### Daloopa MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Daloopa API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

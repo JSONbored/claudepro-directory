@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, BadgeCheck, CircleDollarSign } from "lucide-react";
 import type { ToolListing } from "@heyclaude/registry";
+import { linkRelForDisclosure } from "@heyclaude/registry/commercial";
 
 type ToolsDirectoryProps = {
   tools: ToolListing[];
@@ -17,18 +18,28 @@ export function ToolsDirectory({ tools }: ToolsDirectoryProps) {
   if (!tools.length) {
     return (
       <section className="surface-panel space-y-4 p-8">
-        <p className="text-xs uppercase tracking-[0.18em] text-primary">Open inventory</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-primary">
+          Open inventory
+        </p>
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Tool listings are open for maintainer review.
         </h2>
         <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-          Free organic listings are reviewed for usefulness and fit. Featured and sponsored placements are available after approval and are always labeled.
+          Free organic listings are reviewed for usefulness and fit. Featured
+          and sponsored placements are available after approval and are always
+          labeled.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Link href="/tools/submit" className="inline-flex items-center rounded-full border border-primary/40 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90">
+          <Link
+            href="/tools/submit"
+            className="inline-flex items-center rounded-full border border-primary/40 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+          >
             Submit a tool
           </Link>
-          <Link href="/advertise" className="inline-flex items-center rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition hover:border-primary/40">
+          <Link
+            href="/advertise"
+            className="inline-flex items-center rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition hover:border-primary/40"
+          >
             Advertising options
           </Link>
         </div>
@@ -39,7 +50,9 @@ export function ToolsDirectory({ tools }: ToolsDirectoryProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       {tools.map((tool) => {
-        const paid = tool.sponsored || tool.disclosure === "affiliate";
+        const linkRel = linkRelForDisclosure(
+          tool.sponsored ? "sponsored" : tool.disclosure,
+        );
         return (
           <article
             key={tool.slug}
@@ -68,20 +81,25 @@ export function ToolsDirectory({ tools }: ToolsDirectoryProps) {
                 ) : null}
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold tracking-tight text-foreground">{tool.title}</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                  {tool.title}
+                </h2>
                 <p className="text-sm leading-7 text-muted-foreground">
                   {tool.cardDescription || tool.description}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Link href={`/tools/${tool.slug}`} className="directory-link-chip">
+                <Link
+                  href={`/tools/${tool.slug}`}
+                  className="directory-link-chip"
+                >
                   Details
                 </Link>
                 {tool.websiteUrl ? (
                   <a
                     href={tool.websiteUrl}
                     target="_blank"
-                    rel={paid ? "sponsored nofollow noreferrer" : "noreferrer"}
+                    rel={linkRel}
                     className="directory-link-chip"
                   >
                     <ArrowUpRight className="size-3.5" />

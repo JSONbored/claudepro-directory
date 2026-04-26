@@ -1,0 +1,84 @@
+# OpenClaw Operator Capability Pack Skill
+URL: https://heyclau.de/skills/openclaw-operator-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://github.com/openclaw/openclaw
+Repository: https://github.com/openclaw/openclaw
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-operator-capability-pack.mdx
+Download: /downloads/skills/openclaw-operator-capability-pack.zip
+## Summary
+Expert OpenClaw operator capability skill for secure deployment, policy governance, tool boundaries, and production observability.
+## Tags
+- openclaw
+- ai-agents
+- operations
+- security
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://github.com/openclaw/openclaw
+- https://github.com/openclaw/openclaw/blob/main/README.md
+- https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This capability pack teaches agents to operate OpenClaw in production responsibly. It covers governance, privilege boundaries, runtime controls, and incident readiness.
+
+## Capability Scope
+- Runtime architecture and isolation
+- Tool governance and approval workflows
+- Cost/latency/reliability controls
+- Auditability and compliance-ready logs
+- Incident containment and recovery
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Treat agent tool access as privileged surface.
+- Prefer explicit approvals for high-impact actions.
+- Segment environments and secrets by risk.
+- Keep response plans tested and documented.
+
+## Troubleshooting
+**Issue:** Agents exceed intended permission scope  
+**Fix:** Move to strict allowlists with per-tool approvals.
+
+**Issue:** Hard to diagnose cross-agent failures  
+**Fix:** Add trace IDs and event correlation across all agent actions.
+
+**Issue:** Cost spikes during autonomous runs  
+**Fix:** Add budget limits and route heavy tasks to cheaper model/tool paths.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

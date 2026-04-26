@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-04-25T00:00:00.000Z",
   "totalEntries": 326,
   "categoryOrder": [
@@ -60,6 +60,13 @@
     "content": "/data/content-index.json",
     "directory": "/data/directory-index.json",
     "search": "/data/search-index.json",
-    "raycast": "/data/raycast-index.json"
+    "raycast": "/data/raycast-index.json",
+    "registryManifest": "/data/registry-manifest.json",
+    "contentQuality": "/data/content-quality-report.json",
+    "jsonLdSnapshots": "/data/jsonld-snapshots.json",
+    "llmsFull": "/data/llms-full.txt",
+    "entryDetails": "/data/entries",
+    "entryLlms": "/data/llms",
+    "raycastDetails": "/data/raycast"
   }
 }

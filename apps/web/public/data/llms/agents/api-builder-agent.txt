@@ -1,0 +1,1503 @@
+# API Builder Agent for Claude
+URL: https://heyclau.de/agents/api-builder-agent
+Category: agents
+Author: JSONbored
+Date added: 2025-09-16
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/api-builder-agent.mdx
+## Summary
+Specialized agent for designing, building, and optimizing RESTful APIs and GraphQL services with modern best practices
+## Tags
+- api
+- rest
+- graphql
+- backend
+- microservices
+- architecture
+## Content
+## Agent Implementation
+Create this file as `.claude/agents/api-builder-agent.md`:
+
+```markdown
+---
+name: API Builder Agent
+description: Expert API builder specializing in RESTful APIs, GraphQL, and modern API frameworks
+tools:
+  - web_search
+  - file_editor
+  - code_runner
+---
+
+You are an expert API builder specializing in creating robust, scalable, and well-documented APIs using modern frameworks and best practices.
+
+Focus on:
+- RESTful API design principles and best practices
+- GraphQL schema design and optimization
+- Modern frameworks (Express.js, FastAPI, Apollo Server)
+- API security, authentication, and authorization
+- Performance optimization and caching strategies
+- Comprehensive testing and documentation
+- OpenAPI/Swagger specification generation
+
+Always provide production-ready code with proper error handling, validation, and security measures.
+```
+
+You are an expert API builder specializing in creating robust, scalable, and well-documented APIs using modern frameworks and best practices.
+```markdown
+---
+name: API Builder Agent
+description: Expert API builder specializing in RESTful APIs, GraphQL, and modern API frameworks
+tools:
+  - web_search
+  - file_editor
+  - code_runner
+---
+
+You are an expert API builder specializing in creating robust, scalable, and well-documented APIs using modern frameworks and best practices.
+
+Focus on:
+- RESTful API design principles and best practices
+- GraphQL schema design and optimization
+- Modern frameworks (Express.js, FastAPI, Apollo Server)
+- API security, authentication, and authorization
+- Performance optimization and caching strategies
+- Comprehensive testing and documentation
+- OpenAPI/Swagger specification generation
+
+Always provide production-ready code with proper error handling, validation, and security measures.
+```
+
+## Core API Development Principles
+### RESTful API Design
+- **Resource-Oriented Architecture** - Design around resources, not actions
+- **HTTP Methods** - Proper use of GET, POST, PUT, PATCH, DELETE
+- **Status Codes** - Meaningful HTTP status codes for different scenarios
+- **URL Design** - Consistent, intuitive endpoint naming
+- **Stateless Design** - Each request contains all necessary information
+- **HATEOAS** - Hypermedia as the Engine of Application State
+
+### GraphQL Best Practices
+- **Schema Design** - Well-structured type definitions
+- **Resolver Optimization** - Efficient data fetching
+- **Query Complexity** - Depth and complexity limiting
+- **Caching Strategies** - Field-level and query-level caching
+- **Error Handling** - Structured error responses
+- **Security** - Query validation and rate limiting
+
+## API Framework Expertise
+### Node.js/Express
+```javascript
+// Modern Express API structure
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+
+class APIBuilder {
+  constructor() {
+    this.app = express();
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupErrorHandling();
+  }
+  
+  setupMiddleware() {
+    // Security middleware
+    this.app.use(helmet());
+    this.app.use(cors({
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+      credentials: true
+    }));
+    
+    // Rate limiting
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+      message: 'Too many requests from this IP'
+    });
+    this.app.use('/api/', limiter);
+    
+    // Body parsing
+    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.urlencoded({ extended: true }));
+    
+    // Request logging
+    this.app.use(this.requestLogger);
+  }
+  
+  setupRoutes() {
+    // Health check
+    this.app.get('/health', (req, res) => {
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.API_VERSION || '1.0.0'
+      });
+    });
+    
+    // API routes
+    this.app.use('/api/v1/users', this.createUserRoutes());
+    this.app.use('/api/v1/auth', this.createAuthRoutes());
+    
+    // API documentation
+    this.app.use('/docs', express.static('docs'));
+  }
+  
+  createUserRoutes() {
+    const router = express.Router();
+    
+    // GET /api/v1/users
+    router.get('/', this.asyncHandler(async (req, res) => {
+      const { page = 1, limit = 10, search } = req.query;
+      
+      const users = await this.userService.getUsers({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search
+      });
+      
+      res.json({
+        data: users.data,
+        pagination: {
+          page: users.page,
+          limit: users.limit,
+          total: users.total,
+          pages: Math.ceil(users.total / users.limit)
+        }
+      });
+    }));
+    
+    // POST /api/v1/users
+    router.post('/',
+      [
+        body('email').isEmail().normalizeEmail(),
+        body('name').trim().isLength({ min: 2, max: 50 }),
+        body('password').isLength({ min: 8 }).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      ],
+      this.validateRequest,
+      this.asyncHandler(async (req, res) => {
+        const user = await this.userService.createUser(req.body);
+        res.status(201).json({ data: user });
+      })
+    );
+    
+    return router;
+  }
+  
+  // Async error handling wrapper
+  asyncHandler(fn) {
+    return (req, res, next) => {
+      Promise.resolve(fn(req, res, next)).catch(next);
+    };
+  }
+  
+  // Request validation middleware
+  validateRequest(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+    next();
+  }
+  
+  // Request logging middleware
+  requestLogger(req, res, next) {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      console.log(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+    });
+    next();
+  }
+}
+```
+
+### FastAPI (Python)
+```python
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+import asyncio
+import logging
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class PaginatedResponse(BaseModel):
+    data: List[UserResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int
+
+class APIBuilder:
+    def __init__(self):
+        self.app = FastAPI(
+            title="User Management API",
+            description="A comprehensive user management system",
+            version="1.0.0",
+            docs_url="/docs",
+            redoc_url="/redoc"
+        )
+        self.setup_middleware()
+        self.setup_routes()
+    
+    def setup_middleware(self):
+        # CORS
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],  # Configure for production
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        
+        # Trusted hosts
+        self.app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=["localhost", "*.example.com"]
+        )
+    
+    def setup_routes(self):
+        @self.app.get("/health")
+        async def health_check():
+            return {
+                "status": "healthy",
+                "timestamp": datetime.now().isoformat(),
+                "version": "1.0.0"
+            }
+        
+        @self.app.get("/users", response_model=PaginatedResponse)
+        async def get_users(
+            page: int = 1,
+            limit: int = 10,
+            search: Optional[str] = None,
+            db: Session = Depends(get_db)
+        ):
+            users = await self.user_service.get_users(
+                db, page=page, limit=limit, search=search
+            )
+            return users
+        
+        @self.app.post("/users", 
+                      response_model=UserResponse, 
+                      status_code=status.HTTP_201_CREATED)
+        async def create_user(
+            user_data: UserCreate,
+            db: Session = Depends(get_db)
+        ):
+            try:
+                user = await self.user_service.create_user(db, user_data)
+                return user
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(e)
+                )
+        
+        @self.app.exception_handler(HTTPException)
+        async def http_exception_handler(request, exc):
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "error": exc.detail,
+                    "timestamp": datetime.now().isoformat(),
+                    "path": request.url.path
+                }
+            )
+```
+
+### GraphQL API with Apollo Server
+```javascript
+const { ApolloServer, gql } = require('apollo-server-express');
+const { createComplexityLimitRule } = require('graphql-query-complexity');
+const DataLoader = require('dataloader');
+
+class GraphQLAPIBuilder {
+  constructor() {
+    this.typeDefs = this.createTypeDefs();
+    this.resolvers = this.createResolvers();
+    this.server = this.createServer();
+  }
+  
+  createTypeDefs() {
+    return gql`
+      type User {
+        id: ID!
+        name: String!
+        email: String!
+        posts: [Post!]!
+        createdAt: String!
+      }
+      
+      type Post {
+        id: ID!
+        title: String!
+        content: String!
+        author: User!
+        createdAt: String!
+      }
+      
+      input UserInput {
+        name: String!
+        email: String!
+        password: String!
+      }
+      
+      type Query {
+        users(page: Int = 1, limit: Int = 10): UserConnection!
+        user(id: ID!): User
+        posts(authorId: ID): [Post!]!
+      }
+      
+      type Mutation {
+        createUser(input: UserInput!): User!
+        updateUser(id: ID!, input: UserInput!): User!
+        deleteUser(id: ID!): Boolean!
+      }
+      
+      type UserConnection {
+        nodes: [User!]!
+        pageInfo: PageInfo!
+        totalCount: Int!
+      }
+      
+      type PageInfo {
+        hasNextPage: Boolean!
+        hasPreviousPage: Boolean!
+        startCursor: String
+        endCursor: String
+      }
+    `;
+  }
+  
+  createResolvers() {
+    return {
+      Query: {
+        users: async (parent, { page, limit }, { dataSources }) => {
+          return dataSources.userAPI.getUsers({ page, limit });
+        },
+        user: async (parent, { id }, { dataSources }) => {
+          return dataSources.userAPI.getUserById(id);
+        },
+        posts: async (parent, { authorId }, { dataSources }) => {
+          return dataSources.postAPI.getPostsByAuthor(authorId);
+        }
+      },
+      
+      Mutation: {
+        createUser: async (parent, { input }, { dataSources }) => {
+          return dataSources.userAPI.createUser(input);
+        },
+        updateUser: async (parent, { id, input }, { dataSources }) => {
+          return dataSources.userAPI.updateUser(id, input);
+        },
+        deleteUser: async (parent, { id }, { dataSources }) => {
+          return dataSources.userAPI.deleteUser(id);
+        }
+      },
+      
+      User: {
+        posts: async (user, args, { loaders }) => {
+          return loaders.postsByUserId.load(user.id);
+        }
+      },
+      
+      Post: {
+        author: async (post, args, { loaders }) => {
+          return loaders.userById.load(post.authorId);
+        }
+      }
+    };
+  }
+  
+  createServer() {
+    return new ApolloServer({
+      typeDefs: this.typeDefs,
+      resolvers: this.resolvers,
+      context: ({ req }) => {
+        return {
+          user: req.user,
+          loaders: this.createDataLoaders(),
+          dataSources: this.createDataSources()
+        };
+      },
+      validationRules: [
+        createComplexityLimitRule(1000)
+      ],
+      formatError: (error) => {
+        console.error(error);
+        return {
+          message: error.message,
+          code: error.extensions?.code,
+          path: error.path
+        };
+      }
+    });
+  }
+  
+  createDataLoaders() {
+    return {
+      userById: new DataLoader(async (ids) => {
+        const users = await this.userService.getUsersByIds(ids);
+        return ids.map(id => users.find(user => user.id === id));
+      }),
+      
+      postsByUserId: new DataLoader(async (userIds) => {
+        const posts = await this.postService.getPostsByUserIds(userIds);
+        return userIds.map(userId => 
+          posts.filter(post => post.authorId === userId)
+        );
+      })
+    };
+  }
+}
+```
+```javascript
+// Modern Express API structure
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const { body, validationResult } = require('express-validator');
+
+class APIBuilder {
+  constructor() {
+    this.app = express();
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupErrorHandling();
+  }
+  
+  setupMiddleware() {
+    // Security middleware
+    this.app.use(helmet());
+    this.app.use(cors({
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
+      credentials: true
+    }));
+    
+    // Rate limiting
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+      message: 'Too many requests from this IP'
+    });
+    this.app.use('/api/', limiter);
+    
+    // Body parsing
+    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.urlencoded({ extended: true }));
+    
+    // Request logging
+    this.app.use(this.requestLogger);
+  }
+  
+  setupRoutes() {
+    // Health check
+    this.app.get('/health', (req, res) => {
+      res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: process.env.API_VERSION || '1.0.0'
+      });
+    });
+    
+    // API routes
+    this.app.use('/api/v1/users', this.createUserRoutes());
+    this.app.use('/api/v1/auth', this.createAuthRoutes());
+    
+    // API documentation
+    this.app.use('/docs', express.static('docs'));
+  }
+  
+  createUserRoutes() {
+    const router = express.Router();
+    
+    // GET /api/v1/users
+    router.get('/', this.asyncHandler(async (req, res) => {
+      const { page = 1, limit = 10, search } = req.query;
+      
+      const users = await this.userService.getUsers({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search
+      });
+      
+      res.json({
+        data: users.data,
+        pagination: {
+          page: users.page,
+          limit: users.limit,
+          total: users.total,
+          pages: Math.ceil(users.total / users.limit)
+        }
+      });
+    }));
+    
+    // POST /api/v1/users
+    router.post('/',
+      [
+        body('email').isEmail().normalizeEmail(),
+        body('name').trim().isLength({ min: 2, max: 50 }),
+        body('password').isLength({ min: 8 }).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+      ],
+      this.validateRequest,
+      this.asyncHandler(async (req, res) => {
+        const user = await this.userService.createUser(req.body);
+        res.status(201).json({ data: user });
+      })
+    );
+    
+    return router;
+  }
+  
+  // Async error handling wrapper
+  asyncHandler(fn) {
+    return (req, res, next) => {
+      Promise.resolve(fn(req, res, next)).catch(next);
+    };
+  }
+  
+  // Request validation middleware
+  validateRequest(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+    next();
+  }
+  
+  // Request logging middleware
+  requestLogger(req, res, next) {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      console.log(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+    });
+    next();
+  }
+}
+```
+```python
+from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+import asyncio
+import logging
+
+class UserCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    created_at: datetime
+    
+    class Config:
+        orm_mode = True
+
+class PaginatedResponse(BaseModel):
+    data: List[UserResponse]
+    total: int
+    page: int
+    limit: int
+    pages: int
+
+class APIBuilder:
+    def __init__(self):
+        self.app = FastAPI(
+            title="User Management API",
+            description="A comprehensive user management system",
+            version="1.0.0",
+            docs_url="/docs",
+            redoc_url="/redoc"
+        )
+        self.setup_middleware()
+        self.setup_routes()
+    
+    def setup_middleware(self):
+        # CORS
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],  # Configure for production
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        
+        # Trusted hosts
+        self.app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=["localhost", "*.example.com"]
+        )
+    
+    def setup_routes(self):
+        @self.app.get("/health")
+        async def health_check():
+            return {
+                "status": "healthy",
+                "timestamp": datetime.now().isoformat(),
+                "version": "1.0.0"
+            }
+        
+        @self.app.get("/users", response_model=PaginatedResponse)
+        async def get_users(
+            page: int = 1,
+            limit: int = 10,
+            search: Optional[str] = None,
+            db: Session = Depends(get_db)
+        ):
+            users = await self.user_service.get_users(
+                db, page=page, limit=limit, search=search
+            )
+            return users
+        
+        @self.app.post("/users", 
+                      response_model=UserResponse, 
+                      status_code=status.HTTP_201_CREATED)
+        async def create_user(
+            user_data: UserCreate,
+            db: Session = Depends(get_db)
+        ):
+            try:
+                user = await self.user_service.create_user(db, user_data)
+                return user
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(e)
+                )
+        
+        @self.app.exception_handler(HTTPException)
+        async def http_exception_handler(request, exc):
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "error": exc.detail,
+                    "timestamp": datetime.now().isoformat(),
+                    "path": request.url.path
+                }
+            )
+```
+```javascript
+const { ApolloServer, gql } = require('apollo-server-express');
+const { createComplexityLimitRule } = require('graphql-query-complexity');
+const DataLoader = require('dataloader');
+
+class GraphQLAPIBuilder {
+  constructor() {
+    this.typeDefs = this.createTypeDefs();
+    this.resolvers = this.createResolvers();
+    this.server = this.createServer();
+  }
+  
+  createTypeDefs() {
+    return gql`
+      type User {
+        id: ID!
+        name: String!
+        email: String!
+        posts: [Post!]!
+        createdAt: String!
+      }
+      
+      type Post {
+        id: ID!
+        title: String!
+        content: String!
+        author: User!
+        createdAt: String!
+      }
+      
+      input UserInput {
+        name: String!
+        email: String!
+        password: String!
+      }
+      
+      type Query {
+        users(page: Int = 1, limit: Int = 10): UserConnection!
+        user(id: ID!): User
+        posts(authorId: ID): [Post!]!
+      }
+      
+      type Mutation {
+        createUser(input: UserInput!): User!
+        updateUser(id: ID!, input: UserInput!): User!
+        deleteUser(id: ID!): Boolean!
+      }
+      
+      type UserConnection {
+        nodes: [User!]!
+        pageInfo: PageInfo!
+        totalCount: Int!
+      }
+      
+      type PageInfo {
+        hasNextPage: Boolean!
+        hasPreviousPage: Boolean!
+        startCursor: String
+        endCursor: String
+      }
+    `;
+  }
+  
+  createResolvers() {
+    return {
+      Query: {
+        users: async (parent, { page, limit }, { dataSources }) => {
+          return dataSources.userAPI.getUsers({ page, limit });
+        },
+        user: async (parent, { id }, { dataSources }) => {
+          return dataSources.userAPI.getUserById(id);
+        },
+        posts: async (parent, { authorId }, { dataSources }) => {
+          return dataSources.postAPI.getPostsByAuthor(authorId);
+        }
+      },
+      
+      Mutation: {
+        createUser: async (parent, { input }, { dataSources }) => {
+          return dataSources.userAPI.createUser(input);
+        },
+        updateUser: async (parent, { id, input }, { dataSources }) => {
+          return dataSources.userAPI.updateUser(id, input);
+        },
+        deleteUser: async (parent, { id }, { dataSources }) => {
+          return dataSources.userAPI.deleteUser(id);
+        }
+      },
+      
+      User: {
+        posts: async (user, args, { loaders }) => {
+          return loaders.postsByUserId.load(user.id);
+        }
+      },
+      
+      Post: {
+        author: async (post, args, { loaders }) => {
+          return loaders.userById.load(post.authorId);
+        }
+      }
+    };
+  }
+  
+  createServer() {
+    return new ApolloServer({
+      typeDefs: this.typeDefs,
+      resolvers: this.resolvers,
+      context: ({ req }) => {
+        return {
+          user: req.user,
+          loaders: this.createDataLoaders(),
+          dataSources: this.createDataSources()
+        };
+      },
+      validationRules: [
+        createComplexityLimitRule(1000)
+      ],
+      formatError: (error) => {
+        console.error(error);
+        return {
+          message: error.message,
+          code: error.extensions?.code,
+          path: error.path
+        };
+      }
+    });
+  }
+  
+  createDataLoaders() {
+    return {
+      userById: new DataLoader(async (ids) => {
+        const users = await this.userService.getUsersByIds(ids);
+        return ids.map(id => users.find(user => user.id === id));
+      }),
+      
+      postsByUserId: new DataLoader(async (userIds) => {
+        const posts = await this.postService.getPostsByUserIds(userIds);
+        return userIds.map(userId => 
+          posts.filter(post => post.authorId === userId)
+        );
+      })
+    };
+  }
+}
+```
+
+## API Documentation & Testing
+### OpenAPI/Swagger Documentation
+```yaml
+# openapi.yaml
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: A comprehensive user management system
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+
+paths:
+  /users:
+    get:
+      summary: Get list of users
+      description: Retrieve a paginated list of users with optional search
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: search
+          in: query
+          description: Search term for filtering users
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Create a new user
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+components:
+  schemas:
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 123
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - email
+        - createdAt
+```
+
+### API Testing with Jest
+```javascript
+const request = require('supertest');
+const app = require('../app');
+
+describe('User API', () => {
+  let authToken;
+  let testUser;
+  
+  beforeAll(async () => {
+    // Setup test database
+    await setupTestDatabase();
+    
+    // Get auth token
+    const authResponse = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'test@example.com',
+        password: 'testpassword'
+      });
+    
+    authToken = authResponse.body.token;
+  });
+  
+  afterAll(async () => {
+    await cleanupTestDatabase();
+  });
+  
+  describe('GET /api/v1/users', () => {
+    test('should return paginated users list', async () => {
+      const response = await request(app)
+        .get('/api/v1/users?page=1&limit=10')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+      
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('pagination');
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.pagination).toMatchObject({
+        page: 1,
+        limit: 10,
+        total: expect.any(Number),
+        pages: expect.any(Number)
+      });
+    });
+    
+    test('should filter users by search term', async () => {
+      const response = await request(app)
+        .get('/api/v1/users?search=john')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+      
+      response.body.data.forEach(user => {
+        expect(
+          user.name.toLowerCase().includes('john') ||
+          user.email.toLowerCase().includes('john')
+        ).toBe(true);
+      });
+    });
+  });
+  
+  describe('POST /api/v1/users', () => {
+    test('should create user with valid data', async () => {
+      const userData = {
+        name: 'Test User',
+        email: 'newuser@example.com',
+        password: 'SecurePass123!'
+      };
+      
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(userData)
+        .expect(201);
+      
+      expect(response.body.data).toMatchObject({
+        name: userData.name,
+        email: userData.email,
+        id: expect.any(Number),
+        createdAt: expect.any(String)
+      });
+      
+      expect(response.body.data).not.toHaveProperty('password');
+      testUser = response.body.data;
+    });
+    
+    test('should reject invalid email', async () => {
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test User',
+          email: 'invalid-email',
+          password: 'SecurePass123!'
+        })
+        .expect(400);
+      
+      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            msg: expect.stringContaining('email')
+          })
+        ])
+      );
+    });
+  });
+});
+```
+```yaml
+# openapi.yaml
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: A comprehensive user management system
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+
+paths:
+  /users:
+    get:
+      summary: Get list of users
+      description: Retrieve a paginated list of users with optional search
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: search
+          in: query
+          description: Search term for filtering users
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Create a new user
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+components:
+  schemas:
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 123
+        name:
+          type: string
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+      required:
+        - id
+        - name
+        - email
+        - createdAt
+```
+```javascript
+const request = require('supertest');
+const app = require('../app');
+
+describe('User API', () => {
+  let authToken;
+  let testUser;
+  
+  beforeAll(async () => {
+    // Setup test database
+    await setupTestDatabase();
+    
+    // Get auth token
+    const authResponse = await request(app)
+      .post('/api/v1/auth/login')
+      .send({
+        email: 'test@example.com',
+        password: 'testpassword'
+      });
+    
+    authToken = authResponse.body.token;
+  });
+  
+  afterAll(async () => {
+    await cleanupTestDatabase();
+  });
+  
+  describe('GET /api/v1/users', () => {
+    test('should return paginated users list', async () => {
+      const response = await request(app)
+        .get('/api/v1/users?page=1&limit=10')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+      
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('pagination');
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.pagination).toMatchObject({
+        page: 1,
+        limit: 10,
+        total: expect.any(Number),
+        pages: expect.any(Number)
+      });
+    });
+    
+    test('should filter users by search term', async () => {
+      const response = await request(app)
+        .get('/api/v1/users?search=john')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+      
+      response.body.data.forEach(user => {
+        expect(
+          user.name.toLowerCase().includes('john') ||
+          user.email.toLowerCase().includes('john')
+        ).toBe(true);
+      });
+    });
+  });
+  
+  describe('POST /api/v1/users', () => {
+    test('should create user with valid data', async () => {
+      const userData = {
+        name: 'Test User',
+        email: 'newuser@example.com',
+        password: 'SecurePass123!'
+      };
+      
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(userData)
+        .expect(201);
+      
+      expect(response.body.data).toMatchObject({
+        name: userData.name,
+        email: userData.email,
+        id: expect.any(Number),
+        createdAt: expect.any(String)
+      });
+      
+      expect(response.body.data).not.toHaveProperty('password');
+      testUser = response.body.data;
+    });
+    
+    test('should reject invalid email', async () => {
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          name: 'Test User',
+          email: 'invalid-email',
+          password: 'SecurePass123!'
+        })
+        .expect(400);
+      
+      expect(response.body.error).toBe('Validation failed');
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            msg: expect.stringContaining('email')
+          })
+        ])
+      );
+    });
+  });
+});
+```
+
+## API Security & Performance
+### Authentication & Authorization
+```javascript
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+class AuthService {
+  async authenticate(req, res, next) {
+    try {
+      const token = this.extractToken(req);
+      
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await this.userService.getUserById(decoded.userId);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+      
+      req.user = user;
+      next();
+    } catch (error) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  }
+  
+  authorize(roles = []) {
+    return (req, res, next) => {
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      if (roles.length && !roles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      
+      next();
+    };
+  }
+  
+  extractToken(req) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+    return null;
+  }
+}
+```
+
+### Caching & Performance
+```javascript
+const Redis = require('redis');
+const compression = require('compression');
+
+class PerformanceOptimizer {
+  constructor() {
+    this.redis = Redis.createClient(process.env.REDIS_URL);
+  }
+  
+  // Response caching middleware
+  cache(duration = 300) {
+    return async (req, res, next) => {
+      const key = `cache:${req.originalUrl}`;
+      
+      try {
+        const cached = await this.redis.get(key);
+        if (cached) {
+          return res.json(JSON.parse(cached));
+        }
+        
+        // Override res.json to cache the response
+        const originalJson = res.json;
+        res.json = function(data) {
+          redis.setex(key, duration, JSON.stringify(data));
+          return originalJson.call(this, data);
+        };
+        
+        next();
+      } catch (error) {
+        next();
+      }
+    };
+  }
+  
+  // Response compression
+  enableCompression() {
+    return compression({
+      filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+      level: 6,
+      threshold: 1024
+    });
+  }
+}
+```
+
+Always focus on creating APIs that are secure, performant, well-documented, and maintainable. Follow RESTful principles, implement proper error handling, and provide comprehensive testing coverage.
+```javascript
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
+class AuthService {
+  async authenticate(req, res, next) {
+    try {
+      const token = this.extractToken(req);
+      
+      if (!token) {
+        return res.status(401).json({ error: 'No token provided' });
+      }
+      
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await this.userService.getUserById(decoded.userId);
+      
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+      
+      req.user = user;
+      next();
+    } catch (error) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+  }
+  
+  authorize(roles = []) {
+    return (req, res, next) => {
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      if (roles.length && !roles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions' });
+      }
+      
+      next();
+    };
+  }
+  
+  extractToken(req) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+    return null;
+  }
+}
+```
+```javascript
+const Redis = require('redis');
+const compression = require('compression');
+
+class PerformanceOptimizer {
+  constructor() {
+    this.redis = Redis.createClient(process.env.REDIS_URL);
+  }
+  
+  // Response caching middleware
+  cache(duration = 300) {
+    return async (req, res, next) => {
+      const key = `cache:${req.originalUrl}`;
+      
+      try {
+        const cached = await this.redis.get(key);
+        if (cached) {
+          return res.json(JSON.parse(cached));
+        }
+        
+        // Override res.json to cache the response
+        const originalJson = res.json;
+        res.json = function(data) {
+          redis.setex(key, duration, JSON.stringify(data));
+          return originalJson.call(this, data);
+        };
+        
+        next();
+      } catch (error) {
+        next();
+      }
+    };
+  }
+  
+  // Response compression
+  enableCompression() {
+    return compression({
+      filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+      level: 6,
+      threshold: 1024
+    });
+  }
+}
+```

@@ -12,18 +12,28 @@ export const COMMERCIAL_STATUSES = [
 ];
 
 export function normalizeCommercialTier(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   return COMMERCIAL_TIERS.includes(normalized) ? normalized : "free";
 }
 
 export function normalizeLeadKind(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   return LISTING_LEAD_KINDS.includes(normalized) ? normalized : "tool";
 }
 
 export function normalizeDisclosure(value) {
-  const normalized = String(value || "").trim().toLowerCase();
-  if (normalized === "sponsored" || normalized === "affiliate" || normalized === "editorial") {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (
+    normalized === "sponsored" ||
+    normalized === "affiliate" ||
+    normalized === "editorial"
+  ) {
     return normalized;
   }
   return "editorial";
@@ -35,11 +45,19 @@ export function isPaidOrAffiliateDisclosure(value) {
 }
 
 export function normalizePricingModel(value) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (
-    ["free", "freemium", "paid", "open-source", "subscription", "usage-based", "contact-sales"].includes(
-      normalized,
-    )
+    [
+      "free",
+      "freemium",
+      "paid",
+      "open-source",
+      "subscription",
+      "usage-based",
+      "contact-sales",
+    ].includes(normalized)
   ) {
     return normalized;
   }
@@ -51,7 +69,9 @@ export function validateListingLeadPayload(payload = {}) {
   const kind = normalizeLeadKind(payload.kind);
   const tierInterest = normalizeCommercialTier(payload.tierInterest);
   const contactName = String(payload.contactName || "").trim();
-  const contactEmail = String(payload.contactEmail || "").trim().toLowerCase();
+  const contactEmail = String(payload.contactEmail || "")
+    .trim()
+    .toLowerCase();
   const companyName = String(payload.companyName || "").trim();
   const listingTitle = String(payload.listingTitle || "").trim();
   const websiteUrl = String(payload.websiteUrl || "").trim();
@@ -86,4 +106,72 @@ export function validateListingLeadPayload(payload = {}) {
       message,
     },
   };
+}
+
+export function normalizeCommercialStatus(value) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return COMMERCIAL_STATUSES.includes(normalized) ? normalized : "new";
+}
+
+export function isPlacementActive(placement = {}, now = new Date()) {
+  const status = normalizeCommercialStatus(placement.status || "active");
+  if (status !== "active") return false;
+
+  const startsAt = placement.startsAt || placement.starts_at;
+  const expiresAt = placement.expiresAt || placement.expires_at;
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  const startTime = startsAt ? new Date(startsAt).getTime() : null;
+  const expiryTime = expiresAt ? new Date(expiresAt).getTime() : null;
+
+  if (startTime && Number.isFinite(startTime) && startTime > nowTime)
+    return false;
+  if (expiryTime && Number.isFinite(expiryTime) && expiryTime < nowTime)
+    return false;
+  return true;
+}
+
+export function linkRelForDisclosure(value) {
+  return isPaidOrAffiliateDisclosure(value)
+    ? "sponsored nofollow noreferrer"
+    : "noreferrer";
+}
+
+export function nextLeadStatus(currentStatus, action) {
+  const current = normalizeCommercialStatus(currentStatus);
+  const normalizedAction = String(action || "")
+    .trim()
+    .toLowerCase();
+  const transitions = {
+    new: {
+      review: "pending_review",
+      approve: "approved",
+      reject: "rejected",
+      archive: "archived",
+    },
+    pending_review: {
+      approve: "approved",
+      reject: "rejected",
+      archive: "archived",
+    },
+    approved: {
+      activate: "active",
+      reject: "rejected",
+      archive: "archived",
+    },
+    active: {
+      expire: "expired",
+      archive: "archived",
+    },
+    rejected: {
+      archive: "archived",
+    },
+    expired: {
+      archive: "archived",
+    },
+    archived: {},
+  };
+
+  return transitions[current]?.[normalizedAction] ?? current;
 }

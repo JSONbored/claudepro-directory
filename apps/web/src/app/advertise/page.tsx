@@ -2,17 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BriefcaseBusiness, Megaphone, PlusCircle } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { JsonLd } from "@/components/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
-import { buildBreadcrumbJsonLd } from "@heyclaude/registry/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildWebPageJsonLd,
+} from "@heyclaude/registry/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Advertise or submit to HeyClaude",
   description:
     "Choose the right HeyClaude intake path for tool sponsorships, hiring roles, or free Claude resources.",
   path: "/advertise",
-  keywords: ["advertise claude tools", "sponsor ai directory", "post claude job"],
+  keywords: [
+    "advertise claude tools",
+    "sponsor ai directory",
+    "post claude job",
+  ],
 });
 
 const paths = [
@@ -43,19 +51,34 @@ const paths = [
 ];
 
 export default function AdvertisePage() {
-  const jsonLd = buildBreadcrumbJsonLd([
-    { name: "Home", url: siteConfig.url },
-    { name: "Advertise", url: `${siteConfig.url}/advertise` },
-  ]);
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      { name: "Advertise", url: `${siteConfig.url}/advertise` },
+    ]),
+    buildWebPageJsonLd({
+      siteUrl: siteConfig.url,
+      path: "/advertise",
+      name: "Advertise or submit to HeyClaude",
+      description:
+        "Choose the right HeyClaude intake path for tools, jobs, or free Claude resources.",
+      breadcrumbId: `${siteConfig.url}/advertise#breadcrumb`,
+    }),
+  ];
 
   return (
     <div className="container-shell space-y-8 py-12">
       <JsonLd data={jsonLd} />
       <div className="space-y-4 border-b border-border/80 pb-8">
+        <Breadcrumbs
+          items={[{ label: "Home", href: "/" }, { label: "Advertise" }]}
+        />
         <span className="eyebrow">Advertise</span>
         <h1 className="section-title">Choose the right intake path.</h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
-          HeyClaude separates editorial submissions, commercial product listings, and hiring roles so every request lands in the right review queue.
+          HeyClaude separates editorial submissions, commercial product
+          listings, and hiring roles so every request lands in the right review
+          queue.
         </p>
       </div>
 
@@ -63,14 +86,22 @@ export default function AdvertisePage() {
         {paths.map((path) => {
           const Icon = path.icon;
           return (
-            <Link key={path.href} href={path.href} className="surface-panel group flex min-h-72 flex-col justify-between p-6 transition hover:border-primary/45">
+            <Link
+              key={path.href}
+              href={path.href}
+              className="surface-panel group flex min-h-72 flex-col justify-between p-6 transition hover:border-primary/45"
+            >
               <div className="space-y-4">
                 <span className="inline-flex size-10 items-center justify-center rounded-xl border border-border bg-background text-primary">
                   <Icon className="size-5" />
                 </span>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">{path.title}</h2>
-                  <p className="text-sm leading-7 text-muted-foreground">{path.description}</p>
+                  <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+                    {path.title}
+                  </h2>
+                  <p className="text-sm leading-7 text-muted-foreground">
+                    {path.description}
+                  </p>
                 </div>
               </div>
               <span className="mt-6 inline-flex text-sm font-medium text-primary transition group-hover:translate-x-1">

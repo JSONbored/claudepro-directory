@@ -1,0 +1,83 @@
+# MCP Server Authoring Security Capability Pack Skill
+URL: https://heyclau.de/skills/mcp-server-authoring-security-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-authoring-security-capability-pack.mdx
+Download: /downloads/skills/mcp-server-authoring-security-capability-pack.zip
+## Summary
+Expert MCP capability skill for secure server authoring, tool schema discipline, auth boundaries, and adversarial prompt hardening.
+## Tags
+- mcp
+- security
+- server-authoring
+- tools
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices
+- https://modelcontextprotocol.io/specification/2025-06-18
+- https://modelcontextprotocol.io/docs/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This capability pack teaches agents how to design MCP servers that remain safe under real adversarial conditions. It emphasizes least privilege, explicit contracts, and secure default behavior.
+
+## Capability Scope
+- Threat modeling for tool invocation flows
+- Input validation and schema hardening
+- AuthN/AuthZ boundaries for tools and resources
+- Prompt-injection and data exfiltration defenses
+- Audit logging and incident response readiness
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Validate all tool input before execution.
+- Scope each tool to minimal permissions.
+- Deny by default for unsafe/unknown operations.
+- Preserve immutable audit trails for sensitive invocations.
+
+## Troubleshooting
+**Issue:** Tool abuse through crafted prompts  
+**Fix:** Add policy layer between prompt interpretation and tool invocation.
+
+**Issue:** Schema drift breaks clients  
+**Fix:** Enforce contract tests and backward compatibility checks.
+
+**Issue:** Difficult to investigate incidents  
+**Fix:** Add structured event logs with actor/tool/input/result correlation.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

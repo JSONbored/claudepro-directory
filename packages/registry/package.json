@@ -22,6 +22,10 @@
       "types": "./src/index.d.ts",
       "default": "./src/presentation.js"
     },
+    "./quality": {
+      "types": "./src/index.d.ts",
+      "default": "./src/quality.js"
+    },
     "./seo": {
       "types": "./src/index.d.ts",
       "default": "./src/seo.js"
@@ -29,6 +33,14 @@
     "./submission": {
       "types": "./src/index.d.ts",
       "default": "./src/submission.js"
+    },
+    "./submission-spec": {
+      "types": "./src/index.d.ts",
+      "default": "./src/submission-spec.js"
+    },
+    "./llms": {
+      "types": "./src/index.d.ts",
+      "default": "./src/llms.js"
     },
     "./artifacts": {
       "types": "./src/index.d.ts",

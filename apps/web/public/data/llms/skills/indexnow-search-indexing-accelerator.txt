@@ -1,0 +1,76 @@
+# IndexNow Search Indexing Accelerator Skill
+URL: https://heyclau.de/skills/indexnow-search-indexing-accelerator
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://www.indexnow.org/documentation
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/indexnow-search-indexing-accelerator.mdx
+Download: /downloads/skills/indexnow-search-indexing-accelerator.zip
+## Summary
+Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.
+## Tags
+- indexnow
+- seo
+- indexing
+- sitemap
+- search
+## Content
+## Overview
+This skill helps AI agents implement fast, reliable indexing workflows. It coordinates URL-change detection, IndexNow submission, and consistency checks so search engines receive clear and timely signals.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Canonical URL policy
+- Working sitemap and robots endpoints
+- Alerting path for submission failures
+
+## What This Skill Delivers
+- URL-change classification (new, updated, removed)
+- IndexNow submission strategy by batch size and priority
+- Validation checklist for search consistency signals
+- Retry and failure handling logic
+
+## How to Use This Skill
+1. Detect changed URLs from publish events.
+2. Validate canonical and sitemap membership.
+3. Submit changes through IndexNow endpoint strategy.
+4. Track acceptance and indexing progress.
+5. Retry failures and escalate persistent errors.
+
+## Troubleshooting
+**Issue:** URLs submitted but indexing stays slow  
+**Fix:** Verify canonical tags, crawlability, and no conflicting redirect chains.
+
+**Issue:** Frequent submission failures  
+**Fix:** Add backoff retries and endpoint health checks with alerting.
+
+**Issue:** Duplicate URL variants get indexed  
+**Fix:** Enforce strict canonical and redirect consistency before submission.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://www.indexnow.org/documentation
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

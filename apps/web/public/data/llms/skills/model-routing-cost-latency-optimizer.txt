@@ -1,0 +1,96 @@
+# Model Routing Cost and Latency Optimizer Skill
+URL: https://heyclau.de/skills/model-routing-cost-latency-optimizer
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://platform.openai.com/docs/guides/latency-optimization
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/model-routing-cost-latency-optimizer.mdx
+Download: /downloads/skills/model-routing-cost-latency-optimizer.zip
+## Summary
+Design and validate model routing strategies that reduce cost and latency while preserving output quality.
+## Tags
+- model-routing
+- cost-optimization
+- latency
+- token-budget
+- ai-operations
+## Content
+## Overview
+This skill helps teams ship model routing policies that cut spend and latency without quietly degrading quality. It enforces baseline measurement, explicit quality gates, and safe rollback criteria so optimization decisions remain production-safe.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Token and latency telemetry by endpoint/workflow
+- Quality benchmark set for your highest-value tasks
+- Runtime control over model selection policy
+
+## Routing Strategy
+- **Tier 1 (fast):** low-cost model for straightforward tasks
+- **Tier 2 (default):** balanced model for common workloads
+- **Tier 3 (quality):** higher-capability model for complex or failed cases
+
+## How to Use This Skill
+### Prompt Pattern
+
+```text
+Apply model routing cost/latency optimizer.
+Output:
+1) baseline cost/latency table,
+2) routing policy with escalation rules,
+3) quality guardrails,
+4) before/after savings projection.
+```
+
+### Execution Flow
+
+1. Segment traffic by task complexity and business value.
+2. Benchmark candidate models on representative tasks.
+3. Define routing and escalation policy with hard quality thresholds.
+4. Deploy canary and monitor cost, latency, and quality deltas.
+5. Promote or rollback based on explicit guardrails.
+```text
+Apply model routing cost/latency optimizer.
+Output:
+1) baseline cost/latency table,
+2) routing policy with escalation rules,
+3) quality guardrails,
+4) before/after savings projection.
+```
+
+## Troubleshooting
+**Issue:** Savings improve but user quality drops  
+**Fix:** tighten escalation thresholds and reserve stronger models for high-impact tasks.
+
+**Issue:** Latency improves but cost rises unexpectedly  
+**Fix:** inspect token bloat from prompts/context size and cap response/output tokens.
+
+**Issue:** Routing policy is hard to explain  
+**Fix:** keep deterministic rules for first rollout, then add adaptive logic incrementally.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://platform.openai.com/docs/guides/latency-optimization
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

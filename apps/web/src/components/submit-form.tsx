@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/select";
 import categorySpec from "@/generated/content-category-spec.json";
 import { categoryLabels, siteConfig } from "@/lib/site";
+import { buildSubmissionFieldModel } from "@heyclaude/registry/submission-spec";
 
 type SubmissionCategorySpec = {
   template: string;
@@ -96,7 +97,9 @@ export function SubmitForm() {
   const [verificationStatus, setVerificationStatus] = useState("draft");
   const [verifiedAt, setVerifiedAt] = useState("");
   const [retrievalSources, setRetrievalSources] = useState("");
-  const [testedPlatforms, setTestedPlatforms] = useState(defaultTestedPlatforms);
+  const [testedPlatforms, setTestedPlatforms] = useState(
+    defaultTestedPlatforms,
+  );
   const suggestedSlug = useMemo(() => slugifySubmission(toolName), [toolName]);
   const normalizedSlug = slug || suggestedSlug;
 
@@ -177,10 +180,21 @@ export function SubmitForm() {
     verifiedAt,
   ]);
 
-  const categoryNeedsAsset = categoriesRequiringAssetContent.has(category);
+  const selectedFieldModel = useMemo(
+    () => (category ? buildSubmissionFieldModel(category) : null),
+    [category],
+  );
+  const categoryNeedsAsset =
+    selectedFieldModel?.fields.some(
+      (field) => field.id === "full_copyable_content" && field.required,
+    ) ?? categoriesRequiringAssetContent.has(category);
   const categoryNeedsSkillMetadata =
+    selectedFieldModel?.fields.some((field) => field.id === "skill_type") ??
     categorySpecs[category]?.supportsSkillMetadata === true;
-  const categoryNeedsUsage = categoriesRequiringUsageSnippet.has(category);
+  const categoryNeedsUsage =
+    selectedFieldModel?.fields.some(
+      (field) => field.id === "usage_snippet" && field.required,
+    ) ?? categoriesRequiringUsageSnippet.has(category);
 
   const readinessItems = useMemo(() => {
     const items = [

@@ -1,0 +1,76 @@
+# SaaS Pricing Experimentation Engine Skill
+URL: https://heyclau.de/skills/saas-pricing-experimentation-engine
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://stripe.com/docs
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/saas-pricing-experimentation-engine.mdx
+Download: /downloads/skills/saas-pricing-experimentation-engine.zip
+## Summary
+Run low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls.
+## Tags
+- saas
+- pricing
+- experimentation
+- revenue
+- product
+## Content
+## Overview
+This skill helps AI agents run pricing experiments that are rigorous and operationally safe. It avoids vanity wins by enforcing guardrails for retention, support burden, and customer trust.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Current pricing matrix and value proposition
+- Segment-level behavior data
+- Experiment timeline and confidence criteria
+
+## What This Skill Delivers
+- Experiment design with measurable hypotheses
+- Segment targeting and holdout strategy
+- Guardrail metrics and fail-fast triggers
+- Decision memo template for launch/revert/iterate
+
+## How to Use This Skill
+1. Define primary and guardrail metrics.
+2. Choose test cohorts and traffic allocation.
+3. Run experiment with clear exposure limits.
+4. Evaluate statistical and practical impact.
+5. Decide rollout, rollback, or follow-up test.
+
+## Troubleshooting
+**Issue:** Conversion increases but churn worsens  
+**Fix:** Enforce retention guardrails and include lagging metrics in decisions.
+
+**Issue:** Results are inconclusive  
+**Fix:** Extend sample duration or tighten cohort segmentation assumptions.
+
+**Issue:** Pricing experiment hurts trust  
+**Fix:** Improve messaging clarity and align price changes with explicit value communication.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://stripe.com/docs
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

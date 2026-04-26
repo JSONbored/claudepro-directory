@@ -1,0 +1,749 @@
+# Multi Provider Token Counter - Statuslines
+URL: https://heyclau.de/statuslines/multi-provider-token-counter
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-16
+Documentation: https://docs.anthropic.com/claude/docs/models-overview
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-provider-token-counter.mdx
+## Summary
+Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits
+## Tags
+- tokens
+- multi-provider
+- context-limits
+- ai-models
+- monitoring
+## Content
+## Features
+- Automatic provider detection (Claude, GPT-4, Gemini, Grok)
+- 2025 verified context limits (1M for latest models)
+- Real-time usage percentage calculation
+- Color-coded warnings (green <50%, yellow <80%, red ≥80%)
+- Formatted token counts with thousand separators
+- Provider-specific icons for visual identification
+- Supports legacy models with correct limits
+- Context window utilization trend tracking
+
+## Use Cases
+- Monitoring context usage across multiple AI providers
+- Tracking token consumption to avoid context limit errors
+- Comparing model efficiency across providers
+- Real-time awareness of remaining context budget
+- Multi-model workflow optimization
+- Cost optimization by selecting models with appropriate context limits
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for pattern matching with [[ ]] and string manipulation)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- awk command (for percentage calculation with floating point precision)
+- bc calculator (optional, for precise floating point comparison - script has integer fallback)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded warnings)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Multi-Provider Token Counter with Input/Output Split
+Extended version tracking input and output tokens separately
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Multi-Provider Token Counter with Input/Output Split
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+input_tokens=$(echo "$input" | jq -r '.cost.input_tokens // 0')
+output_tokens=$(echo "$input" | jq -r '.cost.output_tokens // 0')
+total_tokens=$((input_tokens + output_tokens))
+
+# Determine provider and context limit (same logic as base script)
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  if [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"sonnet-3.5"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+    limit=1000000
+    provider="Claude"
+    icon="🔮"
+  else
+    limit=200000
+    provider="Claude"
+    icon="🔮"
+  fi
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  limit=1000000
+  provider="GPT-4.1"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  if [[ "$model" == *"2."* ]] || [[ "$model" == *"1.5-pro"* ]]; then
+    limit=1000000
+    provider="Gemini"
+    icon="💎"
+  else
+    limit=128000
+    provider="Gemini"
+    icon="💎"
+  fi
+elif [[ "$model" == *"grok-3"* ]] || [[ "$model" == *"Grok 3"* ]]; then
+  limit=1000000
+  provider="Grok"
+  icon="⚡"
+else
+  limit=100000
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+tokens=$total_tokens
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token counts
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+  input_formatted=$(printf "%'d" $input_tokens 2>/dev/null || echo "$input_tokens")
+  output_formatted=$(printf "%'d" $output_tokens 2>/dev/null || echo "$output_tokens")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+  input_formatted="$input_tokens"
+  output_formatted="$output_tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%) │ In:${input_formatted} Out:${output_formatted}"
+```
+### Multi-Provider Token Counter with Custom Limits
+Version with configurable context limits via environment variables
+```bash
+#!/usr/bin/env bash
+
+# Multi-Provider Token Counter with Custom Limits
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+
+# Custom limits via environment variables (defaults to standard limits)
+CLAUDE_LIMIT=${CLAUDE_TOKEN_LIMIT:-1000000}
+GPT_LIMIT=${GPT_TOKEN_LIMIT:-1000000}
+GEMINI_LIMIT=${GEMINI_TOKEN_LIMIT:-1000000}
+GROK_LIMIT=${GROK_TOKEN_LIMIT:-1000000}
+DEFAULT_LIMIT=${DEFAULT_TOKEN_LIMIT:-100000}
+
+# Determine provider and context limit
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  limit=$CLAUDE_LIMIT
+  provider="Claude"
+  icon="🔮"
+elif [[ "$model" == *"gpt"* ]] || [[ "$model" == *"GPT"* ]]; then
+  limit=$GPT_LIMIT
+  provider="GPT"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  limit=$GEMINI_LIMIT
+  provider="Gemini"
+  icon="💎"
+elif [[ "$model" == *"grok"* ]] || [[ "$model" == *"Grok"* ]]; then
+  limit=$GROK_LIMIT
+  provider="Grok"
+  icon="⚡"
+else
+  limit=$DEFAULT_LIMIT
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token count
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%)"
+```
+### Multi-Provider Token Counter Installation Example
+Complete setup script with provider detection testing and bc calculator verification
+```bash
+#!/bin/bash
+# Installation script for Multi-Provider Token Counter
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for bc (optional, for floating point comparison)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc calculator (optional, for precise percentage comparison)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "bc is optional - script will use integer comparison fallback"
+    fi
+fi
+
+# Test emoji/Unicode characters
+if echo -e '🔮 🤖 💎 ⚡ ❓' &> /dev/null; then
+    echo "Emoji characters supported: 🔮 🤖 💎 ⚡ ❓"
+else
+    echo "Warning: Emoji characters may not display correctly"
+    echo "Install Nerd Font or emoji-capable font"
+fi
+
+# Test color support
+if echo -e '\033[32mGreen\033[0m' &> /dev/null; then
+    echo "ANSI color codes supported"
+else
+    echo "Warning: ANSI color codes may not work"
+fi
+
+# Test TERM variable
+if [ -n "$TERM" ]; then
+    echo "TERM variable set: $TERM"
+else
+    echo "Warning: TERM variable not set - colors may not work"
+    echo "Set with: export TERM=xterm-256color"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/multi-provider-token-counter.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Multi-Provider Token Counter - 2025 Context Limits
+# Supports: Claude Sonnet 4 (1M), GPT-4.1 (1M), Gemini 2.x (1M), Grok 3 (1M)
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+
+# Determine provider and context limit
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  if [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"sonnet-3.5"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+    limit=1000000
+    provider="Claude"
+    icon="🔮"
+  else
+    limit=200000
+    provider="Claude"
+    icon="🔮"
+  fi
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  limit=1000000
+  provider="GPT-4.1"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  if [[ "$model" == *"2."* ]] || [[ "$model" == *"1.5-pro"* ]]; then
+    limit=1000000
+    provider="Gemini"
+    icon="💎"
+  else
+    limit=128000
+    provider="Gemini"
+    icon="💎"
+  fi
+elif [[ "$model" == *"grok-3"* ]] || [[ "$model" == *"Grok 3"* ]]; then
+  limit=1000000
+  provider="Grok"
+  icon="⚡"
+else
+  limit=100000
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding based on usage
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"  # Green
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"  # Yellow
+  else
+    color="\033[31m"  # Red
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token count with commas
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%)"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/multi-provider-token-counter.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Multi-Provider Token Counter installed successfully!"
+echo "Note: Ensure terminal supports emoji characters for provider icons"
+echo "Test with: echo -e '🔮 🤖 💎 ⚡ ❓'"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Multi-Provider Token Counter with Input/Output Split
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+input_tokens=$(echo "$input" | jq -r '.cost.input_tokens // 0')
+output_tokens=$(echo "$input" | jq -r '.cost.output_tokens // 0')
+total_tokens=$((input_tokens + output_tokens))
+
+# Determine provider and context limit (same logic as base script)
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  if [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"sonnet-3.5"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+    limit=1000000
+    provider="Claude"
+    icon="🔮"
+  else
+    limit=200000
+    provider="Claude"
+    icon="🔮"
+  fi
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  limit=1000000
+  provider="GPT-4.1"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  if [[ "$model" == *"2."* ]] || [[ "$model" == *"1.5-pro"* ]]; then
+    limit=1000000
+    provider="Gemini"
+    icon="💎"
+  else
+    limit=128000
+    provider="Gemini"
+    icon="💎"
+  fi
+elif [[ "$model" == *"grok-3"* ]] || [[ "$model" == *"Grok 3"* ]]; then
+  limit=1000000
+  provider="Grok"
+  icon="⚡"
+else
+  limit=100000
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+tokens=$total_tokens
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token counts
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+  input_formatted=$(printf "%'d" $input_tokens 2>/dev/null || echo "$input_tokens")
+  output_formatted=$(printf "%'d" $output_tokens 2>/dev/null || echo "$output_tokens")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+  input_formatted="$input_tokens"
+  output_formatted="$output_tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%) │ In:${input_formatted} Out:${output_formatted}"
+```
+```bash
+#!/usr/bin/env bash
+
+# Multi-Provider Token Counter with Custom Limits
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+
+# Custom limits via environment variables (defaults to standard limits)
+CLAUDE_LIMIT=${CLAUDE_TOKEN_LIMIT:-1000000}
+GPT_LIMIT=${GPT_TOKEN_LIMIT:-1000000}
+GEMINI_LIMIT=${GEMINI_TOKEN_LIMIT:-1000000}
+GROK_LIMIT=${GROK_TOKEN_LIMIT:-1000000}
+DEFAULT_LIMIT=${DEFAULT_TOKEN_LIMIT:-100000}
+
+# Determine provider and context limit
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  limit=$CLAUDE_LIMIT
+  provider="Claude"
+  icon="🔮"
+elif [[ "$model" == *"gpt"* ]] || [[ "$model" == *"GPT"* ]]; then
+  limit=$GPT_LIMIT
+  provider="GPT"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  limit=$GEMINI_LIMIT
+  provider="Gemini"
+  icon="💎"
+elif [[ "$model" == *"grok"* ]] || [[ "$model" == *"Grok"* ]]; then
+  limit=$GROK_LIMIT
+  provider="Grok"
+  icon="⚡"
+else
+  limit=$DEFAULT_LIMIT
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token count
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%)"
+```
+```bash
+#!/bin/bash
+# Installation script for Multi-Provider Token Counter
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for bc (optional, for floating point comparison)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc calculator (optional, for precise percentage comparison)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "bc is optional - script will use integer comparison fallback"
+    fi
+fi
+
+# Test emoji/Unicode characters
+if echo -e '🔮 🤖 💎 ⚡ ❓' &> /dev/null; then
+    echo "Emoji characters supported: 🔮 🤖 💎 ⚡ ❓"
+else
+    echo "Warning: Emoji characters may not display correctly"
+    echo "Install Nerd Font or emoji-capable font"
+fi
+
+# Test color support
+if echo -e '\033[32mGreen\033[0m' &> /dev/null; then
+    echo "ANSI color codes supported"
+else
+    echo "Warning: ANSI color codes may not work"
+fi
+
+# Test TERM variable
+if [ -n "$TERM" ]; then
+    echo "TERM variable set: $TERM"
+else
+    echo "Warning: TERM variable not set - colors may not work"
+    echo "Set with: export TERM=xterm-256color"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/multi-provider-token-counter.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Multi-Provider Token Counter - 2025 Context Limits
+# Supports: Claude Sonnet 4 (1M), GPT-4.1 (1M), Gemini 2.x (1M), Grok 3 (1M)
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // 0')
+
+# Determine provider and context limit
+if [[ "$model" == *"claude"* ]] || [[ "$model" == *"Claude"* ]]; then
+  if [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"sonnet-3.5"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+    limit=1000000
+    provider="Claude"
+    icon="🔮"
+  else
+    limit=200000
+    provider="Claude"
+    icon="🔮"
+  fi
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  limit=1000000
+  provider="GPT-4.1"
+  icon="🤖"
+elif [[ "$model" == *"gemini"* ]] || [[ "$model" == *"Gemini"* ]]; then
+  if [[ "$model" == *"2."* ]] || [[ "$model" == *"1.5-pro"* ]]; then
+    limit=1000000
+    provider="Gemini"
+    icon="💎"
+  else
+    limit=128000
+    provider="Gemini"
+    icon="💎"
+  fi
+elif [[ "$model" == *"grok-3"* ]] || [[ "$model" == *"Grok 3"* ]]; then
+  limit=1000000
+  provider="Grok"
+  icon="⚡"
+else
+  limit=100000
+  provider="Unknown"
+  icon="❓"
+fi
+
+# Calculate usage percentage
+if command -v awk > /dev/null 2>&1; then
+  percentage=$(awk "BEGIN {printf \"%.1f\", ($tokens / $limit) * 100}" 2>/dev/null || echo "0.0")
+else
+  percentage="0.0"
+fi
+
+# Color coding based on usage
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$percentage < 50" | bc -l 2>/dev/null) )); then
+    color="\033[32m"  # Green
+  elif (( $(echo "$percentage < 80" | bc -l 2>/dev/null) )); then
+    color="\033[33m"  # Yellow
+  else
+    color="\033[31m"  # Red
+  fi
+else
+  percentage_int=${percentage%.*}
+  if [ $percentage_int -lt 50 ]; then
+    color="\033[32m"
+  elif [ $percentage_int -lt 80 ]; then
+    color="\033[33m"
+  else
+    color="\033[31m"
+  fi
+fi
+
+# Format token count with commas
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+  limit_formatted=$(printf "%'d" $limit 2>/dev/null || echo "$limit")
+else
+  tokens_formatted="$tokens"
+  limit_formatted="$limit"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${provider} │ ${color}${tokens_formatted}${RESET}/${limit_formatted} (${percentage}%)"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/multi-provider-token-counter.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/multi-provider-token-counter.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Multi-Provider Token Counter installed successfully!"
+echo "Note: Ensure terminal supports emoji characters for provider icons"
+echo "Test with: echo -e '🔮 🤖 💎 ⚡ ❓'"
+```
+
+## Troubleshooting
+### Percentage shows >100% or incorrect limit
+
+Update model detection logic with latest model names. Check Claude docs for current model IDs. Verify model field: echo '$input' | jq .model.id. Test pattern matching: [[ "$model" == *"claude"* ]] && echo "Matched". Update limit values for new model versions. Check if tokens exceed limit (may indicate incorrect limit or token counting issue).
+### Icons showing as boxes or question marks
+
+Install Nerd Font or emoji-capable font. Test with: echo '🔮 🤖 💎 ⚡ ❓'. Verify terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Check font configuration in terminal settings. If not supported, modify script to use ASCII alternatives: icon="[C]" for Claude, "[G]" for GPT, etc.
+### Colors not working or showing as escape codes
+
+Ensure TERM environment variable supports colors: echo $TERM (should show 'xterm-256color' or similar). Set if needed: export TERM=xterm-256color. Test colors: echo -e '\033[32mGreen\033[0m' (should show green text). Check 256-color mode: tput colors (should be >= 256). Verify ANSI escape sequences are supported by terminal.
+### Model detection fails for new AI models or versions
+
+Add patterns to detection logic. Common patterns: claude-* (Opus/Sonnet/Haiku), gpt-* (4o/4.1/o3), gemini-* (2.0/2.5-pro), grok-* (3/4). Update with: [[ "$model" == *"pattern"* ]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [[ "test-claude-sonnet-4" == *"claude"* ]] && echo "Matched". Add new model variants to appropriate provider block.
+### Percentage calculation precision too low or rounded values
+
+Increase awk precision for decimals. Current: awk 'BEGIN {printf "%.1f", ...}' (1 decimal). Use: awk 'BEGIN {printf "%.2f", ($tokens / $limit) * 100}' for two decimals. Higher precision: awk 'BEGIN {printf "%.3f", ...}' (3 decimals). Note: Higher precision may slow execution. Verify calculation: echo '456789 1000000' | awk 'BEGIN {printf "%.1f", (456789 / 1000000) * 100}' (should return 45.7).
+### Token count showing as 0 or incorrect values
+
+Check JSON field names: echo '$input' | jq .cost.total_lines_added (tokens). Verify jq extraction: echo '$input' | jq -r '.cost.total_lines_added // 0'. Check if field exists: echo '$input' | jq 'has("cost")'. Verify token counting: Some Claude Code versions may use different field names (e.g., 'total_tokens', 'input_tokens', 'output_tokens'). Update script to check multiple field names.
+### bc command not found or floating point comparison fails
+
+Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return /usr/bin/bc or similar). Test bc: echo '45.7 < 50' | bc -l (should return 1 for true). If bc unavailable, script uses integer comparison fallback. Verify fallback works: percentage_int=${percentage%.*} (extracts integer part).
+### Thousands separator not displaying in token counts
+
+Verify printf supports thousands separator: printf "%'d" 12345 (should return 12,345). Check locale settings: locale (should include thousands separator). Set locale if needed: export LC_NUMERIC=en_US.UTF-8. Test formatting: printf "%'d" 1234567 (should return 1,234,567). If not supported, script falls back to plain numbers. Alternative: Use awk for formatting: awk '{printf "%'"'"'d", $1}' <<< 12345.

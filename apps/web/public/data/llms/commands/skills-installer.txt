@@ -1,0 +1,821 @@
+# Agent Skills Installer for Claude Code
+URL: https://heyclau.de/commands/skills-installer
+Category: commands
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/skills
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/skills-installer.mdx
+## Summary
+Install and manage Claude Code Agent Skills - specialized knowledge packages that extend Claude's capabilities with domain expertise and progressive disclosure
+## Tags
+- skills
+- agent-skills
+- capabilities
+- domain-expertise
+- plugins
+- extensions
+## Content
+## Overview
+The `/skills-installer` command installs Agent Skills - model-controlled configuration packages that extend Claude's capabilities with specialized domain knowledge.
+
+## Features
+- **47 Specialized Skills**: Domain-specific expertise packages
+- **Progressive Disclosure**: Skills activate only when relevant to task
+- **Plugin System**: Modular knowledge packages
+- **Auto-Activation**: Claude automatically selects appropriate skills
+- **Skill Discovery**: Browse available skills by category
+- **Version Management**: Update skills as they evolve
+- **Dependency Resolution**: Auto-install required dependencies
+- **Team Sharing**: Commit skills config to git
+
+## Usage
+```bash
+/skills-installer [action] [skill-name]
+```
+
+### Actions
+
+- `--install` - Install skill by name
+- `--list` - List available skills
+- `--installed` - Show installed skills
+- `--uninstall` - Remove skill
+- `--update` - Update installed skills
+- `--search` - Search skills by keyword
+
+### Categories
+
+- `--development` - Programming and development skills
+- `--devops` - Infrastructure and deployment
+- `--data` - Data science and analytics
+- `--security` - Security and compliance
+- `--frontend` - UI/UX and frontend
+- `--backend` - Server-side and APIs
+```bash
+/skills-installer [action] [skill-name]
+```
+
+## What Are Agent Skills?
+Agent Skills are **model-controlled configurations** that give Claude specialized knowledge:
+
+- Files, scripts, resources for specific domains
+- Activated automatically when relevant
+- Extend capabilities without manual prompting
+- Similar to VS Code extensions but for AI
+
+## Examples
+### Install React 19 Skill
+
+**Command:**
+```bash
+/skills-installer --install react-19-expert
+```
+
+**Installation:**
+```
+[Installing Skill: React 19 Expert]
+
+✓ Downloaded skill package
+✓ Installed dependencies
+✓ Configured activation triggers
+
+Skill Capabilities:
+- React 19.1 features (use hook, Server Actions)
+- React Compiler optimization
+- Server Components best practices
+- Concurrent rendering patterns
+- New hooks (useOptimistic, useFormStatus)
+
+Activation Triggers:
+- React file detected (*.tsx, *.jsx)
+- package.json contains "react": "^19"
+- Prompts mentioning React/components
+
+✓ Skill installed successfully
+```
+
+**Auto-Activation:**
+```bash
+User: "Create a form with optimistic updates"
+
+[Agent Skill: React 19 Expert - Activated]
+
+Claude: "I'll use React 19's useOptimistic hook for this..."
+
+// Generated code uses React 19 patterns
+import { useOptimistic } from 'react';
+
+export function TodoForm({ addTodo }: Props) {
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
+    todos,
+    (state, newTodo) => [...state, newTodo]
+  );
+  
+  // ...
+}
+```
+
+### Install TypeScript Strict Mode Skill
+
+**Command:**
+```bash
+/skills-installer --install typescript-strict
+```
+
+**Skill Details:**
+```
+[TypeScript Strict Mode Expert]
+
+Capabilities:
+- Enforce strict mode conventions
+- No `any` type - suggest `unknown` instead
+- Proper type guards
+- Discriminated unions
+- Advanced type inference
+
+Configuration:
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true
+  }
+
+✓ Installed
+```
+
+**Effect:**
+```typescript
+// Before skill:
+function getData(id: any) {  // Claude might use 'any'
+  return data[id];
+}
+
+// After skill activated:
+function getData(id: string): User | undefined {  // Strict types
+  const user = data[id];  // Could be undefined
+  if (!user) {
+    throw new Error(`User ${id} not found`);
+  }
+  return user;
+}
+```
+
+### Install Multiple Skills
+
+**Command:**
+```bash
+/skills-installer --install next-15-expert prisma-advanced tdd-workflow
+```
+
+**Batch Installation:**
+```
+[Installing 3 Skills]
+
+1/3 Next.js 15 Expert
+  ✓ Installed
+  - App Router patterns
+  - Server Components
+  - Partial Prerendering
+  - React 19 integration
+
+2/3 Prisma Advanced
+  ✓ Installed
+  - Query optimization
+  - N+1 prevention
+  - Migration strategies
+  - Type safety patterns
+
+3/3 TDD Workflow
+  ✓ Installed
+  - Test-first development
+  - Red-green-refactor
+  - Coverage enforcement
+  - Mock strategies
+
+✓ All skills installed
+```
+
+### List Available Skills
+
+**Command:**
+```bash
+/skills-installer --list --category=development
+```
+
+**Output:**
+```
+[Available Development Skills]
+
+## Frontend
+- react-19-expert - React 19.1 features and patterns
+- next-15-expert - Next.js 15 App Router mastery
+- tailwind-v4 - TailwindCSS v4 modern patterns
+- svelte-5-runes - Svelte 5 with runes system
+
+## Backend
+- node-20-performance - Node.js 20 performance patterns
+- fastify-optimization - Fastify web framework expert
+- graphql-federation - GraphQL Federation v2
+- prisma-advanced - Advanced Prisma ORM patterns
+
+## Testing
+- vitest-advanced - Vitest testing mastery
+- playwright-e2e - Playwright E2E testing
+- tdd-workflow - Test-driven development expert
+
+## Language Expertise
+- typescript-strict - TypeScript strict mode expert
+- python-type-hints - Python typing and mypy
+- go-idioms - Go language idioms
+- rust-ownership - Rust ownership patterns
+
+Total: 47 skills available
+Installed: 0
+```
+
+### View Installed Skills
+
+**Command:**
+```bash
+/skills-installer --installed
+```
+
+**Output:**
+```
+[Installed Skills]
+
+✓ react-19-expert (v1.2.0)
+  Last used: 2 hours ago
+  Activations: 45 times
+  
+✓ typescript-strict (v2.1.0)
+  Last used: Active now
+  Activations: 120 times
+  
+✓ next-15-expert (v1.0.5)
+  Last used: Yesterday
+  Activations: 30 times
+
+3 skills installed
+Storage: 2.4 MB
+```
+
+### Search Skills
+
+**Command:**
+```bash
+/skills-installer --search "database optimization"
+```
+
+**Results:**
+```
+[Search Results: database optimization]
+
+1. prisma-advanced
+   Description: Advanced Prisma patterns with query optimization
+   Tags: database, orm, optimization, performance
+   
+2. postgres-performance
+   Description: PostgreSQL query optimization and indexing
+   Tags: database, postgresql, performance, sql
+   
+3. mongodb-aggregation
+   Description: MongoDB aggregation pipeline mastery
+   Tags: database, mongodb, nosql, performance
+
+Found 3 matching skills
+```
+```bash
+/skills-installer --install react-19-expert
+```
+```text
+[Installing Skill: React 19 Expert]
+
+✓ Downloaded skill package
+✓ Installed dependencies
+✓ Configured activation triggers
+
+Skill Capabilities:
+- React 19.1 features (use hook, Server Actions)
+- React Compiler optimization
+- Server Components best practices
+- Concurrent rendering patterns
+- New hooks (useOptimistic, useFormStatus)
+
+Activation Triggers:
+- React file detected (*.tsx, *.jsx)
+- package.json contains "react": "^19"
+- Prompts mentioning React/components
+
+✓ Skill installed successfully
+```
+```bash
+User: "Create a form with optimistic updates"
+
+[Agent Skill: React 19 Expert - Activated]
+
+Claude: "I'll use React 19's useOptimistic hook for this..."
+
+// Generated code uses React 19 patterns
+import { useOptimistic } from 'react';
+
+export function TodoForm({ addTodo }: Props) {
+  const [optimisticTodos, addOptimisticTodo] = useOptimistic(
+    todos,
+    (state, newTodo) => [...state, newTodo]
+  );
+  
+  // ...
+}
+```
+```bash
+/skills-installer --install typescript-strict
+```
+```text
+[TypeScript Strict Mode Expert]
+
+Capabilities:
+- Enforce strict mode conventions
+- No `any` type - suggest `unknown` instead
+- Proper type guards
+- Discriminated unions
+- Advanced type inference
+
+Configuration:
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true
+  }
+
+✓ Installed
+```
+```typescript
+// Before skill:
+function getData(id: any) {  // Claude might use 'any'
+  return data[id];
+}
+
+// After skill activated:
+function getData(id: string): User | undefined {  // Strict types
+  const user = data[id];  // Could be undefined
+  if (!user) {
+    throw new Error(`User ${id} not found`);
+  }
+  return user;
+}
+```
+```bash
+/skills-installer --install next-15-expert prisma-advanced tdd-workflow
+```
+```text
+[Installing 3 Skills]
+
+1/3 Next.js 15 Expert
+  ✓ Installed
+  - App Router patterns
+  - Server Components
+  - Partial Prerendering
+  - React 19 integration
+
+2/3 Prisma Advanced
+  ✓ Installed
+  - Query optimization
+  - N+1 prevention
+  - Migration strategies
+  - Type safety patterns
+
+3/3 TDD Workflow
+  ✓ Installed
+  - Test-first development
+  - Red-green-refactor
+  - Coverage enforcement
+  - Mock strategies
+
+✓ All skills installed
+```
+```bash
+/skills-installer --list --category=development
+```
+```text
+[Available Development Skills]
+
+## Frontend
+- react-19-expert - React 19.1 features and patterns
+- next-15-expert - Next.js 15 App Router mastery
+- tailwind-v4 - TailwindCSS v4 modern patterns
+- svelte-5-runes - Svelte 5 with runes system
+
+## Backend
+- node-20-performance - Node.js 20 performance patterns
+- fastify-optimization - Fastify web framework expert
+- graphql-federation - GraphQL Federation v2
+- prisma-advanced - Advanced Prisma ORM patterns
+
+## Testing
+- vitest-advanced - Vitest testing mastery
+- playwright-e2e - Playwright E2E testing
+- tdd-workflow - Test-driven development expert
+
+## Language Expertise
+- typescript-strict - TypeScript strict mode expert
+- python-type-hints - Python typing and mypy
+- go-idioms - Go language idioms
+- rust-ownership - Rust ownership patterns
+
+Total: 47 skills available
+Installed: 0
+```
+```bash
+/skills-installer --installed
+```
+```text
+[Installed Skills]
+
+✓ react-19-expert (v1.2.0)
+  Last used: 2 hours ago
+  Activations: 45 times
+  
+✓ typescript-strict (v2.1.0)
+  Last used: Active now
+  Activations: 120 times
+  
+✓ next-15-expert (v1.0.5)
+  Last used: Yesterday
+  Activations: 30 times
+
+3 skills installed
+Storage: 2.4 MB
+```
+```bash
+/skills-installer --search "database optimization"
+```
+```text
+[Search Results: database optimization]
+
+1. prisma-advanced
+   Description: Advanced Prisma patterns with query optimization
+   Tags: database, orm, optimization, performance
+   
+2. postgres-performance
+   Description: PostgreSQL query optimization and indexing
+   Tags: database, postgresql, performance, sql
+   
+3. mongodb-aggregation
+   Description: MongoDB aggregation pipeline mastery
+   Tags: database, mongodb, nosql, performance
+
+Found 3 matching skills
+```
+
+## Skill Categories
+### Frontend Skills
+- `react-19-expert` - React 19 features
+- `next-15-expert` - Next.js 15 patterns
+- `vue-3-composition` - Vue 3 Composition API
+- `svelte-5-runes` - Svelte 5 runes
+- `tailwind-v4` - TailwindCSS v4
+- `framer-motion-advanced` - Animation patterns
+
+### Backend Skills
+- `node-20-performance` - Node.js optimization
+- `fastapi-async` - FastAPI async patterns
+- `nestjs-microservices` - NestJS architecture
+- `express-security` - Express.js security
+- `graphql-federation` - GraphQL Federation
+
+### Database Skills
+- `prisma-advanced` - Prisma ORM mastery
+- `postgres-performance` - PostgreSQL optimization
+- `mongodb-aggregation` - MongoDB pipelines
+- `redis-caching` - Redis caching strategies
+- `drizzle-orm` - Drizzle ORM patterns
+
+### DevOps Skills
+- `docker-optimization` - Docker best practices
+- `kubernetes-deployment` - K8s deployments
+- `github-actions-ci` - GitHub Actions CI/CD
+- `terraform-iac` - Infrastructure as Code
+- `vercel-edge` - Vercel Edge Functions
+
+### Testing Skills
+- `vitest-advanced` - Vitest mastery
+- `playwright-e2e` - Playwright E2E
+- `cypress-component` - Cypress testing
+- `tdd-workflow` - Test-driven development
+- `jest-migration` - Jest to Vitest migration
+
+### Security Skills
+- `owasp-top-10` - OWASP security patterns
+- `auth-best-practices` - Authentication/authorization
+- `input-validation` - Input sanitization
+- `secrets-management` - Secret handling
+- `csrf-protection` - CSRF prevention
+
+## Progressive Disclosure
+### How Skills Activate
+
+```
+User: "Fix the login component"
+
+[Skill Selection Process]
+1. Detect context: React component
+2. Check installed skills
+3. Activate: react-19-expert
+4. Load knowledge: React 19 patterns
+5. Apply to task
+
+Claude: *Uses React 19 patterns automatically*
+```
+
+### Multiple Skills Simultaneously
+
+```
+User: "Optimize the database queries in the API"
+
+[Skills Activated]
+✓ prisma-advanced (database queries)
+✓ node-20-performance (API optimization)
+✓ typescript-strict (type safety)
+
+Claude: *Combines knowledge from all 3 skills*
+```
+```text
+User: "Fix the login component"
+
+[Skill Selection Process]
+1. Detect context: React component
+2. Check installed skills
+3. Activate: react-19-expert
+4. Load knowledge: React 19 patterns
+5. Apply to task
+
+Claude: *Uses React 19 patterns automatically*
+```
+```text
+User: "Optimize the database queries in the API"
+
+[Skills Activated]
+✓ prisma-advanced (database queries)
+✓ node-20-performance (API optimization)
+✓ typescript-strict (type safety)
+
+Claude: *Combines knowledge from all 3 skills*
+```
+
+## Skill Configuration
+### Where Skills Are Stored
+
+```bash
+# Project skills (team-shared)
+.claude/
+  skills/
+    react-19-expert/
+      config.json
+      patterns.md
+      examples/
+    typescript-strict/
+      config.json
+      rules.md
+
+# User skills (personal)
+~/.claude/
+  skills/
+    personal-shortcuts/
+```
+
+### Skill Configuration File
+
+```json
+// .claude/skills/react-19-expert/config.json
+{
+  "name": "react-19-expert",
+  "version": "1.2.0",
+  "description": "React 19 expert with latest features",
+  "activationTriggers": [
+    { "filePattern": "**/*.{tsx,jsx}" },
+    { "keyword": "react" },
+    { "packageJson": "react" }
+  ],
+  "capabilities": [
+    "React 19.1 features",
+    "Server Components",
+    "React Compiler",
+    "New hooks"
+  ],
+  "dependencies": [
+    "typescript-strict"
+  ]
+}
+```
+```bash
+# Project skills (team-shared)
+.claude/
+  skills/
+    react-19-expert/
+      config.json
+      patterns.md
+      examples/
+    typescript-strict/
+      config.json
+      rules.md
+
+# User skills (personal)
+~/.claude/
+  skills/
+    personal-shortcuts/
+```
+```json
+// .claude/skills/react-19-expert/config.json
+{
+  "name": "react-19-expert",
+  "version": "1.2.0",
+  "description": "React 19 expert with latest features",
+  "activationTriggers": [
+    { "filePattern": "**/*.{tsx,jsx}" },
+    { "keyword": "react" },
+    { "packageJson": "react" }
+  ],
+  "capabilities": [
+    "React 19.1 features",
+    "Server Components",
+    "React Compiler",
+    "New hooks"
+  ],
+  "dependencies": [
+    "typescript-strict"
+  ]
+}
+```
+
+## Updating Skills
+**Command:**
+```bash
+/skills-installer --update
+```
+
+**Update Process:**
+```
+[Checking for Updates]
+
+✓ react-19-expert: v1.2.0 → v1.3.0 available
+  - Added Server Actions patterns
+  - Improved useOptimistic examples
+  
+✓ typescript-strict: Up to date (v2.1.0)
+
+✓ next-15-expert: v1.0.5 → v1.1.0 available
+  - Partial Prerendering patterns
+  - Updated caching strategies
+
+Update all? (y/n): y
+
+[Updating 2 skills]
+✓ react-19-expert updated
+✓ next-15-expert updated
+
+All skills up to date
+```
+```bash
+/skills-installer --update
+```
+```text
+[Checking for Updates]
+
+✓ react-19-expert: v1.2.0 → v1.3.0 available
+  - Added Server Actions patterns
+  - Improved useOptimistic examples
+  
+✓ typescript-strict: Up to date (v2.1.0)
+
+✓ next-15-expert: v1.0.5 → v1.1.0 available
+  - Partial Prerendering patterns
+  - Updated caching strategies
+
+Update all? (y/n): y
+
+[Updating 2 skills]
+✓ react-19-expert updated
+✓ next-15-expert updated
+
+All skills up to date
+```
+
+## Best Practices
+### Install Relevant Skills Only
+
+```bash
+# ✅ Good: Install skills you actually use
+/skills-installer --install react-19-expert typescript-strict
+
+# ❌ Bad: Install everything
+/skills-installer --install * # Don't do this
+```
+
+### Team Collaboration
+
+```bash
+# Commit skills config to git
+git add .claude/skills/
+git commit -m "Add React 19 and TypeScript skills"
+
+# Team members get same skills automatically
+git pull
+# Skills auto-install on first use
+```
+
+### Skill Priority
+
+```json
+// More specific skills override general skills
+{
+  "skills": [
+    { "name": "typescript-strict", "priority": 10 },
+    { "name": "react-19-expert", "priority": 20 },  // Higher priority
+    { "name": "next-15-expert", "priority": 30 }   // Highest priority
+  ]
+}
+```
+```bash
+# ✅ Good: Install skills you actually use
+/skills-installer --install react-19-expert typescript-strict
+
+# ❌ Bad: Install everything
+/skills-installer --install * # Don't do this
+```
+```bash
+# Commit skills config to git
+git add .claude/skills/
+git commit -m "Add React 19 and TypeScript skills"
+
+# Team members get same skills automatically
+git pull
+# Skills auto-install on first use
+```
+```json
+// More specific skills override general skills
+{
+  "skills": [
+    { "name": "typescript-strict", "priority": 10 },
+    { "name": "react-19-expert", "priority": 20 },  // Higher priority
+    { "name": "next-15-expert", "priority": 30 }   // Highest priority
+  ]
+}
+```
+
+## Troubleshooting
+### Skill Not Activating
+
+```bash
+# Check skill installation
+/skills-installer --installed
+
+# Verify activation triggers
+# Edit .claude/skills/[skill]/config.json
+
+# Manually activate for testing
+"Use the React 19 expert skill for this task"
+```
+
+### Conflicting Skills
+
+```bash
+# Some skills may conflict
+# Example: jest-expert + vitest-expert
+
+# Solution: Uninstall conflicting skill
+/skills-installer --uninstall jest-expert
+```
+
+### Skill Updates Breaking
+
+```bash
+# Rollback to previous version
+/skills-installer --rollback react-19-expert
+
+# Or pin specific version
+/skills-installer --install react-19-expert@1.2.0
+```
+```bash
+# Check skill installation
+/skills-installer --installed
+
+# Verify activation triggers
+# Edit .claude/skills/[skill]/config.json
+
+# Manually activate for testing
+"Use the React 19 expert skill for this task"
+```
+```bash
+# Some skills may conflict
+# Example: jest-expert + vitest-expert
+
+# Solution: Uninstall conflicting skill
+/skills-installer --uninstall jest-expert
+```
+```bash
+# Rollback to previous version
+/skills-installer --rollback react-19-expert
+
+# Or pin specific version
+/skills-installer --install react-19-expert@1.2.0
+```

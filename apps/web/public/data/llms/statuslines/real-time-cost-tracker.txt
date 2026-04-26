@@ -1,0 +1,782 @@
+# Real Time Cost Tracker - Statuslines
+URL: https://heyclau.de/statuslines/real-time-cost-tracker
+Category: statuslines
+Author: JSONbored
+Date added: 2025-10-16
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/real-time-cost-tracker.mdx
+## Summary
+Real-time AI cost tracking statusline with per-session spend analytics, model pricing, and budget alerts
+## Tags
+- cost
+- pricing
+- budget
+- analytics
+- monitoring
+## Content
+## Features
+- Real-time cost calculation
+- 2025 model pricing (Claude, GPT-4, Gemini)
+- Budget threshold alerts
+- Color-coded spend warnings
+- Session cost tracking
+- Daily and weekly cost aggregation
+- Cost per token breakdown by model
+- Historical cost trend visualization
+
+## Use Cases
+- Budget-conscious developers tracking API spending
+- Team leads monitoring aggregate Claude Code usage costs
+- Client billing for AI-assisted development work
+- Cost optimization by comparing model pricing efficiency
+- Real-time budget alerts to prevent unexpected charges
+- Financial planning for long-term AI development projects
+
+## Requirements
+- Claude Code CLI installed and configured
+- Bash shell available (bash 4.0+ recommended for pattern matching, arithmetic operations, and string manipulation)
+- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)
+- awk command (for floating point cost calculation with printf - preferred method)
+- bc calculator (required for floating point comparison and as fallback for cost calculation)
+- Terminal with ANSI color code support (256-color mode recommended for color-coded budget alerts)
+
+## Configuration
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh",
+    "refreshInterval": 1000
+  }
+}
+```
+
+## Examples
+### Enhanced Real-Time Cost Tracker with Daily Budget
+Extended version tracking daily spending and budget limits
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Real-Time Cost Tracker with Daily Budget
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# Daily budget (configurable via environment variable)
+DAILY_BUDGET=${COST_TRACKER_DAILY_BUDGET:-10.00}
+
+# Session cost file
+COST_FILE="${HOME}/.claude-code-daily-cost"
+TODAY=$(date +%Y-%m-%d)
+
+# Read today's total cost
+if [ -f "$COST_FILE" ]; then
+  today_total=$(grep "^${TODAY}" "$COST_FILE" | cut -d'|' -f2 2>/dev/null || echo "0.0000")
+else
+  today_total="0.0000"
+fi
+
+# 2025 Pricing
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]]; then
+  price_per_m=3.00
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]]; then
+  price_per_m=15.00
+elif [[ "$model" == *"gpt-4.1"* ]]; then
+  price_per_m=5.00
+elif [[ "$model" == *"gemini-2"* ]]; then
+  price_per_m=3.50
+else
+  price_per_m=1.00
+fi
+
+# Calculate session cost
+if command -v awk > /dev/null 2>&1; then
+  session_cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  session_cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+fi
+
+# Update daily total
+if command -v bc > /dev/null 2>&1; then
+  new_total=$(echo "$today_total + $session_cost" | bc -l 2>/dev/null || echo "$today_total")
+else
+  new_total="$today_total"
+fi
+
+# Write updated total
+if [ -f "$COST_FILE" ]; then
+  sed -i.bak "/^${TODAY}/d" "$COST_FILE" 2>/dev/null || true
+fi
+echo "${TODAY}|${new_total}" >> "$COST_FILE"
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  budget_percentage=$(awk "BEGIN {printf \"%.1f\", ($new_total / $DAILY_BUDGET) * 100}" 2>/dev/null || echo "0.0")
+  
+  if (( $(echo "$new_total >= $DAILY_BUDGET" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="🚨"
+    budget_status="BUDGET EXCEEDED"
+  elif (( $(echo "$new_total > ($DAILY_BUDGET * 0.8)" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="⚠️"
+    budget_status="${budget_percentage}%"
+  else
+    color="\033[32m"
+    icon="💵"
+    budget_status="${budget_percentage}%"
+  fi
+else
+  color="\033[32m"
+  icon="💵"
+  budget_status=""
+fi
+
+# Format costs
+if command -v printf > /dev/null 2>&1; then
+  session_formatted=$(printf "$%.4f" $session_cost 2>/dev/null || echo "$${session_cost}")
+  total_formatted=$(printf "$%.2f" $new_total 2>/dev/null || echo "$${new_total}")
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  session_formatted="$${session_cost}"
+  total_formatted="$${new_total}"
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}${session_formatted}${RESET} │ Daily: ${total_formatted} (${budget_status}) │ ${tokens_formatted} tokens"
+```
+### Real-Time Cost Tracker with Custom Pricing
+Version with configurable pricing via environment variables
+```bash
+#!/usr/bin/env bash
+
+# Real-Time Cost Tracker with Custom Pricing
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# Custom pricing via environment variables (defaults to 2025 pricing)
+CLAUDE_SONNET_PRICE=${CLAUDE_SONNET_PRICE:-3.00}
+CLAUDE_OPUS_PRICE=${CLAUDE_OPUS_PRICE:-15.00}
+CLAUDE_HAIKU_PRICE=${CLAUDE_HAIKU_PRICE:-0.25}
+GPT4_PRICE=${GPT4_PRICE:-5.00}
+GEMINI_PRICE=${GEMINI_PRICE:-3.50}
+DEFAULT_PRICE=${DEFAULT_PRICE:-1.00}
+
+# Determine pricing based on model
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]]; then
+  price_per_m=$CLAUDE_SONNET_PRICE
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]]; then
+  price_per_m=$CLAUDE_OPUS_PRICE
+elif [[ "$model" == *"claude-haiku"* ]] || [[ "$model" == *"haiku"* ]]; then
+  price_per_m=$CLAUDE_HAIKU_PRICE
+elif [[ "$model" == *"gpt-4"* ]]; then
+  price_per_m=$GPT4_PRICE
+elif [[ "$model" == *"gemini"* ]]; then
+  price_per_m=$GEMINI_PRICE
+else
+  price_per_m=$DEFAULT_PRICE
+fi
+
+# Calculate cost
+if command -v awk > /dev/null 2>&1; then
+  cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+fi
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$cost > 0.50" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="⚠️"
+  elif (( $(echo "$cost > 0.10" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+else
+  cost_int=${cost%.*}
+  if [ $cost_int -gt 0 ] || [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 50 ]; then
+    color="\033[31m"
+    icon="⚠️"
+  elif [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 10 ]; then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+fi
+
+# Format output
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}$${cost}${RESET} │ ${tokens_formatted} tokens"
+```
+### Real-Time Cost Tracker Installation Example
+Complete setup script with bc calculator verification and locale configuration
+```bash
+#!/bin/bash
+# Installation script for Real-Time Cost Tracker
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for bc (required for floating point comparison)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc calculator (required for cost calculations)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "Please install bc manually: https://www.gnu.org/software/bc/"
+    fi
+fi
+
+# Check for awk (usually pre-installed)
+if ! command -v awk &> /dev/null; then
+    echo "Warning: awk command not found - cost calculations may not work"
+    echo "Install awk: macOS (pre-installed), Linux (sudo apt-get install gawk or sudo yum install gawk)"
+else
+    echo "awk command available"
+fi
+
+# Test locale for decimal separator
+if [ "$(locale -k LC_NUMERIC | grep decimal_point | cut -d'=' -f2 | tr -d '"')" = "." ]; then
+    echo "Decimal separator verified: . (dot)"
+else
+    echo "Warning: Decimal separator may be comma - set LC_NUMERIC=C in script"
+    echo "Script sets export LC_NUMERIC=C automatically"
+fi
+
+# Test bc calculator
+if command -v bc &> /dev/null; then
+    if echo "scale=4; 1000000 / 1000000 * 3.00" | bc -l 2>/dev/null | grep -q "3.0000"; then
+        echo "bc calculator working: $(echo 'scale=4; 1000000 / 1000000 * 3.00' | bc -l)"
+    else
+        echo "Warning: bc calculator test failed"
+    fi
+fi
+
+# Test awk for cost calculation
+if command -v awk &> /dev/null; then
+    test_cost=$(awk "BEGIN {printf \"%.4f\", (1000000 / 1000000) * 3.00}" 2>/dev/null)
+    if [ "$test_cost" = "3.0000" ]; then
+        echo "awk cost calculation working: $test_cost"
+    else
+        echo "Warning: awk cost calculation test failed"
+    fi
+fi
+
+# Test emoji support
+if echo -e '💵 💰 ⚠️ 🚨' &> /dev/null; then
+    echo "Emoji characters supported: 💵 💰 ⚠️ 🚨"
+else
+    echo "Warning: Emoji characters may not display correctly"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/real-time-cost-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Real-Time Cost Tracker
+# Calculate session costs based on token usage
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# 2025 Pricing (per 1M tokens)
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+  price_per_m=3.00
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]] || [[ "$model" == *"Opus"* ]]; then
+  price_per_m=15.00
+elif [[ "$model" == *"claude-haiku"* ]] || [[ "$model" == *"haiku"* ]] || [[ "$model" == *"Haiku"* ]]; then
+  price_per_m=0.25
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  price_per_m=5.00
+elif [[ "$model" == *"gpt-4o"* ]] || [[ "$model" == *"GPT-4o"* ]]; then
+  price_per_m=2.50
+elif [[ "$model" == *"gemini-2"* ]] || [[ "$model" == *"Gemini 2"* ]]; then
+  price_per_m=3.50
+elif [[ "$model" == *"gemini-1.5-pro"* ]] || [[ "$model" == *"Gemini 1.5 Pro"* ]]; then
+  price_per_m=3.50
+else
+  price_per_m=1.00
+fi
+
+# Calculate cost
+if command -v awk > /dev/null 2>&1; then
+  cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  if command -v bc > /dev/null 2>&1; then
+    cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+  else
+    cost="0.0000"
+  fi
+fi
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$cost > 0.50" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="⚠️"
+  elif (( $(echo "$cost > 0.10" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+else
+  cost_int=${cost%.*}
+  if [ $cost_int -gt 0 ] || [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 50 ]; then
+    color="\033[31m"
+    icon="⚠️"
+  elif [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 10 ]; then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+fi
+
+# Format token count
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}$${cost}${RESET} │ ${tokens_formatted} tokens"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/real-time-cost-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Real-Time Cost Tracker installed successfully!"
+echo "Note: Ensure LC_NUMERIC=C is set for correct decimal formatting"
+echo "Test cost calculation: echo 'scale=4; 1000000 / 1000000 * 3.00' | bc -l"
+```
+```bash
+#!/usr/bin/env bash
+
+# Enhanced Real-Time Cost Tracker with Daily Budget
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# Daily budget (configurable via environment variable)
+DAILY_BUDGET=${COST_TRACKER_DAILY_BUDGET:-10.00}
+
+# Session cost file
+COST_FILE="${HOME}/.claude-code-daily-cost"
+TODAY=$(date +%Y-%m-%d)
+
+# Read today's total cost
+if [ -f "$COST_FILE" ]; then
+  today_total=$(grep "^${TODAY}" "$COST_FILE" | cut -d'|' -f2 2>/dev/null || echo "0.0000")
+else
+  today_total="0.0000"
+fi
+
+# 2025 Pricing
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]]; then
+  price_per_m=3.00
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]]; then
+  price_per_m=15.00
+elif [[ "$model" == *"gpt-4.1"* ]]; then
+  price_per_m=5.00
+elif [[ "$model" == *"gemini-2"* ]]; then
+  price_per_m=3.50
+else
+  price_per_m=1.00
+fi
+
+# Calculate session cost
+if command -v awk > /dev/null 2>&1; then
+  session_cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  session_cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+fi
+
+# Update daily total
+if command -v bc > /dev/null 2>&1; then
+  new_total=$(echo "$today_total + $session_cost" | bc -l 2>/dev/null || echo "$today_total")
+else
+  new_total="$today_total"
+fi
+
+# Write updated total
+if [ -f "$COST_FILE" ]; then
+  sed -i.bak "/^${TODAY}/d" "$COST_FILE" 2>/dev/null || true
+fi
+echo "${TODAY}|${new_total}" >> "$COST_FILE"
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  budget_percentage=$(awk "BEGIN {printf \"%.1f\", ($new_total / $DAILY_BUDGET) * 100}" 2>/dev/null || echo "0.0")
+  
+  if (( $(echo "$new_total >= $DAILY_BUDGET" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="🚨"
+    budget_status="BUDGET EXCEEDED"
+  elif (( $(echo "$new_total > ($DAILY_BUDGET * 0.8)" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="⚠️"
+    budget_status="${budget_percentage}%"
+  else
+    color="\033[32m"
+    icon="💵"
+    budget_status="${budget_percentage}%"
+  fi
+else
+  color="\033[32m"
+  icon="💵"
+  budget_status=""
+fi
+
+# Format costs
+if command -v printf > /dev/null 2>&1; then
+  session_formatted=$(printf "$%.4f" $session_cost 2>/dev/null || echo "$${session_cost}")
+  total_formatted=$(printf "$%.2f" $new_total 2>/dev/null || echo "$${new_total}")
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  session_formatted="$${session_cost}"
+  total_formatted="$${new_total}"
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}${session_formatted}${RESET} │ Daily: ${total_formatted} (${budget_status}) │ ${tokens_formatted} tokens"
+```
+```bash
+#!/usr/bin/env bash
+
+# Real-Time Cost Tracker with Custom Pricing
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# Custom pricing via environment variables (defaults to 2025 pricing)
+CLAUDE_SONNET_PRICE=${CLAUDE_SONNET_PRICE:-3.00}
+CLAUDE_OPUS_PRICE=${CLAUDE_OPUS_PRICE:-15.00}
+CLAUDE_HAIKU_PRICE=${CLAUDE_HAIKU_PRICE:-0.25}
+GPT4_PRICE=${GPT4_PRICE:-5.00}
+GEMINI_PRICE=${GEMINI_PRICE:-3.50}
+DEFAULT_PRICE=${DEFAULT_PRICE:-1.00}
+
+# Determine pricing based on model
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]]; then
+  price_per_m=$CLAUDE_SONNET_PRICE
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]]; then
+  price_per_m=$CLAUDE_OPUS_PRICE
+elif [[ "$model" == *"claude-haiku"* ]] || [[ "$model" == *"haiku"* ]]; then
+  price_per_m=$CLAUDE_HAIKU_PRICE
+elif [[ "$model" == *"gpt-4"* ]]; then
+  price_per_m=$GPT4_PRICE
+elif [[ "$model" == *"gemini"* ]]; then
+  price_per_m=$GEMINI_PRICE
+else
+  price_per_m=$DEFAULT_PRICE
+fi
+
+# Calculate cost
+if command -v awk > /dev/null 2>&1; then
+  cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+fi
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$cost > 0.50" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="⚠️"
+  elif (( $(echo "$cost > 0.10" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+else
+  cost_int=${cost%.*}
+  if [ $cost_int -gt 0 ] || [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 50 ]; then
+    color="\033[31m"
+    icon="⚠️"
+  elif [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 10 ]; then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+fi
+
+# Format output
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}$${cost}${RESET} │ ${tokens_formatted} tokens"
+```
+```bash
+#!/bin/bash
+# Installation script for Real-Time Cost Tracker
+
+# Check for jq (required for JSON parsing)
+if ! command -v jq &> /dev/null; then
+    echo "Installing jq for JSON parsing..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install jq
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y jq || sudo yum install -y jq
+    else
+        echo "Please install jq manually: https://stedolan.github.io/jq/"
+    fi
+fi
+
+# Check for bc (required for floating point comparison)
+if ! command -v bc &> /dev/null; then
+    echo "Installing bc calculator (required for cost calculations)..."
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        brew install bc
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        sudo apt-get install -y bc || sudo yum install -y bc
+    else
+        echo "Please install bc manually: https://www.gnu.org/software/bc/"
+    fi
+fi
+
+# Check for awk (usually pre-installed)
+if ! command -v awk &> /dev/null; then
+    echo "Warning: awk command not found - cost calculations may not work"
+    echo "Install awk: macOS (pre-installed), Linux (sudo apt-get install gawk or sudo yum install gawk)"
+else
+    echo "awk command available"
+fi
+
+# Test locale for decimal separator
+if [ "$(locale -k LC_NUMERIC | grep decimal_point | cut -d'=' -f2 | tr -d '"')" = "." ]; then
+    echo "Decimal separator verified: . (dot)"
+else
+    echo "Warning: Decimal separator may be comma - set LC_NUMERIC=C in script"
+    echo "Script sets export LC_NUMERIC=C automatically"
+fi
+
+# Test bc calculator
+if command -v bc &> /dev/null; then
+    if echo "scale=4; 1000000 / 1000000 * 3.00" | bc -l 2>/dev/null | grep -q "3.0000"; then
+        echo "bc calculator working: $(echo 'scale=4; 1000000 / 1000000 * 3.00' | bc -l)"
+    else
+        echo "Warning: bc calculator test failed"
+    fi
+fi
+
+# Test awk for cost calculation
+if command -v awk &> /dev/null; then
+    test_cost=$(awk "BEGIN {printf \"%.4f\", (1000000 / 1000000) * 3.00}" 2>/dev/null)
+    if [ "$test_cost" = "3.0000" ]; then
+        echo "awk cost calculation working: $test_cost"
+    else
+        echo "Warning: awk cost calculation test failed"
+    fi
+fi
+
+# Test emoji support
+if echo -e '💵 💰 ⚠️ 🚨' &> /dev/null; then
+    echo "Emoji characters supported: 💵 💰 ⚠️ 🚨"
+else
+    echo "Warning: Emoji characters may not display correctly"
+fi
+
+# Create statuslines directory
+mkdir -p .claude/statuslines
+
+cat > .claude/statuslines/real-time-cost-tracker.sh << 'SCRIPT_EOF'
+#!/usr/bin/env bash
+
+# Real-Time Cost Tracker
+# Calculate session costs based on token usage
+
+export LC_NUMERIC=C
+
+read -r input
+
+model=$(echo "$input" | jq -r '.model.id // .model.display_name // "unknown"')
+tokens=$(echo "$input" | jq -r '.cost.total_lines_added // .session.totalTokens // 0')
+
+# 2025 Pricing (per 1M tokens)
+if [[ "$model" == *"claude-sonnet-4"* ]] || [[ "$model" == *"sonnet-4"* ]] || [[ "$model" == *"Sonnet 4"* ]]; then
+  price_per_m=3.00
+elif [[ "$model" == *"claude-opus"* ]] || [[ "$model" == *"opus"* ]] || [[ "$model" == *"Opus"* ]]; then
+  price_per_m=15.00
+elif [[ "$model" == *"claude-haiku"* ]] || [[ "$model" == *"haiku"* ]] || [[ "$model" == *"Haiku"* ]]; then
+  price_per_m=0.25
+elif [[ "$model" == *"gpt-4.1"* ]] || [[ "$model" == *"GPT-4.1"* ]]; then
+  price_per_m=5.00
+elif [[ "$model" == *"gpt-4o"* ]] || [[ "$model" == *"GPT-4o"* ]]; then
+  price_per_m=2.50
+elif [[ "$model" == *"gemini-2"* ]] || [[ "$model" == *"Gemini 2"* ]]; then
+  price_per_m=3.50
+elif [[ "$model" == *"gemini-1.5-pro"* ]] || [[ "$model" == *"Gemini 1.5 Pro"* ]]; then
+  price_per_m=3.50
+else
+  price_per_m=1.00
+fi
+
+# Calculate cost
+if command -v awk > /dev/null 2>&1; then
+  cost=$(awk "BEGIN {printf \"%.4f\", ($tokens / 1000000) * $price_per_m}" 2>/dev/null || echo "0.0000")
+else
+  if command -v bc > /dev/null 2>&1; then
+    cost=$(echo "scale=4; ($tokens / 1000000) * $price_per_m" | bc -l 2>/dev/null || echo "0.0000")
+  else
+    cost="0.0000"
+  fi
+fi
+
+# Budget alert
+if command -v bc > /dev/null 2>&1; then
+  if (( $(echo "$cost > 0.50" | bc -l 2>/dev/null) )); then
+    color="\033[31m"
+    icon="⚠️"
+  elif (( $(echo "$cost > 0.10" | bc -l 2>/dev/null) )); then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+else
+  cost_int=${cost%.*}
+  if [ $cost_int -gt 0 ] || [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 50 ]; then
+    color="\033[31m"
+    icon="⚠️"
+  elif [ "$(echo "$cost" | cut -d'.' -f2 | cut -c1-2)" -gt 10 ]; then
+    color="\033[33m"
+    icon="💰"
+  else
+    color="\033[32m"
+    icon="💵"
+  fi
+fi
+
+# Format token count
+if command -v printf > /dev/null 2>&1; then
+  tokens_formatted=$(printf "%'d" $tokens 2>/dev/null || echo "$tokens")
+else
+  tokens_formatted="$tokens"
+fi
+
+RESET="\033[0m"
+
+echo -e "${icon} ${color}$${cost}${RESET} │ ${tokens_formatted} tokens"
+SCRIPT_EOF
+
+chmod +x .claude/statuslines/real-time-cost-tracker.sh
+
+# Add to settings.json
+if [ ! -f .claude/settings.json ]; then
+    echo '{"statusLine":{"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh","refreshInterval":1000}}' > .claude/settings.json
+else
+    jq '.statusLine = {"type":"command","command":"$CLAUDE_PROJECT_DIR/.claude/statuslines/real-time-cost-tracker.sh","refreshInterval":1000}' .claude/settings.json > .claude/settings.json.tmp
+    mv .claude/settings.json.tmp .claude/settings.json
+fi
+
+echo "Real-Time Cost Tracker installed successfully!"
+echo "Note: Ensure LC_NUMERIC=C is set for correct decimal formatting"
+echo "Test cost calculation: echo 'scale=4; 1000000 / 1000000 * 3.00' | bc -l"
+```
+
+## Troubleshooting
+### Cost calculation shows wrong decimal format with comma separator
+
+Set LC_NUMERIC=C at script start to enforce dot decimal separator. Some locales default to comma, breaking bc. Add: export LC_NUMERIC=C before math operations. Verify locale: locale -k LC_NUMERIC | grep decimal_point (should be '.'). Test: echo 'scale=4; 3.00' | bc -l (should return 3.0000, not 3,0000). Check script: Ensure export LC_NUMERIC=C is at the top of the script.
+### Pricing appears outdated or incorrect for current AI models
+
+Update price_per_m values. Claude Sonnet 4 is $3/M (2025), Claude Opus is $15/M, Claude Haiku is $0.25/M, GPT-4.1 is $5/M, GPT-4o is $2.50/M, Gemini 2.0 is $3.50/M. Verify at provider docs before updating script. Check model detection: echo '$input' | jq .model.id (should match pattern in script). Update pricing: Modify price_per_m values in script for each model pattern. Test: Calculate manually: (tokens / 1000000) * price_per_m.
+### bc: command not found when running cost calculations
+
+Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return path). Test bc: echo 'scale=4; 3.00' | bc -l (should return 3.0000). Script has awk fallback: If bc unavailable, script uses awk for cost calculation. Verify awk: command -v awk (should return path). Check both: Script tries awk first, then bc as fallback.
+### Cost displays as $0.0000 despite high token usage
+
+Check printf precision: use %.4f for micro-dollars. Verify tokens populated: echo '$input' | jq '.cost.total_lines_added' (should return number). If zero, test JSON parsing: echo '$input' | jq '.session.totalTokens'. Check field names: Script checks cost.total_lines_added and session.totalTokens. Verify calculation: echo 'scale=4; (1000000 / 1000000) * 3.00' | bc -l (should return 3.0000). Check model detection: If model not recognized, default price is 1.00 - verify model name matches patterns.
+### Budget alert colors not changing or always showing same color
+
+Verify bc comparison works: echo '0.60 > 0.50' | bc -l (should return 1 for true). Check cost value: echo $cost (should be decimal like 0.1234). Verify thresholds: Script uses > 0.50 (red), > 0.10 (yellow), else (green). Test comparison: echo 'scale=4; 0.60 > 0.50' | bc -l (should return 1). Check if bc unavailable: Script uses integer fallback if bc not found - may not work correctly for decimal comparisons.
+### Token count not displaying with thousands separator
+
+Verify printf supports thousands separator: printf "%'d" 12345 (should return 12,345). Check locale settings: locale (should include thousands separator). Set locale if needed: export LC_NUMERIC=en_US.UTF-8 (but keep LC_NUMERIC=C for calculations). Test formatting: printf "%'d" 1234567 (should return 1,234,567). If not supported, script falls back to plain numbers. Alternative: Use awk for formatting: awk '{printf "%'"'"'d", $1}' <<< 12345.
+### Model pricing not detected correctly for new model variants
+
+Add patterns to model detection logic. Common patterns: claude-sonnet-4, claude-opus, claude-haiku, gpt-4.1, gpt-4o, gemini-2, gemini-1.5-pro. Update with: [[ "$model" == *"pattern"* ]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [[ "test-claude-sonnet-4" == *"claude-sonnet-4"* ]] && echo "Matched". Add new model variants to appropriate pricing block. Verify pricing: Check provider documentation for current pricing.
+### Cost calculation precision too low or rounded incorrectly
+
+Increase precision in awk: awk 'BEGIN {printf "%.4f", ...}' (4 decimals). For bc: echo 'scale=4; ...' (4 decimal places). Verify calculation: echo 'scale=4; (1000000 / 1000000) * 3.00' | bc -l (should return 3.0000). Check printf format: printf "$%.4f" 0.1234 (should return $0.1234). Higher precision: Use %.6f for 6 decimals (micro-dollars). Note: Higher precision may slow execution slightly.

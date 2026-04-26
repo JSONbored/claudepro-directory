@@ -40,27 +40,31 @@ const utilityFilterOptions = [
 ] as const;
 const sortModeOptions = ["popular", "newest", "title"] as const;
 
-type DirectoryEntriesPayload =
-  | DirectoryEntry[]
-  | {
-      entries?: DirectoryEntry[];
-    };
+type DirectoryEntriesPayload = {
+  entries?: DirectoryEntry[];
+};
 
 function normalizeCategory(value?: string) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   if (normalized === "all") return "all";
   return siteConfig.categoryOrder.includes(normalized) ? normalized : "all";
 }
 
 function normalizeUtilityFilter(value?: string) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   return utilityFilterOptions.some((option) => option.value === normalized)
     ? normalized
     : "all";
 }
 
 function normalizeSortMode(value?: string) {
-  const normalized = String(value || "").trim().toLowerCase();
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
   return sortModeOptions.includes(
     normalized as (typeof sortModeOptions)[number],
   )
@@ -109,9 +113,7 @@ export function BrowseDirectory({
   const isDefaultQuery = initialQuery.trim().length === 0;
   const initialSortMode = normalizeSortMode(initialSortModeProp);
   const initialCategory = normalizeCategory(initialCategoryProp);
-  const initialUtilityFilter = normalizeUtilityFilter(
-    initialUtilityFilterProp,
-  );
+  const initialUtilityFilter = normalizeUtilityFilter(initialUtilityFilterProp);
   const [allEntries, setAllEntries] = useState(entries);
   const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
   const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
@@ -152,7 +154,7 @@ export function BrowseDirectory({
       if (!response.ok) return;
 
       const payload = (await response.json()) as DirectoryEntriesPayload;
-      const nextEntries = Array.isArray(payload) ? payload : payload.entries;
+      const nextEntries = payload.entries;
       if (!Array.isArray(nextEntries) || nextEntries.length === 0) return;
 
       setAllEntries(nextEntries);

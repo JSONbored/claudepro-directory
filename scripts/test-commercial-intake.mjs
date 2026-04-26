@@ -4,6 +4,9 @@ import {
   normalizeCommercialTier,
   normalizeDisclosure,
   normalizeLeadKind,
+  isPlacementActive,
+  linkRelForDisclosure,
+  nextLeadStatus,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
 
@@ -13,6 +16,35 @@ assert.equal(normalizeCommercialTier("sponsored"), "sponsored");
 assert.equal(normalizeCommercialTier("unknown"), "free");
 assert.equal(normalizeDisclosure("affiliate"), "affiliate");
 assert.equal(normalizeDisclosure(""), "editorial");
+assert.equal(
+  linkRelForDisclosure("sponsored"),
+  "sponsored nofollow noreferrer",
+);
+assert.equal(linkRelForDisclosure("editorial"), "noreferrer");
+assert.equal(nextLeadStatus("new", "review"), "pending_review");
+assert.equal(nextLeadStatus("pending_review", "approve"), "approved");
+assert.equal(nextLeadStatus("active", "expire"), "expired");
+assert.equal(
+  isPlacementActive(
+    {
+      status: "active",
+      startsAt: "2026-01-01T00:00:00Z",
+      expiresAt: "2026-12-31T23:59:59Z",
+    },
+    new Date("2026-04-26T00:00:00Z"),
+  ),
+  true,
+);
+assert.equal(
+  isPlacementActive(
+    {
+      status: "active",
+      expiresAt: "2026-01-01T00:00:00Z",
+    },
+    new Date("2026-04-26T00:00:00Z"),
+  ),
+  false,
+);
 
 {
   const report = validateListingLeadPayload({

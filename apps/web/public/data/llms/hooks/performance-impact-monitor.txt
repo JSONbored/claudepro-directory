@@ -1,0 +1,949 @@
+# Performance Impact Monitor - Hooks
+URL: https://heyclau.de/hooks/performance-impact-monitor
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-impact-monitor.mdx
+## Summary
+Monitors and alerts on performance-impacting changes in real-time.
+## Tags
+- performance
+- monitoring
+- notification
+- profiling
+- alerts
+## Content
+## Features
+- Real-time performance anti-pattern detection and alerting including performance anti-pattern detection (nested loops with O(n²) and O(n³) complexity detection, memory leak patterns with event listener and closure leak detection, inefficient algorithms with algorithmic complexity analysis, global variable pollution detection), real-time alerting (immediate notifications on performance issues with ERROR/WARNING/INFO severity levels, actionable suggestions for performance improvements, context-aware recommendations), language-specific anti-patterns (JavaScript/TypeScript anti-patterns: jQuery usage, long timers, nested loops, memory leaks, Python anti-patterns: list comprehensions vs loops, imports inside functions, string concatenation, SQL anti-patterns: missing indexes, SELECT *, cartesian products, CSS anti-patterns: complex selectors, expensive properties, multiple @imports, HTML anti-patterns: inline styles, images without dimensions), and framework-specific analysis (React performance patterns: component re-render detection, inline object/function creation in props, memoization recommendations, Vue/Angular performance patterns)
+- Bundle size impact analysis with threshold monitoring including bundle size calculation (file size analysis with KB/MB reporting, dependency impact assessment with import analysis, import size tracking with large library detection), threshold-based monitoring (configurable file size thresholds: LARGE_FILE_THRESHOLD 100KB, MASSIVE_FILE_THRESHOLD 500KB, bundle size regression detection with historical comparison, size impact scoring with severity classification), bundle optimization recommendations (code splitting suggestions for reducing bundle size, tree shaking recommendations for unused code removal, lazy loading suggestions for on-demand loading, dynamic import recommendations), and bundle size tracking (historical bundle size comparison across sessions, size trend analysis with regression detection, bundle size reporting with detailed breakdown)
+- Complex algorithm and nested loop detection including nested loop detection (double nested loops O(n²) complexity detection with pattern matching, triple nested loops O(n³) complexity detection with critical alerts, nested loop counting and reporting with location identification), algorithmic complexity analysis (time complexity estimation with Big O notation, space complexity assessment with memory usage analysis, complexity warnings with severity classification), algorithm optimization suggestions (data structure recommendations for better performance, algorithm alternatives with efficiency improvements, optimization strategies with code examples), and performance-critical code identification (hot path detection with performance profiling, bottleneck identification with impact scoring, optimization priority scoring with actionable recommendations)
+- Memory leak pattern identification and warnings including memory leak detection (event listener leaks with addEventListener/removeEventListener detection, closure leaks with scope analysis, global variable leaks with pollution detection, circular reference detection), memory leak pattern identification (addEventListener without removeEventListener pattern matching, unclosed resources with resource tracking, memory accumulation patterns with growth detection), memory leak warnings (severity-based warnings with ERROR/WARNING levels, memory leak location identification with line numbers, cleanup suggestions with code examples), and memory management recommendations (proper cleanup patterns with best practices, resource management with lifecycle hooks, memory optimization strategies with performance tips)
+- Database query performance impact assessment including query performance analysis (N+1 query detection with loop and query pattern matching, missing index detection with WHERE clause analysis, SELECT * usage detection with column specification recommendations), query optimization suggestions (index recommendations for WHERE clauses, query rewriting suggestions for better performance, batch query recommendations for N+1 prevention), database performance warnings (slow query patterns with complexity detection, inefficient joins with cartesian product detection, query performance impact scoring), and query performance scoring (query complexity assessment with execution time estimation, performance impact scoring with severity classification, optimization priority with actionable recommendations)
+- Asset optimization recommendations and size tracking including asset size analysis (image size analysis with KB/MB reporting, base64 data detection with encoding size calculation, asset reference counting with import analysis), asset optimization recommendations (image optimization suggestions with format recommendations, lazy loading recommendations for on-demand loading, asset bundling suggestions for HTTP request reduction), asset size tracking (historical asset size comparison across sessions, asset size regression detection with threshold-based alerts, asset performance scoring), and asset performance scoring (asset impact assessment with bundle size impact, optimization priority with severity classification, performance recommendations with actionable suggestions)
+- Render blocking resource detection for web applications including render blocking detection (CSS blocking resources with @import and <link> detection, JavaScript blocking resources with <script> tag analysis, font loading blocking with @font-face detection), render blocking analysis (critical path identification with render blocking chain analysis, blocking resource identification with impact assessment, render blocking impact assessment with performance scoring), render blocking recommendations (async/defer script loading suggestions, critical CSS extraction recommendations, font loading optimization with font-display strategies), and render blocking scoring (blocking resource severity with impact classification, optimization priority with actionable recommendations, performance impact with Core Web Vitals correlation)
+- Performance regression risk scoring and prioritization including risk scoring (performance impact scoring with severity classification: ERROR/WARNING/INFO, regression risk assessment with historical comparison, severity classification with critical/high/medium/low levels), risk prioritization (critical issues first with immediate action required, high-impact optimizations with significant performance gains, low-priority suggestions with minor improvements), regression prevention (threshold-based blocking with configurable thresholds, performance gates with CI/CD integration, automated alerts with notification systems), and performance metrics tracking (historical performance tracking with session-based storage, trend analysis with percentage change calculation, regression detection with statistical significance)
+
+## Use Cases
+- Real-time development feedback with performance impact awareness automatically providing immediate performance feedback during code editing, alerting developers to performance issues as they code, and enabling performance-aware development practices
+- Code review automation with performance-focused analysis automatically analyzing code changes for performance impacts, providing performance-focused code review comments, and enabling automated performance checks in pull requests
+- Continuous performance monitoring during active development automatically monitoring performance impacts throughout development sessions, tracking performance regressions in real-time, and maintaining performance awareness during active coding
+- Team education and awareness about performance best practices automatically educating team members about performance anti-patterns, providing actionable performance optimization suggestions, and building performance awareness across the team
+- Performance regression prevention with immediate alerts automatically detecting performance regressions before they reach production, providing immediate alerts for critical performance issues, and preventing performance degradation through early detection
+- Development workflow integration seamlessly integrating performance monitoring into development workflows without manual performance audits or separate performance testing tools
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/performance-impact-monitor.sh
+3. Make executable: chmod +x .claude/hooks/performance-impact-monitor.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- jq (optional, for JSON parsing)
+- stat command (for file size)
+- grep command (for pattern matching)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/performance-impact-monitor.sh"
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "notification": {
+      "script": "./.claude/hooks/performance-impact-monitor.sh"
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/usr/bin/env bash
+
+# Performance Impact Monitor Hook
+# Monitors for performance-impacting changes in real-time
+
+echo "⚡ Performance Impact Monitor" >&2
+
+# Initialize performance monitoring
+PERF_WARNINGS=0
+PERF_ERRORS=0
+PERF_INFO=0
+FILE_SIZE=0
+LINE_COUNT=0
+
+# Performance thresholds (configurable)
+LARGE_FILE_THRESHOLD=100000    # 100KB
+MASSIVE_FILE_THRESHOLD=500000  # 500KB
+LARGE_FUNCTION_LINES=50
+COMPLEX_CYCLOMATIC=10
+LONG_TIMER_MS=5000
+
+# Function to report performance impacts
+report_performance() {
+  local level="$1"
+  local message="$2"
+  local suggestion="$3"
+  
+  case "$level" in
+    "ERROR")
+      echo "🚨 CRITICAL PERFORMANCE IMPACT: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Suggestion: $suggestion" >&2
+      PERF_ERRORS=$((PERF_ERRORS + 1))
+      ;;
+    "WARNING")
+      echo "⚠️ PERFORMANCE WARNING: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Suggestion: $suggestion" >&2
+      PERF_WARNINGS=$((PERF_WARNINGS + 1))
+      ;;
+    "INFO")
+      echo "ℹ️ PERFORMANCE INFO: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Tip: $suggestion" >&2
+      PERF_INFO=$((PERF_INFO + 1))
+      ;;
+  esac
+}
+
+# Get environment variables (simulated Claude tool context)
+TOOL_NAME="${CLAUDE_TOOL_NAME:-unknown}"
+FILE_PATH="${CLAUDE_TOOL_FILE_PATH:-}"
+
+# If no file path provided, try to get from stdin input
+if [ -z "$FILE_PATH" ]; then
+  # Try to read tool input from stdin (for newer hook format)
+  INPUT=$(cat)
+  TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null || echo "unknown")
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""' 2>/dev/null || echo "")
+fi
+
+# Skip if no file path available
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Skip if file doesn't exist or is not readable
+if [ ! -f "$FILE_PATH" ] || [ ! -r "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Only monitor for Edit/Write operations
+if [[ "$TOOL_NAME" != "Edit" ]] && [[ "$TOOL_NAME" != "Write" ]] && [[ "$TOOL_NAME" != "MultiEdit" ]]; then
+  exit 0
+fi
+
+FILE_NAME=$(basename "$FILE_PATH")
+FILE_EXT="${FILE_NAME##*.}"
+
+echo "   📊 Analyzing performance impact of: $FILE_NAME" >&2
+
+# 1. File Size Impact Analysis
+FILE_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || echo "0")
+LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
+
+echo "   📏 File size: $(( FILE_SIZE / 1024 ))KB, Lines: $LINE_COUNT" >&2
+
+# File size warnings
+if [ "$FILE_SIZE" -gt "$MASSIVE_FILE_THRESHOLD" ]; then
+  report_performance "ERROR" "Massive file detected ($(( FILE_SIZE / 1024 ))KB)" "Consider code splitting or modularization"
+elif [ "$FILE_SIZE" -gt "$LARGE_FILE_THRESHOLD" ]; then
+  report_performance "WARNING" "Large file detected ($(( FILE_SIZE / 1024 ))KB)" "Monitor bundle size impact and consider optimization"
+fi
+
+# 2. Language-Specific Performance Analysis
+case "$FILE_EXT" in
+  "js"|"jsx"|"ts"|"tsx")
+    echo "   📦 JavaScript/TypeScript performance analysis..." >&2
+    
+    # Large function detection
+    LARGE_FUNCTIONS=$(grep -n 'function\\|=>' "$FILE_PATH" | while read line; do
+      line_num=$(echo "$line" | cut -d: -f1)
+      # Simple heuristic: look for next function or end of file
+      next_func=$(tail -n +$((line_num + 1)) "$FILE_PATH" | grep -n 'function\\|=>' | head -1 | cut -d: -f1)
+      if [ -n "$next_func" ]; then
+        func_lines=$((next_func - 1))
+      else
+        func_lines=$(tail -n +$line_num "$FILE_PATH" | wc -l)
+      fi
+      
+      if [ "$func_lines" -gt "$LARGE_FUNCTION_LINES" ]; then
+        echo "$line_num:$func_lines"
+      fi
+    done)
+    
+    if [ -n "$LARGE_FUNCTIONS" ]; then
+      func_count=$(echo "$LARGE_FUNCTIONS" | wc -l)
+      report_performance "WARNING" "$func_count large function(s) detected (>$LARGE_FUNCTION_LINES lines)" "Consider breaking down into smaller functions"
+    fi
+    
+    # Performance anti-patterns
+    if grep -q '\\$(' "$FILE_PATH" 2>/dev/null; then
+      jquery_count=$(grep -c '\\$(' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$jquery_count" -gt 5 ]; then
+        report_performance "INFO" "Heavy jQuery usage detected ($jquery_count instances)" "Consider modern alternatives like vanilla JS or React"
+      fi
+    fi
+    
+    # Long timers
+    if grep -E '(setTimeout|setInterval).*[0-9]{4,}' "$FILE_PATH" 2>/dev/null; then
+      report_performance "WARNING" "Long timer intervals detected (>=${LONG_TIMER_MS}ms)" "Verify if long delays are intentional"
+    fi
+    
+    # Nested loops
+    NESTED_LOOPS=$(grep -E 'for.*{[^}]*for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "")
+    if [ -n "$NESTED_LOOPS" ]; then
+      report_performance "ERROR" "Triple nested loops detected - O(n³) complexity" "Consider algorithm optimization or data structure changes"
+    elif grep -E 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+      nested_count=$(grep -c 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$nested_count" -gt 3 ]; then
+        report_performance "WARNING" "Multiple nested loops detected" "Review algorithmic complexity"
+      fi
+    fi
+    
+    # Memory leak patterns
+    if grep -q 'addEventListener.*function' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -q 'removeEventListener' "$FILE_PATH" 2>/dev/null; then
+        report_performance "WARNING" "Event listeners without cleanup detected" "Add removeEventListener calls to prevent memory leaks"
+      fi
+    fi
+    
+    # Global variable pollution
+    GLOBAL_VARS=$(grep -c '^var\\|^let\\|^const' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$GLOBAL_VARS" -gt 20 ]; then
+      report_performance "INFO" "Many global variables detected ($GLOBAL_VARS)" "Consider using modules or namespacing"
+    fi
+    
+    # Bundle size impact for dependencies
+    if grep -q 'import.*from' "$FILE_PATH" 2>/dev/null; then
+      LARGE_IMPORTS=$(grep -E 'import.*(lodash|moment|rxjs)' "$FILE_PATH" 2>/dev/null || echo "")
+      if [ -n "$LARGE_IMPORTS" ]; then
+        report_performance "INFO" "Large library imports detected" "Consider tree shaking or lighter alternatives"
+      fi
+    fi
+    ;;
+    
+  "py")
+    echo "   🐍 Python performance analysis..." >&2
+    
+    # List comprehensions vs loops
+    if grep -q 'for.*in.*:' "$FILE_PATH" 2>/dev/null; then
+      list_comp_count=$(grep -c '\\[.*for.*in.*\\]' "$FILE_PATH" 2>/dev/null || echo "0")
+      loop_count=$(grep -c 'for.*in.*:' "$FILE_PATH" 2>/dev/null || echo "0")
+      
+      if [ "$loop_count" -gt 0 ] && [ "$list_comp_count" -eq 0 ]; then
+        report_performance "INFO" "Consider using list comprehensions for better performance" "List comprehensions are often faster than explicit loops"
+      fi
+    fi
+    
+    # Global imports inside functions
+    if grep -A 5 'def ' "$FILE_PATH" | grep -q 'import' 2>/dev/null; then
+      report_performance "WARNING" "Imports inside functions detected" "Move imports to module level for better performance"
+    fi
+    
+    # String concatenation
+    if grep -q '+.*+.*+' "$FILE_PATH" 2>/dev/null; then
+      report_performance "INFO" "String concatenation chains detected" "Consider using f-strings or join() for better performance"
+    fi
+    ;;
+    
+  "sql")
+    echo "   🗄️ SQL performance analysis..." >&2
+    
+    # Missing indexes (basic heuristics)
+    if grep -qi 'where.*=' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -qi 'index' "$FILE_PATH" 2>/dev/null; then
+        report_performance "WARNING" "WHERE clauses without visible indexes" "Ensure proper indexing for query performance"
+      fi
+    fi
+    
+    # SELECT * usage
+    if grep -qi 'select \\*' "$FILE_PATH" 2>/dev/null; then
+      select_star_count=$(grep -ci 'select \\*' "$FILE_PATH" 2>/dev/null || echo "0")
+      report_performance "WARNING" "SELECT * queries detected ($select_star_count)" "Specify only needed columns for better performance"
+    fi
+    
+    # Cartesian products
+    if grep -qi 'from.*,.*where' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -qi 'join' "$FILE_PATH" 2>/dev/null; then
+        report_performance "ERROR" "Potential cartesian product detected" "Use explicit JOINs instead of comma-separated tables"
+      fi
+    fi
+    ;;
+    
+  "css"|"scss"|"sass")
+    echo "   🎨 CSS performance analysis..." >&2
+    
+    # Complex selectors
+    COMPLEX_SELECTORS=$(grep -c '[[:space:]].*[[:space:]].*[[:space:]].*[[:space:]]' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$COMPLEX_SELECTORS" -gt 5 ]; then
+      report_performance "WARNING" "Complex CSS selectors detected ($COMPLEX_SELECTORS)" "Simplify selectors for better rendering performance"
+    fi
+    
+    # Expensive properties
+    if grep -q 'box-shadow.*,.*,' "$FILE_PATH" 2>/dev/null; then
+      report_performance "INFO" "Complex box-shadow detected" "Consider simpler shadow effects for better performance"
+    fi
+    
+    if grep -q '@import' "$FILE_PATH" 2>/dev/null; then
+      import_count=$(grep -c '@import' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$import_count" -gt 3 ]; then
+        report_performance "WARNING" "Multiple CSS @imports detected ($import_count)" "Consider bundling CSS files to reduce HTTP requests"
+      fi
+    fi
+    ;;
+    
+  "html")
+    echo "   🌐 HTML performance analysis..." >&2
+    
+    # Inline styles
+    INLINE_STYLES=$(grep -c 'style=' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$INLINE_STYLES" -gt 10 ]; then
+      report_performance "WARNING" "Many inline styles detected ($INLINE_STYLES)" "Move styles to CSS files for better caching"
+    fi
+    
+    # Large images without attributes
+    if grep -q '<img' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -q 'width=\\|height=' "$FILE_PATH" 2>/dev/null; then
+        img_count=$(grep -c '<img' "$FILE_PATH" 2>/dev/null || echo "0")
+        report_performance "INFO" "Images without dimensions detected ($img_count)" "Add width/height attributes to prevent layout shifts"
+      fi
+    fi
+    ;;
+esac
+
+# 3. Asset Performance Analysis
+echo "   🖼️ Asset performance analysis..." >&2
+
+# Check for asset imports/references
+if [[ "$FILE_EXT" =~ ^(js|jsx|ts|tsx|css|scss|html)$ ]]; then
+  # Image references
+  IMAGE_REFS=$(grep -oE '\\.(jpg|jpeg|png|gif|svg|webp)' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
+  if [ "$IMAGE_REFS" -gt 10 ]; then
+    report_performance "INFO" "Many image references detected ($IMAGE_REFS)" "Consider image optimization and lazy loading"
+  fi
+  
+  # Large base64 data
+  if grep -q 'data:image' "$FILE_PATH" 2>/dev/null; then
+    BASE64_COUNT=$(grep -c 'data:image' "$FILE_PATH" 2>/dev/null || echo "0")
+    report_performance "WARNING" "Base64 encoded images detected ($BASE64_COUNT)" "Consider using separate image files for better caching"
+  fi
+fi
+
+# 4. Database Query Analysis
+if grep -qi 'select\\|insert\\|update\\|delete' "$FILE_PATH" 2>/dev/null; then
+  echo "   🗄️ Database query analysis..." >&2
+  
+  # N+1 query patterns
+  if grep -q 'for.*in' "$FILE_PATH" 2>/dev/null && grep -q 'select\\|query' "$FILE_PATH" 2>/dev/null; then
+    report_performance "WARNING" "Potential N+1 query pattern detected" "Consider using joins or batch queries"
+  fi
+  
+  # Missing LIMIT clauses
+  if grep -qi 'select.*from' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -qi 'limit\\|top\\|rownum' "$FILE_PATH" 2>/dev/null; then
+      unlimited_queries=$(grep -ci 'select.*from' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$unlimited_queries" -gt 2 ]; then
+        report_performance "WARNING" "Queries without LIMIT detected ($unlimited_queries)" "Add LIMIT clauses to prevent large result sets"
+      fi
+    fi
+  fi
+fi
+
+# 5. Framework-Specific Analysis
+if [[ "$FILE_EXT" =~ ^(jsx|tsx)$ ]]; then
+  echo "   ⚛️ React performance analysis..." >&2
+  
+  # Component re-render patterns
+  if grep -q 'useState\\|useEffect' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -q 'useMemo\\|useCallback\\|React.memo' "$FILE_PATH" 2>/dev/null; then
+      hooks_count=$(grep -c 'useState\\|useEffect' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$hooks_count" -gt 5 ]; then
+        report_performance "INFO" "Many React hooks without memoization" "Consider useMemo/useCallback for expensive operations"
+      fi
+    fi
+  fi
+  
+  # Inline object/function creation in props
+  if grep -q '={{' "$FILE_PATH" 2>/dev/null; then
+    inline_objects=$(grep -c '={{' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$inline_objects" -gt 5 ]; then
+      report_performance "WARNING" "Many inline objects in JSX props ($inline_objects)" "Extract to variables to prevent unnecessary re-renders"
+    fi
+  fi
+fi
+
+# 6. Generate Performance Impact Summary
+echo "" >&2
+echo "⚡ Performance Impact Summary" >&2
+echo "============================" >&2
+echo "   📄 File: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)" >&2
+echo "   🚨 Critical Issues: $PERF_ERRORS" >&2
+echo "   ⚠️ Warnings: $PERF_WARNINGS" >&2
+echo "   ℹ️ Optimization Tips: $PERF_INFO" >&2
+
+# Performance impact assessment
+TOTAL_ISSUES=$((PERF_ERRORS + PERF_WARNINGS))
+
+if [ "$PERF_ERRORS" -gt 0 ]; then
+  echo "   🚨 Impact Level: HIGH - Critical performance issues detected" >&2
+elif [ "$PERF_WARNINGS" -gt 3 ]; then
+  echo "   ⚠️ Impact Level: MODERATE - Multiple performance concerns" >&2
+elif [ "$PERF_WARNINGS" -gt 0 ]; then
+  echo "   ⚠️ Impact Level: LOW - Minor performance considerations" >&2
+elif [ "$PERF_INFO" -gt 0 ]; then
+  echo "   ✅ Impact Level: MINIMAL - Good practices recommended" >&2
+else
+  echo "   🎉 Impact Level: OPTIMAL - No performance issues detected" >&2
+fi
+
+if [ "$TOTAL_ISSUES" -gt 0 ]; then
+  echo "" >&2
+  echo "💡 Performance Optimization Resources:" >&2
+  echo "   • Web: Core Web Vitals and Lighthouse audits" >&2
+  echo "   • JavaScript: Profiler tools and performance monitoring" >&2
+  echo "   • Database: Query optimization and indexing strategies" >&2
+  echo "   • Bundle: Code splitting and tree shaking" >&2
+fi
+
+echo "⚡ Performance impact monitoring complete" >&2
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+
+# Performance Impact Monitor Hook
+# Monitors for performance-impacting changes in real-time
+
+echo "⚡ Performance Impact Monitor" >&2
+
+# Initialize performance monitoring
+PERF_WARNINGS=0
+PERF_ERRORS=0
+PERF_INFO=0
+FILE_SIZE=0
+LINE_COUNT=0
+
+# Performance thresholds (configurable)
+LARGE_FILE_THRESHOLD=100000    # 100KB
+MASSIVE_FILE_THRESHOLD=500000  # 500KB
+LARGE_FUNCTION_LINES=50
+COMPLEX_CYCLOMATIC=10
+LONG_TIMER_MS=5000
+
+# Function to report performance impacts
+report_performance() {
+  local level="$1"
+  local message="$2"
+  local suggestion="$3"
+  
+  case "$level" in
+    "ERROR")
+      echo "🚨 CRITICAL PERFORMANCE IMPACT: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Suggestion: $suggestion" >&2
+      PERF_ERRORS=$((PERF_ERRORS + 1))
+      ;;
+    "WARNING")
+      echo "⚠️ PERFORMANCE WARNING: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Suggestion: $suggestion" >&2
+      PERF_WARNINGS=$((PERF_WARNINGS + 1))
+      ;;
+    "INFO")
+      echo "ℹ️ PERFORMANCE INFO: $message" >&2
+      [ -n "$suggestion" ] && echo "   💡 Tip: $suggestion" >&2
+      PERF_INFO=$((PERF_INFO + 1))
+      ;;
+  esac
+}
+
+# Get environment variables (simulated Claude tool context)
+TOOL_NAME="${CLAUDE_TOOL_NAME:-unknown}"
+FILE_PATH="${CLAUDE_TOOL_FILE_PATH:-}"
+
+# If no file path provided, try to get from stdin input
+if [ -z "$FILE_PATH" ]; then
+  # Try to read tool input from stdin (for newer hook format)
+  INPUT=$(cat)
+  TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // "unknown"' 2>/dev/null || echo "unknown")
+  FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""' 2>/dev/null || echo "")
+fi
+
+# Skip if no file path available
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Skip if file doesn't exist or is not readable
+if [ ! -f "$FILE_PATH" ] || [ ! -r "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Only monitor for Edit/Write operations
+if [[ "$TOOL_NAME" != "Edit" ]] && [[ "$TOOL_NAME" != "Write" ]] && [[ "$TOOL_NAME" != "MultiEdit" ]]; then
+  exit 0
+fi
+
+FILE_NAME=$(basename "$FILE_PATH")
+FILE_EXT="${FILE_NAME##*.}"
+
+echo "   📊 Analyzing performance impact of: $FILE_NAME" >&2
+
+# 1. File Size Impact Analysis
+FILE_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || echo "0")
+LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
+
+echo "   📏 File size: $(( FILE_SIZE / 1024 ))KB, Lines: $LINE_COUNT" >&2
+
+# File size warnings
+if [ "$FILE_SIZE" -gt "$MASSIVE_FILE_THRESHOLD" ]; then
+  report_performance "ERROR" "Massive file detected ($(( FILE_SIZE / 1024 ))KB)" "Consider code splitting or modularization"
+elif [ "$FILE_SIZE" -gt "$LARGE_FILE_THRESHOLD" ]; then
+  report_performance "WARNING" "Large file detected ($(( FILE_SIZE / 1024 ))KB)" "Monitor bundle size impact and consider optimization"
+fi
+
+# 2. Language-Specific Performance Analysis
+case "$FILE_EXT" in
+  "js"|"jsx"|"ts"|"tsx")
+    echo "   📦 JavaScript/TypeScript performance analysis..." >&2
+    
+    # Large function detection
+    LARGE_FUNCTIONS=$(grep -n 'function\\|=>' "$FILE_PATH" | while read line; do
+      line_num=$(echo "$line" | cut -d: -f1)
+      # Simple heuristic: look for next function or end of file
+      next_func=$(tail -n +$((line_num + 1)) "$FILE_PATH" | grep -n 'function\\|=>' | head -1 | cut -d: -f1)
+      if [ -n "$next_func" ]; then
+        func_lines=$((next_func - 1))
+      else
+        func_lines=$(tail -n +$line_num "$FILE_PATH" | wc -l)
+      fi
+      
+      if [ "$func_lines" -gt "$LARGE_FUNCTION_LINES" ]; then
+        echo "$line_num:$func_lines"
+      fi
+    done)
+    
+    if [ -n "$LARGE_FUNCTIONS" ]; then
+      func_count=$(echo "$LARGE_FUNCTIONS" | wc -l)
+      report_performance "WARNING" "$func_count large function(s) detected (>$LARGE_FUNCTION_LINES lines)" "Consider breaking down into smaller functions"
+    fi
+    
+    # Performance anti-patterns
+    if grep -q '\\$(' "$FILE_PATH" 2>/dev/null; then
+      jquery_count=$(grep -c '\\$(' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$jquery_count" -gt 5 ]; then
+        report_performance "INFO" "Heavy jQuery usage detected ($jquery_count instances)" "Consider modern alternatives like vanilla JS or React"
+      fi
+    fi
+    
+    # Long timers
+    if grep -E '(setTimeout|setInterval).*[0-9]{4,}' "$FILE_PATH" 2>/dev/null; then
+      report_performance "WARNING" "Long timer intervals detected (>=${LONG_TIMER_MS}ms)" "Verify if long delays are intentional"
+    fi
+    
+    # Nested loops
+    NESTED_LOOPS=$(grep -E 'for.*{[^}]*for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "")
+    if [ -n "$NESTED_LOOPS" ]; then
+      report_performance "ERROR" "Triple nested loops detected - O(n³) complexity" "Consider algorithm optimization or data structure changes"
+    elif grep -E 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+      nested_count=$(grep -c 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$nested_count" -gt 3 ]; then
+        report_performance "WARNING" "Multiple nested loops detected" "Review algorithmic complexity"
+      fi
+    fi
+    
+    # Memory leak patterns
+    if grep -q 'addEventListener.*function' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -q 'removeEventListener' "$FILE_PATH" 2>/dev/null; then
+        report_performance "WARNING" "Event listeners without cleanup detected" "Add removeEventListener calls to prevent memory leaks"
+      fi
+    fi
+    
+    # Global variable pollution
+    GLOBAL_VARS=$(grep -c '^var\\|^let\\|^const' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$GLOBAL_VARS" -gt 20 ]; then
+      report_performance "INFO" "Many global variables detected ($GLOBAL_VARS)" "Consider using modules or namespacing"
+    fi
+    
+    # Bundle size impact for dependencies
+    if grep -q 'import.*from' "$FILE_PATH" 2>/dev/null; then
+      LARGE_IMPORTS=$(grep -E 'import.*(lodash|moment|rxjs)' "$FILE_PATH" 2>/dev/null || echo "")
+      if [ -n "$LARGE_IMPORTS" ]; then
+        report_performance "INFO" "Large library imports detected" "Consider tree shaking or lighter alternatives"
+      fi
+    fi
+    ;;
+    
+  "py")
+    echo "   🐍 Python performance analysis..." >&2
+    
+    # List comprehensions vs loops
+    if grep -q 'for.*in.*:' "$FILE_PATH" 2>/dev/null; then
+      list_comp_count=$(grep -c '\\[.*for.*in.*\\]' "$FILE_PATH" 2>/dev/null || echo "0")
+      loop_count=$(grep -c 'for.*in.*:' "$FILE_PATH" 2>/dev/null || echo "0")
+      
+      if [ "$loop_count" -gt 0 ] && [ "$list_comp_count" -eq 0 ]; then
+        report_performance "INFO" "Consider using list comprehensions for better performance" "List comprehensions are often faster than explicit loops"
+      fi
+    fi
+    
+    # Global imports inside functions
+    if grep -A 5 'def ' "$FILE_PATH" | grep -q 'import' 2>/dev/null; then
+      report_performance "WARNING" "Imports inside functions detected" "Move imports to module level for better performance"
+    fi
+    
+    # String concatenation
+    if grep -q '+.*+.*+' "$FILE_PATH" 2>/dev/null; then
+      report_performance "INFO" "String concatenation chains detected" "Consider using f-strings or join() for better performance"
+    fi
+    ;;
+    
+  "sql")
+    echo "   🗄️ SQL performance analysis..." >&2
+    
+    # Missing indexes (basic heuristics)
+    if grep -qi 'where.*=' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -qi 'index' "$FILE_PATH" 2>/dev/null; then
+        report_performance "WARNING" "WHERE clauses without visible indexes" "Ensure proper indexing for query performance"
+      fi
+    fi
+    
+    # SELECT * usage
+    if grep -qi 'select \\*' "$FILE_PATH" 2>/dev/null; then
+      select_star_count=$(grep -ci 'select \\*' "$FILE_PATH" 2>/dev/null || echo "0")
+      report_performance "WARNING" "SELECT * queries detected ($select_star_count)" "Specify only needed columns for better performance"
+    fi
+    
+    # Cartesian products
+    if grep -qi 'from.*,.*where' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -qi 'join' "$FILE_PATH" 2>/dev/null; then
+        report_performance "ERROR" "Potential cartesian product detected" "Use explicit JOINs instead of comma-separated tables"
+      fi
+    fi
+    ;;
+    
+  "css"|"scss"|"sass")
+    echo "   🎨 CSS performance analysis..." >&2
+    
+    # Complex selectors
+    COMPLEX_SELECTORS=$(grep -c '[[:space:]].*[[:space:]].*[[:space:]].*[[:space:]]' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$COMPLEX_SELECTORS" -gt 5 ]; then
+      report_performance "WARNING" "Complex CSS selectors detected ($COMPLEX_SELECTORS)" "Simplify selectors for better rendering performance"
+    fi
+    
+    # Expensive properties
+    if grep -q 'box-shadow.*,.*,' "$FILE_PATH" 2>/dev/null; then
+      report_performance "INFO" "Complex box-shadow detected" "Consider simpler shadow effects for better performance"
+    fi
+    
+    if grep -q '@import' "$FILE_PATH" 2>/dev/null; then
+      import_count=$(grep -c '@import' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$import_count" -gt 3 ]; then
+        report_performance "WARNING" "Multiple CSS @imports detected ($import_count)" "Consider bundling CSS files to reduce HTTP requests"
+      fi
+    fi
+    ;;
+    
+  "html")
+    echo "   🌐 HTML performance analysis..." >&2
+    
+    # Inline styles
+    INLINE_STYLES=$(grep -c 'style=' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$INLINE_STYLES" -gt 10 ]; then
+      report_performance "WARNING" "Many inline styles detected ($INLINE_STYLES)" "Move styles to CSS files for better caching"
+    fi
+    
+    # Large images without attributes
+    if grep -q '<img' "$FILE_PATH" 2>/dev/null; then
+      if ! grep -q 'width=\\|height=' "$FILE_PATH" 2>/dev/null; then
+        img_count=$(grep -c '<img' "$FILE_PATH" 2>/dev/null || echo "0")
+        report_performance "INFO" "Images without dimensions detected ($img_count)" "Add width/height attributes to prevent layout shifts"
+      fi
+    fi
+    ;;
+esac
+
+# 3. Asset Performance Analysis
+echo "   🖼️ Asset performance analysis..." >&2
+
+# Check for asset imports/references
+if [[ "$FILE_EXT" =~ ^(js|jsx|ts|tsx|css|scss|html)$ ]]; then
+  # Image references
+  IMAGE_REFS=$(grep -oE '\\.(jpg|jpeg|png|gif|svg|webp)' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
+  if [ "$IMAGE_REFS" -gt 10 ]; then
+    report_performance "INFO" "Many image references detected ($IMAGE_REFS)" "Consider image optimization and lazy loading"
+  fi
+  
+  # Large base64 data
+  if grep -q 'data:image' "$FILE_PATH" 2>/dev/null; then
+    BASE64_COUNT=$(grep -c 'data:image' "$FILE_PATH" 2>/dev/null || echo "0")
+    report_performance "WARNING" "Base64 encoded images detected ($BASE64_COUNT)" "Consider using separate image files for better caching"
+  fi
+fi
+
+# 4. Database Query Analysis
+if grep -qi 'select\\|insert\\|update\\|delete' "$FILE_PATH" 2>/dev/null; then
+  echo "   🗄️ Database query analysis..." >&2
+  
+  # N+1 query patterns
+  if grep -q 'for.*in' "$FILE_PATH" 2>/dev/null && grep -q 'select\\|query' "$FILE_PATH" 2>/dev/null; then
+    report_performance "WARNING" "Potential N+1 query pattern detected" "Consider using joins or batch queries"
+  fi
+  
+  # Missing LIMIT clauses
+  if grep -qi 'select.*from' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -qi 'limit\\|top\\|rownum' "$FILE_PATH" 2>/dev/null; then
+      unlimited_queries=$(grep -ci 'select.*from' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$unlimited_queries" -gt 2 ]; then
+        report_performance "WARNING" "Queries without LIMIT detected ($unlimited_queries)" "Add LIMIT clauses to prevent large result sets"
+      fi
+    fi
+  fi
+fi
+
+# 5. Framework-Specific Analysis
+if [[ "$FILE_EXT" =~ ^(jsx|tsx)$ ]]; then
+  echo "   ⚛️ React performance analysis..." >&2
+  
+  # Component re-render patterns
+  if grep -q 'useState\\|useEffect' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -q 'useMemo\\|useCallback\\|React.memo' "$FILE_PATH" 2>/dev/null; then
+      hooks_count=$(grep -c 'useState\\|useEffect' "$FILE_PATH" 2>/dev/null || echo "0")
+      if [ "$hooks_count" -gt 5 ]; then
+        report_performance "INFO" "Many React hooks without memoization" "Consider useMemo/useCallback for expensive operations"
+      fi
+    fi
+  fi
+  
+  # Inline object/function creation in props
+  if grep -q '={{' "$FILE_PATH" 2>/dev/null; then
+    inline_objects=$(grep -c '={{' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$inline_objects" -gt 5 ]; then
+      report_performance "WARNING" "Many inline objects in JSX props ($inline_objects)" "Extract to variables to prevent unnecessary re-renders"
+    fi
+  fi
+fi
+
+# 6. Generate Performance Impact Summary
+echo "" >&2
+echo "⚡ Performance Impact Summary" >&2
+echo "============================" >&2
+echo "   📄 File: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB)" >&2
+echo "   🚨 Critical Issues: $PERF_ERRORS" >&2
+echo "   ⚠️ Warnings: $PERF_WARNINGS" >&2
+echo "   ℹ️ Optimization Tips: $PERF_INFO" >&2
+
+# Performance impact assessment
+TOTAL_ISSUES=$((PERF_ERRORS + PERF_WARNINGS))
+
+if [ "$PERF_ERRORS" -gt 0 ]; then
+  echo "   🚨 Impact Level: HIGH - Critical performance issues detected" >&2
+elif [ "$PERF_WARNINGS" -gt 3 ]; then
+  echo "   ⚠️ Impact Level: MODERATE - Multiple performance concerns" >&2
+elif [ "$PERF_WARNINGS" -gt 0 ]; then
+  echo "   ⚠️ Impact Level: LOW - Minor performance considerations" >&2
+elif [ "$PERF_INFO" -gt 0 ]; then
+  echo "   ✅ Impact Level: MINIMAL - Good practices recommended" >&2
+else
+  echo "   🎉 Impact Level: OPTIMAL - No performance issues detected" >&2
+fi
+
+if [ "$TOTAL_ISSUES" -gt 0 ]; then
+  echo "" >&2
+  echo "💡 Performance Optimization Resources:" >&2
+  echo "   • Web: Core Web Vitals and Lighthouse audits" >&2
+  echo "   • JavaScript: Profiler tools and performance monitoring" >&2
+  echo "   • Database: Query optimization and indexing strategies" >&2
+  echo "   • Bundle: Code splitting and tree shaking" >&2
+fi
+
+echo "⚡ Performance impact monitoring complete" >&2
+exit 0
+```
+
+## Examples
+### Performance Impact Monitor Hook Script
+
+Complete hook script that performs real-time performance monitoring
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+FILE_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || echo "0")
+if [ "$FILE_SIZE" -gt 100000 ]; then
+  echo "⚠️ PERFORMANCE WARNING: Large file detected ($(( FILE_SIZE / 1024 ))KB)" >&2
+  echo "   💡 Suggestion: Monitor bundle size impact and consider optimization" >&2
+fi
+exit 0
+```
+### Nested Loop Detection
+
+Enhanced hook script for nested loop detection with complexity analysis
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  if grep -E 'for.*{[^}]*for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 CRITICAL PERFORMANCE IMPACT: Triple nested loops detected - O(n³) complexity" >&2
+    echo "   💡 Suggestion: Consider algorithm optimization or data structure changes" >&2
+  elif grep -E 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+    NESTED_COUNT=$(grep -c 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$NESTED_COUNT" -gt 3 ]; then
+      echo "⚠️ PERFORMANCE WARNING: Multiple nested loops detected" >&2
+      echo "   💡 Suggestion: Review algorithmic complexity" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Memory Leak Detection
+
+Enhanced hook script for memory leak pattern detection
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]]; then
+  if grep -q 'addEventListener.*function' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -q 'removeEventListener' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ PERFORMANCE WARNING: Event listeners without cleanup detected" >&2
+      echo "   💡 Suggestion: Add removeEventListener calls to prevent memory leaks" >&2
+    fi
+  fi
+fi
+exit 0
+```
+### Database Query Performance Analysis
+
+Enhanced hook script for database query performance impact assessment
+
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.sql ]]; then
+  if grep -qi 'select \\*' "$FILE_PATH" 2>/dev/null; then
+    SELECT_STAR_COUNT=$(grep -ci 'select \\*' "$FILE_PATH" 2>/dev/null || echo "0")
+    echo "⚠️ PERFORMANCE WARNING: SELECT * queries detected ($SELECT_STAR_COUNT)" >&2
+    echo "   💡 Suggestion: Specify only needed columns for better performance" >&2
+  fi
+  if grep -qi 'from.*,.*where' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -qi 'join' "$FILE_PATH" 2>/dev/null; then
+      echo "🚨 CRITICAL PERFORMANCE IMPACT: Potential cartesian product detected" >&2
+      echo "   💡 Suggestion: Use explicit JOINs instead of comma-separated tables" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+FILE_SIZE=$(stat -f%z "$FILE_PATH" 2>/dev/null || stat -c%s "$FILE_PATH" 2>/dev/null || echo "0")
+if [ "$FILE_SIZE" -gt 100000 ]; then
+  echo "⚠️ PERFORMANCE WARNING: Large file detected ($(( FILE_SIZE / 1024 ))KB)" >&2
+  echo "   💡 Suggestion: Monitor bundle size impact and consider optimization" >&2
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]]; then
+  if grep -E 'for.*{[^}]*for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+    echo "🚨 CRITICAL PERFORMANCE IMPACT: Triple nested loops detected - O(n³) complexity" >&2
+    echo "   💡 Suggestion: Consider algorithm optimization or data structure changes" >&2
+  elif grep -E 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null; then
+    NESTED_COUNT=$(grep -c 'for.*{[^}]*for' "$FILE_PATH" 2>/dev/null || echo "0")
+    if [ "$NESTED_COUNT" -gt 3 ]; then
+      echo "⚠️ PERFORMANCE WARNING: Multiple nested loops detected" >&2
+      echo "   💡 Suggestion: Review algorithmic complexity" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]]; then
+  if grep -q 'addEventListener.*function' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -q 'removeEventListener' "$FILE_PATH" 2>/dev/null; then
+      echo "⚠️ PERFORMANCE WARNING: Event listeners without cleanup detected" >&2
+      echo "   💡 Suggestion: Add removeEventListener calls to prevent memory leaks" >&2
+    fi
+  fi
+fi
+exit 0
+```
+```bash
+#!/usr/bin/env bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [[ "$FILE_PATH" == *.sql ]]; then
+  if grep -qi 'select \\*' "$FILE_PATH" 2>/dev/null; then
+    SELECT_STAR_COUNT=$(grep -ci 'select \\*' "$FILE_PATH" 2>/dev/null || echo "0")
+    echo "⚠️ PERFORMANCE WARNING: SELECT * queries detected ($SELECT_STAR_COUNT)" >&2
+    echo "   💡 Suggestion: Specify only needed columns for better performance" >&2
+  fi
+  if grep -qi 'from.*,.*where' "$FILE_PATH" 2>/dev/null; then
+    if ! grep -qi 'join' "$FILE_PATH" 2>/dev/null; then
+      echo "🚨 CRITICAL PERFORMANCE IMPACT: Potential cartesian product detected" >&2
+      echo "   💡 Suggestion: Use explicit JOINs instead of comma-separated tables" >&2
+    fi
+  fi
+fi
+exit 0
+```
+
+## Troubleshooting
+### Hook runs on every file save slowing workflow
+
+Use matchers to limit to specific file types or directories, or add file size check: `if [ "$FILE_SIZE" -lt 10000 ]; then exit 0; fi` to skip small files under 10KB and reduce overhead. Verify file path patterns. Test with various file sizes.
+### False positives for nested loop warnings
+
+Adjust COMPLEX_CYCLOMATIC threshold or refine the regex pattern `grep -E 'for.*{[^}]*for.*{[^}]*for'` to exclude specific comment patterns or multi-line structures that trigger false matches. Verify regex patterns. Test with various code structures.
+### Performance thresholds not matching project
+
+Customize thresholds at script top: set LARGE_FILE_THRESHOLD=200000 for larger projects, LARGE_FUNCTION_LINES=100 for verbose codebases, or LONG_TIMER_MS=10000 for intentional delays. Verify threshold values. Test with various project sizes.
+### Cannot access file path from stdin JSON input
+
+Ensure jq is installed for JSON parsing. The hook reads: `FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')`. Verify INPUT has valid JSON structure. Verify jq installation. Test with various JSON formats.
+### Memory leak warnings appear without cleanup
+
+Hook detects addEventListener without removeEventListener. Add cleanup: `useEffect(() => { el.addEventListener('click', fn); return () => el.removeEventListener('click', fn); }, []);`. Verify event listener patterns. Test with various React patterns.
+### Bundle size warnings for legitimate large files
+
+Adjust LARGE_FILE_THRESHOLD and MASSIVE_FILE_THRESHOLD to match project needs. For large projects, increase thresholds: LARGE_FILE_THRESHOLD=200000, MASSIVE_FILE_THRESHOLD=1000000. Verify file size thresholds. Test with various file sizes.
+### SQL query warnings for valid queries
+
+Hook uses heuristics that may not apply to all query patterns. Review warnings and adjust patterns if needed. For complex queries, consider disabling specific checks. Verify SQL patterns. Test with various query structures.
+### React performance warnings for intentional patterns
+
+Hook detects inline objects in JSX props which may be intentional. Review warnings and adjust thresholds: INLINE_OBJECTS_THRESHOLD=10. For performance-critical components, consider memoization. Verify React patterns. Test with various component structures.

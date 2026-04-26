@@ -1,0 +1,84 @@
+# Cloudflare Workers D1 KV R2 Capability Pack Skill
+URL: https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://developers.cloudflare.com/workers/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx
+Download: /downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip
+## Summary
+Expert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.
+## Tags
+- cloudflare
+- workers
+- d1
+- kv
+- r2
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-10**.
+When upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.
+
+## Retrieval Sources
+- https://developers.cloudflare.com/workers/
+- https://developers.cloudflare.com/d1/
+- https://developers.cloudflare.com/kv/
+- https://developers.cloudflare.com/r2/
+
+Always prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.
+
+## Core Workflow
+1. Confirm target version/runtime and pull latest official docs for the task scope.
+2. Build an execution plan with explicit read-only discovery before any mutation.
+3. Validate contracts, permissions, and safety constraints before applying changes.
+4. Execute with deterministic checkpoints and rollback criteria.
+5. Produce a verification report with evidence, caveats, and next actions.
+
+## Overview
+This capability pack teaches agents how to choose the right Cloudflare storage primitive per workload and combine them safely. It focuses on practical consistency, performance, and operational correctness.
+
+## Capability Scope
+- D1 for relational transactional paths
+- KV for globally distributed low-latency reads
+- R2 for object storage and package/media assets
+- Cache key strategy and invalidation mechanics
+- Security boundaries, rate controls, and abuse mitigation
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Align storage choice with access pattern, not convenience.
+- Keep mutation paths deterministic and auditable.
+- Avoid cross-store race conditions without explicit coordination.
+- Enforce endpoint-level auth and rate limits for write operations.
+
+## Troubleshooting
+**Issue:** Stale reads after updates  
+**Fix:** Define explicit invalidation/order rules between D1 source of truth and KV caches.
+
+**Issue:** High read latency on hot paths  
+**Fix:** Move read-heavy projection to KV with controlled sync from D1.
+
+**Issue:** Unexpected storage cost growth  
+**Fix:** Add lifecycle policies and payload minimization for R2/KV objects.
+
+## Output Contract
+1. Provide an implementation plan ordered by risk and dependency.
+2. Provide exact production-ready config/commands with no placeholders.
+3. Call out secrets, permissions, and least-privilege requirements.
+4. Include rollback and recovery guidance for each risky step.
+
+## Validation Checklist
+- Verify all referenced docs/versions before applying changes.
+- Run smoke checks for core user flow and error paths.
+- Confirm observability/logging is enabled for changed components.
+- Confirm security controls (auth, rate limits, input validation) still pass.
+- Record final known limitations and follow-up actions.

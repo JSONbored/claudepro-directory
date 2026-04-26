@@ -1,0 +1,73 @@
+# Zero-Budget SaaS Launch Capability Pack Skill
+URL: https://heyclau.de/skills/zero-budget-saas-launch-capability-pack
+Category: skills
+Author: JSONbored
+Date added: 2026-04-11
+Documentation: https://developers.cloudflare.com/workers/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx
+Download: /downloads/skills/zero-budget-saas-launch-capability-pack.zip
+## Summary
+Expert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.
+## Tags
+- saas
+- bootstrap
+- growth
+- cost-optimization
+- capability-pack
+## Content
+## Knowledge Freshness
+This capability pack is pinned to documentation verified on **2026-04-11**.
+
+## Retrieval Sources
+- https://developers.cloudflare.com/workers/
+- https://vercel.com/docs
+- https://resend.com/docs
+
+## Core Workflow
+1. Define minimal paid-free architecture constraints.
+2. Cut scope to one painful user workflow.
+3. Build MVP with observability and fallback paths.
+4. Ship distribution loop before expansion features.
+5. Track revenue triggers and reinvest only on proof.
+
+## Overview
+This skill enables practical bootstrap execution where money is constrained and time must be allocated to high-signal work only.
+
+## Capability Scope
+- Free-tier architecture planning
+- MVP cut-list and sequence control
+- Distribution loop design
+- Early monetization checkpointing
+- Cost-risk tradeoff governance
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Production Rules
+- Keep MVP scope to a single painful workflow.
+- Do not add paid dependencies before revenue validation.
+- Instrument conversion and retention signals from day one.
+- Drop low-signal features quickly when metrics miss thresholds.
+
+## Troubleshooting
+**Issue:** Free-tier limits break reliability  
+**Fix:** add graceful degradation and hard usage thresholds.
+
+**Issue:** Feature creep stalls launch  
+**Fix:** enforce strict cut-list with deadline lock.
+
+**Issue:** Traffic arrives but no conversion  
+**Fix:** tighten problem/offer fit and simplify CTA path.
+
+## Output Contract
+1. MVP architecture and scope map.
+2. Launch sequence with dependency order.
+3. Distribution and monetization loop.
+4. KPI dashboard and next-step gates.

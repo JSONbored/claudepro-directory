@@ -1,0 +1,800 @@
+# MCP Server Setup for Claude Code
+URL: https://heyclau.de/commands/mcp-setup
+Category: commands
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mcp-setup.mdx
+## Summary
+Configure and connect MCP servers to Claude Code with OAuth authentication, tool access, and remote server support for seamless external integrations
+## Tags
+- mcp
+- integration
+- oauth
+- remote-server
+- tools
+- setup
+## Content
+## Overview
+The `/mcp-setup` command guides you through configuring Model Context Protocol (MCP) servers in Claude Code, enabling seamless integration with external tools, databases, and APIs through Anthropic's open-source standard.
+
+## Features
+- **Remote MCP Server Support**: Connect to cloud-hosted MCP servers with native OAuth authentication
+- **Local Server Configuration**: Set up containerized MCP servers using Docker MCP Toolkit
+- **Project-Scoped Setup**: Configure `.mcp.json` for team-wide server access
+- **User-Global Setup**: Install personal MCP servers available across all projects
+- **OAuth Management**: One-click authentication with secure credential storage
+- **Tool Discovery**: Automatically detect and enable available tools from connected servers
+- **Resource Access**: Grant Claude Code access to databases, file systems, and APIs
+- **Health Monitoring**: Verify server connectivity and troubleshoot connection issues
+
+## Usage
+```bash
+/mcp-setup [server-type] [options]
+```
+
+### Server Types
+
+- `--remote` - Configure remote MCP server with OAuth (default)
+- `--local` - Set up local/Docker MCP server
+- `--list` - List all available MCP servers from marketplace
+- `--status` - Check status of configured servers
+
+### Configuration Scope
+
+- `--project` - Add to `.mcp.json` (team-shared, checked into git)
+- `--user` - Add to `~/.config/claude/mcp.json` (personal)
+
+### Popular Servers
+
+- `--github` - GitHub REST API integration
+- `--linear` - Linear issue tracking
+- `--sentry` - Error monitoring integration
+- `--postgres` - PostgreSQL database access
+- `--mongodb` - MongoDB database integration
+- `--slack` - Slack messaging integration
+- `--google-drive` - Google Drive file access
+- `--aws` - AWS service integration
+```bash
+/mcp-setup [server-type] [options]
+```
+
+## Examples
+### Remote GitHub MCP Server with OAuth
+
+**Command:**
+```bash
+/mcp-setup --remote --github --project
+```
+
+**What happens:**
+1. Claude detects project needs GitHub integration
+2. Generates `.mcp.json` configuration:
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": {
+        "type": "oauth",
+        "provider": "github"
+      },
+      "tools": [
+        "create_pull_request",
+        "get_repository",
+        "list_issues",
+        "create_issue",
+        "update_issue",
+        "merge_pull_request"
+      ],
+      "resources": [
+        "repository://repos",
+        "issue://issues",
+        "pull_request://pulls"
+      ]
+    }
+  }
+}
+```
+
+3. Prompts OAuth flow:
+   - Opens browser for GitHub authentication
+   - Requests necessary scopes (repo, issues, pull_requests)
+   - Stores OAuth token securely in system keychain
+
+4. Verifies connection:
+   - Tests API connectivity
+   - Lists available repositories
+   - Confirms tool access
+
+**Usage in Claude Code:**
+```bash
+# Claude can now use GitHub tools automatically
+User: "Create a PR for my authentication refactor"
+Claude: *uses create_pull_request tool from GitHub MCP server*
+
+User: "What issues are assigned to me?"
+Claude: *uses list_issues tool to fetch assigned issues*
+```
+
+### Local Postgres MCP Server with Docker
+
+**Command:**
+```bash
+/mcp-setup --local --postgres --project
+```
+
+**Generated Configuration:**
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--network=host",
+        "mcp/postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://localhost:5432/mydb"
+      },
+      "tools": [
+        "execute_query",
+        "list_tables",
+        "describe_table",
+        "get_schema"
+      ]
+    }
+  }
+}
+```
+
+**Environment Setup:**
+```bash
+# Claude creates .env.local for secrets
+POSTGRES_CONNECTION_STRING=postgresql://user:password@localhost:5432/mydb
+```
+
+**Usage:**
+```bash
+User: "What tables are in the database?"
+Claude: *uses list_tables tool*
+
+User: "Show me all users created in the last week"
+Claude: *uses execute_query tool with date filtering*
+```
+
+### Multiple MCP Servers for Full-Stack Project
+
+**Command:**
+```bash
+/mcp-setup --project --github --linear --sentry --postgres
+```
+
+**Generated `.mcp.json`:**
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": { "type": "oauth", "provider": "github" }
+    },
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app",
+      "auth": { "type": "oauth", "provider": "linear" }
+    },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.io",
+      "auth": {
+        "type": "bearer",
+        "token": "${SENTRY_AUTH_TOKEN}"
+      }
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "mcp/postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      }
+    }
+  }
+}
+```
+
+**Workflow Integration:**
+```bash
+User: "Check Sentry for errors related to authentication, create Linear tickets for each unique error, and analyze the auth database table"
+
+Claude:
+1. *Uses Sentry MCP to fetch recent auth errors*
+2. *Groups by error type and stack trace*
+3. *Uses Linear MCP to create tickets with error details*
+4. *Uses Postgres MCP to query auth table for affected users*
+5. Presents comprehensive report with tickets created
+```
+
+### User-Global MCP Servers (Personal Setup)
+
+**Command:**
+```bash
+/mcp-setup --user --slack --google-drive
+```
+
+**Configuration Location:**
+```
+~/.config/claude/mcp.json
+```
+
+**Benefit:**
+- Available across ALL projects
+- Personal authentication (not shared with team)
+- Useful for productivity tools
+```bash
+/mcp-setup --remote --github --project
+```
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": {
+        "type": "oauth",
+        "provider": "github"
+      },
+      "tools": [
+        "create_pull_request",
+        "get_repository",
+        "list_issues",
+        "create_issue",
+        "update_issue",
+        "merge_pull_request"
+      ],
+      "resources": [
+        "repository://repos",
+        "issue://issues",
+        "pull_request://pulls"
+      ]
+    }
+  }
+}
+```
+```bash
+# Claude can now use GitHub tools automatically
+User: "Create a PR for my authentication refactor"
+Claude: *uses create_pull_request tool from GitHub MCP server*
+
+User: "What issues are assigned to me?"
+Claude: *uses list_issues tool to fetch assigned issues*
+```
+```bash
+/mcp-setup --local --postgres --project
+```
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--network=host",
+        "mcp/postgres"
+      ],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://localhost:5432/mydb"
+      },
+      "tools": [
+        "execute_query",
+        "list_tables",
+        "describe_table",
+        "get_schema"
+      ]
+    }
+  }
+}
+```
+```bash
+# Claude creates .env.local for secrets
+POSTGRES_CONNECTION_STRING=postgresql://user:password@localhost:5432/mydb
+```
+```bash
+User: "What tables are in the database?"
+Claude: *uses list_tables tool*
+
+User: "Show me all users created in the last week"
+Claude: *uses execute_query tool with date filtering*
+```
+```bash
+/mcp-setup --project --github --linear --sentry --postgres
+```
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": { "type": "oauth", "provider": "github" }
+    },
+    "linear": {
+      "type": "remote",
+      "url": "https://mcp.linear.app",
+      "auth": { "type": "oauth", "provider": "linear" }
+    },
+    "sentry": {
+      "type": "remote",
+      "url": "https://mcp.sentry.io",
+      "auth": {
+        "type": "bearer",
+        "token": "${SENTRY_AUTH_TOKEN}"
+      }
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "mcp/postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      }
+    }
+  }
+}
+```
+```bash
+User: "Check Sentry for errors related to authentication, create Linear tickets for each unique error, and analyze the auth database table"
+
+Claude:
+1. *Uses Sentry MCP to fetch recent auth errors*
+2. *Groups by error type and stack trace*
+3. *Uses Linear MCP to create tickets with error details*
+4. *Uses Postgres MCP to query auth table for affected users*
+5. Presents comprehensive report with tickets created
+```
+```bash
+/mcp-setup --user --slack --google-drive
+```
+```text
+~/.config/claude/mcp.json
+```
+
+## MCP Server Marketplace
+### Development Tools
+- **GitHub** - Repository management, PRs, issues, CI/CD
+- **GitLab** - GitLab API integration
+- **Bitbucket** - Bitbucket Cloud/Server integration
+
+### Issue Tracking
+- **Linear** - Issue tracking and project management
+- **Jira** - Atlassian Jira integration
+- **Asana** - Task management
+
+### Monitoring & Observability
+- **Sentry** - Error tracking and monitoring
+- **Datadog** - Infrastructure monitoring
+- **New Relic** - Application performance monitoring
+
+### Databases
+- **PostgreSQL** - PostgreSQL database access
+- **MongoDB** - MongoDB document database
+- **MySQL** - MySQL/MariaDB integration
+- **Redis** - Redis cache and data structure store
+- **Supabase** - Supabase backend platform
+
+### Cloud Platforms
+- **AWS** - Amazon Web Services integration
+- **Google Cloud** - GCP service integration
+- **Azure** - Microsoft Azure integration
+- **Vercel** - Vercel deployment platform
+- **Cloudflare** - Cloudflare edge platform
+
+### Communication
+- **Slack** - Slack messaging and notifications
+- **Discord** - Discord server integration
+- **Notion** - Notion workspace access
+
+### AI & ML
+- **Pinecone** - Vector database for embeddings
+- **Weaviate** - Vector search engine
+- **Chroma** - Embedding database
+
+## Authentication Methods
+### OAuth 2.0 (Recommended for Remote Servers)
+```json
+{
+  "auth": {
+    "type": "oauth",
+    "provider": "github",
+    "scopes": ["repo", "issues"]
+  }
+}
+```
+
+**Benefits:**
+- No API keys to manage
+- Automatic token refresh
+- Secure credential storage
+- One-click authentication
+
+### Bearer Token
+```json
+{
+  "auth": {
+    "type": "bearer",
+    "token": "${API_TOKEN}"
+  }
+}
+```
+
+**Use When:**
+- Service doesn't support OAuth
+- Using API keys or personal access tokens
+- Environment variables preferred
+
+### No Authentication (Local/Docker)
+```json
+{
+  "type": "stdio",
+  "command": "docker",
+  "args": ["run", "-i", "--rm", "mcp/server"]
+}
+```
+
+**Use When:**
+- Local development servers
+- Containerized services
+- Internal network resources
+```json
+{
+  "auth": {
+    "type": "oauth",
+    "provider": "github",
+    "scopes": ["repo", "issues"]
+  }
+}
+```
+```json
+{
+  "auth": {
+    "type": "bearer",
+    "token": "${API_TOKEN}"
+  }
+}
+```
+```json
+{
+  "type": "stdio",
+  "command": "docker",
+  "args": ["run", "-i", "--rm", "mcp/server"]
+}
+```
+
+## Docker MCP Toolkit
+### Installing MCP Toolkit
+```bash
+# Claude runs this automatically
+docker pull mcp/toolkit
+```
+
+### Available Containerized Servers (200+)
+- Pre-built, security-audited containers
+- One-command installation
+- Isolated environments
+- Automatic updates
+
+### Example: Setup Multiple Servers via Docker
+```bash
+/mcp-setup --local --postgres --redis --mongodb
+```
+
+**Generated docker-compose.yml:**
+```yaml
+version: '3.8'
+services:
+  mcp-postgres:
+    image: mcp/postgres
+    environment:
+      - POSTGRES_CONNECTION_STRING=${POSTGRES_CONNECTION_STRING}
+    network_mode: host
+
+  mcp-redis:
+    image: mcp/redis
+    environment:
+      - REDIS_URL=${REDIS_URL}
+    network_mode: host
+
+  mcp-mongodb:
+    image: mcp/mongodb
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+    network_mode: host
+```
+```bash
+# Claude runs this automatically
+docker pull mcp/toolkit
+```
+```bash
+/mcp-setup --local --postgres --redis --mongodb
+```
+```yaml
+version: '3.8'
+services:
+  mcp-postgres:
+    image: mcp/postgres
+    environment:
+      - POSTGRES_CONNECTION_STRING=${POSTGRES_CONNECTION_STRING}
+    network_mode: host
+
+  mcp-redis:
+    image: mcp/redis
+    environment:
+      - REDIS_URL=${REDIS_URL}
+    network_mode: host
+
+  mcp-mongodb:
+    image: mcp/mongodb
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+    network_mode: host
+```
+
+## Health Monitoring & Troubleshooting
+### Check Server Status
+```bash
+/mcp-setup --status
+```
+
+**Output:**
+```
+✓ github (remote) - Connected, 6 tools available
+✓ linear (remote) - Connected, 8 tools available
+✗ postgres (local) - Connection failed: Docker container not running
+⚠ sentry (remote) - Connected, rate limit: 80% used
+```
+
+### Test Server Connection
+```bash
+/mcp-setup --test github
+```
+
+**Verification Steps:**
+1. Ping server endpoint
+2. Verify authentication
+3. List available tools
+4. Test tool invocation
+5. Check resource access
+```bash
+/mcp-setup --status
+```
+```text
+✓ github (remote) - Connected, 6 tools available
+✓ linear (remote) - Connected, 8 tools available
+✗ postgres (local) - Connection failed: Docker container not running
+⚠ sentry (remote) - Connected, rate limit: 80% used
+```
+```bash
+/mcp-setup --test github
+```
+
+## Security Best Practices
+### Project vs User Configuration
+
+**Project (`.mcp.json` - checked into git):**
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": {
+        "type": "oauth",
+        "provider": "github"
+      }
+    }
+  }
+}
+```
+- ✅ Server configuration (URLs, tool lists)
+- ✅ Authentication *method* (oauth, bearer)
+- ❌ NO secrets or tokens
+
+**User (`~/.config/claude/mcp.json` - personal):**
+- ✅ OAuth tokens (stored in system keychain)
+- ✅ Personal API keys
+- ✅ User-specific servers
+
+### Environment Variables for Secrets
+```bash
+# .env.local (NOT checked into git)
+SENTRY_AUTH_TOKEN=abc123...
+POSTGRES_CONNECTION_STRING=postgresql://...
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+```
+
+**Reference in `.mcp.json`:**
+```json
+{
+  "auth": {
+    "type": "bearer",
+    "token": "${SENTRY_AUTH_TOKEN}"
+  }
+}
+```
+```json
+{
+  "mcpServers": {
+    "github": {
+      "type": "remote",
+      "url": "https://mcp.github.com",
+      "auth": {
+        "type": "oauth",
+        "provider": "github"
+      }
+    }
+  }
+}
+```
+```bash
+# .env.local (NOT checked into git)
+SENTRY_AUTH_TOKEN=abc123...
+POSTGRES_CONNECTION_STRING=postgresql://...
+AWS_ACCESS_KEY_ID=AKIA...
+AWS_SECRET_ACCESS_KEY=...
+```
+```json
+{
+  "auth": {
+    "type": "bearer",
+    "token": "${SENTRY_AUTH_TOKEN}"
+  }
+}
+```
+
+## Advanced Configuration
+### Tool Permissions (Restrict Access)
+```json
+{
+  "mcpServers": {
+    "github": {
+      "tools": ["get_repository", "list_issues"],
+      "excludeTools": ["delete_repository", "force_push"]
+    }
+  }
+}
+```
+
+### Resource Filtering
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "resources": ["table://users", "table://posts"],
+      "excludeResources": ["table://internal_*"]
+    }
+  }
+}
+```
+
+### Rate Limiting
+```json
+{
+  "mcpServers": {
+    "github": {
+      "rateLimit": {
+        "requests": 100,
+        "period": "hour"
+      }
+    }
+  }
+}
+```
+```json
+{
+  "mcpServers": {
+    "github": {
+      "tools": ["get_repository", "list_issues"],
+      "excludeTools": ["delete_repository", "force_push"]
+    }
+  }
+}
+```
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "resources": ["table://users", "table://posts"],
+      "excludeResources": ["table://internal_*"]
+    }
+  }
+}
+```
+```json
+{
+  "mcpServers": {
+    "github": {
+      "rateLimit": {
+        "requests": 100,
+        "period": "hour"
+      }
+    }
+  }
+}
+```
+
+## Migration from Manual Setup
+### Before (Manual Configuration)
+```json
+// Scattered across multiple config files
+// Manual OAuth flow
+// No centralized management
+```
+
+### After (`/mcp-setup`)
+```bash
+/mcp-setup --project --github --linear --sentry
+# One command, automatic OAuth, team-ready config
+```
+```json
+// Scattered across multiple config files
+// Manual OAuth flow
+// No centralized management
+```
+```bash
+/mcp-setup --project --github --linear --sentry
+# One command, automatic OAuth, team-ready config
+```
+
+## Team Collaboration
+### Shared Project Setup
+1. Lead developer runs `/mcp-setup --project --github --linear`
+2. Commits `.mcp.json` to git
+3. Team members clone repo
+4. Each member authenticates with OAuth (personal credentials)
+5. Everyone has same tool access
+
+### Onboarding New Developers
+```bash
+# New team member clones repo
+git clone repo.git
+cd repo
+
+# Claude Code detects .mcp.json
+Claude: "I found 3 MCP servers configured. Would you like to authenticate?"
+User: "yes"
+Claude: *opens OAuth flows for GitHub, Linear, Sentry*
+
+# Done - fully integrated in 30 seconds
+```
+```bash
+# New team member clones repo
+git clone repo.git
+cd repo
+
+# Claude Code detects .mcp.json
+Claude: "I found 3 MCP servers configured. Would you like to authenticate?"
+User: "yes"
+Claude: *opens OAuth flows for GitHub, Linear, Sentry*
+
+# Done - fully integrated in 30 seconds
+```
+
+## Best Practices
+1. **Use Project Scope for Team Tools**: GitHub, Linear, CI/CD
+2. **Use User Scope for Personal Tools**: Slack, Google Drive, Notion
+3. **Prefer OAuth Over API Keys**: Better security, auto-refresh
+4. **Docker for Local Services**: Isolated, reproducible environments
+5. **Monitor Rate Limits**: Check `--status` regularly
+6. **Test After Setup**: Use `--test` to verify connectivity
+7. **Document Custom Servers**: Add comments in `.mcp.json`
+8. **Version Control Config**: Commit `.mcp.json`, ignore `.env.local`

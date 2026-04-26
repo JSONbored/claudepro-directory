@@ -1,0 +1,664 @@
+# TypeScript Checker
+URL: https://heyclau.de/hooks/typescript-compilation-checker
+Category: hooks
+Author: JSONbored
+Date added: 2025-09-19
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/typescript-compilation-checker.mdx
+## Summary
+Automatically runs TypeScript compiler checks after editing .ts or .tsx files to catch type errors early.
+## Tags
+- typescript
+- validation
+- type-safety
+- compilation
+## Content
+## Features
+- Real-time TypeScript compilation checking including compilation checking (automatic TypeScript compilation checking on file changes, type error detection with error identification, compilation validation with validation checking, compilation reporting with compilation status), checking optimization (checking performance with fast checking, checking accuracy with accurate checking, checking efficiency with efficient processing, checking reporting with checking status), checking validation (compilation checking validation with checking verification, type error validation with error verification, compilation accuracy validation with accuracy checking, compilation consistency validation with consistency verification), and checking reporting (compilation checking reporting with checking status, type error reporting with error status, compilation validation reporting with validation status, checking analytics with checking statistics)
+- Type error detection and reporting including error detection (type error detection with error identification, compilation error detection with compilation error identification, type safety error detection with type safety error identification, error reporting with error status), error management (error configuration with error settings, error customization with custom error handling, error filtering with error filtering, error updates with error updates), error optimization (error performance optimization with performance improvement, error accuracy optimization with accuracy improvement, error completeness optimization with completeness improvement, error analytics with error statistics), and error reporting (type error reporting with error status, compilation error reporting with compilation status, type safety error reporting with safety status, error analytics with error statistics)
+- No-emit mode for fast validation including no-emit execution (no-emit TypeScript compilation with fast validation, compilation validation without file emission, validation optimization with performance improvement, validation reporting with validation status), no-emit management (no-emit configuration with no-emit settings, no-emit customization with custom no-emit, no-emit monitoring with no-emit tracking, no-emit updates with no-emit updates), no-emit optimization (no-emit performance optimization with performance improvement, no-emit accuracy optimization with accuracy improvement, no-emit efficiency optimization with efficiency improvement, no-emit analytics with no-emit statistics), and no-emit reporting (no-emit execution reporting with execution status, validation reporting with validation status, no-emit performance reporting with performance status, no-emit analytics with no-emit statistics)
+- TSX and TS file support including file support (TSX and TS file support with file type detection, file extension detection with extension identification, file type validation with type checking, file support reporting with support status), support management (support configuration with support settings, support customization with custom support, support filtering with support filtering, support updates with support updates), support optimization (support performance optimization with performance improvement, support accuracy optimization with accuracy improvement, support completeness optimization with completeness improvement, support analytics with support statistics), and support reporting (file support reporting with support status, file type reporting with type status, file extension reporting with extension status, support analytics with support statistics)
+- Clear error messaging and feedback including messaging (clear error messaging with error communication, error feedback with feedback delivery, error reporting with reporting status, messaging optimization with messaging improvement), messaging management (messaging configuration with messaging settings, messaging customization with custom messaging, messaging filtering with messaging filtering, messaging updates with messaging updates), messaging optimization (messaging performance optimization with performance improvement, messaging accuracy optimization with accuracy improvement, messaging readability optimization with readability improvement, messaging analytics with messaging statistics), and messaging reporting (error messaging reporting with messaging status, error feedback reporting with feedback status, error reporting with reporting status, messaging analytics with messaging statistics)
+- Integration with project tsconfig.json including integration (tsconfig.json integration with configuration support, project configuration detection with config detection, configuration validation with config verification, integration reporting with integration status), integration management (integration configuration with integration settings, integration customization with custom integration, integration monitoring with integration tracking, integration updates with integration updates), integration optimization (integration performance optimization with performance improvement, integration accuracy optimization with accuracy improvement, integration efficiency optimization with efficiency improvement, integration analytics with integration statistics), and integration reporting (tsconfig.json integration reporting with integration status, project configuration reporting with config status, configuration validation reporting with validation status, integration analytics with integration statistics)
+- Strict mode and type safety validation including strict validation (strict mode validation with strict checking, type safety validation with safety checking, strict null checks with null checking, strict validation reporting with validation status), strict management (strict configuration with strict settings, strict customization with custom strict, strict monitoring with strict tracking, strict updates with strict updates), strict optimization (strict performance optimization with performance improvement, strict accuracy optimization with accuracy improvement, strict completeness optimization with completeness improvement, strict analytics with strict statistics), and strict reporting (strict mode reporting with strict status, type safety reporting with safety status, strict null checks reporting with null status, strict analytics with strict statistics)
+- Development workflow integration including continuous type checking (automatic TypeScript compilation checking on file changes, immediate type error detection on file edits, automatic type safety validation on file changes, seamless type checking integration with development workflow), workflow automation (automated type checking without manual intervention, type checking automation with automatic checking, type safety automation with automatic safety checks), and workflow optimization (type checking tracking with checking monitoring, type safety optimization with safety optimization, type quality maintenance with quality checks)
+
+## Use Cases
+- Catch TypeScript errors immediately after editing automatically detecting type errors, providing immediate feedback, and enabling rapid error correction
+- Validate type safety before commits automatically checking type safety, validating compilation, and preventing broken TypeScript from being committed
+- Ensure code compiles without errors automatically validating compilation, detecting errors, and ensuring code quality
+- Prevent broken TypeScript from entering codebase automatically detecting type errors, preventing broken code, and maintaining code quality
+- Quick feedback on type-related issues automatically providing type error feedback, enabling rapid iteration, and improving development efficiency
+- Development workflow integration seamlessly integrating TypeScript compilation checking into development workflows without manual type checks or type safety validation
+
+## Installation
+1. Create hooks directory: mkdir -p .claude/hooks
+2. Create hook file: touch .claude/hooks/typescript-compilation-checker.sh
+3. Make executable: chmod +x .claude/hooks/typescript-compilation-checker.sh
+4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json
+5. Alternative: Use the interactive /hooks command in Claude Code
+
+### Config paths
+
+- Local (not committed): `.claude/settings.local.json`
+- User settings (global): `~/.claude/settings.json`
+- Project-wide (committed): `.claude/settings.json`
+
+## Requirements
+- Claude Code CLI installed
+- Project directory initialized
+- Bash shell available
+- Node.js and npm installed
+- TypeScript installed (npm install -g typescript or npm install --save-dev typescript)
+- jq (optional, for JSON parsing of tool input)
+
+## Hook Configuration
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/typescript-compilation-checker.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/typescript-compilation-checker.sh",
+      "matchers": [
+        "write",
+        "edit"
+      ]
+    }
+  }
+}
+```
+
+## Hook Script
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a TypeScript file
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    echo "📄 File: $FILE_PATH"
+    
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+    
+    # Check if TypeScript is available
+    if ! command -v npx >/dev/null 2>&1; then
+        echo "⚠️ npx not found - please install Node.js"
+        exit 1
+    fi
+    
+    if ! npx tsc --version >/dev/null 2>&1; then
+        echo "⚠️ TypeScript not found - install with: npm install -g typescript"
+        exit 1
+    fi
+    
+    # Get TypeScript version
+    TS_VERSION=$(npx tsc --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
+    echo "📦 TypeScript version: $TS_VERSION"
+    
+    # Check for tsconfig.json
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        CONFIG_FLAG=""
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        CONFIG_FLAG="--strict --target es2020 --module esnext --moduleResolution node"
+    fi
+    
+    echo "🔍 Running TypeScript compilation check..."
+    
+    # Run TypeScript compiler in no-emit mode
+    if npx tsc --noEmit $CONFIG_FLAG "$FILE_PATH" 2>&1; then
+        echo "✅ TypeScript compilation successful - no type errors found"
+        
+        # Additional file analysis
+        echo ""
+        echo "📊 File Analysis:"
+        
+        # Count interfaces, types, classes
+        INTERFACES=$(grep -c '^interface\\|^export interface' "$FILE_PATH" 2>/dev/null || echo 0)
+        TYPES=$(grep -c '^type\\|^export type' "$FILE_PATH" 2>/dev/null || echo 0)
+        CLASSES=$(grep -c '^class\\|^export class' "$FILE_PATH" 2>/dev/null || echo 0)
+        FUNCTIONS=$(grep -c '^function\\|^export function' "$FILE_PATH" 2>/dev/null || echo 0)
+        
+        echo "  • Interfaces: $INTERFACES"
+        echo "  • Type aliases: $TYPES"
+        echo "  • Classes: $CLASSES"
+        echo "  • Functions: $FUNCTIONS"
+        
+        # Check for any usage
+        if grep -q ': any' "$FILE_PATH" 2>/dev/null; then
+            ANY_COUNT=$(grep -c ': any' "$FILE_PATH" 2>/dev/null || echo 0)
+            echo "  • ⚠️ 'any' types found: $ANY_COUNT (consider more specific types)"
+        fi
+        
+        # Check for strict mode compliance
+        if grep -q '"use strict"' "$FILE_PATH" 2>/dev/null; then
+            echo "  • ✅ Strict mode enabled"
+        fi
+        
+    else
+        echo "❌ TypeScript compilation failed - type errors detected"
+        echo ""
+        echo "💡 Common fixes:"
+        echo "  • Check for missing type annotations"
+        echo "  • Verify import statements are correct"
+        echo "  • Ensure all variables are properly typed"
+        echo "  • Check for undefined/null value handling"
+        echo "  • Verify function return types match implementation"
+        exit 1
+    fi
+    
+    # Project-wide TypeScript health check
+    echo ""
+    echo "🏗️ Project TypeScript Health:"
+    
+    # Count total TypeScript files
+    TS_FILES=$(find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | wc -l)
+    echo "  • Total TS/TSX files: $TS_FILES"
+    
+    # Check if project compiles
+    if [ -f "tsconfig.json" ]; then
+        echo "  • 🔍 Checking project compilation..."
+        if npx tsc --noEmit >/dev/null 2>&1; then
+            echo "  • ✅ Project compiles successfully"
+        else
+            echo "  • ⚠️ Project has compilation errors - run 'npx tsc --noEmit' for details"
+        fi
+    fi
+    
+    echo ""
+    echo "💡 TypeScript Best Practices:"
+    echo "  • Use strict TypeScript configuration"
+    echo "  • Avoid 'any' types when possible"
+    echo "  • Use union types for multiple possibilities"
+    echo "  • Implement proper error handling with typed exceptions"
+    echo "  • Use interface segregation principle"
+    
+    echo ""
+    echo "🎯 TypeScript validation complete!"
+    
+else
+    echo "ℹ️ File is not a TypeScript file: $FILE_PATH"
+fi
+
+exit 0
+```
+```bash
+#!/bin/bash
+
+# Read the tool input from stdin
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name')
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+
+# Check if this is a TypeScript file
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    echo "📄 File: $FILE_PATH"
+    
+    # Check if file exists
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+    
+    # Check if TypeScript is available
+    if ! command -v npx >/dev/null 2>&1; then
+        echo "⚠️ npx not found - please install Node.js"
+        exit 1
+    fi
+    
+    if ! npx tsc --version >/dev/null 2>&1; then
+        echo "⚠️ TypeScript not found - install with: npm install -g typescript"
+        exit 1
+    fi
+    
+    # Get TypeScript version
+    TS_VERSION=$(npx tsc --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
+    echo "📦 TypeScript version: $TS_VERSION"
+    
+    # Check for tsconfig.json
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        CONFIG_FLAG=""
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        CONFIG_FLAG="--strict --target es2020 --module esnext --moduleResolution node"
+    fi
+    
+    echo "🔍 Running TypeScript compilation check..."
+    
+    # Run TypeScript compiler in no-emit mode
+    if npx tsc --noEmit $CONFIG_FLAG "$FILE_PATH" 2>&1; then
+        echo "✅ TypeScript compilation successful - no type errors found"
+        
+        # Additional file analysis
+        echo ""
+        echo "📊 File Analysis:"
+        
+        # Count interfaces, types, classes
+        INTERFACES=$(grep -c '^interface\\|^export interface' "$FILE_PATH" 2>/dev/null || echo 0)
+        TYPES=$(grep -c '^type\\|^export type' "$FILE_PATH" 2>/dev/null || echo 0)
+        CLASSES=$(grep -c '^class\\|^export class' "$FILE_PATH" 2>/dev/null || echo 0)
+        FUNCTIONS=$(grep -c '^function\\|^export function' "$FILE_PATH" 2>/dev/null || echo 0)
+        
+        echo "  • Interfaces: $INTERFACES"
+        echo "  • Type aliases: $TYPES"
+        echo "  • Classes: $CLASSES"
+        echo "  • Functions: $FUNCTIONS"
+        
+        # Check for any usage
+        if grep -q ': any' "$FILE_PATH" 2>/dev/null; then
+            ANY_COUNT=$(grep -c ': any' "$FILE_PATH" 2>/dev/null || echo 0)
+            echo "  • ⚠️ 'any' types found: $ANY_COUNT (consider more specific types)"
+        fi
+        
+        # Check for strict mode compliance
+        if grep -q '"use strict"' "$FILE_PATH" 2>/dev/null; then
+            echo "  • ✅ Strict mode enabled"
+        fi
+        
+    else
+        echo "❌ TypeScript compilation failed - type errors detected"
+        echo ""
+        echo "💡 Common fixes:"
+        echo "  • Check for missing type annotations"
+        echo "  • Verify import statements are correct"
+        echo "  • Ensure all variables are properly typed"
+        echo "  • Check for undefined/null value handling"
+        echo "  • Verify function return types match implementation"
+        exit 1
+    fi
+    
+    # Project-wide TypeScript health check
+    echo ""
+    echo "🏗️ Project TypeScript Health:"
+    
+    # Count total TypeScript files
+    TS_FILES=$(find . -name "*.ts" -o -name "*.tsx" | grep -v node_modules | wc -l)
+    echo "  • Total TS/TSX files: $TS_FILES"
+    
+    # Check if project compiles
+    if [ -f "tsconfig.json" ]; then
+        echo "  • 🔍 Checking project compilation..."
+        if npx tsc --noEmit >/dev/null 2>&1; then
+            echo "  • ✅ Project compiles successfully"
+        else
+            echo "  • ⚠️ Project has compilation errors - run 'npx tsc --noEmit' for details"
+        fi
+    fi
+    
+    echo ""
+    echo "💡 TypeScript Best Practices:"
+    echo "  • Use strict TypeScript configuration"
+    echo "  • Avoid 'any' types when possible"
+    echo "  • Use union types for multiple possibilities"
+    echo "  • Implement proper error handling with typed exceptions"
+    echo "  • Use interface segregation principle"
+    
+    echo ""
+    echo "🎯 TypeScript validation complete!"
+    
+else
+    echo "ℹ️ File is not a TypeScript file: $FILE_PATH"
+fi
+
+exit 0
+```
+
+## Examples
+### TypeScript Compilation Checker Hook Script
+
+Complete hook script that automatically runs TypeScript compilation checks after editing .ts or .tsx files
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    echo "📄 File: $FILE_PATH"
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+    if ! command -v npx >/dev/null 2>&1; then
+        echo "⚠️ npx not found - please install Node.js"
+        exit 1
+    fi
+    if ! npx tsc --version >/dev/null 2>&1; then
+        echo "⚠️ TypeScript not found - install with: npm install -g typescript"
+        exit 1
+    fi
+    TS_VERSION=$(npx tsc --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
+    echo "📦 TypeScript version: $TS_VERSION"
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        CONFIG_FLAG=""
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        CONFIG_FLAG="--strict --target es2020 --module esnext --moduleResolution node"
+    fi
+    echo "🔍 Running TypeScript compilation check..."
+    if npx tsc --noEmit $CONFIG_FLAG "$FILE_PATH" 2>&1; then
+        echo "✅ TypeScript compilation successful - no type errors found"
+    else
+        echo "❌ TypeScript compilation failed - type errors detected"
+        exit 1
+    fi
+else
+    echo "ℹ️ File is not a TypeScript file: $FILE_PATH"
+fi
+exit 0
+```
+### Hook Configuration
+
+Complete hook configuration for .claude/settings.json to enable automatic TypeScript compilation checking
+
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/typescript-compilation-checker.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+### Enhanced TypeScript Compilation Checker with File Analysis
+
+Enhanced hook script with file analysis, type counting, and 'any' type detection
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    if [ -f "tsconfig.json" ]; then
+        if npx tsc --noEmit --skipLibCheck "$FILE_PATH" 2>&1; then
+            echo "✅ TypeScript compilation successful"
+            INTERFACES=$(grep -c '^interface\|^export interface' "$FILE_PATH" 2>/dev/null || echo 0)
+            TYPES=$(grep -c '^type\|^export type' "$FILE_PATH" 2>/dev/null || echo 0)
+            CLASSES=$(grep -c '^class\|^export class' "$FILE_PATH" 2>/dev/null || echo 0)
+            FUNCTIONS=$(grep -c '^function\|^export function' "$FILE_PATH" 2>/dev/null || echo 0)
+            echo "📊 File Analysis:"
+            echo "  • Interfaces: $INTERFACES"
+            echo "  • Type aliases: $TYPES"
+            echo "  • Classes: $CLASSES"
+            echo "  • Functions: $FUNCTIONS"
+            if grep -q ': any' "$FILE_PATH" 2>/dev/null; then
+                ANY_COUNT=$(grep -c ': any' "$FILE_PATH" 2>/dev/null || echo 0)
+                echo "  • ⚠️ 'any' types found: $ANY_COUNT (consider more specific types)"
+            fi
+        else
+            echo "❌ TypeScript compilation failed - type errors detected"
+            exit 1
+        fi
+    fi
+fi
+exit 0
+```
+### TypeScript Compilation Checker with Project-Wide Health Check
+
+Enhanced hook script with project-wide TypeScript health check and tsconfig.json integration
+
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        if npx tsc --noEmit --skipLibCheck 2>&1; then
+            echo "✅ Project compiles successfully"
+        else
+            echo "⚠️ Project has compilation errors - run 'npx tsc --noEmit' for details"
+        fi
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        if npx tsc --noEmit --strict --target es2020 --module esnext --moduleResolution node "$FILE_PATH" 2>&1; then
+            echo "✅ TypeScript compilation successful"
+        else
+            echo "❌ TypeScript compilation failed - type errors detected"
+            exit 1
+        fi
+    fi
+fi
+exit 0
+```
+### TypeScript Compilation Checker Configuration Example
+
+Example TypeScript compilation checker configuration for customizing compilation checking behavior
+
+```json
+{
+  "typescript_compilation_checker": {
+    "enabled": true,
+    "no_emit": true,
+    "skip_lib_check": true,
+    "strict_mode": true,
+    "file_extensions": [".ts", ".tsx"],
+    "tsconfig_path": "tsconfig.json",
+    "default_config": {
+      "strict": true,
+      "target": "es2020",
+      "module": "esnext",
+      "moduleResolution": "node"
+    },
+    "analysis": {
+      "count_interfaces": true,
+      "count_types": true,
+      "count_classes": true,
+      "count_functions": true,
+      "detect_any_types": true
+    },
+    "project_health_check": true,
+    "exclude_patterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    echo "📄 File: $FILE_PATH"
+    if [ ! -f "$FILE_PATH" ]; then
+        echo "⚠️ File not found: $FILE_PATH"
+        exit 1
+    fi
+    if ! command -v npx >/dev/null 2>&1; then
+        echo "⚠️ npx not found - please install Node.js"
+        exit 1
+    fi
+    if ! npx tsc --version >/dev/null 2>&1; then
+        echo "⚠️ TypeScript not found - install with: npm install -g typescript"
+        exit 1
+    fi
+    TS_VERSION=$(npx tsc --version 2>/dev/null | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
+    echo "📦 TypeScript version: $TS_VERSION"
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        CONFIG_FLAG=""
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        CONFIG_FLAG="--strict --target es2020 --module esnext --moduleResolution node"
+    fi
+    echo "🔍 Running TypeScript compilation check..."
+    if npx tsc --noEmit $CONFIG_FLAG "$FILE_PATH" 2>&1; then
+        echo "✅ TypeScript compilation successful - no type errors found"
+    else
+        echo "❌ TypeScript compilation failed - type errors detected"
+        exit 1
+    fi
+else
+    echo "ℹ️ File is not a TypeScript file: $FILE_PATH"
+fi
+exit 0
+```
+```json
+{
+  "hooks": {
+    "postToolUse": {
+      "script": "./.claude/hooks/typescript-compilation-checker.sh",
+      "matchers": ["write", "edit"]
+    }
+  }
+}
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    if [ -f "tsconfig.json" ]; then
+        if npx tsc --noEmit --skipLibCheck "$FILE_PATH" 2>&1; then
+            echo "✅ TypeScript compilation successful"
+            INTERFACES=$(grep -c '^interface\|^export interface' "$FILE_PATH" 2>/dev/null || echo 0)
+            TYPES=$(grep -c '^type\|^export type' "$FILE_PATH" 2>/dev/null || echo 0)
+            CLASSES=$(grep -c '^class\|^export class' "$FILE_PATH" 2>/dev/null || echo 0)
+            FUNCTIONS=$(grep -c '^function\|^export function' "$FILE_PATH" 2>/dev/null || echo 0)
+            echo "📊 File Analysis:"
+            echo "  • Interfaces: $INTERFACES"
+            echo "  • Type aliases: $TYPES"
+            echo "  • Classes: $CLASSES"
+            echo "  • Functions: $FUNCTIONS"
+            if grep -q ': any' "$FILE_PATH" 2>/dev/null; then
+                ANY_COUNT=$(grep -c ': any' "$FILE_PATH" 2>/dev/null || echo 0)
+                echo "  • ⚠️ 'any' types found: $ANY_COUNT (consider more specific types)"
+            fi
+        else
+            echo "❌ TypeScript compilation failed - type errors detected"
+            exit 1
+        fi
+    fi
+fi
+exit 0
+```
+```bash
+#!/bin/bash
+INPUT=$(cat)
+FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // ""')
+if [ -z "$FILE_PATH" ]; then
+  exit 0
+fi
+if [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]]; then
+    echo "🔍 TypeScript Compilation Checker - Validating TypeScript code..."
+    if [ -f "tsconfig.json" ]; then
+        echo "⚙️ Using project tsconfig.json"
+        if npx tsc --noEmit --skipLibCheck 2>&1; then
+            echo "✅ Project compiles successfully"
+        else
+            echo "⚠️ Project has compilation errors - run 'npx tsc --noEmit' for details"
+        fi
+    else
+        echo "⚠️ No tsconfig.json found - using default configuration"
+        if npx tsc --noEmit --strict --target es2020 --module esnext --moduleResolution node "$FILE_PATH" 2>&1; then
+            echo "✅ TypeScript compilation successful"
+        else
+            echo "❌ TypeScript compilation failed - type errors detected"
+            exit 1
+        fi
+    fi
+fi
+exit 0
+```
+```json
+{
+  "typescript_compilation_checker": {
+    "enabled": true,
+    "no_emit": true,
+    "skip_lib_check": true,
+    "strict_mode": true,
+    "file_extensions": [".ts", ".tsx"],
+    "tsconfig_path": "tsconfig.json",
+    "default_config": {
+      "strict": true,
+      "target": "es2020",
+      "module": "esnext",
+      "moduleResolution": "node"
+    },
+    "analysis": {
+      "count_interfaces": true,
+      "count_types": true,
+      "count_classes": true,
+      "count_functions": true,
+      "detect_any_types": true
+    },
+    "project_health_check": true,
+    "exclude_patterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
+  }
+}
+```
+
+## Troubleshooting
+### tsc --noEmit checks entire project instead of single file
+
+TypeScript follows imports checking dependencies. Add --skipLibCheck: 'tsc --noEmit --skipLibCheck "$FILE_PATH"' or use --isolatedModules for single-file validation without imports. Verify tsconfig.json includes/excludes. Check TypeScript version.
+### Compilation fails with module resolution errors for node_modules
+
+Missing @types packages or wrong moduleResolution. Install types: 'npm install --save-dev @types/node @types/react'. Set tsconfig: '"moduleResolution": "node"' or "bundler". Verify node_modules structure. Check TypeScript version compatibility.
+### Hook shows success but VSCode still displays type errors
+
+Different TS versions between CLI and editor. Check: 'npx tsc --version' vs VSCode version. Sync: install workspace TS: 'npm install --save-dev typescript@latest'. Restart VSCode. Verify tsconfig.json is being used by both.
+### 'any' type detection misses implicit any from missing type annotations
+
+grep pattern only finds explicit ': any'. Enable noImplicitAny in tsconfig.json. Or check tsc output: parse 'implicitly has an any type' from compilation errors for complete detection. Verify strict mode settings.
+### Project-wide health check freezes on large monorepos
+
+Full tsc scans thousands of files. Skip or timeout: 'timeout 10 npx tsc --noEmit >/dev/null 2>&1' with exit code check. Or remove: comment out project compilation section. Use --skipLibCheck to speed up. Configure tsconfig.json includes/excludes.
+### TypeScript not found despite npm installation
+
+Verify TypeScript installation: 'npm list typescript' or 'npx tsc --version'. Install globally: 'npm install -g typescript' or locally: 'npm install --save-dev typescript'. Check PATH. Verify Node.js version compatibility.
+### tsconfig.json not being detected or used
+
+Verify tsconfig.json exists in project root. Check file permissions. Use explicit path: 'npx tsc --project tsconfig.json --noEmit'. Verify tsconfig.json syntax is valid JSON. Check for multiple tsconfig.json files.
+### Type errors in dependencies not being skipped
+
+Use --skipLibCheck flag: 'npx tsc --noEmit --skipLibCheck'. Configure tsconfig.json: '"skipLibCheck": true'. Verify @types packages are installed. Check TypeScript version supports skipLibCheck.

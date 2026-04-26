@@ -16,7 +16,6 @@ import { categoryDescriptions, categoryLabels, siteConfig } from "@/lib/site";
 export type { CategorySummary, ContentEntry, DirectoryEntry };
 
 const DATA_ORIGIN = "https://heyclau.de";
-let contentIndexPromise: Promise<ContentEntry[]> | null = null;
 let directoryIndexPromise: Promise<DirectoryEntry[]> | null = null;
 const entryDetailPromises = new Map<string, Promise<ContentEntry | null>>();
 
@@ -29,9 +28,16 @@ async function loadJsonDataFile<T>(fileName: string): Promise<T> {
     // In the Cloudflare Worker runtime, read from the static ASSETS binding.
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as {
-      ASSETS: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
+      ASSETS: {
+        fetch: (
+          input: RequestInfo | URL,
+          init?: RequestInit,
+        ) => Promise<Response>;
+      };
     };
-    const response = await envRecord.ASSETS.fetch(new Request(`${DATA_ORIGIN}/data/${fileName}`));
+    const response = await envRecord.ASSETS.fetch(
+      new Request(`${DATA_ORIGIN}/data/${fileName}`),
+    );
     if (!response.ok) {
       throw new Error(`Failed to load ${fileName} asset (${response.status})`);
     }
@@ -39,23 +45,42 @@ async function loadJsonDataFile<T>(fileName: string): Promise<T> {
   }
 }
 
-const loadContentIndex = cache(async (): Promise<ContentEntry[]> => {
-  contentIndexPromise ??= loadJsonDataFile<ContentEntry[] | RegistryEnvelope<ContentEntry>>("content-index.json").then(
-    normalizeRegistryEntries
-  );
-  return contentIndexPromise;
-});
+export async function loadTextDataFile(fileName: string): Promise<string> {
+  try {
+    const filePath = path.join(process.cwd(), "public", "data", fileName);
+    return await readFile(filePath, "utf8");
+  } catch {
+    const { env } = getCloudflareContext();
+    const envRecord = env as unknown as {
+      ASSETS: {
+        fetch: (
+          input: RequestInfo | URL,
+          init?: RequestInit,
+        ) => Promise<Response>;
+      };
+    };
+    const response = await envRecord.ASSETS.fetch(
+      new Request(`${DATA_ORIGIN}/data/${fileName}`),
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to load ${fileName} asset (${response.status})`);
+    }
+    return response.text();
+  }
+}
 
 const loadDirectoryIndex = cache(async (): Promise<DirectoryEntry[]> => {
-  directoryIndexPromise ??= loadJsonDataFile<DirectoryEntry[] | RegistryEnvelope<DirectoryEntry>>(
-    "directory-index.json"
+  directoryIndexPromise ??= loadJsonDataFile<RegistryEnvelope<DirectoryEntry>>(
+    "directory-index.json",
   ).then(normalizeRegistryEntries);
   return directoryIndexPromise;
 });
 
-function normalizeRegistryEntries<T>(payload: T[] | RegistryEnvelope<T>): T[] {
-  if (Array.isArray(payload)) return payload;
-  return Array.isArray(payload?.entries) ? payload.entries : [];
+function normalizeRegistryEntries<T>(payload: RegistryEnvelope<T>): T[] {
+  if (!Array.isArray(payload?.entries)) {
+    throw new Error("Invalid registry artifact: expected entries envelope");
+  }
+  return payload.entries;
 }
 
 function isSafeContentPathPart(value: string) {
@@ -70,9 +95,10 @@ async function loadEntryDetail(category: string, slug: string) {
   const key = `${category}:${slug}`;
   let promise = entryDetailPromises.get(key);
   if (!promise) {
-    promise = loadJsonDataFile<{ schemaVersion?: number; entry?: ContentEntry }>(
-      `entries/${category}/${slug}.json`
-    )
+    promise = loadJsonDataFile<{
+      schemaVersion?: number;
+      entry?: ContentEntry;
+    }>(`entries/${category}/${slug}.json`)
       .then((payload) => payload.entry ?? null)
       .catch(() => null);
     entryDetailPromises.set(key, promise);
@@ -82,20 +108,29 @@ async function loadEntryDetail(category: string, slug: string) {
 }
 
 export const getAllEntries = cache(async (): Promise<ContentEntry[]> => {
-  return loadContentIndex();
+  const directoryEntries = await getDirectoryEntries();
+  const details = await Promise.all(
+    directoryEntries.map((entry) => getEntry(entry.category, entry.slug)),
+  );
+  return details.filter((entry): entry is ContentEntry => Boolean(entry));
 });
 
-export const getDirectoryEntries = cache(async (): Promise<DirectoryEntry[]> => {
-  return loadDirectoryIndex();
-});
+export const getDirectoryEntries = cache(
+  async (): Promise<DirectoryEntry[]> => {
+    return loadDirectoryIndex();
+  },
+);
 
 export const getEntry = cache(async (category: string, slug: string) => {
   return loadEntryDetail(category, slug);
 });
 
 export const getEntriesByCategory = cache(async (category: string) => {
-  const entries = await getAllEntries();
-  return entries.filter((entry) => entry.category === category);
+  const entries = await getDirectoryEntriesByCategory(category);
+  const details = await Promise.all(
+    entries.map((entry) => getEntry(entry.category, entry.slug)),
+  );
+  return details.filter((entry): entry is ContentEntry => Boolean(entry));
 });
 
 export const getDirectoryEntriesByCategory = cache(async (category: string) => {
@@ -103,25 +138,31 @@ export const getDirectoryEntriesByCategory = cache(async (category: string) => {
   return entries.filter((entry) => entry.category === category);
 });
 
-export const getCategorySummaries = cache(async (): Promise<CategorySummary[]> => {
-  const entries = await getDirectoryEntries();
-  return siteConfig.categoryOrder
-    .map((category) => {
-      const count = entries.filter((entry) => entry.category === category).length;
-      return {
-        category,
-        label: categoryLabels[category],
-        count,
-        description: categoryDescriptions[category]
-      };
-    })
-    .filter((entry) => entry.count > 0);
-});
+export const getCategorySummaries = cache(
+  async (): Promise<CategorySummary[]> => {
+    const entries = await getDirectoryEntries();
+    return siteConfig.categoryOrder
+      .map((category) => {
+        const count = entries.filter(
+          (entry) => entry.category === category,
+        ).length;
+        return {
+          category,
+          label: categoryLabels[category],
+          count,
+          description: categoryDescriptions[category],
+        };
+      })
+      .filter((entry) => entry.count > 0);
+  },
+);
 
 export const getRecentEntries = cache(async () => {
   const entries = await getDirectoryEntries();
   return [...entries]
     .filter((entry) => entry.dateAdded)
-    .sort((left, right) => String(right.dateAdded).localeCompare(String(left.dateAdded)))
+    .sort((left, right) =>
+      String(right.dateAdded).localeCompare(String(left.dateAdded)),
+    )
     .slice(0, 12);
 });

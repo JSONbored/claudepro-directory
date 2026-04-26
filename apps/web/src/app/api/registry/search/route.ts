@@ -19,40 +19,55 @@ type SearchEntry = {
   url: string;
 };
 
-type SearchPayload =
-  | SearchEntry[]
-  | {
-      schemaVersion?: number;
-      generatedAt?: string;
-      entries?: SearchEntry[];
-    };
+type SearchPayload = {
+  schemaVersion?: number;
+  generatedAt?: string;
+  entries?: SearchEntry[];
+};
 
 const DATA_ORIGIN = "https://heyclau.de";
 let searchIndexPromise: Promise<SearchEntry[]> | null = null;
 
 async function loadSearchIndexFile(): Promise<SearchPayload> {
   try {
-    const filePath = path.join(process.cwd(), "public", "data", "search-index.json");
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "data",
+      "search-index.json",
+    );
     return JSON.parse(await readFile(filePath, "utf8")) as SearchPayload;
   } catch {
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as {
-      ASSETS: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
+      ASSETS: {
+        fetch: (
+          input: RequestInfo | URL,
+          init?: RequestInit,
+        ) => Promise<Response>;
+      };
     };
     const response = await envRecord.ASSETS.fetch(
-      new Request(`${DATA_ORIGIN}/data/search-index.json`)
+      new Request(`${DATA_ORIGIN}/data/search-index.json`),
     );
     if (!response.ok) {
-      throw new Error(`Failed to load search-index.json asset (${response.status})`);
+      throw new Error(
+        `Failed to load search-index.json asset (${response.status})`,
+      );
     }
     return (await response.json()) as SearchPayload;
   }
 }
 
 async function loadSearchIndex() {
-  searchIndexPromise ??= loadSearchIndexFile().then((payload) =>
-    Array.isArray(payload) ? payload : Array.isArray(payload.entries) ? payload.entries : []
-  );
+  searchIndexPromise ??= loadSearchIndexFile().then((payload) => {
+    if (!Array.isArray(payload.entries)) {
+      throw new Error(
+        "Invalid registry search artifact: expected entries envelope",
+      );
+    }
+    return payload.entries;
+  });
   return searchIndexPromise;
 }
 
@@ -63,7 +78,9 @@ function normalizeLimit(value: string | null) {
 }
 
 function normalizeCategory(value: string | null) {
-  const normalized = String(value ?? "").trim().toLowerCase();
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
   return /^[a-z0-9-]+$/.test(normalized) ? normalized : "";
 }
 
@@ -91,13 +108,23 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
   }
 
-  if (isRateLimited({ request, scope: "registry-search", limit: 120, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "registry-search",
+      limit: 120,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "registry.search.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
   const url = new URL(request.url);
-  const query = String(url.searchParams.get("q") ?? "").trim().toLowerCase().slice(0, 120);
+  const query = String(url.searchParams.get("q") ?? "")
+    .trim()
+    .toLowerCase()
+    .slice(0, 120);
   const category = normalizeCategory(url.searchParams.get("category"));
   const limit = normalizeLimit(url.searchParams.get("limit"));
 
@@ -119,6 +146,6 @@ export async function GET(request: Request) {
       headers: {
         "cache-control": "public, max-age=60, stale-while-revalidate=600",
       },
-    }
+    },
   );
 }

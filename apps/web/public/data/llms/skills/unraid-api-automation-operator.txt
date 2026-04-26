@@ -1,0 +1,76 @@
+# Unraid API Automation Operator Skill
+URL: https://heyclau.de/skills/unraid-api-automation-operator
+Category: skills
+Author: JSONbored
+Date added: 2026-04-10
+Documentation: https://docs.unraid.net/API/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-automation-operator.mdx
+Download: /downloads/skills/unraid-api-automation-operator.zip
+## Summary
+Build practical Unraid API automations for server operations, health checks, and routine maintenance with safe execution controls.
+## Tags
+- unraid
+- homelab
+- automation
+- api
+- operations
+## Content
+## Overview
+This skill helps AI agents create safe and repeatable Unraid automations. It focuses on real operational tasks such as health checks, backup verification, container lifecycle actions, and maintenance windows.
+
+## Compatibility
+### Native
+
+- **Claude Code / Claude**: native skill usage via `SKILL.md`.
+- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.
+
+### Manual Adaptation
+
+- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+
+## Prerequisites
+- Operational policy for when automation may modify host state
+- Backup and restore baseline
+- Alert channel for actionable failures
+
+## What This Skill Delivers
+- Task-level automation design with execution boundaries
+- API request sequencing with safety checks
+- Retry/backoff and rollback considerations
+- Human-readable run summary and escalation guidance
+
+## How to Use This Skill
+1. Define allowed operations and protected resources.
+2. Map API calls to deterministic execution steps.
+3. Add pre-checks and post-checks for each action.
+4. Add failure handling and rollback branches.
+5. Emit concise run report for ops visibility.
+
+## Troubleshooting
+**Issue:** Automation retries create duplicate side effects  
+**Fix:** Add idempotency keys and state checks before write operations.
+
+**Issue:** API calls fail intermittently  
+**Fix:** Add bounded retries with backoff and explicit timeout policy.
+
+**Issue:** Hard to trust autonomous changes  
+**Fix:** Add human approval for destructive or high-risk operations.
+
+## Knowledge Freshness
+Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.
+
+## Retrieval Sources
+- https://docs.unraid.net/API/
+
+## Output Contract
+1. Return a concrete plan with implementation order.
+2. Provide production-ready commands/config/code snippets (not placeholders).
+3. Include explicit assumptions and unresolved risks.
+4. Include a verification checklist with pass/fail criteria.
+
+## Quality Gates
+- All commands are copy/paste ready.
+- Security-sensitive steps call out secret handling and least privilege.
+- Version-sensitive guidance cites current docs used.
+- Rollback path is included for risky changes.
+- Final output includes quick validation commands/tests.

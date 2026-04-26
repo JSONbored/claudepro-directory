@@ -1,0 +1,1197 @@
+# TDD Workflow for Claude Code
+URL: https://heyclau.de/commands/tdd-workflow
+Category: commands
+Author: JSONbored
+Date added: 2025-10-25
+Documentation: https://docs.claude.com/en/docs/claude-code/testing
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/tdd-workflow.mdx
+## Summary
+Implement test-driven development workflows with Claude Code using red-green-refactor cycles, automatic test generation, and AI-guided iteration until all tests pass
+## Tags
+- tdd
+- testing
+- red-green-refactor
+- test-automation
+- quality
+- ai-testing
+## Content
+## Overview
+The `/tdd-workflow` command implements test-driven development (TDD) in Claude Code with AI-assisted red-green-refactor cycles, preventing hallucination through test-anchored iteration.
+
+## Features
+- **Red-Green-Refactor Automation**: Full TDD cycle with failing tests → passing code → optimization
+- **Test-First Enforcement**: Claude writes tests BEFORE implementing features
+- **Iteration Until Pass**: AI refines code until all tests pass (no manual fixes)
+- **Anti-Hallucination**: Tests serve as ground truth preventing scope drift
+- **Coverage Tracking**: Automatic code coverage measurement (80%+ target)
+- **Test Templates**: Pre-built patterns for unit, integration, and E2E tests
+- **Framework Support**: Vitest, Jest, Playwright, Cypress
+- **Continuous Verification**: Run tests after each code change
+
+## Usage
+```bash
+/tdd-workflow [feature] [options]
+```
+
+### Workflow Modes
+
+- `--unit` - Unit test TDD workflow (default)
+- `--integration` - Integration test workflow
+- `--e2e` - End-to-end test workflow
+- `--full` - Complete test pyramid (unit + integration + e2e)
+
+### Test Frameworks
+
+- `--vitest` - Vitest (default for unit/integration)
+- `--jest` - Jest testing framework
+- `--playwright` - Playwright for E2E
+- `--cypress` - Cypress for E2E
+
+### Coverage Options
+
+- `--coverage` - Generate coverage report (default: true)
+- `--min-coverage=<percent>` - Minimum coverage threshold (default: 80)
+- `--strict` - Fail if coverage below threshold
+
+### Behavior Modifiers
+
+- `--watch` - Watch mode, re-run tests on file changes
+- `--debug` - Show detailed test execution logs
+- `--commit-on-green` - Auto-commit when all tests pass
+```bash
+/tdd-workflow [feature] [options]
+```
+
+## Examples
+### Basic TDD Workflow - User Authentication
+
+**Command:**
+```bash
+/tdd-workflow "user authentication service with email/password" --unit
+```
+
+**TDD Cycle:**
+
+**Phase 1: RED (Write Failing Tests)**
+```typescript
+// Claude generates: tests/unit/auth.service.test.ts
+import { describe, it, expect, beforeEach } from 'vitest';
+import { AuthService } from '@/services/auth.service';
+
+describe('AuthService', () => {
+  let authService: AuthService;
+
+  beforeEach(() => {
+    authService = new AuthService();
+  });
+
+  describe('login', () => {
+    it('should return user token for valid credentials', async () => {
+      const result = await authService.login({
+        email: 'user@example.com',
+        password: 'ValidPass123'
+      });
+
+      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty('user');
+      expect(result.user.email).toBe('user@example.com');
+    });
+
+    it('should throw error for invalid email', async () => {
+      await expect(
+        authService.login({ email: 'invalid', password: 'pass' })
+      ).rejects.toThrow('Invalid email format');
+    });
+
+    it('should throw error for incorrect password', async () => {
+      await expect(
+        authService.login({ email: 'user@example.com', password: 'wrong' })
+      ).rejects.toThrow('Invalid credentials');
+    });
+
+    it('should hash password before comparison', async () => {
+      const loginSpy = vi.spyOn(authService, 'comparePassword');
+      await authService.login({ email: 'user@example.com', password: 'pass' });
+      
+      expect(loginSpy).toHaveBeenCalledWith('pass', expect.any(String));
+    });
+  });
+
+  describe('register', () => {
+    it('should create new user and return token', async () => {
+      const result = await authService.register({
+        email: 'new@example.com',
+        password: 'ValidPass123',
+        name: 'New User'
+      });
+
+      expect(result).toHaveProperty('token');
+      expect(result.user.email).toBe('new@example.com');
+    });
+
+    it('should reject weak passwords', async () => {
+      await expect(
+        authService.register({ email: 'user@example.com', password: '123' })
+      ).rejects.toThrow('Password must be at least 8 characters');
+    });
+
+    it('should reject duplicate emails', async () => {
+      await authService.register({ email: 'dup@example.com', password: 'ValidPass123' });
+      
+      await expect(
+        authService.register({ email: 'dup@example.com', password: 'ValidPass123' })
+      ).rejects.toThrow('Email already exists');
+    });
+  });
+});
+```
+
+**Run Tests (Expect Failures):**
+```bash
+pnpm test auth.service.test.ts
+
+❌ FAIL  tests/unit/auth.service.test.ts
+  AuthService
+    login
+      ✗ should return user token for valid credentials
+        → Cannot find module '@/services/auth.service'
+      ✗ should throw error for invalid email
+      ✗ should throw error for incorrect password
+      ✗ should hash password before comparison
+```
+
+Claude: "Tests written and failing as expected. Proceeding to GREEN phase."
+
+**Phase 2: GREEN (Implement Minimum Code to Pass)**
+```typescript
+// Claude generates: src/services/auth.service.ts
+import { hash, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(1)
+});
+
+const registerSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(1)
+});
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+}
+
+export class AuthService {
+  private users: Map<string, User> = new Map();
+
+  async login(credentials: { email: string; password: string }) {
+    const validated = loginSchema.parse(credentials);
+    
+    const user = Array.from(this.users.values()).find(
+      u => u.email === validated.email
+    );
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    const passwordMatch = await this.comparePassword(
+      validated.password,
+      user.passwordHash
+    );
+
+    if (!passwordMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    const token = this.generateToken(user);
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
+
+  async register(data: { email: string; password: string; name: string }) {
+    const validated = registerSchema.parse(data);
+
+    if (Array.from(this.users.values()).some(u => u.email === validated.email)) {
+      throw new Error('Email already exists');
+    }
+
+    const passwordHash = await hash(validated.password, 10);
+    const user: User = {
+      id: crypto.randomUUID(),
+      email: validated.email,
+      name: validated.name,
+      passwordHash
+    };
+
+    this.users.set(user.id, user);
+
+    const token = this.generateToken(user);
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
+
+  async comparePassword(password: string, hash: string): Promise<boolean> {
+    return compare(password, hash);
+  }
+
+  private generateToken(user: User): string {
+    return sign({ userId: user.id }, process.env.JWT_SECRET || 'dev-secret', {
+      expiresIn: '7d'
+    });
+  }
+}
+```
+
+**Run Tests Again:**
+```bash
+pnpm test auth.service.test.ts
+
+✓ PASS  tests/unit/auth.service.test.ts
+  AuthService
+    login
+      ✓ should return user token for valid credentials (45ms)
+      ✓ should throw error for invalid email (12ms)
+      ✓ should throw error for incorrect password (38ms)
+      ✓ should hash password before comparison (42ms)
+    register
+      ✓ should create new user and return token (48ms)
+      ✓ should reject weak passwords (8ms)
+      ✓ should reject duplicate emails (52ms)
+
+Test Coverage:
+  File: auth.service.ts
+  Statements: 95.2%
+  Branches: 100%
+  Functions: 100%
+  Lines: 94.7%
+```
+
+Claude: "All tests passing! Coverage: 95.2%. Proceeding to REFACTOR phase."
+
+**Phase 3: REFACTOR (Optimize While Keeping Tests Green)**
+```typescript
+// Claude refactors for better organization
+export class AuthService {
+  private users: Map<string, User> = new Map();
+  private readonly saltRounds = 10;
+  private readonly tokenExpiry = '7d';
+
+  async login(credentials: LoginCredentials): Promise<AuthResult> {
+    const validated = this.validateLoginCredentials(credentials);
+    const user = await this.findUserByEmail(validated.email);
+    await this.verifyPassword(validated.password, user.passwordHash);
+    
+    return this.createAuthResult(user);
+  }
+
+  async register(data: RegisterData): Promise<AuthResult> {
+    const validated = this.validateRegisterData(data);
+    await this.ensureEmailNotExists(validated.email);
+    
+    const user = await this.createUser(validated);
+    return this.createAuthResult(user);
+  }
+
+  private validateLoginCredentials(credentials: unknown): LoginCredentials {
+    return loginSchema.parse(credentials);
+  }
+
+  private async findUserByEmail(email: string): Promise<User> {
+    const user = Array.from(this.users.values()).find(u => u.email === email);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+    return user;
+  }
+
+  private async verifyPassword(password: string, hash: string): Promise<void> {
+    const match = await compare(password, hash);
+    if (!match) {
+      throw new Error('Invalid credentials');
+    }
+  }
+
+  private createAuthResult(user: User): AuthResult {
+    return {
+      token: this.generateToken(user),
+      user: this.sanitizeUser(user)
+    };
+  }
+
+  // ... more refactored methods
+}
+```
+
+**Run Tests After Refactor:**
+```bash
+pnpm test auth.service.test.ts
+
+✓ All tests still passing
+✓ Coverage maintained: 95.2%
+```
+
+Claude: "Refactoring complete. All tests green. Ready for commit."
+
+### Integration Testing Workflow
+
+**Command:**
+```bash
+/tdd-workflow "user registration API endpoint" --integration
+```
+
+**Generated Integration Tests:**
+```typescript
+// tests/integration/auth.api.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import { app } from '@/app';
+import { db } from '@/lib/db';
+
+describe('POST /api/auth/register', () => {
+  beforeAll(async () => {
+    await db.migrate.latest();
+  });
+
+  afterAll(async () => {
+    await db.migrate.rollback();
+    await db.destroy();
+  });
+
+  it('should register new user and return 201', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: 'newuser@example.com',
+        password: 'ValidPass123',
+        name: 'New User'
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('token');
+    expect(response.body.user.email).toBe('newuser@example.com');
+  });
+
+  it('should return 400 for invalid email format', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'invalid', password: 'pass', name: 'User' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toContain('Invalid email');
+  });
+
+  it('should return 409 for duplicate email', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User' });
+
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User2' });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toContain('already exists');
+  });
+
+  it('should store hashed password in database', async () => {
+    const password = 'PlainPassword123';
+    
+    await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'hash@example.com', password, name: 'User' });
+
+    const user = await db('users').where({ email: 'hash@example.com' }).first();
+    
+    expect(user.password).not.toBe(password);
+    expect(user.password).toMatch(/^\$2[aby]\$/);
+  });
+});
+```
+
+### E2E Testing Workflow with Playwright
+
+**Command:**
+```bash
+/tdd-workflow "complete user registration flow" --e2e --playwright
+```
+
+**Generated E2E Tests:**
+```typescript
+// tests/e2e/auth.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('User Registration Flow', () => {
+  test('should complete full registration process', async ({ page }) => {
+    // Navigate to registration page
+    await page.goto('/register');
+
+    // Fill registration form
+    await page.fill('[name="email"]', 'e2e@example.com');
+    await page.fill('[name="password"]', 'ValidPass123');
+    await page.fill('[name="confirmPassword"]', 'ValidPass123');
+    await page.fill('[name="name"]', 'E2E User');
+
+    // Submit form
+    await page.click('[type="submit"]');
+
+    // Verify redirect to dashboard
+    await expect(page).toHaveURL('/dashboard');
+
+    // Verify user name displayed
+    await expect(page.locator('[data-testid="user-name"]')).toHaveText('E2E User');
+  });
+
+  test('should show validation errors for invalid inputs', async ({ page }) => {
+    await page.goto('/register');
+
+    // Submit empty form
+    await page.click('[type="submit"]');
+
+    // Verify error messages
+    await expect(page.locator('[data-testid="email-error"]')).toBeVisible();
+    await expect(page.locator('[data-testid="password-error"]')).toBeVisible();
+  });
+
+  test('should persist session after registration', async ({ page, context }) => {
+    await page.goto('/register');
+    
+    // Register user
+    await page.fill('[name="email"]', 'session@example.com');
+    await page.fill('[name="password"]', 'ValidPass123');
+    await page.fill('[name="confirmPassword"]', 'ValidPass123');
+    await page.fill('[name="name"]', 'Session User');
+    await page.click('[type="submit"]');
+
+    // Verify cookies set
+    const cookies = await context.cookies();
+    expect(cookies.find(c => c.name === 'auth_token')).toBeDefined();
+
+    // Reload page - should stay authenticated
+    await page.reload();
+    await expect(page).toHaveURL('/dashboard');
+  });
+});
+```
+
+### Full Test Pyramid Workflow
+
+**Command:**
+```bash
+/tdd-workflow "payment processing feature" --full --min-coverage=90
+```
+
+**Claude Executes:**
+
+1. **Unit Tests** (70% of test suite)
+   - Service layer logic
+   - Utility functions
+   - Data validation
+   - Business rules
+
+2. **Integration Tests** (20% of test suite)
+   - API endpoints
+   - Database operations
+   - External service mocks
+
+3. **E2E Tests** (10% of test suite)
+   - Critical user flows
+   - Payment completion
+   - Error handling UX
+
+**Coverage Report:**
+```
+Test Results:
+  Unit: 45 tests passing
+  Integration: 12 tests passing
+  E2E: 3 tests passing
+
+Coverage:
+  Overall: 92.3% ✓
+  Statements: 93.1%
+  Branches: 89.7%
+  Functions: 95.2%
+  Lines: 92.8%
+
+Target: 90% - PASSED ✓
+```
+```bash
+/tdd-workflow "user authentication service with email/password" --unit
+```
+```typescript
+// Claude generates: tests/unit/auth.service.test.ts
+import { describe, it, expect, beforeEach } from 'vitest';
+import { AuthService } from '@/services/auth.service';
+
+describe('AuthService', () => {
+  let authService: AuthService;
+
+  beforeEach(() => {
+    authService = new AuthService();
+  });
+
+  describe('login', () => {
+    it('should return user token for valid credentials', async () => {
+      const result = await authService.login({
+        email: 'user@example.com',
+        password: 'ValidPass123'
+      });
+
+      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty('user');
+      expect(result.user.email).toBe('user@example.com');
+    });
+
+    it('should throw error for invalid email', async () => {
+      await expect(
+        authService.login({ email: 'invalid', password: 'pass' })
+      ).rejects.toThrow('Invalid email format');
+    });
+
+    it('should throw error for incorrect password', async () => {
+      await expect(
+        authService.login({ email: 'user@example.com', password: 'wrong' })
+      ).rejects.toThrow('Invalid credentials');
+    });
+
+    it('should hash password before comparison', async () => {
+      const loginSpy = vi.spyOn(authService, 'comparePassword');
+      await authService.login({ email: 'user@example.com', password: 'pass' });
+      
+      expect(loginSpy).toHaveBeenCalledWith('pass', expect.any(String));
+    });
+  });
+
+  describe('register', () => {
+    it('should create new user and return token', async () => {
+      const result = await authService.register({
+        email: 'new@example.com',
+        password: 'ValidPass123',
+        name: 'New User'
+      });
+
+      expect(result).toHaveProperty('token');
+      expect(result.user.email).toBe('new@example.com');
+    });
+
+    it('should reject weak passwords', async () => {
+      await expect(
+        authService.register({ email: 'user@example.com', password: '123' })
+      ).rejects.toThrow('Password must be at least 8 characters');
+    });
+
+    it('should reject duplicate emails', async () => {
+      await authService.register({ email: 'dup@example.com', password: 'ValidPass123' });
+      
+      await expect(
+        authService.register({ email: 'dup@example.com', password: 'ValidPass123' })
+      ).rejects.toThrow('Email already exists');
+    });
+  });
+});
+```
+```bash
+pnpm test auth.service.test.ts
+
+❌ FAIL  tests/unit/auth.service.test.ts
+  AuthService
+    login
+      ✗ should return user token for valid credentials
+        → Cannot find module '@/services/auth.service'
+      ✗ should throw error for invalid email
+      ✗ should throw error for incorrect password
+      ✗ should hash password before comparison
+```
+```typescript
+// Claude generates: src/services/auth.service.ts
+import { hash, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
+import { z } from 'zod';
+
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(1)
+});
+
+const registerSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(1)
+});
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+}
+
+export class AuthService {
+  private users: Map<string, User> = new Map();
+
+  async login(credentials: { email: string; password: string }) {
+    const validated = loginSchema.parse(credentials);
+    
+    const user = Array.from(this.users.values()).find(
+      u => u.email === validated.email
+    );
+
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+
+    const passwordMatch = await this.comparePassword(
+      validated.password,
+      user.passwordHash
+    );
+
+    if (!passwordMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    const token = this.generateToken(user);
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
+
+  async register(data: { email: string; password: string; name: string }) {
+    const validated = registerSchema.parse(data);
+
+    if (Array.from(this.users.values()).some(u => u.email === validated.email)) {
+      throw new Error('Email already exists');
+    }
+
+    const passwordHash = await hash(validated.password, 10);
+    const user: User = {
+      id: crypto.randomUUID(),
+      email: validated.email,
+      name: validated.name,
+      passwordHash
+    };
+
+    this.users.set(user.id, user);
+
+    const token = this.generateToken(user);
+
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name
+      }
+    };
+  }
+
+  async comparePassword(password: string, hash: string): Promise<boolean> {
+    return compare(password, hash);
+  }
+
+  private generateToken(user: User): string {
+    return sign({ userId: user.id }, process.env.JWT_SECRET || 'dev-secret', {
+      expiresIn: '7d'
+    });
+  }
+}
+```
+```bash
+pnpm test auth.service.test.ts
+
+✓ PASS  tests/unit/auth.service.test.ts
+  AuthService
+    login
+      ✓ should return user token for valid credentials (45ms)
+      ✓ should throw error for invalid email (12ms)
+      ✓ should throw error for incorrect password (38ms)
+      ✓ should hash password before comparison (42ms)
+    register
+      ✓ should create new user and return token (48ms)
+      ✓ should reject weak passwords (8ms)
+      ✓ should reject duplicate emails (52ms)
+
+Test Coverage:
+  File: auth.service.ts
+  Statements: 95.2%
+  Branches: 100%
+  Functions: 100%
+  Lines: 94.7%
+```
+```typescript
+// Claude refactors for better organization
+export class AuthService {
+  private users: Map<string, User> = new Map();
+  private readonly saltRounds = 10;
+  private readonly tokenExpiry = '7d';
+
+  async login(credentials: LoginCredentials): Promise<AuthResult> {
+    const validated = this.validateLoginCredentials(credentials);
+    const user = await this.findUserByEmail(validated.email);
+    await this.verifyPassword(validated.password, user.passwordHash);
+    
+    return this.createAuthResult(user);
+  }
+
+  async register(data: RegisterData): Promise<AuthResult> {
+    const validated = this.validateRegisterData(data);
+    await this.ensureEmailNotExists(validated.email);
+    
+    const user = await this.createUser(validated);
+    return this.createAuthResult(user);
+  }
+
+  private validateLoginCredentials(credentials: unknown): LoginCredentials {
+    return loginSchema.parse(credentials);
+  }
+
+  private async findUserByEmail(email: string): Promise<User> {
+    const user = Array.from(this.users.values()).find(u => u.email === email);
+    if (!user) {
+      throw new Error('Invalid credentials');
+    }
+    return user;
+  }
+
+  private async verifyPassword(password: string, hash: string): Promise<void> {
+    const match = await compare(password, hash);
+    if (!match) {
+      throw new Error('Invalid credentials');
+    }
+  }
+
+  private createAuthResult(user: User): AuthResult {
+    return {
+      token: this.generateToken(user),
+      user: this.sanitizeUser(user)
+    };
+  }
+
+  // ... more refactored methods
+}
+```
+```bash
+pnpm test auth.service.test.ts
+
+✓ All tests still passing
+✓ Coverage maintained: 95.2%
+```
+```bash
+/tdd-workflow "user registration API endpoint" --integration
+```
+```typescript
+// tests/integration/auth.api.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import { app } from '@/app';
+import { db } from '@/lib/db';
+
+describe('POST /api/auth/register', () => {
+  beforeAll(async () => {
+    await db.migrate.latest();
+  });
+
+  afterAll(async () => {
+    await db.migrate.rollback();
+    await db.destroy();
+  });
+
+  it('should register new user and return 201', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({
+        email: 'newuser@example.com',
+        password: 'ValidPass123',
+        name: 'New User'
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('token');
+    expect(response.body.user.email).toBe('newuser@example.com');
+  });
+
+  it('should return 400 for invalid email format', async () => {
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'invalid', password: 'pass', name: 'User' });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toContain('Invalid email');
+  });
+
+  it('should return 409 for duplicate email', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User' });
+
+    const response = await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'dup@example.com', password: 'ValidPass123', name: 'User2' });
+
+    expect(response.status).toBe(409);
+    expect(response.body.error).toContain('already exists');
+  });
+
+  it('should store hashed password in database', async () => {
+    const password = 'PlainPassword123';
+    
+    await request(app)
+      .post('/api/auth/register')
+      .send({ email: 'hash@example.com', password, name: 'User' });
+
+    const user = await db('users').where({ email: 'hash@example.com' }).first();
+    
+    expect(user.password).not.toBe(password);
+    expect(user.password).toMatch(/^\$2[aby]\$/);
+  });
+});
+```
+```bash
+/tdd-workflow "complete user registration flow" --e2e --playwright
+```
+```typescript
+// tests/e2e/auth.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('User Registration Flow', () => {
+  test('should complete full registration process', async ({ page }) => {
+    // Navigate to registration page
+    await page.goto('/register');
+
+    // Fill registration form
+    await page.fill('[name="email"]', 'e2e@example.com');
+    await page.fill('[name="password"]', 'ValidPass123');
+    await page.fill('[name="confirmPassword"]', 'ValidPass123');
+    await page.fill('[name="name"]', 'E2E User');
+
+    // Submit form
+    await page.click('[type="submit"]');
+
+    // Verify redirect to dashboard
+    await expect(page).toHaveURL('/dashboard');
+
+    // Verify user name displayed
+    await expect(page.locator('[data-testid="user-name"]')).toHaveText('E2E User');
+  });
+
+  test('should show validation errors for invalid inputs', async ({ page }) => {
+    await page.goto('/register');
+
+    // Submit empty form
+    await page.click('[type="submit"]');
+
+    // Verify error messages
+    await expect(page.locator('[data-testid="email-error"]')).toBeVisible();
+    await expect(page.locator('[data-testid="password-error"]')).toBeVisible();
+  });
+
+  test('should persist session after registration', async ({ page, context }) => {
+    await page.goto('/register');
+    
+    // Register user
+    await page.fill('[name="email"]', 'session@example.com');
+    await page.fill('[name="password"]', 'ValidPass123');
+    await page.fill('[name="confirmPassword"]', 'ValidPass123');
+    await page.fill('[name="name"]', 'Session User');
+    await page.click('[type="submit"]');
+
+    // Verify cookies set
+    const cookies = await context.cookies();
+    expect(cookies.find(c => c.name === 'auth_token')).toBeDefined();
+
+    // Reload page - should stay authenticated
+    await page.reload();
+    await expect(page).toHaveURL('/dashboard');
+  });
+});
+```
+```bash
+/tdd-workflow "payment processing feature" --full --min-coverage=90
+```
+```text
+Test Results:
+  Unit: 45 tests passing
+  Integration: 12 tests passing
+  E2E: 3 tests passing
+
+Coverage:
+  Overall: 92.3% ✓
+  Statements: 93.1%
+  Branches: 89.7%
+  Functions: 95.2%
+  Lines: 92.8%
+
+Target: 90% - PASSED ✓
+```
+
+## TDD Best Practices
+### 1. Write Tests First (Always)
+```bash
+# Claude will REFUSE to implement before tests exist
+User: "Implement user authentication"
+
+Claude: "I'll follow TDD workflow:
+1. First, I'll write comprehensive tests
+2. Run tests (expect failures)
+3. Implement minimal code to pass
+4. Refactor while keeping tests green
+
+Starting with test creation..."
+```
+
+### 2. Test Behavior, Not Implementation
+```typescript
+// ❌ Bad: Testing implementation details
+it('should call bcrypt.hash with saltRounds=10', () => {
+  expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+});
+
+// ✅ Good: Testing behavior
+it('should store hashed password', async () => {
+  await authService.register({ email, password });
+  const user = await db.users.findOne({ email });
+  
+  expect(user.password).not.toBe(password);
+  expect(await bcrypt.compare(password, user.password)).toBe(true);
+});
+```
+
+### 3. Descriptive Test Names
+```typescript
+// ✅ Clear test names following Given-When-Then
+describe('AuthService', () => {
+  describe('when user provides valid credentials', () => {
+    it('should return auth token and user data', async () => {
+      // test
+    });
+  });
+
+  describe('when password is incorrect', () => {
+    it('should throw InvalidCredentialsError', async () => {
+      // test
+    });
+  });
+});
+```
+
+### 4. Arrange-Act-Assert Pattern
+```typescript
+it('should update user email', async () => {
+  // Arrange: Set up test data
+  const user = await createTestUser({ email: 'old@example.com' });
+  
+  // Act: Perform action
+  await userService.updateEmail(user.id, 'new@example.com');
+  
+  // Assert: Verify outcome
+  const updated = await userService.findById(user.id);
+  expect(updated.email).toBe('new@example.com');
+});
+```
+```bash
+# Claude will REFUSE to implement before tests exist
+User: "Implement user authentication"
+
+Claude: "I'll follow TDD workflow:
+1. First, I'll write comprehensive tests
+2. Run tests (expect failures)
+3. Implement minimal code to pass
+4. Refactor while keeping tests green
+
+Starting with test creation..."
+```
+```typescript
+// ❌ Bad: Testing implementation details
+it('should call bcrypt.hash with saltRounds=10', () => {
+  expect(bcrypt.hash).toHaveBeenCalledWith(password, 10);
+});
+
+// ✅ Good: Testing behavior
+it('should store hashed password', async () => {
+  await authService.register({ email, password });
+  const user = await db.users.findOne({ email });
+  
+  expect(user.password).not.toBe(password);
+  expect(await bcrypt.compare(password, user.password)).toBe(true);
+});
+```
+```typescript
+// ✅ Clear test names following Given-When-Then
+describe('AuthService', () => {
+  describe('when user provides valid credentials', () => {
+    it('should return auth token and user data', async () => {
+      // test
+    });
+  });
+
+  describe('when password is incorrect', () => {
+    it('should throw InvalidCredentialsError', async () => {
+      // test
+    });
+  });
+});
+```
+```typescript
+it('should update user email', async () => {
+  // Arrange: Set up test data
+  const user = await createTestUser({ email: 'old@example.com' });
+  
+  // Act: Perform action
+  await userService.updateEmail(user.id, 'new@example.com');
+  
+  // Assert: Verify outcome
+  const updated = await userService.findById(user.id);
+  expect(updated.email).toBe('new@example.com');
+});
+```
+
+## Anti-Hallucination Benefits
+### Problem: LLM Scope Drift
+```bash
+User: "Add user authentication"
+
+Claude (without TDD):
+*Implements auth + session management + password reset + 2FA + OAuth*
+# Hallucinated features not requested
+```
+
+### Solution: Test-Anchored Iteration
+```bash
+Claude (with TDD):
+1. Writes tests ONLY for requested features
+2. Tests define exact scope and behavior
+3. Implementation guided by test requirements
+4. Iteration stops when tests pass
+5. No feature creep - tests are ground truth
+```
+```bash
+User: "Add user authentication"
+
+Claude (without TDD):
+*Implements auth + session management + password reset + 2FA + OAuth*
+# Hallucinated features not requested
+```
+```bash
+Claude (with TDD):
+1. Writes tests ONLY for requested features
+2. Tests define exact scope and behavior
+3. Implementation guided by test requirements
+4. Iteration stops when tests pass
+5. No feature creep - tests are ground truth
+```
+
+## Watch Mode & Continuous Testing
+```bash
+/tdd-workflow "shopping cart service" --watch
+```
+
+**Behavior:**
+- Monitors file changes
+- Re-runs affected tests automatically
+- Shows real-time coverage updates
+- Alerts when tests fail
+
+**Terminal Output:**
+```
+Watching: src/**/*.ts, tests/**/*.test.ts
+
+✓ 24 tests passing
+✓ Coverage: 87.3%
+
+Waiting for changes... (press 'q' to quit)
+
+[File changed: src/services/cart.service.ts]
+Re-running tests...
+
+✗ 1 test failing
+  CartService > should remove item from cart
+    Expected: 1 item, Received: 2 items
+
+Coverage: 85.1% (↓ 2.2%)
+```
+```bash
+/tdd-workflow "shopping cart service" --watch
+```
+```text
+Watching: src/**/*.ts, tests/**/*.test.ts
+
+✓ 24 tests passing
+✓ Coverage: 87.3%
+
+Waiting for changes... (press 'q' to quit)
+
+[File changed: src/services/cart.service.ts]
+Re-running tests...
+
+✗ 1 test failing
+  CartService > should remove item from cart
+    Expected: 1 item, Received: 2 items
+
+Coverage: 85.1% (↓ 2.2%)
+```
+
+## Configuration
+### Custom Test Runner
+```json
+// .claude/tdd.config.json
+{
+  "framework": "vitest",
+  "coverage": {
+    "enabled": true,
+    "threshold": 80,
+    "reportDir": "coverage"
+  },
+  "testMatch": ["**/*.test.ts", "**/*.spec.ts"],
+  "autoCommit": true,
+  "commitMessage": "test: {{feature}} - all tests passing ✓"
+}
+```
+```json
+// .claude/tdd.config.json
+{
+  "framework": "vitest",
+  "coverage": {
+    "enabled": true,
+    "threshold": 80,
+    "reportDir": "coverage"
+  },
+  "testMatch": ["**/*.test.ts", "**/*.spec.ts"],
+  "autoCommit": true,
+  "commitMessage": "test: {{feature}} - all tests passing ✓"
+}
+```
+
+## Best Practices Summary
+1. **Always Write Tests First**: No implementation before failing tests
+2. **Iterate Until Green**: Let AI refine until all tests pass
+3. **Minimum Code**: Implement only what's needed to pass tests
+4. **Refactor Fearlessly**: Tests protect against regressions
+5. **Descriptive Names**: Test names document expected behavior
+6. **High Coverage**: Target 80%+ for production code
+7. **Fast Feedback**: Use watch mode for continuous verification
+8. **Commit on Green**: Auto-commit when test suite passes

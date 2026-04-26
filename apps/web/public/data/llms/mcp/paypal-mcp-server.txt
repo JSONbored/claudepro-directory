@@ -1,0 +1,193 @@
+# Paypal MCP Server for Claude
+URL: https://heyclau.de/mcp/paypal-mcp-server
+Category: mcp
+Author: PayPal
+Date added: 2025-09-18
+Documentation: https://www.paypal.ai/
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx
+Download: /downloads/mcp/paypal-mcp-server.mcpb
+## Summary
+Integrate PayPal commerce capabilities, payment processing, and transaction management
+## Tags
+- payments
+- paypal
+- commerce
+- transactions
+- financial
+## Content
+## Content
+Streamline your payment processing and financial operations by connecting Claude to PayPal. Process payments and refunds, manage transactions and disputes, handle chargebacks, view account balances, generate financial reports, manage payment authorizations, access transaction details, and integrate webhooks—all through natural language commands. Leverage PayPal's powerful API with OAuth authentication, sandbox testing, and PCI compliance support.
+
+## Features
+- Process payments and refunds (complete payment lifecycle management)
+- Manage transactions and disputes (transaction tracking and resolution)
+- Handle chargebacks and resolutions (dispute management and resolution)
+- View account balances and history (financial account information)
+- Generate financial reports and analytics (transaction reporting and insights)
+- Manage payment authorizations and captures (two-step payment processing)
+- Access transaction details and metadata (comprehensive transaction information)
+- Webhook integration support (real-time event notifications)
+- Advanced PayPal payment and transaction management with subscription handling, refund processing, and merchant analytics
+- Batch operations support for efficient bulk payment operations, transaction management, and financial reporting with automatic rate limit handling and retry logic
+- Real-time payment synchronization capabilities with webhook integration support for monitoring PayPal events and triggering automated workflows
+
+## Use Cases
+- Process customer refunds quickly (automated refund processing)
+- Review transaction history (comprehensive transaction analysis)
+- Handle payment disputes efficiently (dispute management and resolution)
+- Generate financial reports (transaction reporting and analytics)
+- Monitor account activity (real-time account monitoring)
+- Manage payment authorizations (two-step payment processing workflow)
+- Automate payment reconciliation (transaction matching and reconciliation)
+- Track chargeback status (dispute tracking and management)
+- Build automated payment processing workflows that sync external systems with PayPal for real-time transaction management and financial operations
+
+## Installation
+### Claude Code
+
+1. Create PayPal Business account (if not already have one)
+2. Log into PayPal Developer Dashboard (https://developer.paypal.com/dashboard/)
+3. Navigate to Apps & Credentials and create a new app or use Default Application
+4. Copy your Client ID and Client Secret from the app credentials
+5. claude mcp add --transport sse paypal https://mcp.paypal.com/sse
+6. Authenticate with your PayPal OAuth credentials when prompted
+7. Verify installation: claude mcp list
+8. Test connection: claude mcp status paypal
+
+### Claude Desktop
+
+1. Create PayPal Business account (if not already have one)
+2. Log into PayPal Developer Dashboard (https://developer.paypal.com/dashboard/)
+3. Navigate to Apps & Credentials and create a new app or use Default Application
+4. Copy your Client ID and Client Secret from the app credentials
+5. Open Claude Desktop configuration file (see configPath below)
+6. Add the PayPal server configuration with SSE or HTTP transport pointing to https://mcp.paypal.com/sse
+7. Add OAuth credentials (Client ID and Client Secret) to environment variables or configuration
+8. Restart Claude Desktop
+9. Authenticate with your PayPal account when prompted
+
+## Requirements
+- PayPal Business account (not Personal account - Business account required for API access)
+- OAuth 2.0 Client Credentials (Client ID and Client Secret from PayPal Developer Dashboard)
+- SSE or HTTP transport support (remote MCP server at https://mcp.paypal.com/sse or https://mcp.paypal.com/mcp)
+- Internet connection (remote PayPal API access required)
+- Understanding of PayPal API rate limits (not published, but anomalous traffic is blocked)
+- Understanding of PayPal OAuth token management (tokens valid 8 hours, should be cached)
+- Understanding of PayPal sandbox vs production environments (separate credentials required)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of payment processing concepts (refunds, disputes, chargebacks, transactions)
+- PCI compliance awareness (required for payment processing operations)
+
+## Configuration
+```json
+{
+  "paypal": {
+    "url": "https://mcp.paypal.com/sse",
+    "transport": "sse"
+  }
+}
+```
+```json
+{
+  "paypal": {
+    "url": "https://mcp.paypal.com/sse",
+    "transport": "sse"
+  }
+}
+```
+
+## Examples
+### Process a refund for transaction ID ABC123
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Process a refund for transaction ID ABC123"
+```
+### Show today's payment activity
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show today's payment activity"
+```
+### Generate monthly transaction report
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Generate monthly transaction report"
+```
+### Check account balance
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Check account balance"
+```
+### Create Payment
+Create a new PayPal payment with amount and currency
+```typescript
+// Create PayPal payment
+const payment = await paypal.payments.create({
+  intent: "sale",
+  payer: { payment_method: "paypal" },
+  transactions: [{
+    amount: { total: "10.00", currency: "USD" },
+    description: "Payment description"
+  }]
+});
+```
+```plaintext
+Ask Claude: "Process a refund for transaction ID ABC123"
+```
+```plaintext
+Ask Claude: "Show today's payment activity"
+```
+```plaintext
+Ask Claude: "Generate monthly transaction report"
+```
+```plaintext
+Ask Claude: "Check account balance"
+```
+```typescript
+// Create PayPal payment
+const payment = await paypal.payments.create({
+  intent: "sale",
+  payer: { payment_method: "paypal" },
+  transactions: [{
+    amount: { total: "10.00", currency: "USD" },
+    description: "Payment description"
+  }]
+});
+```
+
+## Security
+- OAuth authentication required (OAuth 2.0 Client Credentials Grant)
+- Use sandbox for testing (separate environment with test credentials)
+- Monitor transaction logs (audit trail for payment operations)
+- Follow PCI compliance guidelines (required for payment processing)
+- Cache OAuth tokens securely (tokens valid 8 hours, reduce authentication calls)
+- PayPal API credentials and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- PayPal OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- PayPal transaction IDs and payment identifiers may expose financial data and customer information - ensure PayPal resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for PayPal MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- PayPal webhook configurations and payloads may contain sensitive payment data and financial information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Rate limit reached - 429 RATE_LIMIT_REACHED error
+
+PayPal doesn't publish rate limits but blocks anomalous traffic. Use webhooks instead of polling to reduce API calls. Cache OAuth tokens (valid 8 hours) to minimize authentication requests. Implement exponential backoff on 429 errors. Monitor request patterns and avoid burst traffic. Contact PayPal support if legitimate traffic is blocked.
+### Authentication failed - 401 Unauthorized error
+
+Verify API credentials match environment (sandbox vs production). Check client ID and client secret are correct from PayPal Developer Dashboard. Generate new OAuth token if expired (8 hour lifetime). Use https://api-m.sandbox.paypal.com for sandbox testing. Ensure OAuth token endpoint URL matches your environment. Verify credentials are for the correct app in developer dashboard.
+### Sandbox vs production environment confusion
+
+Sandbox URL: https://api-m.sandbox.paypal.com. Production URL: https://api-m.paypal.com. Use separate API credentials for each environment. Test all operations in sandbox before going live. Sandbox credentials are available in Developer Dashboard > Apps & Credentials. Production credentials require app approval and going live process.
+### Insufficient permissions for refund or transaction operation
+
+Verify PayPal account is Business account (not Personal). Check API app has required scopes enabled in developer dashboard. Ensure transaction is eligible for refund (not expired, within refund window). Review account restrictions and verification status. Some operations require verified business accounts. Check API app permissions in Developer Dashboard > Apps & Credentials > Your App > Permissions.
+### PayPal MCP server authentication errors with API credentials
+
+Verify API credentials (Client ID and Secret) are valid and not expired. Check credentials match the correct environment (sandbox vs production). Ensure credentials format is correct (Basic Auth or OAuth Bearer token). For OAuth integrations, verify token refresh logic is working correctly.
+### PayPal rate limit errors when processing multiple payment requests
+
+Implement exponential backoff retry logic with jitter. Use PayPal API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed payment data. PayPal allows 500 requests per minute per API key.
+### PayPal payment or transaction access denied errors
+
+Verify API credentials have access to the payment or transaction. Check account permissions and merchant account status. Ensure API credentials have required scopes for target operations.
+### PayPal MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify PayPal API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

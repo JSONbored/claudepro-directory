@@ -1,0 +1,80 @@
+# Debug & Troubleshoot
+URL: https://heyclau.de/collections/debugging-troubleshooting-system
+Category: collections
+Author: JSONbored
+Date added: 2025-10-02
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/debugging-troubleshooting-system.mdx
+## Summary
+Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.
+## Tags
+- debugging
+- troubleshooting
+- error-handling
+- diagnostics
+- problem-solving
+## Content
+## Overview
+Complete debugging toolkit for identifying, analyzing, and resolving complex software issues. Combines AI-assisted debugging with powerful diagnostic commands.
+
+## Features
+- AI-powered error analysis and resolution
+- Step-by-step debugging guidance
+- Root cause identification
+- Code explanation for complex bugs
+
+## Use Cases
+- Resolving production bugs quickly
+- Understanding unfamiliar codebase issues
+- Debugging complex asynchronous code
+- Training junior developers on debugging techniques
+
+## TL;DR
+A systematic debugging toolkit with error analysis patterns, logging strategies, and troubleshooting workflows. Reduce time spent debugging with Claude-powered root cause analysis.
+
+- Structured logging and error tracking configurations
+- Debug workflows for common error patterns
+- Performance profiling and optimization guides
+- Production incident response playbooks
+
+Debug faster and more systematically with this collection of logging frameworks, error analysis prompts, and troubleshooting workflows optimized for Claude-assisted debugging.
+
+## Collection Overview
+**Collection Type:** Development Tools
+**Focus Area:** Debugging & Performance
+**Skill Level:** All Levels
+**Time Saving:** 40-60% reduction in debugging time
+
+## Collection Contents
+Systematic debugging and troubleshooting
+
+- **Structured Logging** (Logging): Winston, Pino, and structured logging configs with error context and trace IDs.
+- **Error Analysis** (Analysis): Claude prompts for stack trace analysis, root cause investigation, and solution generation.
+- **Performance Tools** (Profiling): CPU profiling, memory leak detection, and performance bottleneck identification workflows.
+- **Observability** (Monitoring): Sentry, DataDog, and APM integrations with alert configurations and dashboards.
+
+## Quick Start
+Set up structured logging first, then add error tracking and monitoring. Use Claude prompts to analyze errors and generate fixes systematically.
+
+## Prerequisites
+- Basic debugging knowledge
+- Access to application logs
+- Development environment setup
+
+## Recommended Order
+1. `debugging-assistant-agent`
+2. `debug`
+3. `explain`
+
+## Troubleshooting
+### Collection items fail to load with 'missing component' errors
+
+Verify all items exist in respective category folders (agents/, commands/). Install missing components individually first, then activate collection.
+### Prerequisites check passes but debugging features still unavailable
+
+Ensure application logs are accessible and readable. Check development environment PATH includes debugger tools. Restart IDE after installing dependencies.
+### Debugging agent and debug command conflict causing duplicate output
+
+Use agent for systematic analysis, command for quick fixes. Disable one component temporarily if conflicts persist. Check configuration.systemPrompt doesn't overlap.
+### Installation order not followed, components incompatible after setup
+
+Remove all collection items and reinstall in specified order: debugging-assistant-agent, debug, explain. Clear Claude cache between installations.

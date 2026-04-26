@@ -193,7 +193,7 @@ paths:
             maximum: 50
       responses:
         "200":
-          description: Search succeeded
+          description: Search succeeded against the compact registry search artifact
           content:
             application/json:
               schema:
@@ -223,6 +223,90 @@ paths:
           description: Forbidden origin
         "429":
           description: Rate limited
+  /api/listing-leads:
+    post:
+      summary: Create a job or tool listing lead
+      description: Stores hiring and tools/apps/services listing inquiries in D1 for manual review and follow-up.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                kind:
+                  type: string
+                  enum:
+                    - job
+                    - tool
+                tierInterest:
+                  type: string
+                  enum:
+                    - free
+                    - standard
+                    - featured
+                    - sponsored
+                contactName:
+                  type: string
+                  minLength: 1
+                  maxLength: 160
+                contactEmail:
+                  type: string
+                  format: email
+                  maxLength: 320
+                companyName:
+                  type: string
+                  minLength: 1
+                  maxLength: 180
+                listingTitle:
+                  type: string
+                  minLength: 1
+                  maxLength: 180
+                websiteUrl:
+                  type: string
+                  format: uri
+                  pattern: "^https://"
+                applyUrl:
+                  type: string
+                  format: uri
+                  pattern: "^https://"
+                message:
+                  type: string
+                  maxLength: 4000
+              required:
+                - kind
+                - contactName
+                - contactEmail
+                - companyName
+                - listingTitle
+      responses:
+        "200":
+          description: Lead accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  ok:
+                    type: boolean
+                required:
+                  - ok
+        "400":
+          description: Invalid JSON or invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "500":
+          description: D1 insert failed
+        "503":
+          description: Site DB not configured
   /api/github-stats:
     get:
       responses:

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { marked } from "marked";
 import {
   AlertTriangle,
   BookOpen,
@@ -17,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { ContentSections } from "@/components/content-sections";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { DetailToc } from "@/components/detail-toc";
 import { EntryCopyButton } from "@/components/entry-copy-button";
 import { EntryChecklistCard } from "@/components/entry-checklist-card";
@@ -24,10 +24,25 @@ import { GitHubMark } from "@/components/icons/github-mark";
 import { JsonLd } from "@/components/json-ld";
 import { SnippetCard } from "@/components/snippet-card";
 import { getDirectoryEntries, getEntry } from "@/lib/content";
+import {
+  getCollectionItems,
+  getDownloadHref,
+  getMetadataFallback,
+  getPrimarySnippet,
+  getRelatedEntries,
+  getSourceSignals,
+  getTopFacts,
+  renderMarkdown,
+  stripCodeBlocks,
+} from "@/lib/detail-assembly";
 import { getDistributionBadges } from "@/lib/entry-presentation";
 import { buildPageMetadata } from "@/lib/seo";
 import { categoryLabels, siteConfig } from "@/lib/site";
-import { buildBreadcrumbJsonLd, buildEntryJsonLd } from "@heyclaude/registry/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildEntryJsonLd,
+  buildWebPageJsonLd,
+} from "@heyclaude/registry/seo";
 
 type DetailPageProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -73,161 +88,6 @@ export async function generateMetadata({
   });
 }
 
-function stripCodeBlocks(markdown: string) {
-  return String(markdown || "")
-    .replace(/```[\w-]*\n[\s\S]*?```/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-async function renderMarkdown(markdown: string) {
-  const output = await marked.parse(markdown);
-  return typeof output === "string" ? output : String(output);
-}
-
-function getPrimarySnippet(
-  entry: NonNullable<Awaited<ReturnType<typeof getEntry>>>,
-) {
-  switch (entry.category) {
-    case "agents":
-    case "rules":
-      return {
-        title: "Copyable asset",
-        code: entry.body || entry.copySnippet || entry.usageSnippet,
-        language: "md",
-      };
-    case "hooks":
-      if (entry.configSnippet) {
-        return {
-          title: "Claude config",
-          code: entry.configSnippet,
-          language: "json",
-        };
-      }
-      return {
-        title: entry.scriptBody ? "Hook script" : "Usage",
-        code: entry.scriptBody || entry.copySnippet || entry.usageSnippet,
-        language: entry.scriptLanguage || "text",
-      };
-    case "mcp":
-    case "skills":
-    case "commands":
-      return {
-        title: entry.installCommand
-          ? "Install command"
-          : entry.commandSyntax
-            ? "Command syntax"
-            : "Usage",
-        code:
-          entry.installCommand ||
-          entry.commandSyntax ||
-          entry.copySnippet ||
-          entry.usageSnippet,
-        language: entry.scriptLanguage || "text",
-      };
-    case "statuslines":
-      return {
-        title: entry.configSnippet
-          ? "Claude config"
-          : entry.scriptBody
-            ? "Source asset"
-            : "Usage",
-        code:
-          entry.configSnippet ||
-          entry.scriptBody ||
-          entry.copySnippet ||
-          entry.usageSnippet,
-        language: entry.configSnippet ? "json" : entry.scriptLanguage || "text",
-      };
-    case "collections":
-      return {
-        title: "Quick start",
-        code: entry.usageSnippet || entry.copySnippet || entry.body,
-        language: "text",
-      };
-    case "guides":
-      return {
-        title: "Quick summary",
-        code: entry.usageSnippet || entry.copySnippet || entry.body,
-        language: "text",
-      };
-    default:
-      return {
-        title: entry.copySnippet ? "Copyable asset" : "Usage",
-        code: entry.copySnippet || entry.usageSnippet || entry.body,
-        language: entry.scriptLanguage || "text",
-      };
-  }
-}
-
-function getMetadataFallback(entry: Awaited<ReturnType<typeof getEntry>>) {
-  if (!entry) return null;
-
-  if (entry.category === "hooks") {
-    return {
-      title: "How to use this hook",
-      points: [
-        entry.trigger
-          ? `Register it under the \`${entry.trigger}\` hook event in your Claude Code configuration.`
-          : "Register it in your Claude Code hooks configuration.",
-        entry.documentationUrl
-          ? "Use the documentation link in the sidebar to confirm the event shape and required config."
-          : "Open the source file in GitHub to copy the exact implementation and adapt it to your project.",
-        "Keep the source file in your repo and test it locally before relying on it in production workflows.",
-      ],
-    };
-  }
-
-  if (entry.category === "collections") {
-    return {
-      title: "How to use this collection",
-      points: [
-        "Open the source file to review the assets included in the collection.",
-        "Pick the individual entries you want to use and add them to your Claude workflow one by one.",
-        "Collections need richer item metadata next, but the GitHub source still gives you the current canonical list.",
-      ],
-    };
-  }
-
-  if (entry.documentationUrl || entry.repoUrl) {
-    return {
-      title: "How to use this entry",
-      points: [
-        entry.documentationUrl
-          ? "Start with the documentation link in the sidebar for setup and usage details."
-          : "Open the repository in the sidebar for setup details.",
-        "Use the source link to inspect the exact file this directory entry was built from.",
-        "Copy the relevant snippet or config into your local Claude setup and test it before wider use.",
-      ],
-    };
-  }
-
-  return {
-    title: "How to use this entry",
-    points: [
-      "Open the GitHub source file in the sidebar.",
-      "Copy the content you need into your project or Claude configuration.",
-      "Test it locally and adapt it to your workflow before relying on it.",
-    ],
-  };
-}
-
-function getDownloadHref(downloadUrl: string) {
-  if (downloadUrl.startsWith("/downloads/")) {
-    return `/api/download?asset=${encodeURIComponent(downloadUrl)}`;
-  }
-  return downloadUrl;
-}
-
-function hashString(value: string) {
-  let hash = 0;
-  for (let index = 0; index < value.length; index += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(index);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
 export default async function DetailPage({ params }: DetailPageProps) {
   const { category, slug } = await params;
   const entry = await getEntry(category, slug);
@@ -235,53 +95,8 @@ export default async function DetailPage({ params }: DetailPageProps) {
   if (!entry) notFound();
 
   const allEntries = await getDirectoryEntries();
-  const relatedPool = allEntries.filter((item) => item.slug !== slug);
-  const entryTagSet = new Set(
-    (entry.tags ?? []).map((tag) => tag.toLowerCase()),
-  );
-  const anchorHash = hashString(`${entry.category}:${entry.slug}`);
-  const related = relatedPool
-    .map((item) => {
-      const sharedTagCount = (item.tags ?? []).reduce((count, tag) => {
-        return entryTagSet.has(tag.toLowerCase()) ? count + 1 : count;
-      }, 0);
-      const sameCategory = item.category === entry.category ? 1 : 0;
-      const hasDocs = item.documentationUrl ? 1 : 0;
-      const hasInstall = item.installCommand ? 1 : 0;
-      const dateScore = item.dateAdded ? new Date(item.dateAdded).getTime() : 0;
-      const closeness = Math.abs(
-        hashString(`${item.category}:${item.slug}`) - anchorHash,
-      );
-
-      return {
-        item,
-        score: sharedTagCount * 8 + sameCategory * 3 + hasDocs + hasInstall,
-        dateScore,
-        closeness,
-      };
-    })
-    .sort((left, right) => {
-      if (right.score !== left.score) return right.score - left.score;
-      if (right.dateScore !== left.dateScore)
-        return right.dateScore - left.dateScore;
-      return left.closeness - right.closeness;
-    })
-    .slice(0, 2)
-    .map((entry) => entry.item);
-  const collectionItems =
-    entry.category === "collections" && Array.isArray(entry.items)
-      ? entry.items
-          .map((item) => ({
-            ...item,
-            target:
-              allEntries.find(
-                (candidate) =>
-                  candidate.category === item.category &&
-                  candidate.slug === item.slug,
-              ) ?? null,
-          }))
-          .filter((item) => item.target)
-      : [];
+  const related = getRelatedEntries(entry, allEntries);
+  const collectionItems = getCollectionItems(entry, allEntries);
   const hasBody = Boolean(entry.body?.trim());
   const primaryCodeBlock = entry.codeBlocks?.[0];
   const metadataOnly = !hasBody;
@@ -315,33 +130,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
     return hasProse || hasCode;
   });
   const sidebarSections = visibleSections;
-  const topFacts: Array<{ label: string; value: string }> = [
-    entry.author ? { label: "Author", value: entry.author } : null,
-    entry.dateAdded ? { label: "Added", value: entry.dateAdded } : null,
-    entry.trigger ? { label: "Trigger", value: entry.trigger } : null,
-    entry.argumentHint
-      ? { label: "Arguments", value: entry.argumentHint }
-      : null,
-    entry.scriptLanguage
-      ? { label: "Format", value: entry.scriptLanguage }
-      : null,
-    entry.estimatedSetupTime
-      ? { label: "Setup time", value: entry.estimatedSetupTime }
-      : null,
-    entry.difficulty ? { label: "Difficulty", value: entry.difficulty } : null,
-    entry.category === "skills" && entry.skillType
-      ? { label: "Skill type", value: entry.skillType }
-      : null,
-    entry.category === "skills" && entry.skillLevel
-      ? { label: "Skill level", value: entry.skillLevel }
-      : null,
-    entry.category === "skills" && entry.verificationStatus
-      ? { label: "Verification", value: entry.verificationStatus }
-      : null,
-    entry.category === "skills" && entry.verifiedAt
-      ? { label: "Verified", value: entry.verifiedAt }
-      : null,
-  ].filter((fact): fact is { label: string; value: string } => Boolean(fact));
+  const topFacts = getTopFacts(entry);
   const githubStars = Number(
     "githubStars" in entry && typeof entry.githubStars === "number"
       ? entry.githubStars
@@ -373,32 +162,19 @@ export default async function DetailPage({ params }: DetailPageProps) {
         url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
       },
     ]),
+    buildWebPageJsonLd({
+      siteUrl: siteConfig.url,
+      path: `/${entry.category}/${entry.slug}`,
+      name: entry.title,
+      description: entry.seoDescription || entry.description,
+      breadcrumbId: `${siteConfig.url}/${entry.category}/${entry.slug}#breadcrumb`,
+    }),
     buildEntryJsonLd(entry, {
       siteUrl: siteConfig.url,
       siteName: siteConfig.name,
     }),
   ];
-  const sourceSignals = [
-    entry.downloadTrust
-      ? {
-          label: "Package trust",
-          value:
-            entry.downloadTrust === "first-party"
-              ? "Verified first-party package"
-              : "External package, review before use",
-        }
-      : null,
-    entry.verificationStatus
-      ? { label: "Verification", value: entry.verificationStatus }
-      : null,
-    entry.repoUrl ? { label: "Repository", value: entry.repoUrl } : null,
-    entry.documentationUrl
-      ? { label: "Documentation", value: entry.documentationUrl }
-      : null,
-    entry.githubUrl ? { label: "Content source", value: entry.githubUrl } : null,
-  ].filter(
-    (signal): signal is { label: string; value: string } => Boolean(signal),
-  );
+  const sourceSignals = getSourceSignals(entry);
   const renderedBody = await renderMarkdown(entry.body || "");
 
   return (
@@ -406,6 +182,16 @@ export default async function DetailPage({ params }: DetailPageProps) {
       <JsonLd data={jsonLd} />
       <article className="space-y-8">
         <div className="space-y-4">
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              {
+                label: categoryLabels[entry.category] ?? entry.category,
+                href: `/${entry.category}`,
+              },
+              { label: entry.title },
+            ]}
+          />
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <Link href={`/${entry.category}`}>
               {categoryLabels[entry.category] ?? entry.category}

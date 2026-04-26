@@ -1,0 +1,185 @@
+# Vercel MCP Server for Claude
+URL: https://heyclau.de/mcp/vercel-mcp-server
+Category: mcp
+Author: Vercel
+Date added: 2025-09-18
+Documentation: https://vercel.com/docs/mcp/vercel-mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx
+Download: /downloads/mcp/vercel-mcp-server.mcpb
+## Summary
+Manage deployments, analyze logs, and control Vercel projects
+## Tags
+- deployment
+- vercel
+- hosting
+- devops
+- infrastructure
+## Content
+## Content
+Control Vercel deployments and infrastructure through Claude for seamless deployment management. Deploy new versions, analyze build logs, debug failures, manage environment variables, configure custom domains, monitor deployment performance, roll back failed deployments, and manage team projects—all through natural language commands. Supports OAuth/Bearer token authentication, team tokens for collaboration, and comprehensive deployment operations.
+
+## Features
+- Search and navigate Vercel documentation (knowledge base access)
+- Manage projects and deployment configurations (project lifecycle management)
+- Analyze deployment logs and build outputs (debugging and monitoring)
+- Monitor build status and performance (deployment tracking)
+- Configure environment variables and domains (project configuration)
+- Manage deployments and rollbacks (deployment operations)
+- View project analytics and metrics (performance monitoring)
+- Configure custom domains and SSL certificates (domain management)
+- Advanced Vercel deployment and project management with build automation, edge function configuration, and analytics integration
+- Batch operations support for efficient bulk deployment operations, project management, and build automation with automatic rate limit handling and retry logic
+- Real-time deployment synchronization capabilities with webhook integration support for monitoring Vercel events and triggering automated workflows
+
+## Use Cases
+- Deploy new versions to production (automated deployments)
+- Debug build failures and errors (troubleshooting)
+- Analyze deployment logs for issues (log analysis)
+- Manage environment variables across projects (configuration management)
+- Configure custom domains and redirects (domain configuration)
+- Monitor deployment performance and metrics (analytics)
+- Roll back failed deployments (deployment recovery)
+- Manage team projects and access (collaboration)
+- Build automated deployment workflows that sync external systems with Vercel for real-time site management and build automation
+
+## Installation
+### Claude Code
+
+1. Run: claude mcp add --transport http vercel https://mcp.vercel.com
+2. Verify installation: claude mcp list
+3. Test connection: claude mcp status vercel
+4. Authenticate with your Vercel account (OAuth flow)
+5. Grant required permissions (project access, deployment permissions)
+
+### Claude Desktop
+
+1. Open Claude Desktop configuration file (see configPath below)
+2. Add the Vercel server configuration with HTTP transport and URL
+3. Restart Claude Desktop
+4. Authenticate with your Vercel account (OAuth flow)
+5. Grant required permissions (project access, deployment permissions)
+6. Verify connection in Claude Desktop
+
+## Requirements
+- Vercel account (free or paid plan)
+- OAuth/Bearer token authentication (for mcp.vercel.com MCP connection)
+- Vercel Access Token (created in Dashboard Settings > Tokens)
+- Network access to mcp.vercel.com (HTTPS required, HTTP transport)
+- Understanding of Vercel deployment concepts (projects, deployments, builds, domains)
+- Vercel Dashboard access (for token management and project configuration)
+- Claude Desktop 0.7.0+ or Claude Code with MCP support
+- Understanding of Vercel rate limits (varies by endpoint, check X-RateLimit headers)
+- Understanding of build quotas (plan-specific build time/memory limits)
+- Optional: Team membership (for team projects and shared resources)
+
+## Configuration
+```json
+{
+  "vercel": {
+    "url": "https://mcp.vercel.com",
+    "transport": "http"
+  }
+}
+```
+```json
+{
+  "vercel": {
+    "url": "https://mcp.vercel.com",
+    "transport": "http"
+  }
+}
+```
+
+## Examples
+### Deploy the latest commit to production
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Deploy the latest commit to production"
+```
+### Show me the build logs for the failed deployment
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Show me the build logs for the failed deployment"
+```
+### Update the API_KEY environment variable
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "Update the API_KEY environment variable"
+```
+### List all recent deployments
+Common usage pattern for this MCP server
+```plaintext
+Ask Claude: "List all recent deployments"
+```
+### Deploy Project
+Deploy a project to Vercel with files and configuration
+```typescript
+// Deploy project to Vercel
+const deployment = await vercel.deployments.create({
+  name: "my-project",
+  files: [
+    { file: "index.html", data: "<html>...</html>" },
+    { file: "package.json", data: JSON.stringify({ ... }) }
+  ]
+});
+```
+```plaintext
+Ask Claude: "Deploy the latest commit to production"
+```
+```plaintext
+Ask Claude: "Show me the build logs for the failed deployment"
+```
+```plaintext
+Ask Claude: "Update the API_KEY environment variable"
+```
+```plaintext
+Ask Claude: "List all recent deployments"
+```
+```typescript
+// Deploy project to Vercel
+const deployment = await vercel.deployments.create({
+  name: "my-project",
+  files: [
+    { file: "index.html", data: "<html>...</html>" },
+    { file: "package.json", data: JSON.stringify({ ... }) }
+  ]
+});
+```
+
+## Security
+- OAuth/Bearer token authentication required for secure access
+- Use team tokens for shared projects (team-level access control)
+- Monitor deployment permissions carefully (review before production deploys)
+- Review changes before production deploys (prevent accidental deployments)
+- API token security (store tokens securely, never commit to git)
+- Vercel API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
+- Vercel OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
+- Vercel project, deployment, and team IDs may expose infrastructure architecture and deployment patterns - ensure Vercel resource identifiers are kept private and not shared in public configurations
+- Rate limiting and API quota management are critical for Vercel MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
+- Vercel webhook configurations and payloads may contain sensitive deployment data and project information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+
+## Troubleshooting
+### Build quota exceeded or deployment fails from quota limits
+
+Vercel plans have specific build time and memory limits. Check quota usage at vercel.com/dashboard/usage to see current consumption. Plans have different limits: Hobby (100 build minutes/month), Pro (included build minutes), Enterprise (custom limits). Upgrade plan for higher quotas. Optimize build scripts to reduce build time (remove unnecessary dependencies, use build caching, parallelize builds). Review vercel.com/docs/limits for detailed plan limits. Consider using Vercel's build cache to speed up builds. Monitor build logs to identify slow build steps.
+### Deployment fails with missing environment variables
+
+Add environment variables in Project Settings > Environment Variables in Vercel Dashboard. Set correct environment scope: Production (production deployments), Preview (preview deployments), Development (local development). Redeploy after adding variables (environment variables are injected at build time). Check .env.local not committed to git (use .env.example for documentation). Verify variable names match exactly (case-sensitive). For sensitive variables, use Vercel's encrypted environment variables. Note: Total environment variables cannot exceed 64 KB per deployment (all variables combined).
+### API rate limit errors from third-party services
+
+Vercel API rate limits vary by endpoint and are communicated via response headers: X-RateLimit-Limit (max requests), X-RateLimit-Remaining (remaining requests), X-RateLimit-Reset (reset time in UTC epoch seconds). When exceeded, API returns 429 status with `too_many_requests` error. Implement exponential backoff for retries (wait time increases with each retry). Monitor X-RateLimit-Remaining header to track available requests. Check X-RateLimit-Reset to know when to retry. For third-party API rate limits, implement rate limiting with Vercel WAF. Use Vercel KV/Redis for rate limit tracking. Add delays between API calls. Use edge functions for caching to reduce API calls.
+### Authentication failed or insufficient project permissions
+
+Verify Vercel API token has required scopes (project:read, project:write, deployment:read, etc.). Check token created in Dashboard Settings > Tokens. Ensure token not expired or revoked. Check team membership and project access in Dashboard (verify you're a member of the team that owns the project). Use team tokens for shared projects (team-level tokens). Re-authenticate OAuth connection if using OAuth flow. Verify Bearer token format: `Authorization: Bearer <TOKEN>`. Check token has permissions for specific project (some tokens are project-scoped). Review project settings to ensure user has required role (Owner, Developer, etc.).
+### Vercel MCP server authentication errors with API tokens
+
+Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+### Vercel rate limit errors when processing multiple deployment requests
+
+Implement exponential backoff retry logic with jitter. Use Vercel API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed project data. Vercel allows 100 requests per minute per API token.
+### Vercel project or deployment access denied errors
+
+Verify API token has access to the project. Check project permissions and team membership. Ensure API token has required permissions for target operations.
+### Vercel MCP server connection timeouts or network errors
+
+Check network connectivity and firewall settings. Verify Vercel API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
