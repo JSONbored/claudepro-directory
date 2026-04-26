@@ -2,7 +2,7 @@ name: Submit statusline
 description: Submit a Claude statusline entry for the directory.
 title: "Submit Statusline: "
 labels:
-  - submission
+  - content-submission
   - statuslines
 body:
   - type: markdown

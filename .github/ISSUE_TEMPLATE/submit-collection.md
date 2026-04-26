@@ -2,7 +2,7 @@
 name: Submit collection
 about: Submit a collection entry for the directory.
 title: "Submit Collection: "
-labels: ["submission", "collections"]
+labels: ["content-submission", "collections"]
 assignees: []
 ---
 

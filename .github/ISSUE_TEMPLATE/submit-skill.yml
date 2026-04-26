@@ -2,7 +2,7 @@ name: Submit skill
 description: Submit a Claude skill entry for the directory.
 title: "Submit Skill: "
 labels:
-  - submission
+  - content-submission
   - skills
 body:
   - type: markdown

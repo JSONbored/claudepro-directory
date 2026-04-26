@@ -2,7 +2,7 @@ name: Submit rule
 description: Submit a Claude rule entry for the directory.
 title: "Submit Rule: "
 labels:
-  - submission
+  - content-submission
   - rules
 body:
   - type: markdown

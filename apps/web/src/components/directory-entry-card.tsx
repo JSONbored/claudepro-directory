@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, BadgeCheck, Check, ChevronUp, Copy, FileCode2, FileText } from "lucide-react";
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  Check,
+  ChevronUp,
+  Copy,
+  FileCode2,
+  FileText,
+} from "lucide-react";
 
 import { GitHubMark } from "@/components/icons/github-mark";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast-provider";
 import type { DirectoryEntry } from "@/lib/content";
-import { compactCount, getCopyText, getPreviewLine } from "@/lib/entry-presentation";
+import {
+  compactCount,
+  getCopyText,
+  getPreviewLine,
+} from "@/lib/entry-presentation";
 import { cn } from "@/lib";
 import { categoryAccentClasses, categoryLabels } from "@/lib/site";
 
@@ -18,12 +30,14 @@ type DirectoryEntryCardProps = {
   hasVoted?: boolean;
   onToggleVote?: (
     entry: DirectoryEntry,
-    nextVote: boolean
+    nextVote: boolean,
   ) => Promise<{ count: number; voted: boolean }>;
 };
 
 function getCardDescription(entry: DirectoryEntry) {
-  const normalized = (entry.cardDescription || entry.description).replace(/\s+/g, " ").trim();
+  const normalized = (entry.cardDescription || entry.description)
+    .replace(/\s+/g, " ")
+    .trim();
   if (normalized.length <= 220) return normalized;
 
   const sentence = normalized.match(/^(.{0,220}[.!?])\s/);
@@ -39,7 +53,7 @@ function formatRelativeDate(date?: string) {
 
   const diffDays = Math.max(
     1,
-    Math.round((Date.now() - published.getTime()) / (1000 * 60 * 60 * 24))
+    Math.round((Date.now() - published.getTime()) / (1000 * 60 * 60 * 24)),
   );
 
   if (diffDays < 30) return `${diffDays}d ago`;
@@ -61,22 +75,31 @@ export function DirectoryEntryCard({
   entry,
   voteCount,
   hasVoted: hasVotedProp = false,
-  onToggleVote
+  onToggleVote,
 }: DirectoryEntryCardProps) {
   const baseVotes = 0;
   const [hasVoted, setHasVoted] = useState(hasVotedProp);
   const [displayedVotes, setDisplayedVotes] = useState(voteCount ?? baseVotes);
   const [isVoting, setIsVoting] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copiedAction, setCopiedAction] = useState<string | null>(null);
   const { pushToast } = useToast();
 
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
+  const fullCopyText = useMemo(() => getCopyText(entry), [entry]);
   const repoHref = entry.repoUrl || entry.githubUrl;
   const isGitHubRepo = Boolean(repoHref && /github\.com/i.test(repoHref));
-  const isGitHubSource = Boolean(entry.githubUrl && /github\.com/i.test(entry.githubUrl));
-  const isCreatorEntry = String(entry.author ?? "").trim().toLowerCase() === "jsonbored";
-  const relativeDate = useMemo(() => formatRelativeDate(entry.dateAdded), [entry.dateAdded]);
+  const isGitHubSource = Boolean(
+    entry.githubUrl && /github\.com/i.test(entry.githubUrl),
+  );
+  const isCreatorEntry =
+    String(entry.author ?? "")
+      .trim()
+      .toLowerCase() === "jsonbored";
+  const relativeDate = useMemo(
+    () => formatRelativeDate(entry.dateAdded),
+    [entry.dateAdded],
+  );
 
   useEffect(() => {
     setHasVoted(hasVotedProp);
@@ -87,10 +110,10 @@ export function DirectoryEntryCard({
   }, [baseVotes, voteCount]);
 
   useEffect(() => {
-    if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 1600);
+    if (!copiedAction) return;
+    const timer = window.setTimeout(() => setCopiedAction(null), 1600);
     return () => window.clearTimeout(timer);
-  }, [copied]);
+  }, [copiedAction]);
 
   const handleVote = async () => {
     if (isVoting) return;
@@ -122,33 +145,47 @@ export function DirectoryEntryCard({
     }
   };
 
-  const handleCopy = async () => {
+  const handleCopyValue = async (
+    action: string,
+    value: string,
+    label: string,
+  ) => {
+    const normalized = value.trim();
+    if (!normalized) return;
+
     try {
-      await navigator.clipboard.writeText(getCopyText(entry));
-      setCopied(true);
-      window.dispatchEvent(new CustomEvent("heyclaude:intent", { detail: { type: "copy" } }));
+      await navigator.clipboard.writeText(normalized);
+      setCopiedAction(action);
+      window.dispatchEvent(
+        new CustomEvent("heyclaude:intent", { detail: { type: "copy" } }),
+      );
       pushToast({
         variant: "success",
         title: "Copied to clipboard",
-        description: entry.title
+        description: label,
       });
     } catch {
       pushToast({
         variant: "error",
         title: "Copy failed",
-        description: "Clipboard access was blocked by the browser."
+        description: "Clipboard access was blocked by the browser.",
       });
     }
   };
 
   return (
     <article className="directory-stack-card group">
-      <div className={cn("directory-vote-rail", hasVoted && "directory-vote-rail-active")}>
+      <div
+        className={cn(
+          "directory-vote-rail",
+          hasVoted && "directory-vote-rail-active",
+        )}
+      >
         <div
           className={cn(
             "directory-vote-tile text-[11px] font-medium uppercase tracking-[0.18em]",
             hasVoted && "directory-vote-tile-active",
-            categoryAccentClasses[entry.category]
+            categoryAccentClasses[entry.category],
           )}
         >
           {getMonogram(entry)}
@@ -167,7 +204,7 @@ export function DirectoryEntryCard({
           <div
             className={cn(
               "text-[18px] font-medium tracking-tight text-foreground transition",
-              hasVoted && "text-primary"
+              hasVoted && "text-primary",
             )}
           >
             {compactCount(displayedVotes)}
@@ -192,7 +229,7 @@ export function DirectoryEntryCard({
               <span
                 className={cn(
                   "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
-                  categoryAccentClasses[entry.category]
+                  categoryAccentClasses[entry.category],
                 )}
               >
                 {categoryLabels[entry.category] ?? entry.category}
@@ -202,15 +239,23 @@ export function DirectoryEntryCard({
             </div>
           </div>
 
-          {repoHref && typeof entry.githubStars === "number" && entry.githubStars > 0 ? (
+          {repoHref &&
+          typeof entry.githubStars === "number" &&
+          entry.githubStars > 0 ? (
             <a
               href={repoHref}
               target="_blank"
               rel="noreferrer"
               className="directory-github-stat"
-              aria-label={isGitHubRepo ? "Open repository on GitHub" : "Open repository"}
+              aria-label={
+                isGitHubRepo ? "Open repository on GitHub" : "Open repository"
+              }
             >
-              {isGitHubRepo ? <GitHubMark className="size-4" /> : <FileCode2 className="size-4" />}
+              {isGitHubRepo ? (
+                <GitHubMark className="size-4" />
+              ) : (
+                <FileCode2 className="size-4" />
+              )}
               {typeof entry.githubStars === "number" ? (
                 <span>{compactCount(entry.githubStars)}</span>
               ) : null}
@@ -230,9 +275,17 @@ export function DirectoryEntryCard({
               target="_blank"
               rel="noreferrer"
               className="directory-github-stat"
-              aria-label={isGitHubRepo ? "Open source on GitHub" : "Open source repository"}
+              aria-label={
+                isGitHubRepo
+                  ? "Open source on GitHub"
+                  : "Open source repository"
+              }
             >
-              {isGitHubRepo ? <GitHubMark className="size-4" /> : <FileCode2 className="size-4" />}
+              {isGitHubRepo ? (
+                <GitHubMark className="size-4" />
+              ) : (
+                <FileCode2 className="size-4" />
+              )}
               <span>{isGitHubRepo ? "GitHub" : "Source"}</span>
             </a>
           ) : null}
@@ -244,26 +297,84 @@ export function DirectoryEntryCard({
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="directory-code-bar">
-            <span className="directory-code-text text-[13px] text-primary">{previewLine}</span>
+            <span className="directory-code-text text-[13px] text-primary">
+              {previewLine}
+            </span>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleCopy}
-            className={cn(
-              "h-8 rounded-lg border-border bg-background px-3 text-[11px]",
-              copied &&
-                "border-emerald-500/45 bg-[color-mix(in_oklab,var(--background)_88%,oklch(0.85_0.08_154)_12%)] text-emerald-600 dark:text-emerald-300"
-            )}
-          >
-            {copied ? (
-              <Check className="copy-check-icon mr-1.5 size-3.5 text-emerald-500" />
-            ) : (
-              <Copy className="mr-1.5 size-3.5" />
-            )}
-            {copied ? "Copied" : "Copy"}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                handleCopyValue("full", fullCopyText, "Full asset")
+              }
+              className={cn(
+                "h-8 rounded-lg border-border bg-background px-3 text-[11px]",
+                copiedAction === "full" &&
+                  "border-emerald-500/45 bg-[color-mix(in_oklab,var(--background)_88%,oklch(0.85_0.08_154)_12%)] text-emerald-600 dark:text-emerald-300",
+              )}
+            >
+              {copiedAction === "full" ? (
+                <Check className="copy-check-icon mr-1.5 size-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="mr-1.5 size-3.5" />
+              )}
+              {copiedAction === "full" ? "Copied" : "Full"}
+            </Button>
+            {entry.installCommand ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleCopyValue(
+                    "install",
+                    entry.installCommand ?? "",
+                    "Install command",
+                  )
+                }
+                className={cn(
+                  "h-8 rounded-lg border-border bg-background px-3 text-[11px]",
+                  copiedAction === "install" &&
+                    "border-emerald-500/45 bg-[color-mix(in_oklab,var(--background)_88%,oklch(0.85_0.08_154)_12%)] text-emerald-600 dark:text-emerald-300",
+                )}
+              >
+                {copiedAction === "install" ? (
+                  <Check className="copy-check-icon mr-1.5 size-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="mr-1.5 size-3.5" />
+                )}
+                {copiedAction === "install" ? "Copied" : "Install"}
+              </Button>
+            ) : null}
+            {entry.configSnippet ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  handleCopyValue(
+                    "config",
+                    entry.configSnippet ?? "",
+                    "Config snippet",
+                  )
+                }
+                className={cn(
+                  "h-8 rounded-lg border-border bg-background px-3 text-[11px]",
+                  copiedAction === "config" &&
+                    "border-emerald-500/45 bg-[color-mix(in_oklab,var(--background)_88%,oklch(0.85_0.08_154)_12%)] text-emerald-600 dark:text-emerald-300",
+                )}
+              >
+                {copiedAction === "config" ? (
+                  <Check className="copy-check-icon mr-1.5 size-3.5 text-emerald-500" />
+                ) : (
+                  <Copy className="mr-1.5 size-3.5" />
+                )}
+                {copiedAction === "config" ? "Copied" : "Config"}
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
@@ -297,7 +408,11 @@ export function DirectoryEntryCard({
                 aria-label="Open repository"
                 title="Open repository"
               >
-                {isGitHubRepo ? <GitHubMark className="size-3.5" /> : <FileCode2 className="size-3.5" />}
+                {isGitHubRepo ? (
+                  <GitHubMark className="size-3.5" />
+                ) : (
+                  <FileCode2 className="size-3.5" />
+                )}
               </a>
             ) : null}
             {entry.githubUrl && entry.githubUrl !== repoHref ? (
@@ -309,10 +424,17 @@ export function DirectoryEntryCard({
                 aria-label="Open source content file"
                 title="Open source content file"
               >
-                {isGitHubSource ? <GitHubMark className="size-3.5" /> : <FileCode2 className="size-3.5" />}
+                {isGitHubSource ? (
+                  <GitHubMark className="size-3.5" />
+                ) : (
+                  <FileCode2 className="size-3.5" />
+                )}
               </a>
             ) : null}
-            <Link href={`/${entry.category}/${entry.slug}`} className="directory-link-chip">
+            <Link
+              href={`/${entry.category}/${entry.slug}`}
+              className="directory-link-chip"
+            >
               <ArrowUpRight className="size-3.5" />
               Open
             </Link>

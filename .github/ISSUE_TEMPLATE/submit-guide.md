@@ -2,7 +2,7 @@
 name: Submit guide
 about: Submit a guide entry for the directory.
 title: "Submit Guide: "
-labels: ["submission", "guides"]
+labels: ["content-submission", "guides"]
 assignees: []
 ---
 

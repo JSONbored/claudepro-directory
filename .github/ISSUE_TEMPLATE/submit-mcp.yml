@@ -2,7 +2,7 @@ name: Submit MCP server
 description: Submit a Claude MCP server entry for the directory.
 title: "Submit MCP: "
 labels:
-  - submission
+  - content-submission
   - mcp
 body:
   - type: markdown

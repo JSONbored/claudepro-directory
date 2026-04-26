@@ -1,0 +1,49 @@
+---
+title: ContrastAPI Security Tools
+slug: contrastapi-mcp-server
+category: mcp
+description: "31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport."
+cardDescription: "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key."
+author: UPinar
+dateAdded: "2026-04-20"
+repoUrl: https://github.com/UPinar/contrastapi
+documentationUrl: https://api.contrastcyber.com
+installable: true
+installCommand: claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/
+usageSnippet: |-
+  claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/
+  claude mcp list
+configSnippet: |-
+  {
+    "contrastapi": {
+      "url": "https://api.contrastcyber.com/mcp/",
+      "transport": "http"
+    }
+  }
+tags:
+  - security
+  - cve
+  - osint
+  - threat-intelligence
+  - ip-reputation
+  - domain-audit
+  - dependency-scanner
+---
+## Overview
+
+31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
+
+## Usage
+
+claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/
+claude mcp list
+
+## Auth Requirements
+
+None required for free tier (100 credits/hour per IP). Optional X-API-Key header for Pro tier (1000/hr). See https://api.contrastcyber.com/pricing
+
+## Verification
+
+1. `claude mcp list` shows contrastapi as connected
+2. Ask Claude: "Look up CVE-2021-44228 with EPSS and KEV data"
+3. Response includes verdict.completeness=full with real CVSS + EPSS percentile (~94%) + KEV listing date

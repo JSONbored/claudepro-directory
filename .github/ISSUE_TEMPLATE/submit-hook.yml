@@ -2,7 +2,7 @@ name: Submit hook
 description: Submit a Claude hook entry for the directory.
 title: "Submit Hook: "
 labels:
-  - submission
+  - content-submission
   - hooks
 body:
   - type: markdown

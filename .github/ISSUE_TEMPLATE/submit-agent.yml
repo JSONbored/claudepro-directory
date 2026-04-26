@@ -2,7 +2,7 @@ name: Submit agent
 description: Submit a Claude agent entry for the directory.
 title: "Submit Agent: "
 labels:
-  - submission
+  - content-submission
   - agents
 body:
   - type: markdown

@@ -9,7 +9,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 import type { DirectoryEntry } from "@/lib/content";
 import { categoryLabels, siteConfig } from "@/lib/site";
@@ -24,28 +24,71 @@ type BrowseDirectoryProps = {
 const VOTE_QUERY_BATCH_SIZE = 120;
 const VOTE_QUERY_MAX_ATTEMPTS = 3;
 const VOTE_QUERY_RETRY_DELAYS_MS = [250, 900, 1800] as const;
+const utilityFilterOptions = [
+  { value: "all", label: "All Utility" },
+  { value: "installable", label: "Installable" },
+  { value: "trusted-package", label: "Trusted Package" },
+  { value: "verified", label: "Verified/Prod" },
+  { value: "draft", label: "Draft" },
+  { value: "hook-trigger", label: "Hook Trigger" },
+  { value: "prerequisites", label: "Prerequisites" },
+  { value: "troubleshooting", label: "Troubleshooting" },
+] as const;
+
+function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
+  switch (filter) {
+    case "installable":
+      return Boolean(
+        entry.installable || entry.installCommand || entry.downloadUrl,
+      );
+    case "trusted-package":
+      return (
+        entry.downloadTrust === "first-party" || entry.packageVerified === true
+      );
+    case "verified":
+      return (
+        entry.verificationStatus === "validated" ||
+        entry.verificationStatus === "production"
+      );
+    case "draft":
+      return entry.verificationStatus === "draft";
+    case "hook-trigger":
+      return Boolean(entry.trigger);
+    case "prerequisites":
+      return Boolean(entry.hasPrerequisites || entry.prerequisites?.length);
+    case "troubleshooting":
+      return entry.hasTroubleshooting === true;
+    default:
+      return true;
+  }
+}
 
 export function BrowseDirectory({
   entries,
   initialQuery = "",
   limit,
-  entriesUrl
+  entriesUrl,
 }: BrowseDirectoryProps) {
   const isDefaultQuery = initialQuery.trim().length === 0;
   const initialSortMode = "popular";
   const initialCategory = "all";
+  const initialUtilityFilter = "all";
   const [allEntries, setAllEntries] = useState(entries);
   const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
   const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
-  const getEntryKey = (entry: DirectoryEntry) => `${entry.category}:${entry.slug}`;
+  const getEntryKey = (entry: DirectoryEntry) =>
+    `${entry.category}:${entry.slug}`;
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
+  const [utilityFilter, setUtilityFilter] = useState(initialUtilityFilter);
   const [sortMode, setSortMode] = useState(initialSortMode);
   const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
   const [clientId, setClientId] = useState("");
   const [votesAvailable, setVotesAvailable] = useState(true);
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
-  const [popularSortSnapshot, setPopularSortSnapshot] = useState<Record<string, number>>({});
+  const [popularSortSnapshot, setPopularSortSnapshot] = useState<
+    Record<string, number>
+  >({});
   const [votedByMe, setVotedByMe] = useState<Record<string, boolean>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const deferredQuery = useDeferredValue(query);
@@ -64,7 +107,7 @@ export function BrowseDirectory({
     try {
       const response = await fetch(entriesUrl, {
         method: "GET",
-        cache: "force-cache"
+        cache: "force-cache",
       });
       if (!response.ok) return;
 
@@ -85,7 +128,7 @@ export function BrowseDirectory({
     if (!isDefaultQuery) {
       void loadFullEntriesIfNeeded();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesUrl, isDefaultQuery]);
 
   useEffect(() => {
@@ -121,8 +164,8 @@ export function BrowseDirectory({
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           keys: batchKeys,
-          clientId
-        })
+          clientId,
+        }),
       });
       if (!response.ok) {
         throw new Error(`votes query failed: ${response.status}`);
@@ -166,7 +209,9 @@ export function BrowseDirectory({
         } catch {
           if (attempt >= VOTE_QUERY_MAX_ATTEMPTS || cancelled) break;
           const delay =
-            VOTE_QUERY_RETRY_DELAYS_MS[Math.min(attempt - 1, VOTE_QUERY_RETRY_DELAYS_MS.length - 1)];
+            VOTE_QUERY_RETRY_DELAYS_MS[
+              Math.min(attempt - 1, VOTE_QUERY_RETRY_DELAYS_MS.length - 1)
+            ];
           await new Promise((resolve) => window.setTimeout(resolve, delay));
         }
       }
@@ -184,14 +229,20 @@ export function BrowseDirectory({
   const filteredEntries = useMemo(() => {
     const matched = allEntries.filter((entry) => {
       if (category !== "all" && entry.category !== category) return false;
+      if (!matchesUtilityFilter(entry, utilityFilter)) return false;
       if (!normalizedQuery) return true;
 
       const haystack = [
         entry.title,
         entry.description,
         entry.author,
+        entry.trigger,
+        entry.skillType,
+        entry.skillLevel,
+        entry.verificationStatus,
+        entry.downloadTrust,
         ...entry.tags,
-        ...entry.keywords
+        ...entry.keywords,
       ]
         .filter(Boolean)
         .join(" ")
@@ -203,13 +254,13 @@ export function BrowseDirectory({
     const sorted = [...matched].sort((left, right) => {
       const rightKey = getEntryKey(right);
       const leftKey = getEntryKey(left);
-      const rightVotes =
-        popularSortSnapshot[rightKey] ?? 0;
-      const leftVotes =
-        popularSortSnapshot[leftKey] ?? 0;
+      const rightVotes = popularSortSnapshot[rightKey] ?? 0;
+      const leftVotes = popularSortSnapshot[leftKey] ?? 0;
 
       if (sortMode === "newest") {
-        return String(right.dateAdded ?? "").localeCompare(String(left.dateAdded ?? ""));
+        return String(right.dateAdded ?? "").localeCompare(
+          String(left.dateAdded ?? ""),
+        );
       }
       if (sortMode === "title") {
         return left.title.localeCompare(right.title);
@@ -218,11 +269,25 @@ export function BrowseDirectory({
     });
 
     return sorted;
-  }, [allEntries, category, normalizedQuery, popularSortSnapshot, sortMode]);
+  }, [
+    allEntries,
+    category,
+    normalizedQuery,
+    popularSortSnapshot,
+    sortMode,
+    utilityFilter,
+  ]);
 
   useEffect(() => {
     setVisibleCount(limit ?? filteredEntries.length);
-  }, [category, deferredQuery, filteredEntries.length, limit, sortMode]);
+  }, [
+    category,
+    deferredQuery,
+    filteredEntries.length,
+    limit,
+    sortMode,
+    utilityFilter,
+  ]);
 
   useEffect(() => {
     if (!limit) return;
@@ -236,22 +301,35 @@ export function BrowseDirectory({
           void loadFullEntriesIfNeeded();
           return;
         }
-        setVisibleCount((current) => Math.min(current + limit, filteredEntries.length));
+        setVisibleCount((current) =>
+          Math.min(current + limit, filteredEntries.length),
+        );
       },
-      { rootMargin: "400px 0px" }
+      { rootMargin: "400px 0px" },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [entriesUrl, filteredEntries.length, hasLoadedFullEntries, isLoadingFullEntries, limit]);
+  }, [
+    entriesUrl,
+    filteredEntries.length,
+    hasLoadedFullEntries,
+    isLoadingFullEntries,
+    limit,
+  ]);
 
   useEffect(() => {
     if (!entriesUrl) return;
-    if (category !== initialCategory || sortMode !== initialSortMode || query.trim().length > 0) {
+    if (
+      category !== initialCategory ||
+      utilityFilter !== initialUtilityFilter ||
+      sortMode !== initialSortMode ||
+      query.trim().length > 0
+    ) {
       void loadFullEntriesIfNeeded();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entriesUrl, category, sortMode, query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entriesUrl, category, utilityFilter, sortMode, query]);
 
   const displayedEntries = useMemo(() => {
     if (!limit) return filteredEntries;
@@ -262,7 +340,9 @@ export function BrowseDirectory({
     const key = getEntryKey(entry);
     let effectiveClientId = clientId;
     if (!effectiveClientId) {
-      effectiveClientId = window.localStorage.getItem("heyclaude-client-id") ?? crypto.randomUUID();
+      effectiveClientId =
+        window.localStorage.getItem("heyclaude-client-id") ??
+        crypto.randomUUID();
       window.localStorage.setItem("heyclaude-client-id", effectiveClientId);
       setClientId(effectiveClientId);
     }
@@ -281,8 +361,8 @@ export function BrowseDirectory({
         body: JSON.stringify({
           key,
           clientId: effectiveClientId,
-          vote: nextVote
-        })
+          vote: nextVote,
+        }),
       });
 
       if (!response.ok) {
@@ -294,20 +374,28 @@ export function BrowseDirectory({
         voted: boolean;
       };
 
-      setVoteCounts((current) => ({ ...current, [key]: Number(payload.count ?? 0) }));
-      setVotedByMe((current) => ({ ...current, [key]: Boolean(payload.voted) }));
-      window.dispatchEvent(new CustomEvent("heyclaude:intent", { detail: { type: "vote" } }));
+      setVoteCounts((current) => ({
+        ...current,
+        [key]: Number(payload.count ?? 0),
+      }));
+      setVotedByMe((current) => ({
+        ...current,
+        [key]: Boolean(payload.voted),
+      }));
+      window.dispatchEvent(
+        new CustomEvent("heyclaude:intent", { detail: { type: "vote" } }),
+      );
 
       return {
         count: Number(payload.count ?? 0),
-        voted: Boolean(payload.voted)
+        voted: Boolean(payload.voted),
       };
     } catch {
       setVoteCounts((current) => ({ ...current, [key]: previousCount }));
       setVotedByMe((current) => ({ ...current, [key]: previousVoted }));
       return {
         count: previousCount,
-        voted: previousVoted
+        voted: previousVoted,
       };
     }
   };
@@ -336,11 +424,23 @@ export function BrowseDirectory({
             ))}
           </SelectContent>
         </Select>
-        <Select value={sortMode} onValueChange={setSortMode}>
+        <Select value={utilityFilter} onValueChange={setUtilityFilter}>
           <SelectTrigger
-            aria-label="Sort"
-            className="directory-select-trigger"
+            aria-label="Utility filter"
+            className="directory-select-trigger sm:w-[12rem]"
           >
+            <SelectValue placeholder="All Utility" />
+          </SelectTrigger>
+          <SelectContent className="directory-select-content">
+            {utilityFilterOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortMode} onValueChange={setSortMode}>
+          <SelectTrigger aria-label="Sort" className="directory-select-trigger">
             <SelectValue placeholder="Most Popular" />
           </SelectTrigger>
           <SelectContent className="directory-select-content">
@@ -376,7 +476,10 @@ export function BrowseDirectory({
         ) : null}
 
         {limit && displayedEntries.length < filteredEntries.length ? (
-          <div ref={loadMoreRef} className="py-4 text-center text-sm text-muted-foreground">
+          <div
+            ref={loadMoreRef}
+            className="py-4 text-center text-sm text-muted-foreground"
+          >
             Loading more entries...
           </div>
         ) : null}

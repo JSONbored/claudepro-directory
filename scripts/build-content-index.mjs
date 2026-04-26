@@ -12,7 +12,7 @@ import {
   headingId,
   inferSectionBooleans,
   inferStructuredFields,
-  normalizeBody
+  normalizeBody,
 } from "./content-schema.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
@@ -22,12 +22,20 @@ const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const publicDataDir = path.join(repoRoot, "apps/web/public/data");
 const outputFile = path.join(publicDataDir, "content-index.json");
 const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
+const raycastOutputFile = path.join(publicDataDir, "raycast-index.json");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
 const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
-const generatedLegacyVoteSeedFile = path.join(generatedDir, "legacy-vote-seed.json");
-const skillsDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/skills");
+const generatedLegacyVoteSeedFile = path.join(
+  generatedDir,
+  "legacy-vote-seed.json",
+);
+const skillsDownloadsDir = path.join(
+  repoRoot,
+  "apps/web/public/downloads/skills",
+);
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const SITE_URL = "https://heyclau.de";
 const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
 const categories = fs
   .readdirSync(contentRoot, { withFileTypes: true })
@@ -36,12 +44,15 @@ const categories = fs
 
 marked.setOptions({
   gfm: true,
-  breaks: false
+  breaks: false,
 });
 
 const renderer = new marked.Renderer();
 renderer.heading = ({ tokens, depth }) => {
-  const text = tokens.map((token) => token.raw).join("").trim();
+  const text = tokens
+    .map((token) => token.raw)
+    .join("")
+    .trim();
   const id = headingId(text);
   return `<h${depth} id="${id}">${text}</h${depth}>`;
 };
@@ -64,7 +75,12 @@ function parseGitHubRepo(repoUrl) {
     const owner = parts[0];
     const repo = parts[1].replace(/\.git$/, "");
 
-    return { owner, repo, key: `${owner}/${repo}`, url: `https://github.com/${owner}/${repo}` };
+    return {
+      owner,
+      repo,
+      key: `${owner}/${repo}`,
+      url: `https://github.com/${owner}/${repo}`,
+    };
   } catch {
     return null;
   }
@@ -73,16 +89,19 @@ function parseGitHubRepo(repoUrl) {
 async function fetchGitHubRepoStats(repo) {
   const headers = {
     Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28"
+    "X-GitHub-Api-Version": "2022-11-28",
   };
 
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   }
 
-  const response = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}`, {
-    headers
-  });
+  const response = await fetch(
+    `https://api.github.com/repos/${repo.owner}/${repo.repo}`,
+    {
+      headers,
+    },
+  );
 
   if (!response.ok) {
     const fallback = await fetchShieldsStars(repo);
@@ -90,7 +109,7 @@ async function fetchGitHubRepoStats(repo) {
       return {
         stars: fallback,
         forks: undefined,
-        updatedAt: undefined
+        updatedAt: undefined,
       };
     }
 
@@ -99,21 +118,27 @@ async function fetchGitHubRepoStats(repo) {
 
   const data = await response.json();
   return {
-    stars: typeof data.stargazers_count === "number" ? data.stargazers_count : undefined,
+    stars:
+      typeof data.stargazers_count === "number"
+        ? data.stargazers_count
+        : undefined,
     forks: typeof data.forks_count === "number" ? data.forks_count : undefined,
-    updatedAt: typeof data.updated_at === "string" ? data.updated_at : undefined
+    updatedAt:
+      typeof data.updated_at === "string" ? data.updated_at : undefined,
   };
 }
 
 async function fetchShieldsStars(repo) {
   try {
     const response = await fetch(
-      `https://img.shields.io/github/stars/${repo.owner}/${repo.repo}.json`
+      `https://img.shields.io/github/stars/${repo.owner}/${repo.repo}.json`,
     );
 
     if (!response.ok) return null;
     const data = await response.json();
-    const value = Number.parseFloat(String(data.value || data.message || "").replace(/[^\d.]/g, ""));
+    const value = Number.parseFloat(
+      String(data.value || data.message || "").replace(/[^\d.]/g, ""),
+    );
 
     return Number.isFinite(value) ? Math.round(value) : null;
   } catch {
@@ -124,6 +149,17 @@ async function fetchShieldsStars(repo) {
 function normalizeDownloadUrl(downloadUrl) {
   if (!downloadUrl) return "";
   return downloadUrl;
+}
+
+function normalizeDateAdded(value) {
+  if (!value) return undefined;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+
+  const normalized = String(value).trim();
+  const isoMatch = normalized.match(/^\d{4}-\d{2}-\d{2}/);
+  return isoMatch?.[0] ?? normalized;
 }
 
 function isFirstPartyPackage(data = {}) {
@@ -180,6 +216,178 @@ function copyFileIfChanged(sourcePath, destPath) {
   return true;
 }
 
+function appendLabeledBlock(lines, label, value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return;
+  if (lines.length) lines.push("");
+  lines.push(`${label}:`);
+  lines.push(normalized);
+}
+
+function buildCopyText(entry) {
+  const body = String(entry.body || "").trim();
+
+  if (entry.category === "agents" || entry.category === "rules") {
+    return body || entry.copySnippet || entry.usageSnippet || entry.description;
+  }
+
+  if (entry.category === "hooks") {
+    const lines = [];
+    appendLabeledBlock(lines, "Trigger", entry.trigger);
+    appendLabeledBlock(lines, "Install", entry.installCommand);
+    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
+    appendLabeledBlock(
+      lines,
+      "Hook script",
+      entry.scriptBody || entry.copySnippet,
+    );
+    appendLabeledBlock(lines, "Reference", body);
+    return lines.join("\n");
+  }
+
+  if (entry.category === "mcp") {
+    const lines = [];
+    appendLabeledBlock(
+      lines,
+      "Install",
+      entry.installCommand || entry.commandSyntax,
+    );
+    appendLabeledBlock(lines, "Config", entry.configSnippet);
+    appendLabeledBlock(
+      lines,
+      "Usage",
+      entry.copySnippet || entry.usageSnippet || body,
+    );
+    return (
+      lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title
+    );
+  }
+
+  if (entry.category === "skills" || entry.category === "statuslines") {
+    const lines = [];
+    appendLabeledBlock(lines, "Install", entry.installCommand);
+    appendLabeledBlock(lines, "Claude config", entry.configSnippet);
+    appendLabeledBlock(lines, "Usage", entry.usageSnippet);
+    appendLabeledBlock(
+      lines,
+      "Asset",
+      entry.scriptBody || entry.copySnippet || body,
+    );
+    return lines.join("\n");
+  }
+
+  if (entry.category === "commands") {
+    return (
+      entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body
+    );
+  }
+
+  if (entry.category === "collections") {
+    const lines = [];
+    appendLabeledBlock(lines, "Quick start", entry.usageSnippet);
+    if (Array.isArray(entry.items) && entry.items.length) {
+      appendLabeledBlock(
+        lines,
+        "Included items",
+        entry.items.map((item) => `${item.category}/${item.slug}`).join("\n"),
+      );
+    }
+    appendLabeledBlock(lines, "Reference", body);
+    return lines.join("\n") || entry.description;
+  }
+
+  if (entry.category === "guides") {
+    return body || entry.copySnippet || entry.usageSnippet || entry.description;
+  }
+
+  if (entry.copySnippet) return entry.copySnippet;
+  if (entry.installCommand) return entry.installCommand;
+  if (entry.usageSnippet) return entry.usageSnippet;
+  const firstCodeBlock = entry.codeBlocks?.[0]?.code?.trim();
+  if (firstCodeBlock) return firstCodeBlock;
+  if (body) return body;
+  if (entry.documentationUrl) return entry.documentationUrl;
+  if (entry.githubUrl) return entry.githubUrl;
+  return `${entry.title}\n${SITE_URL}/${entry.category}/${entry.slug}`;
+}
+
+function truncateText(value, maxLength) {
+  const normalized = String(value || "").trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength - 3).trimEnd()}...`;
+}
+
+function codeBlock(language, value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return "";
+  return `\`\`\`${language}\n${normalized}\n\`\`\``;
+}
+
+function buildRaycastDetailMarkdown(entry) {
+  const lines = [
+    `# ${entry.title}`,
+    "",
+    entry.description,
+    "",
+    `**Category:** ${entry.category}`,
+    entry.author ? `**Author:** ${entry.author}` : "",
+    entry.verificationStatus
+      ? `**Verification:** ${entry.verificationStatus}`
+      : "",
+    entry.downloadTrust ? `**Download trust:** ${entry.downloadTrust}` : "",
+    entry.tags?.length
+      ? `**Tags:** ${entry.tags.map((tag) => `\`${tag}\``).join(" ")}`
+      : "",
+  ].filter(Boolean);
+
+  if (entry.installCommand || entry.commandSyntax) {
+    lines.push(
+      "",
+      "## Install",
+      codeBlock("bash", entry.installCommand || entry.commandSyntax),
+    );
+  }
+
+  if (entry.configSnippet) {
+    lines.push("", "## Config", codeBlock("json", entry.configSnippet));
+  }
+
+  if (entry.usageSnippet) {
+    lines.push("", "## Usage", entry.usageSnippet);
+  }
+
+  const links = [
+    `${SITE_URL}/${entry.category}/${entry.slug}`,
+    entry.documentationUrl,
+    entry.repoUrl,
+  ].filter(Boolean);
+
+  if (links.length) {
+    lines.push("", "## Links", ...links.map((link) => `- ${link}`));
+  }
+
+  return truncateText(lines.join("\n"), 6000);
+}
+
+function buildRaycastEntries(entries) {
+  return entries.map((entry) => ({
+    category: entry.category,
+    slug: entry.slug,
+    title: entry.title,
+    description: entry.cardDescription || entry.description,
+    tags: entry.tags,
+    installCommand: entry.installCommand || "",
+    configSnippet: entry.configSnippet || "",
+    copyText: truncateText(buildCopyText(entry), 20000),
+    detailMarkdown: buildRaycastDetailMarkdown(entry),
+    webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    repoUrl: entry.repoUrl || "",
+    documentationUrl: entry.documentationUrl || "",
+    downloadTrust: entry.downloadTrust,
+    verificationStatus: entry.verificationStatus || "",
+  }));
+}
+
 ensureDir(generatedDir);
 ensureDir(publicDataDir);
 ensureDir(skillsDownloadsDir);
@@ -189,7 +397,7 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "skills"))) {
   if (!fileName.endsWith(".zip")) continue;
   copyFileIfChanged(
     path.join(contentRoot, "skills", fileName),
-    path.join(skillsDownloadsDir, fileName)
+    path.join(skillsDownloadsDir, fileName),
   );
 }
 
@@ -197,7 +405,7 @@ for (const fileName of fs.readdirSync(path.join(contentRoot, "mcp"))) {
   if (!fileName.endsWith(".mcpb")) continue;
   copyFileIfChanged(
     path.join(contentRoot, "mcp", fileName),
-    path.join(mcpDownloadsDir, fileName)
+    path.join(mcpDownloadsDir, fileName),
   );
 }
 
@@ -230,7 +438,9 @@ async function main() {
       const sectionFlags = inferSectionBooleans(body);
       const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : "";
       const githubRepo = parseGitHubRepo(repoUrl);
-      const downloadUrl = normalizeDownloadUrl(data.downloadUrl ? String(data.downloadUrl) : "");
+      const downloadUrl = normalizeDownloadUrl(
+        data.downloadUrl ? String(data.downloadUrl) : "",
+      );
       const localDownloadPath = isLocalDownloadUrl(downloadUrl)
         ? localDownloadSourcePath(downloadUrl)
         : null;
@@ -255,18 +465,22 @@ async function main() {
         title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
         description: String(data.description ?? ""),
         seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
-        seoDescription: data.seoDescription ? String(data.seoDescription) : undefined,
+        seoDescription: data.seoDescription
+          ? String(data.seoDescription)
+          : undefined,
         author: data.author ? String(data.author) : undefined,
         authorProfileUrl: data.authorProfileUrl
           ? String(data.authorProfileUrl)
           : undefined,
-        dateAdded: data.dateAdded ? String(data.dateAdded) : undefined,
+        dateAdded: normalizeDateAdded(data.dateAdded),
         tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
         keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
         readingTime:
           typeof data.readingTime === "number" ? data.readingTime : undefined,
         difficultyScore:
-          typeof data.difficultyScore === "number" ? data.difficultyScore : undefined,
+          typeof data.difficultyScore === "number"
+            ? data.difficultyScore
+            : undefined,
         documentationUrl: data.documentationUrl
           ? String(data.documentationUrl)
           : undefined,
@@ -289,7 +503,7 @@ async function main() {
         items: Array.isArray(data.items)
           ? data.items.map((item) => ({
               slug: String(item.slug),
-              category: String(item.category)
+              category: String(item.category),
             }))
           : undefined,
         installationOrder: Array.isArray(data.installationOrder)
@@ -304,11 +518,13 @@ async function main() {
         verificationStatus: inferred.verificationStatus || undefined,
         verifiedAt: inferred.verifiedAt || undefined,
         retrievalSources:
-          Array.isArray(inferred.retrievalSources) && inferred.retrievalSources.length
+          Array.isArray(inferred.retrievalSources) &&
+          inferred.retrievalSources.length
             ? inferred.retrievalSources
             : undefined,
         testedPlatforms:
-          Array.isArray(inferred.testedPlatforms) && inferred.testedPlatforms.length
+          Array.isArray(inferred.testedPlatforms) &&
+          inferred.testedPlatforms.length
             ? inferred.testedPlatforms
             : undefined,
         prerequisites: Array.isArray(data.prerequisites)
@@ -329,9 +545,13 @@ async function main() {
         robotsIndex:
           typeof data.robotsIndex === "boolean" ? data.robotsIndex : undefined,
         robotsFollow:
-          typeof data.robotsFollow === "boolean" ? data.robotsFollow : undefined,
+          typeof data.robotsFollow === "boolean"
+            ? data.robotsFollow
+            : undefined,
         packageVerified:
-          typeof data.packageVerified === "boolean" ? data.packageVerified : undefined,
+          typeof data.packageVerified === "boolean"
+            ? data.packageVerified
+            : undefined,
         downloadUrl,
         downloadTrust,
         downloadSha256,
@@ -340,7 +560,7 @@ async function main() {
           title: section.title,
           id: section.id,
           markdown: section.markdown,
-          codeBlocks: extractCodeBlocks(section.markdown)
+          codeBlocks: extractCodeBlocks(section.markdown),
         })),
         headings,
         codeBlocks,
@@ -349,7 +569,7 @@ async function main() {
         repoUrl: githubRepo?.url ?? null,
         githubStars: null,
         githubForks: null,
-        repoUpdatedAt: null
+        repoUpdatedAt: null,
       });
     }
   }
@@ -360,9 +580,11 @@ async function main() {
         try {
           repoStats.set(repo.key, await fetchGitHubRepoStats(repo));
         } catch (error) {
-          console.warn(`Could not fetch GitHub stats for ${repo.key}: ${error.message}`);
+          console.warn(
+            `Could not fetch GitHub stats for ${repo.key}: ${error.message}`,
+          );
         }
-      })
+      }),
     );
   }
 
@@ -395,43 +617,59 @@ async function main() {
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
   const wroteContentIndex = writeFileIfChanged(outputFile, payload);
   const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
-  const wroteDirectoryIndex = writeFileIfChanged(directoryOutputFile, directoryPayload);
+  const wroteDirectoryIndex = writeFileIfChanged(
+    directoryOutputFile,
+    directoryPayload,
+  );
+  const raycastEntries = buildRaycastEntries(entries);
+  const raycastPayload = `${JSON.stringify(raycastEntries, null, 2)}\n`;
+  const wroteRaycastIndex = writeFileIfChanged(
+    raycastOutputFile,
+    raycastPayload,
+  );
 
-  const directoryStats = directoryRepo ? repoStats.get(directoryRepo.key) : null;
+  const directoryStats = directoryRepo
+    ? repoStats.get(directoryRepo.key)
+    : null;
   const siteStatsPayload = {
     directoryRepo: DIRECTORY_REPO_URL,
     githubStars: directoryStats?.stars ?? null,
     githubForks: directoryStats?.forks ?? null,
-    repoUpdatedAt: directoryStats?.updatedAt ?? null
+    repoUpdatedAt: directoryStats?.updatedAt ?? null,
   };
   const wroteSiteStats = writeFileIfChanged(
     siteStatsFile,
-    `${JSON.stringify(siteStatsPayload, null, 2)}\n`
+    `${JSON.stringify(siteStatsPayload, null, 2)}\n`,
   );
 
   const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
     ? JSON.parse(fs.readFileSync(legacyVoteSeedFile, "utf8"))
     : { votes: {} };
   const votes =
-    rawLegacySeed && typeof rawLegacySeed === "object" && typeof rawLegacySeed.votes === "object"
+    rawLegacySeed &&
+    typeof rawLegacySeed === "object" &&
+    typeof rawLegacySeed.votes === "object"
       ? rawLegacySeed.votes
       : {};
   const wroteLegacySeed = writeFileIfChanged(
     generatedLegacyVoteSeedFile,
-    `${JSON.stringify(votes, null, 2)}\n`
+    `${JSON.stringify(votes, null, 2)}\n`,
   );
 
   console.log(
-    `${wroteContentIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`
+    `${wroteContentIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`,
   );
   console.log(
-    `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`
+    `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`,
   );
   console.log(
-    `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`
+    `${wroteRaycastIndex ? "Wrote" : "Unchanged"} ${raycastEntries.length} entries to ${path.relative(repoRoot, raycastOutputFile)}`,
   );
   console.log(
-    `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`
+    `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`,
+  );
+  console.log(
+    `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`,
   );
 }
 

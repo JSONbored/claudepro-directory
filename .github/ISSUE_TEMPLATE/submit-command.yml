@@ -2,7 +2,7 @@ name: Submit command
 description: Submit a Claude command entry for the directory.
 title: "Submit Command: "
 labels:
-  - submission
+  - content-submission
   - commands
 body:
   - type: markdown

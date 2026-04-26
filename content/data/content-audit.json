@@ -1522,6 +1522,15 @@
   },
   {
     "category": "mcp",
+    "filePath": "content/mcp/contrastapi-mcp-server.mdx",
+    "slug": "contrastapi-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
     "filePath": "content/mcp/daloopa-mcp-server.mdx",
     "slug": "daloopa-mcp-server",
     "metadataOnly": false,
@@ -1731,6 +1740,15 @@
     "category": "mcp",
     "filePath": "content/mcp/postgresql-mcp-server.mdx",
     "slug": "postgresql-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/prompt-to-asset.mdx",
+    "slug": "prompt-to-asset",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
