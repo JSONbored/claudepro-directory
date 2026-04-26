@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:jam-mcp-server",
+  "category": "mcp",
+  "slug": "jam-mcp-server",
+  "title": "Jam MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status jam\n\nConfig:\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Jam MCP Server for Claude\nDebug faster with AI agents that access video recordings, console logs, and network requests\n**Category:** mcp\n**Author:** Jam\n**Download trust:** first-party\n**Tags:** `debugging` `jam` `testing` `bug-tracking` `developer-tools`\n\n## Install\n```bash\nclaude mcp list && claude mcp status jam\n```\n\n## Config\n```json\n{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status jam\n\n## Links\n- https://heyclau.de/mcp/jam-mcp-server\n- https://jam.dev/docs/debug-a-jam/mcp",
+  "webUrl": "https://heyclau.de/mcp/jam-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp"
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:checkpoint-manager",
+  "category": "commands",
+  "slug": "checkpoint-manager",
+  "title": "Checkpoint Manager for Claude Code",
+  "copyText": "/checkpoint-manager [action] [options]",
+  "detailMarkdown": "# Checkpoint Manager for Claude Code\nManage Claude Code checkpoints to safely rewind code changes, restore conversation states, and explore alternatives without fear using ESC+ESC or /rewind commands\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `checkpoints` `rewind` `undo` `version-control` `session-recovery` `safety`\n\n## Install\n```bash\n/checkpoint-manager [action] [options]\n```\n\n## Usage\n/checkpoint-manager [action] [options]\n\n## Links\n- https://heyclau.de/commands/checkpoint-manager\n- https://docs.claude.com/en/docs/claude-code/checkpointing",
+  "webUrl": "https://heyclau.de/commands/checkpoint-manager",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/checkpointing"
+}

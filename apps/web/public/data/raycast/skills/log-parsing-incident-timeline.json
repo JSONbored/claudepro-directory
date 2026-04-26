@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:log-parsing-incident-timeline",
+  "category": "skills",
+  "slug": "log-parsing-incident-timeline",
+  "title": "Log Parsing + Incident Timeline Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline\n\nUsage:\nClaude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.\n\nAsset:\n# Filter 5xx errors from nginx and sort by time\nrg -n ' 5\\d\\d ' access.log | awk '{print $4, $5, $9, $7}' | sort > timeline.txt\nhead -n 5 timeline.txt",
+  "detailMarkdown": "# Log Parsing + Incident Timeline Skill\nParse web, application, and system logs into structured incidents and timelines with anomaly detection.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `logs` `observability` `ripgrep` `bash`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline\n```\n\n## Usage\nClaude can parse application logs, server logs, and system logs to extract errors, create incident timelines, identify patterns, and correlate events across distributed systems. Transform raw log data into actionable insights.\n\n## Links\n- https://heyclau.de/skills/log-parsing-incident-timeline\n- https://github.com/BurntSushi/ripgrep\n- https://github.com/BurntSushi/ripgrep",
+  "webUrl": "https://heyclau.de/skills/log-parsing-incident-timeline",
+  "repoUrl": "https://github.com/BurntSushi/ripgrep",
+  "documentationUrl": "https://github.com/BurntSushi/ripgrep"
+}

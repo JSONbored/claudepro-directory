@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "ai-business-idea-validation-capability-pack",
+    "title": "AI Business Idea Validation Capability Pack Skill",
+    "description": "Expert business-validation capability pack for testing AI product ideas, market demand, pricing readiness, and launch feasibility.",
+    "seoTitle": "AI Business Idea Validation Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for market validation, pricing experiments, and zero-to-one launch decision frameworks for AI products.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "business",
+      "validation",
+      "product-strategy",
+      "growth",
+      "capability-pack"
+    ],
+    "keywords": [
+      "ai startup validation",
+      "product market demand",
+      "pricing hypothesis",
+      "go to market testing"
+    ],
+    "readingTime": 9,
+    "difficultyScore": 83,
+    "documentationUrl": "https://www.ycombinator.com/library",
+    "cardDescription": "Validate AI business ideas with evidence-driven demand checks, positioning tests, and practical go/no-go decisions.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip -o ai-business-idea-validation-capability-pack.zip && unzip -o ai-business-idea-validation-capability-pack.zip -d ./ai-business-idea-validation-capability-pack",
+    "usageSnippet": "Use this skill to validate AI product ideas against demand, pain intensity, willingness-to-pay, and execution constraints.",
+    "copySnippet": "# Trigger\n\"Apply the AI business idea validation capability pack.\"\n\n# Required output\n1) Problem and buyer segmentation\n2) Demand signals and competitor map\n3) Pricing and offer hypothesis\n4) Go/no-go decision with evidence",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://www.ycombinator.com/library",
+      "https://www.lennysnewsletter.com/",
+      "https://www.indiehackers.com/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Problem domain hypothesis",
+      "Target user segment",
+      "Time and budget constraints"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/ai-business-idea-validation-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "9955465ac6dea7ab8837ab2ad18bf6a53f6635c72c85c7cff24025a9efbd8cfe",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to sources verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://www.ycombinator.com/library\n- https://www.lennysnewsletter.com/\n- https://www.indiehackers.com/\n\n## Core Workflow\n\n1. Define target buyer and high-pain workflow.\n2. Validate demand with real user signal, not vanity metrics.\n3. Map alternatives and clear differentiation.\n4. Test pricing and offer framing with constrained experiments.\n5. Decide go/no-go with explicit evidence thresholds.\n\n## Overview\n\nThis skill helps agents pressure-test business ideas before heavy build effort, reducing wasted cycles and weak launches.\n\n## Capability Scope\n\n- Buyer/problem framing\n- Market and alternative analysis\n- Offer and pricing experiment design\n- Validation metric and threshold definition\n- Decision memo generation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Base decisions on direct demand evidence, not social vanity metrics.\n- Keep pricing tests tied to measurable user outcomes.\n- Preserve a clear no-build threshold when evidence is weak.\n- Re-test assumptions whenever segment or offer changes materially.\n\n## Troubleshooting\n\n**Issue:** Validation result is inconclusive  \n**Fix:** narrow segment and run higher-signal interviews/tests.\n\n**Issue:** Competitor map is generic  \n**Fix:** compare by workflow outcome, not feature list.\n\n**Issue:** Pricing feels arbitrary  \n**Fix:** tie price to measurable ROI or time/cost savings.\n\n## Output Contract\n\n1. Evidence-backed demand assessment.\n2. Testable offer and pricing proposal.\n3. Execution scope for first launch.\n4. Go/no-go recommendation with rationale.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to sources verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://www.ycombinator.com/library\n- https://www.lennysnewsletter.com/\n- https://www.indiehackers.com/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Define target buyer and high-pain workflow.\n2. Validate demand with real user signal, not vanity metrics.\n3. Map alternatives and clear differentiation.\n4. Test pricing and offer framing with constrained experiments.\n5. Decide go/no-go with explicit evidence thresholds.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps agents pressure-test business ideas before heavy build effort, reducing wasted cycles and weak launches.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Buyer/problem framing\n- Market and alternative analysis\n- Offer and pricing experiment design\n- Validation metric and threshold definition\n- Decision memo generation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Base decisions on direct demand evidence, not social vanity metrics.\n- Keep pricing tests tied to measurable user outcomes.\n- Preserve a clear no-build threshold when evidence is weak.\n- Re-test assumptions whenever segment or offer changes materially.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Validation result is inconclusive  \n**Fix:** narrow segment and run higher-signal interviews/tests.\n\n**Issue:** Competitor map is generic  \n**Fix:** compare by workflow outcome, not feature list.\n\n**Issue:** Pricing feels arbitrary  \n**Fix:** tie price to measurable ROI or time/cost savings.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Evidence-backed demand assessment.\n2. Testable offer and pricing proposal.\n3. Execution scope for first launch.\n4. Go/no-go recommendation with rationale.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/ai-business-idea-validation-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-business-idea-validation-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:mcp-setup",
+  "category": "commands",
+  "slug": "mcp-setup",
+  "title": "MCP Server Setup for Claude Code",
+  "copyText": "/mcp-setup [server-type] [options]",
+  "detailMarkdown": "# MCP Server Setup for Claude Code\nConfigure and connect MCP servers to Claude Code with OAuth authentication, tool access, and remote server support for seamless external integrations\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `mcp` `integration` `oauth` `remote-server` `tools` `setup`\n\n## Install\n```bash\n/mcp-setup [server-type] [options]\n```\n\n## Usage\n/mcp-setup [server-type] [options]\n\n## Links\n- https://heyclau.de/commands/mcp-setup\n- https://docs.claude.com/en/docs/claude-code/mcp",
+  "webUrl": "https://heyclau.de/commands/mcp-setup",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp"
+}

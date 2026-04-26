@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "git-mcp-server",
+    "title": "Git MCP Server for Claude",
+    "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
+    "seoTitle": "Git MCP Server for Claude",
+    "seoDescription": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories Discover tools for AI development.",
+    "author": "Anthropic",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "git",
+      "version-control",
+      "repositories",
+      "official",
+      "anthropic"
+    ],
+    "keywords": [
+      "anthropic",
+      "claude",
+      "development",
+      "git",
+      "mcp",
+      "mcp servers",
+      "official",
+      "repositories",
+      "server",
+      "tools",
+      "version-control"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://modelcontextprotocol.io/examples",
+    "cardDescription": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status git",
+    "usageSnippet": "claude mcp list && claude mcp status git",
+    "copySnippet": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "3 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Git installed (verify with: git --version, install via sudo apt install git (Linux) or brew install git (macOS))",
+      "Node.js and npx available (comes with Node.js, verify with: npx --version)",
+      "Local Git repository (server works with local repositories only, navigate to repository root directory)",
+      "File system read permissions for repository directory (check with ls -l or icacls)",
+      "Understanding of Git concepts (branches, commits, tags, repository structure)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding that server is read-only (safe exploration without making changes to repository)",
+      "Platform: macOS, Windows, or Linux (cross-platform support)",
+      "Ability to create and edit JSON configuration files (.mcp.json or claude_desktop_config.json)",
+      "Understanding of repository root directory (must be in repository root for MCP server to work)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/git-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "f7f4ab253a6a32a2cb2d8b024239dd024523ebd49047d08b8693df98cf83d0eb",
+    "body": "## Content\n\nEmpower Claude to explore and analyze your Git repositories safely with read-only access. The official Git MCP Server from Anthropic enables natural language queries to browse commit history, search code changes, compare branches, examine file evolution, and understand repository structure—all without making any modifications to your codebase.\n\n## Features\n\n- Access commit history, branch information, and repository status\n- Read files from any commit, branch, or tag\n- Search through commit messages, file contents, and repository structure\n- Compare changes between commits, branches, and files\n- Work with different branches and track changes\n- Safe exploration without making changes\n- Advanced Git repository management with branch operations, commit history analysis, and merge conflict resolution\n- Batch operations support for efficient bulk repository operations, file staging, and commit management with automatic error handling\n- Real-time repository monitoring capabilities with change detection support for tracking commits and triggering automated workflows\n\n## Use Cases\n\n- Analyze commit patterns and development history\n- Understand code evolution over time\n- Examine specific commits and their changes\n- Compare different versions of files\n- Search for commits mentioning specific topics\n- Generate repository documentation\n- Build automated version control workflows that sync external systems with Git repositories for real-time code management and collaboration\n\n## Installation\n\n### Claude Code\n\n1. Create a .mcp.json file in your project root directory (must be in Git repository root)\n2. Add the Git server configuration with npx command and @modelcontextprotocol/server-git package\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status git\n\n### Claude Desktop\n\n1. Open your Claude Desktop configuration file (see configPath below)\n2. Add the Git MCP server configuration with npx command and @modelcontextprotocol/server-git package\n3. Restart Claude Desktop\n4. Navigate to a Git repository root directory and ask Claude about recent commit history to verify connection\n\n## Requirements\n\n- Git installed (verify with: git --version, install via sudo apt install git (Linux) or brew install git (macOS))\n- Node.js and npx available (comes with Node.js, verify with: npx --version)\n- Local Git repository (server works with local repositories only, navigate to repository root directory)\n- File system read permissions for repository directory (check with ls -l or icacls)\n- Understanding of Git concepts (branches, commits, tags, repository structure)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding that server is read-only (safe exploration without making changes to repository)\n- Platform: macOS, Windows, or Linux (cross-platform support)\n- Ability to create and edit JSON configuration files (.mcp.json or claude_desktop_config.json)\n- Understanding of repository root directory (must be in repository root for MCP server to work)\n\n## Configuration\n\n```json\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### Show me the recent commit history\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show me the recent commit history\"\n```\n### What branches exist in this repository?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What branches exist in this repository?\"\n```\n### Find commits mentioning bug fix\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find commits mentioning bug fix\"\n```\n### What changed in the last 5 commits?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What changed in the last 5 commits?\"\n```\n### Compare this file between two commits\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Compare this file between two commits\"\n```\n### Create Commit with Message\nStage files and create a commit with a descriptive message\n```typescript\n// Create Git commit\nawait git.add({\n  files: [\"src/components/Button.tsx\", \"src/utils/helpers.ts\"]\n});\nconst commit = await git.commit({\n  message: \"feat: Add new Button component\",\n  author: \"Claude <claude@example.com>\"\n});\n```\n\n## Security\n\n- Read-only access to repositories\n- Works with local Git repositories only\n- No remote operations performed\n- Safe exploration without making changes\n- Respects existing file permissions\n- Git repository access grants code modification capabilities - ensure Git MCP server is configured with restricted repository paths and never granted access to sensitive repositories\n- Git credentials and SSH keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Git commit history and repository structure may expose code architecture and development patterns - ensure Git resource identifiers are kept private and not shared in public configurations\n- Rate limiting and resource management are critical for Git MCP servers - implement proper error handling, retry logic, and resource monitoring to prevent repository corruption\n- Git operations execute with user privileges and could potentially modify or delete code - review server configuration and restrict access to specific repositories only\n\n## Troubleshooting\n### Not a Git repository error when accessing features\n\nNavigate to Git repository root directory before using MCP server. Run git status locally to verify directory is initialized. Initialize repository with git init if needed.\n### Permission denied accessing repository files\n\nRun ls -l (Unix) or icacls (Windows) on repository directory to check user has read permissions. Verify MCP server process user matches repository owner. Add user to appropriate group if needed: sudo usermod -a -G groupname username.\n### Git command not found or unavailable error\n\nInstall Git: sudo apt install git (Linux) or brew install git (macOS) or download from https://git-scm.com/downloads (Windows). Verify installation: git --version. Ensure Git binary is in system PATH environment variable.\n### Cannot read commits or repository history\n\nVerify .git directory exists and isn't corrupted. Check repository permissions allow read access. Run git fsck to check repository integrity. Clone fresh copy if repository is corrupted.\n### Git MCP server authentication errors with credentials\n\nVerify Git credentials are valid. Check SSH key permissions (should be 600). Ensure credential helper is configured correctly. For HTTPS, verify username and password/token are correct.\n### Git operations failing with permission errors\n\nVerify repository permissions allow read/write access. Check file system permissions for .git directory. Ensure user has necessary Git repository permissions. For remote operations, verify SSH key or credentials are authorized.\n### Git MCP server connection timeouts or network errors\n\nCheck network connectivity to Git remote. Verify SSH connectivity for remote repositories. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.\n### Git merge conflicts or branch operation failures\n\nCheck for uncommitted changes before merge operations. Verify branch exists and is accessible. Resolve merge conflicts manually if needed. Ensure working directory is clean before branch operations.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Empower Claude to explore and analyze your Git repositories safely with read-only access. The official Git MCP Server from Anthropic enables natural language queries to browse commit history, search code changes, compare branches, examine file evolution, and understand repository structure—all without making any modifications to your codebase.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Access commit history, branch information, and repository status\n- Read files from any commit, branch, or tag\n- Search through commit messages, file contents, and repository structure\n- Compare changes between commits, branches, and files\n- Work with different branches and track changes\n- Safe exploration without making changes\n- Advanced Git repository management with branch operations, commit history analysis, and merge conflict resolution\n- Batch operations support for efficient bulk repository operations, file staging, and commit management with automatic error handling\n- Real-time repository monitoring capabilities with change detection support for tracking commits and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Analyze commit patterns and development history\n- Understand code evolution over time\n- Examine specific commits and their changes\n- Compare different versions of files\n- Search for commits mentioning specific topics\n- Generate repository documentation\n- Build automated version control workflows that sync external systems with Git repositories for real-time code management and collaboration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Create a .mcp.json file in your project root directory (must be in Git repository root)\n2. Add the Git server configuration with npx command and @modelcontextprotocol/server-git package\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status git\n\n### Claude Desktop\n\n1. Open your Claude Desktop configuration file (see configPath below)\n2. Add the Git MCP server configuration with npx command and @modelcontextprotocol/server-git package\n3. Restart Claude Desktop\n4. Navigate to a Git repository root directory and ask Claude about recent commit history to verify connection",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Git installed (verify with: git --version, install via sudo apt install git (Linux) or brew install git (macOS))\n- Node.js and npx available (comes with Node.js, verify with: npx --version)\n- Local Git repository (server works with local repositories only, navigate to repository root directory)\n- File system read permissions for repository directory (check with ls -l or icacls)\n- Understanding of Git concepts (branches, commits, tags, repository structure)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding that server is read-only (safe exploration without making changes to repository)\n- Platform: macOS, Windows, or Linux (cross-platform support)\n- Ability to create and edit JSON configuration files (.mcp.json or claude_desktop_config.json)\n- Understanding of repository root directory (must be in repository root for MCP server to work)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Show me the recent commit history\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show me the recent commit history\"\n```\n### What branches exist in this repository?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What branches exist in this repository?\"\n```\n### Find commits mentioning bug fix\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find commits mentioning bug fix\"\n```\n### What changed in the last 5 commits?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What changed in the last 5 commits?\"\n```\n### Compare this file between two commits\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Compare this file between two commits\"\n```\n### Create Commit with Message\nStage files and create a commit with a descriptive message\n```typescript\n// Create Git commit\nawait git.add({\n  files: [\"src/components/Button.tsx\", \"src/utils/helpers.ts\"]\n});\nconst commit = await git.commit({\n  message: \"feat: Add new Button component\",\n  author: \"Claude <claude@example.com>\"\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show me the recent commit history\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What branches exist in this repository?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find commits mentioning bug fix\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What changed in the last 5 commits?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Compare this file between two commits\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Git commit\nawait git.add({\n  files: [\"src/components/Button.tsx\", \"src/utils/helpers.ts\"]\n});\nconst commit = await git.commit({\n  message: \"feat: Add new Button component\",\n  author: \"Claude <claude@example.com>\"\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Read-only access to repositories\n- Works with local Git repositories only\n- No remote operations performed\n- Safe exploration without making changes\n- Respects existing file permissions\n- Git repository access grants code modification capabilities - ensure Git MCP server is configured with restricted repository paths and never granted access to sensitive repositories\n- Git credentials and SSH keys must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Git commit history and repository structure may expose code architecture and development patterns - ensure Git resource identifiers are kept private and not shared in public configurations\n- Rate limiting and resource management are critical for Git MCP servers - implement proper error handling, retry logic, and resource monitoring to prevent repository corruption\n- Git operations execute with user privileges and could potentially modify or delete code - review server configuration and restrict access to specific repositories only",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Not a Git repository error when accessing features\n\nNavigate to Git repository root directory before using MCP server. Run git status locally to verify directory is initialized. Initialize repository with git init if needed.\n### Permission denied accessing repository files\n\nRun ls -l (Unix) or icacls (Windows) on repository directory to check user has read permissions. Verify MCP server process user matches repository owner. Add user to appropriate group if needed: sudo usermod -a -G groupname username.\n### Git command not found or unavailable error\n\nInstall Git: sudo apt install git (Linux) or brew install git (macOS) or download from https://git-scm.com/downloads (Windows). Verify installation: git --version. Ensure Git binary is in system PATH environment variable.\n### Cannot read commits or repository history\n\nVerify .git directory exists and isn't corrupted. Check repository permissions allow read access. Run git fsck to check repository integrity. Clone fresh copy if repository is corrupted.\n### Git MCP server authentication errors with credentials\n\nVerify Git credentials are valid. Check SSH key permissions (should be 600). Ensure credential helper is configured correctly. For HTTPS, verify username and password/token are correct.\n### Git operations failing with permission errors\n\nVerify repository permissions allow read/write access. Check file system permissions for .git directory. Ensure user has necessary Git repository permissions. For remote operations, verify SSH key or credentials are authorized.\n### Git MCP server connection timeouts or network errors\n\nCheck network connectivity to Git remote. Verify SSH connectivity for remote repositories. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.\n### Git merge conflicts or branch operation failures\n\nCheck for uncommitted changes before merge operations. Verify branch exists and is accessible. Resolve merge conflicts manually if needed. Ensure working directory is clean before branch operations.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Show me the recent commit history",
+        "id": "show-me-the-recent-commit-history"
+      },
+      {
+        "depth": 3,
+        "text": "What branches exist in this repository?",
+        "id": "what-branches-exist-in-this-repository"
+      },
+      {
+        "depth": 3,
+        "text": "Find commits mentioning bug fix",
+        "id": "find-commits-mentioning-bug-fix"
+      },
+      {
+        "depth": 3,
+        "text": "What changed in the last 5 commits?",
+        "id": "what-changed-in-the-last-5-commits"
+      },
+      {
+        "depth": 3,
+        "text": "Compare this file between two commits",
+        "id": "compare-this-file-between-two-commits"
+      },
+      {
+        "depth": 3,
+        "text": "Create Commit with Message",
+        "id": "create-commit-with-message"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Not a Git repository error when accessing features",
+        "id": "not-a-git-repository-error-when-accessing-features"
+      },
+      {
+        "depth": 3,
+        "text": "Permission denied accessing repository files",
+        "id": "permission-denied-accessing-repository-files"
+      },
+      {
+        "depth": 3,
+        "text": "Git command not found or unavailable error",
+        "id": "git-command-not-found-or-unavailable-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot read commits or repository history",
+        "id": "cannot-read-commits-or-repository-history"
+      },
+      {
+        "depth": 3,
+        "text": "Git MCP server authentication errors with credentials",
+        "id": "git-mcp-server-authentication-errors-with-credentials"
+      },
+      {
+        "depth": 3,
+        "text": "Git operations failing with permission errors",
+        "id": "git-operations-failing-with-permission-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Git MCP server connection timeouts or network errors",
+        "id": "git-mcp-server-connection-timeouts-or-network-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Git merge conflicts or branch operation failures",
+        "id": "git-merge-conflicts-or-branch-operation-failures"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show me the recent commit history\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What branches exist in this repository?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find commits mentioning bug fix\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What changed in the last 5 commits?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Compare this file between two commits\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Git commit\nawait git.add({\n  files: [\"src/components/Button.tsx\", \"src/utils/helpers.ts\"]\n});\nconst commit = await git.commit({\n  message: \"feat: Add new Button component\",\n  author: \"Claude <claude@example.com>\"\n});"
+      }
+    ],
+    "filePath": "content/mcp/git-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

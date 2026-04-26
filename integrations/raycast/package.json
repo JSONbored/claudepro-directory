@@ -1,5 +1,6 @@
 {
   "name": "heyclaude",
+  "version": "1.0.0",
   "type": "module",
   "title": "HeyClaude",
   "description": "Search and copy Claude agents, MCP servers, skills, hooks, rules, commands, guides, and statuslines from HeyClaude.",

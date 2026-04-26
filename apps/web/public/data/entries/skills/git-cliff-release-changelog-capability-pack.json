@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "git-cliff-release-changelog-capability-pack",
+    "title": "Git-Cliff Release Changelog Capability Pack Skill",
+    "description": "Expert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.",
+    "seoTitle": "Git-Cliff Release Changelog Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "git-cliff",
+      "changelog",
+      "releases",
+      "conventional-commits",
+      "capability-pack"
+    ],
+    "keywords": [
+      "git cliff changelog",
+      "automated release notes",
+      "conventional commits release",
+      "semantic version workflow"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 84,
+    "documentationUrl": "https://git-cliff.org/docs/",
+    "cardDescription": "Generate stable, high-signal changelogs and release notes with git-cliff and conventional commit discipline.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack",
+    "usageSnippet": "Use this skill to enforce changelog quality from commit history through release publication.",
+    "copySnippet": "# Trigger\n\"Apply the git-cliff release changelog capability pack for this release.\"\n\n# Required output\n1) Conventional commit compliance report\n2) Proposed release version and rationale\n3) Generated changelog sections\n4) Tag/release execution checklist",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://git-cliff.org/docs/",
+      "https://www.conventionalcommits.org/en/v1.0.0/",
+      "https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Conventional commit policy",
+      "Git tags access",
+      "Release workflow ownership"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/git-cliff-release-changelog-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "88297534195c8e594486b5e5c230f5c99b1053118e534e7dbf598514e79a4741",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://git-cliff.org/docs/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases\n\n## Core Workflow\n\n1. Validate commit history quality against conventional commit policy.\n2. Determine next version from merged change scope.\n3. Generate changelog draft and remove low-signal noise.\n4. Stage release commit/tag plan with rollback path.\n5. Publish release and verify changelog consistency.\n\n## Overview\n\nThis skill gives agents a deterministic release process that produces readable changelogs without manual rewrite churn.\n\n## Capability Scope\n\n- Commit history normalization\n- Semver recommendation logic\n- Changelog generation and section tuning\n- Release tagging and publication checks\n- Post-release verification and correction\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Enforce conventional commits before changelog generation.\n- Keep release source-of-truth tied to tags on protected branches.\n- Exclude bot-only and merge-noise commits from user-facing notes.\n- Require human review before publishing release artifacts.\n\n## Troubleshooting\n\n**Issue:** Changelog section grouping is noisy  \n**Fix:** tighten commit scopes and skip bots/merge-only commits.\n\n**Issue:** Wrong version bump recommendation  \n**Fix:** map feat/fix/breaking conventions explicitly in config.\n\n**Issue:** Release notes differ from changelog  \n**Fix:** derive both from same generated artifact path.\n\n## Output Contract\n\n1. Proposed version with justification.\n2. Clean changelog text ready for merge.\n3. Tag/release command sequence.\n4. Verification notes and fallback steps.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://git-cliff.org/docs/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Validate commit history quality against conventional commit policy.\n2. Determine next version from merged change scope.\n3. Generate changelog draft and remove low-signal noise.\n4. Stage release commit/tag plan with rollback path.\n5. Publish release and verify changelog consistency.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill gives agents a deterministic release process that produces readable changelogs without manual rewrite churn.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Commit history normalization\n- Semver recommendation logic\n- Changelog generation and section tuning\n- Release tagging and publication checks\n- Post-release verification and correction",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Enforce conventional commits before changelog generation.\n- Keep release source-of-truth tied to tags on protected branches.\n- Exclude bot-only and merge-noise commits from user-facing notes.\n- Require human review before publishing release artifacts.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Changelog section grouping is noisy  \n**Fix:** tighten commit scopes and skip bots/merge-only commits.\n\n**Issue:** Wrong version bump recommendation  \n**Fix:** map feat/fix/breaking conventions explicitly in config.\n\n**Issue:** Release notes differ from changelog  \n**Fix:** derive both from same generated artifact path.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Proposed version with justification.\n2. Clean changelog text ready for merge.\n3. Tag/release command sequence.\n4. Verification notes and fallback steps.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/git-cliff-release-changelog-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/git-cliff-release-changelog-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

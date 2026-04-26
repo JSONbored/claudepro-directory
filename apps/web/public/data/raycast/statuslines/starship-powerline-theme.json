@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "statuslines:starship-powerline-theme",
+  "category": "statuslines",
+  "slug": "starship-powerline-theme",
+  "title": "Starship Powerline Theme - Statuslines",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n\nUsage:\nsnnt  156k  main\n\nAsset:\n#!/usr/bin/env bash\n\n# Starship-Inspired Powerline Theme\n# Requires Nerd Font\n\nread -r input\n\n# Extract data\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"' | sed 's/claude-//' | sed 's/sonnet/snnt/' | sed 's/-4-5//')\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\nworkdir=$(echo \"$input\" | jq -r '.workspace.path // \".\"')\n\n# Git info\ncd \"$workdir\" 2>/dev/null\nif git rev-parse --git-dir > /dev/null 2>&1; then\n  branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo \"detached\")\n  if [ -z \"$(git status --porcelain)\" ]; then\n    git_icon=\"\"\n    git_color=\"\\033[32m\"\n  else\n    git_icon=\"\"\n    git_color=\"\\033[33m\"\n  fi\n  git_segment=\"${git_color}  ${branch} ${git_icon}\\033[0m\"\nfi\n\n# Model segment\nmodel_segment=\"\\033[36m ${model}\\033[0m\"\n\n# Token segment with icon\ntoken_k=$((tokens / 1000))\ntoken_segment=\"\\033[35m ${token_k}k\\033[0m\"\n\n# Build powerline\necho -e \"${model_segment} ${token_segment}${git_segment}\"",
+  "detailMarkdown": "# Starship Powerline Theme - Statuslines\nStarship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code\n**Category:** statuslines\n**Author:** JSONbored\n**Tags:** `starship` `powerline` `nerd-fonts` `git` `theme`\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/starship-powerline-theme.sh\",\n    \"refreshInterval\": 1000\n  }\n}\n```\n\n## Usage\n snnt  156k  main \n\n## Links\n- https://heyclau.de/statuslines/starship-powerline-theme",
+  "webUrl": "https://heyclau.de/statuslines/starship-powerline-theme",
+  "repoUrl": "",
+  "documentationUrl": ""
+}

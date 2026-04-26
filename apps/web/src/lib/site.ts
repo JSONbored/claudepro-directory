@@ -1,3 +1,14 @@
+import categorySpec from "@/generated/content-category-spec.json";
+
+type CategorySpecEntry = {
+  label: string;
+  description: string;
+  usageHint: string;
+  quickstart?: string[];
+};
+
+const categories = categorySpec.categories as Record<string, CategorySpecEntry>;
+
 export const siteConfig = {
   name: "HeyClaude",
   shortName: "heyclaude",
@@ -17,54 +28,33 @@ export const siteConfig = {
     { href: "/jobs", label: "Jobs" },
     { href: "/about", label: "About" }
   ],
-  categoryOrder: [
-    "agents",
-    "mcp",
-    "skills",
-    "rules",
-    "commands",
-    "hooks",
-    "guides",
-    "collections",
-    "statuslines"
-  ]
+  categoryOrder: categorySpec.categoryOrder
 } as const;
 
-export const categoryLabels: Record<string, string> = {
-  agents: "Agents",
-  mcp: "MCP Servers",
-  skills: "Skills",
-  rules: "Rules",
-  commands: "Commands",
-  hooks: "Hooks",
-  guides: "Guides",
-  collections: "Collections",
-  statuslines: "Statuslines"
-};
+export const categoryLabels: Record<string, string> = Object.fromEntries(
+  Object.entries(categories).map(([category, spec]) => [category, spec.label])
+);
 
-export const categoryDescriptions: Record<string, string> = {
-  agents: "Specialized Claude agents and expert roles.",
-  mcp: "Model Context Protocol servers and integrations.",
-  skills: "Installable skill packs and reusable capabilities.",
-  rules: "Prompt guardrails, project rules, and operating constraints.",
-  commands: "Slash commands and reusable command prompts.",
-  hooks: "Claude Code hook configs and automation helpers.",
-  guides: "Long-form guides and practical walkthroughs.",
-  collections: "Curated bundles of related assets.",
-  statuslines: "Statusline scripts and workflow telemetry."
-};
+export const categoryDescriptions: Record<string, string> = Object.fromEntries(
+  Object.entries(categories).map(([category, spec]) => [
+    category,
+    spec.description
+  ])
+);
 
-export const categoryUsageHints: Record<string, string> = {
-  agents: "Copy the full prompt into a Claude agent definition and adapt it to your workflow.",
-  mcp: "Install the server, copy the Claude config, then verify the connection in Claude Code.",
-  skills: "Install or download the skill pack, then reuse the included files, prompts, or scripts directly.",
-  rules: "Copy the full rule asset into CLAUDE.md or your project rule system instead of only taking the summary.",
-  commands: "Use the exact slash command syntax shown for the best starting point, then inspect the full source if needed.",
-  hooks: "Install the hook script, copy the Claude config, and test the trigger locally before wider use.",
-  guides: "Use guides as reference docs and implementation walkthroughs, not as standalone assets.",
-  collections: "Start with the recommended order and then open the included entries one by one.",
-  statuslines: "Copy the Claude statusline config first, then install or adapt the script asset behind it."
-};
+export const categoryUsageHints: Record<string, string> = Object.fromEntries(
+  Object.entries(categories).map(([category, spec]) => [
+    category,
+    spec.usageHint
+  ])
+);
+
+export const categoryQuickstarts: Record<string, string[]> = Object.fromEntries(
+  Object.entries(categories).map(([category, spec]) => [
+    category,
+    Array.isArray(spec.quickstart) ? spec.quickstart : []
+  ])
+);
 
 export const categoryAccentClasses: Record<string, string> = {
   agents: "text-chart-1 border-border bg-secondary/30",

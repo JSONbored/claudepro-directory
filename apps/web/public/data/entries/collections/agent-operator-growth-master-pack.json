@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "collections",
+    "slug": "agent-operator-growth-master-pack",
+    "title": "Agent Operator Growth Master Pack",
+    "description": "High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.",
+    "seoTitle": "Agent Operator Growth Master Pack",
+    "seoDescription": "End-to-end collection for AI operators combining code review automation, changelog governance, plugin and skill authoring, and zero-budget SaaS growth workflows.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "ai-operators",
+      "growth",
+      "automation",
+      "production",
+      "collections"
+    ],
+    "keywords": [
+      "ai operator toolkit",
+      "codex automation stack",
+      "release governance bundle",
+      "bootstrap growth workflows"
+    ],
+    "readingTime": 2,
+    "difficultyScore": 0,
+    "cardDescription": "End-to-end bundle for AI operators shipping products with strong governance, automation, and growth execution.",
+    "installable": false,
+    "usageSnippet": "Start with `coderabbit-lite-pr-review-capability-pack` → `git-cliff-release-changelog-capability-pack` → `zero-budget-saas-launch-capability-pack`",
+    "items": [
+      {
+        "slug": "coderabbit-lite-pr-review-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "git-cliff-release-changelog-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "husky-commit-governance-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "codex-automations-orchestrator-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "codex-plugin-creator-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "openclaw-skill-authoring-factory-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "n8n-operations-resilience-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "unraid-ca-template-authoring-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "ai-business-idea-validation-capability-pack",
+        "category": "skills"
+      },
+      {
+        "slug": "zero-budget-saas-launch-capability-pack",
+        "category": "skills"
+      }
+    ],
+    "installationOrder": [
+      "coderabbit-lite-pr-review-capability-pack",
+      "git-cliff-release-changelog-capability-pack",
+      "husky-commit-governance-capability-pack",
+      "codex-automations-orchestrator-capability-pack",
+      "codex-plugin-creator-capability-pack",
+      "openclaw-skill-authoring-factory-capability-pack",
+      "n8n-operations-resilience-capability-pack",
+      "unraid-ca-template-authoring-capability-pack",
+      "ai-business-idea-validation-capability-pack",
+      "zero-budget-saas-launch-capability-pack"
+    ],
+    "estimatedSetupTime": "95 minutes",
+    "difficulty": "advanced",
+    "prerequisites": [
+      "Active software project with CI/CD access",
+      "Clear product or growth goal",
+      "Willingness to enforce process guardrails"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.\n\n## Features\n\n- Practical release and commit governance\n- Local-first quality and security guardrails\n- Deterministic automation orchestration\n- Skill and plugin authoring workflows\n- Lean launch and growth execution\n\n## Use Cases\n\n- Solo builders shipping weekly without quality collapse\n- Small teams reducing CI noise and release risk\n- Operators combining technical and growth execution\n\n## Recommended Order\n\n1. `coderabbit-lite-pr-review-capability-pack`\n2. `git-cliff-release-changelog-capability-pack`\n3. `husky-commit-governance-capability-pack`\n4. `codex-automations-orchestrator-capability-pack`\n5. `codex-plugin-creator-capability-pack`\n6. `openclaw-skill-authoring-factory-capability-pack`\n7. `n8n-operations-resilience-capability-pack`\n8. `unraid-ca-template-authoring-capability-pack`\n9. `ai-business-idea-validation-capability-pack`\n10. `zero-budget-saas-launch-capability-pack`\n\n## Troubleshooting\n\n### Too many parallel process changes at once\n\nAdopt the first three governance skills first, then layer automation and growth skills.\n\n### Team pushback on guardrails\n\nStart with fast local hooks and deterministic release notes to show immediate productivity gains.\n\n### Launch still feels unfocused\n\nUse the business-validation and zero-budget launch skills to cut nonessential scope.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Practical release and commit governance\n- Local-first quality and security guardrails\n- Deterministic automation orchestration\n- Skill and plugin authoring workflows\n- Lean launch and growth execution",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Solo builders shipping weekly without quality collapse\n- Small teams reducing CI noise and release risk\n- Operators combining technical and growth execution",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `coderabbit-lite-pr-review-capability-pack`\n2. `git-cliff-release-changelog-capability-pack`\n3. `husky-commit-governance-capability-pack`\n4. `codex-automations-orchestrator-capability-pack`\n5. `codex-plugin-creator-capability-pack`\n6. `openclaw-skill-authoring-factory-capability-pack`\n7. `n8n-operations-resilience-capability-pack`\n8. `unraid-ca-template-authoring-capability-pack`\n9. `ai-business-idea-validation-capability-pack`\n10. `zero-budget-saas-launch-capability-pack`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Too many parallel process changes at once\n\nAdopt the first three governance skills first, then layer automation and growth skills.\n\n### Team pushback on guardrails\n\nStart with fast local hooks and deterministic release notes to show immediate productivity gains.\n\n### Launch still feels unfocused\n\nUse the business-validation and zero-budget launch skills to cut nonessential scope.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Too many parallel process changes at once",
+        "id": "too-many-parallel-process-changes-at-once"
+      },
+      {
+        "depth": 3,
+        "text": "Team pushback on guardrails",
+        "id": "team-pushback-on-guardrails"
+      },
+      {
+        "depth": 3,
+        "text": "Launch still feels unfocused",
+        "id": "launch-still-feels-unfocused"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/agent-operator-growth-master-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:tdd-workflow",
+  "category": "commands",
+  "slug": "tdd-workflow",
+  "title": "TDD Workflow for Claude Code",
+  "copyText": "/tdd-workflow [feature] [options]",
+  "detailMarkdown": "# TDD Workflow for Claude Code\nImplement test-driven development workflows with Claude Code using red-green-refactor cycles, automatic test generation, and AI-guided iteration until all tests pass\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `tdd` `testing` `red-green-refactor` `test-automation` `quality` `ai-testing`\n\n## Install\n```bash\n/tdd-workflow [feature] [options]\n```\n\n## Usage\n/tdd-workflow [feature] [options]\n\n## Links\n- https://heyclau.de/commands/tdd-workflow\n- https://docs.claude.com/en/docs/claude-code/testing",
+  "webUrl": "https://heyclau.de/commands/tdd-workflow",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/testing"
+}

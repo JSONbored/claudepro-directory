@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:postgresql-mcp-server",
+  "category": "mcp",
+  "slug": "postgresql-mcp-server",
+  "title": "Postgresql MCP Server - MCP Servers",
+  "copyText": "Install:\nclaude mcp list && claude mcp status postgres\n\nConfig:\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+  "detailMarkdown": "# Postgresql MCP Server - MCP Servers\nOfficial MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities\n**Category:** mcp\n**Author:** Anthropic\n**Download trust:** first-party\n**Tags:** `postgresql` `database` `sql` `official` `anthropic`\n\n## Install\n```bash\nclaude mcp list && claude mcp status postgres\n```\n\n## Config\n```json\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status postgres\n\n## Links\n- https://heyclau.de/mcp/postgresql-mcp-server\n- https://modelcontextprotocol.io/examples",
+  "webUrl": "https://heyclau.de/mcp/postgresql-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://modelcontextprotocol.io/examples"
+}

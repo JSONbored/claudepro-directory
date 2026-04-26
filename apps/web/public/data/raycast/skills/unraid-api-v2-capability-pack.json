@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:unraid-api-v2-capability-pack",
+  "category": "skills",
+  "slug": "unraid-api-v2-capability-pack",
+  "title": "Unraid API v2 Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip -o unraid-api-v2-capability-pack.zip && unzip -o unraid-api-v2-capability-pack.zip -d ./unraid-api-v2-capability-pack\n\nUsage:\nUse this skill when building real Unraid API automations and requiring up-to-date endpoint semantics and operational safeguards.\n\nAsset:\n# Trigger\n\"Apply the Unraid API v2 capability pack skill for this automation request.\"\n\n# Required output\n1) API endpoint contract mapping\n2) Auth and permission model\n3) Safe mutation plan with rollback checks\n4) Tested request/response examples",
+  "detailMarkdown": "# Unraid API v2 Capability Pack Skill\nDeep, version-pinned Unraid API capability skill covering auth, schema patterns, safe mutations, and operational automation design.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `unraid` `api` `homelab` `automation` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip -o unraid-api-v2-capability-pack.zip && unzip -o unraid-api-v2-capability-pack.zip -d ./unraid-api-v2-capability-pack\n```\n\n## Usage\nUse this skill when building real Unraid API automations and requiring up-to-date endpoint semantics and operational safeguards.\n\n## Links\n- https://heyclau.de/skills/unraid-api-v2-capability-pack\n- https://docs.unraid.net/API/",
+  "webUrl": "https://heyclau.de/skills/unraid-api-v2-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.unraid.net/API/"
+}

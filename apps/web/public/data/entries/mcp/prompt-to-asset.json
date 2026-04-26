@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "prompt-to-asset",
+    "title": "Prompt-to-asset",
+    "description": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+    "author": "MohamedAbdallah-14",
+    "dateAdded": "2026-04-25",
+    "tags": [
+      "mcp",
+      "image-generation",
+      "design-tools",
+      "visual-assets",
+      "icons",
+      "favicons",
+      "og-images"
+    ],
+    "keywords": [],
+    "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
+    "cardDescription": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",
+    "installable": true,
+    "installCommand": "npx -y prompt-to-asset",
+    "usageSnippet": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "copySnippet": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "configSnippet": "{\n  \"mcpServers\": {\n    \"prompt-to-asset\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"prompt-to-asset\"]\n    }\n  }\n}",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Overview\n\nMCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.\n\n## Usage\n\nclaude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Usage",
+        "id": "usage",
+        "markdown": "claude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Usage",
+        "id": "usage"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/mcp/prompt-to-asset.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx",
+    "repoUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

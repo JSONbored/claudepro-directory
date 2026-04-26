@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "saas-pricing-experimentation-engine",
+    "title": "SaaS Pricing Experimentation Engine Skill",
+    "description": "Run low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls.",
+    "seoTitle": "SaaS Pricing Experimentation Engine Skill",
+    "seoDescription": "Reusable AI skill for SaaS pricing experiments, including hypothesis design, guardrail metrics, and rollout decision frameworks.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "saas",
+      "pricing",
+      "experimentation",
+      "revenue",
+      "product"
+    ],
+    "keywords": [
+      "saas pricing tests",
+      "pricing optimization",
+      "conversion experiments",
+      "revenue operations skill"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 69,
+    "documentationUrl": "https://stripe.com/docs",
+    "cardDescription": "Revenue optimization skill for designing and evaluating pricing experiments without corrupting core business metrics.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine",
+    "usageSnippet": "Use this skill to structure pricing tests that improve revenue signals while protecting retention and trust.",
+    "copySnippet": "# Trigger\n\"Apply the SaaS pricing experimentation engine skill to this offer model.\"\n\n# Required output\n1) Test hypotheses and success metrics\n2) Segment and cohort strategy\n3) Guardrails and stop-loss criteria\n4) Rollout decision framework",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://stripe.com/docs"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Baseline conversion and retention data",
+      "Ability to segment traffic/cohorts",
+      "Instrumentation for funnel and revenue metrics"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/saas-pricing-experimentation-engine.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "0eebf445e5f54017b313993dbe934576dd54daf29da27ed35db45ff4f84dc005",
+    "body": "## Overview\n\nThis skill helps AI agents run pricing experiments that are rigorous and operationally safe. It avoids vanity wins by enforcing guardrails for retention, support burden, and customer trust.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Current pricing matrix and value proposition\n- Segment-level behavior data\n- Experiment timeline and confidence criteria\n\n## What This Skill Delivers\n\n- Experiment design with measurable hypotheses\n- Segment targeting and holdout strategy\n- Guardrail metrics and fail-fast triggers\n- Decision memo template for launch/revert/iterate\n\n## How to Use This Skill\n\n1. Define primary and guardrail metrics.\n2. Choose test cohorts and traffic allocation.\n3. Run experiment with clear exposure limits.\n4. Evaluate statistical and practical impact.\n5. Decide rollout, rollback, or follow-up test.\n\n## Troubleshooting\n\n**Issue:** Conversion increases but churn worsens  \n**Fix:** Enforce retention guardrails and include lagging metrics in decisions.\n\n**Issue:** Results are inconclusive  \n**Fix:** Extend sample duration or tighten cohort segmentation assumptions.\n\n**Issue:** Pricing experiment hurts trust  \n**Fix:** Improve messaging clarity and align price changes with explicit value communication.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://stripe.com/docs\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps AI agents run pricing experiments that are rigorous and operationally safe. It avoids vanity wins by enforcing guardrails for retention, support burden, and customer trust.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Current pricing matrix and value proposition\n- Segment-level behavior data\n- Experiment timeline and confidence criteria",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Delivers",
+        "id": "what-this-skill-delivers",
+        "markdown": "- Experiment design with measurable hypotheses\n- Segment targeting and holdout strategy\n- Guardrail metrics and fail-fast triggers\n- Decision memo template for launch/revert/iterate",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "1. Define primary and guardrail metrics.\n2. Choose test cohorts and traffic allocation.\n3. Run experiment with clear exposure limits.\n4. Evaluate statistical and practical impact.\n5. Decide rollout, rollback, or follow-up test.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Conversion increases but churn worsens  \n**Fix:** Enforce retention guardrails and include lagging metrics in decisions.\n\n**Issue:** Results are inconclusive  \n**Fix:** Extend sample duration or tighten cohort segmentation assumptions.\n\n**Issue:** Pricing experiment hurts trust  \n**Fix:** Improve messaging clarity and align price changes with explicit value communication.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://stripe.com/docs",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Delivers",
+        "id": "what-this-skill-delivers"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/saas-pricing-experimentation-engine.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/saas-pricing-experimentation-engine.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

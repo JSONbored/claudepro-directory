@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
+    "title": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
+    "description": "Expert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.",
+    "seoTitle": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for Cloudflare Workers architecture with D1, KV, and R2, focused on consistency, performance, and secure operation.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "cloudflare",
+      "workers",
+      "d1",
+      "kv",
+      "r2"
+    ],
+    "keywords": [
+      "cloudflare d1 kv r2",
+      "edge data architecture",
+      "workers storage patterns",
+      "serverless data strategy"
+    ],
+    "readingTime": 10,
+    "difficultyScore": 89,
+    "documentationUrl": "https://developers.cloudflare.com/workers/",
+    "cardDescription": "Deep data-layer architecture skill for Cloudflare Workers using D1, KV, and R2 in production-safe patterns.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack",
+    "usageSnippet": "Use this skill when designing edge applications that need reliable storage coordination across D1, KV, and R2.",
+    "copySnippet": "# Trigger\n\"Apply the Cloudflare Workers D1/KV/R2 capability pack to this system.\"\n\n# Required output\n1) Data placement strategy\n2) Read/write consistency model\n3) Cache and invalidation plan\n4) Security and abuse controls",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://developers.cloudflare.com/workers/",
+      "https://developers.cloudflare.com/d1/",
+      "https://developers.cloudflare.com/kv/",
+      "https://developers.cloudflare.com/r2/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Cloudflare account and worker project",
+      "D1/KV/R2 bindings access",
+      "Defined data model and SLA targets"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "2b0c31db74f9b42751e2c14d8dab16fa3ded453bd4397a1347ac782ce5bc792a",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.\n\n## Retrieval Sources\n\n- https://developers.cloudflare.com/workers/\n- https://developers.cloudflare.com/d1/\n- https://developers.cloudflare.com/kv/\n- https://developers.cloudflare.com/r2/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.\n\n## Core Workflow\n\n1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.\n\n## Overview\n\nThis capability pack teaches agents how to choose the right Cloudflare storage primitive per workload and combine them safely. It focuses on practical consistency, performance, and operational correctness.\n\n## Capability Scope\n\n- D1 for relational transactional paths\n- KV for globally distributed low-latency reads\n- R2 for object storage and package/media assets\n- Cache key strategy and invalidation mechanics\n- Security boundaries, rate controls, and abuse mitigation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Align storage choice with access pattern, not convenience.\n- Keep mutation paths deterministic and auditable.\n- Avoid cross-store race conditions without explicit coordination.\n- Enforce endpoint-level auth and rate limits for write operations.\n\n## Troubleshooting\n\n**Issue:** Stale reads after updates  \n**Fix:** Define explicit invalidation/order rules between D1 source of truth and KV caches.\n\n**Issue:** High read latency on hot paths  \n**Fix:** Move read-heavy projection to KV with controlled sync from D1.\n\n**Issue:** Unexpected storage cost growth  \n**Fix:** Add lifecycle policies and payload minimization for R2/KV objects.\n\n## Output Contract\n\n1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.\n\n## Validation Checklist\n\n- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://developers.cloudflare.com/workers/\n- https://developers.cloudflare.com/d1/\n- https://developers.cloudflare.com/kv/\n- https://developers.cloudflare.com/r2/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This capability pack teaches agents how to choose the right Cloudflare storage primitive per workload and combine them safely. It focuses on practical consistency, performance, and operational correctness.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- D1 for relational transactional paths\n- KV for globally distributed low-latency reads\n- R2 for object storage and package/media assets\n- Cache key strategy and invalidation mechanics\n- Security boundaries, rate controls, and abuse mitigation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Align storage choice with access pattern, not convenience.\n- Keep mutation paths deterministic and auditable.\n- Avoid cross-store race conditions without explicit coordination.\n- Enforce endpoint-level auth and rate limits for write operations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Stale reads after updates  \n**Fix:** Define explicit invalidation/order rules between D1 source of truth and KV caches.\n\n**Issue:** High read latency on hot paths  \n**Fix:** Move read-heavy projection to KV with controlled sync from D1.\n\n**Issue:** Unexpected storage cost growth  \n**Fix:** Add lifecycle policies and payload minimization for R2/KV objects.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Validation Checklist",
+        "id": "validation-checklist",
+        "markdown": "- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Validation Checklist",
+        "id": "validation-checklist"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

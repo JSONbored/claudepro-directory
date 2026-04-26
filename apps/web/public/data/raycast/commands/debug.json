@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:debug",
+  "category": "commands",
+  "slug": "debug",
+  "title": "/debug - Debugging Assistant Command for Claude Code",
+  "copyText": "/debug",
+  "detailMarkdown": "# /debug - Debugging Assistant Command for Claude Code\nAdvanced debugging assistant with root cause analysis, step-by-step troubleshooting, and automated fix suggestions\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `debugging` `troubleshooting` `error-analysis` `diagnostics` `fixes`\n\n## Install\n```bash\n/debug\n```\n\n## Usage\n/debug\n\n## Links\n- https://heyclau.de/commands/debug\n- https://docs.claude.ai/commands/debug",
+  "webUrl": "https://heyclau.de/commands/debug",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/debug"
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:security-audit",
+  "category": "commands",
+  "slug": "security-audit",
+  "title": "/security-audit - Security Scanner Command for Claude Code",
+  "copyText": "/security-audit [scope]",
+  "detailMarkdown": "# /security-audit - Security Scanner Command for Claude Code\nDeploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `security-audit` `enterprise` `performance` `optimization` `production` `comprehensive-analysis` `sub-agents` `architecture` `scalability` `code-quality`\n\n## Install\n```bash\n/security-audit [scope]\n```\n\n## Usage\n/security-audit [scope]\n\n## Links\n- https://heyclau.de/commands/security-audit\n- https://docs.claude.ai/commands/security-audit",
+  "webUrl": "https://heyclau.de/commands/security-audit",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/security-audit"
+}

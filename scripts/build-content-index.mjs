@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import matter from "gray-matter";
 import { marked } from "marked";
+import categorySpec from "../content/category-spec.json" with { type: "json" };
 import {
   extractCodeBlocks,
   extractHeadings,
@@ -23,7 +24,13 @@ const publicDataDir = path.join(repoRoot, "apps/web/public/data");
 const outputFile = path.join(publicDataDir, "content-index.json");
 const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
 const raycastOutputFile = path.join(publicDataDir, "raycast-index.json");
+const entryDataDir = path.join(publicDataDir, "entries");
+const raycastDetailDir = path.join(publicDataDir, "raycast");
 const siteStatsFile = path.join(generatedDir, "site-stats.json");
+const generatedCategorySpecFile = path.join(
+  generatedDir,
+  "content-category-spec.json",
+);
 const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
 const generatedLegacyVoteSeedFile = path.join(
   generatedDir,
@@ -36,11 +43,12 @@ const skillsDownloadsDir = path.join(
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const SITE_URL = "https://heyclau.de";
+const ENTRY_SCHEMA_VERSION = 1;
+const RAYCAST_SCHEMA_VERSION = 1;
 const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
-const categories = fs
-  .readdirSync(contentRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && entry.name !== "data")
-  .map((entry) => entry.name);
+const categories = categorySpec.categoryOrder.filter((category) =>
+  fs.existsSync(path.join(contentRoot, category)),
+);
 
 marked.setOptions({
   gfm: true,
@@ -193,6 +201,11 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function resetGeneratedJsonDir(dir) {
+  fs.rmSync(dir, { recursive: true, force: true });
+  ensureDir(dir);
+}
+
 function writeFileIfChanged(filePath, content) {
   if (fs.existsSync(filePath)) {
     const current = fs.readFileSync(filePath, "utf8");
@@ -203,6 +216,11 @@ function writeFileIfChanged(filePath, content) {
   fs.writeFileSync(tempFile, content);
   fs.renameSync(tempFile, filePath);
   return true;
+}
+
+function writeJsonFile(filePath, value) {
+  ensureDir(path.dirname(filePath));
+  return writeFileIfChanged(filePath, `${JSON.stringify(value, null, 2)}\n`);
 }
 
 function copyFileIfChanged(sourcePath, destPath) {
@@ -369,23 +387,67 @@ function buildRaycastDetailMarkdown(entry) {
   return truncateText(lines.join("\n"), 6000);
 }
 
+function generatedAtForEntries(entries) {
+  const latestDate = entries
+    .map((entry) => String(entry.dateAdded || "").slice(0, 10))
+    .filter((value) => /^\d{4}-\d{2}-\d{2}$/.test(value))
+    .sort()
+    .at(-1);
+
+  return latestDate ? `${latestDate}T00:00:00.000Z` : "1970-01-01T00:00:00.000Z";
+}
+
+function dataUrl(...segments) {
+  return `/data/${segments.map((segment) => encodeURIComponent(String(segment))).join("/")}`;
+}
+
 function buildRaycastEntries(entries) {
-  return entries.map((entry) => ({
+  return entries.map((entry) => {
+    const copyText = buildCopyText(entry);
+
+    return {
+      category: entry.category,
+      slug: entry.slug,
+      title: entry.title,
+      description: entry.cardDescription || entry.description,
+      tags: entry.tags,
+      installCommand: entry.installCommand || "",
+      configSnippet: entry.configSnippet || "",
+      copyText: truncateText(copyText, 20000),
+      copyTextLength: copyText.length,
+      copyTextTruncated: copyText.length > 20000,
+      detailMarkdown: buildRaycastDetailMarkdown(entry),
+      detailUrl: dataUrl("raycast", entry.category, `${entry.slug}.json`),
+      webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+      repoUrl: entry.repoUrl || "",
+      documentationUrl: entry.documentationUrl || "",
+      downloadTrust: entry.downloadTrust,
+      verificationStatus: entry.verificationStatus || "",
+    };
+  });
+}
+
+function buildRaycastDetail(entry) {
+  return {
+    schemaVersion: RAYCAST_SCHEMA_VERSION,
+    key: `${entry.category}:${entry.slug}`,
     category: entry.category,
     slug: entry.slug,
     title: entry.title,
-    description: entry.cardDescription || entry.description,
-    tags: entry.tags,
-    installCommand: entry.installCommand || "",
-    configSnippet: entry.configSnippet || "",
-    copyText: truncateText(buildCopyText(entry), 20000),
+    copyText: buildCopyText(entry),
     detailMarkdown: buildRaycastDetailMarkdown(entry),
     webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
     repoUrl: entry.repoUrl || "",
     documentationUrl: entry.documentationUrl || "",
-    downloadTrust: entry.downloadTrust,
-    verificationStatus: entry.verificationStatus || "",
-  }));
+  };
+}
+
+function buildRaycastEnvelope(entries) {
+  return {
+    schemaVersion: RAYCAST_SCHEMA_VERSION,
+    generatedAt: generatedAtForEntries(entries),
+    entries: buildRaycastEntries(entries),
+  };
 }
 
 ensureDir(generatedDir);
@@ -614,6 +676,28 @@ async function main() {
     return directoryEntry;
   });
 
+  resetGeneratedJsonDir(entryDataDir);
+  resetGeneratedJsonDir(raycastDetailDir);
+  let entryDetailCount = 0;
+  let raycastDetailCount = 0;
+
+  for (const entry of entries) {
+    const entryDetail = {
+      schemaVersion: ENTRY_SCHEMA_VERSION,
+      entry,
+    };
+    writeJsonFile(
+      path.join(entryDataDir, entry.category, `${entry.slug}.json`),
+      entryDetail,
+    );
+    writeJsonFile(
+      path.join(raycastDetailDir, entry.category, `${entry.slug}.json`),
+      buildRaycastDetail(entry),
+    );
+    entryDetailCount += 1;
+    raycastDetailCount += 1;
+  }
+
   const payload = `${JSON.stringify(entries, null, 2)}\n`;
   const wroteContentIndex = writeFileIfChanged(outputFile, payload);
   const directoryPayload = `${JSON.stringify(directoryEntries, null, 2)}\n`;
@@ -621,8 +705,7 @@ async function main() {
     directoryOutputFile,
     directoryPayload,
   );
-  const raycastEntries = buildRaycastEntries(entries);
-  const raycastPayload = `${JSON.stringify(raycastEntries, null, 2)}\n`;
+  const raycastPayload = `${JSON.stringify(buildRaycastEnvelope(entries), null, 2)}\n`;
   const wroteRaycastIndex = writeFileIfChanged(
     raycastOutputFile,
     raycastPayload,
@@ -640,6 +723,10 @@ async function main() {
   const wroteSiteStats = writeFileIfChanged(
     siteStatsFile,
     `${JSON.stringify(siteStatsPayload, null, 2)}\n`,
+  );
+  const wroteCategorySpec = writeFileIfChanged(
+    generatedCategorySpecFile,
+    `${JSON.stringify(categorySpec, null, 2)}\n`,
   );
 
   const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
@@ -663,10 +750,19 @@ async function main() {
     `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`,
   );
   console.log(
-    `${wroteRaycastIndex ? "Wrote" : "Unchanged"} ${raycastEntries.length} entries to ${path.relative(repoRoot, raycastOutputFile)}`,
+    `${wroteRaycastIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, raycastOutputFile)}`,
+  );
+  console.log(
+    `Wrote ${entryDetailCount} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,
+  );
+  console.log(
+    `Wrote ${raycastDetailCount} Raycast detail files to ${path.relative(repoRoot, raycastDetailDir)}`,
   );
   console.log(
     `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`,
+  );
+  console.log(
+    `${wroteCategorySpec ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedCategorySpecFile)}`,
   );
   console.log(
     `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`,

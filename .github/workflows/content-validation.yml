@@ -6,6 +6,8 @@ on:
       - "content/**"
       - "scripts/**"
       - "examples/content/**"
+      - "integrations/raycast/**"
+      - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/content-validation.yml"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -40,8 +42,14 @@ jobs:
       - name: Validate content schema
         run: pnpm validate:content:strict
 
+      - name: Validate category submission spec
+        run: pnpm validate:category-spec
+
       - name: Validate downloadable packages
         run: pnpm validate:packages
+
+      - name: Validate Raycast feed
+        run: pnpm validate:raycast-feed
 
       - name: Audit content report
         run: pnpm audit:content

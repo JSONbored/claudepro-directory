@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "mcp-server-security-hardening",
+    "title": "MCP Server Security Hardening Skill",
+    "description": "Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.",
+    "seoTitle": "MCP Server Security Hardening Skill for AI Engineers",
+    "seoDescription": "Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "mcp",
+      "security",
+      "hardening",
+      "auth",
+      "ai-infrastructure"
+    ],
+    "keywords": [
+      "ai-skill",
+      "mcp-security",
+      "tool-safety",
+      "prompt-injection",
+      "server-hardening",
+      "security-checklist"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 82,
+    "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18",
+    "cardDescription": "Harden Model Context Protocol servers with practical controls for auth, tool scope, input validation, and supply-chain risk.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening",
+    "usageSnippet": "Apply this skill before exposing any MCP server to third-party clients or shared environments.",
+    "copySnippet": "# Trigger\n\"Run the MCP server security hardening skill against this MCP implementation.\"\n\n# Required output\n1) Threat model (auth, tool abuse, prompt injection, supply chain)\n2) Concrete hardening patch plan\n3) Logging and alerting requirements\n4) Deployment gate checklist",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://modelcontextprotocol.io/specification/2025-06-18"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Existing MCP server implementation (local or remote)",
+      "Access to server config, dependency manifest, and deployment settings",
+      "Ability to run integration tests after hardening"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/mcp-server-security-hardening.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "d55bf62f2aa6f52fa38a0e362cd9e5da2cc52c9d6012037f4a98919fbd342a88",
+    "body": "## Overview\n\nThis skill provides a production security baseline for MCP servers. It focuses on the practical risks that matter most in real deployments: over-permissive tools, weak authentication, unsafe input handling, dependency drift, and missing audit trails.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- MCP server code and runtime configuration\n- Tool manifest and permission model\n- Deployment target constraints (local, cloud, or edge)\n\n## Hardening Scope\n\n- Strict auth and identity verification\n- Least-privilege tool exposure\n- Input schema validation and sanitization\n- Output filtering for sensitive data\n- Request tracing, audit logs, and abuse detection\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nApply the MCP server security hardening skill.\nDeliver:\n1) Critical risks (P0/P1/P2),\n2) Exact config/code changes,\n3) Validation tests for each control,\n4) Rollout plan with rollback criteria.\n```\n\n### Execution Flow\n\n1. Enumerate all exposed tools and classify risk.\n2. Define trusted client model and auth strategy.\n3. Enforce schemas on all tool inputs and outputs.\n4. Add request IDs, structured logs, and alert hooks.\n5. Re-test normal and adversarial flows before release.\n\n## Troubleshooting\n\n**Issue:** Hardening breaks legitimate tool calls  \n**Fix:** Add explicit allowlist exceptions per trusted client scope, not global relaxations.\n\n**Issue:** Prompt injection still causes unsafe tool chains  \n**Fix:** Separate model instructions from executable tool policy and enforce server-side policy checks.\n\n**Issue:** Logs are too noisy to be actionable  \n**Fix:** Keep high-signal events (auth failures, denied tools, schema violations, repeated abuse IP/client IDs).\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://modelcontextprotocol.io/specification/2025-06-18\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill provides a production security baseline for MCP servers. It focuses on the practical risks that matter most in real deployments: over-permissive tools, weak authentication, unsafe input handling, dependency drift, and missing audit trails.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- MCP server code and runtime configuration\n- Tool manifest and permission model\n- Deployment target constraints (local, cloud, or edge)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Hardening Scope",
+        "id": "hardening-scope",
+        "markdown": "- Strict auth and identity verification\n- Least-privilege tool exposure\n- Input schema validation and sanitization\n- Output filtering for sensitive data\n- Request tracing, audit logs, and abuse detection",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\n```text\nApply the MCP server security hardening skill.\nDeliver:\n1) Critical risks (P0/P1/P2),\n2) Exact config/code changes,\n3) Validation tests for each control,\n4) Rollout plan with rollback criteria.\n```\n\n### Execution Flow\n\n1. Enumerate all exposed tools and classify risk.\n2. Define trusted client model and auth strategy.\n3. Enforce schemas on all tool inputs and outputs.\n4. Add request IDs, structured logs, and alert hooks.\n5. Re-test normal and adversarial flows before release.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply the MCP server security hardening skill.\nDeliver:\n1) Critical risks (P0/P1/P2),\n2) Exact config/code changes,\n3) Validation tests for each control,\n4) Rollout plan with rollback criteria."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Hardening breaks legitimate tool calls  \n**Fix:** Add explicit allowlist exceptions per trusted client scope, not global relaxations.\n\n**Issue:** Prompt injection still causes unsafe tool chains  \n**Fix:** Separate model instructions from executable tool policy and enforce server-side policy checks.\n\n**Issue:** Logs are too noisy to be actionable  \n**Fix:** Keep high-signal events (auth failures, denied tools, schema violations, repeated abuse IP/client IDs).",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://modelcontextprotocol.io/specification/2025-06-18",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Hardening Scope",
+        "id": "hardening-scope"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply the MCP server security hardening skill.\nDeliver:\n1) Critical risks (P0/P1/P2),\n2) Exact config/code changes,\n3) Validation tests for each control,\n4) Rollout plan with rollback criteria."
+      }
+    ],
+    "filePath": "content/skills/mcp-server-security-hardening.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-security-hardening.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

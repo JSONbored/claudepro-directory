@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:github-actions-secure-cicd-capability-pack",
+  "category": "skills",
+  "slug": "github-actions-secure-cicd-capability-pack",
+  "title": "GitHub Actions Secure CI/CD Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/github-actions-secure-cicd-capability-pack.zip -o github-actions-secure-cicd-capability-pack.zip && unzip -o github-actions-secure-cicd-capability-pack.zip -d ./github-actions-secure-cicd-capability-pack\n\nUsage:\nUse this skill when designing or auditing GitHub Actions pipelines for security, reliability, and maintainability.\n\nAsset:\n# Trigger\n\"Apply the GitHub Actions secure CI/CD capability pack to this repository.\"\n\n# Required output\n1) Workflow threat model\n2) Permissions and token scope plan\n3) Supply-chain hardening changes\n4) Reliability and failure-recovery checklist",
+  "detailMarkdown": "# GitHub Actions Secure CI/CD Capability Pack Skill\nExpert GitHub Actions capability skill for secure workflow architecture, token minimization, supply-chain controls, and CI reliability.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `github-actions` `cicd` `security` `devops` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/github-actions-secure-cicd-capability-pack.zip -o github-actions-secure-cicd-capability-pack.zip && unzip -o github-actions-secure-cicd-capability-pack.zip -d ./github-actions-secure-cicd-capability-pack\n```\n\n## Usage\nUse this skill when designing or auditing GitHub Actions pipelines for security, reliability, and maintainability.\n\n## Links\n- https://heyclau.de/skills/github-actions-secure-cicd-capability-pack\n- https://docs.github.com/actions",
+  "webUrl": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.github.com/actions"
+}

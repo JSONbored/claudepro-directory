@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:zero-budget-saas-launch-capability-pack",
+  "category": "skills",
+  "slug": "zero-budget-saas-launch-capability-pack",
+  "title": "Zero-Budget SaaS Launch Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip -o zero-budget-saas-launch-capability-pack.zip && unzip -o zero-budget-saas-launch-capability-pack.zip -d ./zero-budget-saas-launch-capability-pack\n\nUsage:\nUse this skill to design and execute a constrained SaaS launch with no paid infrastructure dependencies.\n\nAsset:\n# Trigger\n\"Apply the zero-budget SaaS launch capability pack.\"\n\n# Required output\n1) Free-tier architecture map\n2) MVP scope and cut-list\n3) Distribution and traffic loop\n4) Revenue trigger milestones",
+  "detailMarkdown": "# Zero-Budget SaaS Launch Capability Pack Skill\nExpert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `saas` `bootstrap` `growth` `cost-optimization` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip -o zero-budget-saas-launch-capability-pack.zip && unzip -o zero-budget-saas-launch-capability-pack.zip -d ./zero-budget-saas-launch-capability-pack\n```\n\n## Usage\nUse this skill to design and execute a constrained SaaS launch with no paid infrastructure dependencies.\n\n## Links\n- https://heyclau.de/skills/zero-budget-saas-launch-capability-pack\n- https://developers.cloudflare.com/workers/",
+  "webUrl": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.cloudflare.com/workers/"
+}

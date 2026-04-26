@@ -69,12 +69,20 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                   <span
                     className={
-                      job.sponsored
+                      job.isPlaceholder
+                        ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                        : job.sponsored
                         ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
                         : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
                     }
                   >
-                    {job.sponsored ? "Sponsored" : job.featured ? "Featured" : "Role"}
+                    {job.isPlaceholder
+                      ? "Available"
+                      : job.sponsored
+                        ? "Sponsored"
+                        : job.featured
+                          ? "Featured"
+                          : "Role"}
                   </span>
                   {job.featured && !job.sponsored ? (
                     <span className="inline-flex rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -95,9 +103,11 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Link href={`/jobs/${job.slug}`} className="directory-link-chip">
-                  Details
-                </Link>
+                {job.isPlaceholder ? null : (
+                  <Link href={`/jobs/${job.slug}`} className="directory-link-chip">
+                    Details
+                  </Link>
+                )}
                 <a
                   href={job.applyUrl}
                   className="directory-link-chip"

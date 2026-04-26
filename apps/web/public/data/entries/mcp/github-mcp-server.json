@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "github-mcp-server",
+    "title": "GitHub MCP Server for Claude",
+    "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
+    "seoTitle": "GitHub MCP Server for Claude",
+    "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
+    "author": "GitHub",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "github",
+      "git",
+      "repositories",
+      "api",
+      "official"
+    ],
+    "keywords": [
+      "api",
+      "claude",
+      "development",
+      "git",
+      "github",
+      "mcp",
+      "mcp servers",
+      "official",
+      "repositories",
+      "server",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+    "cardDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
+    "installable": true,
+    "installCommand": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
+    "usageSnippet": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
+    "copySnippet": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "3 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "GitHub account (sign up at https://github.com if needed)",
+      "GitHub Personal Access Token with repo scope (generate from GitHub Settings > Developer Settings > Personal Access Tokens)",
+      "Node.js and npx available (comes with Node.js, verify with: npx --version)",
+      "Internet connection (remote GitHub API access required)",
+      "Understanding of GitHub API rate limits (5,000 requests/hour for Personal Access Tokens, 15,000/hour for GitHub Apps on Enterprise Cloud)",
+      "Understanding of repository permissions (read access for viewing, write access for creating/updating files)",
+      "Understanding of SSO requirements (organization repos may require SSO authorization for Personal Access Tokens)",
+      "Understanding of repository naming format (owner/repo-name, e.g., github/octocat)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Git concepts (branches, commits, repository structure) for effective use"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/github-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "0cbf34c03e258fe4bae54d619073caa8277f026af7103ee92323be2a97e7a923",
+    "body": "## Content\n\nTransform how you interact with GitHub repositories by connecting Claude to the official GitHub MCP Server. Seamlessly read, create, and update files across repositories, search code and issues, manage pull requests, and analyze repository insights—all through natural language commands with automatic branch creation and proper Git history preservation.\n\n## Features\n\n- Create, read, update, and delete files across repositories\n- Access repository information, branches, and metadata\n- Search code, issues, pull requests, and users\n- Automatic branch creation and Git history preservation\n- Batch operations support for multi-file changes\n- Repository insights and contributor statistics\n- Advanced GitHub repository and issue management with pull request workflows, code review automation, and team collaboration features\n- Batch operations support for efficient bulk repository operations, issue management, and code review processes with automatic rate limit handling and retry logic\n- Real-time repository synchronization capabilities with webhook integration support for monitoring GitHub events and triggering automated workflows\n\n## Use Cases\n\n- Browse and manage repository files and folders\n- Search code across multiple repositories\n- Access repository information and commit history\n- Create and update files with proper Git history\n- Find issues, pull requests, and collaborators\n- Analyze codebase structure and development patterns\n- Build automated development workflows that sync external systems with GitHub for real-time code management, issue tracking, and collaboration\n\n## Installation\n\n### Claude Code\n\n1. Generate a GitHub Personal Access Token with repo scope from GitHub Settings > Developer Settings\n2. Run: claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status github\n\n### Claude Desktop\n\n1. Generate a GitHub Personal Access Token with repo permissions from GitHub Settings > Developer Settings\n2. Open your Claude Desktop configuration file (see configPath below)\n3. Add the GitHub MCP server configuration with your token in the env section\n4. Restart Claude Desktop\n5. Verify connection by asking Claude to show your repositories\n\n## Requirements\n\n- GitHub account (sign up at https://github.com if needed)\n- GitHub Personal Access Token with repo scope (generate from GitHub Settings > Developer Settings > Personal Access Tokens)\n- Node.js and npx available (comes with Node.js, verify with: npx --version)\n- Internet connection (remote GitHub API access required)\n- Understanding of GitHub API rate limits (5,000 requests/hour for Personal Access Tokens, 15,000/hour for GitHub Apps on Enterprise Cloud)\n- Understanding of repository permissions (read access for viewing, write access for creating/updating files)\n- Understanding of SSO requirements (organization repos may require SSO authorization for Personal Access Tokens)\n- Understanding of repository naming format (owner/repo-name, e.g., github/octocat)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Git concepts (branches, commits, repository structure) for effective use\n\n## Configuration\n\n```json\n{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### Reading Repository Files\nRead files and directories from any GitHub repository you have access to. Claude will fetch the content and help you understand or modify it.\n```javascript\n// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\"\n```\n### Creating and Updating Files\nCreate new files or update existing ones. The MCP server automatically creates branches and maintains proper Git history for all changes.\n```javascript\n// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\"\n```\n### Searching Code Across Repositories\nSearch code using GitHub's powerful search API. Find functions, classes, patterns, or specific implementations across your repositories.\n```javascript\n// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\"\n```\n### Managing Issues and Pull Requests\nQuery issues and pull requests using GitHub's search syntax. Filter by labels, status, author, and more.\n```javascript\n// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\"\n```\n### Repository Information and Statistics\nAccess repository metadata, statistics, and insights. Useful for analyzing project health and contributor activity.\n```javascript\n// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\"\n```\n### Batch File Operations\nPerform multiple file operations atomically. The MCP server handles branch creation and ensures all changes are committed together.\n```javascript\n// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\"\n```\n### Create Issue with Labels\nCreate a new GitHub issue with labels and description\n```typescript\n// Create GitHub issue with labels\nconst issue = await github.issues.create({\n  owner: \"owner\",\n  repo: \"repo\",\n  title: \"Bug: Fix authentication error\",\n  body: \"Issue description\",\n  labels: [\"bug\", \"high-priority\"]\n});\n```\n\n## Security\n\n- Use Personal Access Tokens with minimal required scopes\n- Store tokens securely and rotate regularly\n- Respect GitHub API rate limits\n- All operations maintain proper Git history\n- Built-in error handling for API issues\n- GitHub personal access tokens and OAuth tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- GitHub OAuth access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- GitHub repository, issue, and pull request IDs may expose organizational structure and development patterns - ensure GitHub resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for GitHub MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- GitHub webhook configurations and payloads may contain sensitive repository data and code information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### API rate limit exceeded: 5000 requests per hour hit\n\nPersonal access tokens have 5,000 requests/hour limit. Wait for hourly reset or use GitHub App with 15,000/hour limit for Enterprise Cloud. Check X-RateLimit-Reset header for reset time.\n### HTTP 401 unauthorized error with valid token\n\nRegenerate personal access token from GitHub Settings > Developer Settings. Verify token includes repo scope for repository access. Check token hasn't expired and update GITHUB_PERSONAL_ACCESS_TOKEN in config.\n### 403 forbidden when accessing organization repos\n\nAuthorize token for SSO if organization requires it. Go to GitHub Settings > Applications > Personal Access Tokens, click Configure SSO, and authorize organization. Verify you have repo access.\n### Repository not found or access denied error\n\nVerify repository name spelling: owner/repo-name format. Check you have read permissions to repository. For private repos, ensure token has repo scope, not just public_repo.\n### Cannot create or update files - permission error\n\nVerify token has repo write permissions. Check repository isn't archived or locked. For organization repos, confirm you have push access and branch protection rules allow commits.\n### GitHub MCP server authentication errors with tokens\n\nVerify personal access token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### GitHub rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use GitHub API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed repository data. GitHub allows 5,000 requests per hour for authenticated users.\n### GitHub repository or issue access denied errors\n\nVerify token has access to the repository. Check repository permissions and organization membership. Ensure token has required scopes (repo, issues, pull_requests) for target operations.\n### GitHub MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify GitHub API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Transform how you interact with GitHub repositories by connecting Claude to the official GitHub MCP Server. Seamlessly read, create, and update files across repositories, search code and issues, manage pull requests, and analyze repository insights—all through natural language commands with automatic branch creation and proper Git history preservation.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Create, read, update, and delete files across repositories\n- Access repository information, branches, and metadata\n- Search code, issues, pull requests, and users\n- Automatic branch creation and Git history preservation\n- Batch operations support for multi-file changes\n- Repository insights and contributor statistics\n- Advanced GitHub repository and issue management with pull request workflows, code review automation, and team collaboration features\n- Batch operations support for efficient bulk repository operations, issue management, and code review processes with automatic rate limit handling and retry logic\n- Real-time repository synchronization capabilities with webhook integration support for monitoring GitHub events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Browse and manage repository files and folders\n- Search code across multiple repositories\n- Access repository information and commit history\n- Create and update files with proper Git history\n- Find issues, pull requests, and collaborators\n- Analyze codebase structure and development patterns\n- Build automated development workflows that sync external systems with GitHub for real-time code management, issue tracking, and collaboration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Generate a GitHub Personal Access Token with repo scope from GitHub Settings > Developer Settings\n2. Run: claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status github\n\n### Claude Desktop\n\n1. Generate a GitHub Personal Access Token with repo permissions from GitHub Settings > Developer Settings\n2. Open your Claude Desktop configuration file (see configPath below)\n3. Add the GitHub MCP server configuration with your token in the env section\n4. Restart Claude Desktop\n5. Verify connection by asking Claude to show your repositories",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- GitHub account (sign up at https://github.com if needed)\n- GitHub Personal Access Token with repo scope (generate from GitHub Settings > Developer Settings > Personal Access Tokens)\n- Node.js and npx available (comes with Node.js, verify with: npx --version)\n- Internet connection (remote GitHub API access required)\n- Understanding of GitHub API rate limits (5,000 requests/hour for Personal Access Tokens, 15,000/hour for GitHub Apps on Enterprise Cloud)\n- Understanding of repository permissions (read access for viewing, write access for creating/updating files)\n- Understanding of SSO requirements (organization repos may require SSO authorization for Personal Access Tokens)\n- Understanding of repository naming format (owner/repo-name, e.g., github/octocat)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Git concepts (branches, commits, repository structure) for effective use",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Reading Repository Files\nRead files and directories from any GitHub repository you have access to. Claude will fetch the content and help you understand or modify it.\n```javascript\n// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\"\n```\n### Creating and Updating Files\nCreate new files or update existing ones. The MCP server automatically creates branches and maintains proper Git history for all changes.\n```javascript\n// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\"\n```\n### Searching Code Across Repositories\nSearch code using GitHub's powerful search API. Find functions, classes, patterns, or specific implementations across your repositories.\n```javascript\n// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\"\n```\n### Managing Issues and Pull Requests\nQuery issues and pull requests using GitHub's search syntax. Filter by labels, status, author, and more.\n```javascript\n// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\"\n```\n### Repository Information and Statistics\nAccess repository metadata, statistics, and insights. Useful for analyzing project health and contributor activity.\n```javascript\n// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\"\n```\n### Batch File Operations\nPerform multiple file operations atomically. The MCP server handles branch creation and ensures all changes are committed together.\n```javascript\n// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\"\n```\n### Create Issue with Labels\nCreate a new GitHub issue with labels and description\n```typescript\n// Create GitHub issue with labels\nconst issue = await github.issues.create({\n  owner: \"owner\",\n  repo: \"repo\",\n  title: \"Bug: Fix authentication error\",\n  body: \"Issue description\",\n  labels: [\"bug\", \"high-priority\"]\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "javascript",
+            "code": "// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\""
+          },
+          {
+            "language": "javascript",
+            "code": "// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\""
+          },
+          {
+            "language": "javascript",
+            "code": "// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\""
+          },
+          {
+            "language": "javascript",
+            "code": "// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\""
+          },
+          {
+            "language": "javascript",
+            "code": "// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\""
+          },
+          {
+            "language": "javascript",
+            "code": "// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create GitHub issue with labels\nconst issue = await github.issues.create({\n  owner: \"owner\",\n  repo: \"repo\",\n  title: \"Bug: Fix authentication error\",\n  body: \"Issue description\",\n  labels: [\"bug\", \"high-priority\"]\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Use Personal Access Tokens with minimal required scopes\n- Store tokens securely and rotate regularly\n- Respect GitHub API rate limits\n- All operations maintain proper Git history\n- Built-in error handling for API issues\n- GitHub personal access tokens and OAuth tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- GitHub OAuth access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- GitHub repository, issue, and pull request IDs may expose organizational structure and development patterns - ensure GitHub resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for GitHub MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- GitHub webhook configurations and payloads may contain sensitive repository data and code information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### API rate limit exceeded: 5000 requests per hour hit\n\nPersonal access tokens have 5,000 requests/hour limit. Wait for hourly reset or use GitHub App with 15,000/hour limit for Enterprise Cloud. Check X-RateLimit-Reset header for reset time.\n### HTTP 401 unauthorized error with valid token\n\nRegenerate personal access token from GitHub Settings > Developer Settings. Verify token includes repo scope for repository access. Check token hasn't expired and update GITHUB_PERSONAL_ACCESS_TOKEN in config.\n### 403 forbidden when accessing organization repos\n\nAuthorize token for SSO if organization requires it. Go to GitHub Settings > Applications > Personal Access Tokens, click Configure SSO, and authorize organization. Verify you have repo access.\n### Repository not found or access denied error\n\nVerify repository name spelling: owner/repo-name format. Check you have read permissions to repository. For private repos, ensure token has repo scope, not just public_repo.\n### Cannot create or update files - permission error\n\nVerify token has repo write permissions. Check repository isn't archived or locked. For organization repos, confirm you have push access and branch protection rules allow commits.\n### GitHub MCP server authentication errors with tokens\n\nVerify personal access token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### GitHub rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use GitHub API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed repository data. GitHub allows 5,000 requests per hour for authenticated users.\n### GitHub repository or issue access denied errors\n\nVerify token has access to the repository. Check repository permissions and organization membership. Ensure token has required scopes (repo, issues, pull_requests) for target operations.\n### GitHub MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify GitHub API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Reading Repository Files",
+        "id": "reading-repository-files"
+      },
+      {
+        "depth": 3,
+        "text": "Creating and Updating Files",
+        "id": "creating-and-updating-files"
+      },
+      {
+        "depth": 3,
+        "text": "Searching Code Across Repositories",
+        "id": "searching-code-across-repositories"
+      },
+      {
+        "depth": 3,
+        "text": "Managing Issues and Pull Requests",
+        "id": "managing-issues-and-pull-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Repository Information and Statistics",
+        "id": "repository-information-and-statistics"
+      },
+      {
+        "depth": 3,
+        "text": "Batch File Operations",
+        "id": "batch-file-operations"
+      },
+      {
+        "depth": 3,
+        "text": "Create Issue with Labels",
+        "id": "create-issue-with-labels"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "API rate limit exceeded: 5000 requests per hour hit",
+        "id": "api-rate-limit-exceeded-5000-requests-per-hour-hit"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 401 unauthorized error with valid token",
+        "id": "http-401-unauthorized-error-with-valid-token"
+      },
+      {
+        "depth": 3,
+        "text": "403 forbidden when accessing organization repos",
+        "id": "403-forbidden-when-accessing-organization-repos"
+      },
+      {
+        "depth": 3,
+        "text": "Repository not found or access denied error",
+        "id": "repository-not-found-or-access-denied-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot create or update files - permission error",
+        "id": "cannot-create-or-update-files---permission-error"
+      },
+      {
+        "depth": 3,
+        "text": "GitHub MCP server authentication errors with tokens",
+        "id": "github-mcp-server-authentication-errors-with-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "GitHub rate limit errors when making multiple API calls",
+        "id": "github-rate-limit-errors-when-making-multiple-api-calls"
+      },
+      {
+        "depth": 3,
+        "text": "GitHub repository or issue access denied errors",
+        "id": "github-repository-or-issue-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "GitHub MCP server connection timeouts or network errors",
+        "id": "github-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "javascript",
+        "code": "// Ask Claude to read a specific file\n\"Can you show me the contents of src/lib/utils.ts from my-org/my-repo?\"\n\n// Or read multiple files\n\"Show me all TypeScript files in the src/components directory of my-org/my-repo\""
+      },
+      {
+        "language": "javascript",
+        "code": "// Create a new React component\n\"Create a new Button component in my-org/my-repo at src/components/Button.tsx with TypeScript and proper props\"\n\n// Update existing file\n\"Update the README.md in my-org/my-repo to include installation instructions for the new Button component\""
+      },
+      {
+        "language": "javascript",
+        "code": "// Search for specific patterns\n\"Find all files in my-org/my-repo that use the 'useState' hook\"\n\n// Search across multiple repos\n\"Search all my repositories for functions that handle authentication\""
+      },
+      {
+        "language": "javascript",
+        "code": "// List issues\n\"Show me all open issues with the 'bug' label in my-org/my-repo\"\n\n// Find pull requests\n\"Find all pull requests that mention 'authentication' in my-org/my-repo\""
+      },
+      {
+        "language": "javascript",
+        "code": "// Get repository details\n\"Show me information about my-org/my-repo including stars, forks, and main language\"\n\n// List all repositories\n\"List all repositories in my-org organization sorted by stars\""
+      },
+      {
+        "language": "javascript",
+        "code": "// Create multiple related files at once\n\"Create a new feature in my-org/my-repo:\n- Component file at src/components/Feature.tsx\n- Test file at src/components/Feature.test.tsx  \n- Export it from src/components/index.ts\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create GitHub issue with labels\nconst issue = await github.issues.create({\n  owner: \"owner\",\n  repo: \"repo\",\n  title: \"Bug: Fix authentication error\",\n  body: \"Issue description\",\n  labels: [\"bug\", \"high-priority\"]\n});"
+      }
+    ],
+    "filePath": "content/mcp/github-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/github-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

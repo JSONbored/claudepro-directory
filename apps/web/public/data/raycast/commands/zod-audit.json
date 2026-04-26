@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:zod-audit",
+  "category": "commands",
+  "slug": "zod-audit",
+  "title": "/zod-audit - Zod Auditor Command for Claude Code",
+  "copyText": "/zod-audit [audit-type=full|security|duplication|validation|zod] [path]",
+  "detailMarkdown": "# /zod-audit - Zod Auditor Command for Claude Code\nProduction codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `zod` `validation` `security-audit` `typescript` `dead-code` `duplication` `schema-validation` `open-source` `production` `technical-debt`\n\n## Install\n```bash\n/zod-audit\n```\n\n## Usage\n/zod-audit security apps/web\n\n## Links\n- https://heyclau.de/commands/zod-audit\n- https://owasp.org/www-project-top-ten/",
+  "webUrl": "https://heyclau.de/commands/zod-audit",
+  "repoUrl": "",
+  "documentationUrl": "https://owasp.org/www-project-top-ten/"
+}

@@ -9,51 +9,54 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import categorySpec from "@/generated/content-category-spec.json";
 import { categoryLabels, siteConfig } from "@/lib/site";
 
-const submissionCategoryOrder = [
-  "agents",
-  "rules",
-  "mcp",
-  "skills",
-  "hooks",
-  "commands",
-  "statuslines",
-] as const;
+type SubmissionCategorySpec = {
+  template: string;
+  requiresAssetContent: boolean;
+  requiresUsageSnippet: boolean;
+  supportsSkillMetadata: boolean;
+  supportsDownloadUrl: boolean;
+};
+
+const categorySpecs = categorySpec.categories as Record<
+  string,
+  SubmissionCategorySpec
+>;
+const submissionCategoryOrder = categorySpec.submissionOrder;
 
 const categories = submissionCategoryOrder.map((category) => ({
   value: category,
   label: categoryLabels[category] ?? category,
 }));
 
-const categoryTemplateMap: Record<string, string> = {
-  agents: "submit-agent.yml",
-  rules: "submit-rule.yml",
-  mcp: "submit-mcp.yml",
-  skills: "submit-skill.yml",
-  hooks: "submit-hook.yml",
-  commands: "submit-command.yml",
-  statuslines: "submit-statusline.yml",
-  collections: "submit-collection.md",
-  guides: "submit-guide.md",
-};
+const categoryTemplateMap = Object.fromEntries(
+  Object.entries(categorySpecs).map(([category, spec]) => [
+    category,
+    spec.template,
+  ]),
+) as Record<string, string>;
 
-const categoriesRequiringAssetContent = new Set([
-  "agents",
-  "rules",
-  "hooks",
-  "commands",
-  "statuslines",
-  "guides",
-]);
+const categoriesRequiringAssetContent = new Set(
+  Object.entries(categorySpecs)
+    .filter(([, spec]) => spec.requiresAssetContent)
+    .map(([category]) => category),
+);
 
-const categoriesRequiringUsageSnippet = new Set([
-  "commands",
-  "hooks",
-  "mcp",
-  "skills",
-  "statuslines",
-]);
+const categoriesRequiringUsageSnippet = new Set(
+  Object.entries(categorySpecs)
+    .filter(([, spec]) => spec.requiresUsageSnippet)
+    .map(([category]) => category),
+);
+
+const categoriesSupportingDownloads = new Set(
+  Object.entries(categorySpecs)
+    .filter(([, spec]) => spec.supportsDownloadUrl)
+    .map(([category]) => category),
+);
+
+const defaultTestedPlatforms = categorySpec.defaultTestedPlatforms.join(", ");
 
 function slugifySubmission(value: string) {
   return value
@@ -93,9 +96,7 @@ export function SubmitForm() {
   const [verificationStatus, setVerificationStatus] = useState("draft");
   const [verifiedAt, setVerifiedAt] = useState("");
   const [retrievalSources, setRetrievalSources] = useState("");
-  const [testedPlatforms, setTestedPlatforms] = useState(
-    "Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini",
-  );
+  const [testedPlatforms, setTestedPlatforms] = useState(defaultTestedPlatforms);
   const suggestedSlug = useMemo(() => slugifySubmission(toolName), [toolName]);
   const normalizedSlug = slug || suggestedSlug;
 
@@ -177,7 +178,8 @@ export function SubmitForm() {
   ]);
 
   const categoryNeedsAsset = categoriesRequiringAssetContent.has(category);
-  const categoryNeedsSkillMetadata = category === "skills";
+  const categoryNeedsSkillMetadata =
+    categorySpecs[category]?.supportsSkillMetadata === true;
   const categoryNeedsUsage = categoriesRequiringUsageSnippet.has(category);
 
   const readinessItems = useMemo(() => {
@@ -401,7 +403,7 @@ export function SubmitForm() {
         />
       </div>
 
-      {category === "skills" ? (
+      {categoriesSupportingDownloads.has(category) ? (
         <div className="space-y-1">
           <label htmlFor="submit-download" className="submit-label">
             Download URL

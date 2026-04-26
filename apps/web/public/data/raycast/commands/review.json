@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:review",
+  "category": "commands",
+  "slug": "review",
+  "title": "/review - Code Review Command for Claude Code",
+  "copyText": "/review [options] <file_or_directory>",
+  "detailMarkdown": "# /review - Code Review Command for Claude Code\nComprehensive code review with security analysis, performance optimization, and best practices validation\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `code-review` `security` `performance` `quality` `analysis`\n\n## Install\n```bash\n/review [options] <file_or_directory>\n```\n\n## Usage\n/review [options] <file_or_directory>\n\n## Links\n- https://heyclau.de/commands/review\n- https://docs.claude.ai/commands/review",
+  "webUrl": "https://heyclau.de/commands/review",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/review"
+}

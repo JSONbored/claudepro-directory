@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:security",
+  "category": "commands",
+  "slug": "security",
+  "title": "/security - Vulnerability Scan Command for Claude Code",
+  "copyText": "/security [options] <file_or_project>",
+  "detailMarkdown": "# /security - Vulnerability Scan Command for Claude Code\nComprehensive security audit with vulnerability detection, threat analysis, and automated remediation recommendations\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `security` `audit` `vulnerability` `threat-analysis` `penetration-testing`\n\n## Install\n```bash\n/security [options] <file_or_project>\n```\n\n## Usage\n/security [options] <file_or_project>\n\n## Links\n- https://heyclau.de/commands/security\n- https://docs.claude.ai/commands/security",
+  "webUrl": "https://heyclau.de/commands/security",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/security"
+}

@@ -13,7 +13,12 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 type BrowsePageProps = {
-  searchParams?: Promise<{ q?: string }>;
+  searchParams?: Promise<{
+    q?: string;
+    category?: string;
+    utility?: string;
+    sort?: string;
+  }>;
 };
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
@@ -30,7 +35,14 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           guides, collections, and statuslines.
         </p>
       </div>
-      <BrowseDirectory entries={directoryEntries} initialQuery={params?.q ?? ""} />
+      <BrowseDirectory
+        entries={directoryEntries}
+        initialQuery={params?.q ?? ""}
+        initialCategory={params?.category ?? "all"}
+        initialUtilityFilter={params?.utility ?? "all"}
+        initialSortMode={params?.sort ?? "popular"}
+        syncUrl
+      />
     </div>
   );
 }

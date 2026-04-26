@@ -1,5 +1,10 @@
 import type { DirectoryEntry } from "@/lib/content";
 
+export type DistributionBadge = {
+  label: string;
+  title: string;
+};
+
 export function compactCount(value: number) {
   if (value >= 1000) {
     return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
@@ -189,4 +194,46 @@ export function getCopyText(entry: DirectoryEntry) {
   if (entry.documentationUrl) return entry.documentationUrl;
   if (entry.githubUrl) return entry.githubUrl;
   return `${entry.title}\nhttps://heyclau.de/${entry.category}/${entry.slug}`;
+}
+
+export function getDistributionBadges(entry: DirectoryEntry): DistributionBadge[] {
+  const badges: DistributionBadge[] = [
+    {
+      label: "Raycast",
+      title: "Available in the HeyClaude Raycast feed"
+    }
+  ];
+
+  if (entry.downloadUrl) {
+    badges.push({
+      label: entry.category === "skills" ? "ZIP" : "MCPB",
+      title:
+        entry.downloadTrust === "first-party"
+          ? "First-party downloadable package"
+          : "External downloadable package"
+    });
+  }
+
+  if (!entry.downloadUrl && !entry.installCommand && !entry.configSnippet) {
+    badges.push({
+      label: "copy-only",
+      title: "Use this entry by copying the asset text"
+    });
+  }
+
+  if (entry.documentationUrl) {
+    badges.push({
+      label: "docs",
+      title: "Documentation link available"
+    });
+  }
+
+  if (entry.repoUrl || entry.githubUrl) {
+    badges.push({
+      label: "source",
+      title: "Source or repository link available"
+    });
+  }
+
+  return badges;
 }

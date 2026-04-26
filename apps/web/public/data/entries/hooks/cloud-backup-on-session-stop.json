@@ -1,0 +1,283 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "hooks",
+    "slug": "cloud-backup-on-session-stop",
+    "title": "Cloud Backup On Session Stop - Hooks",
+    "description": "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for universal cloud provider support.",
+    "seoTitle": "Cloud Backup On Session Stop - Hooks",
+    "seoDescription": "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for universal cloud provide...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-19",
+    "tags": [
+      "backup",
+      "cloud",
+      "stop-hook",
+      "aws",
+      "safety"
+    ],
+    "keywords": [
+      "aws",
+      "backup",
+      "claude",
+      "cloud",
+      "development",
+      "hooks",
+      "safety",
+      "session",
+      "stop",
+      "stop-hook",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for uni...",
+    "installable": true,
+    "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/cloud-backup-on-session-stop.sh && chmod +x .claude/hooks/cloud-backup-on-session-stop.sh",
+    "usageSnippet": "mkdir -p .claude/hooks && touch .claude/hooks/cloud-backup-on-session-stop.sh && chmod +x .claude/hooks/cloud-backup-on-session-stop.sh",
+    "copySnippet": "{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}",
+    "configSnippet": "{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}",
+    "scriptLanguage": "bash",
+    "scriptBody": "#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1",
+    "trigger": "Stop",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Features\n\n- Automatic cloud backup when Claude session ends using Stop hook with intelligent session detection\n- Support for multiple cloud providers including AWS S3 (via AWS CLI v2.27.54+), Google Cloud Storage (via gsutil), and rclone (40+ providers)\n- Intelligent file selection using git diff to track only modified files reducing backup size and transfer time\n- Timestamped backup archives with ISO 8601 format (YYYYMMDD_HHMMSS) for easy version management and recovery\n- Fallback to rclone for universal cloud support ensuring backup works with any S3-compatible or cloud storage provider\n- Environment variable configuration for security allowing credentials to be stored securely without hardcoding\n- Compressed backup archives using tar with gzip compression reducing storage costs and transfer bandwidth\n- Error handling with graceful fallbacks trying multiple cloud providers in priority order (S3 → GCS → rclone)\n\n## Use Cases\n\n- Automatic session-end backup for critical projects ensuring no work is lost when sessions end unexpectedly\n- Data loss prevention in cloud-first workflows providing off-site backup for development work\n- Multi-cloud backup strategy implementation supporting redundancy across multiple cloud providers\n- CI/CD integration for development artifacts automatically backing up build outputs and generated files\n- Remote work safety net for unsaved changes protecting work during network interruptions or system crashes\n- Compliance and audit requirements for development work maintaining backup history for regulatory purposes\n\n## Installation\n\n1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/cloud-backup-on-session-stop.sh\n3. Make executable: chmod +x .claude/hooks/cloud-backup-on-session-stop.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`\n\n## Requirements\n\n- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing)\n- Cloud storage tools: AWS CLI v2.27.54+ (aws --version) for S3, Google Cloud SDK (gcloud, gsutil) for GCS, or rclone ^1.66.0 (rclone --version) for universal support\n- Git repository initialized (for git diff to track modified files) and cloud storage credentials configured (AWS credentials via AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY, GCS via gcloud auth, or rclone config)\n\n## Hook Configuration\n\n```json\n{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}\n```\n\n## Hook Script\n\n```bash\n#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1\n```\n\n## Examples\n### Cloud Backup On Session Stop Hook Script\n\nComplete hook script that backs up modified files to cloud storage when session ends using AWS S3, GCS, or rclone\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup process...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"No modified files to backup\" >&2\n  exit 0\nfi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"\n  if [ $? -eq 0 ]; then\n    echo \"Successfully backed up to S3\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable cloud backup when session stops\n\n```json\n{\n  \"hooks\": {\n    \"Stop\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n### Rclone Universal Backup Hook\n\nHook script using rclone for universal cloud provider support with progress reporting\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nTEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\necho \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T -\nif command -v rclone >/dev/null 2>&1; then\n  rclone copy \"$TEMP_BACKUP\" remote:backups/ --progress 2>&1\n  rm -f \"$TEMP_BACKUP\"\nfi\nexit 0\n```\n### AWS S3 Backup with Storage Class\n\nEnhanced hook script that uses S3 Infrequent Access storage class for cost optimization\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only --diff-filter=ACMR 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | \\\n    aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" \\\n    --storage-class STANDARD_IA 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backed up to S3 with Infrequent Access storage class\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```\n### Backup with Timeout and File Limit\n\nHook script with timeout protection and file count limit to prevent hanging on large backups\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null | head -100)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  timeout 60s sh -c \"echo \\\"$MODIFIED_FILES\\\" | tar -czf - -T - | aws s3 cp - \\\"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\\\"\" 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backup completed successfully\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```\n\n## Troubleshooting\n### Stop hook not triggering when Claude session ends\n\nVerify hook script is executable with chmod +x and registered in .claude/settings.json. Check hook script path matches config. Ensure session ends cleanly without force quit. Test hook manually: bash hook-script.sh. Verify Stop hook type is correct in configuration.\n### AWS S3 backup fails with permission denied error\n\nConfigure AWS_BACKUP_BUCKET environment variable in .env file. Verify AWS credentials with aws s3 ls. Check IAM permissions allow s3:PutObject action on target bucket. Verify bucket exists: aws s3 ls s3://bucket-name. Check AWS region configuration: aws configure get region.\n### Git diff returns no modified files despite changes\n\nEnsure files are tracked by git. Run git status to verify changes exist. Stage files with git add if needed. Check hook runs after file operations complete, not during. Use git diff --name-only --diff-filter=ACMR to include all modified files.\n### Backup archive creation hangs on large file sets\n\nUse .gitignore to exclude node_modules and build artifacts from git tracking. Consider implementing file size filtering in hook script. Add timeout parameter to tar command: timeout 60s tar. Limit file count: git diff --name-only | head -100. Use rclone with --max-size option.\n### Multiple cloud providers configured but rclone used\n\nHook tries AWS S3 first, then Google Cloud, then rclone. Check AWS_BACKUP_BUCKET and GCS_BACKUP_BUCKET variables are set. Verify aws or gcloud CLI tools are in PATH and authenticated. Check exit codes: aws s3 cp returns 0 on success. Review error messages without 2>&1 redirection.\n### Backup succeeds but files are corrupted or incomplete\n\nVerify tar archive integrity: tar -tzf backup.tar.gz. Check network connectivity during upload. Use checksum verification: rclone copy --checksum. Test with small file set first. Verify cloud storage provider supports streaming uploads. Check disk space on /tmp for temporary archives.\n### rclone backup fails with authentication error\n\nConfigure rclone remote: rclone config. Verify remote configuration: rclone listremotes. Test connection: rclone lsd remote:. Check credentials are valid: rclone about remote:. Use rclone config show remote to verify settings.\n### Backup takes too long causing session end delay\n\nAdd timeout wrapper: timeout 30s backup-command. Limit files backed up: git diff --name-only | head -50. Use compression level: tar -czf with gzip -1 for faster compression. Consider async backup: run backup in background. Exclude large files: --exclude \"*.log\" --exclude \"node_modules\".",
+    "sections": [
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Automatic cloud backup when Claude session ends using Stop hook with intelligent session detection\n- Support for multiple cloud providers including AWS S3 (via AWS CLI v2.27.54+), Google Cloud Storage (via gsutil), and rclone (40+ providers)\n- Intelligent file selection using git diff to track only modified files reducing backup size and transfer time\n- Timestamped backup archives with ISO 8601 format (YYYYMMDD_HHMMSS) for easy version management and recovery\n- Fallback to rclone for universal cloud support ensuring backup works with any S3-compatible or cloud storage provider\n- Environment variable configuration for security allowing credentials to be stored securely without hardcoding\n- Compressed backup archives using tar with gzip compression reducing storage costs and transfer bandwidth\n- Error handling with graceful fallbacks trying multiple cloud providers in priority order (S3 → GCS → rclone)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Automatic session-end backup for critical projects ensuring no work is lost when sessions end unexpectedly\n- Data loss prevention in cloud-first workflows providing off-site backup for development work\n- Multi-cloud backup strategy implementation supporting redundancy across multiple cloud providers\n- CI/CD integration for development artifacts automatically backing up build outputs and generated files\n- Remote work safety net for unsaved changes protecting work during network interruptions or system crashes\n- Compliance and audit requirements for development work maintaining backup history for regulatory purposes",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/cloud-backup-on-session-stop.sh\n3. Make executable: chmod +x .claude/hooks/cloud-backup-on-session-stop.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing)\n- Cloud storage tools: AWS CLI v2.27.54+ (aws --version) for S3, Google Cloud SDK (gcloud, gsutil) for GCS, or rclone ^1.66.0 (rclone --version) for universal support\n- Git repository initialized (for git diff to track modified files) and cloud storage credentials configured (AWS credentials via AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY, GCS via gcloud auth, or rclone config)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Hook Configuration",
+        "id": "hook-configuration",
+        "markdown": "```json\n{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Hook Script",
+        "id": "hook-script",
+        "markdown": "```bash\n#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Cloud Backup On Session Stop Hook Script\n\nComplete hook script that backs up modified files to cloud storage when session ends using AWS S3, GCS, or rclone\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup process...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"No modified files to backup\" >&2\n  exit 0\nfi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"\n  if [ $? -eq 0 ]; then\n    echo \"Successfully backed up to S3\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable cloud backup when session stops\n\n```json\n{\n  \"hooks\": {\n    \"Stop\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n### Rclone Universal Backup Hook\n\nHook script using rclone for universal cloud provider support with progress reporting\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nTEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\necho \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T -\nif command -v rclone >/dev/null 2>&1; then\n  rclone copy \"$TEMP_BACKUP\" remote:backups/ --progress 2>&1\n  rm -f \"$TEMP_BACKUP\"\nfi\nexit 0\n```\n### AWS S3 Backup with Storage Class\n\nEnhanced hook script that uses S3 Infrequent Access storage class for cost optimization\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only --diff-filter=ACMR 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | \\\n    aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" \\\n    --storage-class STANDARD_IA 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backed up to S3 with Infrequent Access storage class\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```\n### Backup with Timeout and File Limit\n\nHook script with timeout protection and file count limit to prevent hanging on large backups\n\n```bash\n#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null | head -100)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  timeout 60s sh -c \"echo \\\"$MODIFIED_FILES\\\" | tar -czf - -T - | aws s3 cp - \\\"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\\\"\" 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backup completed successfully\" >&2\n    exit 0\n  fi\nfi\nexit 1\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\necho \"Starting cloud backup process...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"No modified files to backup\" >&2\n  exit 0\nfi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"\n  if [ $? -eq 0 ]; then\n    echo \"Successfully backed up to S3\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+          },
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"Stop\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nTEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\necho \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T -\nif command -v rclone >/dev/null 2>&1; then\n  rclone copy \"$TEMP_BACKUP\" remote:backups/ --progress 2>&1\n  rm -f \"$TEMP_BACKUP\"\nfi\nexit 0"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only --diff-filter=ACMR 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | \\\n    aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" \\\n    --storage-class STANDARD_IA 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backed up to S3 with Infrequent Access storage class\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null | head -100)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  timeout 60s sh -c \"echo \\\"$MODIFIED_FILES\\\" | tar -czf - -T - | aws s3 cp - \\\"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\\\"\" 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backup completed successfully\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Stop hook not triggering when Claude session ends\n\nVerify hook script is executable with chmod +x and registered in .claude/settings.json. Check hook script path matches config. Ensure session ends cleanly without force quit. Test hook manually: bash hook-script.sh. Verify Stop hook type is correct in configuration.\n### AWS S3 backup fails with permission denied error\n\nConfigure AWS_BACKUP_BUCKET environment variable in .env file. Verify AWS credentials with aws s3 ls. Check IAM permissions allow s3:PutObject action on target bucket. Verify bucket exists: aws s3 ls s3://bucket-name. Check AWS region configuration: aws configure get region.\n### Git diff returns no modified files despite changes\n\nEnsure files are tracked by git. Run git status to verify changes exist. Stage files with git add if needed. Check hook runs after file operations complete, not during. Use git diff --name-only --diff-filter=ACMR to include all modified files.\n### Backup archive creation hangs on large file sets\n\nUse .gitignore to exclude node_modules and build artifacts from git tracking. Consider implementing file size filtering in hook script. Add timeout parameter to tar command: timeout 60s tar. Limit file count: git diff --name-only | head -100. Use rclone with --max-size option.\n### Multiple cloud providers configured but rclone used\n\nHook tries AWS S3 first, then Google Cloud, then rclone. Check AWS_BACKUP_BUCKET and GCS_BACKUP_BUCKET variables are set. Verify aws or gcloud CLI tools are in PATH and authenticated. Check exit codes: aws s3 cp returns 0 on success. Review error messages without 2>&1 redirection.\n### Backup succeeds but files are corrupted or incomplete\n\nVerify tar archive integrity: tar -tzf backup.tar.gz. Check network connectivity during upload. Use checksum verification: rclone copy --checksum. Test with small file set first. Verify cloud storage provider supports streaming uploads. Check disk space on /tmp for temporary archives.\n### rclone backup fails with authentication error\n\nConfigure rclone remote: rclone config. Verify remote configuration: rclone listremotes. Test connection: rclone lsd remote:. Check credentials are valid: rclone about remote:. Use rclone config show remote to verify settings.\n### Backup takes too long causing session end delay\n\nAdd timeout wrapper: timeout 30s backup-command. Limit files backed up: git diff --name-only | head -50. Use compression level: tar -czf with gzip -1 for faster compression. Consider async backup: run backup in background. Exclude large files: --exclude \"*.log\" --exclude \"node_modules\".",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Config paths",
+        "id": "config-paths"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Configuration",
+        "id": "hook-configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Script",
+        "id": "hook-script"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Cloud Backup On Session Stop Hook Script",
+        "id": "cloud-backup-on-session-stop-hook-script"
+      },
+      {
+        "depth": 3,
+        "text": "Hook Configuration",
+        "id": "hook-configuration"
+      },
+      {
+        "depth": 3,
+        "text": "Rclone Universal Backup Hook",
+        "id": "rclone-universal-backup-hook"
+      },
+      {
+        "depth": 3,
+        "text": "AWS S3 Backup with Storage Class",
+        "id": "aws-s3-backup-with-storage-class"
+      },
+      {
+        "depth": 3,
+        "text": "Backup with Timeout and File Limit",
+        "id": "backup-with-timeout-and-file-limit"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Stop hook not triggering when Claude session ends",
+        "id": "stop-hook-not-triggering-when-claude-session-ends"
+      },
+      {
+        "depth": 3,
+        "text": "AWS S3 backup fails with permission denied error",
+        "id": "aws-s3-backup-fails-with-permission-denied-error"
+      },
+      {
+        "depth": 3,
+        "text": "Git diff returns no modified files despite changes",
+        "id": "git-diff-returns-no-modified-files-despite-changes"
+      },
+      {
+        "depth": 3,
+        "text": "Backup archive creation hangs on large file sets",
+        "id": "backup-archive-creation-hangs-on-large-file-sets"
+      },
+      {
+        "depth": 3,
+        "text": "Multiple cloud providers configured but rclone used",
+        "id": "multiple-cloud-providers-configured-but-rclone-used"
+      },
+      {
+        "depth": 3,
+        "text": "Backup succeeds but files are corrupted or incomplete",
+        "id": "backup-succeeds-but-files-are-corrupted-or-incomplete"
+      },
+      {
+        "depth": 3,
+        "text": "rclone backup fails with authentication error",
+        "id": "rclone-backup-fails-with-authentication-error"
+      },
+      {
+        "depth": 3,
+        "text": "Backup takes too long causing session end delay",
+        "id": "backup-takes-too-long-causing-session-end-delay"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"stop\": {\n      \"script\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n    }\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\necho \"☁️ Starting cloud backup process...\" >&2\n\n# Generate timestamped backup directory name\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\n\n# Get list of modified files\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\n\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"📂 No modified files to backup\" >&2\n  exit 0\nfi\n\necho \"📦 Found modified files to backup\" >&2\n\n# Try AWS S3 first\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to AWS S3...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to S3: $AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ AWS S3 backup failed\" >&2\n  fi\nfi\n\n# Try Google Cloud Storage\nif command -v gcloud >/dev/null 2>&1 && [[ -n \"$GCS_BACKUP_BUCKET\" ]]; then\n  echo \"📦 Backing up to Google Cloud Storage...\" >&2\n  if echo \"$MODIFIED_FILES\" | tar -czf - -T - | gsutil cp - \"gs://$GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"; then\n    echo \"✅ Successfully backed up to GCS: $GCS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" >&2\n    exit 0\n  else\n    echo \"❌ Google Cloud backup failed\" >&2\n  fi\nfi\n\n# Try rclone as universal fallback\nif command -v rclone >/dev/null 2>&1; then\n  echo \"📦 Backing up using rclone...\" >&2\n  TEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\n  if echo \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T - && rclone copy \"$TEMP_BACKUP\" remote:backups/; then\n    echo \"✅ Successfully backed up using rclone\" >&2\n    rm -f \"$TEMP_BACKUP\"\n    exit 0\n  else\n    echo \"❌ rclone backup failed\" >&2\n    rm -f \"$TEMP_BACKUP\"\n  fi\nfi\n\necho \"⚠️ No cloud storage provider configured or available\" >&2\necho \"💡 Configure AWS_BACKUP_BUCKET, GCS_BACKUP_BUCKET, or rclone to enable cloud backup\" >&2\nexit 1"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\necho \"Starting cloud backup process...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then\n  echo \"No modified files to backup\" >&2\n  exit 0\nfi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\"\n  if [ $? -eq 0 ]; then\n    echo \"Successfully backed up to S3\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+      },
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"Stop\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/cloud-backup-on-session-stop.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nTEMP_BACKUP=\"/tmp/$BACKUP_DIR.tar.gz\"\necho \"$MODIFIED_FILES\" | tar -czf \"$TEMP_BACKUP\" -T -\nif command -v rclone >/dev/null 2>&1; then\n  rclone copy \"$TEMP_BACKUP\" remote:backups/ --progress 2>&1\n  rm -f \"$TEMP_BACKUP\"\nfi\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only --diff-filter=ACMR 2>/dev/null)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  echo \"$MODIFIED_FILES\" | tar -czf - -T - | \\\n    aws s3 cp - \"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\" \\\n    --storage-class STANDARD_IA 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backed up to S3 with Infrequent Access storage class\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\necho \"Starting cloud backup...\" >&2\nBACKUP_DIR=\"claude-backup-$(date +%Y%m%d_%H%M%S)\"\nMODIFIED_FILES=$(git diff --name-only 2>/dev/null | head -100)\nif [ -z \"$MODIFIED_FILES\" ]; then exit 0; fi\nif command -v aws >/dev/null 2>&1 && [[ -n \"$AWS_BACKUP_BUCKET\" ]]; then\n  timeout 60s sh -c \"echo \\\"$MODIFIED_FILES\\\" | tar -czf - -T - | aws s3 cp - \\\"s3://$AWS_BACKUP_BUCKET/$BACKUP_DIR.tar.gz\\\"\" 2>&1\n  if [ $? -eq 0 ]; then\n    echo \"Backup completed successfully\" >&2\n    exit 0\n  fi\nfi\nexit 1"
+      }
+    ],
+    "filePath": "content/hooks/cloud-backup-on-session-stop.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/cloud-backup-on-session-stop.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "reddit-mcp-buddy",
+    "title": "Reddit MCP Buddy for Claude",
+    "description": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
+    "seoTitle": "Reddit MCP Buddy for Claude",
+    "seoDescription": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required Discover tools for AI development.",
+    "author": "karanb192",
+    "authorProfileUrl": "https://github.com/karanb192",
+    "dateAdded": "2025-09-27",
+    "tags": [
+      "reddit",
+      "social-media",
+      "search",
+      "analytics",
+      "community"
+    ],
+    "keywords": [
+      "analytics",
+      "buddy",
+      "claude",
+      "community",
+      "development",
+      "mcp",
+      "mcp servers",
+      "reddit",
+      "search",
+      "social-media",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 6,
+    "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+    "cardDescription": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
+    "installable": true,
+    "installCommand": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
+    "usageSnippet": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
+    "copySnippet": "{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "1 minute",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Node.js and npx (for running reddit-mcp-buddy package)",
+      "Internet connection (access to Reddit API required)",
+      "Understanding of Reddit concepts (subreddits, posts, comments, karma)",
+      "Optional: Reddit account with OAuth app credentials (for enhanced rate limits)",
+      "Understanding of Reddit API rate limits (dynamic limits, higher with authentication)",
+      "Understanding of Reddit subreddit types (public, private, restricted)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "No API keys required for basic usage (works instantly with zero setup)",
+      "Understanding of Reddit sorting options (hot, new, top, rising)",
+      "Understanding of Reddit search and filtering capabilities"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/reddit-mcp-buddy.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "4789d95508464215c52e523a39bd41dd04909b297e06af2e37e4ce8ea6320a30",
+    "body": "## Content\n\nStreamline your Reddit research and analysis by connecting Claude to Reddit. Browse subreddits with sorting options, search across Reddit with advanced filters, get full post details and comments, analyze user profiles and karma, discover trending content, and track community dynamics—all through natural language commands. Works instantly with zero setup (no API keys required) and offers optional OAuth authentication for enhanced rate limits.\n\n## Features\n\n- Browse any subreddit with sorting options (hot, new, top, rising)\n- Search across Reddit with advanced filters (keywords, subreddits, time ranges)\n- Get full post details including all comments (comprehensive post information)\n- Analyze user profiles, karma, and post history (user activity analysis)\n- No API keys required - works instantly (zero setup for public content)\n- Optional Reddit authentication for enhanced rate limits (OAuth credentials)\n- Access trending content across Reddit (discover popular discussions)\n- Filter and sort search results (relevance, time, subreddit-specific)\n- Advanced Reddit content and community management with post creation, comment moderation, and subreddit administration\n- Batch operations support for efficient bulk content operations, moderation workflows, and community management with automatic rate limit handling and retry logic\n- Real-time Reddit synchronization capabilities with webhook integration support for monitoring Reddit events and triggering automated workflows\n\n## Use Cases\n\n- Research trending topics and community sentiment (real-time trend analysis)\n- Analyze discussions about products or technologies (product research)\n- Track user engagement and community dynamics (engagement metrics)\n- Find relevant discussions across multiple subreddits (cross-subreddit search)\n- Monitor brand mentions and feedback (brand monitoring)\n- Gather insights from specialized communities (niche community analysis)\n- Discover trending content and viral posts (trend discovery)\n- Analyze comment threads and discussion patterns (conversation analysis)\n- Build automated content management workflows that sync external systems with Reddit for real-time community engagement and moderation\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add reddit-buddy -- npx reddit-mcp-buddy\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status reddit-mcp-buddy\n4. Start browsing Reddit immediately (no authentication required)\n5. Optionally add Reddit OAuth credentials for enhanced rate limits (see configuration)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Reddit MCP Buddy server configuration with npx command\n3. Restart Claude Desktop\n4. Start browsing Reddit immediately (no auth required)\n5. Optionally add Reddit credentials for higher rate limits (see configuration section)\n\n## Requirements\n\n- Node.js and npx (for running reddit-mcp-buddy package)\n- Internet connection (access to Reddit API required)\n- Understanding of Reddit concepts (subreddits, posts, comments, karma)\n- Optional: Reddit account with OAuth app credentials (for enhanced rate limits)\n- Understanding of Reddit API rate limits (dynamic limits, higher with authentication)\n- Understanding of Reddit subreddit types (public, private, restricted)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- No API keys required for basic usage (works instantly with zero setup)\n- Understanding of Reddit sorting options (hot, new, top, rising)\n- Understanding of Reddit search and filtering capabilities\n\n## Configuration\n\n```json\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### What's trending in r/technology today?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What's trending in r/technology today?\"\n```\n### Search for discussions about ChatGPT in r/programm...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about ChatGPT in r/programming\"\n```\n### Get the top posts from r/MachineLearning this week\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get the top posts from r/MachineLearning this week\"\n```\n### Find the most discussed topics in r/stocks\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find the most discussed topics in r/stocks\"\n```\n### What is trending on reddit?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What is trending on reddit?\"\n```\n### Search for discussions about AI\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about AI\"\n```\n### Show me the comments on this Reddit URL\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show me the comments on this Reddit URL\"\n```\n### Create Post\nCreate a new Reddit post in a subreddit\n```typescript\n// Create Reddit post\nconst post = await reddit.subreddit(\"subreddit\").submit({\n  title: \"Post Title\",\n  text: \"Post content\",\n  kind: \"self\"\n});\n```\n\n## Security\n\n- No API keys required for basic usage (read-only public content access)\n- Optional Reddit app credentials for enhanced rate limits (stored locally)\n- All credentials stored locally in Claude config (not transmitted externally)\n- Read-only access - no posting capabilities (safe exploration)\n- OAuth credentials optional (works without authentication for public content)\n- Reddit API credentials and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Reddit OAuth access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- Reddit post, comment, and subreddit identifiers may expose user activity and community information - ensure Reddit resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Reddit MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Reddit webhook configurations and payloads may contain sensitive user data and content information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Rate limit errors: Add Reddit credentials for higher limits\n\nReddit API enforces dynamic rate limits based on HTTP response headers. Unauthenticated requests have lower limits. Add Reddit OAuth credentials (client_id, client_secret, username, password) to environment variables in your MCP configuration for enhanced rate limits. Monitor rate limit headers in responses. Implement exponential backoff on 429 errors. Each OAuth authorization has its own rate limit window.\n### Subreddit not found: Check spelling (case-insensitive)\n\nVerify subreddit name spelling (case-insensitive). Check if subreddit exists by visiting r/subredditname in browser. Ensure subreddit is public (private subreddits require authentication). Some subreddits may be banned or quarantined. Use Reddit search to confirm subreddit name before querying.\n### Private subreddits require authentication\n\nPrivate subreddits require Reddit OAuth authentication. Add Reddit credentials (client_id, client_secret, username, password) to your MCP configuration environment variables. Ensure your Reddit account has access to the private subreddit. Create a Reddit OAuth app at https://www.reddit.com/prefs/apps if you don't have one. Use script-type OAuth app for read-only access.\n### Restart Claude Desktop after config changes\n\nClaude Desktop requires a restart to load new MCP server configurations. After adding or modifying the reddit-mcp-buddy configuration in claude_desktop_config.json, fully quit and restart Claude Desktop. Verify the server is loaded with claude mcp list command (Claude Code) or by asking Claude to list available tools. Configuration changes take effect only after restart.\n### Reddit MCP server authentication errors with OAuth tokens\n\nVerify OAuth token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Reddit rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use Reddit API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed content data. Reddit allows 60 requests per minute per OAuth application.\n### Reddit post or subreddit access denied errors\n\nVerify OAuth token has access to the post or subreddit. Check subreddit permissions and user role. Ensure OAuth token has required scopes (read, submit, modposts) for target operations.\n### Reddit MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Reddit API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Streamline your Reddit research and analysis by connecting Claude to Reddit. Browse subreddits with sorting options, search across Reddit with advanced filters, get full post details and comments, analyze user profiles and karma, discover trending content, and track community dynamics—all through natural language commands. Works instantly with zero setup (no API keys required) and offers optional OAuth authentication for enhanced rate limits.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Browse any subreddit with sorting options (hot, new, top, rising)\n- Search across Reddit with advanced filters (keywords, subreddits, time ranges)\n- Get full post details including all comments (comprehensive post information)\n- Analyze user profiles, karma, and post history (user activity analysis)\n- No API keys required - works instantly (zero setup for public content)\n- Optional Reddit authentication for enhanced rate limits (OAuth credentials)\n- Access trending content across Reddit (discover popular discussions)\n- Filter and sort search results (relevance, time, subreddit-specific)\n- Advanced Reddit content and community management with post creation, comment moderation, and subreddit administration\n- Batch operations support for efficient bulk content operations, moderation workflows, and community management with automatic rate limit handling and retry logic\n- Real-time Reddit synchronization capabilities with webhook integration support for monitoring Reddit events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Research trending topics and community sentiment (real-time trend analysis)\n- Analyze discussions about products or technologies (product research)\n- Track user engagement and community dynamics (engagement metrics)\n- Find relevant discussions across multiple subreddits (cross-subreddit search)\n- Monitor brand mentions and feedback (brand monitoring)\n- Gather insights from specialized communities (niche community analysis)\n- Discover trending content and viral posts (trend discovery)\n- Analyze comment threads and discussion patterns (conversation analysis)\n- Build automated content management workflows that sync external systems with Reddit for real-time community engagement and moderation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add reddit-buddy -- npx reddit-mcp-buddy\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status reddit-mcp-buddy\n4. Start browsing Reddit immediately (no authentication required)\n5. Optionally add Reddit OAuth credentials for enhanced rate limits (see configuration)\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file (see configPath below)\n2. Add the Reddit MCP Buddy server configuration with npx command\n3. Restart Claude Desktop\n4. Start browsing Reddit immediately (no auth required)\n5. Optionally add Reddit credentials for higher rate limits (see configuration section)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Node.js and npx (for running reddit-mcp-buddy package)\n- Internet connection (access to Reddit API required)\n- Understanding of Reddit concepts (subreddits, posts, comments, karma)\n- Optional: Reddit account with OAuth app credentials (for enhanced rate limits)\n- Understanding of Reddit API rate limits (dynamic limits, higher with authentication)\n- Understanding of Reddit subreddit types (public, private, restricted)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- No API keys required for basic usage (works instantly with zero setup)\n- Understanding of Reddit sorting options (hot, new, top, rising)\n- Understanding of Reddit search and filtering capabilities",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### What's trending in r/technology today?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What's trending in r/technology today?\"\n```\n### Search for discussions about ChatGPT in r/programm...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about ChatGPT in r/programming\"\n```\n### Get the top posts from r/MachineLearning this week\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get the top posts from r/MachineLearning this week\"\n```\n### Find the most discussed topics in r/stocks\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find the most discussed topics in r/stocks\"\n```\n### What is trending on reddit?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What is trending on reddit?\"\n```\n### Search for discussions about AI\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about AI\"\n```\n### Show me the comments on this Reddit URL\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show me the comments on this Reddit URL\"\n```\n### Create Post\nCreate a new Reddit post in a subreddit\n```typescript\n// Create Reddit post\nconst post = await reddit.subreddit(\"subreddit\").submit({\n  title: \"Post Title\",\n  text: \"Post content\",\n  kind: \"self\"\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What's trending in r/technology today?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Search for discussions about ChatGPT in r/programming\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Get the top posts from r/MachineLearning this week\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find the most discussed topics in r/stocks\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What is trending on reddit?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Search for discussions about AI\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show me the comments on this Reddit URL\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Reddit post\nconst post = await reddit.subreddit(\"subreddit\").submit({\n  title: \"Post Title\",\n  text: \"Post content\",\n  kind: \"self\"\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- No API keys required for basic usage (read-only public content access)\n- Optional Reddit app credentials for enhanced rate limits (stored locally)\n- All credentials stored locally in Claude config (not transmitted externally)\n- Read-only access - no posting capabilities (safe exploration)\n- OAuth credentials optional (works without authentication for public content)\n- Reddit API credentials and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Reddit OAuth access tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit token permissions and remove unused scopes\n- Reddit post, comment, and subreddit identifiers may expose user activity and community information - ensure Reddit resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Reddit MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Reddit webhook configurations and payloads may contain sensitive user data and content information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Rate limit errors: Add Reddit credentials for higher limits\n\nReddit API enforces dynamic rate limits based on HTTP response headers. Unauthenticated requests have lower limits. Add Reddit OAuth credentials (client_id, client_secret, username, password) to environment variables in your MCP configuration for enhanced rate limits. Monitor rate limit headers in responses. Implement exponential backoff on 429 errors. Each OAuth authorization has its own rate limit window.\n### Subreddit not found: Check spelling (case-insensitive)\n\nVerify subreddit name spelling (case-insensitive). Check if subreddit exists by visiting r/subredditname in browser. Ensure subreddit is public (private subreddits require authentication). Some subreddits may be banned or quarantined. Use Reddit search to confirm subreddit name before querying.\n### Private subreddits require authentication\n\nPrivate subreddits require Reddit OAuth authentication. Add Reddit credentials (client_id, client_secret, username, password) to your MCP configuration environment variables. Ensure your Reddit account has access to the private subreddit. Create a Reddit OAuth app at https://www.reddit.com/prefs/apps if you don't have one. Use script-type OAuth app for read-only access.\n### Restart Claude Desktop after config changes\n\nClaude Desktop requires a restart to load new MCP server configurations. After adding or modifying the reddit-mcp-buddy configuration in claude_desktop_config.json, fully quit and restart Claude Desktop. Verify the server is loaded with claude mcp list command (Claude Code) or by asking Claude to list available tools. Configuration changes take effect only after restart.\n### Reddit MCP server authentication errors with OAuth tokens\n\nVerify OAuth token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Reddit rate limit errors when making multiple API calls\n\nImplement exponential backoff retry logic with jitter. Use Reddit API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed content data. Reddit allows 60 requests per minute per OAuth application.\n### Reddit post or subreddit access denied errors\n\nVerify OAuth token has access to the post or subreddit. Check subreddit permissions and user role. Ensure OAuth token has required scopes (read, submit, modposts) for target operations.\n### Reddit MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Reddit API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "What's trending in r/technology today?",
+        "id": "whats-trending-in-rtechnology-today"
+      },
+      {
+        "depth": 3,
+        "text": "Search for discussions about ChatGPT in r/programm...",
+        "id": "search-for-discussions-about-chatgpt-in-rprogramm"
+      },
+      {
+        "depth": 3,
+        "text": "Get the top posts from r/MachineLearning this week",
+        "id": "get-the-top-posts-from-rmachinelearning-this-week"
+      },
+      {
+        "depth": 3,
+        "text": "Find the most discussed topics in r/stocks",
+        "id": "find-the-most-discussed-topics-in-rstocks"
+      },
+      {
+        "depth": 3,
+        "text": "What is trending on reddit?",
+        "id": "what-is-trending-on-reddit"
+      },
+      {
+        "depth": 3,
+        "text": "Search for discussions about AI",
+        "id": "search-for-discussions-about-ai"
+      },
+      {
+        "depth": 3,
+        "text": "Show me the comments on this Reddit URL",
+        "id": "show-me-the-comments-on-this-reddit-url"
+      },
+      {
+        "depth": 3,
+        "text": "Create Post",
+        "id": "create-post"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit errors: Add Reddit credentials for higher limits",
+        "id": "rate-limit-errors-add-reddit-credentials-for-higher-limits"
+      },
+      {
+        "depth": 3,
+        "text": "Subreddit not found: Check spelling (case-insensitive)",
+        "id": "subreddit-not-found-check-spelling-case-insensitive"
+      },
+      {
+        "depth": 3,
+        "text": "Private subreddits require authentication",
+        "id": "private-subreddits-require-authentication"
+      },
+      {
+        "depth": 3,
+        "text": "Restart Claude Desktop after config changes",
+        "id": "restart-claude-desktop-after-config-changes"
+      },
+      {
+        "depth": 3,
+        "text": "Reddit MCP server authentication errors with OAuth tokens",
+        "id": "reddit-mcp-server-authentication-errors-with-oauth-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Reddit rate limit errors when making multiple API calls",
+        "id": "reddit-rate-limit-errors-when-making-multiple-api-calls"
+      },
+      {
+        "depth": 3,
+        "text": "Reddit post or subreddit access denied errors",
+        "id": "reddit-post-or-subreddit-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Reddit MCP server connection timeouts or network errors",
+        "id": "reddit-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What's trending in r/technology today?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Search for discussions about ChatGPT in r/programming\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Get the top posts from r/MachineLearning this week\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find the most discussed topics in r/stocks\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What is trending on reddit?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Search for discussions about AI\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show me the comments on this Reddit URL\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Reddit post\nconst post = await reddit.subreddit(\"subreddit\").submit({\n  title: \"Post Title\",\n  text: \"Post content\",\n  kind: \"self\"\n});"
+      }
+    ],
+    "filePath": "content/mcp/reddit-mcp-buddy.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx",
+    "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

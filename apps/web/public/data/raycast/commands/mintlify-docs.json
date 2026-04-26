@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:mintlify-docs",
+  "category": "commands",
+  "slug": "mintlify-docs",
+  "title": "Mintlify Documentation Generator for Claude",
+  "copyText": "/mintlify-docs [options] <documentation_scope>",
+  "detailMarkdown": "# Mintlify Documentation Generator for Claude\nGenerate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `mintlify` `documentation` `mdx` `api-docs` `ai`\n\n## Install\n```bash\n/mintlify-docs [options] <documentation_scope>\n```\n\n## Usage\n/mintlify-docs [options] <documentation_scope>\n\n## Links\n- https://heyclau.de/commands/mintlify-docs\n- https://mintlify.com/docs",
+  "webUrl": "https://heyclau.de/commands/mintlify-docs",
+  "repoUrl": "",
+  "documentationUrl": "https://mintlify.com/docs"
+}

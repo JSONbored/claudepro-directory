@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "n8n-operations-resilience-capability-pack",
+    "title": "n8n Operations Resilience Capability Pack Skill",
+    "description": "Expert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.",
+    "seoTitle": "n8n Operations Resilience Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for production n8n operations including reliability patterns, security controls, and workflow incident response.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "n8n",
+      "operations",
+      "workflow-automation",
+      "reliability",
+      "capability-pack"
+    ],
+    "keywords": [
+      "n8n production operations",
+      "workflow resilience",
+      "n8n incident response",
+      "n8n credential security"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 86,
+    "documentationUrl": "https://docs.n8n.io/",
+    "cardDescription": "Run n8n in production with retry strategy, failure isolation, and secure credential governance.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack",
+    "usageSnippet": "Use this skill to harden n8n workflows for production reliability, security, and fast incident response.",
+    "copySnippet": "# Trigger\n\"Apply the n8n operations resilience capability pack.\"\n\n# Required output\n1) Workflow reliability design\n2) Credential/security controls\n3) Failure recovery runbooks\n4) Monitoring and alert map",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://docs.n8n.io/",
+      "https://docs.n8n.io/hosting/",
+      "https://docs.n8n.io/workflows/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "n8n instance access",
+      "Workflow inventory",
+      "Secrets management baseline"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/n8n-operations-resilience-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "39e4ad81bf6055fbe1832b8e0344f3e41dd23ae88b6b8e677102b6a0d97aedcc",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://docs.n8n.io/\n- https://docs.n8n.io/hosting/\n- https://docs.n8n.io/workflows/\n\n## Core Workflow\n\n1. Inventory workflows by business criticality.\n2. Add retry, timeout, and idempotency protections.\n3. Enforce credential scope and secret-rotation policy.\n4. Build incident runbooks for queue, node, and downstream failures.\n5. Add monitoring and alerting with actionable thresholds.\n\n## Overview\n\nThis skill gives agents an operational blueprint for running n8n safely in environments where workflow failure has real business impact.\n\n## Capability Scope\n\n- Workflow reliability patterns\n- Credential and secret governance\n- Failure isolation and retries\n- Incident playbook design\n- Monitoring/alert instrumentation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Require idempotency strategy for side-effecting workflows.\n- Scope credentials to least privilege and rotate regularly.\n- Define dead-letter or fallback behavior for failed executions.\n- Publish runbooks for queue, dependency, and auth failures.\n\n## Troubleshooting\n\n**Issue:** Retries cause duplicate side effects  \n**Fix:** enforce idempotency keys and dedupe controls.\n\n**Issue:** Credential sprawl across workflows  \n**Fix:** centralize and scope credentials by workflow domain.\n\n**Issue:** Silent failures in non-critical jobs  \n**Fix:** add alert thresholds and dead-letter visibility.\n\n## Output Contract\n\n1. Reliability architecture by workflow class.\n2. Security controls and credential policy.\n3. Incident runbook actions per failure mode.\n4. Monitoring plan with exact alert thresholds.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://docs.n8n.io/\n- https://docs.n8n.io/hosting/\n- https://docs.n8n.io/workflows/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Inventory workflows by business criticality.\n2. Add retry, timeout, and idempotency protections.\n3. Enforce credential scope and secret-rotation policy.\n4. Build incident runbooks for queue, node, and downstream failures.\n5. Add monitoring and alerting with actionable thresholds.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill gives agents an operational blueprint for running n8n safely in environments where workflow failure has real business impact.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Workflow reliability patterns\n- Credential and secret governance\n- Failure isolation and retries\n- Incident playbook design\n- Monitoring/alert instrumentation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Require idempotency strategy for side-effecting workflows.\n- Scope credentials to least privilege and rotate regularly.\n- Define dead-letter or fallback behavior for failed executions.\n- Publish runbooks for queue, dependency, and auth failures.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Retries cause duplicate side effects  \n**Fix:** enforce idempotency keys and dedupe controls.\n\n**Issue:** Credential sprawl across workflows  \n**Fix:** centralize and scope credentials by workflow domain.\n\n**Issue:** Silent failures in non-critical jobs  \n**Fix:** add alert thresholds and dead-letter visibility.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Reliability architecture by workflow class.\n2. Security controls and credential policy.\n3. Incident runbook actions per failure mode.\n4. Monitoring plan with exact alert thresholds.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/n8n-operations-resilience-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

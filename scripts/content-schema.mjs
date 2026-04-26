@@ -1,68 +1,23 @@
+import categorySpec from "../content/category-spec.json" with { type: "json" };
+
 const DEFAULT_DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
 const DEFAULT_SITE_URL = "https://heyclau.de";
 
-export const CATEGORY_SCHEMAS = {
-  agents: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["usageSnippet", "copySnippet"]
-  },
-  collections: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["items"]
-  },
-  commands: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["commandSyntax", "usageSnippet", "copySnippet"]
-  },
-  guides: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["usageSnippet"]
-  },
-  hooks: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["trigger", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
-  },
-  mcp: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["installCommand", "usageSnippet", "copySnippet", "configSnippet"]
-  },
-  rules: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["copySnippet"]
-  },
-  skills: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: [
-      "installCommand",
-      "usageSnippet",
-      "copySnippet",
-      "downloadUrl",
-      "skillType",
-      "skillLevel",
-      "verificationStatus",
-      "verifiedAt",
-      "retrievalSources",
-      "testedPlatforms"
-    ]
-  },
-  statuslines: {
-    required: ["title", "slug", "description", "cardDescription"],
-    recommended: ["scriptLanguage", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"]
-  }
-};
+export const CATEGORY_SCHEMAS = Object.fromEntries(
+  Object.entries(categorySpec.categories).map(([category, spec]) => [
+    category,
+    {
+      required: spec.contentRequired,
+      recommended: spec.contentRecommended
+    }
+  ])
+);
 
 export const FORBIDDEN_CONTENT_FIELDS = ["viewCount", "copyCount", "popularityScore"];
-export const SKILL_TYPE_VALUES = ["general", "capability-pack"];
-export const SKILL_LEVEL_VALUES = ["foundational", "advanced", "expert"];
-export const VERIFICATION_STATUS_VALUES = ["draft", "validated", "production"];
-const DEFAULT_TESTED_PLATFORMS = [
-  "Claude",
-  "Codex",
-  "OpenClaw",
-  "Cursor",
-  "Windsurf",
-  "Gemini"
-];
+export const SKILL_TYPE_VALUES = categorySpec.skillTypeValues;
+export const SKILL_LEVEL_VALUES = categorySpec.skillLevelValues;
+export const VERIFICATION_STATUS_VALUES = categorySpec.verificationStatusValues;
+const DEFAULT_TESTED_PLATFORMS = categorySpec.defaultTestedPlatforms;
 
 export function headingId(text) {
   return text

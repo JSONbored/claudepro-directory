@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "workato-mcp-server",
+    "title": "Workato MCP Server for Claude",
+    "description": "Access any application, workflows, or data via Workato's integration platform",
+    "seoTitle": "Workato MCP Server for Claude",
+    "seoDescription": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development.",
+    "author": "Workato",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "automation",
+      "workato",
+      "integration",
+      "workflow",
+      "iPaaS"
+    ],
+    "keywords": [
+      "automation",
+      "claude",
+      "development",
+      "integration",
+      "iPaaS",
+      "mcp",
+      "mcp servers",
+      "server",
+      "tools",
+      "workato",
+      "workflow"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 1,
+    "documentationUrl": "https://docs.workato.com/mcp.html",
+    "cardDescription": "Access any application, workflows, or data via Workato's integration platform",
+    "installable": true,
+    "installCommand": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
+    "usageSnippet": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
+    "copySnippet": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "1 minute",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Workato account (workspace access required)",
+      "Bearer token authentication (created in Workato Dashboard)",
+      "Network access to your Workato workspace MCP endpoint (HTTPS required, HTTP transport)",
+      "Understanding of Workato recipes/workflows (automation concepts)",
+      "Workato Dashboard access (for token management and recipe configuration)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Workato API rate limits (varies by endpoint: 60 req/min, 1 req/sec, 20 req/min)",
+      "Understanding of webhook rate limits (20 events/sec, 72K events/hour, burst 9K)",
+      "Understanding of API timeout limits (40 seconds for Developer API requests)",
+      "Optional: RecipeOps access (for monitoring API rate limit violations)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/workato-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "c69f27e627ef47cea43d72c64d4c1425ad1e7e07481aa656188d08ab0af611dc",
+    "body": "## Content\n\nConnect to hundreds of applications through Workato's enterprise automation and integration platform. Execute recipes on demand, access connected application data, retrieve and update cross-system data, monitor job execution status, trigger complex automation workflows, manage recipe connections, view recipe health metrics, and process real-time events—all through natural language commands. Supports Bearer token authentication, role-based access control, audit trails, and comprehensive workflow automation.\n\n## Features\n\n- Execute recipes (workflows) on demand (trigger automation)\n- Access connected application data (cross-system data retrieval)\n- Retrieve and update cross-system data (data synchronization)\n- Monitor job execution status (real-time job tracking)\n- Trigger complex automation workflows (multi-step processes)\n- Manage recipe connections and configurations (connection management)\n- View recipe health and performance metrics (monitoring and analytics)\n- Access event streams and webhooks (real-time event processing)\n- Advanced Workato workflow automation and integration management with recipe execution, connector configuration, and data transformation\n- Batch operations support for efficient bulk workflow operations, recipe management, and integration processing with automatic rate limit handling and retry logic\n- Real-time workflow synchronization capabilities with webhook integration support for monitoring Workato events and triggering automated workflows\n\n## Use Cases\n\n- Trigger complex multi-system workflows (end-to-end automation)\n- Integrate data across enterprise applications (data synchronization)\n- Access any connected system through one interface (unified access)\n- Automate business processes end-to-end (process automation)\n- Execute custom recipes on demand (on-demand execution)\n- Monitor recipe performance and health (operational monitoring)\n- Process real-time events via webhooks (event-driven automation)\n- Manage connections and authentication (infrastructure management)\n- Build automated integration workflows that sync external systems with Workato for real-time data processing and business process automation\n\n## Installation\n\n### Claude Code\n\n1. Run: claude mcp add --transport http workato YOUR_WORKATO_MCP_URL\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status workato\n4. Authenticate with your Workato account (Bearer token)\n5. Grant required permissions (recipe access, job monitoring)\n\n### Claude Desktop\n\n1. Access your Workato workspace\n2. Navigate to MCP configuration section\n3. Generate your custom MCP endpoint\n4. Add the generated URL to Claude Desktop configuration\n5. Authenticate with your Workato account (Bearer token)\n6. Grant required permissions (recipe access, job monitoring)\n7. Verify connection in Claude Desktop\n\n## Requirements\n\n- Workato account (workspace access required)\n- Bearer token authentication (created in Workato Dashboard)\n- Network access to your Workato workspace MCP endpoint (HTTPS required, HTTP transport)\n- Understanding of Workato recipes/workflows (automation concepts)\n- Workato Dashboard access (for token management and recipe configuration)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Workato API rate limits (varies by endpoint: 60 req/min, 1 req/sec, 20 req/min)\n- Understanding of webhook rate limits (20 events/sec, 72K events/hour, burst 9K)\n- Understanding of API timeout limits (40 seconds for Developer API requests)\n- Optional: RecipeOps access (for monitoring API rate limit violations)\n\n## Configuration\n\n```json\n{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n### Sync Salesforce contacts to HubSpot\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Sync Salesforce contacts to HubSpot\"\n```\n### Execute the invoice processing workflow\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Execute the invoice processing workflow\"\n```\n### Check status of overnight data sync\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Check status of overnight data sync\"\n```\n### Trigger customer onboarding recipe\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Trigger customer onboarding recipe\"\n```\n### Execute Recipe\nExecute a Workato recipe with input data\n```typescript\n// Execute Workato recipe\nconst execution = await workato.recipes.execute({\n  recipe_id: \"recipe-id\",\n  input: {\n    data: \"input-data\"\n  }\n});\n```\n\n## Security\n\n- Bearer token authentication required for secure API access\n- Role-based access control (RBAC) for workspace permissions\n- Audit trail for all operations (recipe executions, API calls)\n- Test recipes in sandbox environment before production\n- API token security (store tokens securely, never commit to git)\n- Workato API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Workato OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Workato recipe, connection, and execution IDs may expose integration architecture and business process information - ensure Workato resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Workato MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Workato webhook configurations and payloads may contain sensitive workflow data and business information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Webhook rate limit exceeded - 429 Too Many Requests\n\nWorkato webhook rate limits: 20 events/sec (72K events/hour), burst capacity 9K events. Check response headers: X-Rate-Limit-Remaining (remaining events), X-Rate-Limit-Reset (reset time). Wait for Retry-After duration before retrying. Reduce event frequency by optimizing recipes to minimize webhook calls. Use batch processing where possible. Monitor webhook usage in Workato Dashboard. Consider using polling triggers instead of webhooks for high-frequency events. Implement exponential backoff for retries.\n### Recipe execution failed - job error during processing\n\nNavigate to Jobs tab in Workato Dashboard, select the failed job, inspect Data tab step-by-step to identify the failing step. Check trigger configuration matches event source (verify trigger data structure). Verify all app connections are active (test connections in Connections tab). Review error message for specific issue (authentication, data format, API limits). Re-authenticate connections if credentials expired. Check recipe logic for data transformation errors. Verify input data format matches recipe expectations. Review recipe logs for detailed error context.\n### API rate limit violation from external app (Salesforce, Slack, etc.)\n\nUse Wait/Batch/Conditional steps in recipes to rate-limit API calls programmatically. Reduce number of actions per recipe (combine operations where possible). Optimize recipes to make minimal API calls (use lookup tables, cache data). RecipeOps monitors API rate limit violations every 5 minutes and sends alerts. Review app-specific rate limits in Workato documentation. Implement retry logic with exponential backoff. Use Workato's built-in rate limiting features. Consider using webhooks instead of polling to reduce API calls. Monitor RecipeOps alerts for rate limit violations.\n### Recipe not running or trigger not activating\n\nVerify recipe is active (not paused) in Recipe tab - check recipe status indicator. Check trigger configuration matches event source (verify trigger type, filters, conditions). Test trigger with sample data using 'Test trigger' button. Review connection permissions allow trigger access (check connection scopes in Connections tab). Check app webhook configuration if using webhook trigger (verify webhook URL, authentication, event subscriptions). Verify recipe has required connections configured (all connectors have active connections). Check recipe schedule if using scheduled trigger (verify timezone, frequency). Review recipe logs for trigger activation attempts. Ensure workspace has sufficient capacity for recipe execution.\n### Workato MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Workato rate limit errors when processing multiple workflow requests\n\nImplement exponential backoff retry logic with jitter. Use Workato API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed recipe data. Check Workato documentation for specific rate limits.\n### Workato recipe or connection access denied errors\n\nVerify API token has access to the recipe or connection. Check recipe permissions and workspace membership. Ensure API token has required permissions for target operations.\n### Workato MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Workato API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Connect to hundreds of applications through Workato's enterprise automation and integration platform. Execute recipes on demand, access connected application data, retrieve and update cross-system data, monitor job execution status, trigger complex automation workflows, manage recipe connections, view recipe health metrics, and process real-time events—all through natural language commands. Supports Bearer token authentication, role-based access control, audit trails, and comprehensive workflow automation.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Execute recipes (workflows) on demand (trigger automation)\n- Access connected application data (cross-system data retrieval)\n- Retrieve and update cross-system data (data synchronization)\n- Monitor job execution status (real-time job tracking)\n- Trigger complex automation workflows (multi-step processes)\n- Manage recipe connections and configurations (connection management)\n- View recipe health and performance metrics (monitoring and analytics)\n- Access event streams and webhooks (real-time event processing)\n- Advanced Workato workflow automation and integration management with recipe execution, connector configuration, and data transformation\n- Batch operations support for efficient bulk workflow operations, recipe management, and integration processing with automatic rate limit handling and retry logic\n- Real-time workflow synchronization capabilities with webhook integration support for monitoring Workato events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Trigger complex multi-system workflows (end-to-end automation)\n- Integrate data across enterprise applications (data synchronization)\n- Access any connected system through one interface (unified access)\n- Automate business processes end-to-end (process automation)\n- Execute custom recipes on demand (on-demand execution)\n- Monitor recipe performance and health (operational monitoring)\n- Process real-time events via webhooks (event-driven automation)\n- Manage connections and authentication (infrastructure management)\n- Build automated integration workflows that sync external systems with Workato for real-time data processing and business process automation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Run: claude mcp add --transport http workato YOUR_WORKATO_MCP_URL\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status workato\n4. Authenticate with your Workato account (Bearer token)\n5. Grant required permissions (recipe access, job monitoring)\n\n### Claude Desktop\n\n1. Access your Workato workspace\n2. Navigate to MCP configuration section\n3. Generate your custom MCP endpoint\n4. Add the generated URL to Claude Desktop configuration\n5. Authenticate with your Workato account (Bearer token)\n6. Grant required permissions (recipe access, job monitoring)\n7. Verify connection in Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Workato account (workspace access required)\n- Bearer token authentication (created in Workato Dashboard)\n- Network access to your Workato workspace MCP endpoint (HTTPS required, HTTP transport)\n- Understanding of Workato recipes/workflows (automation concepts)\n- Workato Dashboard access (for token management and recipe configuration)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Workato API rate limits (varies by endpoint: 60 req/min, 1 req/sec, 20 req/min)\n- Understanding of webhook rate limits (20 events/sec, 72K events/hour, burst 9K)\n- Understanding of API timeout limits (40 seconds for Developer API requests)\n- Optional: RecipeOps access (for monitoring API rate limit violations)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Sync Salesforce contacts to HubSpot\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Sync Salesforce contacts to HubSpot\"\n```\n### Execute the invoice processing workflow\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Execute the invoice processing workflow\"\n```\n### Check status of overnight data sync\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Check status of overnight data sync\"\n```\n### Trigger customer onboarding recipe\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Trigger customer onboarding recipe\"\n```\n### Execute Recipe\nExecute a Workato recipe with input data\n```typescript\n// Execute Workato recipe\nconst execution = await workato.recipes.execute({\n  recipe_id: \"recipe-id\",\n  input: {\n    data: \"input-data\"\n  }\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Sync Salesforce contacts to HubSpot\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Execute the invoice processing workflow\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Check status of overnight data sync\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Trigger customer onboarding recipe\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Execute Workato recipe\nconst execution = await workato.recipes.execute({\n  recipe_id: \"recipe-id\",\n  input: {\n    data: \"input-data\"\n  }\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Bearer token authentication required for secure API access\n- Role-based access control (RBAC) for workspace permissions\n- Audit trail for all operations (recipe executions, API calls)\n- Test recipes in sandbox environment before production\n- API token security (store tokens securely, never commit to git)\n- Workato API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Workato OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Workato recipe, connection, and execution IDs may expose integration architecture and business process information - ensure Workato resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Workato MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Workato webhook configurations and payloads may contain sensitive workflow data and business information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Webhook rate limit exceeded - 429 Too Many Requests\n\nWorkato webhook rate limits: 20 events/sec (72K events/hour), burst capacity 9K events. Check response headers: X-Rate-Limit-Remaining (remaining events), X-Rate-Limit-Reset (reset time). Wait for Retry-After duration before retrying. Reduce event frequency by optimizing recipes to minimize webhook calls. Use batch processing where possible. Monitor webhook usage in Workato Dashboard. Consider using polling triggers instead of webhooks for high-frequency events. Implement exponential backoff for retries.\n### Recipe execution failed - job error during processing\n\nNavigate to Jobs tab in Workato Dashboard, select the failed job, inspect Data tab step-by-step to identify the failing step. Check trigger configuration matches event source (verify trigger data structure). Verify all app connections are active (test connections in Connections tab). Review error message for specific issue (authentication, data format, API limits). Re-authenticate connections if credentials expired. Check recipe logic for data transformation errors. Verify input data format matches recipe expectations. Review recipe logs for detailed error context.\n### API rate limit violation from external app (Salesforce, Slack, etc.)\n\nUse Wait/Batch/Conditional steps in recipes to rate-limit API calls programmatically. Reduce number of actions per recipe (combine operations where possible). Optimize recipes to make minimal API calls (use lookup tables, cache data). RecipeOps monitors API rate limit violations every 5 minutes and sends alerts. Review app-specific rate limits in Workato documentation. Implement retry logic with exponential backoff. Use Workato's built-in rate limiting features. Consider using webhooks instead of polling to reduce API calls. Monitor RecipeOps alerts for rate limit violations.\n### Recipe not running or trigger not activating\n\nVerify recipe is active (not paused) in Recipe tab - check recipe status indicator. Check trigger configuration matches event source (verify trigger type, filters, conditions). Test trigger with sample data using 'Test trigger' button. Review connection permissions allow trigger access (check connection scopes in Connections tab). Check app webhook configuration if using webhook trigger (verify webhook URL, authentication, event subscriptions). Verify recipe has required connections configured (all connectors have active connections). Check recipe schedule if using scheduled trigger (verify timezone, frequency). Review recipe logs for trigger activation attempts. Ensure workspace has sufficient capacity for recipe execution.\n### Workato MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Workato rate limit errors when processing multiple workflow requests\n\nImplement exponential backoff retry logic with jitter. Use Workato API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed recipe data. Check Workato documentation for specific rate limits.\n### Workato recipe or connection access denied errors\n\nVerify API token has access to the recipe or connection. Check recipe permissions and workspace membership. Ensure API token has required permissions for target operations.\n### Workato MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Workato API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Sync Salesforce contacts to HubSpot",
+        "id": "sync-salesforce-contacts-to-hubspot"
+      },
+      {
+        "depth": 3,
+        "text": "Execute the invoice processing workflow",
+        "id": "execute-the-invoice-processing-workflow"
+      },
+      {
+        "depth": 3,
+        "text": "Check status of overnight data sync",
+        "id": "check-status-of-overnight-data-sync"
+      },
+      {
+        "depth": 3,
+        "text": "Trigger customer onboarding recipe",
+        "id": "trigger-customer-onboarding-recipe"
+      },
+      {
+        "depth": 3,
+        "text": "Execute Recipe",
+        "id": "execute-recipe"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Webhook rate limit exceeded - 429 Too Many Requests",
+        "id": "webhook-rate-limit-exceeded---429-too-many-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Recipe execution failed - job error during processing",
+        "id": "recipe-execution-failed---job-error-during-processing"
+      },
+      {
+        "depth": 3,
+        "text": "API rate limit violation from external app (Salesforce, Slack, etc.)",
+        "id": "api-rate-limit-violation-from-external-app-salesforce-slack-etc"
+      },
+      {
+        "depth": 3,
+        "text": "Recipe not running or trigger not activating",
+        "id": "recipe-not-running-or-trigger-not-activating"
+      },
+      {
+        "depth": 3,
+        "text": "Workato MCP server authentication errors with API tokens",
+        "id": "workato-mcp-server-authentication-errors-with-api-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Workato rate limit errors when processing multiple workflow requests",
+        "id": "workato-rate-limit-errors-when-processing-multiple-workflow-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Workato recipe or connection access denied errors",
+        "id": "workato-recipe-or-connection-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Workato MCP server connection timeouts or network errors",
+        "id": "workato-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Sync Salesforce contacts to HubSpot\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Execute the invoice processing workflow\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Check status of overnight data sync\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Trigger customer onboarding recipe\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Execute Workato recipe\nconst execution = await workato.recipes.execute({\n  recipe_id: \"recipe-id\",\n  input: {\n    data: \"input-data\"\n  }\n});"
+      }
+    ],
+    "filePath": "content/mcp/workato-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

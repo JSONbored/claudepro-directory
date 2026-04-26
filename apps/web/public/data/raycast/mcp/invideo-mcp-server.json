@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:invideo-mcp-server",
+  "category": "mcp",
+  "slug": "invideo-mcp-server",
+  "title": "Invideo MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status invideo\n\nConfig:\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Invideo MCP Server for Claude\nBuild video creation capabilities into your applications\n**Category:** mcp\n**Author:** invideo\n**Download trust:** first-party\n**Tags:** `video` `invideo` `media` `content-creation` `ai-video`\n\n## Install\n```bash\nclaude mcp list && claude mcp status invideo\n```\n\n## Config\n```json\n{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status invideo\n\n## Links\n- https://heyclau.de/mcp/invideo-mcp-server\n- https://invideo.io/ai/mcp",
+  "webUrl": "https://heyclau.de/mcp/invideo-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://invideo.io/ai/mcp"
+}

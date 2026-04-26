@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "model-routing-cost-latency-optimizer",
+    "title": "Model Routing Cost and Latency Optimizer Skill",
+    "description": "Design and validate model routing strategies that reduce cost and latency while preserving output quality.",
+    "seoTitle": "Model Routing Cost and Latency Optimizer Skill",
+    "seoDescription": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "model-routing",
+      "cost-optimization",
+      "latency",
+      "token-budget",
+      "ai-operations"
+    ],
+    "keywords": [
+      "ai-skill",
+      "model-router",
+      "token-cost",
+      "latency-optimization",
+      "fallback-strategy"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 79,
+    "documentationUrl": "https://platform.openai.com/docs/guides/latency-optimization",
+    "cardDescription": "Build quality-aware model routing with fallback tiers, budget controls, and measurable cost/performance tradeoffs.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip -o model-routing-cost-latency-optimizer.zip && unzip -o model-routing-cost-latency-optimizer.zip -d ./model-routing-cost-latency-optimizer",
+    "usageSnippet": "Use this skill to reduce token spend and response times with guardrails that preserve answer quality.",
+    "copySnippet": "# Trigger\n\"Apply model routing cost/latency optimizer skill to this workflow.\"\n\n# Required output\n1) Current cost + latency baseline\n2) Candidate routing policy (fast/default/high-quality tiers)\n3) Quality regression checks and rollback triggers\n4) Expected savings and SLO impact",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://platform.openai.com/docs/guides/latency-optimization"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Access to request volume and token usage data",
+      "At least two candidate model tiers available",
+      "Benchmark tasks for quality comparison"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/model-routing-cost-latency-optimizer.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "8d45355903bb0faf1b2104e91a605180579611f7647fd252e981b0d4873d574f",
+    "body": "## Overview\n\nThis skill helps teams ship model routing policies that cut spend and latency without quietly degrading quality. It enforces baseline measurement, explicit quality gates, and safe rollback criteria so optimization decisions remain production-safe.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Token and latency telemetry by endpoint/workflow\n- Quality benchmark set for your highest-value tasks\n- Runtime control over model selection policy\n\n## Routing Strategy\n\n- **Tier 1 (fast):** low-cost model for straightforward tasks\n- **Tier 2 (default):** balanced model for common workloads\n- **Tier 3 (quality):** higher-capability model for complex or failed cases\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nApply model routing cost/latency optimizer.\nOutput:\n1) baseline cost/latency table,\n2) routing policy with escalation rules,\n3) quality guardrails,\n4) before/after savings projection.\n```\n\n### Execution Flow\n\n1. Segment traffic by task complexity and business value.\n2. Benchmark candidate models on representative tasks.\n3. Define routing and escalation policy with hard quality thresholds.\n4. Deploy canary and monitor cost, latency, and quality deltas.\n5. Promote or rollback based on explicit guardrails.\n\n## Troubleshooting\n\n**Issue:** Savings improve but user quality drops  \n**Fix:** tighten escalation thresholds and reserve stronger models for high-impact tasks.\n\n**Issue:** Latency improves but cost rises unexpectedly  \n**Fix:** inspect token bloat from prompts/context size and cap response/output tokens.\n\n**Issue:** Routing policy is hard to explain  \n**Fix:** keep deterministic rules for first rollout, then add adaptive logic incrementally.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://platform.openai.com/docs/guides/latency-optimization\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps teams ship model routing policies that cut spend and latency without quietly degrading quality. It enforces baseline measurement, explicit quality gates, and safe rollback criteria so optimization decisions remain production-safe.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Token and latency telemetry by endpoint/workflow\n- Quality benchmark set for your highest-value tasks\n- Runtime control over model selection policy",
+        "codeBlocks": []
+      },
+      {
+        "title": "Routing Strategy",
+        "id": "routing-strategy",
+        "markdown": "- **Tier 1 (fast):** low-cost model for straightforward tasks\n- **Tier 2 (default):** balanced model for common workloads\n- **Tier 3 (quality):** higher-capability model for complex or failed cases",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\n```text\nApply model routing cost/latency optimizer.\nOutput:\n1) baseline cost/latency table,\n2) routing policy with escalation rules,\n3) quality guardrails,\n4) before/after savings projection.\n```\n\n### Execution Flow\n\n1. Segment traffic by task complexity and business value.\n2. Benchmark candidate models on representative tasks.\n3. Define routing and escalation policy with hard quality thresholds.\n4. Deploy canary and monitor cost, latency, and quality deltas.\n5. Promote or rollback based on explicit guardrails.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply model routing cost/latency optimizer.\nOutput:\n1) baseline cost/latency table,\n2) routing policy with escalation rules,\n3) quality guardrails,\n4) before/after savings projection."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Savings improve but user quality drops  \n**Fix:** tighten escalation thresholds and reserve stronger models for high-impact tasks.\n\n**Issue:** Latency improves but cost rises unexpectedly  \n**Fix:** inspect token bloat from prompts/context size and cap response/output tokens.\n\n**Issue:** Routing policy is hard to explain  \n**Fix:** keep deterministic rules for first rollout, then add adaptive logic incrementally.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://platform.openai.com/docs/guides/latency-optimization",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Routing Strategy",
+        "id": "routing-strategy"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply model routing cost/latency optimizer.\nOutput:\n1) baseline cost/latency table,\n2) routing policy with escalation rules,\n3) quality guardrails,\n4) before/after savings projection."
+      }
+    ],
+    "filePath": "content/skills/model-routing-cost-latency-optimizer.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/model-routing-cost-latency-optimizer.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

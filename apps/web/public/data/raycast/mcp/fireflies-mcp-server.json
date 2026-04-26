@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:fireflies-mcp-server",
+  "category": "mcp",
+  "slug": "fireflies-mcp-server",
+  "title": "Fireflies MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status fireflies\n\nConfig:\n{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Fireflies MCP Server for Claude\nExtract valuable insights from meeting transcripts and summaries\n**Category:** mcp\n**Author:** Fireflies\n**Download trust:** first-party\n**Tags:** `meetings` `fireflies` `transcription` `notes` `ai-assistant`\n\n## Install\n```bash\nclaude mcp list && claude mcp status fireflies\n```\n\n## Config\n```json\n{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status fireflies\n\n## Links\n- https://heyclau.de/mcp/fireflies-mcp-server\n- https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+  "webUrl": "https://heyclau.de/mcp/fireflies-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol"
+}

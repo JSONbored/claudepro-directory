@@ -1,0 +1,320 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "postgresql-mcp-server",
+    "title": "Postgresql MCP Server - MCP Servers",
+    "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
+    "seoTitle": "Postgresql MCP Server - MCP Servers",
+    "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
+    "author": "Anthropic",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "postgresql",
+      "database",
+      "sql",
+      "official",
+      "anthropic"
+    ],
+    "keywords": [
+      "anthropic",
+      "claude",
+      "database",
+      "development",
+      "mcp",
+      "mcp servers",
+      "official",
+      "postgresql",
+      "server",
+      "sql",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 1,
+    "documentationUrl": "https://modelcontextprotocol.io/examples",
+    "cardDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status postgres",
+    "usageSnippet": "claude mcp list && claude mcp status postgres",
+    "copySnippet": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "3 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "PostgreSQL database (local or remote PostgreSQL server)",
+      "PostgreSQL connection string (postgresql://user:password@host:port/database format)",
+      "Node.js and npx (for running @modelcontextprotocol/server-postgres package)",
+      "Network access (if connecting to remote PostgreSQL server)",
+      "Database user with SELECT permissions (read-only access required)",
+      "Understanding of PostgreSQL connection string format (postgresql:// URI scheme)",
+      "Understanding of PostgreSQL authentication methods (password, certificate, peer)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of SQL and database concepts (tables, schemas, queries, transactions)",
+      "Understanding of read-only transaction safety (SELECT queries only, no data modification)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/postgresql-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "2935644e5353e573faf8b78d11f376a7f99e6662b4687ae8f40d2ad39d1fde83",
+    "body": "## Content\n\nStreamline your database exploration and analysis by connecting Claude to PostgreSQL. Inspect schemas and relationships, execute safe SELECT queries, discover table structures, access metadata, perform data analysis, generate reports, create documentation, and validate data integrity—all through natural language commands. Leverage the official Anthropic PostgreSQL MCP Server with read-only transaction safety, SSL support, and comprehensive schema inspection capabilities.\n\n## Features\n\n- Read-only access for safe database exploration (SELECT queries only)\n- Automatic discovery of table structures and columns (schema inspection)\n- Execute SELECT queries within read-only transactions (safe query execution)\n- Access detailed database metadata and structure (tables, schemas, indexes)\n- Perform data analysis without altering database state (read-only operations)\n- Support for SSL connections and authentication (secure connections)\n- Query execution with transaction safety (automatic rollback on errors)\n- Schema relationship discovery (foreign keys, constraints, relationships)\n- Advanced PostgreSQL database management with query execution, schema introspection, and transaction handling\n- Batch operations support for efficient bulk database operations, data migration, and query optimization with automatic error handling\n- Real-time database monitoring capabilities with connection pooling support for tracking database performance and triggering automated workflows\n\n## Use Cases\n\n- Understand database schema and relationships (comprehensive schema analysis)\n- Generate reports from existing data (data aggregation and reporting)\n- Analyze data patterns and distributions (statistical analysis)\n- Create documentation from database structure (auto-generated documentation)\n- Write and test SELECT queries (query development and testing)\n- Explore unfamiliar database schemas (schema discovery and exploration)\n- Debug data issues without modifying data (safe troubleshooting)\n- Validate data integrity and relationships (constraint and relationship verification)\n- Build automated database management workflows that sync external systems with PostgreSQL for real-time data operations and analytics\n\n## Installation\n\n### Claude Code\n\n1. Ensure PostgreSQL is running and accessible\n2. Create a read-only database user with SELECT permissions (if needed)\n3. Construct your PostgreSQL connection string: postgresql://user:password@host:port/database\n4. Create a .mcp.json file in your project root with PostgreSQL server configuration\n5. Add the postgres server config with npx command and connection string as argument\n6. Verify installation: claude mcp list\n7. Test connection: claude mcp status postgres\n\n### Claude Desktop\n\n1. Ensure PostgreSQL is running and accessible\n2. Create a read-only database user with SELECT permissions (if needed)\n3. Construct your PostgreSQL connection string: postgresql://user:password@host:port/database\n4. Open Claude Desktop configuration file (see configPath below)\n5. Add the PostgreSQL MCP server configuration with npx command and connection string\n6. Add connection string as argument to the server command\n7. Restart Claude Desktop\n8. Ask Claude to list tables to verify connection\n\n## Requirements\n\n- PostgreSQL database (local or remote PostgreSQL server)\n- PostgreSQL connection string (postgresql://user:password@host:port/database format)\n- Node.js and npx (for running @modelcontextprotocol/server-postgres package)\n- Network access (if connecting to remote PostgreSQL server)\n- Database user with SELECT permissions (read-only access required)\n- Understanding of PostgreSQL connection string format (postgresql:// URI scheme)\n- Understanding of PostgreSQL authentication methods (password, certificate, peer)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of SQL and database concepts (tables, schemas, queries, transactions)\n- Understanding of read-only transaction safety (SELECT queries only, no data modification)\n\n## Configuration\n\n```json\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### What tables exist in my database?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What tables exist in my database?\"\n```\n### Describe the structure of the users table\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Describe the structure of the users table\"\n```\n### How many records are in each table?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"How many records are in each table?\"\n```\n### Write a query to find active users from last month\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Write a query to find active users from last month\"\n```\n### Generate documentation for my database schema\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate documentation for my database schema\"\n```\n### Execute Query\nExecute a parameterized PostgreSQL query with prepared statement\n```typescript\n// Execute PostgreSQL query\nconst result = await postgres.query({\n  text: \"SELECT * FROM users WHERE email = $1\",\n  values: [\"user@example.com\"]\n});\n```\n\n## Security\n\n- All queries execute in read-only transactions (INSERT, UPDATE, DELETE prevented)\n- Supports SSL/TLS encryption for connections (sslmode parameter in connection string)\n- Respects existing database user permissions (SELECT only, no schema modifications)\n- Safe exploration without data modification risks (read-only access enforced)\n- Connection string credentials should be stored securely (environment variables or secure config)\n- PostgreSQL connection strings and credentials must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- PostgreSQL database credentials should use role-based access control (RBAC) with minimal required permissions following the principle of least privilege - regularly audit database permissions\n- PostgreSQL database, schema, and table names may expose data architecture and application structure - ensure PostgreSQL resource identifiers are kept private and not shared in public configurations\n- Rate limiting and connection management are critical for PostgreSQL MCP servers - implement proper connection pooling, query timeout handling, and resource monitoring to prevent service disruption\n- PostgreSQL query results and database metadata may contain sensitive data - ensure query results are properly secured and access-controlled according to data privacy requirements\n\n## Troubleshooting\n### Connection refused or database not accessible\n\nVerify PostgreSQL is running with pg_isready command. Check connection string format: postgresql://user:password@host:port/database. Test with psql command first (psql 'postgresql://user:password@host:port/database'). Verify firewall allows connections on port 5432 (default). Check PostgreSQL is listening on correct interface (localhost vs 0.0.0.0). Verify hostname resolves correctly for remote connections.\n### SSL connection error - wrong version number or verify failed\n\nAdd sslmode parameter: postgresql://host/db?sslmode=require. Verify PostgreSQL supports TLS version (check pg_config --configure). Use sslmode=disable for local dev only (not recommended for production). Use sslmode=verify-ca or verify-full for production. Check certificate matches CA in ssl_ca_file. Verify SSL is enabled in postgresql.conf (ssl = on).\n### Authentication failed for user or password rejected\n\nVerify username/password in connection string exact match (case-sensitive). Check pg_hba.conf allows connection method (md5, scram-sha-256, trust for local). Ensure user exists with GRANT SELECT permissions. Test auth with psql -U username -d database. Check password special characters are URL-encoded in connection string. Verify user has CONNECT privilege on database.\n### Certificate authentication failed - CN mismatch\n\nVerify certificate CN matches PostgreSQL username exactly. Configure pg_ident.conf for username mapping if needed. Check ssl_cert_file and ssl_key_file permissions (owned by postgres user, mode 600). Ensure client cert trusted by server CA. Verify sslmode=verify-full for certificate validation. Check certificate hasn't expired.\n### Permission denied on table or schema access error\n\nGrant SELECT permissions: GRANT SELECT ON ALL TABLES IN SCHEMA public TO username. For future tables: ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO username. Verify read-only user has pg_read_all_data role (GRANT pg_read_all_data TO username). Check schema permissions with \\dp command in psql. Ensure user connected to correct database. Grant USAGE on schema: GRANT USAGE ON SCHEMA public TO username.\n### PostgreSQL MCP server authentication errors with connection strings\n\nVerify connection string is valid and credentials are correct. Check database host, port, username, and password. Ensure SSL/TLS configuration is correct for secure connections. Verify database user has required permissions.\n### PostgreSQL connection pool exhaustion or timeout errors\n\nCheck connection pool size and configuration. Reduce connection timeout values. Implement connection pooling with proper limits. Monitor active connections and close idle connections. Check database max_connections setting.\n### PostgreSQL query execution failures or performance issues\n\nCheck query syntax and parameter binding. Verify table and column names are correct. Review query execution plans for optimization. Check database indexes and statistics. Monitor slow query logs for performance bottlenecks.\n### PostgreSQL MCP server connection timeouts or network errors\n\nCheck network connectivity to PostgreSQL server. Verify firewall rules allow database connections. Increase connection timeout values. Implement connection retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Streamline your database exploration and analysis by connecting Claude to PostgreSQL. Inspect schemas and relationships, execute safe SELECT queries, discover table structures, access metadata, perform data analysis, generate reports, create documentation, and validate data integrity—all through natural language commands. Leverage the official Anthropic PostgreSQL MCP Server with read-only transaction safety, SSL support, and comprehensive schema inspection capabilities.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Read-only access for safe database exploration (SELECT queries only)\n- Automatic discovery of table structures and columns (schema inspection)\n- Execute SELECT queries within read-only transactions (safe query execution)\n- Access detailed database metadata and structure (tables, schemas, indexes)\n- Perform data analysis without altering database state (read-only operations)\n- Support for SSL connections and authentication (secure connections)\n- Query execution with transaction safety (automatic rollback on errors)\n- Schema relationship discovery (foreign keys, constraints, relationships)\n- Advanced PostgreSQL database management with query execution, schema introspection, and transaction handling\n- Batch operations support for efficient bulk database operations, data migration, and query optimization with automatic error handling\n- Real-time database monitoring capabilities with connection pooling support for tracking database performance and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Understand database schema and relationships (comprehensive schema analysis)\n- Generate reports from existing data (data aggregation and reporting)\n- Analyze data patterns and distributions (statistical analysis)\n- Create documentation from database structure (auto-generated documentation)\n- Write and test SELECT queries (query development and testing)\n- Explore unfamiliar database schemas (schema discovery and exploration)\n- Debug data issues without modifying data (safe troubleshooting)\n- Validate data integrity and relationships (constraint and relationship verification)\n- Build automated database management workflows that sync external systems with PostgreSQL for real-time data operations and analytics",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Ensure PostgreSQL is running and accessible\n2. Create a read-only database user with SELECT permissions (if needed)\n3. Construct your PostgreSQL connection string: postgresql://user:password@host:port/database\n4. Create a .mcp.json file in your project root with PostgreSQL server configuration\n5. Add the postgres server config with npx command and connection string as argument\n6. Verify installation: claude mcp list\n7. Test connection: claude mcp status postgres\n\n### Claude Desktop\n\n1. Ensure PostgreSQL is running and accessible\n2. Create a read-only database user with SELECT permissions (if needed)\n3. Construct your PostgreSQL connection string: postgresql://user:password@host:port/database\n4. Open Claude Desktop configuration file (see configPath below)\n5. Add the PostgreSQL MCP server configuration with npx command and connection string\n6. Add connection string as argument to the server command\n7. Restart Claude Desktop\n8. Ask Claude to list tables to verify connection",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- PostgreSQL database (local or remote PostgreSQL server)\n- PostgreSQL connection string (postgresql://user:password@host:port/database format)\n- Node.js and npx (for running @modelcontextprotocol/server-postgres package)\n- Network access (if connecting to remote PostgreSQL server)\n- Database user with SELECT permissions (read-only access required)\n- Understanding of PostgreSQL connection string format (postgresql:// URI scheme)\n- Understanding of PostgreSQL authentication methods (password, certificate, peer)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of SQL and database concepts (tables, schemas, queries, transactions)\n- Understanding of read-only transaction safety (SELECT queries only, no data modification)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### What tables exist in my database?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"What tables exist in my database?\"\n```\n### Describe the structure of the users table\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Describe the structure of the users table\"\n```\n### How many records are in each table?\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"How many records are in each table?\"\n```\n### Write a query to find active users from last month\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Write a query to find active users from last month\"\n```\n### Generate documentation for my database schema\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate documentation for my database schema\"\n```\n### Execute Query\nExecute a parameterized PostgreSQL query with prepared statement\n```typescript\n// Execute PostgreSQL query\nconst result = await postgres.query({\n  text: \"SELECT * FROM users WHERE email = $1\",\n  values: [\"user@example.com\"]\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"What tables exist in my database?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Describe the structure of the users table\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"How many records are in each table?\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Write a query to find active users from last month\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Generate documentation for my database schema\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Execute PostgreSQL query\nconst result = await postgres.query({\n  text: \"SELECT * FROM users WHERE email = $1\",\n  values: [\"user@example.com\"]\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- All queries execute in read-only transactions (INSERT, UPDATE, DELETE prevented)\n- Supports SSL/TLS encryption for connections (sslmode parameter in connection string)\n- Respects existing database user permissions (SELECT only, no schema modifications)\n- Safe exploration without data modification risks (read-only access enforced)\n- Connection string credentials should be stored securely (environment variables or secure config)\n- PostgreSQL connection strings and credentials must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- PostgreSQL database credentials should use role-based access control (RBAC) with minimal required permissions following the principle of least privilege - regularly audit database permissions\n- PostgreSQL database, schema, and table names may expose data architecture and application structure - ensure PostgreSQL resource identifiers are kept private and not shared in public configurations\n- Rate limiting and connection management are critical for PostgreSQL MCP servers - implement proper connection pooling, query timeout handling, and resource monitoring to prevent service disruption\n- PostgreSQL query results and database metadata may contain sensitive data - ensure query results are properly secured and access-controlled according to data privacy requirements",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Connection refused or database not accessible\n\nVerify PostgreSQL is running with pg_isready command. Check connection string format: postgresql://user:password@host:port/database. Test with psql command first (psql 'postgresql://user:password@host:port/database'). Verify firewall allows connections on port 5432 (default). Check PostgreSQL is listening on correct interface (localhost vs 0.0.0.0). Verify hostname resolves correctly for remote connections.\n### SSL connection error - wrong version number or verify failed\n\nAdd sslmode parameter: postgresql://host/db?sslmode=require. Verify PostgreSQL supports TLS version (check pg_config --configure). Use sslmode=disable for local dev only (not recommended for production). Use sslmode=verify-ca or verify-full for production. Check certificate matches CA in ssl_ca_file. Verify SSL is enabled in postgresql.conf (ssl = on).\n### Authentication failed for user or password rejected\n\nVerify username/password in connection string exact match (case-sensitive). Check pg_hba.conf allows connection method (md5, scram-sha-256, trust for local). Ensure user exists with GRANT SELECT permissions. Test auth with psql -U username -d database. Check password special characters are URL-encoded in connection string. Verify user has CONNECT privilege on database.\n### Certificate authentication failed - CN mismatch\n\nVerify certificate CN matches PostgreSQL username exactly. Configure pg_ident.conf for username mapping if needed. Check ssl_cert_file and ssl_key_file permissions (owned by postgres user, mode 600). Ensure client cert trusted by server CA. Verify sslmode=verify-full for certificate validation. Check certificate hasn't expired.\n### Permission denied on table or schema access error\n\nGrant SELECT permissions: GRANT SELECT ON ALL TABLES IN SCHEMA public TO username. For future tables: ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO username. Verify read-only user has pg_read_all_data role (GRANT pg_read_all_data TO username). Check schema permissions with \\dp command in psql. Ensure user connected to correct database. Grant USAGE on schema: GRANT USAGE ON SCHEMA public TO username.\n### PostgreSQL MCP server authentication errors with connection strings\n\nVerify connection string is valid and credentials are correct. Check database host, port, username, and password. Ensure SSL/TLS configuration is correct for secure connections. Verify database user has required permissions.\n### PostgreSQL connection pool exhaustion or timeout errors\n\nCheck connection pool size and configuration. Reduce connection timeout values. Implement connection pooling with proper limits. Monitor active connections and close idle connections. Check database max_connections setting.\n### PostgreSQL query execution failures or performance issues\n\nCheck query syntax and parameter binding. Verify table and column names are correct. Review query execution plans for optimization. Check database indexes and statistics. Monitor slow query logs for performance bottlenecks.\n### PostgreSQL MCP server connection timeouts or network errors\n\nCheck network connectivity to PostgreSQL server. Verify firewall rules allow database connections. Increase connection timeout values. Implement connection retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "What tables exist in my database?",
+        "id": "what-tables-exist-in-my-database"
+      },
+      {
+        "depth": 3,
+        "text": "Describe the structure of the users table",
+        "id": "describe-the-structure-of-the-users-table"
+      },
+      {
+        "depth": 3,
+        "text": "How many records are in each table?",
+        "id": "how-many-records-are-in-each-table"
+      },
+      {
+        "depth": 3,
+        "text": "Write a query to find active users from last month",
+        "id": "write-a-query-to-find-active-users-from-last-month"
+      },
+      {
+        "depth": 3,
+        "text": "Generate documentation for my database schema",
+        "id": "generate-documentation-for-my-database-schema"
+      },
+      {
+        "depth": 3,
+        "text": "Execute Query",
+        "id": "execute-query"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Connection refused or database not accessible",
+        "id": "connection-refused-or-database-not-accessible"
+      },
+      {
+        "depth": 3,
+        "text": "SSL connection error - wrong version number or verify failed",
+        "id": "ssl-connection-error---wrong-version-number-or-verify-failed"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication failed for user or password rejected",
+        "id": "authentication-failed-for-user-or-password-rejected"
+      },
+      {
+        "depth": 3,
+        "text": "Certificate authentication failed - CN mismatch",
+        "id": "certificate-authentication-failed---cn-mismatch"
+      },
+      {
+        "depth": 3,
+        "text": "Permission denied on table or schema access error",
+        "id": "permission-denied-on-table-or-schema-access-error"
+      },
+      {
+        "depth": 3,
+        "text": "PostgreSQL MCP server authentication errors with connection strings",
+        "id": "postgresql-mcp-server-authentication-errors-with-connection-strings"
+      },
+      {
+        "depth": 3,
+        "text": "PostgreSQL connection pool exhaustion or timeout errors",
+        "id": "postgresql-connection-pool-exhaustion-or-timeout-errors"
+      },
+      {
+        "depth": 3,
+        "text": "PostgreSQL query execution failures or performance issues",
+        "id": "postgresql-query-execution-failures-or-performance-issues"
+      },
+      {
+        "depth": 3,
+        "text": "PostgreSQL MCP server connection timeouts or network errors",
+        "id": "postgresql-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"What tables exist in my database?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Describe the structure of the users table\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"How many records are in each table?\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Write a query to find active users from last month\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Generate documentation for my database schema\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Execute PostgreSQL query\nconst result = await postgres.query({\n  text: \"SELECT * FROM users WHERE email = $1\",\n  values: [\"user@example.com\"]\n});"
+      }
+    ],
+    "filePath": "content/mcp/postgresql-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

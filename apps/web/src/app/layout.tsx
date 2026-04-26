@@ -28,12 +28,21 @@ export const metadata: Metadata = {
     url: siteConfig.url,
     title: `${siteConfig.name} | Claude Directory`,
     description: siteConfig.description,
-    siteName: siteConfig.name
+    siteName: siteConfig.name,
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} Claude directory`
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | Claude Directory`,
-    description: siteConfig.description
+    description: siteConfig.description,
+    images: ["/og-image.png"]
   },
   icons: {
     icon: "/icon.svg"

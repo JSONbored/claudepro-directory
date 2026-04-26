@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "fastapi-python-backend",
+    "title": "FastAPI Python API Development Skill",
+    "description": "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.",
+    "seoTitle": "FastAPI Python API Development Skill",
+    "seoDescription": "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation wi...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-23",
+    "tags": [
+      "fastapi",
+      "python",
+      "api",
+      "async",
+      "pydantic"
+    ],
+    "keywords": [
+      "api",
+      "async",
+      "backend",
+      "claude",
+      "development",
+      "expert",
+      "fastapi",
+      "pydantic",
+      "python",
+      "skills",
+      "tools"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 100,
+    "documentationUrl": "https://fastapi.tiangolo.com/",
+    "cardDescription": "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework.",
+    "installable": true,
+    "installCommand": "pip install fastapi uvicorn[standard] pydantic sqlalchemy",
+    "usageSnippet": "pip install fastapi uvicorn[standard] pydantic sqlalchemy",
+    "copySnippet": "from fastapi import FastAPI, HTTPException\nfrom pydantic import BaseModel, Field\nfrom typing import List\n\napp = FastAPI(title=\"Blog API\", version=\"1.0.0\")\n\n# Pydantic models\nclass PostCreate(BaseModel):\n    title: str = Field(..., min_length=1, max_length=200)\n    content: str = Field(..., min_length=1)\n    published: bool = False\n\nclass Post(PostCreate):\n    id: int\n    \n    class Config:\n        from_attributes = True\n\n# In-memory storage (use database in production)\nposts_db: List[Post] = []\npost_id_counter = 1\n\n@app.get(\"/posts\", response_model=List[Post], tags=[\"posts\"])\nasync def list_posts():\n    \"\"\"Get all blog posts\"\"\"\n    return posts_db\n\n@app.post(\"/posts\", response_model=Post, status_code=201, tags=[\"posts\"])\nasync def create_post(post: PostCreate):\n    \"\"\"Create a new blog post\"\"\"\n    global post_id_counter\n    new_post = Post(id=post_id_counter, **post.dict())\n    posts_db.append(new_post)\n    post_id_counter += 1\n    return new_post\n\n@app.get(\"/posts/{post_id}\", response_model=Post, tags=[\"posts\"])\nasync def get_post(post_id: int):\n    \"\"\"Get a single post by ID\"\"\"\n    for post in posts_db:\n        if post.id == post_id:\n            return post\n    raise HTTPException(status_code=404, detail=\"Post not found\")\n\n@app.delete(\"/posts/{post_id}\", status_code=204, tags=[\"posts\"])\nasync def delete_post(post_id: int):\n    \"\"\"Delete a post by ID\"\"\"\n    for i, post in enumerate(posts_db):\n        if post.id == post_id:\n            posts_db.pop(i)\n            return\n    raise HTTPException(status_code=404, detail=\"Post not found\")\n\n# Run with: uvicorn main:app --reload\n# Docs at: http://localhost:8000/docs",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2025-10-23",
+    "retrievalSources": [
+      "https://fastapi.tiangolo.com/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Python 3.9+",
+      "fastapi ^0.104.0",
+      "uvicorn[standard] ^0.24.0",
+      "pydantic ^2.0.0",
+      "ASGI server (uvicorn, hypercorn, or daphne) for running FastAPI applications in production",
+      "Database driver for async operations (asyncpg for PostgreSQL, aiomysql for MySQL, or motor for MongoDB) when using database integration"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/fastapi-python-backend.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "a62b1a1e1fcee8faa7b1fb5cd68fa3c5112a74337fea3729a6bc5738c24f36d9",
+    "body": "## What This Skill Enables\n\nClaude can build production-ready REST APIs using FastAPI, Python's fastest web framework with automatic OpenAPI documentation and async support. FastAPI combines Python 3.9+ type hints with Pydantic validation for type-safe APIs that rival Node.js performance. With automatic interactive docs, dependency injection, and async/await, FastAPI eliminates boilerplate while maintaining enterprise-grade reliability.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n\n## Prerequisites\n\n**Required:**\n- Claude Pro subscription or Claude Code CLI\n- Python 3.9+ (3.11+ recommended for best performance)\n- pip or poetry package manager\n- Basic Python knowledge\n\n**What Claude handles automatically:**\n- Writing FastAPI route handlers with type hints\n- Creating Pydantic models for request/response validation\n- Adding automatic OpenAPI/Swagger documentation\n- Implementing async endpoints for I/O-bound operations\n- Setting up dependency injection for auth/database\n- Handling errors with custom exception handlers\n- Adding middleware for CORS, logging, rate limiting\n- Structuring large applications with routers\n\n## How to Use This Skill\n\n### Basic CRUD API\n\n**Prompt:** \"Create a FastAPI CRUD API for blog posts with: GET /posts (list), POST /posts (create), GET /posts/{id} (get one), PUT /posts/{id} (update), DELETE /posts/{id} (delete). Use Pydantic for validation.\"\n\nClaude will:\n1. Create FastAPI app with routers\n2. Define Pydantic models for Post\n3. Implement all 5 CRUD endpoints\n4. Add automatic validation\n5. Include OpenAPI docs at /docs\n6. Add error handling for 404s\n7. Return proper HTTP status codes\n\n### Database Integration with SQLAlchemy\n\n**Prompt:** \"Build FastAPI app with PostgreSQL using SQLAlchemy ORM. Include: user authentication, database models for users/posts, async queries, connection pooling, and migrations with Alembic.\"\n\nClaude will:\n1. Set up async SQLAlchemy engine\n2. Create database models with relationships\n3. Implement dependency injection for sessions\n4. Add async CRUD operations\n5. Include connection pooling config\n6. Set up Alembic for migrations\n7. Add authentication dependencies\n\n### Authentication & Authorization\n\n**Prompt:** \"Create FastAPI auth system with JWT tokens. Include: user registration, login, password hashing with bcrypt, protected routes with dependencies, refresh tokens, and role-based access control.\"\n\nClaude will:\n1. Implement password hashing with passlib\n2. Create JWT token generation/validation\n3. Add OAuth2 password bearer scheme\n4. Build auth dependencies for routes\n5. Implement refresh token rotation\n6. Add role-based access decorators\n7. Include user registration/login endpoints\n\n### Async Background Tasks\n\n**Prompt:** \"Build FastAPI endpoint that processes uploaded CSV file in background. Include: file upload validation, background task with progress tracking, webhook notification on completion, and error handling.\"\n\nClaude will:\n1. Create file upload endpoint\n2. Validate CSV format with Pydantic\n3. Launch background task\n4. Add progress tracking with Redis\n5. Implement webhook callback\n6. Handle errors gracefully\n7. Return task ID for status checks\n\n## Tips for Best Results\n\n1. **Use Type Hints Everywhere**: FastAPI relies on Python type hints for automatic validation and docs. Always specify return types and use `Optional[T]` for nullable fields.\n\n2. **Async for I/O-Bound**: Use `async def` for endpoints that do database queries, API calls, or file operations. FastAPI handles concurrency automatically.\n\n3. **Pydantic for Validation**: Create Pydantic models for request bodies. Never parse JSON manually - let Pydantic handle validation and serialization.\n\n4. **Dependency Injection**: Use FastAPI's `Depends()` for auth, database sessions, pagination, etc. This keeps endpoints clean and testable.\n\n5. **Status Codes Matter**: Use proper HTTP status codes: 201 for created, 204 for deleted, 404 for not found, 422 for validation errors.\n\n6. **OpenAPI Customization**: Add descriptions, examples, and tags to endpoints for better automatic documentation.\n\n## Common Workflows\n\n### E-Commerce API\n```\n\"Build FastAPI e-commerce backend:\n1. Products: CRUD with search, filtering, pagination\n2. Cart: session-based with Redis, add/remove items, calculate totals\n3. Orders: create order, payment processing, order history\n4. Auth: JWT-based customer accounts with OAuth2\n5. Admin: protected endpoints for inventory management\n6. Webhooks: Stripe payment notifications\n7. Database: PostgreSQL with async SQLAlchemy\n8. Background tasks: order confirmation emails\"\n```\n\n### Real-Time Analytics API\n```\n\"Create FastAPI analytics dashboard backend:\n1. Ingest endpoint: accept events via POST with Pydantic validation\n2. Time-series storage: TimescaleDB for event data\n3. Aggregation endpoints: metrics by day/week/month\n4. WebSocket: real-time updates for live dashboard\n5. Caching: Redis for frequently-accessed metrics\n6. Rate limiting: per-API-key limits with middleware\n7. Export: CSV/JSON download of filtered data\n8. Admin API: user management, API key generation\"\n```\n\n### Multi-Tenant SaaS API\n```\n\"Build multi-tenant SaaS API with FastAPI:\n1. Tenant isolation: subdomain-based routing\n2. Database: separate schemas per tenant in PostgreSQL\n3. Auth: tenant-scoped JWT tokens\n4. Billing: usage tracking, quota enforcement\n5. API versioning: /v1/, /v2/ with deprecation notices\n6. Rate limiting: per-tenant quotas\n7. Webhooks: tenant-configurable event notifications\n8. Admin: tenant provisioning, feature flags\"\n```\n\n### GraphQL + REST Hybrid\n```\n\"Create FastAPI app with both REST and GraphQL:\n1. REST endpoints: CRUD operations with OpenAPI docs\n2. GraphQL: Strawberry integration for complex queries\n3. DataLoader: batching and caching for N+1 queries\n4. Auth: shared JWT validation across REST/GraphQL\n5. Subscriptions: WebSocket support for real-time data\n6. File uploads: multipart form data handling\n7. Error handling: unified error format\n8. Testing: pytest fixtures for both APIs\"\n```\n\n## Troubleshooting\n\n**Issue:** \"Pydantic validation errors not showing custom messages\"\n**Solution:** Add Field() with description: `email: str = Field(..., description='Valid email required')`. Use @validator decorator for complex rules. Check Pydantic V2 migration if using FastAPI 0.100+.\n\n**Issue:** \"Async endpoints slower than sync\"\n**Solution:** Only use async for I/O operations (database, HTTP calls). CPU-bound tasks should use sync functions. Ensure database driver supports async (asyncpg, aiomysql). Check connection pool settings.\n\n**Issue:** \"CORS errors in browser\"\n**Solution:** Add CORSMiddleware with correct origins: `app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:3000'], allow_credentials=True)`. Don't use wildcard in production.\n\n**Issue:** \"Dependency injection not working\"\n**Solution:** Ensure dependencies return values, not None. Use `Depends()` in function signature, not inside function body. Check dependency order - dependencies can depend on other dependencies.\n\n**Issue:** \"File uploads failing with 413 error\"\n**Solution:** Increase max upload size in uvicorn: `uvicorn.run(app, limit_concurrency=100, limit_max_requests=1000, timeout_keep_alive=30)`. For large files, use streaming with `UploadFile`.\n\n## Learn More\n\n- [FastAPI Official Documentation](https://fastapi.tiangolo.com/)\n- [FastAPI GitHub Repository](https://github.com/fastapi/fastapi)\n- [Pydantic V2 Documentation](https://docs.pydantic.dev/)\n- [SQLAlchemy Async Tutorial](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)\n- [FastAPI Full Stack Template](https://github.com/fastapi/full-stack-fastapi-template)\n- [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices)\n\n## Features\n\n- Automatic OpenAPI/Swagger documentation generation\n- Native async/await support for high concurrency\n- Pydantic integration for request/response validation\n- Dependency injection system for clean architecture\n- Type-safe APIs with automatic request/response validation\n- WebSocket support for real-time bidirectional communication\n- Built-in testing utilities with TestClient for API testing\n- Background task processing with BackgroundTasks for async operations, task queue integration, and long-running job management without blocking request responses\n\n## Use Cases\n\n- REST API backends with automatic documentation\n- Microservices with async database operations\n- Real-time APIs with WebSocket support\n- High-performance microservices with async database operations\n- API-first applications with automatic OpenAPI documentation\n- Real-time applications with WebSocket and Server-Sent Events",
+    "sections": [
+      {
+        "title": "What This Skill Enables",
+        "id": "what-this-skill-enables",
+        "markdown": "Claude can build production-ready REST APIs using FastAPI, Python's fastest web framework with automatic OpenAPI documentation and async support. FastAPI combines Python 3.9+ type hints with Pydantic validation for type-safe APIs that rival Node.js performance. With automatic interactive docs, dependency injection, and async/await, FastAPI eliminates boilerplate while maintaining enterprise-grade reliability.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "**Required:**\n- Claude Pro subscription or Claude Code CLI\n- Python 3.9+ (3.11+ recommended for best performance)\n- pip or poetry package manager\n- Basic Python knowledge\n\n**What Claude handles automatically:**\n- Writing FastAPI route handlers with type hints\n- Creating Pydantic models for request/response validation\n- Adding automatic OpenAPI/Swagger documentation\n- Implementing async endpoints for I/O-bound operations\n- Setting up dependency injection for auth/database\n- Handling errors with custom exception handlers\n- Adding middleware for CORS, logging, rate limiting\n- Structuring large applications with routers",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Basic CRUD API\n\n**Prompt:** \"Create a FastAPI CRUD API for blog posts with: GET /posts (list), POST /posts (create), GET /posts/{id} (get one), PUT /posts/{id} (update), DELETE /posts/{id} (delete). Use Pydantic for validation.\"\n\nClaude will:\n1. Create FastAPI app with routers\n2. Define Pydantic models for Post\n3. Implement all 5 CRUD endpoints\n4. Add automatic validation\n5. Include OpenAPI docs at /docs\n6. Add error handling for 404s\n7. Return proper HTTP status codes\n\n### Database Integration with SQLAlchemy\n\n**Prompt:** \"Build FastAPI app with PostgreSQL using SQLAlchemy ORM. Include: user authentication, database models for users/posts, async queries, connection pooling, and migrations with Alembic.\"\n\nClaude will:\n1. Set up async SQLAlchemy engine\n2. Create database models with relationships\n3. Implement dependency injection for sessions\n4. Add async CRUD operations\n5. Include connection pooling config\n6. Set up Alembic for migrations\n7. Add authentication dependencies\n\n### Authentication & Authorization\n\n**Prompt:** \"Create FastAPI auth system with JWT tokens. Include: user registration, login, password hashing with bcrypt, protected routes with dependencies, refresh tokens, and role-based access control.\"\n\nClaude will:\n1. Implement password hashing with passlib\n2. Create JWT token generation/validation\n3. Add OAuth2 password bearer scheme\n4. Build auth dependencies for routes\n5. Implement refresh token rotation\n6. Add role-based access decorators\n7. Include user registration/login endpoints\n\n### Async Background Tasks\n\n**Prompt:** \"Build FastAPI endpoint that processes uploaded CSV file in background. Include: file upload validation, background task with progress tracking, webhook notification on completion, and error handling.\"\n\nClaude will:\n1. Create file upload endpoint\n2. Validate CSV format with Pydantic\n3. Launch background task\n4. Add progress tracking with Redis\n5. Implement webhook callback\n6. Handle errors gracefully\n7. Return task ID for status checks",
+        "codeBlocks": []
+      },
+      {
+        "title": "Tips for Best Results",
+        "id": "tips-for-best-results",
+        "markdown": "1. **Use Type Hints Everywhere**: FastAPI relies on Python type hints for automatic validation and docs. Always specify return types and use `Optional[T]` for nullable fields.\n\n2. **Async for I/O-Bound**: Use `async def` for endpoints that do database queries, API calls, or file operations. FastAPI handles concurrency automatically.\n\n3. **Pydantic for Validation**: Create Pydantic models for request bodies. Never parse JSON manually - let Pydantic handle validation and serialization.\n\n4. **Dependency Injection**: Use FastAPI's `Depends()` for auth, database sessions, pagination, etc. This keeps endpoints clean and testable.\n\n5. **Status Codes Matter**: Use proper HTTP status codes: 201 for created, 204 for deleted, 404 for not found, 422 for validation errors.\n\n6. **OpenAPI Customization**: Add descriptions, examples, and tags to endpoints for better automatic documentation.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Common Workflows",
+        "id": "common-workflows",
+        "markdown": "### E-Commerce API\n```\n\"Build FastAPI e-commerce backend:\n1. Products: CRUD with search, filtering, pagination\n2. Cart: session-based with Redis, add/remove items, calculate totals\n3. Orders: create order, payment processing, order history\n4. Auth: JWT-based customer accounts with OAuth2\n5. Admin: protected endpoints for inventory management\n6. Webhooks: Stripe payment notifications\n7. Database: PostgreSQL with async SQLAlchemy\n8. Background tasks: order confirmation emails\"\n```\n\n### Real-Time Analytics API\n```\n\"Create FastAPI analytics dashboard backend:\n1. Ingest endpoint: accept events via POST with Pydantic validation\n2. Time-series storage: TimescaleDB for event data\n3. Aggregation endpoints: metrics by day/week/month\n4. WebSocket: real-time updates for live dashboard\n5. Caching: Redis for frequently-accessed metrics\n6. Rate limiting: per-API-key limits with middleware\n7. Export: CSV/JSON download of filtered data\n8. Admin API: user management, API key generation\"\n```\n\n### Multi-Tenant SaaS API\n```\n\"Build multi-tenant SaaS API with FastAPI:\n1. Tenant isolation: subdomain-based routing\n2. Database: separate schemas per tenant in PostgreSQL\n3. Auth: tenant-scoped JWT tokens\n4. Billing: usage tracking, quota enforcement\n5. API versioning: /v1/, /v2/ with deprecation notices\n6. Rate limiting: per-tenant quotas\n7. Webhooks: tenant-configurable event notifications\n8. Admin: tenant provisioning, feature flags\"\n```\n\n### GraphQL + REST Hybrid\n```\n\"Create FastAPI app with both REST and GraphQL:\n1. REST endpoints: CRUD operations with OpenAPI docs\n2. GraphQL: Strawberry integration for complex queries\n3. DataLoader: batching and caching for N+1 queries\n4. Auth: shared JWT validation across REST/GraphQL\n5. Subscriptions: WebSocket support for real-time data\n6. File uploads: multipart form data handling\n7. Error handling: unified error format\n8. Testing: pytest fixtures for both APIs\"\n```",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "\"Build FastAPI e-commerce backend:\n1. Products: CRUD with search, filtering, pagination\n2. Cart: session-based with Redis, add/remove items, calculate totals\n3. Orders: create order, payment processing, order history\n4. Auth: JWT-based customer accounts with OAuth2\n5. Admin: protected endpoints for inventory management\n6. Webhooks: Stripe payment notifications\n7. Database: PostgreSQL with async SQLAlchemy\n8. Background tasks: order confirmation emails\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create FastAPI analytics dashboard backend:\n1. Ingest endpoint: accept events via POST with Pydantic validation\n2. Time-series storage: TimescaleDB for event data\n3. Aggregation endpoints: metrics by day/week/month\n4. WebSocket: real-time updates for live dashboard\n5. Caching: Redis for frequently-accessed metrics\n6. Rate limiting: per-API-key limits with middleware\n7. Export: CSV/JSON download of filtered data\n8. Admin API: user management, API key generation\""
+          },
+          {
+            "language": "text",
+            "code": "\"Build multi-tenant SaaS API with FastAPI:\n1. Tenant isolation: subdomain-based routing\n2. Database: separate schemas per tenant in PostgreSQL\n3. Auth: tenant-scoped JWT tokens\n4. Billing: usage tracking, quota enforcement\n5. API versioning: /v1/, /v2/ with deprecation notices\n6. Rate limiting: per-tenant quotas\n7. Webhooks: tenant-configurable event notifications\n8. Admin: tenant provisioning, feature flags\""
+          },
+          {
+            "language": "text",
+            "code": "\"Create FastAPI app with both REST and GraphQL:\n1. REST endpoints: CRUD operations with OpenAPI docs\n2. GraphQL: Strawberry integration for complex queries\n3. DataLoader: batching and caching for N+1 queries\n4. Auth: shared JWT validation across REST/GraphQL\n5. Subscriptions: WebSocket support for real-time data\n6. File uploads: multipart form data handling\n7. Error handling: unified error format\n8. Testing: pytest fixtures for both APIs\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** \"Pydantic validation errors not showing custom messages\"\n**Solution:** Add Field() with description: `email: str = Field(..., description='Valid email required')`. Use @validator decorator for complex rules. Check Pydantic V2 migration if using FastAPI 0.100+.\n\n**Issue:** \"Async endpoints slower than sync\"\n**Solution:** Only use async for I/O operations (database, HTTP calls). CPU-bound tasks should use sync functions. Ensure database driver supports async (asyncpg, aiomysql). Check connection pool settings.\n\n**Issue:** \"CORS errors in browser\"\n**Solution:** Add CORSMiddleware with correct origins: `app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:3000'], allow_credentials=True)`. Don't use wildcard in production.\n\n**Issue:** \"Dependency injection not working\"\n**Solution:** Ensure dependencies return values, not None. Use `Depends()` in function signature, not inside function body. Check dependency order - dependencies can depend on other dependencies.\n\n**Issue:** \"File uploads failing with 413 error\"\n**Solution:** Increase max upload size in uvicorn: `uvicorn.run(app, limit_concurrency=100, limit_max_requests=1000, timeout_keep_alive=30)`. For large files, use streaming with `UploadFile`.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Learn More",
+        "id": "learn-more",
+        "markdown": "- [FastAPI Official Documentation](https://fastapi.tiangolo.com/)\n- [FastAPI GitHub Repository](https://github.com/fastapi/fastapi)\n- [Pydantic V2 Documentation](https://docs.pydantic.dev/)\n- [SQLAlchemy Async Tutorial](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html)\n- [FastAPI Full Stack Template](https://github.com/fastapi/full-stack-fastapi-template)\n- [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Automatic OpenAPI/Swagger documentation generation\n- Native async/await support for high concurrency\n- Pydantic integration for request/response validation\n- Dependency injection system for clean architecture\n- Type-safe APIs with automatic request/response validation\n- WebSocket support for real-time bidirectional communication\n- Built-in testing utilities with TestClient for API testing\n- Background task processing with BackgroundTasks for async operations, task queue integration, and long-running job management without blocking request responses",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- REST API backends with automatic documentation\n- Microservices with async database operations\n- Real-time APIs with WebSocket support\n- High-performance microservices with async database operations\n- API-first applications with automatic OpenAPI documentation\n- Real-time applications with WebSocket and Server-Sent Events",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "What This Skill Enables",
+        "id": "what-this-skill-enables"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Basic CRUD API",
+        "id": "basic-crud-api"
+      },
+      {
+        "depth": 3,
+        "text": "Database Integration with SQLAlchemy",
+        "id": "database-integration-with-sqlalchemy"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication & Authorization",
+        "id": "authentication-authorization"
+      },
+      {
+        "depth": 3,
+        "text": "Async Background Tasks",
+        "id": "async-background-tasks"
+      },
+      {
+        "depth": 2,
+        "text": "Tips for Best Results",
+        "id": "tips-for-best-results"
+      },
+      {
+        "depth": 2,
+        "text": "Common Workflows",
+        "id": "common-workflows"
+      },
+      {
+        "depth": 3,
+        "text": "E-Commerce API",
+        "id": "e-commerce-api"
+      },
+      {
+        "depth": 3,
+        "text": "Real-Time Analytics API",
+        "id": "real-time-analytics-api"
+      },
+      {
+        "depth": 3,
+        "text": "Multi-Tenant SaaS API",
+        "id": "multi-tenant-saas-api"
+      },
+      {
+        "depth": 3,
+        "text": "GraphQL + REST Hybrid",
+        "id": "graphql-rest-hybrid"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Learn More",
+        "id": "learn-more"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "\"Build FastAPI e-commerce backend:\n1. Products: CRUD with search, filtering, pagination\n2. Cart: session-based with Redis, add/remove items, calculate totals\n3. Orders: create order, payment processing, order history\n4. Auth: JWT-based customer accounts with OAuth2\n5. Admin: protected endpoints for inventory management\n6. Webhooks: Stripe payment notifications\n7. Database: PostgreSQL with async SQLAlchemy\n8. Background tasks: order confirmation emails\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create FastAPI analytics dashboard backend:\n1. Ingest endpoint: accept events via POST with Pydantic validation\n2. Time-series storage: TimescaleDB for event data\n3. Aggregation endpoints: metrics by day/week/month\n4. WebSocket: real-time updates for live dashboard\n5. Caching: Redis for frequently-accessed metrics\n6. Rate limiting: per-API-key limits with middleware\n7. Export: CSV/JSON download of filtered data\n8. Admin API: user management, API key generation\""
+      },
+      {
+        "language": "text",
+        "code": "\"Build multi-tenant SaaS API with FastAPI:\n1. Tenant isolation: subdomain-based routing\n2. Database: separate schemas per tenant in PostgreSQL\n3. Auth: tenant-scoped JWT tokens\n4. Billing: usage tracking, quota enforcement\n5. API versioning: /v1/, /v2/ with deprecation notices\n6. Rate limiting: per-tenant quotas\n7. Webhooks: tenant-configurable event notifications\n8. Admin: tenant provisioning, feature flags\""
+      },
+      {
+        "language": "text",
+        "code": "\"Create FastAPI app with both REST and GraphQL:\n1. REST endpoints: CRUD operations with OpenAPI docs\n2. GraphQL: Strawberry integration for complex queries\n3. DataLoader: batching and caching for N+1 queries\n4. Auth: shared JWT validation across REST/GraphQL\n5. Subscriptions: WebSocket support for real-time data\n6. File uploads: multipart form data handling\n7. Error handling: unified error format\n8. Testing: pytest fixtures for both APIs\""
+      }
+    ],
+    "filePath": "content/skills/fastapi-python-backend.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

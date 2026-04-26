@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:optimize",
+  "category": "commands",
+  "slug": "optimize",
+  "title": "/optimize - Performance Optimizer Command for Claude Code",
+  "copyText": "/optimize [options] <file_or_function>",
+  "detailMarkdown": "# /optimize - Performance Optimizer Command for Claude Code\nAdvanced performance optimization with bottleneck analysis, memory profiling, and automated improvements\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `performance` `optimization` `profiling` `bottleneck` `efficiency`\n\n## Install\n```bash\n/optimize [options] <file_or_function>\n```\n\n## Usage\n/optimize [options] <file_or_function>\n\n## Links\n- https://heyclau.de/commands/optimize\n- https://docs.claude.ai/commands/optimize",
+  "webUrl": "https://heyclau.de/commands/optimize",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/optimize"
+}

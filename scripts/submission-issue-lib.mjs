@@ -1,35 +1,15 @@
-export const CORE_CATEGORIES = [
-  "agents",
-  "rules",
-  "mcp",
-  "skills",
-  "hooks",
-  "commands",
-  "statuslines",
-  "collections",
-  "guides",
-];
+import categorySpec from "../content/category-spec.json" with { type: "json" };
 
-export const CATEGORY_REQUIREMENTS = {
-  agents: ["full_copyable_content"],
-  commands: ["command_syntax", "usage_snippet", "full_copyable_content"],
-  collections: ["items"],
-  guides: ["guide_content"],
-  hooks: ["trigger", "usage_snippet", "full_copyable_content"],
-  mcp: ["install_command", "usage_snippet"],
-  rules: ["full_copyable_content"],
-  skills: ["usage_snippet", "skill_type", "skill_level", "verification_status"],
-  statuslines: ["script_language", "usage_snippet", "full_copyable_content"],
-};
+export const CORE_CATEGORIES = categorySpec.categoryOrder;
 
-export const COMMON_REQUIRED_FIELDS = [
-  "name",
-  "slug",
-  "category",
-  "contact_email",
-  "description",
-  "card_description",
-];
+export const CATEGORY_REQUIREMENTS = Object.fromEntries(
+  Object.entries(categorySpec.categories).map(([category, spec]) => [
+    category,
+    spec.submissionRequired,
+  ]),
+);
+
+export const COMMON_REQUIRED_FIELDS = categorySpec.commonIssueRequiredFields;
 
 export const HEADING_KEY_MAP = {
   name: "name",
@@ -98,29 +78,7 @@ export const HEADING_KEY_MAP = {
   difficulty: "difficulty",
 };
 
-const CATEGORY_ALIASES = new Map([
-  ["agent", "agents"],
-  ["agents", "agents"],
-  ["rule", "rules"],
-  ["rules", "rules"],
-  ["mcp", "mcp"],
-  ["mcp-server", "mcp"],
-  ["mcp-servers", "mcp"],
-  ["mcp-server-submission", "mcp"],
-  ["mcp-server-content", "mcp"],
-  ["skill", "skills"],
-  ["skills", "skills"],
-  ["hook", "hooks"],
-  ["hooks", "hooks"],
-  ["command", "commands"],
-  ["commands", "commands"],
-  ["statusline", "statuslines"],
-  ["statuslines", "statuslines"],
-  ["collection", "collections"],
-  ["collections", "collections"],
-  ["guide", "guides"],
-  ["guides", "guides"],
-]);
+const CATEGORY_ALIASES = new Map(Object.entries(categorySpec.aliases));
 
 export function normalizeHeading(label) {
   return String(label)
@@ -381,9 +339,9 @@ export function validateSubmission(issue) {
     const retrievalSources = String(fields.retrieval_sources ?? "").trim();
     const testedPlatforms = String(fields.tested_platforms ?? "").trim();
 
-    const validSkillTypes = new Set(["general", "capability-pack"]);
-    const validSkillLevels = new Set(["foundational", "advanced", "expert"]);
-    const validStatuses = new Set(["draft", "validated", "production"]);
+    const validSkillTypes = new Set(categorySpec.skillTypeValues);
+    const validSkillLevels = new Set(categorySpec.skillLevelValues);
+    const validStatuses = new Set(categorySpec.verificationStatusValues);
 
     if (skillType && !validSkillTypes.has(skillType)) {
       errors.push(`Invalid skill_type: ${skillType}`);

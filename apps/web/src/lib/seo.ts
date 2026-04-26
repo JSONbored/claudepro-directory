@@ -33,6 +33,7 @@ function toTwitterHandle(url: string) {
 }
 
 const twitterCreator = toTwitterHandle(siteConfig.twitterUrl);
+const defaultSocialImage = absoluteUrl("/og-image.png");
 
 export function buildPageMetadata(input: PageMetadataInput): Metadata {
   const canonical = absoluteUrl(input.path);
@@ -51,15 +52,23 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
       url: canonical,
       title,
       description,
-      siteName: siteConfig.name
+      siteName: siteConfig.name,
+      images: [
+        {
+          url: defaultSocialImage,
+          width: 1200,
+          height: 630,
+          alt: `${siteConfig.name} Claude directory`
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      creator: twitterCreator
+      creator: twitterCreator,
+      images: [defaultSocialImage]
     },
     robots: input.robots
   };
 }
-

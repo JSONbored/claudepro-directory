@@ -1,11 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import {
-  normalizeValue,
-  parseIssueFormBody,
-  validateSubmission,
-} from "./submission-issue-lib.mjs";
+import { normalizeValue, validateSubmission } from "./submission-issue-lib.mjs";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -146,7 +142,7 @@ function buildBody(fields, category) {
 }
 
 function buildContent(issue, report) {
-  const fields = parseIssueFormBody(issue.body ?? "");
+  const fields = report.fields;
   const category = report.category;
   const slug = fields.slug;
   const dateAdded = issue.createdAt

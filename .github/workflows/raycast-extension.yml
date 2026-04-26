@@ -1,0 +1,59 @@
+name: Raycast Extension
+
+on:
+  pull_request:
+    paths:
+      - "integrations/raycast/**"
+      - "apps/web/public/data/raycast-index.json"
+      - "apps/web/public/data/raycast/**"
+      - "scripts/build-content-index.mjs"
+      - "scripts/validate-raycast-feed.mjs"
+      - "content/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/raycast-extension.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-raycast:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: raycast-extension-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build feed artifacts
+        run: pnpm --filter web run prebuild
+
+      - name: Validate Raycast feed
+        run: pnpm validate:raycast-feed
+
+      - name: Install Raycast dependencies
+        working-directory: integrations/raycast
+        run: npm ci
+
+      - name: Lint Raycast extension
+        working-directory: integrations/raycast
+        run: npm run lint
+
+      - name: Build Raycast extension
+        working-directory: integrations/raycast
+        run: npm run build

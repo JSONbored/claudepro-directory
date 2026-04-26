@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "mcp-tool-contract-testing",
+    "title": "MCP Tool Contract Testing Skill",
+    "description": "Validate MCP server tools with contract-style tests to catch schema drift, unsafe behavior, and integration regressions early.",
+    "seoTitle": "MCP Tool Contract Testing Skill",
+    "seoDescription": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "mcp",
+      "testing",
+      "contracts",
+      "reliability",
+      "api"
+    ],
+    "keywords": [
+      "mcp testing",
+      "tool contract validation",
+      "mcp schema checks",
+      "ai tool reliability"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 77,
+    "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18/",
+    "cardDescription": "Test-first MCP tool validation for safer integrations, stronger reliability, and lower breakage risk.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing",
+    "usageSnippet": "Use this skill to define and enforce MCP tool behavior contracts before deploying server updates.",
+    "copySnippet": "# Trigger\n\"Run the MCP tool contract testing skill on this server update.\"\n\n# Required output\n1) Tool contract matrix\n2) Positive/negative test cases\n3) Schema compliance report\n4) Release go/no-go summary",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://modelcontextprotocol.io/specification/2025-06-18/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "MCP server implementation and tool catalog",
+      "Staging environment for test execution",
+      "Known expected outputs per critical tool"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/mcp-tool-contract-testing.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "7e8f76baf26241e849bdb0108bf57628864ffb91a056e3878de27247f1d7d352",
+    "body": "## Overview\n\nThis skill helps AI agents enforce explicit behavior contracts for MCP tools. It prevents accidental schema drift, unsafe edge-case handling, and hidden regressions when tools evolve.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Contract definitions for high-value tools\n- Stable test inputs and expected outputs\n- Regression thresholds for release decisions\n\n## What This Skill Delivers\n\n- Contract catalog for each tool endpoint\n- Validation suite for payload and response guarantees\n- Safety/negative tests for malformed and adversarial inputs\n- Regression summary for release gating\n\n## How to Use This Skill\n\n1. Define mandatory response fields and allowed ranges.\n2. Build positive and negative test vectors.\n3. Execute against baseline and candidate builds.\n4. Compare behavior and schema diffs.\n5. Block release when contract-critical checks fail.\n\n## Troubleshooting\n\n**Issue:** Tool output changes break downstream clients  \n**Fix:** Add strict backward-compatibility contract checks for public fields.\n\n**Issue:** Tests pass but runtime still fails on edge cases  \n**Fix:** Add adversarial input suites and timeout/error propagation checks.\n\n**Issue:** Frequent false positives in test suite  \n**Fix:** Split deterministic contract checks from heuristic quality checks.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://modelcontextprotocol.io/specification/2025-06-18/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps AI agents enforce explicit behavior contracts for MCP tools. It prevents accidental schema drift, unsafe edge-case handling, and hidden regressions when tools evolve.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Contract definitions for high-value tools\n- Stable test inputs and expected outputs\n- Regression thresholds for release decisions",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Delivers",
+        "id": "what-this-skill-delivers",
+        "markdown": "- Contract catalog for each tool endpoint\n- Validation suite for payload and response guarantees\n- Safety/negative tests for malformed and adversarial inputs\n- Regression summary for release gating",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "1. Define mandatory response fields and allowed ranges.\n2. Build positive and negative test vectors.\n3. Execute against baseline and candidate builds.\n4. Compare behavior and schema diffs.\n5. Block release when contract-critical checks fail.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Tool output changes break downstream clients  \n**Fix:** Add strict backward-compatibility contract checks for public fields.\n\n**Issue:** Tests pass but runtime still fails on edge cases  \n**Fix:** Add adversarial input suites and timeout/error propagation checks.\n\n**Issue:** Frequent false positives in test suite  \n**Fix:** Split deterministic contract checks from heuristic quality checks.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://modelcontextprotocol.io/specification/2025-06-18/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Delivers",
+        "id": "what-this-skill-delivers"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/mcp-tool-contract-testing.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-tool-contract-testing.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

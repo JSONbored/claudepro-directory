@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:git-smart-commit",
+  "category": "commands",
+  "slug": "git-smart-commit",
+  "title": "Git Smart Commit for Claude Code",
+  "copyText": "/git-smart-commit [type] [message]",
+  "detailMarkdown": "# Git Smart Commit for Claude Code\nIntelligently analyzes changes and creates well-formatted git commits with conventional commit messages\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `git` `commit` `version-control` `conventional-commits`\n\n## Install\n```bash\n/git-smart-commit [type] [message]\n```\n\n## Usage\n/git-smart-commit feat \"add structured content schema\"\n\n## Links\n- https://heyclau.de/commands/git-smart-commit\n- https://www.conventionalcommits.org/",
+  "webUrl": "https://heyclau.de/commands/git-smart-commit",
+  "repoUrl": "",
+  "documentationUrl": "https://www.conventionalcommits.org/"
+}

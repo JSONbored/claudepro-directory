@@ -39,16 +39,50 @@ jobs:
 
       - name: Validate submission issue
         id: validate
+        continue-on-error: true
         run: |
           node scripts/validate-submission-issue.mjs \
             --issue-json .github/tmp/issue.json \
             --output .github/tmp/submission-validation.json
 
       - name: Ensure validation report exists
+        if: always()
         run: |
           test -f .github/tmp/submission-validation.json
 
+      - name: Preview import output
+        if: always()
+        run: |
+          node - <<'NODE'
+          const { spawnSync } = require("node:child_process");
+          const fs = require("node:fs");
+          const reportPath = ".github/tmp/submission-validation.json";
+          if (!fs.existsSync(reportPath)) process.exit(0);
+          const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+          if (!report.ok || report.skipped) process.exit(0);
+          const result = spawnSync(
+            process.execPath,
+            [
+              "scripts/import-submission-issue.mjs",
+              "--issue-json",
+              ".github/tmp/issue.json",
+              "--dry-run"
+            ],
+            { encoding: "utf8" }
+          );
+          if (result.status !== 0) {
+            fs.writeFileSync(
+              ".github/tmp/submission-import-preview.md",
+              `Import preview failed:\n\n${result.stderr || result.stdout}`,
+              "utf8"
+            );
+            process.exit(0);
+          }
+          fs.writeFileSync(".github/tmp/submission-import-preview.md", result.stdout, "utf8");
+          NODE
+
       - name: Post validation report comment
+        if: always()
         uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
         with:
           script: |
@@ -83,6 +117,23 @@ jobs:
               for (const warning of report.warnings) lines.push(`- ${warning}`);
             }
 
+            const previewPath = ".github/tmp/submission-import-preview.md";
+            if (fs.existsSync(previewPath)) {
+              const preview = fs.readFileSync(previewPath, "utf8").trim();
+              const [firstLine, ...rest] = preview.split("\n");
+              const importPath = firstLine?.replace(/^Would write\s+/, "").trim();
+              if (importPath) {
+                lines.push("", "### Import preview", `- Output path: \`${importPath}\``);
+              } else {
+                lines.push("", "### Import preview");
+              }
+              const mdxPreview = rest.join("\n").trim();
+              if (mdxPreview) {
+                const capped = mdxPreview.split("\n").slice(0, 120).join("\n");
+                lines.push("", "<details><summary>Dry-run MDX preview</summary>", "", "```mdx", capped, "```", "</details>");
+              }
+            }
+
             const body = lines.join("\n");
             const { owner, repo } = context.repo;
             const issue_number = context.issue.number;
@@ -113,5 +164,6 @@ jobs:
             }
 
       - name: Fail when submission issue is invalid
+        if: always()
         run: |
           node scripts/ci/fail-invalid-submission-report.mjs

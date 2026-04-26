@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:cursor-rules",
+  "category": "commands",
+  "slug": "cursor-rules",
+  "title": "/cursor-rules - Cursor Rules Generator for Claude Code",
+  "copyText": "/cursor-rules [options] <project_type>",
+  "detailMarkdown": "# /cursor-rules - Cursor Rules Generator for Claude Code\nGenerate .cursorrules files for AI-native development with project-specific patterns, coding standards, and intelligent context awareness\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `cursor` `ai-rules` `code-standards` `context` `ai-ide`\n\n## Install\n```bash\n/cursor-rules [options] <project_type>\n```\n\n## Usage\n/cursor-rules [options] <project_type>\n\n## Links\n- https://heyclau.de/commands/cursor-rules\n- https://cursor.com/docs/context/rules",
+  "webUrl": "https://heyclau.de/commands/cursor-rules",
+  "repoUrl": "",
+  "documentationUrl": "https://cursor.com/docs/context/rules"
+}

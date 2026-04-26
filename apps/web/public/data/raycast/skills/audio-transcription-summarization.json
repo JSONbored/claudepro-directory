@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:audio-transcription-summarization",
+  "category": "skills",
+  "slug": "audio-transcription-summarization",
+  "title": "Audio Transcription + Summarization Skill",
+  "copyText": "Install:\npip install openai-whisper\n\nUsage:\npip install openai-whisper\n\nAsset:\n# Convert to mono 16kHz WAV\nffmpeg -i input.mp3 -ar 16000 -ac 1 input.wav\n\n# Python whisper (pip install -U openai-whisper)\nwhisper input.wav --model small --language en --output_format txt",
+  "detailMarkdown": "# Audio Transcription + Summarization Skill\nTranscribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `audio` `transcription` `whisper` `ffmpeg`\n\n## Install\n```bash\npip install openai-whisper\n```\n\n## Usage\npip install openai-whisper\n\n## Links\n- https://heyclau.de/skills/audio-transcription-summarization\n- https://github.com/openai/whisper\n- https://github.com/openai/whisper",
+  "webUrl": "https://heyclau.de/skills/audio-transcription-summarization",
+  "repoUrl": "https://github.com/openai/whisper",
+  "documentationUrl": "https://github.com/openai/whisper"
+}

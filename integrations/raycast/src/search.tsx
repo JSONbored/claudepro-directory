@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Cache,
+  Clipboard,
   Color,
   Icon,
   List,
@@ -13,6 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const FEED_URL = "https://heyclau.de/data/raycast-index.json";
 const CACHE_KEY = "heyclaude-raycast-index";
+const DETAIL_CACHE_PREFIX = "heyclaude-raycast-detail";
 const FAVORITES_KEY = "favorite-entry-keys";
 
 type DownloadTrust = "first-party" | "external" | null;
@@ -26,12 +28,25 @@ type RaycastEntry = {
   installCommand: string;
   configSnippet: string;
   copyText: string;
+  copyTextLength?: number;
+  copyTextTruncated?: boolean;
   detailMarkdown: string;
+  detailUrl?: string;
   webUrl: string;
   repoUrl: string;
   documentationUrl: string;
   downloadTrust: DownloadTrust;
   verificationStatus: string;
+};
+
+type RaycastDetail = {
+  copyText: string;
+  detailMarkdown: string;
+};
+
+type ParsedFeed = {
+  entries: RaycastEntry[];
+  generatedAt: string;
 };
 
 type CategoryOption = {
@@ -73,10 +88,8 @@ function categoryLabel(category: string) {
   return categoryLabels[category] ?? category;
 }
 
-function parseEntries(value: string) {
-  const parsed = JSON.parse(value) as unknown;
-  if (!Array.isArray(parsed)) return [];
-  return parsed.filter(isRaycastEntry);
+function absoluteDataUrl(value: string) {
+  return new URL(value, FEED_URL).toString();
 }
 
 function isRaycastEntry(value: unknown): value is RaycastEntry {
@@ -94,15 +107,50 @@ function isRaycastEntry(value: unknown): value is RaycastEntry {
   );
 }
 
-function loadCachedEntries() {
+function parseFeed(value: string): ParsedFeed {
+  const parsed = JSON.parse(value) as unknown;
+
+  if (Array.isArray(parsed)) {
+    return {
+      entries: parsed.filter(isRaycastEntry),
+      generatedAt: "",
+    };
+  }
+
+  const envelope = parsed as {
+    schemaVersion?: unknown;
+    generatedAt?: unknown;
+    entries?: unknown;
+  };
+  if (!Array.isArray(envelope.entries)) {
+    return { entries: [], generatedAt: "" };
+  }
+
+  return {
+    entries: envelope.entries.filter(isRaycastEntry),
+    generatedAt:
+      typeof envelope.generatedAt === "string" ? envelope.generatedAt : "",
+  };
+}
+
+function isRaycastDetail(value: unknown): value is RaycastDetail {
+  const detail = value as Partial<RaycastDetail>;
+  return (
+    Boolean(detail) &&
+    typeof detail.copyText === "string" &&
+    typeof detail.detailMarkdown === "string"
+  );
+}
+
+function loadCachedFeed() {
   const cached = cache.get(CACHE_KEY);
-  if (!cached) return [];
+  if (!cached) return { entries: [], generatedAt: "" };
 
   try {
-    return parseEntries(cached);
+    return parseFeed(cached);
   } catch {
     cache.remove(CACHE_KEY);
-    return [];
+    return { entries: [], generatedAt: "" };
   }
 }
 
@@ -142,71 +190,126 @@ async function persistFavorites(favorites: Set<string>) {
   );
 }
 
+async function loadEntryDetail(entry: RaycastEntry): Promise<RaycastDetail> {
+  if (!entry.detailUrl) {
+    return {
+      copyText: entry.copyText,
+      detailMarkdown: entry.detailMarkdown,
+    };
+  }
+
+  const cacheKey = `${DETAIL_CACHE_PREFIX}:${entryKey(entry)}`;
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached) as unknown;
+      if (isRaycastDetail(parsed)) return parsed;
+    } catch {
+      cache.remove(cacheKey);
+    }
+  }
+
+  const response = await fetch(absoluteDataUrl(entry.detailUrl), {
+    headers: { accept: "application/json" },
+  });
+  if (!response.ok) {
+    throw new Error(`Detail responded with ${response.status}`);
+  }
+
+  const parsed = (await response.json()) as unknown;
+  if (!isRaycastDetail(parsed)) {
+    throw new Error("Detail payload was malformed");
+  }
+
+  cache.set(cacheKey, JSON.stringify(parsed));
+  return parsed;
+}
+
 function metadataAccessories(entry: RaycastEntry, isFavorite: boolean) {
   const accessories: List.Item.Accessory[] = [
     { text: categoryLabel(entry.category) },
   ];
 
-  if (isFavorite)
+  if (isFavorite) {
     accessories.unshift({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
     });
-  if (entry.verificationStatus)
+  }
+  if (entry.verificationStatus) {
     accessories.push({ text: entry.verificationStatus });
+  }
   if (entry.downloadTrust === "first-party") {
     accessories.push({
       icon: { source: Icon.CheckCircle, tintColor: Color.Green },
     });
+  }
+  if (entry.copyTextTruncated) {
+    accessories.push({ text: "Full on demand" });
   }
 
   return accessories;
 }
 
 export default function Command() {
-  const [entries, setEntries] = useState<RaycastEntry[]>(() =>
-    loadCachedEntries(),
-  );
+  const cachedFeed = loadCachedFeed();
+  const [entries, setEntries] = useState<RaycastEntry[]>(cachedFeed.entries);
+  const [generatedAt, setGeneratedAt] = useState(cachedFeed.generatedAt);
   const [isLoading, setIsLoading] = useState(entries.length === 0);
   const [category, setCategory] = useState("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    let cancelled = false;
+  async function refreshEntries(showSuccess = false) {
+    setIsLoading(true);
+    try {
+      const response = await fetch(FEED_URL, {
+        headers: {
+          accept: "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`Feed responded with ${response.status}`);
+      }
 
-    async function refreshEntries() {
-      try {
-        const response = await fetch(FEED_URL, {
-          headers: {
-            accept: "application/json",
-          },
+      const text = await response.text();
+      const nextFeed = parseFeed(text);
+      if (nextFeed.entries.length === 0) {
+        throw new Error("Feed contained no entries");
+      }
+
+      cache.set(CACHE_KEY, text);
+      setEntries(nextFeed.entries);
+      setGeneratedAt(nextFeed.generatedAt);
+      if (showSuccess) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "HeyClaude feed refreshed",
+          message: `${nextFeed.entries.length} entries`,
         });
-        if (!response.ok)
-          throw new Error(`Feed responded with ${response.status}`);
-
-        const text = await response.text();
-        const nextEntries = parseEntries(text);
-        if (nextEntries.length === 0)
-          throw new Error("Feed contained no entries");
-
-        cache.set(CACHE_KEY, JSON.stringify(nextEntries));
-        if (!cancelled) setEntries(nextEntries);
-      } catch (error) {
-        if (cancelled || entries.length > 0) return;
+      }
+    } catch (error) {
+      if (entries.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Could not load HeyClaude",
           message:
             error instanceof Error ? error.message : "Unknown feed error",
         });
-      } finally {
-        if (!cancelled) setIsLoading(false);
+      } else if (showSuccess) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not refresh feed",
+          message:
+            error instanceof Error ? error.message : "Unknown feed error",
+        });
       }
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    void refreshEntries();
-    return () => {
-      cancelled = true;
-    };
+  useEffect(() => {
+    void refreshEntries(false);
+    // Run only once on command open. Manual refresh is exposed as an action.
   }, []);
 
   useEffect(() => {
@@ -234,6 +337,42 @@ export default function Command() {
     if (category === "all") return entries;
     return entries.filter((entry) => entry.category === category);
   }, [category, entries, favorites]);
+
+  async function copyFullAsset(entry: RaycastEntry) {
+    try {
+      const detail = await loadEntryDetail(entry);
+      await Clipboard.copy(detail.copyText || entry.copyText);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Copied full asset",
+        message: entry.title,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not copy full asset",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  async function pasteFullAsset(entry: RaycastEntry) {
+    try {
+      const detail = await loadEntryDetail(entry);
+      await Clipboard.paste(detail.copyText || entry.copyText);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Pasted full asset",
+        message: entry.title,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not paste full asset",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
 
   async function toggleFavorite(entry: RaycastEntry) {
     const key = entryKey(entry);
@@ -281,6 +420,9 @@ export default function Command() {
         const hasInstallCommand = Boolean(entry.installCommand.trim());
         const hasConfig = Boolean(entry.configSnippet.trim());
         const sourceUrl = entry.repoUrl || entry.documentationUrl;
+        const detailMarkdown = generatedAt
+          ? `${entry.detailMarkdown}\n\n---\nFeed updated: ${generatedAt.slice(0, 10)}`
+          : entry.detailMarkdown;
 
         return (
           <List.Item
@@ -294,18 +436,20 @@ export default function Command() {
             ]}
             icon={categoryIcons[entry.category] ?? Icon.Document}
             accessories={metadataAccessories(entry, isFavorite)}
-            detail={<List.Item.Detail markdown={entry.detailMarkdown} />}
+            detail={<List.Item.Detail markdown={detailMarkdown} />}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
+                <Action
                   title="Copy Full Asset"
-                  content={entry.copyText}
+                  icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  onAction={() => void copyFullAsset(entry)}
                 />
-                <Action.Paste
+                <Action
                   title="Paste Full Asset"
-                  content={entry.copyText}
+                  icon={Icon.TextCursor}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                  onAction={() => void pasteFullAsset(entry)}
                 />
                 {hasInstallCommand ? (
                   <Action.CopyToClipboard
@@ -341,6 +485,14 @@ export default function Command() {
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
                   onAction={() => void toggleFavorite(entry)}
                 />
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh Feed"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => void refreshEntries(true)}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -356,6 +508,15 @@ export default function Command() {
             category === "favorites"
               ? "Add favorites from any category to keep them here."
               : "Try another query or category."
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh Feed"
+                icon={Icon.ArrowClockwise}
+                onAction={() => void refreshEntries(true)}
+              />
+            </ActionPanel>
           }
         />
       ) : null}

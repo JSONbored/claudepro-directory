@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "statuslines:simple-text-statusline",
+  "category": "statuslines",
+  "slug": "simple-text-statusline",
+  "title": "Simple Text Statusline - Statuslines",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh\",\n    \"refreshInterval\": 300\n  }\n}\n\nUsage:\n[Model: claude-sonnet-4.5] [Dir: ~/projects/my-app] [Tokens: 1234]\n\nAsset:\n#!/usr/bin/env bash\n\n# Simple Text Statusline for Claude Code\n# Plain text only - maximum compatibility\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using bash built-ins (no jq required)\nmodel=$(echo \"$input\" | grep -o '\"model\":\"[^\"]*\"' | cut -d'\"' -f4)\ndir=$(echo \"$input\" | grep -o '\"path\":\"[^\"]*\"' | cut -d'\"' -f4 | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | grep -o '\"totalTokens\":[0-9]*' | cut -d':' -f2)\n\n# Default values if extraction fails\nmodel=${model:-\"unknown\"}\ndir=${dir:-\"~\"}\ntokens=${tokens:-\"0\"}\n\n# Build simple plain text status\necho \"[Model: $model] [Dir: $dir] [Tokens: $tokens]\"",
+  "detailMarkdown": "# Simple Text Statusline - Statuslines\nUltra-lightweight plain text statusline with no colors or special characters for maximum compatibility and minimal overhead\n**Category:** statuslines\n**Author:** JSONbored\n**Tags:** `simple` `plain-text` `minimal` `bash` `lightweight` `no-dependencies`\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/simple-text-statusline.sh\",\n    \"refreshInterval\": 300\n  }\n}\n```\n\n## Usage\n[Model: claude-sonnet-4.5] [Dir: ~/projects/my-app] [Tokens: 1234]\n\n## Links\n- https://heyclau.de/statuslines/simple-text-statusline",
+  "webUrl": "https://heyclau.de/statuslines/simple-text-statusline",
+  "repoUrl": "",
+  "documentationUrl": ""
+}

@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "intercom-mcp-server",
+    "title": "Intercom MCP Server for Claude",
+    "description": "Access customer conversations, tickets, and user data in real-time",
+    "seoTitle": "Intercom MCP Server for Claude",
+    "seoDescription": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development.",
+    "author": "Intercom",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "customer-support",
+      "intercom",
+      "chat",
+      "helpdesk",
+      "crm"
+    ],
+    "keywords": [
+      "chat",
+      "claude",
+      "crm",
+      "customer-support",
+      "development",
+      "helpdesk",
+      "intercom",
+      "mcp",
+      "mcp servers",
+      "server",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
+    "cardDescription": "Access customer conversations, tickets, and user data in real-time",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status intercom",
+    "usageSnippet": "claude mcp list && claude mcp status intercom",
+    "copySnippet": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "configSnippet": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "estimatedSetupTime": "3 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Intercom workspace account (sign up at https://www.intercom.com if needed)",
+      "Intercom Access Token (for private apps) or OAuth credentials (for public apps) - get from Intercom Developer Hub",
+      "HTTP/SSE transport support (remote MCP server at https://mcp.intercom.com/sse)",
+      "Internet connection (remote Intercom API access required)",
+      "Understanding of Intercom API rate limits (10,000 calls/min per app, 25,000/min per workspace for private apps; same limits for public apps)",
+      "Understanding of rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) for implementing exponential backoff",
+      "Understanding of workspace permissions and team member roles (required for accessing conversations and customer data)",
+      "Understanding of OAuth scopes for private apps (read_conversations, write_conversations) if using OAuth authentication",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of customer support/CRM concepts (conversations, tickets, contacts, companies, webhooks)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/intercom-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "90c46cda2f6c8aab07b4c1deae865e9820fc86227772eb369b5365021ca11e5d",
+    "body": "## Content\n\nTransform your customer support operations by connecting Claude to Intercom. Access real-time conversations, manage tickets and queues, query customer data, and generate insights—all through natural language commands. Automate support workflows, analyze trends, and deliver exceptional customer experiences with AI-powered conversation management.\n\n## Features\n\n- Access customer conversations in real-time with live updates\n- Manage support tickets and queues with priority handling\n- Query user data and profiles with advanced filtering\n- Update customer information and attributes in bulk\n- Track conversation metrics and analytics for insights\n- Search conversations and tickets with complex queries\n- Manage companies and contacts programmatically\n- Receive webhook notifications for real-time events\n- Advanced Intercom customer messaging and support automation with conversation management, user segmentation, and analytics integration\n- Batch operations support for efficient bulk conversation operations, user management, and support automation with automatic rate limit handling and retry logic\n- Real-time conversation synchronization capabilities with webhook integration support for monitoring Intercom events and triggering automated workflows\n\n## Use Cases\n\n- Respond to customer queries efficiently with AI-powered assistance\n- Analyze support trends and patterns across conversations\n- Update customer information in bulk operations\n- Generate support metrics reports and analytics\n- Manage ticket queues and priorities automatically\n- Search and filter conversations by date, status, or attributes\n- Sync customer data between Intercom and other systems\n- Automate customer support workflows with webhook triggers\n- Build automated customer support workflows that sync external systems with Intercom for real-time messaging and customer engagement\n\n## Installation\n\n### Claude Code\n\n1. Get your Intercom Access Token from Developer Hub (for private apps) or set up OAuth (for public apps)\n2. claude mcp add --transport sse intercom https://mcp.intercom.com/sse\n3. Add INTERCOM_ACCESS_TOKEN to your environment or configuration if using Access Token authentication\n4. Verify installation: claude mcp list\n5. Test connection: claude mcp status intercom\n\n### Claude Desktop\n\n1. Get your Intercom Access Token from Developer Hub (for private apps) or set up OAuth (for public apps)\n2. Open your Claude Desktop configuration file (see configPath below)\n3. Add the Intercom server configuration with SSE transport pointing to https://mcp.intercom.com/sse\n4. Add INTERCOM_ACCESS_TOKEN to environment variables in configuration if using Access Token authentication\n5. Restart Claude Desktop\n6. Authenticate with your Intercom workspace when prompted (if using OAuth)\n\n## Requirements\n\n- Intercom workspace account (sign up at https://www.intercom.com if needed)\n- Intercom Access Token (for private apps) or OAuth credentials (for public apps) - get from Intercom Developer Hub\n- HTTP/SSE transport support (remote MCP server at https://mcp.intercom.com/sse)\n- Internet connection (remote Intercom API access required)\n- Understanding of Intercom API rate limits (10,000 calls/min per app, 25,000/min per workspace for private apps; same limits for public apps)\n- Understanding of rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) for implementing exponential backoff\n- Understanding of workspace permissions and team member roles (required for accessing conversations and customer data)\n- Understanding of OAuth scopes for private apps (read_conversations, write_conversations) if using OAuth authentication\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of customer support/CRM concepts (conversations, tickets, contacts, companies, webhooks)\n\n## Configuration\n\n```json\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Examples\n### Show open conversations from today\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show open conversations from today\"\n```\n### Find customer by email\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find customer by email\"\n```\n### Update ticket status to resolved\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update ticket status to resolved\"\n```\n### Generate weekly support metrics\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate weekly support metrics\"\n```\n### Create Conversation\nCreate a new Intercom conversation and assign it to an admin\n```typescript\n// Create Intercom conversation\nconst conversation = await intercom.conversations.create({\n  from: { type: \"user\", id: \"user-id\" },\n  body: \"Hello, I need help with my account\",\n  assign_to: { type: \"admin\", id: \"admin-id\" }\n});\n```\n\n## Security\n\n- OAuth authentication for public apps or Access Token for private apps (workspace access)\n- Respect customer privacy regulations (GDPR, CCPA compliance)\n- Monitor response quality and conversation handling\n- Regular training updates recommended for AI-powered responses\n- Implement rate limit monitoring to avoid service disruption\n- Intercom API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Intercom OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Intercom conversation, user, and company IDs may expose customer data and business information - ensure Intercom resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Intercom MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Intercom webhook configurations and payloads may contain sensitive customer conversations and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### HTTP 429 Too Many Requests - rate limit hit\n\nPrivate apps: 10,000 calls/min per app, 25,000/min per workspace. Public apps have the same limits. Check X-RateLimit-Reset header for reset time. Implement exponential backoff when approaching X-RateLimit-Remaining threshold. Monitor rate limit headers in all API responses to avoid hitting limits.\n### HTTP 401 Unauthorized - authentication failed\n\nVerify API key (Access Token) is valid and copied correctly from Intercom Developer Hub. For private apps, use Access Token. For public apps, ensure OAuth flow completed successfully. Check Authorization header format: Bearer YOUR_API_KEY. Regenerate API key from Intercom Developer Hub if authentication fails.\n### Cannot access conversations or customer data\n\nVerify workspace permissions grant access to conversations. Check team member role has necessary permissions (Admin, Developer, or appropriate role). For private apps, confirm OAuth scope includes required access (read_conversations, write_conversations). Verify the Access Token or OAuth token has not expired.\n### Webhook requests timing out or failing\n\nNote: rate limits apply only to REST API, not webhooks. Verify webhook endpoint is accessible and responds within 15 seconds. Check webhook signature for security validation. Ensure webhook URL is publicly accessible and uses HTTPS. Verify webhook payload structure matches Intercom's expected format.\n### Intercom MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Intercom rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Intercom API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed conversation data. Intercom allows 10,000 requests per hour per app.\n### Intercom conversation or user access denied errors\n\nVerify API token has access to the conversation or user. Check account permissions and workspace membership. Ensure API token has required scopes (conversations, users, companies) for target operations.\n### Intercom MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Intercom API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Transform your customer support operations by connecting Claude to Intercom. Access real-time conversations, manage tickets and queues, query customer data, and generate insights—all through natural language commands. Automate support workflows, analyze trends, and deliver exceptional customer experiences with AI-powered conversation management.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Access customer conversations in real-time with live updates\n- Manage support tickets and queues with priority handling\n- Query user data and profiles with advanced filtering\n- Update customer information and attributes in bulk\n- Track conversation metrics and analytics for insights\n- Search conversations and tickets with complex queries\n- Manage companies and contacts programmatically\n- Receive webhook notifications for real-time events\n- Advanced Intercom customer messaging and support automation with conversation management, user segmentation, and analytics integration\n- Batch operations support for efficient bulk conversation operations, user management, and support automation with automatic rate limit handling and retry logic\n- Real-time conversation synchronization capabilities with webhook integration support for monitoring Intercom events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Respond to customer queries efficiently with AI-powered assistance\n- Analyze support trends and patterns across conversations\n- Update customer information in bulk operations\n- Generate support metrics reports and analytics\n- Manage ticket queues and priorities automatically\n- Search and filter conversations by date, status, or attributes\n- Sync customer data between Intercom and other systems\n- Automate customer support workflows with webhook triggers\n- Build automated customer support workflows that sync external systems with Intercom for real-time messaging and customer engagement",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Get your Intercom Access Token from Developer Hub (for private apps) or set up OAuth (for public apps)\n2. claude mcp add --transport sse intercom https://mcp.intercom.com/sse\n3. Add INTERCOM_ACCESS_TOKEN to your environment or configuration if using Access Token authentication\n4. Verify installation: claude mcp list\n5. Test connection: claude mcp status intercom\n\n### Claude Desktop\n\n1. Get your Intercom Access Token from Developer Hub (for private apps) or set up OAuth (for public apps)\n2. Open your Claude Desktop configuration file (see configPath below)\n3. Add the Intercom server configuration with SSE transport pointing to https://mcp.intercom.com/sse\n4. Add INTERCOM_ACCESS_TOKEN to environment variables in configuration if using Access Token authentication\n5. Restart Claude Desktop\n6. Authenticate with your Intercom workspace when prompted (if using OAuth)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Intercom workspace account (sign up at https://www.intercom.com if needed)\n- Intercom Access Token (for private apps) or OAuth credentials (for public apps) - get from Intercom Developer Hub\n- HTTP/SSE transport support (remote MCP server at https://mcp.intercom.com/sse)\n- Internet connection (remote Intercom API access required)\n- Understanding of Intercom API rate limits (10,000 calls/min per app, 25,000/min per workspace for private apps; same limits for public apps)\n- Understanding of rate limit headers (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset) for implementing exponential backoff\n- Understanding of workspace permissions and team member roles (required for accessing conversations and customer data)\n- Understanding of OAuth scopes for private apps (read_conversations, write_conversations) if using OAuth authentication\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of customer support/CRM concepts (conversations, tickets, contacts, companies, webhooks)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Show open conversations from today\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show open conversations from today\"\n```\n### Find customer by email\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find customer by email\"\n```\n### Update ticket status to resolved\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update ticket status to resolved\"\n```\n### Generate weekly support metrics\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate weekly support metrics\"\n```\n### Create Conversation\nCreate a new Intercom conversation and assign it to an admin\n```typescript\n// Create Intercom conversation\nconst conversation = await intercom.conversations.create({\n  from: { type: \"user\", id: \"user-id\" },\n  body: \"Hello, I need help with my account\",\n  assign_to: { type: \"admin\", id: \"admin-id\" }\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show open conversations from today\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find customer by email\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update ticket status to resolved\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Generate weekly support metrics\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Intercom conversation\nconst conversation = await intercom.conversations.create({\n  from: { type: \"user\", id: \"user-id\" },\n  body: \"Hello, I need help with my account\",\n  assign_to: { type: \"admin\", id: \"admin-id\" }\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication for public apps or Access Token for private apps (workspace access)\n- Respect customer privacy regulations (GDPR, CCPA compliance)\n- Monitor response quality and conversation handling\n- Regular training updates recommended for AI-powered responses\n- Implement rate limit monitoring to avoid service disruption\n- Intercom API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Intercom OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Intercom conversation, user, and company IDs may expose customer data and business information - ensure Intercom resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Intercom MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Intercom webhook configurations and payloads may contain sensitive customer conversations and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### HTTP 429 Too Many Requests - rate limit hit\n\nPrivate apps: 10,000 calls/min per app, 25,000/min per workspace. Public apps have the same limits. Check X-RateLimit-Reset header for reset time. Implement exponential backoff when approaching X-RateLimit-Remaining threshold. Monitor rate limit headers in all API responses to avoid hitting limits.\n### HTTP 401 Unauthorized - authentication failed\n\nVerify API key (Access Token) is valid and copied correctly from Intercom Developer Hub. For private apps, use Access Token. For public apps, ensure OAuth flow completed successfully. Check Authorization header format: Bearer YOUR_API_KEY. Regenerate API key from Intercom Developer Hub if authentication fails.\n### Cannot access conversations or customer data\n\nVerify workspace permissions grant access to conversations. Check team member role has necessary permissions (Admin, Developer, or appropriate role). For private apps, confirm OAuth scope includes required access (read_conversations, write_conversations). Verify the Access Token or OAuth token has not expired.\n### Webhook requests timing out or failing\n\nNote: rate limits apply only to REST API, not webhooks. Verify webhook endpoint is accessible and responds within 15 seconds. Check webhook signature for security validation. Ensure webhook URL is publicly accessible and uses HTTPS. Verify webhook payload structure matches Intercom's expected format.\n### Intercom MCP server authentication errors with API tokens\n\nVerify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Intercom rate limit errors when processing multiple requests\n\nImplement exponential backoff retry logic with jitter. Use Intercom API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed conversation data. Intercom allows 10,000 requests per hour per app.\n### Intercom conversation or user access denied errors\n\nVerify API token has access to the conversation or user. Check account permissions and workspace membership. Ensure API token has required scopes (conversations, users, companies) for target operations.\n### Intercom MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Intercom API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Show open conversations from today",
+        "id": "show-open-conversations-from-today"
+      },
+      {
+        "depth": 3,
+        "text": "Find customer by email",
+        "id": "find-customer-by-email"
+      },
+      {
+        "depth": 3,
+        "text": "Update ticket status to resolved",
+        "id": "update-ticket-status-to-resolved"
+      },
+      {
+        "depth": 3,
+        "text": "Generate weekly support metrics",
+        "id": "generate-weekly-support-metrics"
+      },
+      {
+        "depth": 3,
+        "text": "Create Conversation",
+        "id": "create-conversation"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 429 Too Many Requests - rate limit hit",
+        "id": "http-429-too-many-requests---rate-limit-hit"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 401 Unauthorized - authentication failed",
+        "id": "http-401-unauthorized---authentication-failed"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot access conversations or customer data",
+        "id": "cannot-access-conversations-or-customer-data"
+      },
+      {
+        "depth": 3,
+        "text": "Webhook requests timing out or failing",
+        "id": "webhook-requests-timing-out-or-failing"
+      },
+      {
+        "depth": 3,
+        "text": "Intercom MCP server authentication errors with API tokens",
+        "id": "intercom-mcp-server-authentication-errors-with-api-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Intercom rate limit errors when processing multiple requests",
+        "id": "intercom-rate-limit-errors-when-processing-multiple-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Intercom conversation or user access denied errors",
+        "id": "intercom-conversation-or-user-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Intercom MCP server connection timeouts or network errors",
+        "id": "intercom-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show open conversations from today\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find customer by email\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update ticket status to resolved\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Generate weekly support metrics\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Intercom conversation\nconst conversation = await intercom.conversations.create({\n  from: { type: \"user\", id: \"user-id\" },\n  body: \"Hello, I need help with my account\",\n  assign_to: { type: \"admin\", id: \"admin-id\" }\n});"
+      }
+    ],
+    "filePath": "content/mcp/intercom-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/intercom-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

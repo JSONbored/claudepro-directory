@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:box-mcp-server",
+  "category": "mcp",
+  "slug": "box-mcp-server",
+  "title": "Box MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status box\n\nConfig:\n{\n  \"box\": {\n    \"url\": \"https://mcp.box.com/\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"box\": {\n    \"url\": \"https://mcp.box.com/\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Box MCP Server for Claude\nAccess enterprise content, analyze unstructured data, and automate workflows\n**Category:** mcp\n**Author:** Box\n**Download trust:** first-party\n**Tags:** `storage` `box` `enterprise` `document-management` `collaboration`\n\n## Install\n```bash\nclaude mcp list && claude mcp status box\n```\n\n## Config\n```json\n{\n  \"box\": {\n    \"url\": \"https://mcp.box.com/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status box\n\n## Links\n- https://heyclau.de/mcp/box-mcp-server\n- https://box.dev/guides/box-mcp/remote/",
+  "webUrl": "https://heyclau.de/mcp/box-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://box.dev/guides/box-mcp/remote/"
+}

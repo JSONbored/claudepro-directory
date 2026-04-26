@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:zapier-mcp-server",
+  "category": "mcp",
+  "slug": "zapier-mcp-server",
+  "title": "Zapier MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list\n\nConfig:\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Zapier MCP Server for Claude\nConnect to nearly 8,000 apps through Zapier's automation platform\n**Category:** mcp\n**Author:** Zapier\n**Download trust:** first-party\n**Tags:** `automation` `zapier` `integration` `workflow` `no-code`\n\n## Install\n```bash\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list\n```\n\n## Config\n```json\n{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/zapier-mcp-server\n- https://help.zapier.com/hc/en-us/articles/36265392843917",
+  "webUrl": "https://heyclau.de/mcp/zapier-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917"
+}

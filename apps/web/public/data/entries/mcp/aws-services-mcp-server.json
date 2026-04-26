@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "aws-services-mcp-server",
+    "title": "AWS Services MCP Server - MCP Servers",
+    "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
+    "seoTitle": "AWS Services MCP Server - MCP Servers",
+    "seoDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring Discover tools for AI development.",
+    "author": "AWS Labs",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "aws",
+      "cloud",
+      "infrastructure",
+      "deployment",
+      "monitoring"
+    ],
+    "keywords": [
+      "aws",
+      "claude",
+      "cloud",
+      "deployment",
+      "development",
+      "infrastructure",
+      "mcp",
+      "mcp servers",
+      "monitoring",
+      "server",
+      "services",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://github.com/awslabs/mcp",
+    "cardDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
+    "installable": true,
+    "installCommand": "uvx awslabs.core-mcp-server@latest && claude mcp list",
+    "usageSnippet": "uvx awslabs.core-mcp-server@latest && claude mcp list",
+    "copySnippet": "{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+    "configSnippet": "{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "intermediate",
+    "prerequisites": [
+      "Python 3.8+ installed for running uvx commands",
+      "uv package manager installed (provides uvx command for running Python packages)",
+      "AWS account with active credentials and appropriate IAM permissions",
+      "AWS credentials configured via one of: IAM access keys (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY), AWS profile (~/.aws/credentials), or IAM role (for EC2/ECS)",
+      "AWS CLI installed and configured (optional but recommended for testing authentication with `aws sts get-caller-identity`)",
+      "AWS region configured (default: us-east-1, configurable via AWS_REGION environment variable)",
+      "IAM permissions for target AWS services (e.g., AmazonEC2FullAccess, AmazonS3FullAccess, AWSLambda_FullAccess, AmazonRDSFullAccess, CloudWatchFullAccess, etc.)",
+      "Internet connection for accessing AWS APIs (https://*.amazonaws.com endpoints)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of AWS service concepts (regions, IAM policies, resource IDs, CloudFormation templates)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/aws-services-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "36c5b42a87926bb71ca8bf7a878e163cc8b6f8f28fe4fd6c55394f32659ae580",
+    "body": "## Content\n\nComprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring.\n\n## Features\n\n- EC2 instance management and monitoring\n- S3 bucket and object operations\n- Lambda function deployment and invocation\n- RDS database management\n- CloudWatch metrics and alarms\n- VPC and networking configuration\n- IAM user and role management\n- CloudFormation stack deployment\n- Auto Scaling group management\n- Load balancer configuration\n\n## Use Cases\n\n- Deploy and manage EC2 instances for web applications\n- Automate S3 bucket creation and file operations\n- Deploy Lambda functions for serverless computing\n- Monitor application performance with CloudWatch\n- Manage RDS databases and create read replicas\n- Configure VPC networking and security groups\n- Deploy infrastructure using CloudFormation templates\n- Set up auto-scaling for high availability\n- Implement cost optimization strategies\n- Manage IAM roles and policies for security\n\n## Installation\n\n### Claude Code\n\n1. Run: uvx awslabs.core-mcp-server@latest\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status aws-services\n\n### Claude Desktop\n\n1. Install the AWS MCP server: uvx awslabs.core-mcp-server@latest\n2. Open your Claude Desktop configuration file\n3. Add the AWS MCP server configuration with your credentials\n4. Configure AWS authentication (IAM keys, profile, or roles)\n5. Restart Claude Desktop\n\n## Requirements\n\n- Python 3.8+ installed for running uvx commands\n- uv package manager installed (provides uvx command for running Python packages)\n- AWS account with active credentials and appropriate IAM permissions\n- AWS credentials configured via one of: IAM access keys (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY), AWS profile (~/.aws/credentials), or IAM role (for EC2/ECS)\n- AWS CLI installed and configured (optional but recommended for testing authentication with `aws sts get-caller-identity`)\n- AWS region configured (default: us-east-1, configurable via AWS_REGION environment variable)\n- IAM permissions for target AWS services (e.g., AmazonEC2FullAccess, AmazonS3FullAccess, AWSLambda_FullAccess, AmazonRDSFullAccess, CloudWatchFullAccess, etc.)\n- Internet connection for accessing AWS APIs (https://*.amazonaws.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of AWS service concepts (regions, IAM policies, resource IDs, CloudFormation templates)\n\n## Configuration\n\n```json\n{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Examples\n### Launch a new EC2 instance with custom tags\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Launch a new EC2 instance with custom tags\"\n```\n### Create an S3 bucket with versioning enabled\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an S3 bucket with versioning enabled\"\n```\n### Deploy a Lambda function with environment variable...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a Lambda function with environment variables\"\n```\n### Set up CloudWatch alarms for application monitorin...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Set up CloudWatch alarms for application monitoring\"\n```\n### Create an RDS instance with automated backups\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an RDS instance with automated backups\"\n```\n### Deploy a complete web application stack via CloudF...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a complete web application stack via CloudFormation\"\n```\n\n## Security\n\n- Support for IAM user credentials and roles\n- AWS Profile-based authentication\n- Least privilege access with specific permissions\n- CloudTrail integration for audit logging\n- Secrets Manager for credential management\n- VPC security groups and network ACLs\n- AWS IAM credentials and access keys must be securely stored and never exposed in client-side code or public repositories - use AWS IAM roles, environment variables, and AWS Secrets Manager for credential management\n- AWS service configurations and resource ARNs may expose infrastructure architecture and resource identifiers - ensure AWS resource identifiers are kept private and not shared in public configurations\n- AWS CloudTrail logging and audit trail management are critical for AWS MCP servers - implement proper CloudTrail integration and log retention policies for security compliance and audit requirements\n- AWS credentials (access keys, secret keys, session tokens) must be securely stored using AWS IAM roles, environment variables, or secure credential stores - never hardcode credentials or expose them in client-side code\n- AWS IAM policies should follow the principle of least privilege with minimal required permissions for MCP server operations - regularly audit IAM policies and remove unused permissions\n- AWS CloudTrail logging should be enabled to monitor all API calls made through the MCP server for security auditing and compliance requirements\n\n## Troubleshooting\n### AWS credentials not found or authentication failure\n\nRun `aws configure` to set access keys. Verify AWS_PROFILE matches profile in ~/.aws/credentials. Test with `aws sts get-caller-identity` command to confirm authentication.\n### IAM permissions denied for specific AWS service operations\n\nAttach required IAM policy (AmazonEC2FullAccess, AmazonS3FullAccess, etc). Use AWS Policy Simulator to test permissions. Verify principal has necessary actions in IAM policy document.\n### Resources not found - wrong AWS region configured\n\nVerify AWS_REGION environment variable matches resource location (us-east-1, eu-west-1, etc). Update with `aws configure set region REGION_NAME`. Check region in AWS Console matches CLI.\n### CloudFormation template validation errors or syntax issues\n\nValidate with `aws cloudformation validate-template --template-body file://template.yaml`. Check resource types match AWS documentation exactly. Verify parameter types and AllowedValues constraints.\n### API throttling or RequestLimitExceeded errors\n\nImplement exponential backoff for retries (wait 2^n seconds). Reduce concurrent requests to max 10. Request service quota increase at AWS Service Quotas console for sustained high usage.\n### AWS MCP server authentication errors with IAM credentials\n\nVerify IAM credentials are valid and not expired. Check IAM policy permissions match required AWS service access. Ensure credential format is correct (access key ID and secret access key). For IAM roles, verify role trust relationships and assume role permissions.\n### AWS service rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use AWS SDK built-in retry mechanisms. Monitor AWS service quotas and request rate limits. Implement request queuing and throttling to stay within service limits.\n### AWS MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify AWS service endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff. Check VPC and security group configurations if using private endpoints.\n### AWS MCP server authentication errors with IAM credentials\n\nVerify AWS credentials are valid and not expired. Check IAM user/role has required permissions. Ensure credentials are properly configured in environment variables or AWS credential files. For temporary credentials, verify session token hasn't expired.\n### AWS service access denied errors despite valid credentials\n\nVerify IAM policy includes required service permissions and resource ARNs. Check service-specific permissions (e.g., S3 bucket access, EC2 instance permissions). Review IAM policy conditions and resource restrictions. Use AWS IAM Policy Simulator to test permissions.\n### AWS MCP server rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use AWS SDK built-in retry mechanisms. Monitor service quotas and request rate limits. Consider using AWS service quotas API to check current usage and request increases if needed.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- EC2 instance management and monitoring\n- S3 bucket and object operations\n- Lambda function deployment and invocation\n- RDS database management\n- CloudWatch metrics and alarms\n- VPC and networking configuration\n- IAM user and role management\n- CloudFormation stack deployment\n- Auto Scaling group management\n- Load balancer configuration",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Deploy and manage EC2 instances for web applications\n- Automate S3 bucket creation and file operations\n- Deploy Lambda functions for serverless computing\n- Monitor application performance with CloudWatch\n- Manage RDS databases and create read replicas\n- Configure VPC networking and security groups\n- Deploy infrastructure using CloudFormation templates\n- Set up auto-scaling for high availability\n- Implement cost optimization strategies\n- Manage IAM roles and policies for security",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Run: uvx awslabs.core-mcp-server@latest\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status aws-services\n\n### Claude Desktop\n\n1. Install the AWS MCP server: uvx awslabs.core-mcp-server@latest\n2. Open your Claude Desktop configuration file\n3. Add the AWS MCP server configuration with your credentials\n4. Configure AWS authentication (IAM keys, profile, or roles)\n5. Restart Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Python 3.8+ installed for running uvx commands\n- uv package manager installed (provides uvx command for running Python packages)\n- AWS account with active credentials and appropriate IAM permissions\n- AWS credentials configured via one of: IAM access keys (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY), AWS profile (~/.aws/credentials), or IAM role (for EC2/ECS)\n- AWS CLI installed and configured (optional but recommended for testing authentication with `aws sts get-caller-identity`)\n- AWS region configured (default: us-east-1, configurable via AWS_REGION environment variable)\n- IAM permissions for target AWS services (e.g., AmazonEC2FullAccess, AmazonS3FullAccess, AWSLambda_FullAccess, AmazonRDSFullAccess, CloudWatchFullAccess, etc.)\n- Internet connection for accessing AWS APIs (https://*.amazonaws.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of AWS service concepts (regions, IAM policies, resource IDs, CloudFormation templates)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Launch a new EC2 instance with custom tags\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Launch a new EC2 instance with custom tags\"\n```\n### Create an S3 bucket with versioning enabled\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an S3 bucket with versioning enabled\"\n```\n### Deploy a Lambda function with environment variable...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a Lambda function with environment variables\"\n```\n### Set up CloudWatch alarms for application monitorin...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Set up CloudWatch alarms for application monitoring\"\n```\n### Create an RDS instance with automated backups\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an RDS instance with automated backups\"\n```\n### Deploy a complete web application stack via CloudF...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a complete web application stack via CloudFormation\"\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Launch a new EC2 instance with custom tags\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create an S3 bucket with versioning enabled\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Deploy a Lambda function with environment variables\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Set up CloudWatch alarms for application monitoring\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create an RDS instance with automated backups\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Deploy a complete web application stack via CloudFormation\""
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Support for IAM user credentials and roles\n- AWS Profile-based authentication\n- Least privilege access with specific permissions\n- CloudTrail integration for audit logging\n- Secrets Manager for credential management\n- VPC security groups and network ACLs\n- AWS IAM credentials and access keys must be securely stored and never exposed in client-side code or public repositories - use AWS IAM roles, environment variables, and AWS Secrets Manager for credential management\n- AWS service configurations and resource ARNs may expose infrastructure architecture and resource identifiers - ensure AWS resource identifiers are kept private and not shared in public configurations\n- AWS CloudTrail logging and audit trail management are critical for AWS MCP servers - implement proper CloudTrail integration and log retention policies for security compliance and audit requirements\n- AWS credentials (access keys, secret keys, session tokens) must be securely stored using AWS IAM roles, environment variables, or secure credential stores - never hardcode credentials or expose them in client-side code\n- AWS IAM policies should follow the principle of least privilege with minimal required permissions for MCP server operations - regularly audit IAM policies and remove unused permissions\n- AWS CloudTrail logging should be enabled to monitor all API calls made through the MCP server for security auditing and compliance requirements",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### AWS credentials not found or authentication failure\n\nRun `aws configure` to set access keys. Verify AWS_PROFILE matches profile in ~/.aws/credentials. Test with `aws sts get-caller-identity` command to confirm authentication.\n### IAM permissions denied for specific AWS service operations\n\nAttach required IAM policy (AmazonEC2FullAccess, AmazonS3FullAccess, etc). Use AWS Policy Simulator to test permissions. Verify principal has necessary actions in IAM policy document.\n### Resources not found - wrong AWS region configured\n\nVerify AWS_REGION environment variable matches resource location (us-east-1, eu-west-1, etc). Update with `aws configure set region REGION_NAME`. Check region in AWS Console matches CLI.\n### CloudFormation template validation errors or syntax issues\n\nValidate with `aws cloudformation validate-template --template-body file://template.yaml`. Check resource types match AWS documentation exactly. Verify parameter types and AllowedValues constraints.\n### API throttling or RequestLimitExceeded errors\n\nImplement exponential backoff for retries (wait 2^n seconds). Reduce concurrent requests to max 10. Request service quota increase at AWS Service Quotas console for sustained high usage.\n### AWS MCP server authentication errors with IAM credentials\n\nVerify IAM credentials are valid and not expired. Check IAM policy permissions match required AWS service access. Ensure credential format is correct (access key ID and secret access key). For IAM roles, verify role trust relationships and assume role permissions.\n### AWS service rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use AWS SDK built-in retry mechanisms. Monitor AWS service quotas and request rate limits. Implement request queuing and throttling to stay within service limits.\n### AWS MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify AWS service endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff. Check VPC and security group configurations if using private endpoints.\n### AWS MCP server authentication errors with IAM credentials\n\nVerify AWS credentials are valid and not expired. Check IAM user/role has required permissions. Ensure credentials are properly configured in environment variables or AWS credential files. For temporary credentials, verify session token hasn't expired.\n### AWS service access denied errors despite valid credentials\n\nVerify IAM policy includes required service permissions and resource ARNs. Check service-specific permissions (e.g., S3 bucket access, EC2 instance permissions). Review IAM policy conditions and resource restrictions. Use AWS IAM Policy Simulator to test permissions.\n### AWS MCP server rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use AWS SDK built-in retry mechanisms. Monitor service quotas and request rate limits. Consider using AWS service quotas API to check current usage and request increases if needed.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Launch a new EC2 instance with custom tags",
+        "id": "launch-a-new-ec2-instance-with-custom-tags"
+      },
+      {
+        "depth": 3,
+        "text": "Create an S3 bucket with versioning enabled",
+        "id": "create-an-s3-bucket-with-versioning-enabled"
+      },
+      {
+        "depth": 3,
+        "text": "Deploy a Lambda function with environment variable...",
+        "id": "deploy-a-lambda-function-with-environment-variable"
+      },
+      {
+        "depth": 3,
+        "text": "Set up CloudWatch alarms for application monitorin...",
+        "id": "set-up-cloudwatch-alarms-for-application-monitorin"
+      },
+      {
+        "depth": 3,
+        "text": "Create an RDS instance with automated backups",
+        "id": "create-an-rds-instance-with-automated-backups"
+      },
+      {
+        "depth": 3,
+        "text": "Deploy a complete web application stack via CloudF...",
+        "id": "deploy-a-complete-web-application-stack-via-cloudf"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "AWS credentials not found or authentication failure",
+        "id": "aws-credentials-not-found-or-authentication-failure"
+      },
+      {
+        "depth": 3,
+        "text": "IAM permissions denied for specific AWS service operations",
+        "id": "iam-permissions-denied-for-specific-aws-service-operations"
+      },
+      {
+        "depth": 3,
+        "text": "Resources not found - wrong AWS region configured",
+        "id": "resources-not-found---wrong-aws-region-configured"
+      },
+      {
+        "depth": 3,
+        "text": "CloudFormation template validation errors or syntax issues",
+        "id": "cloudformation-template-validation-errors-or-syntax-issues"
+      },
+      {
+        "depth": 3,
+        "text": "API throttling or RequestLimitExceeded errors",
+        "id": "api-throttling-or-requestlimitexceeded-errors"
+      },
+      {
+        "depth": 3,
+        "text": "AWS MCP server authentication errors with IAM credentials",
+        "id": "aws-mcp-server-authentication-errors-with-iam-credentials"
+      },
+      {
+        "depth": 3,
+        "text": "AWS service rate limiting or throttling errors",
+        "id": "aws-service-rate-limiting-or-throttling-errors"
+      },
+      {
+        "depth": 3,
+        "text": "AWS MCP server connection timeouts or network errors",
+        "id": "aws-mcp-server-connection-timeouts-or-network-errors"
+      },
+      {
+        "depth": 3,
+        "text": "AWS MCP server authentication errors with IAM credentials",
+        "id": "aws-mcp-server-authentication-errors-with-iam-credentials"
+      },
+      {
+        "depth": 3,
+        "text": "AWS service access denied errors despite valid credentials",
+        "id": "aws-service-access-denied-errors-despite-valid-credentials"
+      },
+      {
+        "depth": 3,
+        "text": "AWS MCP server rate limiting or throttling errors",
+        "id": "aws-mcp-server-rate-limiting-or-throttling-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Launch a new EC2 instance with custom tags\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create an S3 bucket with versioning enabled\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Deploy a Lambda function with environment variables\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Set up CloudWatch alarms for application monitoring\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create an RDS instance with automated backups\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Deploy a complete web application stack via CloudFormation\""
+      }
+    ],
+    "filePath": "content/mcp/aws-services-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx",
+    "repoUrl": "https://github.com/awslabs/mcp",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

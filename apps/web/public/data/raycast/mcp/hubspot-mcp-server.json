@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:hubspot-mcp-server",
+  "category": "mcp",
+  "slug": "hubspot-mcp-server",
+  "title": "Hubspot MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status hubspot\n\nConfig:\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Hubspot MCP Server for Claude\nAccess and manage HubSpot CRM data including contacts, companies, and deals\n**Category:** mcp\n**Author:** HubSpot\n**Download trust:** first-party\n**Tags:** `crm` `hubspot` `sales` `marketing` `customer-data`\n\n## Install\n```bash\nclaude mcp list && claude mcp status hubspot\n```\n\n## Config\n```json\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status hubspot\n\n## Links\n- https://heyclau.de/mcp/hubspot-mcp-server\n- https://developers.hubspot.com/mcp",
+  "webUrl": "https://heyclau.de/mcp/hubspot-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.hubspot.com/mcp"
+}

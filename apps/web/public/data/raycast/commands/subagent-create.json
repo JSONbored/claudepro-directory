@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:subagent-create",
+  "category": "commands",
+  "slug": "subagent-create",
+  "title": "Subagent Creator for Claude Code",
+  "copyText": "/subagent-create [role] [options]",
+  "detailMarkdown": "# Subagent Creator for Claude Code\nCreate specialized Claude Code subagents with custom system prompts, scoped tool access, and independent context for parallel task execution and workflow orchestration\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `subagents` `orchestration` `parallel-execution` `specialization` `workflows` `automation`\n\n## Install\n```bash\n/subagent-create [role] [options]\n```\n\n## Usage\n/subagent-create [role] [options]\n\n## Links\n- https://heyclau.de/commands/subagent-create\n- https://docs.claude.com/en/docs/claude-code/sub-agents",
+  "webUrl": "https://heyclau.de/commands/subagent-create",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents"
+}

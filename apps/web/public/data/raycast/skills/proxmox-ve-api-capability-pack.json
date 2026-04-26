@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:proxmox-ve-api-capability-pack",
+  "category": "skills",
+  "slug": "proxmox-ve-api-capability-pack",
+  "title": "Proxmox VE API Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack\n\nUsage:\nUse this skill when an agent must automate Proxmox tasks with cluster-safe sequencing and production-grade verification.\n\nAsset:\n# Trigger\n\"Use the Proxmox VE API capability pack skill for this infrastructure operation.\"\n\n# Required output\n1) Endpoint and task-state mapping\n2) Pre-flight and capacity checks\n3) Operation sequence with stop conditions\n4) Post-flight validation and rollback guidance",
+  "detailMarkdown": "# Proxmox VE API Capability Pack Skill\nExpert Proxmox VE API capability skill for VM/LXC lifecycle orchestration, task polling, auth safety, and cluster-aware operations.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `proxmox` `virtualization` `api` `infrastructure` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack\n```\n\n## Usage\nUse this skill when an agent must automate Proxmox tasks with cluster-safe sequencing and production-grade verification.\n\n## Links\n- https://heyclau.de/skills/proxmox-ve-api-capability-pack\n- https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
+  "webUrl": "https://heyclau.de/skills/proxmox-ve-api-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
+}

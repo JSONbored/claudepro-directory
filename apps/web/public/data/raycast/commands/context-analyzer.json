@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:context-analyzer",
+  "category": "commands",
+  "slug": "context-analyzer",
+  "title": "Context Analyzer for Claude Code",
+  "copyText": "/context-analyzer [scope] [options]",
+  "detailMarkdown": "# Context Analyzer for Claude Code\nAnalyze codebase context with agentic search to understand architecture, patterns, and dependencies before major refactors or feature implementations\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `context-analysis` `codebase-understanding` `architecture` `agentic-search` `refactoring` `planning`\n\n## Install\n```bash\n/context-analyzer [scope] [options]\n```\n\n## Usage\n/context-analyzer [scope] [options]\n\n## Links\n- https://heyclau.de/commands/context-analyzer\n- https://docs.claude.com/en/docs/claude-code/analysis",
+  "webUrl": "https://heyclau.de/commands/context-analyzer",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/analysis"
+}

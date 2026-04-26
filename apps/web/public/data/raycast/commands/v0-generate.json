@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:v0-generate",
+  "category": "commands",
+  "slug": "v0-generate",
+  "title": "V0 Component Generator for Claude",
+  "copyText": "/v0-generate [options] <component_description>",
+  "detailMarkdown": "# V0 Component Generator for Claude\nGenerate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `v0` `ui-generation` `shadcn` `react` `tailwind`\n\n## Install\n```bash\n/v0-generate [options] <component_description>\n```\n\n## Usage\n/v0-generate [options] <component_description>\n\n## Links\n- https://heyclau.de/commands/v0-generate\n- https://v0.dev/docs",
+  "webUrl": "https://heyclau.de/commands/v0-generate",
+  "repoUrl": "",
+  "documentationUrl": "https://v0.dev/docs"
+}

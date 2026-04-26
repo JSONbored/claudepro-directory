@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:prompt-to-asset",
+  "category": "mcp",
+  "slug": "prompt-to-asset",
+  "title": "Prompt-to-asset",
+  "copyText": "Install:\nnpx -y prompt-to-asset\n\nConfig:\n{\n  \"mcpServers\": {\n    \"prompt-to-asset\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"prompt-to-asset\"]\n    }\n  }\n}\n\nUsage:\nclaude mcp add prompt-to-asset -- npx -y prompt-to-asset",
+  "detailMarkdown": "# Prompt-to-asset\nMCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.\n**Category:** mcp\n**Author:** MohamedAbdallah-14\n**Tags:** `mcp` `image-generation` `design-tools` `visual-assets` `icons` `favicons` `og-images`\n\n## Install\n```bash\nnpx -y prompt-to-asset\n```\n\n## Config\n```json\n{\n  \"mcpServers\": {\n    \"prompt-to-asset\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"prompt-to-asset\"]\n    }\n  }\n}\n```\n\n## Usage\nclaude mcp add prompt-to-asset -- npx -y prompt-to-asset\n\n## Links\n- https://heyclau.de/mcp/prompt-to-asset\n- https://github.com/MohamedAbdallah-14/prompt-to-asset#readme\n- https://github.com/MohamedAbdallah-14/prompt-to-asset",
+  "webUrl": "https://heyclau.de/mcp/prompt-to-asset",
+  "repoUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+  "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme"
+}

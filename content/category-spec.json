@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "categoryOrder": [
+    "agents",
+    "mcp",
+    "skills",
+    "rules",
+    "commands",
+    "hooks",
+    "guides",
+    "collections",
+    "statuslines"
+  ],
+  "submissionOrder": [
+    "agents",
+    "rules",
+    "mcp",
+    "skills",
+    "hooks",
+    "commands",
+    "statuslines",
+    "collections",
+    "guides"
+  ],
+  "commonIssueRequiredFields": [
+    "name",
+    "slug",
+    "category",
+    "contact_email",
+    "description",
+    "card_description"
+  ],
+  "skillTypeValues": ["general", "capability-pack"],
+  "skillLevelValues": ["foundational", "advanced", "expert"],
+  "verificationStatusValues": ["draft", "validated", "production"],
+  "defaultTestedPlatforms": [
+    "Claude",
+    "Codex",
+    "OpenClaw",
+    "Cursor",
+    "Windsurf",
+    "Gemini"
+  ],
+  "aliases": {
+    "agent": "agents",
+    "agents": "agents",
+    "rule": "rules",
+    "rules": "rules",
+    "mcp": "mcp",
+    "mcp-server": "mcp",
+    "mcp-servers": "mcp",
+    "mcp-server-submission": "mcp",
+    "mcp-server-content": "mcp",
+    "skill": "skills",
+    "skills": "skills",
+    "hook": "hooks",
+    "hooks": "hooks",
+    "command": "commands",
+    "commands": "commands",
+    "statusline": "statuslines",
+    "statuslines": "statuslines",
+    "collection": "collections",
+    "collections": "collections",
+    "guide": "guides",
+    "guides": "guides"
+  },
+  "categories": {
+    "agents": {
+      "label": "Agents",
+      "description": "Specialized Claude agents and expert roles.",
+      "usageHint": "Copy the full prompt into a Claude agent definition and adapt it to your workflow.",
+      "template": "submit-agent.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["usageSnippet", "copySnippet"],
+      "submissionRequired": ["full_copyable_content"],
+      "requiresUsageSnippet": false,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Open the full asset and review the role boundaries.",
+        "Copy the complete prompt into your Claude agent definition.",
+        "Test on a small task before using it in regular work."
+      ]
+    },
+    "mcp": {
+      "label": "MCP Servers",
+      "description": "Model Context Protocol servers and integrations.",
+      "usageHint": "Install the server, copy the Claude config, then verify the connection in Claude Code.",
+      "template": "submit-mcp.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["installCommand", "usageSnippet", "copySnippet", "configSnippet"],
+      "submissionRequired": ["install_command", "usage_snippet"],
+      "requiresUsageSnippet": true,
+      "requiresAssetContent": false,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": true,
+      "quickstart": [
+        "Run the install command from a trusted source.",
+        "Copy the Claude config into your MCP configuration.",
+        "Restart Claude Code and verify the server responds."
+      ]
+    },
+    "skills": {
+      "label": "Skills",
+      "description": "Installable skill packs and reusable capabilities.",
+      "usageHint": "Install or download the skill pack, then reuse the included files, prompts, or scripts directly.",
+      "template": "submit-skill.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": [
+        "installCommand",
+        "usageSnippet",
+        "copySnippet",
+        "downloadUrl",
+        "skillType",
+        "skillLevel",
+        "verificationStatus",
+        "verifiedAt",
+        "retrievalSources",
+        "testedPlatforms"
+      ],
+      "submissionRequired": ["usage_snippet", "skill_type", "skill_level", "verification_status"],
+      "requiresUsageSnippet": true,
+      "requiresAssetContent": false,
+      "supportsSkillMetadata": true,
+      "supportsDownloadUrl": true,
+      "quickstart": [
+        "Install or download the skill pack.",
+        "Review retrieval sources and tested platforms.",
+        "Invoke it only for the workflows listed in the skill scope."
+      ]
+    },
+    "rules": {
+      "label": "Rules",
+      "description": "Prompt guardrails, project rules, and operating constraints.",
+      "usageHint": "Copy the full rule asset into CLAUDE.md or your project rule system instead of only taking the summary.",
+      "template": "submit-rule.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["copySnippet"],
+      "submissionRequired": ["full_copyable_content"],
+      "requiresUsageSnippet": false,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Read the rule for scope and caveats.",
+        "Copy the full rule into CLAUDE.md or your rule system.",
+        "Run a normal workflow and adjust language that is too broad."
+      ]
+    },
+    "commands": {
+      "label": "Commands",
+      "description": "Slash commands and reusable command prompts.",
+      "usageHint": "Use the exact slash command syntax shown for the best starting point, then inspect the full source if needed.",
+      "template": "submit-command.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["commandSyntax", "usageSnippet", "copySnippet"],
+      "submissionRequired": ["command_syntax", "usage_snippet", "full_copyable_content"],
+      "requiresUsageSnippet": true,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Copy the command syntax.",
+        "Paste the full command asset into your command registry.",
+        "Run it once against a safe test input."
+      ]
+    },
+    "hooks": {
+      "label": "Hooks",
+      "description": "Claude Code hook configs and automation helpers.",
+      "usageHint": "Install the hook script, copy the Claude config, and test the trigger locally before wider use.",
+      "template": "submit-hook.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["trigger", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"],
+      "submissionRequired": ["trigger", "usage_snippet", "full_copyable_content"],
+      "requiresUsageSnippet": true,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Copy the hook script into your repo.",
+        "Add the config under the listed Claude Code trigger.",
+        "Trigger it manually and inspect logs before enabling broadly."
+      ]
+    },
+    "guides": {
+      "label": "Guides",
+      "description": "Long-form guides and practical walkthroughs.",
+      "usageHint": "Use guides as reference docs and implementation walkthroughs, not as standalone assets.",
+      "template": "submit-guide.md",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["usageSnippet"],
+      "submissionRequired": ["guide_content"],
+      "requiresUsageSnippet": false,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Scan prerequisites first.",
+        "Follow the guide steps in order.",
+        "Use troubleshooting notes before adapting the workflow."
+      ]
+    },
+    "collections": {
+      "label": "Collections",
+      "description": "Curated bundles of related assets.",
+      "usageHint": "Start with the recommended order and then open the included entries one by one.",
+      "template": "submit-collection.md",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["items"],
+      "submissionRequired": ["items"],
+      "requiresUsageSnippet": false,
+      "requiresAssetContent": false,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Review the included entries.",
+        "Follow the recommended installation order when present.",
+        "Open each included entry for its exact commands and config."
+      ]
+    },
+    "statuslines": {
+      "label": "Statuslines",
+      "description": "Statusline scripts and workflow telemetry.",
+      "usageHint": "Copy the Claude statusline config first, then install or adapt the script asset behind it.",
+      "template": "submit-statusline.yml",
+      "contentRequired": ["title", "slug", "description", "cardDescription"],
+      "contentRecommended": ["scriptLanguage", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"],
+      "submissionRequired": ["script_language", "usage_snippet", "full_copyable_content"],
+      "requiresUsageSnippet": true,
+      "requiresAssetContent": true,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "quickstart": [
+        "Copy the statusline config.",
+        "Install or adapt the script asset.",
+        "Run it in your shell before wiring it into Claude Code."
+      ]
+    }
+  }
+}

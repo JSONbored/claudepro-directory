@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "commands",
+    "slug": "git-smart-commit",
+    "title": "Git Smart Commit for Claude Code",
+    "description": "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages",
+    "seoTitle": "Git Smart Commit for Claude Code",
+    "seoDescription": "Intelligently analyzes changes and creates well-formatted git commits with conventional commit messages Discover tools for AI development.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-15",
+    "tags": [
+      "git",
+      "commit",
+      "version-control",
+      "conventional-commits"
+    ],
+    "keywords": [
+      "claude",
+      "commands",
+      "commit",
+      "conventional-commits",
+      "development",
+      "git",
+      "smart",
+      "tools",
+      "version-control"
+    ],
+    "readingTime": 2,
+    "difficultyScore": 24,
+    "documentationUrl": "https://www.conventionalcommits.org/",
+    "cardDescription": "Analyze staged changes and generate a clean conventional commit message.",
+    "installable": true,
+    "usageSnippet": "/git-smart-commit feat \"add structured content schema\"",
+    "copySnippet": "/git-smart-commit feat \"add structured content schema\"",
+    "commandSyntax": "/git-smart-commit [type] [message]",
+    "argumentHint": "[type] [message]",
+    "allowedTools": [
+      "Bash(git add:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git commit:*)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Context\n\n- Current git status: !`git status --short`\n- Staged changes: !`git diff --cached --stat`\n- Unstaged changes: !`git diff --stat`\n- Recent commits: !`git log --oneline -5`\n\n## Your Task\n\nAnalyze the changes and create a git commit following these guidelines:\n\n1. **Conventional Commit Format**:\n   - feat: New feature\n   - fix: Bug fix\n   - docs: Documentation changes\n   - style: Code style changes (formatting, etc)\n   - refactor: Code refactoring\n   - perf: Performance improvements\n   - test: Test changes\n   - build: Build system changes\n   - ci: CI/CD changes\n   - chore: Other changes\n\n2. **Commit Message Structure**:\n   ```\n   <type>(<scope>): <subject>\n   \n   <body>\n   \n   <footer>\n   ```\n\n3. **Best Practices**:\n   - Subject line: 50 characters max\n   - Use imperative mood (\"Add\" not \"Added\")\n   - Body: Wrap at 72 characters\n   - Explain what and why, not how\n   - Reference issues if applicable\n\n4. **Smart Analysis**:\n   - Group related changes\n   - Suggest splitting if changes are unrelated\n   - Detect breaking changes\n   - Identify files that shouldn't be committed\n\nIf arguments provided: Use $1 as type and $2 as message.\nOtherwise: Analyze changes and suggest appropriate commit.\n\n## Command Metadata\n\n```yaml\nallowed-tools:\n  - Bash(git add:*)\n  - Bash(git status:*)\n  - Bash(git diff:*)\n  - Bash(git commit:*)\nargument-hint: [type] [message]\ndescription: Create a smart git commit\nmodel: claude-3-5-sonnet-20241022\n```\n\n## Steps\n\n1. Review all changes\n2. Identify the commit type\n3. Stage appropriate files\n4. Create descriptive commit message\n5. Commit the changes",
+    "sections": [
+      {
+        "title": "Context",
+        "id": "context",
+        "markdown": "- Current git status: !`git status --short`\n- Staged changes: !`git diff --cached --stat`\n- Unstaged changes: !`git diff --stat`\n- Recent commits: !`git log --oneline -5`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Your Task",
+        "id": "your-task",
+        "markdown": "Analyze the changes and create a git commit following these guidelines:\n\n1. **Conventional Commit Format**:\n   - feat: New feature\n   - fix: Bug fix\n   - docs: Documentation changes\n   - style: Code style changes (formatting, etc)\n   - refactor: Code refactoring\n   - perf: Performance improvements\n   - test: Test changes\n   - build: Build system changes\n   - ci: CI/CD changes\n   - chore: Other changes\n\n2. **Commit Message Structure**:\n   ```\n   <type>(<scope>): <subject>\n   \n   <body>\n   \n   <footer>\n   ```\n\n3. **Best Practices**:\n   - Subject line: 50 characters max\n   - Use imperative mood (\"Add\" not \"Added\")\n   - Body: Wrap at 72 characters\n   - Explain what and why, not how\n   - Reference issues if applicable\n\n4. **Smart Analysis**:\n   - Group related changes\n   - Suggest splitting if changes are unrelated\n   - Detect breaking changes\n   - Identify files that shouldn't be committed\n\nIf arguments provided: Use $1 as type and $2 as message.\nOtherwise: Analyze changes and suggest appropriate commit.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "<type>(<scope>): <subject>\n   \n   <body>\n   \n   <footer>"
+          }
+        ]
+      },
+      {
+        "title": "Command Metadata",
+        "id": "command-metadata",
+        "markdown": "```yaml\nallowed-tools:\n  - Bash(git add:*)\n  - Bash(git status:*)\n  - Bash(git diff:*)\n  - Bash(git commit:*)\nargument-hint: [type] [message]\ndescription: Create a smart git commit\nmodel: claude-3-5-sonnet-20241022\n```",
+        "codeBlocks": [
+          {
+            "language": "yaml",
+            "code": "allowed-tools:\n  - Bash(git add:*)\n  - Bash(git status:*)\n  - Bash(git diff:*)\n  - Bash(git commit:*)\nargument-hint: [type] [message]\ndescription: Create a smart git commit\nmodel: claude-3-5-sonnet-20241022"
+          }
+        ]
+      },
+      {
+        "title": "Steps",
+        "id": "steps",
+        "markdown": "1. Review all changes\n2. Identify the commit type\n3. Stage appropriate files\n4. Create descriptive commit message\n5. Commit the changes",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Context",
+        "id": "context"
+      },
+      {
+        "depth": 2,
+        "text": "Your Task",
+        "id": "your-task"
+      },
+      {
+        "depth": 2,
+        "text": "Command Metadata",
+        "id": "command-metadata"
+      },
+      {
+        "depth": 2,
+        "text": "Steps",
+        "id": "steps"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "<type>(<scope>): <subject>\n   \n   <body>\n   \n   <footer>"
+      },
+      {
+        "language": "yaml",
+        "code": "allowed-tools:\n  - Bash(git add:*)\n  - Bash(git status:*)\n  - Bash(git diff:*)\n  - Bash(git commit:*)\nargument-hint: [type] [message]\ndescription: Create a smart git commit\nmodel: claude-3-5-sonnet-20241022"
+      }
+    ],
+    "filePath": "content/commands/git-smart-commit.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/git-smart-commit.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

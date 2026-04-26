@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:notion-mcp-server",
+  "category": "mcp",
+  "slug": "notion-mcp-server",
+  "title": "Notion MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status notion\n\nConfig:\n{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Notion MCP Server for Claude\nRead docs, update pages, and manage tasks in Notion workspaces\n**Category:** mcp\n**Author:** Notion\n**Download trust:** first-party\n**Tags:** `documentation` `notion` `wiki` `notes` `knowledge-base`\n\n## Install\n```bash\nclaude mcp list && claude mcp status notion\n```\n\n## Config\n```json\n{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status notion\n\n## Links\n- https://heyclau.de/mcp/notion-mcp-server\n- https://developers.notion.com/docs/mcp",
+  "webUrl": "https://heyclau.de/mcp/notion-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.notion.com/docs/mcp"
+}

@@ -441,7 +441,7 @@
 }
 
 .hero-stats-grid {
-  @apply mx-auto flex max-w-[36rem] items-start justify-center gap-10 pt-4 pb-6;
+  @apply mx-auto flex max-w-[36rem] items-start justify-center gap-3 pt-4 pb-6 sm:gap-10;
 }
 
 .hero-stat-block {
@@ -603,6 +603,10 @@
 
 .directory-tag {
   @apply inline-flex items-center rounded-md border border-border/70 bg-background px-2 py-0.5 text-[10px] text-muted-foreground;
+}
+
+.distribution-badge {
+  @apply inline-flex items-center rounded-md border border-border/70 bg-secondary/35 px-2 py-0.5 text-[10px] uppercase text-muted-foreground;
 }
 
 .directory-github-stat {

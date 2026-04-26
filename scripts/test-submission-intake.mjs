@@ -42,6 +42,40 @@ claude mcp add prompt-to-asset -- npx -y prompt-to-asset`),
 
 {
   const report = validateSubmission(
+    issue(
+      `### Name
+ContrastAPI
+
+### Slug
+ContrastAPI
+
+### Category
+mcp-server
+
+### Contact email
+dev@example.com
+
+### Description
+MCP server for contrast checks.
+
+### Card description
+Check color contrast from Claude.
+
+### Install command
+npx -y contrastapi
+
+### Usage snippet
+claude mcp add contrastapi -- npx -y contrastapi`,
+      ["submission"],
+    ),
+  );
+  assert.equal(report.ok, true);
+  assert.equal(report.category, "mcp");
+  assert.equal(report.fields.slug, "contrastapi");
+}
+
+{
+  const report = validateSubmission(
     issue(`### Name
 Unslop
 

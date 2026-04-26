@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "unraid-ca-template-authoring-capability-pack",
+    "title": "Unraid CA Template Authoring Capability Pack Skill",
+    "description": "Expert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.",
+    "seoTitle": "Unraid CA Template Authoring Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for creating and validating Unraid Community Apps templates with polished metadata and submission standards.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "unraid",
+      "community-apps",
+      "docker",
+      "templates",
+      "capability-pack"
+    ],
+    "keywords": [
+      "unraid ca template",
+      "community apps xml",
+      "unraid docker metadata",
+      "ca submission checklist"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 84,
+    "documentationUrl": "https://forums.unraid.net/forum/64-docker-engine/",
+    "cardDescription": "Author polished Unraid CA templates with correct metadata, support links, and production-safe defaults.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip -o unraid-ca-template-authoring-capability-pack.zip && unzip -o unraid-ca-template-authoring-capability-pack.zip -d ./unraid-ca-template-authoring-capability-pack",
+    "usageSnippet": "Use this skill to author Unraid CA templates that are beginner-safe, operationally honest, and ready for review.",
+    "copySnippet": "# Trigger\n\"Apply the Unraid CA template authoring capability pack.\"\n\n# Required output\n1) Template XML with validated metadata fields\n2) Beginner-safe default config and caveats\n3) Support and documentation linkage\n4) CA submission checklist",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://forums.unraid.net/",
+      "https://github.com/bergware/dynamix",
+      "https://docs.unraid.net/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Container image and runtime requirements",
+      "Support URL and docs",
+      "Unraid-compatible volume/network mapping"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/unraid-ca-template-authoring-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to sources verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://forums.unraid.net/\n- https://github.com/bergware/dynamix\n- https://docs.unraid.net/\n\n## Core Workflow\n\n1. Define intended user profile and operational constraints.\n2. Draft CA XML with complete metadata and accurate support references.\n3. Validate defaults for first-boot safety and recovery behavior.\n4. Add caveats for resource, security, and maintenance tradeoffs.\n5. Complete submission checklist and review pass.\n\n## Overview\n\nThis skill helps agents produce community-ready Unraid templates that are practical for beginners and maintainable for operators.\n\n## Capability Scope\n\n- CA XML metadata completeness\n- Beginner-safe defaults and caveats\n- Support/docs linkage quality\n- Operational tradeoff transparency\n- Submission readiness review\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Maintain accurate CA metadata and reachable support links.\n- Keep defaults beginner-safe with explicit tradeoff notes.\n- Validate networking, storage, and permission assumptions.\n- Treat template updates as user-impacting changes with clear notes.\n\n## Troubleshooting\n\n**Issue:** Template rejected for weak metadata  \n**Fix:** complete Project, Support, TemplateURL, Icon, and Overview fields.\n\n**Issue:** New users fail first boot  \n**Fix:** tighten defaults and add explicit setup prerequisites.\n\n**Issue:** Support load spikes after release  \n**Fix:** publish FAQ + known limitations before submission.\n\n## Output Contract\n\n1. Production-ready CA template metadata.\n2. Safe default config and caveat notes.\n3. Review checklist with unresolved gaps.\n4. Submission package summary.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to sources verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://forums.unraid.net/\n- https://github.com/bergware/dynamix\n- https://docs.unraid.net/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Define intended user profile and operational constraints.\n2. Draft CA XML with complete metadata and accurate support references.\n3. Validate defaults for first-boot safety and recovery behavior.\n4. Add caveats for resource, security, and maintenance tradeoffs.\n5. Complete submission checklist and review pass.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps agents produce community-ready Unraid templates that are practical for beginners and maintainable for operators.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- CA XML metadata completeness\n- Beginner-safe defaults and caveats\n- Support/docs linkage quality\n- Operational tradeoff transparency\n- Submission readiness review",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Maintain accurate CA metadata and reachable support links.\n- Keep defaults beginner-safe with explicit tradeoff notes.\n- Validate networking, storage, and permission assumptions.\n- Treat template updates as user-impacting changes with clear notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Template rejected for weak metadata  \n**Fix:** complete Project, Support, TemplateURL, Icon, and Overview fields.\n\n**Issue:** New users fail first boot  \n**Fix:** tighten defaults and add explicit setup prerequisites.\n\n**Issue:** Support load spikes after release  \n**Fix:** publish FAQ + known limitations before submission.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Production-ready CA template metadata.\n2. Safe default config and caveat notes.\n3. Review checklist with unresolved gaps.\n4. Submission package summary.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/unraid-ca-template-authoring-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

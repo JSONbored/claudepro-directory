@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "pagespeed-insights-optimizer",
+    "title": "PageSpeed Insights Optimization Skill for AI Agents",
+    "description": "Structured optimization workflow for PageSpeed Insights and Lighthouse that improves Core Web Vitals without changing UI/UX.",
+    "seoTitle": "PageSpeed Insights Optimization Skill for AI Agents",
+    "seoDescription": "Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "pagespeed",
+      "lighthouse",
+      "core-web-vitals",
+      "web-performance",
+      "optimization"
+    ],
+    "keywords": [
+      "ai-skill",
+      "pagespeed",
+      "lighthouse",
+      "lcp",
+      "cls",
+      "tbt",
+      "performance",
+      "optimization",
+      "core-web-vitals",
+      "skills"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 78,
+    "documentationUrl": "https://web.dev/articles/vitals",
+    "cardDescription": "Improve PSI/Lighthouse scores with a strict workflow for LCP, render-blocking resources, and unused JS/CSS while preserving design and behavior.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer",
+    "usageSnippet": "Use this skill whenever you need measurable PSI/Lighthouse improvements while keeping UI/UX unchanged.",
+    "copySnippet": "# Trigger\n\"Run the PageSpeed Insights optimizer skill on this route and only propose\nchanges that preserve visual output and behavior.\"\n\n# Required output\n1) Baseline metrics (mobile + desktop): FCP, LCP, TBT, CLS, SI\n2) Top bottlenecks ordered by expected impact\n3) Smallest safe patch set\n4) Validation rerun with before/after deltas\n\n# Hard constraints\n- No visual redesign\n- No feature removal\n- Keep accessibility and SEO intact",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://web.dev/articles/vitals"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Live URL or preview URL that can be tested by Lighthouse/PageSpeed Insights",
+      "Access to run local build/type-check commands",
+      "Ability to patch frontend code and redeploy for verification",
+      "Optional access to Chrome DevTools trace for deep diagnostics"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/pagespeed-insights-optimizer.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "bcb96e6ace1641db8801d2c105e7491c4ecb18fc181ae9a73378e0578d932fc4",
+    "body": "## Overview\n\nThis skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: direct skill package support using `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-format content (`SKILL.md`) and can be used as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.\n\n## Prerequisites\n\n- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, smoke tests)\n- Access to deploy and re-test\n\n## What This Skill Optimizes\n\n- LCP diagnosis and render delay reduction\n- Render-blocking CSS/JS mitigation\n- Unused JavaScript/CSS reduction\n- Third-party script scheduling strategy\n- Cache policy and static asset delivery consistency\n- Regression-safe micro-optimizations for initial route payload\n\n## How to Use This Skill\n\n### Prompt Pattern\n\nUse this prompt:\n\n```text\nApply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas\n```\n\n### Execution Flow\n\n1. Capture baseline metrics and record exact failing audits.\n2. Identify the current LCP element and why it is delayed.\n3. Apply smallest change set that targets top bottlenecks only.\n4. Re-run benchmarks and compare deltas.\n5. If gains are below threshold, stop and report diminishing returns.\n\n## Optimization Playbook\n\n### 1) LCP and above-the-fold path\n\n- Reduce server and render delay for the LCP element.\n- Ensure critical route data and styles load predictably.\n- Move non-critical work after first render.\n\n### 2) Render-blocking resources\n\n- Keep critical CSS minimal.\n- Defer non-critical scripts and low-priority widgets.\n- Avoid introducing blocking dependencies in root layout.\n\n### 3) Bundle pressure\n\n- Defer or split route-noncritical bundles.\n- Remove or gate dead/unused client-side modules.\n- Keep initial route payload focused on first-screen needs.\n\n### 4) Third-party impact\n\n- Delay analytics and low-priority scripts.\n- Verify no third-party library blocks first paint.\n- Keep third-party bytes and main-thread work accountable.\n\n### 5) Cache + delivery checks\n\n- Ensure static assets use long-lived immutable caching where safe.\n- Ensure API and dynamic routes are not accidentally over-cached.\n- Validate cache behavior after deploy.\n\n## Troubleshooting\n\n**Issue:** Score regresses after adding \"helpful\" scripts  \n**Fix:** Prioritize first-view rendering; move non-critical scripts to idle/lazy load.\n\n**Issue:** LCP remains high despite JS reductions  \n**Fix:** Re-check the actual LCP element, image/font loading path, and render delay.\n\n**Issue:** Mobile score volatile between runs  \n**Fix:** Use median over multiple runs and compare stable deltas, not single spikes.\n\n**Issue:** Good lab scores but poor field data  \n**Fix:** Track CrUX trends and verify real-user bottlenecks (device/network mix, third-party load).\n\n## Notes for This Repository\n\n- Use the generated index and existing scripts (`pnpm type-check`, `pnpm build`) after each optimization patch.\n- Keep changes scoped to measurable performance deltas.\n- Preserve the current visual layout and interaction model.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: direct skill package support using `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-format content (`SKILL.md`) and can be used as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, smoke tests)\n- Access to deploy and re-test",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Optimizes",
+        "id": "what-this-skill-optimizes",
+        "markdown": "- LCP diagnosis and render delay reduction\n- Render-blocking CSS/JS mitigation\n- Unused JavaScript/CSS reduction\n- Third-party script scheduling strategy\n- Cache policy and static asset delivery consistency\n- Regression-safe micro-optimizations for initial route payload",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\nUse this prompt:\n\n```text\nApply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas\n```\n\n### Execution Flow\n\n1. Capture baseline metrics and record exact failing audits.\n2. Identify the current LCP element and why it is delayed.\n3. Apply smallest change set that targets top bottlenecks only.\n4. Re-run benchmarks and compare deltas.\n5. If gains are below threshold, stop and report diminishing returns.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas"
+          }
+        ]
+      },
+      {
+        "title": "Optimization Playbook",
+        "id": "optimization-playbook",
+        "markdown": "### 1) LCP and above-the-fold path\n\n- Reduce server and render delay for the LCP element.\n- Ensure critical route data and styles load predictably.\n- Move non-critical work after first render.\n\n### 2) Render-blocking resources\n\n- Keep critical CSS minimal.\n- Defer non-critical scripts and low-priority widgets.\n- Avoid introducing blocking dependencies in root layout.\n\n### 3) Bundle pressure\n\n- Defer or split route-noncritical bundles.\n- Remove or gate dead/unused client-side modules.\n- Keep initial route payload focused on first-screen needs.\n\n### 4) Third-party impact\n\n- Delay analytics and low-priority scripts.\n- Verify no third-party library blocks first paint.\n- Keep third-party bytes and main-thread work accountable.\n\n### 5) Cache + delivery checks\n\n- Ensure static assets use long-lived immutable caching where safe.\n- Ensure API and dynamic routes are not accidentally over-cached.\n- Validate cache behavior after deploy.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Score regresses after adding \"helpful\" scripts  \n**Fix:** Prioritize first-view rendering; move non-critical scripts to idle/lazy load.\n\n**Issue:** LCP remains high despite JS reductions  \n**Fix:** Re-check the actual LCP element, image/font loading path, and render delay.\n\n**Issue:** Mobile score volatile between runs  \n**Fix:** Use median over multiple runs and compare stable deltas, not single spikes.\n\n**Issue:** Good lab scores but poor field data  \n**Fix:** Track CrUX trends and verify real-user bottlenecks (device/network mix, third-party load).",
+        "codeBlocks": []
+      },
+      {
+        "title": "Notes for This Repository",
+        "id": "notes-for-this-repository",
+        "markdown": "- Use the generated index and existing scripts (`pnpm type-check`, `pnpm build`) after each optimization patch.\n- Keep changes scoped to measurable performance deltas.\n- Preserve the current visual layout and interaction model.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Optimizes",
+        "id": "what-this-skill-optimizes"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Optimization Playbook",
+        "id": "optimization-playbook"
+      },
+      {
+        "depth": 3,
+        "text": "1) LCP and above-the-fold path",
+        "id": "1-lcp-and-above-the-fold-path"
+      },
+      {
+        "depth": 3,
+        "text": "2) Render-blocking resources",
+        "id": "2-render-blocking-resources"
+      },
+      {
+        "depth": 3,
+        "text": "3) Bundle pressure",
+        "id": "3-bundle-pressure"
+      },
+      {
+        "depth": 3,
+        "text": "4) Third-party impact",
+        "id": "4-third-party-impact"
+      },
+      {
+        "depth": 3,
+        "text": "5) Cache + delivery checks",
+        "id": "5-cache-delivery-checks"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Notes for This Repository",
+        "id": "notes-for-this-repository"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas"
+      }
+    ],
+    "filePath": "content/skills/pagespeed-insights-optimizer.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/pagespeed-insights-optimizer.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

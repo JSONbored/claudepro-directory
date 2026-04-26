@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:mcp-server-authoring-security-capability-pack",
+  "category": "skills",
+  "slug": "mcp-server-authoring-security-capability-pack",
+  "title": "MCP Server Authoring Security Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/mcp-server-authoring-security-capability-pack.zip -o mcp-server-authoring-security-capability-pack.zip && unzip -o mcp-server-authoring-security-capability-pack.zip -d ./mcp-server-authoring-security-capability-pack\n\nUsage:\nUse this skill when building MCP servers that must be secure, reliable, and safely consumable by external agents.\n\nAsset:\n# Trigger\n\"Apply the MCP server authoring security capability pack to this server.\"\n\n# Required output\n1) Threat model and trust boundaries\n2) Tool schema and validation contracts\n3) Auth and permission architecture\n4) Abuse and incident response controls",
+  "detailMarkdown": "# MCP Server Authoring Security Capability Pack Skill\nExpert MCP capability skill for secure server authoring, tool schema discipline, auth boundaries, and adversarial prompt hardening.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `mcp` `security` `server-authoring` `tools` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/mcp-server-authoring-security-capability-pack.zip -o mcp-server-authoring-security-capability-pack.zip && unzip -o mcp-server-authoring-security-capability-pack.zip -d ./mcp-server-authoring-security-capability-pack\n```\n\n## Usage\nUse this skill when building MCP servers that must be secure, reliable, and safely consumable by external agents.\n\n## Links\n- https://heyclau.de/skills/mcp-server-authoring-security-capability-pack\n- https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
+  "webUrl": "https://heyclau.de/skills/mcp-server-authoring-security-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices"
+}

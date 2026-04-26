@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:kubernetes-mcp-server",
+  "category": "mcp",
+  "slug": "kubernetes-mcp-server",
+  "title": "Kubernetes MCP Server - MCP Servers",
+  "copyText": "Install:\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list\n\nConfig:\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n\nUsage:\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+  "detailMarkdown": "# Kubernetes MCP Server - MCP Servers\nKubernetes cluster management and container orchestration through MCP integration\n**Category:** mcp\n**Author:** feiskyer\n**Download trust:** first-party\n**Tags:** `kubernetes` `k8s` `container` `orchestration` `devops`\n\n## Install\n```bash\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list\n```\n\n## Config\n```json\n{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/kubernetes-mcp-server\n- https://github.com/feiskyer/mcp-kubernetes-server\n- https://github.com/feiskyer/mcp-kubernetes-server",
+  "webUrl": "https://heyclau.de/mcp/kubernetes-mcp-server",
+  "repoUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
+  "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server"
+}

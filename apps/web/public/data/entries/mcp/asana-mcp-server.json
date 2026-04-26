@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "asana-mcp-server",
+    "title": "Asana MCP Server for Claude",
+    "description": "Interact with Asana workspaces to manage projects and tasks",
+    "seoTitle": "Asana MCP Server for Claude",
+    "seoDescription": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development.",
+    "author": "Asana",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "asana",
+      "project-management",
+      "tasks",
+      "team-collaboration",
+      "workflow"
+    ],
+    "keywords": [
+      "asana",
+      "claude",
+      "development",
+      "mcp",
+      "mcp servers",
+      "project-management",
+      "server",
+      "tasks",
+      "team-collaboration",
+      "tools",
+      "workflow"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+    "cardDescription": "Interact with Asana workspaces to manage projects and tasks",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status asana",
+    "usageSnippet": "claude mcp list && claude mcp status asana",
+    "copySnippet": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "configSnippet": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "OAuth 2.0 authentication (required for MCP server via SSE transport)",
+      "Asana account with access to at least one workspace",
+      "Workspace membership with Member role or higher (Guest role insufficient for task creation)",
+      "Internet connection for accessing Asana API (https://app.asana.com)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "SSE (Server-Sent Events) transport support in MCP client",
+      "Rate limit awareness: Free tier 150 requests/minute, Paid tier 1,500 requests/minute",
+      "Understanding of Asana workspace, project, and task structure",
+      "OAuth scopes: default (access to all endpoints) or specific scopes as needed",
+      "Access to ~/.mcp-auth directory for OAuth token storage (may need cleanup if authentication fails)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/asana-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "686fda20bfa3699a449ee489e34d4d57de5279ee41755d346bf90c8289e7a7a1",
+    "body": "## Content\n\nConnect Claude to Asana for comprehensive project management and team collaboration.\n\n## Features\n\n- Create and manage tasks with rich metadata\n- Update project status and milestones\n- Assign team members and collaborators\n- Set due dates and task dependencies\n- Generate progress reports and analytics\n- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking\n- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic\n- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows\n- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking\n- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic\n- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows\n\n## Use Cases\n\n- Create tasks from meeting notes\n- Update project timelines and deadlines\n- Assign work to team members efficiently\n- Track milestone progress across projects\n- Generate status reports for stakeholders\n- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination\n- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add --transport sse asana https://mcp.asana.com/sse\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status asana\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file\n2. Add the Asana server configuration with SSE transport\n3. Restart Claude Desktop\n4. Authenticate via OAuth when prompted\n\n## Requirements\n\n- OAuth 2.0 authentication (required for MCP server via SSE transport)\n- Asana account with access to at least one workspace\n- Workspace membership with Member role or higher (Guest role insufficient for task creation)\n- Internet connection for accessing Asana API (https://app.asana.com)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- SSE (Server-Sent Events) transport support in MCP client\n- Rate limit awareness: Free tier 150 requests/minute, Paid tier 1,500 requests/minute\n- Understanding of Asana workspace, project, and task structure\n- OAuth scopes: default (access to all endpoints) or specific scopes as needed\n- Access to ~/.mcp-auth directory for OAuth token storage (may need cleanup if authentication fails)\n\n## Configuration\n\n```json\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Examples\n### Create a task for the new feature\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create a task for the new feature\"\n```\n### Show all tasks due this week\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show all tasks due this week\"\n```\n### Update project status to on-track\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update project status to on-track\"\n```\n### Assign task to team member\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Assign task to team member\"\n```\n### Create Task with Dependencies\nCreate a new Asana task with project assignment, dependencies, and due date\n```typescript\n// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});\n```\n### Create Task with Dependencies\nCreate a new Asana task with project assignment, dependencies, and due date\n```typescript\n// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});\n```\n\n## Security\n\n- OAuth authentication for secure access\n- Workspace permissions apply automatically\n- Audit trail maintained for all actions\n- Regular permission reviews recommended\n- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### OAuth authentication fails or connection times out\n\nRemove ~/.mcp-auth directory with `rm -rf ~/.mcp-auth` and re-authenticate. Verify SSE URL https://mcp.asana.com/sse is accessible. Logout and re-login to Asana account if errors persist.\n### Insufficient permissions to create or modify tasks\n\nVerify workspace role is Member or higher (not Guest). Check project permissions allow task creation. Contact workspace admin to upgrade access level if needed.\n### Rate limit exceeded during bulk task operations\n\nFree tier: 150 req/min limit. Paid tier: 1,500 req/min. Batch operations into groups of 10-20 tasks. Implement delays between batches. Check Retry-After header in 429 responses.\n### Tasks not appearing or data appears stale\n\nRun tools/list command to refresh available endpoints. Restart MCP client connection. Verify you're querying correct workspace - switch workspaces if accessing wrong data.\n### Asana MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when managing large Asana projects\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Asana workspace or project access denied errors\n\nVerify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.\n### Asana MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.\n### Asana MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when managing large Asana projects\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Asana workspace or project access denied errors\n\nVerify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.\n### Asana MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Connect Claude to Asana for comprehensive project management and team collaboration.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Create and manage tasks with rich metadata\n- Update project status and milestones\n- Assign team members and collaborators\n- Set due dates and task dependencies\n- Generate progress reports and analytics\n- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking\n- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic\n- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows\n- Advanced Asana project and task management with workspace organization, team collaboration features, and project portfolio tracking\n- Batch operations support for efficient bulk task creation, updates, and assignments with automatic rate limit handling and retry logic\n- Real-time task synchronization capabilities with webhook integration support for monitoring project changes and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Create tasks from meeting notes\n- Update project timelines and deadlines\n- Assign work to team members efficiently\n- Track milestone progress across projects\n- Generate status reports for stakeholders\n- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination\n- Build automated project management workflows that sync external systems with Asana projects for real-time task tracking and team coordination",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add --transport sse asana https://mcp.asana.com/sse\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status asana\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file\n2. Add the Asana server configuration with SSE transport\n3. Restart Claude Desktop\n4. Authenticate via OAuth when prompted",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- OAuth 2.0 authentication (required for MCP server via SSE transport)\n- Asana account with access to at least one workspace\n- Workspace membership with Member role or higher (Guest role insufficient for task creation)\n- Internet connection for accessing Asana API (https://app.asana.com)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- SSE (Server-Sent Events) transport support in MCP client\n- Rate limit awareness: Free tier 150 requests/minute, Paid tier 1,500 requests/minute\n- Understanding of Asana workspace, project, and task structure\n- OAuth scopes: default (access to all endpoints) or specific scopes as needed\n- Access to ~/.mcp-auth directory for OAuth token storage (may need cleanup if authentication fails)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Create a task for the new feature\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create a task for the new feature\"\n```\n### Show all tasks due this week\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Show all tasks due this week\"\n```\n### Update project status to on-track\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update project status to on-track\"\n```\n### Assign task to team member\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Assign task to team member\"\n```\n### Create Task with Dependencies\nCreate a new Asana task with project assignment, dependencies, and due date\n```typescript\n// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});\n```\n### Create Task with Dependencies\nCreate a new Asana task with project assignment, dependencies, and due date\n```typescript\n// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create a task for the new feature\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Show all tasks due this week\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update project status to on-track\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Assign task to team member\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});"
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication for secure access\n- Workspace permissions apply automatically\n- Audit trail maintained for all actions\n- Regular permission reviews recommended\n- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n- Asana API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Asana workspace and project IDs may expose organizational structure and team information - ensure workspace IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Asana MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Asana webhook configurations and payloads may contain sensitive project and task data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### OAuth authentication fails or connection times out\n\nRemove ~/.mcp-auth directory with `rm -rf ~/.mcp-auth` and re-authenticate. Verify SSE URL https://mcp.asana.com/sse is accessible. Logout and re-login to Asana account if errors persist.\n### Insufficient permissions to create or modify tasks\n\nVerify workspace role is Member or higher (not Guest). Check project permissions allow task creation. Contact workspace admin to upgrade access level if needed.\n### Rate limit exceeded during bulk task operations\n\nFree tier: 150 req/min limit. Paid tier: 1,500 req/min. Batch operations into groups of 10-20 tasks. Implement delays between batches. Check Retry-After header in 429 responses.\n### Tasks not appearing or data appears stale\n\nRun tools/list command to refresh available endpoints. Restart MCP client connection. Verify you're querying correct workspace - switch workspaces if accessing wrong data.\n### Asana MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when managing large Asana projects\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Asana workspace or project access denied errors\n\nVerify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.\n### Asana MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.\n### Asana MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when managing large Asana projects\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Asana workspace or project access denied errors\n\nVerify API token has access to the workspace and projects. Check workspace permissions and project sharing settings. Ensure OAuth scopes include required workspace and project access permissions.\n### Asana MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Asana API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Create a task for the new feature",
+        "id": "create-a-task-for-the-new-feature"
+      },
+      {
+        "depth": 3,
+        "text": "Show all tasks due this week",
+        "id": "show-all-tasks-due-this-week"
+      },
+      {
+        "depth": 3,
+        "text": "Update project status to on-track",
+        "id": "update-project-status-to-on-track"
+      },
+      {
+        "depth": 3,
+        "text": "Assign task to team member",
+        "id": "assign-task-to-team-member"
+      },
+      {
+        "depth": 3,
+        "text": "Create Task with Dependencies",
+        "id": "create-task-with-dependencies"
+      },
+      {
+        "depth": 3,
+        "text": "Create Task with Dependencies",
+        "id": "create-task-with-dependencies"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "OAuth authentication fails or connection times out",
+        "id": "oauth-authentication-fails-or-connection-times-out"
+      },
+      {
+        "depth": 3,
+        "text": "Insufficient permissions to create or modify tasks",
+        "id": "insufficient-permissions-to-create-or-modify-tasks"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit exceeded during bulk task operations",
+        "id": "rate-limit-exceeded-during-bulk-task-operations"
+      },
+      {
+        "depth": 3,
+        "text": "Tasks not appearing or data appears stale",
+        "id": "tasks-not-appearing-or-data-appears-stale"
+      },
+      {
+        "depth": 3,
+        "text": "Asana MCP server authentication errors with personal access tokens",
+        "id": "asana-mcp-server-authentication-errors-with-personal-access-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit errors when managing large Asana projects",
+        "id": "rate-limit-errors-when-managing-large-asana-projects"
+      },
+      {
+        "depth": 3,
+        "text": "Asana workspace or project access denied errors",
+        "id": "asana-workspace-or-project-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Asana MCP server connection timeouts or network errors",
+        "id": "asana-mcp-server-connection-timeouts-or-network-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Asana MCP server authentication errors with personal access tokens",
+        "id": "asana-mcp-server-authentication-errors-with-personal-access-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit errors when managing large Asana projects",
+        "id": "rate-limit-errors-when-managing-large-asana-projects"
+      },
+      {
+        "depth": 3,
+        "text": "Asana workspace or project access denied errors",
+        "id": "asana-workspace-or-project-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Asana MCP server connection timeouts or network errors",
+        "id": "asana-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create a task for the new feature\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Show all tasks due this week\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update project status to on-track\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Assign task to team member\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});"
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Asana task with dependencies\nconst task = await asana.createTask({\n  workspace: '1234567890',\n  name: 'Complete project documentation',\n  projects: ['9876543210'],\n  dependencies: ['task-id-1', 'task-id-2'],\n  due_on: '2025-12-31'\n});"
+      }
+    ],
+    "filePath": "content/mcp/asana-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:raycast-extension-dev-publish-capability-pack",
+  "category": "skills",
+  "slug": "raycast-extension-dev-publish-capability-pack",
+  "title": "Raycast Extension Dev Publish Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack\n\nUsage:\nUse this skill to build and ship Raycast extensions that are reliable, polished, and publish-ready.\n\nAsset:\n# Trigger\n\"Apply the Raycast extension dev/publish capability pack to this project.\"\n\n# Required output\n1) Extension command architecture\n2) API/auth/storage approach\n3) QA checklist and failure handling\n4) Store publication readiness report",
+  "detailMarkdown": "# Raycast Extension Dev Publish Capability Pack Skill\nExpert Raycast extension capability skill for command design, extension architecture, testing, and store-ready publication workflows.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `raycast` `extensions` `developer-tools` `publishing` `capability-pack`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack\n```\n\n## Usage\nUse this skill to build and ship Raycast extensions that are reliable, polished, and publish-ready.\n\n## Links\n- https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack\n- https://developers.raycast.com/",
+  "webUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.raycast.com/"
+}

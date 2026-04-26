@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "statuslines:minimal-powerline",
+  "category": "statuslines",
+  "slug": "minimal-powerline",
+  "title": "Minimal Powerline - Statuslines",
+  "copyText": "Claude config:\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh\",\n    \"refreshInterval\": 500\n  }\n}\n\nUsage:\nclaude-sonnet-4.5  ~/projects/my-app   1,234\n\nAsset:\n#!/usr/bin/env bash\n\n# Minimal Powerline Statusline for Claude Code\n# Displays: Model | Directory | Token Count\n\n# Read JSON from stdin\nread -r input\n\n# Extract values using jq\nmodel=$(echo \"$input\" | jq -r '.model // \"unknown\"')\ndir=$(echo \"$input\" | jq -r '.workspace.path // \"~\"' | sed \"s|$HOME|~|\")\ntokens=$(echo \"$input\" | jq -r '.session.totalTokens // 0')\n\n# Powerline separators\nSEP=\"\\ue0b0\"\n\n# Color codes (256-color palette)\nMODEL_BG=\"\\033[48;5;111m\"  # Light blue background\nMODEL_FG=\"\\033[38;5;111m\"  # Light blue foreground\nDIR_BG=\"\\033[48;5;246m\"    # Gray background\nDIR_FG=\"\\033[38;5;246m\"    # Gray foreground\nTOKEN_BG=\"\\033[48;5;214m\"  # Orange background\nTOKEN_FG=\"\\033[38;5;214m\"  # Orange foreground\nRESET=\"\\033[0m\"\n\n# Build statusline with Powerline glyphs\necho -e \"${MODEL_BG} ${model} ${RESET}${MODEL_FG}${SEP}${RESET} ${DIR_BG} ${dir} ${RESET}${DIR_FG}${SEP}${RESET} ${TOKEN_BG} ${tokens} ${RESET}${TOKEN_FG}${SEP}${RESET}\"",
+  "detailMarkdown": "# Minimal Powerline - Statuslines\nClean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count\n**Category:** statuslines\n**Author:** JSONbored\n**Tags:** `powerline` `minimal` `performance` `bash` `lightweight`\n\n## Config\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/minimal-powerline.sh\",\n    \"refreshInterval\": 500\n  }\n}\n```\n\n## Usage\n claude-sonnet-4.5  ~/projects/my-app   1,234 \n\n## Links\n- https://heyclau.de/statuslines/minimal-powerline\n- https://github.com/powerline/powerline\n- https://github.com/powerline/powerline",
+  "webUrl": "https://heyclau.de/statuslines/minimal-powerline",
+  "repoUrl": "https://github.com/powerline/powerline",
+  "documentationUrl": "https://github.com/powerline/powerline"
+}

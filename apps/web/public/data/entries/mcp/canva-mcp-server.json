@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "canva-mcp-server",
+    "title": "Canva MCP Server for Claude",
+    "description": "Browse, summarize, and generate Canva designs directly from Claude",
+    "seoTitle": "Canva MCP Server for Claude",
+    "seoDescription": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development.",
+    "author": "Canva",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "design",
+      "canva",
+      "graphics",
+      "templates",
+      "creative"
+    ],
+    "keywords": [
+      "canva",
+      "claude",
+      "creative",
+      "design",
+      "development",
+      "graphics",
+      "mcp",
+      "mcp servers",
+      "server",
+      "templates",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+    "cardDescription": "Browse, summarize, and generate Canva designs directly from Claude",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status canva",
+    "usageSnippet": "claude mcp list && claude mcp status canva",
+    "copySnippet": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Canva account (Canva Pro subscription recommended for full API access and team features)",
+      "OAuth 2.0 authentication configured via Canva Developer Console (https://www.canva.dev/)",
+      "HTTP transport support in MCP client (required for Canva MCP server)",
+      "Internet connection for accessing Canva API (https://api.canva.com endpoints)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Rate limit awareness: Design Export API (10 requests per 10 seconds), Native Element API (20 requests per 10 seconds)",
+      "Understanding of Canva design structure, templates, pages, and brand kits",
+      "Appropriate team permissions for design operations (read, write, create, export as needed)",
+      "Canva Developer Console access for managing OAuth applications and access tokens",
+      "OAuth scopes: design read/write access required for design operations"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/canva-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "461bfddb65f343a48e35a1dfcfbec79028101aebeebb217c5c0ed6dd55e48afe",
+    "body": "## Content\n\nCreate and manage Canva designs through Claude for automated design generation.\n\n## Features\n\n- Browse design templates and assets\n- Generate new designs programmatically\n- Summarize design content and elements\n- Autofill design elements with data\n- Manage brand kits and style guides\n- Advanced Canva design creation and management with template library access, brand kit integration, and collaborative design workflows\n- Batch operations support for efficient bulk design creation, updates, and asset management with automatic rate limit handling and retry logic\n- Real-time design synchronization capabilities with webhook integration support for monitoring design changes and triggering automated workflows\n\n## Use Cases\n\n- Generate social media graphics at scale\n- Create presentation slides automatically\n- Design marketing materials consistently\n- Produce brand assets variations\n- Maintain brand consistency across designs\n- Build automated design generation workflows that create branded content from templates for marketing campaigns and social media\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add --transport http canva https://mcp.canva.com/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status canva\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file\n2. Add the Canva server configuration with HTTP transport\n3. Restart Claude Desktop\n4. Authenticate with your Canva account\n\n## Requirements\n\n- Canva account (Canva Pro subscription recommended for full API access and team features)\n- OAuth 2.0 authentication configured via Canva Developer Console (https://www.canva.dev/)\n- HTTP transport support in MCP client (required for Canva MCP server)\n- Internet connection for accessing Canva API (https://api.canva.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: Design Export API (10 requests per 10 seconds), Native Element API (20 requests per 10 seconds)\n- Understanding of Canva design structure, templates, pages, and brand kits\n- Appropriate team permissions for design operations (read, write, create, export as needed)\n- Canva Developer Console access for managing OAuth applications and access tokens\n- OAuth scopes: design read/write access required for design operations\n\n## Configuration\n\n```json\n{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n### Create an Instagram post about our product launch\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an Instagram post about our product launch\"\n```\n### Generate a presentation slide template\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate a presentation slide template\"\n```\n### Export all logo variations\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Export all logo variations\"\n```\n### Update brand colors in templates\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update brand colors in templates\"\n```\n### Create Design from Template\nCreate a new Canva design from a template with brand kit integration\n```typescript\n// Create Canva design from template\nconst design = await canva.designs.create({\n  templateId: \"template-id\",\n  brandKitId: \"brand-kit-id\",\n  title: \"New Marketing Campaign\",\n  elements: [{ type: \"text\", content: \"Hello World\" }]\n});\n```\n\n## Security\n\n- OAuth authentication for account access\n- Respect brand guidelines and permissions\n- Manage team permissions appropriately\n- Regular asset backups recommended\n- Canva API tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Canva OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Canva design IDs and brand kit IDs may expose organizational design assets and brand information - ensure Canva resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Canva MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Canva webhook configurations and payloads may contain sensitive design metadata and asset information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Rate limit error when exporting designs\n\nDesign Export API allows 10 requests per 10 seconds. Wait for time window to reset before retrying. Implement request queuing with 1-second delays between exports to stay within limits.\n### Authentication fails with 401 signature verification error\n\nVerify your OAuth 2.0 implementation ensures tokens refresh correctly. Check that access token hasn't expired and regenerate from Canva Developer Console if needed.\n### Cannot add elements to design - hitting rate limit\n\nNative Element API allows 20 requests per 10 seconds. Batch element additions where possible and add 500ms delays between individual add operations to avoid throttling.\n### Designs not accessible or permission denied errors\n\nVerify your Canva Pro subscription is active and your account has proper team permissions. Check OAuth scope includes design read/write access and re-authenticate if necessary.\n### Canva MCP server authentication errors with OAuth tokens\n\nVerify OAuth token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). Implement automatic token refresh logic for long-running operations.\n### Canva design creation or update failures\n\nCheck design size limits and template availability. Verify brand kit permissions allow design creation. Ensure network connectivity is stable. For large designs, use chunked upload API with resumable upload support.\n### Canva MCP server rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use Canva API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed design metadata. Request rate limit increases from Canva support if needed.\n### Canva MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Canva API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Create and manage Canva designs through Claude for automated design generation.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Browse design templates and assets\n- Generate new designs programmatically\n- Summarize design content and elements\n- Autofill design elements with data\n- Manage brand kits and style guides\n- Advanced Canva design creation and management with template library access, brand kit integration, and collaborative design workflows\n- Batch operations support for efficient bulk design creation, updates, and asset management with automatic rate limit handling and retry logic\n- Real-time design synchronization capabilities with webhook integration support for monitoring design changes and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Generate social media graphics at scale\n- Create presentation slides automatically\n- Design marketing materials consistently\n- Produce brand assets variations\n- Maintain brand consistency across designs\n- Build automated design generation workflows that create branded content from templates for marketing campaigns and social media",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add --transport http canva https://mcp.canva.com/mcp\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status canva\n\n### Claude Desktop\n\n1. Open Claude Desktop configuration file\n2. Add the Canva server configuration with HTTP transport\n3. Restart Claude Desktop\n4. Authenticate with your Canva account",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Canva account (Canva Pro subscription recommended for full API access and team features)\n- OAuth 2.0 authentication configured via Canva Developer Console (https://www.canva.dev/)\n- HTTP transport support in MCP client (required for Canva MCP server)\n- Internet connection for accessing Canva API (https://api.canva.com endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: Design Export API (10 requests per 10 seconds), Native Element API (20 requests per 10 seconds)\n- Understanding of Canva design structure, templates, pages, and brand kits\n- Appropriate team permissions for design operations (read, write, create, export as needed)\n- Canva Developer Console access for managing OAuth applications and access tokens\n- OAuth scopes: design read/write access required for design operations",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Create an Instagram post about our product launch\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create an Instagram post about our product launch\"\n```\n### Generate a presentation slide template\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate a presentation slide template\"\n```\n### Export all logo variations\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Export all logo variations\"\n```\n### Update brand colors in templates\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update brand colors in templates\"\n```\n### Create Design from Template\nCreate a new Canva design from a template with brand kit integration\n```typescript\n// Create Canva design from template\nconst design = await canva.designs.create({\n  templateId: \"template-id\",\n  brandKitId: \"brand-kit-id\",\n  title: \"New Marketing Campaign\",\n  elements: [{ type: \"text\", content: \"Hello World\" }]\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create an Instagram post about our product launch\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Generate a presentation slide template\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Export all logo variations\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update brand colors in templates\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Create Canva design from template\nconst design = await canva.designs.create({\n  templateId: \"template-id\",\n  brandKitId: \"brand-kit-id\",\n  title: \"New Marketing Campaign\",\n  elements: [{ type: \"text\", content: \"Hello World\" }]\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication for account access\n- Respect brand guidelines and permissions\n- Manage team permissions appropriately\n- Regular asset backups recommended\n- Canva API tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Canva OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Canva design IDs and brand kit IDs may expose organizational design assets and brand information - ensure Canva resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Canva MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Canva webhook configurations and payloads may contain sensitive design metadata and asset information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Rate limit error when exporting designs\n\nDesign Export API allows 10 requests per 10 seconds. Wait for time window to reset before retrying. Implement request queuing with 1-second delays between exports to stay within limits.\n### Authentication fails with 401 signature verification error\n\nVerify your OAuth 2.0 implementation ensures tokens refresh correctly. Check that access token hasn't expired and regenerate from Canva Developer Console if needed.\n### Cannot add elements to design - hitting rate limit\n\nNative Element API allows 20 requests per 10 seconds. Batch element additions where possible and add 500ms delays between individual add operations to avoid throttling.\n### Designs not accessible or permission denied errors\n\nVerify your Canva Pro subscription is active and your account has proper team permissions. Check OAuth scope includes design read/write access and re-authenticate if necessary.\n### Canva MCP server authentication errors with OAuth tokens\n\nVerify OAuth token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). Implement automatic token refresh logic for long-running operations.\n### Canva design creation or update failures\n\nCheck design size limits and template availability. Verify brand kit permissions allow design creation. Ensure network connectivity is stable. For large designs, use chunked upload API with resumable upload support.\n### Canva MCP server rate limiting or throttling errors\n\nImplement exponential backoff retry logic with jitter. Use Canva API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed design metadata. Request rate limit increases from Canva support if needed.\n### Canva MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Canva API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Create an Instagram post about our product launch",
+        "id": "create-an-instagram-post-about-our-product-launch"
+      },
+      {
+        "depth": 3,
+        "text": "Generate a presentation slide template",
+        "id": "generate-a-presentation-slide-template"
+      },
+      {
+        "depth": 3,
+        "text": "Export all logo variations",
+        "id": "export-all-logo-variations"
+      },
+      {
+        "depth": 3,
+        "text": "Update brand colors in templates",
+        "id": "update-brand-colors-in-templates"
+      },
+      {
+        "depth": 3,
+        "text": "Create Design from Template",
+        "id": "create-design-from-template"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit error when exporting designs",
+        "id": "rate-limit-error-when-exporting-designs"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication fails with 401 signature verification error",
+        "id": "authentication-fails-with-401-signature-verification-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot add elements to design - hitting rate limit",
+        "id": "cannot-add-elements-to-design---hitting-rate-limit"
+      },
+      {
+        "depth": 3,
+        "text": "Designs not accessible or permission denied errors",
+        "id": "designs-not-accessible-or-permission-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Canva MCP server authentication errors with OAuth tokens",
+        "id": "canva-mcp-server-authentication-errors-with-oauth-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Canva design creation or update failures",
+        "id": "canva-design-creation-or-update-failures"
+      },
+      {
+        "depth": 3,
+        "text": "Canva MCP server rate limiting or throttling errors",
+        "id": "canva-mcp-server-rate-limiting-or-throttling-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Canva MCP server connection timeouts or network errors",
+        "id": "canva-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create an Instagram post about our product launch\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Generate a presentation slide template\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Export all logo variations\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update brand colors in templates\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Create Canva design from template\nconst design = await canva.designs.create({\n  templateId: \"template-id\",\n  brandKitId: \"brand-kit-id\",\n  title: \"New Marketing Campaign\",\n  elements: [{ type: \"text\", content: \"Hello World\" }]\n});"
+      }
+    ],
+    "filePath": "content/mcp/canva-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/canva-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

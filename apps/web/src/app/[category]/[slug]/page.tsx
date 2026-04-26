@@ -23,6 +23,7 @@ import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { GitHubMark } from "@/components/icons/github-mark";
 import { SnippetCard } from "@/components/snippet-card";
 import { getDirectoryEntries, getEntry } from "@/lib/content";
+import { getDistributionBadges } from "@/lib/entry-presentation";
 import { buildPageMetadata } from "@/lib/seo";
 import { categoryLabels } from "@/lib/site";
 
@@ -357,6 +358,28 @@ export default async function DetailPage({ params }: DetailPageProps) {
   const installationOrder = Array.isArray(entry.installationOrder)
     ? entry.installationOrder
     : [];
+  const distributionBadges = getDistributionBadges(entry);
+  const sourceSignals = [
+    entry.downloadTrust
+      ? {
+          label: "Package trust",
+          value:
+            entry.downloadTrust === "first-party"
+              ? "Verified first-party package"
+              : "External package, review before use",
+        }
+      : null,
+    entry.verificationStatus
+      ? { label: "Verification", value: entry.verificationStatus }
+      : null,
+    entry.repoUrl ? { label: "Repository", value: entry.repoUrl } : null,
+    entry.documentationUrl
+      ? { label: "Documentation", value: entry.documentationUrl }
+      : null,
+    entry.githubUrl ? { label: "Content source", value: entry.githubUrl } : null,
+  ].filter(
+    (signal): signal is { label: string; value: string } => Boolean(signal),
+  );
   const renderedBody = await renderMarkdown(entry.body || "");
 
   return (
@@ -380,6 +403,17 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 className="rounded-full border border-border bg-secondary/40 px-3 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
               >
                 {tag}
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {distributionBadges.map((badge) => (
+              <span
+                key={badge.label}
+                className="distribution-badge"
+                title={badge.title}
+              >
+                {badge.label}
               </span>
             ))}
           </div>
@@ -761,6 +795,41 @@ export default async function DetailPage({ params }: DetailPageProps) {
             </div>
           </div>
         </div>
+
+        {sourceSignals.length ? (
+          <div className="surface-panel p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Trust & source
+            </p>
+            <div className="mt-3 space-y-2.5">
+              {sourceSignals.map((signal) => {
+                const isUrl = /^https?:\/\//i.test(signal.value);
+                return (
+                  <div
+                    key={signal.label}
+                    className="rounded-xl border border-border bg-background px-3 py-3 text-sm"
+                  >
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {signal.label}
+                    </p>
+                    {isUrl ? (
+                      <a
+                        href={signal.value}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 block truncate text-foreground transition hover:text-primary"
+                      >
+                        {signal.value.replace(/^https?:\/\//i, "")}
+                      </a>
+                    ) : (
+                      <p className="mt-1 text-foreground">{signal.value}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
 
         <div className="surface-panel p-4">
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">

@@ -110,6 +110,7 @@ export type DirectoryEntry = Omit<
 const DATA_ORIGIN = "https://heyclau.de";
 let contentIndexPromise: Promise<ContentEntry[]> | null = null;
 let directoryIndexPromise: Promise<DirectoryEntry[]> | null = null;
+const entryDetailPromises = new Map<string, Promise<ContentEntry | null>>();
 
 async function loadJsonDataFile<T>(fileName: string): Promise<T> {
   try {
@@ -140,6 +141,29 @@ const loadDirectoryIndex = cache(async (): Promise<DirectoryEntry[]> => {
   return directoryIndexPromise;
 });
 
+function isSafeContentPathPart(value: string) {
+  return /^[a-z0-9-]+$/.test(value);
+}
+
+async function loadEntryDetail(category: string, slug: string) {
+  if (!isSafeContentPathPart(category) || !isSafeContentPathPart(slug)) {
+    return null;
+  }
+
+  const key = `${category}:${slug}`;
+  let promise = entryDetailPromises.get(key);
+  if (!promise) {
+    promise = loadJsonDataFile<{ schemaVersion?: number; entry?: ContentEntry }>(
+      `entries/${category}/${slug}.json`
+    )
+      .then((payload) => payload.entry ?? null)
+      .catch(() => null);
+    entryDetailPromises.set(key, promise);
+  }
+
+  return promise;
+}
+
 export const getAllEntries = cache(async (): Promise<ContentEntry[]> => {
   return loadContentIndex();
 });
@@ -149,8 +173,7 @@ export const getDirectoryEntries = cache(async (): Promise<DirectoryEntry[]> => 
 });
 
 export const getEntry = cache(async (category: string, slug: string) => {
-  const entries = await getAllEntries();
-  return entries.find((entry) => entry.category === category && entry.slug === slug) ?? null;
+  return loadEntryDetail(category, slug);
 });
 
 export const getEntriesByCategory = cache(async (category: string) => {

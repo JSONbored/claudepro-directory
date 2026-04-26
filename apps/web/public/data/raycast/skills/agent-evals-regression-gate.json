@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:agent-evals-regression-gate",
+  "category": "skills",
+  "slug": "agent-evals-regression-gate",
+  "title": "Agent Evals Regression Gate Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate\n\nUsage:\nUse this skill to define eval datasets, objective scoring, and pass/fail quality gates for agent updates.\n\nAsset:\n# Trigger\n\"Run the agent evals regression gate skill on this project and produce a\nmerge-blocking quality report.\"\n\n# Required output\n1) Eval dataset design (happy path + adversarial + edge cases)\n2) Scoring rubric with explicit pass thresholds\n3) Baseline vs candidate comparison with deltas\n4) Merge decision with release risk summary",
+  "detailMarkdown": "# Agent Evals Regression Gate Skill\nBuild repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `evals` `regression` `ai-agents` `qa` `quality-gate`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate\n```\n\n## Usage\nUse this skill to define eval datasets, objective scoring, and pass/fail quality gates for agent updates.\n\n## Links\n- https://heyclau.de/skills/agent-evals-regression-gate\n- https://openai.com/index/new-tools-and-features-in-the-responses-api/",
+  "webUrl": "https://heyclau.de/skills/agent-evals-regression-gate",
+  "repoUrl": "",
+  "documentationUrl": "https://openai.com/index/new-tools-and-features-in-the-responses-api/"
+}

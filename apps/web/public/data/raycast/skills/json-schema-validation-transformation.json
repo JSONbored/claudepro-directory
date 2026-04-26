@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:json-schema-validation-transformation",
+  "category": "skills",
+  "slug": "json-schema-validation-transformation",
+  "title": "JSON Schema Validate + Transform Skill",
+  "copyText": "Install:\nnpm i ajv\n\nUsage:\nnpm i ajv\n\nAsset:\nimport Ajv from \"ajv\";\nconst ajv = new Ajv({ allErrors: true, strict: true });\nconst validate = ajv.compile({\n  type: \"object\",\n  properties: { id: { type: \"string\" } },\n  required: [\"id\"],\n  additionalProperties: false\n});\nconsole.log(validate({ id: \"abc\" })); // true\nconsole.log(validate({})); // false, see validate.errors",
+  "detailMarkdown": "# JSON Schema Validate + Transform Skill\nValidate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation).\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `json` `schema` `validation` `ajv` `zod`\n\n## Install\n```bash\nnpm i ajv\n```\n\n## Usage\nnpm i ajv\n\n## Links\n- https://heyclau.de/skills/json-schema-validation-transformation\n- https://ajv.js.org/",
+  "webUrl": "https://heyclau.de/skills/json-schema-validation-transformation",
+  "repoUrl": "",
+  "documentationUrl": "https://ajv.js.org/"
+}

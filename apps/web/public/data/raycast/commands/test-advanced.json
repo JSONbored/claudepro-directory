@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:test-advanced",
+  "category": "commands",
+  "slug": "test-advanced",
+  "title": "/test-advanced - Test Suite Command for Claude Code",
+  "copyText": "/test [options] <file_or_function>",
+  "detailMarkdown": "# /test-advanced - Test Suite Command for Claude Code\nAdvanced test suite generator with property-based testing, mutation testing, and intelligent test case discovery\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `testing` `unit-tests` `integration-tests` `property-based` `mutation-testing`\n\n## Install\n```bash\n/test [options] <file_or_function>\n```\n\n## Usage\n/test [options] <file_or_function>\n\n## Links\n- https://heyclau.de/commands/test-advanced\n- https://docs.claude.ai/commands/test",
+  "webUrl": "https://heyclau.de/commands/test-advanced",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/test"
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:coderabbit-lite-pr-review-capability-pack",
+  "category": "skills",
+  "slug": "coderabbit-lite-pr-review-capability-pack",
+  "title": "Code Review Automation Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack\n\nUsage:\nUse this skill to run a deterministic PR audit, rank findings by severity, and generate fix-ready patch guidance.\n\nAsset:\n# Trigger\n\"Apply the code review automation capability pack to this PR.\"\n\n# Required output\n1) Risk-ranked findings (P0-P3) with evidence\n2) Exploitability notes and blast-radius estimate\n3) Minimal patch plan grouped by file ownership\n4) Post-fix validation checklist",
+  "detailMarkdown": "# Code Review Automation Capability Pack Skill\nExpert code-review capability pack for deterministic PR audits, risk-ranked findings, and low-noise fix planning without SaaS lock-in.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `code-review` `pull-requests` `security` `capability-pack` `automation`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack\n```\n\n## Usage\nUse this skill to run a deterministic PR audit, rank findings by severity, and generate fix-ready patch guidance.\n\n## Links\n- https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack\n- https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
+  "webUrl": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews"
+}

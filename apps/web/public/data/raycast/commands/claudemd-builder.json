@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:claudemd-builder",
+  "category": "commands",
+  "slug": "claudemd-builder",
+  "title": "CLAUDE.md Builder for Claude Code",
+  "copyText": "/claudemd-builder [action] [options]",
+  "detailMarkdown": "# CLAUDE.md Builder for Claude Code\nGenerate project-specific CLAUDE.md files with coding standards, architecture notes, and context preservation for team-wide AI consistency and efficient onboarding\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `claude-md` `project-context` `coding-standards` `documentation` `onboarding` `team-collaboration`\n\n## Install\n```bash\n/claudemd-builder [action] [options]\n```\n\n## Usage\n/claudemd-builder [action] [options]\n\n## Links\n- https://heyclau.de/commands/claudemd-builder\n- https://docs.claude.com/en/docs/claude-code/claude-md",
+  "webUrl": "https://heyclau.de/commands/claudemd-builder",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/claude-md"
+}

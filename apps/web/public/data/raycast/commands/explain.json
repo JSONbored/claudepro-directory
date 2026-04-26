@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:explain",
+  "category": "commands",
+  "slug": "explain",
+  "title": "/explain - Code Explanation Command for Claude Code",
+  "copyText": "/explain [options] <code_or_file>",
+  "detailMarkdown": "# /explain - Code Explanation Command for Claude Code\nIntelligent code explanation with visual diagrams, step-by-step breakdowns, and interactive examples\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `explanation` `documentation` `learning` `analysis` `visualization`\n\n## Install\n```bash\n/explain [options] <code_or_file>\n```\n\n## Usage\n/explain [options] <code_or_file>\n\n## Links\n- https://heyclau.de/commands/explain\n- https://docs.claude.ai/commands/explain",
+  "webUrl": "https://heyclau.de/commands/explain",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/explain"
+}

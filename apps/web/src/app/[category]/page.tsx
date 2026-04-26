@@ -7,6 +7,7 @@ import { buildPageMetadata } from "@/lib/seo";
 import {
   categoryDescriptions,
   categoryLabels,
+  categoryQuickstarts,
   categoryUsageHints
 } from "@/lib/site";
 
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
   const directoryEntries = await getDirectoryEntriesByCategory(category);
+  const quickstart = categoryQuickstarts[category] ?? [];
 
   if (!directoryEntries.length) notFound();
 
@@ -65,6 +67,26 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </p>
           </div>
         </div>
+        {quickstart.length ? (
+          <div className="surface-panel p-5">
+            <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+              Quickstart
+            </p>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {quickstart.map((step, index) => (
+                <div
+                  key={step}
+                  className="rounded-xl border border-border bg-background px-4 py-3 text-sm leading-6 text-muted-foreground"
+                >
+                  <span className="mb-2 inline-flex size-6 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-[11px] font-medium text-primary">
+                    {index + 1}
+                  </span>
+                  <p>{step}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
       <BrowseDirectory entries={directoryEntries} />
     </div>

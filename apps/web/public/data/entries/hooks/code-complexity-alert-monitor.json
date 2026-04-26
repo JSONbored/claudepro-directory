@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "hooks",
+    "slug": "code-complexity-alert-monitor",
+    "title": "Code Complexity Alert Monitor - Hooks",
+    "description": "Alerts when code complexity exceeds thresholds in real-time using cyclomatic complexity analysis, line count monitoring, function count analysis, and nesting level detection.",
+    "seoTitle": "Code Complexity Alert Monitor - Hooks",
+    "seoDescription": "Alerts when code complexity exceeds thresholds in real-time using cyclomatic complexity analysis, line count monitoring, function count analysis, and nesting...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-19",
+    "tags": [
+      "complexity",
+      "code-quality",
+      "notification",
+      "monitoring",
+      "maintainability"
+    ],
+    "keywords": [
+      "alert",
+      "claude",
+      "code",
+      "code-quality",
+      "complexity",
+      "development",
+      "hooks",
+      "maintainability",
+      "monitor",
+      "monitoring",
+      "notification",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Alerts when code complexity exceeds thresholds in real-time using cyclomatic complexity analysis, line count monitoring, function count a...",
+    "installable": true,
+    "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/code-complexity-alert-monitor.sh && chmod +x .claude/hooks/code-complexity-alert-monitor.sh",
+    "usageSnippet": "mkdir -p .claude/hooks && touch .claude/hooks/code-complexity-alert-monitor.sh && chmod +x .claude/hooks/code-complexity-alert-monitor.sh",
+    "copySnippet": "{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}",
+    "configSnippet": "{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}",
+    "scriptLanguage": "bash",
+    "scriptBody": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0",
+    "trigger": "Notification",
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Features\n\n- Real-time complexity monitoring for JavaScript, TypeScript, and Python using pattern matching and AST-based analysis with support for ESLint v9.37.0+ complexity rules\n- Configurable line count thresholds (default: 500 lines) with customizable warning (300 lines) and error (500 lines) levels for early detection\n- Function count analysis and alerting to detect over-modularization (>20 functions) or under-modularization (<5 functions) patterns\n- Nesting level detection for code structure using brace counting (JavaScript/TypeScript) and indentation depth analysis (Python 12+ spaces)\n- Instant feedback on code maintainability issues with severity levels (INFO for 300+ lines, WARNING for 500+ lines, ERROR for critical complexity)\n- Multi-language support with pattern matching for .js, .jsx, .ts, .tsx, and .py files with language-specific complexity heuristics\n- Cyclomatic complexity estimation using control flow analysis counting conditional branches, loops, and switch statements\n- Integration with ESLint complexity rules (max-complexity) and Radon ^6.0.0 for Python for comprehensive AST-based complexity analysis\n\n## Use Cases\n\n- Real-time code quality monitoring during development providing immediate feedback when complexity thresholds are exceeded\n- Automated complexity alerts in CI/CD pipelines preventing complex code from being merged into main branches\n- Code review assistance and maintainability checks helping reviewers identify refactoring opportunities before code review\n- Technical debt prevention and early detection catching complexity issues before they accumulate into larger problems\n- Team coding standards enforcement ensuring consistent complexity thresholds across all team members and projects\n- Refactoring guidance identifying specific files and functions that exceed complexity thresholds and need modularization\n\n## Installation\n\n1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/code-complexity-alert-monitor.sh\n3. Make executable: chmod +x .claude/hooks/code-complexity-alert-monitor.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`\n\n## Requirements\n\n- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing from stdin)\n- Optional: ESLint ^9.37.0 (npm install -g eslint) for JavaScript/TypeScript complexity analysis, Radon ^6.0.0 (pip install radon) for Python cyclomatic complexity analysis\n- Standard Unix utilities: grep, awk, wc (for pattern matching and line counting) and file system access for reading source code files\n\n## Hook Configuration\n\n```json\n{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}\n```\n\n## Hook Script\n\n```bash\n#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0\n```\n\n## Examples\n### Code Complexity Alert Monitor Hook Script\n\nComplete hook script that monitors code complexity in real-time for JavaScript, TypeScript, and Python files\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r \".tool_name\")\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting\" >&2\n  fi\nfi\nexit 0\n```\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable complexity monitoring on file write operations\n\n```json\n{\n  \"hooks\": {\n    \"Notification\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n### Python Complexity with Radon\n\nEnhanced hook script using Radon for accurate Python cyclomatic complexity analysis\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.py ]]; then exit 0; fi\nif command -v radon >/dev/null 2>&1; then\n  COMPLEXITY=$(radon cc \"$FILE_PATH\" -a -nc 2>/dev/null | grep -oP \"Average complexity: \\\\K[0-9]+\\.[0-9]+\" || echo \"0\")\n  if (( $(echo \"$COMPLEXITY > 10\" | bc -l) )); then\n    echo \"⚠️ COMPLEXITY: High cyclomatic complexity ($COMPLEXITY) - consider refactoring\" >&2\n  fi\nfi\nexit 0\n```\n### JavaScript/TypeScript Complexity with ESLint\n\nEnhanced hook script using ESLint complexity rule for accurate JavaScript/TypeScript cyclomatic complexity analysis\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.{js,jsx,ts,tsx} ]]; then exit 0; fi\nif command -v eslint >/dev/null 2>&1; then\n  COMPLEXITY=$(eslint --format json \"$FILE_PATH\" 2>/dev/null | jq -r \".[0].messages[] | select(.ruleId==\\\"complexity\\\") | .message\" || echo \"\")\n  if [ -n \"$COMPLEXITY\" ]; then\n    echo \"⚠️ COMPLEXITY: $COMPLEXITY\" >&2\n  fi\nfi\nexit 0\n```\n### Multi-Metric Complexity Analysis\n\nComprehensive hook script that analyzes multiple complexity metrics simultaneously for better detection\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nLINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\nFUNCTION_COUNT=$(grep -E \"(function|def |const.*=>|class |async |export function)\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nOPEN_BRACES=$(grep -o \"{\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nif [ \"$LINES\" -gt 500 ] || [ \"$FUNCTION_COUNT\" -gt 20 ] || [ \"$OPEN_BRACES\" -gt 50 ]; then\n  echo \"⚠️ COMPLEXITY: Multiple thresholds exceeded - Lines: $LINES, Functions: $FUNCTION_COUNT, Nesting: $OPEN_BRACES\" >&2\nfi\nexit 0\n```\n\n## Troubleshooting\n### Notification hook not running on file write operations\n\nVerify hook is registered under hooks.notification in .claude/settings.json. Check script has executable permissions: chmod +x. Ensure jq is installed for JSON parsing from stdin input. Test hook manually with a test JSON input. Verify Notification hook type is correct in configuration.\n### Complexity alerts not showing for TypeScript files\n\nCheck file extension matches supported types: .js, .jsx, .ts, .tsx, .py. Verify FILE_PATH extraction from tool_input using jq processes correctly. Test with echo command to debug input parsing. Ensure file exists before analysis.\n### False positives for brace count in JSX files\n\nHook counts all braces including JSX elements which inflates nesting metrics. Adjust thresholds in script for JSX-heavy files: increase OPEN_BRACES threshold from 50 to 100. Consider implementing AST-based complexity analysis using ESLint instead of regex pattern matching. Use ESLint complexity rule for accurate cyclomatic complexity.\n### File does not exist error during notification processing\n\nHook runs after tool execution but file may not be written yet. Add delay with sleep 1 before analysis. Check tool_name matches write or edit operations. Verify path resolution is absolute. Add file existence check before processing.\n### Python indentation warnings incorrect for valid code\n\nHook detects 12+ space indentation as deep nesting. Adjust threshold for projects using different indent styles. Use Radon for accurate Python complexity: radon cc file.py -a. Consider using 8-space threshold for projects with 4-space indentation.\n### Complexity analysis is too slow for large files\n\nAdd timeout wrapper: timeout 5s complexity-command. Limit analysis scope: only analyze files under 1000 lines. Use faster tools: ESLint with --cache for JavaScript, Radon with --min B for Python. Skip analysis for generated files: exclude node_modules, dist, build directories.\n### ESLint complexity rule not detecting issues\n\nVerify ESLint is installed: eslint --version. Check ESLint configuration includes complexity rule. Ensure ESLint can parse file type: install @typescript-eslint/parser for TypeScript. Test manually with eslint --rule complexity command. Check ESLint version: upgrade to ESLint ^9.37.0 for latest complexity analysis.\n### Radon not calculating Python complexity correctly\n\nVerify Radon is installed: radon --version. Check Python version compatibility: Radon requires Python 3.7+. Test manually: radon cc file.py -a. Ensure file is valid Python syntax. Use specific complexity threshold: radon cc file.py -nc. Check Radon version: upgrade to Radon ^6.0.0 for latest features.",
+    "sections": [
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Real-time complexity monitoring for JavaScript, TypeScript, and Python using pattern matching and AST-based analysis with support for ESLint v9.37.0+ complexity rules\n- Configurable line count thresholds (default: 500 lines) with customizable warning (300 lines) and error (500 lines) levels for early detection\n- Function count analysis and alerting to detect over-modularization (>20 functions) or under-modularization (<5 functions) patterns\n- Nesting level detection for code structure using brace counting (JavaScript/TypeScript) and indentation depth analysis (Python 12+ spaces)\n- Instant feedback on code maintainability issues with severity levels (INFO for 300+ lines, WARNING for 500+ lines, ERROR for critical complexity)\n- Multi-language support with pattern matching for .js, .jsx, .ts, .tsx, and .py files with language-specific complexity heuristics\n- Cyclomatic complexity estimation using control flow analysis counting conditional branches, loops, and switch statements\n- Integration with ESLint complexity rules (max-complexity) and Radon ^6.0.0 for Python for comprehensive AST-based complexity analysis",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Real-time code quality monitoring during development providing immediate feedback when complexity thresholds are exceeded\n- Automated complexity alerts in CI/CD pipelines preventing complex code from being merged into main branches\n- Code review assistance and maintainability checks helping reviewers identify refactoring opportunities before code review\n- Technical debt prevention and early detection catching complexity issues before they accumulate into larger problems\n- Team coding standards enforcement ensuring consistent complexity thresholds across all team members and projects\n- Refactoring guidance identifying specific files and functions that exceed complexity thresholds and need modularization",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "1. Create hooks directory: mkdir -p .claude/hooks\n2. Create hook file: touch .claude/hooks/code-complexity-alert-monitor.sh\n3. Make executable: chmod +x .claude/hooks/code-complexity-alert-monitor.sh\n4. Add configuration from Hook Configuration section above to .claude/settings.json or ~/.claude/settings.json\n5. Alternative: Use the interactive /hooks command in Claude Code\n\n### Config paths\n\n- Local (not committed): `.claude/settings.local.json`\n- User settings (global): `~/.claude/settings.json`\n- Project-wide (committed): `.claude/settings.json`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Claude Code CLI installed\n- Project directory initialized\n- Bash shell available\n- jq installed (for JSON parsing from stdin)\n- Optional: ESLint ^9.37.0 (npm install -g eslint) for JavaScript/TypeScript complexity analysis, Radon ^6.0.0 (pip install radon) for Python cyclomatic complexity analysis\n- Standard Unix utilities: grep, awk, wc (for pattern matching and line counting) and file system access for reading source code files",
+        "codeBlocks": []
+      },
+      {
+        "title": "Hook Configuration",
+        "id": "hook-configuration",
+        "markdown": "```json\n{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Hook Script",
+        "id": "hook-script",
+        "markdown": "```bash\n#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Code Complexity Alert Monitor Hook Script\n\nComplete hook script that monitors code complexity in real-time for JavaScript, TypeScript, and Python files\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r \".tool_name\")\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting\" >&2\n  fi\nfi\nexit 0\n```\n### Hook Configuration\n\nComplete hook configuration for .claude/settings.json to enable complexity monitoring on file write operations\n\n```json\n{\n  \"hooks\": {\n    \"Notification\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}\n```\n### Python Complexity with Radon\n\nEnhanced hook script using Radon for accurate Python cyclomatic complexity analysis\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.py ]]; then exit 0; fi\nif command -v radon >/dev/null 2>&1; then\n  COMPLEXITY=$(radon cc \"$FILE_PATH\" -a -nc 2>/dev/null | grep -oP \"Average complexity: \\\\K[0-9]+\\.[0-9]+\" || echo \"0\")\n  if (( $(echo \"$COMPLEXITY > 10\" | bc -l) )); then\n    echo \"⚠️ COMPLEXITY: High cyclomatic complexity ($COMPLEXITY) - consider refactoring\" >&2\n  fi\nfi\nexit 0\n```\n### JavaScript/TypeScript Complexity with ESLint\n\nEnhanced hook script using ESLint complexity rule for accurate JavaScript/TypeScript cyclomatic complexity analysis\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.{js,jsx,ts,tsx} ]]; then exit 0; fi\nif command -v eslint >/dev/null 2>&1; then\n  COMPLEXITY=$(eslint --format json \"$FILE_PATH\" 2>/dev/null | jq -r \".[0].messages[] | select(.ruleId==\\\"complexity\\\") | .message\" || echo \"\")\n  if [ -n \"$COMPLEXITY\" ]; then\n    echo \"⚠️ COMPLEXITY: $COMPLEXITY\" >&2\n  fi\nfi\nexit 0\n```\n### Multi-Metric Complexity Analysis\n\nComprehensive hook script that analyzes multiple complexity metrics simultaneously for better detection\n\n```bash\n#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nLINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\nFUNCTION_COUNT=$(grep -E \"(function|def |const.*=>|class |async |export function)\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nOPEN_BRACES=$(grep -o \"{\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nif [ \"$LINES\" -gt 500 ] || [ \"$FUNCTION_COUNT\" -gt 20 ] || [ \"$OPEN_BRACES\" -gt 50 ]; then\n  echo \"⚠️ COMPLEXITY: Multiple thresholds exceeded - Lines: $LINES, Functions: $FUNCTION_COUNT, Nesting: $OPEN_BRACES\" >&2\nfi\nexit 0\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r \".tool_name\")\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting\" >&2\n  fi\nfi\nexit 0"
+          },
+          {
+            "language": "json",
+            "code": "{\n  \"hooks\": {\n    \"Notification\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.py ]]; then exit 0; fi\nif command -v radon >/dev/null 2>&1; then\n  COMPLEXITY=$(radon cc \"$FILE_PATH\" -a -nc 2>/dev/null | grep -oP \"Average complexity: \\\\K[0-9]+\\.[0-9]+\" || echo \"0\")\n  if (( $(echo \"$COMPLEXITY > 10\" | bc -l) )); then\n    echo \"⚠️ COMPLEXITY: High cyclomatic complexity ($COMPLEXITY) - consider refactoring\" >&2\n  fi\nfi\nexit 0"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.{js,jsx,ts,tsx} ]]; then exit 0; fi\nif command -v eslint >/dev/null 2>&1; then\n  COMPLEXITY=$(eslint --format json \"$FILE_PATH\" 2>/dev/null | jq -r \".[0].messages[] | select(.ruleId==\\\"complexity\\\") | .message\" || echo \"\")\n  if [ -n \"$COMPLEXITY\" ]; then\n    echo \"⚠️ COMPLEXITY: $COMPLEXITY\" >&2\n  fi\nfi\nexit 0"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nLINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\nFUNCTION_COUNT=$(grep -E \"(function|def |const.*=>|class |async |export function)\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nOPEN_BRACES=$(grep -o \"{\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nif [ \"$LINES\" -gt 500 ] || [ \"$FUNCTION_COUNT\" -gt 20 ] || [ \"$OPEN_BRACES\" -gt 50 ]; then\n  echo \"⚠️ COMPLEXITY: Multiple thresholds exceeded - Lines: $LINES, Functions: $FUNCTION_COUNT, Nesting: $OPEN_BRACES\" >&2\nfi\nexit 0"
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Notification hook not running on file write operations\n\nVerify hook is registered under hooks.notification in .claude/settings.json. Check script has executable permissions: chmod +x. Ensure jq is installed for JSON parsing from stdin input. Test hook manually with a test JSON input. Verify Notification hook type is correct in configuration.\n### Complexity alerts not showing for TypeScript files\n\nCheck file extension matches supported types: .js, .jsx, .ts, .tsx, .py. Verify FILE_PATH extraction from tool_input using jq processes correctly. Test with echo command to debug input parsing. Ensure file exists before analysis.\n### False positives for brace count in JSX files\n\nHook counts all braces including JSX elements which inflates nesting metrics. Adjust thresholds in script for JSX-heavy files: increase OPEN_BRACES threshold from 50 to 100. Consider implementing AST-based complexity analysis using ESLint instead of regex pattern matching. Use ESLint complexity rule for accurate cyclomatic complexity.\n### File does not exist error during notification processing\n\nHook runs after tool execution but file may not be written yet. Add delay with sleep 1 before analysis. Check tool_name matches write or edit operations. Verify path resolution is absolute. Add file existence check before processing.\n### Python indentation warnings incorrect for valid code\n\nHook detects 12+ space indentation as deep nesting. Adjust threshold for projects using different indent styles. Use Radon for accurate Python complexity: radon cc file.py -a. Consider using 8-space threshold for projects with 4-space indentation.\n### Complexity analysis is too slow for large files\n\nAdd timeout wrapper: timeout 5s complexity-command. Limit analysis scope: only analyze files under 1000 lines. Use faster tools: ESLint with --cache for JavaScript, Radon with --min B for Python. Skip analysis for generated files: exclude node_modules, dist, build directories.\n### ESLint complexity rule not detecting issues\n\nVerify ESLint is installed: eslint --version. Check ESLint configuration includes complexity rule. Ensure ESLint can parse file type: install @typescript-eslint/parser for TypeScript. Test manually with eslint --rule complexity command. Check ESLint version: upgrade to ESLint ^9.37.0 for latest complexity analysis.\n### Radon not calculating Python complexity correctly\n\nVerify Radon is installed: radon --version. Check Python version compatibility: Radon requires Python 3.7+. Test manually: radon cc file.py -a. Ensure file is valid Python syntax. Use specific complexity threshold: radon cc file.py -nc. Check Radon version: upgrade to Radon ^6.0.0 for latest features.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Config paths",
+        "id": "config-paths"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Configuration",
+        "id": "hook-configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Hook Script",
+        "id": "hook-script"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Code Complexity Alert Monitor Hook Script",
+        "id": "code-complexity-alert-monitor-hook-script"
+      },
+      {
+        "depth": 3,
+        "text": "Hook Configuration",
+        "id": "hook-configuration"
+      },
+      {
+        "depth": 3,
+        "text": "Python Complexity with Radon",
+        "id": "python-complexity-with-radon"
+      },
+      {
+        "depth": 3,
+        "text": "JavaScript/TypeScript Complexity with ESLint",
+        "id": "javascripttypescript-complexity-with-eslint"
+      },
+      {
+        "depth": 3,
+        "text": "Multi-Metric Complexity Analysis",
+        "id": "multi-metric-complexity-analysis"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Notification hook not running on file write operations",
+        "id": "notification-hook-not-running-on-file-write-operations"
+      },
+      {
+        "depth": 3,
+        "text": "Complexity alerts not showing for TypeScript files",
+        "id": "complexity-alerts-not-showing-for-typescript-files"
+      },
+      {
+        "depth": 3,
+        "text": "False positives for brace count in JSX files",
+        "id": "false-positives-for-brace-count-in-jsx-files"
+      },
+      {
+        "depth": 3,
+        "text": "File does not exist error during notification processing",
+        "id": "file-does-not-exist-error-during-notification-processing"
+      },
+      {
+        "depth": 3,
+        "text": "Python indentation warnings incorrect for valid code",
+        "id": "python-indentation-warnings-incorrect-for-valid-code"
+      },
+      {
+        "depth": 3,
+        "text": "Complexity analysis is too slow for large files",
+        "id": "complexity-analysis-is-too-slow-for-large-files"
+      },
+      {
+        "depth": 3,
+        "text": "ESLint complexity rule not detecting issues",
+        "id": "eslint-complexity-rule-not-detecting-issues"
+      },
+      {
+        "depth": 3,
+        "text": "Radon not calculating Python complexity correctly",
+        "id": "radon-not-calculating-python-complexity-correctly"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"notification\": {\n      \"script\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n    }\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Read the tool input from stdin\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r '.tool_name')\nFILE_PATH=$(echo \"$INPUT\" | jq -r '.tool_input.file_path // .tool_input.path // \"\"')\n\nif [ -z \"$FILE_PATH\" ]; then\n  exit 0\nfi\n\n# Check if it's a supported file type\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.jsx ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.tsx ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  echo \"🔍 Analyzing code complexity for $FILE_PATH...\" >&2\n  \n  # Check file exists\n  if [ ! -f \"$FILE_PATH\" ]; then\n    echo \"📁 File does not exist yet, skipping complexity analysis\" >&2\n    exit 0\n  fi\n  \n  # Line count analysis\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting into smaller modules\" >&2\n  elif [ \"$LINES\" -gt 300 ]; then\n    echo \"📊 INFO: File is getting large ($LINES lines) - monitor for complexity\" >&2\n  fi\n  \n  # Function/method count analysis\n  FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  if [ \"$FUNCTION_COUNT\" -gt 20 ]; then\n    echo \"⚠️ COMPLEXITY: Too many functions/methods ($FUNCTION_COUNT) - consider modularization\" >&2\n  elif [ \"$FUNCTION_COUNT\" -gt 15 ]; then\n    echo \"📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring\" >&2\n  fi\n  \n  # Nesting level analysis (rough estimate)\n  OPEN_BRACES=$(grep -o '{' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  CLOSE_BRACES=$(grep -o '}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n  \n  if [ \"$OPEN_BRACES\" -gt 50 ]; then\n    echo \"⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic\" >&2\n  fi\n  \n  # Python-specific checks\n  if [[ \"$FILE_PATH\" == *.py ]]; then\n    INDENT_DEPTH=$(grep -E '^[ ]{12,}' \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\n    if [ \"$INDENT_DEPTH\" -gt 5 ]; then\n      echo \"⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction\" >&2\n    fi\n  fi\n  \n  echo \"✅ Complexity analysis completed for $FILE_PATH\" >&2\nelse\n  echo \"File $FILE_PATH is not a supported type for complexity analysis\" >&2\nfi\n\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nTOOL_NAME=$(echo \"$INPUT\" | jq -r \".tool_name\")\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nif [[ \"$FILE_PATH\" == *.js ]] || [[ \"$FILE_PATH\" == *.ts ]] || [[ \"$FILE_PATH\" == *.py ]]; then\n  LINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\n  if [ \"$LINES\" -gt 500 ]; then\n    echo \"⚠️ COMPLEXITY: File exceeds 500 lines ($LINES lines) - consider splitting\" >&2\n  fi\nfi\nexit 0"
+      },
+      {
+        "language": "json",
+        "code": "{\n  \"hooks\": {\n    \"Notification\": [\n      {\n        \"hooks\": [\n          {\n            \"type\": \"command\",\n            \"command\": \"./.claude/hooks/code-complexity-alert-monitor.sh\"\n          }\n        ]\n      }\n    ]\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.py ]]; then exit 0; fi\nif command -v radon >/dev/null 2>&1; then\n  COMPLEXITY=$(radon cc \"$FILE_PATH\" -a -nc 2>/dev/null | grep -oP \"Average complexity: \\\\K[0-9]+\\.[0-9]+\" || echo \"0\")\n  if (( $(echo \"$COMPLEXITY > 10\" | bc -l) )); then\n    echo \"⚠️ COMPLEXITY: High cyclomatic complexity ($COMPLEXITY) - consider refactoring\" >&2\n  fi\nfi\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ] || [[ ! \"$FILE_PATH\" == *.{js,jsx,ts,tsx} ]]; then exit 0; fi\nif command -v eslint >/dev/null 2>&1; then\n  COMPLEXITY=$(eslint --format json \"$FILE_PATH\" 2>/dev/null | jq -r \".[0].messages[] | select(.ruleId==\\\"complexity\\\") | .message\" || echo \"\")\n  if [ -n \"$COMPLEXITY\" ]; then\n    echo \"⚠️ COMPLEXITY: $COMPLEXITY\" >&2\n  fi\nfi\nexit 0"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\nINPUT=$(cat)\nFILE_PATH=$(echo \"$INPUT\" | jq -r \".tool_input.file_path // .tool_input.path // \\\"\\\"\")\nif [ -z \"$FILE_PATH\" ]; then exit 0; fi\nLINES=$(wc -l < \"$FILE_PATH\" 2>/dev/null || echo \"0\")\nFUNCTION_COUNT=$(grep -E \"(function|def |const.*=>|class |async |export function)\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nOPEN_BRACES=$(grep -o \"{\" \"$FILE_PATH\" 2>/dev/null | wc -l || echo \"0\")\nif [ \"$LINES\" -gt 500 ] || [ \"$FUNCTION_COUNT\" -gt 20 ] || [ \"$OPEN_BRACES\" -gt 50 ]; then\n  echo \"⚠️ COMPLEXITY: Multiple thresholds exceeded - Lines: $LINES, Functions: $FUNCTION_COUNT, Nesting: $OPEN_BRACES\" >&2\nfi\nexit 0"
+      }
+    ],
+    "filePath": "content/hooks/code-complexity-alert-monitor.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-complexity-alert-monitor.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

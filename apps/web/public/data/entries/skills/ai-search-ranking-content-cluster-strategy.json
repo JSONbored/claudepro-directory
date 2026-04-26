@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "ai-search-ranking-content-cluster-strategy",
+    "title": "AI Search Ranking Content Cluster Strategy Skill",
+    "description": "Build SEO-forward content clusters that align with search intent, topical authority, and conversion pathways for AI tooling niches.",
+    "seoTitle": "AI Search Ranking Content Cluster Strategy Skill",
+    "seoDescription": "Reusable AI skill for planning and executing SEO content clusters that improve rankings, authority, and qualified traffic.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "seo",
+      "content-strategy",
+      "growth",
+      "ranking",
+      "publishing"
+    ],
+    "keywords": [
+      "ai seo skill",
+      "content cluster strategy",
+      "search ranking workflow",
+      "topical authority"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 68,
+    "documentationUrl": "https://developers.google.com/search/docs",
+    "cardDescription": "Content strategy skill for ranking and growth using intent mapping, cluster architecture, and structured publishing workflows.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip -o ai-search-ranking-content-cluster-strategy.zip && unzip -o ai-search-ranking-content-cluster-strategy.zip -d ./ai-search-ranking-content-cluster-strategy",
+    "usageSnippet": "Use this skill to build and operate content clusters that compound traffic and ranking over time.",
+    "copySnippet": "# Trigger\n\"Apply the AI search ranking content cluster strategy skill to this niche.\"\n\n# Required output\n1) Keyword and intent map\n2) Cluster/pillar architecture\n3) Internal linking strategy\n4) Publishing and refresh cadence",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://developers.google.com/search/docs"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Clear niche/topic scope",
+      "Existing content inventory (if available)",
+      "Primary conversion objective"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/ai-search-ranking-content-cluster-strategy.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "cc04f016dc2ee3f988e6fd411ff7406fc999b0c5f2377e7fc6e71d5f795dc2e8",
+    "body": "## Overview\n\nThis skill helps AI agents create practical, ranking-oriented content programs. It focuses on intent-driven coverage, robust internal linking, and repeatable publishing operations.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- ICP and audience pain points\n- Topic boundaries and business relevance\n- Publishing capacity estimate\n\n## What This Skill Delivers\n\n- Search intent map by funnel stage\n- Cluster architecture and page-level briefs\n- Internal link model for authority flow\n- Refresh strategy based on performance signals\n\n## How to Use This Skill\n\n1. Build keyword universe from real user problems.\n2. Group by intent and business relevance.\n3. Design pillar/cluster page architecture.\n4. Define internal links and conversion pathways.\n5. Publish, measure, and refresh using clear rules.\n\n## Troubleshooting\n\n**Issue:** Traffic grows but conversions stay flat  \n**Fix:** Align cluster CTAs and page intent with concrete user next steps.\n\n**Issue:** New pages cannibalize each other  \n**Fix:** Tighten intent separation and canonical/internal-link structure.\n\n**Issue:** Rankings plateau  \n**Fix:** Expand cluster depth and update aging pages with new evidence/examples.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://developers.google.com/search/docs\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill helps AI agents create practical, ranking-oriented content programs. It focuses on intent-driven coverage, robust internal linking, and repeatable publishing operations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- ICP and audience pain points\n- Topic boundaries and business relevance\n- Publishing capacity estimate",
+        "codeBlocks": []
+      },
+      {
+        "title": "What This Skill Delivers",
+        "id": "what-this-skill-delivers",
+        "markdown": "- Search intent map by funnel stage\n- Cluster architecture and page-level briefs\n- Internal link model for authority flow\n- Refresh strategy based on performance signals",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "1. Build keyword universe from real user problems.\n2. Group by intent and business relevance.\n3. Design pillar/cluster page architecture.\n4. Define internal links and conversion pathways.\n5. Publish, measure, and refresh using clear rules.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Traffic grows but conversions stay flat  \n**Fix:** Align cluster CTAs and page intent with concrete user next steps.\n\n**Issue:** New pages cannibalize each other  \n**Fix:** Tighten intent separation and canonical/internal-link structure.\n\n**Issue:** Rankings plateau  \n**Fix:** Expand cluster depth and update aging pages with new evidence/examples.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://developers.google.com/search/docs",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "What This Skill Delivers",
+        "id": "what-this-skill-delivers"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/ai-search-ranking-content-cluster-strategy.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-search-ranking-content-cluster-strategy.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:paypal-mcp-server",
+  "category": "mcp",
+  "slug": "paypal-mcp-server",
+  "title": "Paypal MCP Server for Claude",
+  "copyText": "Install:\nclaude mcp list && claude mcp status paypal\n\nConfig:\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+  "detailMarkdown": "# Paypal MCP Server for Claude\nIntegrate PayPal commerce capabilities, payment processing, and transaction management\n**Category:** mcp\n**Author:** PayPal\n**Download trust:** first-party\n**Tags:** `payments` `paypal` `commerce` `transactions` `financial`\n\n## Install\n```bash\nclaude mcp list && claude mcp status paypal\n```\n\n## Config\n```json\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status paypal\n\n## Links\n- https://heyclau.de/mcp/paypal-mcp-server\n- https://www.paypal.ai/",
+  "webUrl": "https://heyclau.de/mcp/paypal-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://www.paypal.ai/"
+}

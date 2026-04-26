@@ -1,0 +1,308 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "airtable-mcp-server",
+    "title": "Airtable MCP Server for Claude",
+    "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
+    "seoTitle": "Airtable MCP Server for Claude",
+    "seoDescription": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development.",
+    "author": "domdomegg",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "database",
+      "airtable",
+      "data-management",
+      "crud",
+      "tables"
+    ],
+    "keywords": [
+      "airtable",
+      "claude",
+      "crud",
+      "data-management",
+      "database",
+      "development",
+      "mcp",
+      "mcp servers",
+      "server",
+      "tables",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
+    "cardDescription": "Read and write records, manage bases and tables in Airtable directly from Claude",
+    "installable": true,
+    "installCommand": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list",
+    "usageSnippet": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list",
+    "copySnippet": "{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Node.js 18+ installed for running npx commands and MCP server packages",
+      "Airtable Personal Access Token (PAT) from https://airtable.com/account",
+      "Required API scopes: data.records:read (minimum), data.records:write (for updates), schema.bases:read (for schema operations)",
+      "Base ID for the Airtable base you want to access (starts with 'app' prefix)",
+      "Editor or creator permissions on the target base (required for write operations)",
+      "Internet connection for accessing Airtable API (https://api.airtable.com)",
+      "npm or npx available for installing the airtable-mcp-server package",
+      "Understanding of Airtable base structure (tables, fields, record IDs)",
+      "Rate limit awareness: 5 requests/second per base, 50 requests/second per user account",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/airtable-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "de3543063d919647fdf25c518ccd6679e32c5e9ae49d94150344fee4dabc3856",
+    "body": "Read and write records, manage bases and tables in Airtable directly from Claude\n\n## Content\n\nConnect Claude to Airtable databases for seamless data management and automation of your bases and tables.\n\n## Features\n\n- Read and write records in Airtable bases\n- Create and manage tables with full schema control\n- Query and filter data with complex conditions\n- Update multiple records in batch operations\n- Access metadata and schema information\n- Advanced Airtable base and table management with automatic schema detection, field type validation, and relationship mapping for complex data structures\n- Batch operations support for efficient bulk record creation, updates, and deletions with automatic rate limit handling and retry logic\n- Real-time data synchronization capabilities with webhook integration support for monitoring base changes and triggering automated workflows\n\n## Use Cases\n\n- Automate data entry and updates across multiple bases\n- Generate reports from Airtable data with AI analysis\n- Sync data between Airtable and other systems\n- Bulk operations on records for data cleaning\n- Create dynamic dashboards from Airtable content\n- Build automated data pipelines that sync external data sources with Airtable bases for real-time data management and reporting\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status airtable\n\n### Claude Desktop\n\n1. Get your Airtable API key from https://airtable.com/account\n2. Open Claude Desktop configuration file\n3. Add the Airtable server configuration with your API key\n4. Restart Claude Desktop\n\n## Requirements\n\n- Node.js 18+ installed for running npx commands and MCP server packages\n- Airtable Personal Access Token (PAT) from https://airtable.com/account\n- Required API scopes: data.records:read (minimum), data.records:write (for updates), schema.bases:read (for schema operations)\n- Base ID for the Airtable base you want to access (starts with 'app' prefix)\n- Editor or creator permissions on the target base (required for write operations)\n- Internet connection for accessing Airtable API (https://api.airtable.com)\n- npm or npx available for installing the airtable-mcp-server package\n- Understanding of Airtable base structure (tables, fields, record IDs)\n- Rate limit awareness: 5 requests/second per base, 50 requests/second per user account\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n\n## Configuration\n\n```json\n{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### Read all records from the Projects table\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Read all records from the Projects table\"\n```\n### Add a new contact with these details to Airtable\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Add a new contact with these details to Airtable\"\n```\n### Update the status field for all overdue tasks\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update the status field for all overdue tasks\"\n```\n### Filter records where status='active' AND priority=...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Filter records where status='active' AND priority='high'\"\n```\n### Query Records with Filtering\nQuery Airtable records using formula-based filtering to retrieve specific data subsets\n```typescript\n// Query Airtable records with formula filtering\nconst records = await airtable.query({\n  baseId: 'appXXXXXXXXXXXXXX',\n  table: 'Projects',\n  filterByFormula: \"{Status} = 'Active'\",\n  maxRecords: 100\n});\n```\n\n## Security\n\n- Use read-only API keys when write access isn't needed\n- Limit access to specific bases when possible\n- Regularly rotate API keys for security\n- Monitor API usage through Airtable dashboard\n- Airtable API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Airtable base IDs and table names may expose data structure and organization information - ensure base IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Airtable MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Airtable webhook configurations and payloads may contain sensitive data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Authentication failed with 401 Unauthorized error\n\nVerify Personal Access Token at https://airtable.com/account has correct scopes. Ensure token grants access to specific base. Check AIRTABLE_API_KEY environment variable matches your PAT.\n### Rate limit exceeded - 5 requests per second throttling\n\nImplement 200ms delay between requests (5 req/sec limit). Use batch endpoints to update 10 records per request. Consider batching to achieve 50 updates/second maximum throughput.\n### Base or table not found with 404 error\n\nVerify base ID starts with 'app' prefix. Check table name is exact case-sensitive match. Confirm PAT has base-level permissions granted at https://airtable.com/account.\n### Field validation errors when creating or updating records\n\nMatch field types exactly (text, number, single select, etc). Provide all required fields. Use GET request to table schema to verify field names, types, and validation rules.\n### Airtable MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when querying large Airtable bases\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Airtable base schema changes breaking MCP server operations\n\nImplement schema validation and versioning. Use Airtable's schema API to detect changes. Add error handling for missing fields or changed field types. Consider using field IDs instead of field names for stability.\n### Airtable MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Airtable API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Read and write records, manage bases and tables in Airtable directly from Claude",
+        "codeBlocks": []
+      },
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Connect Claude to Airtable databases for seamless data management and automation of your bases and tables.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Read and write records in Airtable bases\n- Create and manage tables with full schema control\n- Query and filter data with complex conditions\n- Update multiple records in batch operations\n- Access metadata and schema information\n- Advanced Airtable base and table management with automatic schema detection, field type validation, and relationship mapping for complex data structures\n- Batch operations support for efficient bulk record creation, updates, and deletions with automatic rate limit handling and retry logic\n- Real-time data synchronization capabilities with webhook integration support for monitoring base changes and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Automate data entry and updates across multiple bases\n- Generate reports from Airtable data with AI analysis\n- Sync data between Airtable and other systems\n- Bulk operations on records for data cleaning\n- Create dynamic dashboards from Airtable content\n- Build automated data pipelines that sync external data sources with Airtable bases for real-time data management and reporting",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status airtable\n\n### Claude Desktop\n\n1. Get your Airtable API key from https://airtable.com/account\n2. Open Claude Desktop configuration file\n3. Add the Airtable server configuration with your API key\n4. Restart Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Node.js 18+ installed for running npx commands and MCP server packages\n- Airtable Personal Access Token (PAT) from https://airtable.com/account\n- Required API scopes: data.records:read (minimum), data.records:write (for updates), schema.bases:read (for schema operations)\n- Base ID for the Airtable base you want to access (starts with 'app' prefix)\n- Editor or creator permissions on the target base (required for write operations)\n- Internet connection for accessing Airtable API (https://api.airtable.com)\n- npm or npx available for installing the airtable-mcp-server package\n- Understanding of Airtable base structure (tables, fields, record IDs)\n- Rate limit awareness: 5 requests/second per base, 50 requests/second per user account\n- Claude Desktop 0.7.0+ or Claude Code with MCP support",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Read all records from the Projects table\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Read all records from the Projects table\"\n```\n### Add a new contact with these details to Airtable\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Add a new contact with these details to Airtable\"\n```\n### Update the status field for all overdue tasks\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Update the status field for all overdue tasks\"\n```\n### Filter records where status='active' AND priority=...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Filter records where status='active' AND priority='high'\"\n```\n### Query Records with Filtering\nQuery Airtable records using formula-based filtering to retrieve specific data subsets\n```typescript\n// Query Airtable records with formula filtering\nconst records = await airtable.query({\n  baseId: 'appXXXXXXXXXXXXXX',\n  table: 'Projects',\n  filterByFormula: \"{Status} = 'Active'\",\n  maxRecords: 100\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Read all records from the Projects table\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Add a new contact with these details to Airtable\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Update the status field for all overdue tasks\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Filter records where status='active' AND priority='high'\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Query Airtable records with formula filtering\nconst records = await airtable.query({\n  baseId: 'appXXXXXXXXXXXXXX',\n  table: 'Projects',\n  filterByFormula: \"{Status} = 'Active'\",\n  maxRecords: 100\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Use read-only API keys when write access isn't needed\n- Limit access to specific bases when possible\n- Regularly rotate API keys for security\n- Monitor API usage through Airtable dashboard\n- Airtable API tokens and personal access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- OAuth access tokens should be used for third-party integrations instead of personal access tokens to ensure proper access control and token lifecycle management\n- Airtable base IDs and table names may expose data structure and organization information - ensure base IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Airtable MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Airtable webhook configurations and payloads may contain sensitive data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Authentication failed with 401 Unauthorized error\n\nVerify Personal Access Token at https://airtable.com/account has correct scopes. Ensure token grants access to specific base. Check AIRTABLE_API_KEY environment variable matches your PAT.\n### Rate limit exceeded - 5 requests per second throttling\n\nImplement 200ms delay between requests (5 req/sec limit). Use batch endpoints to update 10 records per request. Consider batching to achieve 50 updates/second maximum throughput.\n### Base or table not found with 404 error\n\nVerify base ID starts with 'app' prefix. Check table name is exact case-sensitive match. Confirm PAT has base-level permissions granted at https://airtable.com/account.\n### Field validation errors when creating or updating records\n\nMatch field types exactly (text, number, single select, etc). Provide all required fields. Use GET request to table schema to verify field names, types, and validation rules.\n### Airtable MCP server authentication errors with personal access tokens\n\nVerify token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Rate limit errors when querying large Airtable bases\n\nImplement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed data. Monitor rate limit headers and adjust request frequency accordingly.\n### Airtable base schema changes breaking MCP server operations\n\nImplement schema validation and versioning. Use Airtable's schema API to detect changes. Add error handling for missing fields or changed field types. Consider using field IDs instead of field names for stability.\n### Airtable MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Airtable API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Read all records from the Projects table",
+        "id": "read-all-records-from-the-projects-table"
+      },
+      {
+        "depth": 3,
+        "text": "Add a new contact with these details to Airtable",
+        "id": "add-a-new-contact-with-these-details-to-airtable"
+      },
+      {
+        "depth": 3,
+        "text": "Update the status field for all overdue tasks",
+        "id": "update-the-status-field-for-all-overdue-tasks"
+      },
+      {
+        "depth": 3,
+        "text": "Filter records where status='active' AND priority=...",
+        "id": "filter-records-where-statusactive-and-priority"
+      },
+      {
+        "depth": 3,
+        "text": "Query Records with Filtering",
+        "id": "query-records-with-filtering"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Authentication failed with 401 Unauthorized error",
+        "id": "authentication-failed-with-401-unauthorized-error"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit exceeded - 5 requests per second throttling",
+        "id": "rate-limit-exceeded---5-requests-per-second-throttling"
+      },
+      {
+        "depth": 3,
+        "text": "Base or table not found with 404 error",
+        "id": "base-or-table-not-found-with-404-error"
+      },
+      {
+        "depth": 3,
+        "text": "Field validation errors when creating or updating records",
+        "id": "field-validation-errors-when-creating-or-updating-records"
+      },
+      {
+        "depth": 3,
+        "text": "Airtable MCP server authentication errors with personal access tokens",
+        "id": "airtable-mcp-server-authentication-errors-with-personal-access-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Rate limit errors when querying large Airtable bases",
+        "id": "rate-limit-errors-when-querying-large-airtable-bases"
+      },
+      {
+        "depth": 3,
+        "text": "Airtable base schema changes breaking MCP server operations",
+        "id": "airtable-base-schema-changes-breaking-mcp-server-operations"
+      },
+      {
+        "depth": 3,
+        "text": "Airtable MCP server connection timeouts or network errors",
+        "id": "airtable-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Read all records from the Projects table\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Add a new contact with these details to Airtable\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Update the status field for all overdue tasks\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Filter records where status='active' AND priority='high'\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Query Airtable records with formula filtering\nconst records = await airtable.query({\n  baseId: 'appXXXXXXXXXXXXXX',\n  table: 'Projects',\n  filterByFormula: \"{Status} = 'Active'\",\n  maxRecords: 100\n});"
+      }
+    ],
+    "filePath": "content/mcp/airtable-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx",
+    "repoUrl": "https://github.com/domdomegg/airtable-mcp-server",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

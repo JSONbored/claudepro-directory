@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:generate-tests",
+  "category": "commands",
+  "slug": "generate-tests",
+  "title": "Generate Tests for Claude",
+  "copyText": "/test-gen [options] <file_or_function>",
+  "detailMarkdown": "# Generate Tests for Claude\nAutomatically generate comprehensive test suites including unit tests, integration tests, and edge cases with multiple testing framework support\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `testing` `automation` `unit-tests` `integration-tests` `tdd`\n\n## Install\n```bash\n/test-gen [options] <file_or_function>\n```\n\n## Usage\n/test-gen [options] <file_or_function>\n\n## Links\n- https://heyclau.de/commands/generate-tests\n- https://docs.claude.ai/commands/test-gen",
+  "webUrl": "https://heyclau.de/commands/generate-tests",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/test-gen"
+}

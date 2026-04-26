@@ -1,0 +1,302 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "fireflies-mcp-server",
+    "title": "Fireflies MCP Server for Claude",
+    "description": "Extract valuable insights from meeting transcripts and summaries",
+    "seoTitle": "Fireflies MCP Server for Claude",
+    "seoDescription": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development.",
+    "author": "Fireflies",
+    "dateAdded": "2025-09-18",
+    "tags": [
+      "meetings",
+      "fireflies",
+      "transcription",
+      "notes",
+      "ai-assistant"
+    ],
+    "keywords": [
+      "ai-assistant",
+      "claude",
+      "development",
+      "fireflies",
+      "mcp",
+      "mcp servers",
+      "meetings",
+      "notes",
+      "server",
+      "tools",
+      "transcription"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+    "cardDescription": "Extract valuable insights from meeting transcripts and summaries",
+    "installable": true,
+    "installCommand": "claude mcp list && claude mcp status fireflies",
+    "usageSnippet": "claude mcp list && claude mcp status fireflies",
+    "copySnippet": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "configSnippet": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Fireflies.ai account (sign up at https://fireflies.ai if needed)",
+      "Fireflies API key (obtain from Fireflies settings/API section)",
+      "OAuth authentication support (for workspace access)",
+      "HTTP transport support (remote MCP server at https://api.fireflies.ai/mcp)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Internet connection (remote API access required)",
+      "Understanding of rate limits (Free/Pro: 50 requests/day, Business/Enterprise: 60 requests/minute)",
+      "Workspace permissions (viewer or higher role for accessing meetings in Fireflies workspace)",
+      "Understanding of meeting privacy settings (meetings must allow API access)",
+      "Understanding of Fireflies workspace structure and meeting organization"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/fireflies-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "21b16bcef6c23c95d81241c4937bf0c89f4582fb57748f12da8da13a01ba7038",
+    "body": "## Content\n\nUnlock the power of your meeting data by connecting Claude to Fireflies.ai's meeting intelligence platform. Automatically extract action items, search conversation history, analyze speaker participation, and generate comprehensive meeting summaries through natural language commands, transforming how you capture and act on meeting insights.\n\n## Features\n\n- Access meeting transcripts and recordings\n- Retrieve automated meeting summaries\n- Search conversation content\n- Extract action items and decisions\n- Analyze speaker analytics and participation\n- Advanced Fireflies meeting transcription and analysis with AI-powered insights, action item extraction, and meeting summary generation\n- Batch operations support for efficient bulk meeting processing, transcript analysis, and data export with automatic rate limit handling and retry logic\n- Real-time meeting synchronization capabilities with webhook integration support for monitoring new meetings and triggering automated workflows\n\n## Use Cases\n\n- Review meeting outcomes and decisions\n- Extract action items for follow-up\n- Search past discussions by topic\n- Generate meeting reports for stakeholders\n- Track speaker participation metrics\n- Build automated meeting management workflows that sync external systems with Fireflies for real-time meeting transcription and analysis\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add --transport http fireflies https://api.fireflies.ai/mcp\n2. Add your Fireflies API key to the configuration (Authorization header with Bearer token)\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status fireflies\n\n### Claude Desktop\n\n1. Open your Claude Desktop configuration file (see configPath below)\n2. Add the Fireflies server configuration with HTTP transport and your API key\n3. Restart Claude Desktop\n4. Authenticate with your Fireflies account (API key should be in Authorization header)\n\n## Requirements\n\n- Fireflies.ai account (sign up at https://fireflies.ai if needed)\n- Fireflies API key (obtain from Fireflies settings/API section)\n- OAuth authentication support (for workspace access)\n- HTTP transport support (remote MCP server at https://api.fireflies.ai/mcp)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Internet connection (remote API access required)\n- Understanding of rate limits (Free/Pro: 50 requests/day, Business/Enterprise: 60 requests/minute)\n- Workspace permissions (viewer or higher role for accessing meetings in Fireflies workspace)\n- Understanding of meeting privacy settings (meetings must allow API access)\n- Understanding of Fireflies workspace structure and meeting organization\n\n## Configuration\n\n```json\n{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Examples\n### Get action items from today's standup\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get action items from today's standup\"\n```\n### Search for discussions about Q4 planning\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about Q4 planning\"\n```\n### Generate summary of customer call\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate summary of customer call\"\n```\n### Find all mentions of budget in recent meetings\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find all mentions of budget in recent meetings\"\n```\n### Get Meeting Transcript\nRetrieve a meeting transcript with speaker identification\n```typescript\n// Get Fireflies meeting transcript\nconst transcript = await fireflies.transcripts.get({\n  meeting_id: \"meeting-id\",\n  format: \"text\",\n  include_speakers: true\n});\n```\n\n## Security\n\n- OAuth authentication for workspace access\n- Respect meeting privacy settings\n- Control transcript access permissions\n- Regular data audits recommended\n- Fireflies API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Fireflies OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Fireflies meeting IDs and transcript data may contain sensitive business information and personal conversations - ensure Fireflies resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Fireflies MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Fireflies webhook configurations and payloads may contain sensitive meeting transcripts and participant information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Too many requests error with code 429\n\nFree/Pro plans: 50 requests/day limit. Business/Enterprise: 60 requests/minute. Check retryAfter timestamp in error response. Wait specified time before retry or upgrade plan for higher limits.\n### Invalid API key or authentication failed error\n\nAdd Authorization header with Bearer YOUR_API_KEY format. Verify API key hasn't expired in Fireflies settings. Check for typos and regenerate key if authentication continues to fail.\n### Cannot access meeting transcripts or recordings\n\nVerify workspace permissions grant access to meetings. Check meeting privacy settings allow API access. Ensure your account has viewer or higher role for target meetings in Fireflies workspace.\n### Transcripts incomplete or missing sections\n\nCheck audio quality of original recording. Verify storage limits haven't been exceeded for your plan tier. Review transcript settings for language and accuracy preferences in Fireflies workspace.\n### Fireflies MCP server authentication errors with API keys\n\nVerify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Fireflies rate limit errors when processing multiple meetings\n\nImplement exponential backoff retry logic with jitter. Use Fireflies API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed meeting data. Fireflies allows 100 requests per minute per API key.\n### Fireflies meeting or transcript access denied errors\n\nVerify API key has access to the meeting. Check meeting permissions and account membership. Ensure API key has required permissions (read transcripts, read meetings) for target operations.\n### Fireflies MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Fireflies API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Unlock the power of your meeting data by connecting Claude to Fireflies.ai's meeting intelligence platform. Automatically extract action items, search conversation history, analyze speaker participation, and generate comprehensive meeting summaries through natural language commands, transforming how you capture and act on meeting insights.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Access meeting transcripts and recordings\n- Retrieve automated meeting summaries\n- Search conversation content\n- Extract action items and decisions\n- Analyze speaker analytics and participation\n- Advanced Fireflies meeting transcription and analysis with AI-powered insights, action item extraction, and meeting summary generation\n- Batch operations support for efficient bulk meeting processing, transcript analysis, and data export with automatic rate limit handling and retry logic\n- Real-time meeting synchronization capabilities with webhook integration support for monitoring new meetings and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Review meeting outcomes and decisions\n- Extract action items for follow-up\n- Search past discussions by topic\n- Generate meeting reports for stakeholders\n- Track speaker participation metrics\n- Build automated meeting management workflows that sync external systems with Fireflies for real-time meeting transcription and analysis",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add --transport http fireflies https://api.fireflies.ai/mcp\n2. Add your Fireflies API key to the configuration (Authorization header with Bearer token)\n3. Verify installation: claude mcp list\n4. Test connection: claude mcp status fireflies\n\n### Claude Desktop\n\n1. Open your Claude Desktop configuration file (see configPath below)\n2. Add the Fireflies server configuration with HTTP transport and your API key\n3. Restart Claude Desktop\n4. Authenticate with your Fireflies account (API key should be in Authorization header)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Fireflies.ai account (sign up at https://fireflies.ai if needed)\n- Fireflies API key (obtain from Fireflies settings/API section)\n- OAuth authentication support (for workspace access)\n- HTTP transport support (remote MCP server at https://api.fireflies.ai/mcp)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Internet connection (remote API access required)\n- Understanding of rate limits (Free/Pro: 50 requests/day, Business/Enterprise: 60 requests/minute)\n- Workspace permissions (viewer or higher role for accessing meetings in Fireflies workspace)\n- Understanding of meeting privacy settings (meetings must allow API access)\n- Understanding of Fireflies workspace structure and meeting organization",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Get action items from today's standup\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get action items from today's standup\"\n```\n### Search for discussions about Q4 planning\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Search for discussions about Q4 planning\"\n```\n### Generate summary of customer call\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Generate summary of customer call\"\n```\n### Find all mentions of budget in recent meetings\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Find all mentions of budget in recent meetings\"\n```\n### Get Meeting Transcript\nRetrieve a meeting transcript with speaker identification\n```typescript\n// Get Fireflies meeting transcript\nconst transcript = await fireflies.transcripts.get({\n  meeting_id: \"meeting-id\",\n  format: \"text\",\n  include_speakers: true\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Get action items from today's standup\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Search for discussions about Q4 planning\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Generate summary of customer call\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Find all mentions of budget in recent meetings\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Get Fireflies meeting transcript\nconst transcript = await fireflies.transcripts.get({\n  meeting_id: \"meeting-id\",\n  format: \"text\",\n  include_speakers: true\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- OAuth authentication for workspace access\n- Respect meeting privacy settings\n- Control transcript access permissions\n- Regular data audits recommended\n- Fireflies API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Fireflies OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh\n- Fireflies meeting IDs and transcript data may contain sensitive business information and personal conversations - ensure Fireflies resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Fireflies MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Fireflies webhook configurations and payloads may contain sensitive meeting transcripts and participant information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Too many requests error with code 429\n\nFree/Pro plans: 50 requests/day limit. Business/Enterprise: 60 requests/minute. Check retryAfter timestamp in error response. Wait specified time before retry or upgrade plan for higher limits.\n### Invalid API key or authentication failed error\n\nAdd Authorization header with Bearer YOUR_API_KEY format. Verify API key hasn't expired in Fireflies settings. Check for typos and regenerate key if authentication continues to fail.\n### Cannot access meeting transcripts or recordings\n\nVerify workspace permissions grant access to meetings. Check meeting privacy settings allow API access. Ensure your account has viewer or higher role for target meetings in Fireflies workspace.\n### Transcripts incomplete or missing sections\n\nCheck audio quality of original recording. Verify storage limits haven't been exceeded for your plan tier. Review transcript settings for language and accuracy preferences in Fireflies workspace.\n### Fireflies MCP server authentication errors with API keys\n\nVerify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.\n### Fireflies rate limit errors when processing multiple meetings\n\nImplement exponential backoff retry logic with jitter. Use Fireflies API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed meeting data. Fireflies allows 100 requests per minute per API key.\n### Fireflies meeting or transcript access denied errors\n\nVerify API key has access to the meeting. Check meeting permissions and account membership. Ensure API key has required permissions (read transcripts, read meetings) for target operations.\n### Fireflies MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Fireflies API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Get action items from today's standup",
+        "id": "get-action-items-from-todays-standup"
+      },
+      {
+        "depth": 3,
+        "text": "Search for discussions about Q4 planning",
+        "id": "search-for-discussions-about-q4-planning"
+      },
+      {
+        "depth": 3,
+        "text": "Generate summary of customer call",
+        "id": "generate-summary-of-customer-call"
+      },
+      {
+        "depth": 3,
+        "text": "Find all mentions of budget in recent meetings",
+        "id": "find-all-mentions-of-budget-in-recent-meetings"
+      },
+      {
+        "depth": 3,
+        "text": "Get Meeting Transcript",
+        "id": "get-meeting-transcript"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Too many requests error with code 429",
+        "id": "too-many-requests-error-with-code-429"
+      },
+      {
+        "depth": 3,
+        "text": "Invalid API key or authentication failed error",
+        "id": "invalid-api-key-or-authentication-failed-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot access meeting transcripts or recordings",
+        "id": "cannot-access-meeting-transcripts-or-recordings"
+      },
+      {
+        "depth": 3,
+        "text": "Transcripts incomplete or missing sections",
+        "id": "transcripts-incomplete-or-missing-sections"
+      },
+      {
+        "depth": 3,
+        "text": "Fireflies MCP server authentication errors with API keys",
+        "id": "fireflies-mcp-server-authentication-errors-with-api-keys"
+      },
+      {
+        "depth": 3,
+        "text": "Fireflies rate limit errors when processing multiple meetings",
+        "id": "fireflies-rate-limit-errors-when-processing-multiple-meetings"
+      },
+      {
+        "depth": 3,
+        "text": "Fireflies meeting or transcript access denied errors",
+        "id": "fireflies-meeting-or-transcript-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Fireflies MCP server connection timeouts or network errors",
+        "id": "fireflies-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Get action items from today's standup\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Search for discussions about Q4 planning\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Generate summary of customer call\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Find all mentions of budget in recent meetings\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Get Fireflies meeting transcript\nconst transcript = await fireflies.transcripts.get({\n  meeting_id: \"meeting-id\",\n  format: \"text\",\n  include_speakers: true\n});"
+      }
+    ],
+    "filePath": "content/mcp/fireflies-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/fireflies-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

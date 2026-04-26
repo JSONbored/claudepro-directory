@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:refactor",
+  "category": "commands",
+  "slug": "refactor",
+  "title": "/refactor - Code Refactoring Command for Claude",
+  "copyText": "/refactor [options] <file_or_selection>",
+  "detailMarkdown": "# /refactor - Code Refactoring Command for Claude\nIntelligent code refactoring command that analyzes code structure and applies best practices for improved maintainability and performance\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `refactoring` `code-quality` `cleanup` `optimization` `patterns`\n\n## Install\n```bash\n/refactor [options] <file_or_selection>\n```\n\n## Usage\n/refactor [options] <file_or_selection>\n\n## Links\n- https://heyclau.de/commands/refactor\n- https://docs.claude.ai/commands/refactor",
+  "webUrl": "https://heyclau.de/commands/refactor",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/refactor"
+}

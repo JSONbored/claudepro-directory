@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:skills-installer",
+  "category": "commands",
+  "slug": "skills-installer",
+  "title": "Agent Skills Installer for Claude Code",
+  "copyText": "/skills-installer [action] [skill-name]",
+  "detailMarkdown": "# Agent Skills Installer for Claude Code\nInstall and manage Claude Code Agent Skills - specialized knowledge packages that extend Claude's capabilities with domain expertise and progressive disclosure\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `skills` `agent-skills` `capabilities` `domain-expertise` `plugins` `extensions`\n\n## Install\n```bash\n/skills-installer [action] [skill-name]\n```\n\n## Usage\n/skills-installer [action] [skill-name]\n\n## Links\n- https://heyclau.de/commands/skills-installer\n- https://docs.claude.com/en/docs/claude-code/skills",
+  "webUrl": "https://heyclau.de/commands/skills-installer",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/skills"
+}

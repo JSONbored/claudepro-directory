@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:cloudflare-workers-d1-kv-r2-capability-pack",
+  "category": "skills",
+  "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
+  "title": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack\n\nUsage:\nUse this skill when designing edge applications that need reliable storage coordination across D1, KV, and R2.\n\nAsset:\n# Trigger\n\"Apply the Cloudflare Workers D1/KV/R2 capability pack to this system.\"\n\n# Required output\n1) Data placement strategy\n2) Read/write consistency model\n3) Cache and invalidation plan\n4) Security and abuse controls",
+  "detailMarkdown": "# Cloudflare Workers D1 KV R2 Capability Pack Skill\nExpert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** validated\n**Download trust:** first-party\n**Tags:** `cloudflare` `workers` `d1` `kv` `r2`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack\n```\n\n## Usage\nUse this skill when designing edge applications that need reliable storage coordination across D1, KV, and R2.\n\n## Links\n- https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack\n- https://developers.cloudflare.com/workers/",
+  "webUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack",
+  "repoUrl": "",
+  "documentationUrl": "https://developers.cloudflare.com/workers/"
+}

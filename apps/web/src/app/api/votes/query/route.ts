@@ -90,6 +90,19 @@ export async function POST(request: Request) {
     );
   } catch {
     logApiError(request, "votes.query.internal_error", { keyCount: keys.length });
-    return NextResponse.json({ error: "internal_error" }, { status: 500 });
+    const counts: Record<string, number> = {};
+    const voted: Record<string, boolean> = {};
+    for (const key of keys) {
+      counts[key] = 0;
+      voted[key] = false;
+    }
+    return NextResponse.json(
+      { counts, voted, available: false },
+      {
+        headers: {
+          "cache-control": "no-store"
+        }
+      }
+    );
   }
 }

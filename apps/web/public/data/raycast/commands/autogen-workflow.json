@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:autogen-workflow",
+  "category": "commands",
+  "slug": "autogen-workflow",
+  "title": "AutoGen Multi-Agent Workflow for Claude",
+  "copyText": "/autogen-workflow [options] <workflow_description>",
+  "detailMarkdown": "# AutoGen Multi-Agent Workflow for Claude\nOrchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `autogen` `multi-agent` `workflow` `orchestration` `ai`\n\n## Install\n```bash\n/autogen-workflow [options] <workflow_description>\n```\n\n## Usage\n/autogen-workflow [options] <workflow_description>\n\n## Links\n- https://heyclau.de/commands/autogen-workflow\n- https://microsoft.github.io/autogen/",
+  "webUrl": "https://heyclau.de/commands/autogen-workflow",
+  "repoUrl": "",
+  "documentationUrl": "https://microsoft.github.io/autogen/"
+}

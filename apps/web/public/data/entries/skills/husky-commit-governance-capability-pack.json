@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "husky-commit-governance-capability-pack",
+    "title": "Husky Commit Governance Capability Pack Skill",
+    "description": "Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.",
+    "seoTitle": "Husky Commit Governance Capability Pack Skill",
+    "seoDescription": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-11",
+    "tags": [
+      "husky",
+      "git-hooks",
+      "commitlint",
+      "developer-experience",
+      "capability-pack"
+    ],
+    "keywords": [
+      "husky hooks setup",
+      "commit governance",
+      "local quality gates",
+      "precommit optimization"
+    ],
+    "readingTime": 8,
+    "difficultyScore": 79,
+    "documentationUrl": "https://typicode.github.io/husky/",
+    "cardDescription": "Set up practical pre-commit and commit-msg hooks that improve quality without bloating CI costs.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack",
+    "usageSnippet": "Use this skill to install lean local hooks that prevent bad commits before CI.",
+    "copySnippet": "# Trigger\n\"Apply the husky commit governance capability pack to this repository.\"\n\n# Required output\n1) Hook matrix (pre-commit, commit-msg, optional pre-push)\n2) Fast-path command list (< 10s target)\n3) Contributor bypass/override policy\n4) Drift and maintenance checklist",
+    "skillType": "capability-pack",
+    "skillLevel": "expert",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-11",
+    "retrievalSources": [
+      "https://typicode.github.io/husky/",
+      "https://www.conventionalcommits.org/en/v1.0.0/",
+      "https://commitlint.js.org/"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Node package scripts for validation",
+      "Conventional commit policy",
+      "Contributor onboarding docs"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/husky-commit-governance-capability-pack.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "aef3f6a1d69042ef5f12ff5dc7958397dd7c5de9bbbcf55d4b7211f0e0eef66b",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://typicode.github.io/husky/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://commitlint.js.org/\n\n## Core Workflow\n\n1. Define minimum local gate set for the repository type.\n2. Keep hooks fast and deterministic to avoid bypass behavior.\n3. Enforce commit message standard with clear error messages.\n4. Align local checks with CI checks to prevent drift.\n5. Document safe bypass conditions for emergency workflows.\n\n## Overview\n\nThis skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.\n\n## Capability Scope\n\n- Hook design and prioritization\n- Runtime/latency optimization\n- Commit message policy enforcement\n- Contributor ergonomics and onboarding\n- Governance drift controls\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Keep pre-commit checks fast enough to avoid bypass patterns.\n- Use the same underlying scripts for local hooks and CI.\n- Document approved bypass conditions for emergency fixes only.\n- Treat commit-msg enforcement as required for changelog quality.\n\n## Troubleshooting\n\n**Issue:** Hooks are too slow and developers bypass them  \n**Fix:** keep pre-commit to staged-file checks only.\n\n**Issue:** Hook failures differ from CI failures  \n**Fix:** use shared scripts for local and CI paths.\n\n**Issue:** Commit message confusion  \n**Fix:** provide examples in failing output and contributor docs.\n\n## Output Contract\n\n1. Minimal hook policy with justifications.\n2. Exact script wiring in package manager config.\n3. Failure UX recommendations.\n4. Maintenance checklist for future contributors.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This capability pack is pinned to documentation verified on **2026-04-11**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://typicode.github.io/husky/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://commitlint.js.org/",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Define minimum local gate set for the repository type.\n2. Keep hooks fast and deterministic to avoid bypass behavior.\n3. Enforce commit message standard with clear error messages.\n4. Align local checks with CI checks to prevent drift.\n5. Document safe bypass conditions for emergency workflows.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Hook design and prioritization\n- Runtime/latency optimization\n- Commit message policy enforcement\n- Contributor ergonomics and onboarding\n- Governance drift controls",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Keep pre-commit checks fast enough to avoid bypass patterns.\n- Use the same underlying scripts for local hooks and CI.\n- Document approved bypass conditions for emergency fixes only.\n- Treat commit-msg enforcement as required for changelog quality.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Hooks are too slow and developers bypass them  \n**Fix:** keep pre-commit to staged-file checks only.\n\n**Issue:** Hook failures differ from CI failures  \n**Fix:** use shared scripts for local and CI paths.\n\n**Issue:** Commit message confusion  \n**Fix:** provide examples in failing output and contributor docs.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Minimal hook policy with justifications.\n2. Exact script wiring in package manager config.\n3. Failure UX recommendations.\n4. Maintenance checklist for future contributors.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/husky-commit-governance-capability-pack.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

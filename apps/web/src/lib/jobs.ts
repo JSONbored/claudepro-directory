@@ -34,6 +34,7 @@ export type JobListing = {
   expiresAt?: string;
   isRemote?: boolean;
   isWorldwide?: boolean;
+  isPlaceholder?: boolean;
 };
 
 type JobListingRow = {
@@ -60,58 +61,47 @@ type JobListingRow = {
 
 const fallbackJobs: JobListing[] = [
   {
-    slug: "sponsored-job-listing-here",
-    title: "Sponsored job listing here",
-    company: "Your company",
+    slug: "sponsored-placement-available",
+    title: "Sponsored placement available",
+    company: "HeyClaude",
     location: "Remote",
     description:
-      "Reach Claude-native developers, agent builders, and MCP tinkerers with a pinned sponsored job at the top of the board.",
+      "Pinned premium placement for teams hiring Claude-native developers, agent builders, and MCP maintainers.",
     type: "Sponsored placement",
-    postedAt: "2026-04-08",
     featured: true,
     sponsored: true,
     applyUrl: "/jobs/post",
     tier: "sponsored",
-    status: "active"
+    status: "active",
+    isPlaceholder: true
   },
   {
-    slug: "your-job-here",
-    title: "Your job here",
-    company: "Hiring team",
-    location: "Remote or hybrid",
+    slug: "featured-placement-available",
+    title: "Featured job placement available",
+    company: "HeyClaude",
+    location: "Remote",
     description:
-      "Post a role for engineers, AI builders, prompt designers, MCP maintainers, or Claude-native product teams.",
-    type: "Full-time",
-    postedAt: "2026-04-08",
+      "Highlighted listing for engineering, AI product, prompt, MCP, and Claude workflow roles.",
+    type: "Featured placement",
     featured: true,
     applyUrl: "/jobs/post",
     tier: "featured",
-    status: "active"
+    status: "active",
+    isPlaceholder: true
   },
   {
-    slug: "claude-infra-engineer-placeholder",
-    title: "Claude Infrastructure Engineer",
-    company: "Example AI Company",
-    location: "Remote · US timezones",
+    slug: "standard-listing-available",
+    title: "Standard listing available",
+    company: "HeyClaude",
+    location: "Remote",
     description:
-      "Own Claude workflows, MCP integrations, evals, and internal tooling for a fast-moving AI product team.",
-    type: "Full-time",
-    postedAt: "2026-04-07",
-    compensation: "$160k - $220k",
-    responsibilities: [
-      "Design and maintain Claude-native internal tooling.",
-      "Own MCP integration reliability and observability.",
-      "Ship automation paths that reduce manual support load."
-    ],
-    requirements: [
-      "Production TypeScript or backend engineering experience.",
-      "Strong API design and distributed systems debugging skills.",
-      "Comfort working directly with AI workflows and prompts."
-    ],
+      "Main-feed listing for companies looking to reach Claude and AI workflow builders.",
+    type: "Standard placement",
     featured: false,
     applyUrl: "/jobs/post",
     tier: "standard",
-    status: "active"
+    status: "active",
+    isPlaceholder: true
   }
 ];
 
@@ -217,5 +207,6 @@ export async function getJobs(): Promise<JobListing[]> {
 
 export async function getJobBySlug(slug: string): Promise<JobListing | null> {
   const jobs = await getJobs();
-  return jobs.find((job) => job.slug === slug) ?? null;
+  const job = jobs.find((item) => item.slug === slug) ?? null;
+  return job?.isPlaceholder ? null : job;
 }

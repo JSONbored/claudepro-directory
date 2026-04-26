@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:hooks-generator",
+  "category": "commands",
+  "slug": "hooks-generator",
+  "title": "Hooks Generator for Claude Code",
+  "copyText": "/hooks-generator [hook-type] [options]",
+  "detailMarkdown": "# Hooks Generator for Claude Code\nCreate automated Claude Code hooks that execute shell commands at specific lifecycle points for deterministic control over formatting, testing, linting, and notifications\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `hooks` `automation` `lifecycle` `workflow` `deterministic` `triggers`\n\n## Install\n```bash\n/hooks-generator [hook-type] [options]\n```\n\n## Usage\n/hooks-generator [hook-type] [options]\n\n## Links\n- https://heyclau.de/commands/hooks-generator\n- https://docs.claude.com/en/docs/claude-code/hooks",
+  "webUrl": "https://heyclau.de/commands/hooks-generator",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/hooks"
+}

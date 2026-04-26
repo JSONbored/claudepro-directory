@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "statuslines",
+    "slug": "cache-efficiency-monitor",
+    "title": "Cache Efficiency Monitor - Statuslines",
+    "description": "Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and optimization recommendations.",
+    "seoTitle": "Cache Efficiency Monitor - Statuslines",
+    "seoDescription": "Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and optimization recomm...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-25",
+    "tags": [
+      "prompt-caching",
+      "cache-efficiency",
+      "cost-savings",
+      "hit-rate",
+      "cache-optimization"
+    ],
+    "keywords": [
+      "cache",
+      "cache-efficiency",
+      "cache-optimization",
+      "claude",
+      "cost-savings",
+      "development",
+      "efficiency",
+      "hit-rate",
+      "monitor",
+      "prompt-caching",
+      "statuslines",
+      "tools"
+    ],
+    "readingTime": 2,
+    "difficultyScore": 7,
+    "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+    "cardDescription": "Claude Code prompt caching efficiency monitor tracking cache hits, write efficiency, and cost savings with visual hit rate indicators and...",
+    "installable": true,
+    "usageSnippet": "✓ Cache: ████████████░░░░░░░░ 60% | 💰 ~4,500 tok saved",
+    "copySnippet": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}",
+    "configSnippet": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}",
+    "scriptLanguage": "bash",
+    "scriptBody": "#!/usr/bin/env bash\n\n# Cache Efficiency Monitor for Claude Code\n# Tracks prompt caching performance and cost savings\n\n# Read JSON from stdin\nread -r input\n\n# Extract cache metrics (if available in JSON)\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\n# Calculate total input tokens\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\n# Avoid division by zero\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\n# Calculate cache hit rate (percentage of tokens read from cache)\nif [ $cache_read_tokens -gt 0 ]; then\n  cache_hit_rate=$(( (cache_read_tokens * 100) / total_input ))\nelse\n  cache_hit_rate=0\nfi\n\n# Calculate write efficiency (cache creation vs regular input)\nif [ $cache_create_tokens -gt 0 ]; then\n  write_percentage=$(( (cache_create_tokens * 100) / total_input ))\nelse\n  write_percentage=0\nfi\n\n# Cache efficiency scoring\nif [ $cache_hit_rate -ge 50 ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"   # Green: Excellent caching (>50% hit rate)\n  CACHE_ICON=\"✓\"\n  CACHE_STATUS=\"EXCELLENT\"\nelif [ $cache_hit_rate -ge 25 ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"  # Yellow: Good caching (25-50% hit rate)\n  CACHE_ICON=\"●\"\n  CACHE_STATUS=\"GOOD\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"  # Orange: Low caching (1-25% hit rate)\n  CACHE_ICON=\"⚠\"\n  CACHE_STATUS=\"LOW\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"  # Gray: No caching\n  CACHE_ICON=\"○\"\n  CACHE_STATUS=\"NONE\"\nfi\n\n# Estimate cost savings (cache reads cost 90% less than regular input)\nif [ $cache_read_tokens -gt 0 ]; then\n  # Savings = cache_read_tokens * 0.9 (90% discount)\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc)\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\n# Build cache hit rate bar (20 characters wide)\nhit_bar_filled=$(( cache_hit_rate / 5 ))  # Each char = 5%\nhit_bar_empty=$(( 20 - hit_bar_filled ))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\n# Optimization recommendation\nif [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then\n  RECOMMENDATION=\"(Enable caching?)\"\nelif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then\n  RECOMMENDATION=\"(More reads needed)\"\nelse\n  RECOMMENDATION=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\n# Output statusline\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display} ${RECOMMENDATION}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% ${RECOMMENDATION}\"\nfi",
+    "prerequisites": [
+      "Claude Code CLI installed and configured",
+      "Bash shell available (bash 4.0+ recommended for arithmetic operations)",
+      "jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)",
+      "bc calculator (bc 1.07+ optional for precise savings calculations, script falls back to integer math)",
+      "Terminal with ANSI color code support (256-color mode recommended for color-coded efficiency indicators)",
+      "Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens fields in JSON)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Features\n\n- Real-time prompt cache hit rate tracking (percentage of tokens read from cache)\n- Cache write efficiency monitoring (cache creation vs regular input ratio)\n- Cost savings estimation based on 90% cache read discount\n- Visual hit rate bar (20-char progress indicator, each █ = 5%)\n- Efficiency scoring (excellent >50%, good 25-50%, low 1-25%, none 0%)\n- Optimization recommendations (enable caching, increase reuse patterns)\n- Color-coded status (green excellent, yellow good, orange low, gray none)\n- Lightweight bash with bc for percentage calculations\n\n## Use Cases\n\n- Optimizing prompt caching strategy to reduce API costs\n- Identifying inefficient cache usage patterns (high writes, low reads)\n- Validating that prompt caching is properly enabled and working\n- Tracking cost savings from cache utilization\n- Debugging cache misses in long coding sessions\n- Comparing caching efficiency across different projects/workflows\n\n## Requirements\n\n- Claude Code CLI installed and configured\n- Bash shell available (bash 4.0+ recommended for arithmetic operations)\n- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)\n- bc calculator (bc 1.07+ optional for precise savings calculations, script falls back to integer math)\n- Terminal with ANSI color code support (256-color mode recommended for color-coded efficiency indicators)\n- Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens fields in JSON)\n\n## Configuration\n\n```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}\n```\n\n## Examples\n### Enhanced Cache Monitor with Write Efficiency Tracking\nExtended version with detailed write efficiency metrics and recommendations\n```bash\n#!/usr/bin/env bash\n\n# Enhanced Cache Efficiency Monitor with Write Efficiency\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\nif [ $cache_hit_rate -ge 50 ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge 25 ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\n# Enhanced recommendations\nif [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then\n  RECOMMENDATION=\"(Enable caching?)\"\nelif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then\n  RECOMMENDATION=\"(More reads needed - ${write_percentage}% writes)\"\nelif [ $write_percentage -gt 75 ]; then\n  RECOMMENDATION=\"(Too many cache writes)\"\nelse\n  RECOMMENDATION=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% | ${savings_display} ${RECOMMENDATION}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% ${RECOMMENDATION}\"\nfi\n```\n### Cache Monitor with Custom Efficiency Thresholds\nConfigurable efficiency thresholds for different caching strategies\n```bash\n#!/usr/bin/env bash\n\n# Cache Efficiency Monitor with Custom Thresholds\n\nEXCELLENT_THRESHOLD=${CACHE_EXCELLENT_THRESHOLD:-50}\nGOOD_THRESHOLD=${CACHE_GOOD_THRESHOLD:-25}\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\n# Custom thresholds\nif [ $cache_hit_rate -ge $EXCELLENT_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge $GOOD_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}%\"\nfi\n```\n### Cache Efficiency Monitor Installation Example\nComplete setup script with cache field verification\n```bash\n#!/bin/bash\n# Installation script for Cache Efficiency Monitor\n\nmkdir -p .claude/statuslines\n\n# Check for bc (optional, for savings calculation)\nif ! command -v bc &> /dev/null; then\n  echo \"Note: bc not found. Savings calculation will use integer math.\"\n  echo \"Install bc for precise calculations: brew install bc (macOS), apt install bc (Linux)\"\nfi\n\ncat > .claude/statuslines/cache-efficiency-monitor.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# [Script content from first example]\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/cache-efficiency-monitor.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Cache Efficiency Monitor installed successfully!\"\necho \"Note: Requires Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens).\"\necho \"Verify cache fields exist: echo '{\"cost\":{}}' | jq '.cost.cache_read_input_tokens'\"\n```\n\n## Troubleshooting\n### Cache hit rate always showing 0% despite caching enabled\n\nVerify cache fields exist in JSON: echo '$input' | jq '.cost | {cache_read: .cache_read_input_tokens, cache_create: .cache_creation_input_tokens}'. If fields missing, Claude Code version may not expose cache metrics. Check official docs for required version. Caching requires Claude 3.5 Sonnet or Opus with prompt caching feature enabled. Verify prompt caching is configured in Claude Code settings.\n### Cost savings calculation showing unrealistic numbers\n\nScript estimates savings using 90% discount formula (cache reads cost 10% of regular input). Verify cache_read_tokens value: echo '$input' | jq .cost.cache_read_input_tokens. Formula: savings = cache_read_tokens * 0.9. Adjust discount percentage in script if Claude pricing changes. Check bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900).\n### Recommendation showing 'Enable caching?' when caching is on\n\nRecommendation triggers when both cache_read_tokens and cache_create_tokens are 0. This means no cache activity detected. Verify prompt caching is configured in Claude Code settings. Check that prompts contain cacheable prefixes (system messages, long contexts). Short sessions may not benefit from caching. Verify cache fields are being read: echo '$input' | jq '.cost.cache_read_input_tokens'.\n### Hit rate bar not displaying correctly or showing as empty\n\nEnsure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. Bar uses hit_rate / 5 for scaling (each char = 5%). If hit_rate is 0, shows full empty bar (20x ░). Verify cache_hit_rate calculation: (cache_read_tokens * 100) / total_input. Check printf command works: printf '█%.0s' $(seq 1 5) (should show 5 blocks).\n### Write efficiency showing 'More reads needed' incorrectly\n\nRecommendation appears when hit_rate <25% AND write_percentage >50% (creating more cache entries than using them). This indicates inefficient caching pattern. Solution: Reuse prompts more, reduce unique cache writes. Check if session involves many one-off queries vs repeated patterns. Verify write_percentage calculation: (cache_create_tokens * 100) / total_input.\n### Cache efficiency color always showing gray (NONE) even with cache activity\n\nCheck cache_hit_rate calculation: cache_hit_rate=$(( (cache_read_tokens * 100) / total_input )). Verify cache_read_tokens > 0: echo '$input' | jq .cost.cache_read_input_tokens. Ensure total_input includes all token types: total_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens)). Test threshold logic: if [ $cache_hit_rate -ge 50 ]; then echo \"EXCELLENT\"; fi.\n### Percentage calculations showing incorrect values (e.g., >100%)\n\nVerify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_input > 0 before division. Test calculation: cache_hit_rate=$((cache_read_tokens * 100 / total_input)). Ensure values are numeric: echo \"$cache_read_tokens\" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large. Verify total_input includes all components.\n### Savings display showing 'tok saved' with zero or missing value\n\nCheck cache_read_tokens > 0 before calculating savings. Verify bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900). If bc unavailable, script uses integer math: savings_tokens=$((cache_read_tokens * 9 / 10)). Test: cache_read=1000; savings=$((cache_read * 9 / 10)); echo $savings (should be 900). Verify savings_display is set: if [ -n \"$savings_display\" ]; then echo \"Has savings\"; fi.",
+    "sections": [
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Real-time prompt cache hit rate tracking (percentage of tokens read from cache)\n- Cache write efficiency monitoring (cache creation vs regular input ratio)\n- Cost savings estimation based on 90% cache read discount\n- Visual hit rate bar (20-char progress indicator, each █ = 5%)\n- Efficiency scoring (excellent >50%, good 25-50%, low 1-25%, none 0%)\n- Optimization recommendations (enable caching, increase reuse patterns)\n- Color-coded status (green excellent, yellow good, orange low, gray none)\n- Lightweight bash with bc for percentage calculations",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Optimizing prompt caching strategy to reduce API costs\n- Identifying inefficient cache usage patterns (high writes, low reads)\n- Validating that prompt caching is properly enabled and working\n- Tracking cost savings from cache utilization\n- Debugging cache misses in long coding sessions\n- Comparing caching efficiency across different projects/workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Claude Code CLI installed and configured\n- Bash shell available (bash 4.0+ recommended for arithmetic operations)\n- jq command-line JSON processor (jq 1.6+ recommended for safe extraction with // defaults)\n- bc calculator (bc 1.07+ optional for precise savings calculations, script falls back to integer math)\n- Terminal with ANSI color code support (256-color mode recommended for color-coded efficiency indicators)\n- Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens fields in JSON)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Enhanced Cache Monitor with Write Efficiency Tracking\nExtended version with detailed write efficiency metrics and recommendations\n```bash\n#!/usr/bin/env bash\n\n# Enhanced Cache Efficiency Monitor with Write Efficiency\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\nif [ $cache_hit_rate -ge 50 ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge 25 ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\n# Enhanced recommendations\nif [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then\n  RECOMMENDATION=\"(Enable caching?)\"\nelif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then\n  RECOMMENDATION=\"(More reads needed - ${write_percentage}% writes)\"\nelif [ $write_percentage -gt 75 ]; then\n  RECOMMENDATION=\"(Too many cache writes)\"\nelse\n  RECOMMENDATION=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% | ${savings_display} ${RECOMMENDATION}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% ${RECOMMENDATION}\"\nfi\n```\n### Cache Monitor with Custom Efficiency Thresholds\nConfigurable efficiency thresholds for different caching strategies\n```bash\n#!/usr/bin/env bash\n\n# Cache Efficiency Monitor with Custom Thresholds\n\nEXCELLENT_THRESHOLD=${CACHE_EXCELLENT_THRESHOLD:-50}\nGOOD_THRESHOLD=${CACHE_GOOD_THRESHOLD:-25}\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\n# Custom thresholds\nif [ $cache_hit_rate -ge $EXCELLENT_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge $GOOD_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}%\"\nfi\n```\n### Cache Efficiency Monitor Installation Example\nComplete setup script with cache field verification\n```bash\n#!/bin/bash\n# Installation script for Cache Efficiency Monitor\n\nmkdir -p .claude/statuslines\n\n# Check for bc (optional, for savings calculation)\nif ! command -v bc &> /dev/null; then\n  echo \"Note: bc not found. Savings calculation will use integer math.\"\n  echo \"Install bc for precise calculations: brew install bc (macOS), apt install bc (Linux)\"\nfi\n\ncat > .claude/statuslines/cache-efficiency-monitor.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# [Script content from first example]\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/cache-efficiency-monitor.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Cache Efficiency Monitor installed successfully!\"\necho \"Note: Requires Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens).\"\necho \"Verify cache fields exist: echo '{\"cost\":{}}' | jq '.cost.cache_read_input_tokens'\"\n```",
+        "codeBlocks": [
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Enhanced Cache Efficiency Monitor with Write Efficiency\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\nif [ $cache_hit_rate -ge 50 ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge 25 ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\n# Enhanced recommendations\nif [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then\n  RECOMMENDATION=\"(Enable caching?)\"\nelif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then\n  RECOMMENDATION=\"(More reads needed - ${write_percentage}% writes)\"\nelif [ $write_percentage -gt 75 ]; then\n  RECOMMENDATION=\"(Too many cache writes)\"\nelse\n  RECOMMENDATION=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% | ${savings_display} ${RECOMMENDATION}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% ${RECOMMENDATION}\"\nfi"
+          },
+          {
+            "language": "bash",
+            "code": "#!/usr/bin/env bash\n\n# Cache Efficiency Monitor with Custom Thresholds\n\nEXCELLENT_THRESHOLD=${CACHE_EXCELLENT_THRESHOLD:-50}\nGOOD_THRESHOLD=${CACHE_GOOD_THRESHOLD:-25}\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\n# Custom thresholds\nif [ $cache_hit_rate -ge $EXCELLENT_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge $GOOD_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}%\"\nfi"
+          },
+          {
+            "language": "bash",
+            "code": "#!/bin/bash\n# Installation script for Cache Efficiency Monitor\n\nmkdir -p .claude/statuslines\n\n# Check for bc (optional, for savings calculation)\nif ! command -v bc &> /dev/null; then\n  echo \"Note: bc not found. Savings calculation will use integer math.\"\n  echo \"Install bc for precise calculations: brew install bc (macOS), apt install bc (Linux)\"\nfi\n\ncat > .claude/statuslines/cache-efficiency-monitor.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# [Script content from first example]\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/cache-efficiency-monitor.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Cache Efficiency Monitor installed successfully!\"\necho \"Note: Requires Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens).\"\necho \"Verify cache fields exist: echo '{\"cost\":{}}' | jq '.cost.cache_read_input_tokens'\""
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Cache hit rate always showing 0% despite caching enabled\n\nVerify cache fields exist in JSON: echo '$input' | jq '.cost | {cache_read: .cache_read_input_tokens, cache_create: .cache_creation_input_tokens}'. If fields missing, Claude Code version may not expose cache metrics. Check official docs for required version. Caching requires Claude 3.5 Sonnet or Opus with prompt caching feature enabled. Verify prompt caching is configured in Claude Code settings.\n### Cost savings calculation showing unrealistic numbers\n\nScript estimates savings using 90% discount formula (cache reads cost 10% of regular input). Verify cache_read_tokens value: echo '$input' | jq .cost.cache_read_input_tokens. Formula: savings = cache_read_tokens * 0.9. Adjust discount percentage in script if Claude pricing changes. Check bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900).\n### Recommendation showing 'Enable caching?' when caching is on\n\nRecommendation triggers when both cache_read_tokens and cache_create_tokens are 0. This means no cache activity detected. Verify prompt caching is configured in Claude Code settings. Check that prompts contain cacheable prefixes (system messages, long contexts). Short sessions may not benefit from caching. Verify cache fields are being read: echo '$input' | jq '.cost.cache_read_input_tokens'.\n### Hit rate bar not displaying correctly or showing as empty\n\nEnsure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. Bar uses hit_rate / 5 for scaling (each char = 5%). If hit_rate is 0, shows full empty bar (20x ░). Verify cache_hit_rate calculation: (cache_read_tokens * 100) / total_input. Check printf command works: printf '█%.0s' $(seq 1 5) (should show 5 blocks).\n### Write efficiency showing 'More reads needed' incorrectly\n\nRecommendation appears when hit_rate <25% AND write_percentage >50% (creating more cache entries than using them). This indicates inefficient caching pattern. Solution: Reuse prompts more, reduce unique cache writes. Check if session involves many one-off queries vs repeated patterns. Verify write_percentage calculation: (cache_create_tokens * 100) / total_input.\n### Cache efficiency color always showing gray (NONE) even with cache activity\n\nCheck cache_hit_rate calculation: cache_hit_rate=$(( (cache_read_tokens * 100) / total_input )). Verify cache_read_tokens > 0: echo '$input' | jq .cost.cache_read_input_tokens. Ensure total_input includes all token types: total_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens)). Test threshold logic: if [ $cache_hit_rate -ge 50 ]; then echo \"EXCELLENT\"; fi.\n### Percentage calculations showing incorrect values (e.g., >100%)\n\nVerify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_input > 0 before division. Test calculation: cache_hit_rate=$((cache_read_tokens * 100 / total_input)). Ensure values are numeric: echo \"$cache_read_tokens\" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large. Verify total_input includes all components.\n### Savings display showing 'tok saved' with zero or missing value\n\nCheck cache_read_tokens > 0 before calculating savings. Verify bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900). If bc unavailable, script uses integer math: savings_tokens=$((cache_read_tokens * 9 / 10)). Test: cache_read=1000; savings=$((cache_read * 9 / 10)); echo $savings (should be 900). Verify savings_display is set: if [ -n \"$savings_display\" ]; then echo \"Has savings\"; fi.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Enhanced Cache Monitor with Write Efficiency Tracking",
+        "id": "enhanced-cache-monitor-with-write-efficiency-tracking"
+      },
+      {
+        "depth": 3,
+        "text": "Cache Monitor with Custom Efficiency Thresholds",
+        "id": "cache-monitor-with-custom-efficiency-thresholds"
+      },
+      {
+        "depth": 3,
+        "text": "Cache Efficiency Monitor Installation Example",
+        "id": "cache-efficiency-monitor-installation-example"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Cache hit rate always showing 0% despite caching enabled",
+        "id": "cache-hit-rate-always-showing-0-despite-caching-enabled"
+      },
+      {
+        "depth": 3,
+        "text": "Cost savings calculation showing unrealistic numbers",
+        "id": "cost-savings-calculation-showing-unrealistic-numbers"
+      },
+      {
+        "depth": 3,
+        "text": "Recommendation showing 'Enable caching?' when caching is on",
+        "id": "recommendation-showing-enable-caching-when-caching-is-on"
+      },
+      {
+        "depth": 3,
+        "text": "Hit rate bar not displaying correctly or showing as empty",
+        "id": "hit-rate-bar-not-displaying-correctly-or-showing-as-empty"
+      },
+      {
+        "depth": 3,
+        "text": "Write efficiency showing 'More reads needed' incorrectly",
+        "id": "write-efficiency-showing-more-reads-needed-incorrectly"
+      },
+      {
+        "depth": 3,
+        "text": "Cache efficiency color always showing gray (NONE) even with cache activity",
+        "id": "cache-efficiency-color-always-showing-gray-none-even-with-cache-activity"
+      },
+      {
+        "depth": 3,
+        "text": "Percentage calculations showing incorrect values (e.g., >100%)",
+        "id": "percentage-calculations-showing-incorrect-values-eg-100"
+      },
+      {
+        "depth": 3,
+        "text": "Savings display showing 'tok saved' with zero or missing value",
+        "id": "savings-display-showing-tok-saved-with-zero-or-missing-value"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"statusLine\": {\n    \"type\": \"command\",\n    \"command\": \"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\n    \"refreshInterval\": 2000\n  }\n}"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Enhanced Cache Efficiency Monitor with Write Efficiency\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\nif [ $cache_hit_rate -ge 50 ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge 25 ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\n# Enhanced recommendations\nif [ $cache_hit_rate -eq 0 ] && [ $cache_create_tokens -eq 0 ]; then\n  RECOMMENDATION=\"(Enable caching?)\"\nelif [ $cache_hit_rate -lt 25 ] && [ $write_percentage -gt 50 ]; then\n  RECOMMENDATION=\"(More reads needed - ${write_percentage}% writes)\"\nelif [ $write_percentage -gt 75 ]; then\n  RECOMMENDATION=\"(Too many cache writes)\"\nelse\n  RECOMMENDATION=\"\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% | ${savings_display} ${RECOMMENDATION}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% ${RECOMMENDATION}\"\nfi"
+      },
+      {
+        "language": "bash",
+        "code": "#!/usr/bin/env bash\n\n# Cache Efficiency Monitor with Custom Thresholds\n\nEXCELLENT_THRESHOLD=${CACHE_EXCELLENT_THRESHOLD:-50}\nGOOD_THRESHOLD=${CACHE_GOOD_THRESHOLD:-25}\n\ninput=$(cat)\n\ncache_read_tokens=$(echo \"$input\" | jq -r '.cost.cache_read_input_tokens // 0')\ncache_create_tokens=$(echo \"$input\" | jq -r '.cost.cache_creation_input_tokens // 0')\nregular_input_tokens=$(echo \"$input\" | jq -r '.cost.input_tokens // 0')\n\ntotal_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens))\n\nif [ $total_input -eq 0 ]; then\n  total_input=1\nfi\n\ncache_hit_rate=$((cache_read_tokens > 0 ? (cache_read_tokens * 100) / total_input : 0))\nwrite_percentage=$((cache_create_tokens > 0 ? (cache_create_tokens * 100) / total_input : 0))\n\n# Custom thresholds\nif [ $cache_hit_rate -ge $EXCELLENT_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;46m\"\n  CACHE_ICON=\"✓\"\nelif [ $cache_hit_rate -ge $GOOD_THRESHOLD ]; then\n  CACHE_COLOR=\"\\033[38;5;226m\"\n  CACHE_ICON=\"●\"\nelif [ $cache_hit_rate -gt 0 ]; then\n  CACHE_COLOR=\"\\033[38;5;208m\"\n  CACHE_ICON=\"⚠\"\nelse\n  CACHE_COLOR=\"\\033[38;5;250m\"\n  CACHE_ICON=\"○\"\nfi\n\nif [ $cache_read_tokens -gt 0 ]; then\n  savings_tokens=$(echo \"scale=0; $cache_read_tokens * 0.9 / 1\" | bc 2>/dev/null || echo \"$((cache_read_tokens * 9 / 10))\")\n  savings_display=\"💰 ~${savings_tokens} tok saved\"\nelse\n  savings_display=\"\"\nfi\n\nhit_bar_filled=$((cache_hit_rate / 5))\nhit_bar_empty=$((20 - hit_bar_filled))\n\nif [ $hit_bar_filled -gt 0 ]; then\n  hit_bar=$(printf \"█%.0s\" $(seq 1 $hit_bar_filled))$(printf \"░%.0s\" $(seq 1 $hit_bar_empty))\nelse\n  hit_bar=\"░░░░░░░░░░░░░░░░░░░░\"\nfi\n\nRESET=\"\\033[0m\"\n\nif [ -n \"$savings_display\" ]; then\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | ${savings_display}\"\nelse\n  echo -e \"${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}%\"\nfi"
+      },
+      {
+        "language": "bash",
+        "code": "#!/bin/bash\n# Installation script for Cache Efficiency Monitor\n\nmkdir -p .claude/statuslines\n\n# Check for bc (optional, for savings calculation)\nif ! command -v bc &> /dev/null; then\n  echo \"Note: bc not found. Savings calculation will use integer math.\"\n  echo \"Install bc for precise calculations: brew install bc (macOS), apt install bc (Linux)\"\nfi\n\ncat > .claude/statuslines/cache-efficiency-monitor.sh << 'SCRIPT_EOF'\n#!/usr/bin/env bash\n# [Script content from first example]\nSCRIPT_EOF\n\nchmod +x .claude/statuslines/cache-efficiency-monitor.sh\n\n# Add to settings.json\nif [ ! -f .claude/settings.json ]; then\n  echo '{\"statusLine\":{\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}}' > .claude/settings.json\nelse\n  jq '.statusLine = {\"type\":\"command\",\"command\":\"$CLAUDE_PROJECT_DIR/.claude/statuslines/cache-efficiency-monitor.sh\",\"refreshInterval\":2000}' .claude/settings.json > .claude/settings.json.tmp\n  mv .claude/settings.json.tmp .claude/settings.json\nfi\n\necho \"Cache Efficiency Monitor installed successfully!\"\necho \"Note: Requires Claude Code version with cache metrics support (cache_read_input_tokens, cache_creation_input_tokens).\"\necho \"Verify cache fields exist: echo '{\"cost\":{}}' | jq '.cost.cache_read_input_tokens'\""
+      }
+    ],
+    "filePath": "content/statuslines/cache-efficiency-monitor.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/cache-efficiency-monitor.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:slash-command-gen",
+  "category": "commands",
+  "slug": "slash-command-gen",
+  "title": "Slash Command Generator for Claude Code",
+  "copyText": "/slash-command-gen [command-name] [options]",
+  "detailMarkdown": "# Slash Command Generator for Claude Code\nCreate custom slash commands for Claude Code with templates, arguments, frontmatter metadata, and team-shared workflows stored in .claude/commands directory\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `slash-commands` `custom-commands` `workflow-automation` `templates` `team-collaboration` `productivity`\n\n## Install\n```bash\n/slash-command-gen [command-name] [options]\n```\n\n## Usage\n/slash-command-gen [command-name] [options]\n\n## Links\n- https://heyclau.de/commands/slash-command-gen\n- https://docs.claude.com/en/docs/claude-code/slash-commands",
+  "webUrl": "https://heyclau.de/commands/slash-command-gen",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/slash-commands"
+}

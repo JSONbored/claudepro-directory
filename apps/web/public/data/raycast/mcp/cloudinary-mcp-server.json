@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "mcp:cloudinary-mcp-server",
+  "category": "mcp",
+  "slug": "cloudinary-mcp-server",
+  "title": "Cloudinary MCP Server - MCP Servers",
+  "copyText": "Install:\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET\n\nConfig:\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}",
+  "detailMarkdown": "# Cloudinary MCP Server - MCP Servers\nUpload, manage, transform, and analyze media assets in the cloud\n**Category:** mcp\n**Author:** Cloudinary\n**Download trust:** first-party\n**Tags:** `media` `cloudinary` `images` `video` `asset-management`\n\n## Install\n```bash\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET\n```\n\n## Config\n```json\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET\n\n## Links\n- https://heyclau.de/mcp/cloudinary-mcp-server\n- https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+  "webUrl": "https://heyclau.de/mcp/cloudinary-mcp-server",
+  "repoUrl": "",
+  "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers"
+}

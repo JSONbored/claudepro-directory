@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "discord-mcp-server",
+    "title": "Discord MCP Server for Claude",
+    "description": "Discord bot integration for community management, moderation, and server automation",
+    "seoTitle": "Discord MCP Server for Claude",
+    "seoDescription": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development.",
+    "author": "saseq",
+    "dateAdded": "2025-09-20",
+    "tags": [
+      "discord",
+      "bot",
+      "community",
+      "moderation",
+      "social"
+    ],
+    "keywords": [
+      "bot",
+      "claude",
+      "community",
+      "development",
+      "discord",
+      "mcp",
+      "mcp servers",
+      "moderation",
+      "server",
+      "social",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "documentationUrl": "https://github.com/saseq/discord-mcp",
+    "cardDescription": "Discord bot integration for community management, moderation, and server automation",
+    "installable": true,
+    "installCommand": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude && claude mcp list",
+    "usageSnippet": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude && claude mcp list",
+    "copySnippet": "{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}",
+    "configSnippet": "{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}",
+    "estimatedSetupTime": "3 minutes",
+    "difficulty": "intermediate",
+    "prerequisites": [
+      "Discord account with Developer Portal access (https://discord.com/developers/applications)",
+      "Discord bot application created in Discord Developer Portal",
+      "Discord bot token (obtained from Discord Developer Portal - Bot section)",
+      "Discord Guild ID (optional, for default server targeting - found in Discord server settings)",
+      "Java JDK 11 or higher installed (run java -version to verify)",
+      "Node.js and npm/npx available for running Smithery CLI installation",
+      "Internet connection for accessing Discord API (https://discord.com/api endpoints)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Rate limit awareness: 50 requests per second (most endpoints), implement request queuing (4 requests per 100ms = 40/second)",
+      "Understanding of Discord bot permissions and OAuth scopes (bot, send_messages, manage_channels, manage_roles) and absolute path to JAR file"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/discord-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "c533512b60c880469d414d1eb89751df1f7d9db580d53b73f22b5cbb0b696275",
+    "body": "## Content\n\nEnable your AI assistants to seamlessly interact with Discord servers through comprehensive bot functionality and automation capabilities.\n\n## Features\n\n- Server information retrieval\n- Channel management and creation\n- Category organization\n- Message operations\n- Member management\n- Role administration\n- Advanced Discord server and channel management with message handling, user management, and bot integration features\n- Batch operations support for efficient bulk message operations, channel management, and user actions with automatic rate limit handling and retry logic\n- Real-time event synchronization capabilities with webhook integration support for monitoring Discord events and triggering automated workflows\n\n## Use Cases\n\n- Automated server moderation and management\n- Community engagement and member onboarding\n- Channel organization and content management\n- Bot-driven notifications and alerts\n- Member role management and permissions\n- Build automated Discord bot workflows that sync external systems with Discord servers for real-time communication and community management\n\n## Installation\n\n### Claude Code\n\n1. Run: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status discord\n\n### Claude Desktop\n\n1. Install via Smithery CLI: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude\n2. Create a Discord bot application\n3. Get your Discord bot token\n4. Configure the MCP server with your bot token\n5. Restart Claude Desktop\n\n## Requirements\n\n- Discord account with Developer Portal access (https://discord.com/developers/applications)\n- Discord bot application created in Discord Developer Portal\n- Discord bot token (obtained from Discord Developer Portal - Bot section)\n- Discord Guild ID (optional, for default server targeting - found in Discord server settings)\n- Java JDK 11 or higher installed (run java -version to verify)\n- Node.js and npm/npx available for running Smithery CLI installation\n- Internet connection for accessing Discord API (https://discord.com/api endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: 50 requests per second (most endpoints), implement request queuing (4 requests per 100ms = 40/second)\n- Understanding of Discord bot permissions and OAuth scopes (bot, send_messages, manage_channels, manage_roles) and absolute path to JAR file\n\n## Configuration\n\n```json\n{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}\n```\n\n## Examples\n### Get server information and member count\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get server information and member count\"\n```\n### Create new text channels and categories\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create new text channels and categories\"\n```\n### Manage member roles and permissions\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Manage member roles and permissions\"\n```\n### Retrieve channel lists and configurations\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Retrieve channel lists and configurations\"\n```\n### Send Message to Channel\nSend a message to a Discord channel with embed content\n```typescript\n// Send message to Discord channel\nconst message = await discord.channels.createMessage({\n  channel_id: \"channel-id\",\n  content: \"Hello from Claude!\",\n  embeds: [{\n    title: \"Notification\",\n    description: \"This is a test message\",\n    color: 0x00ff00\n  }]\n});\n```\n\n## Security\n\n- Bot token authentication required\n- Guild-specific permissions\n- Configurable access controls\n- Secure Discord API integration\n- Discord bot tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Discord bot tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit bot permissions and remove unused permissions\n- Discord server, channel, and user IDs may expose community structure and member information - ensure Discord resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Discord MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Discord webhook configurations and payloads may contain sensitive message content and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### HTTP 429 rate limit error when sending messages\n\nDiscord limits 50 requests per second most endpoints. Check X-RateLimit headers for specific bucket limits. Implement request queuing with 4 requests per 100ms (40/second) to avoid throttling.\n### Bot gets 24-hour IP ban for invalid requests\n\nIP addresses making 10,000+ invalid HTTP requests per 10 minutes are banned for 24 hours. Fix 401/403 errors in your code, implement proper error handling, validate requests before sending.\n### Bot token authentication fails with 401 error\n\nRegenerate bot token from Discord Developer Portal. Verify DISCORD_TOKEN environment variable is set correctly. Ensure token includes Bot prefix in Authorization header: Bot YOUR_TOKEN.\n### Cannot access guild channels or members\n\nVerify bot has required permissions in Discord server settings. Check DISCORD_GUILD_ID matches target server. Ensure bot has been invited with correct OAuth scopes (bot, send_messages, manage_channels, manage_roles).\n### Java runtime error or MCP server won't start\n\nInstall Java JDK 11 or higher. Run java -version to verify installation. Check JAR file path is absolute and file exists. Verify execute permissions on JAR file.\n### Discord MCP server authentication errors with bot tokens\n\nVerify bot token is valid and not expired. Check bot permissions match required operations. Ensure token format is correct (Bot token prefix). For OAuth integrations, verify token refresh logic is working correctly.\n### Discord rate limit errors when sending multiple messages\n\nImplement exponential backoff retry logic with jitter. Use Discord API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed channel data. Discord allows 5 requests per 5 seconds per route.\n### Discord channel or server access denied errors\n\nVerify bot has access to the server and channels. Check bot permissions and server membership. Ensure bot has required permissions (Send Messages, Read Message History, etc.) for target operations.\n### Discord MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Discord API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Enable your AI assistants to seamlessly interact with Discord servers through comprehensive bot functionality and automation capabilities.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Server information retrieval\n- Channel management and creation\n- Category organization\n- Message operations\n- Member management\n- Role administration\n- Advanced Discord server and channel management with message handling, user management, and bot integration features\n- Batch operations support for efficient bulk message operations, channel management, and user actions with automatic rate limit handling and retry logic\n- Real-time event synchronization capabilities with webhook integration support for monitoring Discord events and triggering automated workflows",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Automated server moderation and management\n- Community engagement and member onboarding\n- Channel organization and content management\n- Bot-driven notifications and alerts\n- Member role management and permissions\n- Build automated Discord bot workflows that sync external systems with Discord servers for real-time communication and community management",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. Run: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status discord\n\n### Claude Desktop\n\n1. Install via Smithery CLI: npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude\n2. Create a Discord bot application\n3. Get your Discord bot token\n4. Configure the MCP server with your bot token\n5. Restart Claude Desktop",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Discord account with Developer Portal access (https://discord.com/developers/applications)\n- Discord bot application created in Discord Developer Portal\n- Discord bot token (obtained from Discord Developer Portal - Bot section)\n- Discord Guild ID (optional, for default server targeting - found in Discord server settings)\n- Java JDK 11 or higher installed (run java -version to verify)\n- Node.js and npm/npx available for running Smithery CLI installation\n- Internet connection for accessing Discord API (https://discord.com/api endpoints)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Rate limit awareness: 50 requests per second (most endpoints), implement request queuing (4 requests per 100ms = 40/second)\n- Understanding of Discord bot permissions and OAuth scopes (bot, send_messages, manage_channels, manage_roles) and absolute path to JAR file",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### Get server information and member count\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Get server information and member count\"\n```\n### Create new text channels and categories\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Create new text channels and categories\"\n```\n### Manage member roles and permissions\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Manage member roles and permissions\"\n```\n### Retrieve channel lists and configurations\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Retrieve channel lists and configurations\"\n```\n### Send Message to Channel\nSend a message to a Discord channel with embed content\n```typescript\n// Send message to Discord channel\nconst message = await discord.channels.createMessage({\n  channel_id: \"channel-id\",\n  content: \"Hello from Claude!\",\n  embeds: [{\n    title: \"Notification\",\n    description: \"This is a test message\",\n    color: 0x00ff00\n  }]\n});\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Get server information and member count\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Create new text channels and categories\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Manage member roles and permissions\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Retrieve channel lists and configurations\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Send message to Discord channel\nconst message = await discord.channels.createMessage({\n  channel_id: \"channel-id\",\n  content: \"Hello from Claude!\",\n  embeds: [{\n    title: \"Notification\",\n    description: \"This is a test message\",\n    color: 0x00ff00\n  }]\n});"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Bot token authentication required\n- Guild-specific permissions\n- Configurable access controls\n- Secure Discord API integration\n- Discord bot tokens and OAuth access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Discord bot tokens should be scoped with minimal required permissions following the principle of least privilege - regularly audit bot permissions and remove unused permissions\n- Discord server, channel, and user IDs may expose community structure and member information - ensure Discord resource IDs are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Discord MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Discord webhook configurations and payloads may contain sensitive message content and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### HTTP 429 rate limit error when sending messages\n\nDiscord limits 50 requests per second most endpoints. Check X-RateLimit headers for specific bucket limits. Implement request queuing with 4 requests per 100ms (40/second) to avoid throttling.\n### Bot gets 24-hour IP ban for invalid requests\n\nIP addresses making 10,000+ invalid HTTP requests per 10 minutes are banned for 24 hours. Fix 401/403 errors in your code, implement proper error handling, validate requests before sending.\n### Bot token authentication fails with 401 error\n\nRegenerate bot token from Discord Developer Portal. Verify DISCORD_TOKEN environment variable is set correctly. Ensure token includes Bot prefix in Authorization header: Bot YOUR_TOKEN.\n### Cannot access guild channels or members\n\nVerify bot has required permissions in Discord server settings. Check DISCORD_GUILD_ID matches target server. Ensure bot has been invited with correct OAuth scopes (bot, send_messages, manage_channels, manage_roles).\n### Java runtime error or MCP server won't start\n\nInstall Java JDK 11 or higher. Run java -version to verify installation. Check JAR file path is absolute and file exists. Verify execute permissions on JAR file.\n### Discord MCP server authentication errors with bot tokens\n\nVerify bot token is valid and not expired. Check bot permissions match required operations. Ensure token format is correct (Bot token prefix). For OAuth integrations, verify token refresh logic is working correctly.\n### Discord rate limit errors when sending multiple messages\n\nImplement exponential backoff retry logic with jitter. Use Discord API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed channel data. Discord allows 5 requests per 5 seconds per route.\n### Discord channel or server access denied errors\n\nVerify bot has access to the server and channels. Check bot permissions and server membership. Ensure bot has required permissions (Send Messages, Read Message History, etc.) for target operations.\n### Discord MCP server connection timeouts or network errors\n\nCheck network connectivity and firewall settings. Verify Discord API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "Get server information and member count",
+        "id": "get-server-information-and-member-count"
+      },
+      {
+        "depth": 3,
+        "text": "Create new text channels and categories",
+        "id": "create-new-text-channels-and-categories"
+      },
+      {
+        "depth": 3,
+        "text": "Manage member roles and permissions",
+        "id": "manage-member-roles-and-permissions"
+      },
+      {
+        "depth": 3,
+        "text": "Retrieve channel lists and configurations",
+        "id": "retrieve-channel-lists-and-configurations"
+      },
+      {
+        "depth": 3,
+        "text": "Send Message to Channel",
+        "id": "send-message-to-channel"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "HTTP 429 rate limit error when sending messages",
+        "id": "http-429-rate-limit-error-when-sending-messages"
+      },
+      {
+        "depth": 3,
+        "text": "Bot gets 24-hour IP ban for invalid requests",
+        "id": "bot-gets-24-hour-ip-ban-for-invalid-requests"
+      },
+      {
+        "depth": 3,
+        "text": "Bot token authentication fails with 401 error",
+        "id": "bot-token-authentication-fails-with-401-error"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot access guild channels or members",
+        "id": "cannot-access-guild-channels-or-members"
+      },
+      {
+        "depth": 3,
+        "text": "Java runtime error or MCP server won't start",
+        "id": "java-runtime-error-or-mcp-server-wont-start"
+      },
+      {
+        "depth": 3,
+        "text": "Discord MCP server authentication errors with bot tokens",
+        "id": "discord-mcp-server-authentication-errors-with-bot-tokens"
+      },
+      {
+        "depth": 3,
+        "text": "Discord rate limit errors when sending multiple messages",
+        "id": "discord-rate-limit-errors-when-sending-multiple-messages"
+      },
+      {
+        "depth": 3,
+        "text": "Discord channel or server access denied errors",
+        "id": "discord-channel-or-server-access-denied-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Discord MCP server connection timeouts or network errors",
+        "id": "discord-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Get server information and member count\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Create new text channels and categories\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Manage member roles and permissions\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Retrieve channel lists and configurations\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Send message to Discord channel\nconst message = await discord.channels.createMessage({\n  channel_id: \"channel-id\",\n  content: \"Hello from Claude!\",\n  embeds: [{\n    title: \"Notification\",\n    description: \"This is a test message\",\n    color: 0x00ff00\n  }]\n});"
+      }
+    ],
+    "filePath": "content/mcp/discord-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx",
+    "repoUrl": "https://github.com/saseq/discord-mcp",
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

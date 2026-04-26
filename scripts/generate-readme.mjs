@@ -2,22 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
+import categorySpec from "../content/category-spec.json" with { type: "json" };
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
 const readmePath = path.join(repoRoot, "README.md");
 
-const categoryOrder = [
-  "agents",
-  "collections",
-  "commands",
-  "guides",
-  "hooks",
-  "mcp",
-  "rules",
-  "skills",
-  "statuslines"
-];
+const categoryOrder = categorySpec.categoryOrder;
 
 const categoryHeadings = {
   agents: "## 🤖 AI Agents",

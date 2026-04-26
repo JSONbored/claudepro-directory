@@ -17,6 +17,10 @@ import { categoryLabels, siteConfig } from "@/lib/site";
 type BrowseDirectoryProps = {
   entries: DirectoryEntry[];
   initialQuery?: string;
+  initialCategory?: string;
+  initialUtilityFilter?: string;
+  initialSortMode?: string;
+  syncUrl?: boolean;
   limit?: number;
   entriesUrl?: string;
 };
@@ -34,6 +38,29 @@ const utilityFilterOptions = [
   { value: "prerequisites", label: "Prerequisites" },
   { value: "troubleshooting", label: "Troubleshooting" },
 ] as const;
+const sortModeOptions = ["popular", "newest", "title"] as const;
+
+function normalizeCategory(value?: string) {
+  const normalized = String(value || "").trim().toLowerCase();
+  if (normalized === "all") return "all";
+  return siteConfig.categoryOrder.includes(normalized) ? normalized : "all";
+}
+
+function normalizeUtilityFilter(value?: string) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return utilityFilterOptions.some((option) => option.value === normalized)
+    ? normalized
+    : "all";
+}
+
+function normalizeSortMode(value?: string) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return sortModeOptions.includes(
+    normalized as (typeof sortModeOptions)[number],
+  )
+    ? normalized
+    : "popular";
+}
 
 function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
   switch (filter) {
@@ -66,13 +93,19 @@ function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
 export function BrowseDirectory({
   entries,
   initialQuery = "",
+  initialCategory: initialCategoryProp = "all",
+  initialUtilityFilter: initialUtilityFilterProp = "all",
+  initialSortMode: initialSortModeProp = "popular",
+  syncUrl = false,
   limit,
   entriesUrl,
 }: BrowseDirectoryProps) {
   const isDefaultQuery = initialQuery.trim().length === 0;
-  const initialSortMode = "popular";
-  const initialCategory = "all";
-  const initialUtilityFilter = "all";
+  const initialSortMode = normalizeSortMode(initialSortModeProp);
+  const initialCategory = normalizeCategory(initialCategoryProp);
+  const initialUtilityFilter = normalizeUtilityFilter(
+    initialUtilityFilterProp,
+  );
   const [allEntries, setAllEntries] = useState(entries);
   const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
   const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
@@ -91,6 +124,7 @@ export function BrowseDirectory({
   >({});
   const [votedByMe, setVotedByMe] = useState<Record<string, boolean>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const hasHydratedUrlState = useRef(false);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
 
@@ -130,6 +164,59 @@ export function BrowseDirectory({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesUrl, isDefaultQuery]);
+
+  useEffect(() => {
+    if (!syncUrl) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const nextQuery = params.get("q");
+    const nextCategory = normalizeCategory(params.get("category") ?? undefined);
+    const nextUtility = normalizeUtilityFilter(
+      params.get("utility") ?? undefined,
+    );
+    const nextSort = normalizeSortMode(params.get("sort") ?? undefined);
+
+    if (nextQuery !== null) setQuery(nextQuery);
+    setCategory(nextCategory);
+    setUtilityFilter(nextUtility);
+    setSortMode(nextSort);
+    hasHydratedUrlState.current = true;
+  }, [syncUrl]);
+
+  useEffect(() => {
+    if (!syncUrl || !hasHydratedUrlState.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const normalized = query.trim();
+
+    if (normalized) {
+      params.set("q", normalized);
+    } else {
+      params.delete("q");
+    }
+
+    if (category !== "all") {
+      params.set("category", category);
+    } else {
+      params.delete("category");
+    }
+
+    if (utilityFilter !== "all") {
+      params.set("utility", utilityFilter);
+    } else {
+      params.delete("utility");
+    }
+
+    if (sortMode !== "popular") {
+      params.set("sort", sortMode);
+    } else {
+      params.delete("sort");
+    }
+
+    const search = params.toString();
+    const nextUrl = `${window.location.pathname}${search ? `?${search}` : ""}`;
+    window.history.replaceState(null, "", nextUrl);
+  }, [category, query, sortMode, syncUrl, utilityFilter]);
 
   useEffect(() => {
     const storageKey = "heyclaude-client-id";

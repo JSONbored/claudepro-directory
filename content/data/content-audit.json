@@ -351,90 +351,1251 @@
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/agent-operator-growth-master-pack.mdx",
-    "slug": "agent-operator-growth-master-pack",
+    "category": "mcp",
+    "filePath": "content/mcp/airtable-mcp-server.mdx",
+    "slug": "airtable-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/api-development-starter-kit.mdx",
-    "slug": "api-development-starter-kit",
+    "category": "mcp",
+    "filePath": "content/mcp/asana-mcp-server.mdx",
+    "slug": "asana-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/aws-cloud-infrastructure-bundle.mdx",
-    "slug": "aws-cloud-infrastructure-bundle",
+    "category": "mcp",
+    "filePath": "content/mcp/aws-services-mcp-server.mdx",
+    "slug": "aws-services-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/backend-development-suite.mdx",
-    "slug": "backend-development-suite",
+    "category": "mcp",
+    "filePath": "content/mcp/box-mcp-server.mdx",
+    "slug": "box-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/code-quality-toolkit.mdx",
-    "slug": "code-quality-toolkit",
+    "category": "mcp",
+    "filePath": "content/mcp/canva-mcp-server.mdx",
+    "slug": "canva-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/content-creation-workflow.mdx",
-    "slug": "content-creation-workflow",
+    "category": "mcp",
+    "filePath": "content/mcp/clickup-mcp-server.mdx",
+    "slug": "clickup-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/data-engineering-suite.mdx",
-    "slug": "data-engineering-suite",
+    "category": "mcp",
+    "filePath": "content/mcp/cloudflare-mcp-server.mdx",
+    "slug": "cloudflare-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/debugging-troubleshooting-system.mdx",
-    "slug": "debugging-troubleshooting-system",
+    "category": "mcp",
+    "filePath": "content/mcp/cloudinary-mcp-server.mdx",
+    "slug": "cloudinary-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/developer-productivity-booster.mdx",
-    "slug": "developer-productivity-booster",
+    "category": "mcp",
+    "filePath": "content/mcp/contrastapi-mcp-server.mdx",
+    "slug": "contrastapi-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "collections",
-    "filePath": "content/collections/production-readiness-toolkit.mdx",
-    "slug": "production-readiness-toolkit",
+    "category": "mcp",
+    "filePath": "content/mcp/daloopa-mcp-server.mdx",
+    "slug": "daloopa-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/desktop-mcp-setup.mdx",
+    "slug": "desktop-mcp-setup",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/discord-mcp-server.mdx",
+    "slug": "discord-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/docker-mcp-server.mdx",
+    "slug": "docker-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/figma-mcp-server.mdx",
+    "slug": "figma-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/filesystem-mcp-server.mdx",
+    "slug": "filesystem-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/fireflies-mcp-server.mdx",
+    "slug": "fireflies-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/git-mcp-server.mdx",
+    "slug": "git-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/github-mcp-server.mdx",
+    "slug": "github-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/heyclaude-mcp.mdx",
+    "slug": "heyclaude-mcp",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/hubspot-mcp-server.mdx",
+    "slug": "hubspot-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/hugging-face-mcp-server.mdx",
+    "slug": "hugging-face-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/intercom-mcp-server.mdx",
+    "slug": "intercom-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/invideo-mcp-server.mdx",
+    "slug": "invideo-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/jam-mcp-server.mdx",
+    "slug": "jam-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/jira-mcp-server.mdx",
+    "slug": "jira-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/kubernetes-mcp-server.mdx",
+    "slug": "kubernetes-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/linear-mcp-server.mdx",
+    "slug": "linear-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/monday-mcp-server.mdx",
+    "slug": "monday-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/netlify-mcp-server.mdx",
+    "slug": "netlify-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/notion-mcp-server.mdx",
+    "slug": "notion-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/paypal-mcp-server.mdx",
+    "slug": "paypal-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/plaid-mcp-server.mdx",
+    "slug": "plaid-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/postgresql-mcp-server.mdx",
+    "slug": "postgresql-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/prompt-to-asset.mdx",
+    "slug": "prompt-to-asset",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/reddit-mcp-buddy.mdx",
+    "slug": "reddit-mcp-buddy",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/redis-mcp-server.mdx",
+    "slug": "redis-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/sentry-mcp-server.mdx",
+    "slug": "sentry-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/socket-mcp-server.mdx",
+    "slug": "socket-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/square-mcp-server.mdx",
+    "slug": "square-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/stripe-mcp-server.mdx",
+    "slug": "stripe-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/stytch-mcp-server.mdx",
+    "slug": "stytch-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/vercel-mcp-server.mdx",
+    "slug": "vercel-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/workato-mcp-server.mdx",
+    "slug": "workato-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "mcp",
+    "filePath": "content/mcp/zapier-mcp-server.mdx",
+    "slug": "zapier-mcp-server",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/agent-evals-regression-gate.mdx",
+    "slug": "agent-evals-regression-gate",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ai-agent-observability-incident-response.mdx",
+    "slug": "ai-agent-observability-incident-response",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ai-business-idea-validation-capability-pack.mdx",
+    "slug": "ai-business-idea-validation-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ai-search-ranking-content-cluster-strategy.mdx",
+    "slug": "ai-search-ranking-content-cluster-strategy",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/audio-transcription-summarization.mdx",
+    "slug": "audio-transcription-summarization",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/base-l2-smart-contract-launchpad.mdx",
+    "slug": "base-l2-smart-contract-launchpad",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/browser-agent-workflow-automation.mdx",
+    "slug": "browser-agent-workflow-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/bun-runtime-modern-javascript.mdx",
+    "slug": "bun-runtime-modern-javascript",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/cli-data-viz-quickstart.mdx",
+    "slug": "cli-data-viz-quickstart",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/cloudflare-workers-ai-edge.mdx",
+    "slug": "cloudflare-workers-ai-edge",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx",
+    "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/coderabbit-lite-pr-review-capability-pack.mdx",
+    "slug": "coderabbit-lite-pr-review-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/codex-automations-orchestrator-capability-pack.mdx",
+    "slug": "codex-automations-orchestrator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/codex-plugin-creator-capability-pack.mdx",
+    "slug": "codex-plugin-creator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/csv-excel-data-wrangler.mdx",
+    "slug": "csv-excel-data-wrangler",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/cursor-windsurf-ai-ide-setup.mdx",
+    "slug": "cursor-windsurf-ai-ide-setup",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/docker-compose-production-blueprints.mdx",
+    "slug": "docker-compose-production-blueprints",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/docx-report-generator.mdx",
+    "slug": "docx-report-generator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ethereum-base-smart-contract-security-capability-pack.mdx",
+    "slug": "ethereum-base-smart-contract-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/ethereum-solidity-security-foundry.mdx",
+    "slug": "ethereum-solidity-security-foundry",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/fastapi-python-backend.mdx",
+    "slug": "fastapi-python-backend",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/git-cliff-release-changelog-capability-pack.mdx",
+    "slug": "git-cliff-release-changelog-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/github-actions-ai-cicd.mdx",
+    "slug": "github-actions-ai-cicd",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/github-actions-secure-cicd-capability-pack.mdx",
+    "slug": "github-actions-secure-cicd-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/google-workspace-gemini-automation.mdx",
+    "slug": "google-workspace-gemini-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/husky-commit-governance-capability-pack.mdx",
+    "slug": "husky-commit-governance-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/image-ocr-table-extraction.mdx",
+    "slug": "image-ocr-table-extraction",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/indexnow-search-indexing-accelerator.mdx",
+    "slug": "indexnow-search-indexing-accelerator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/json-schema-validation-transformation.mdx",
+    "slug": "json-schema-validation-transformation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/log-parsing-incident-timeline.mdx",
+    "slug": "log-parsing-incident-timeline",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/markdown-knowledge-base-composer.mdx",
+    "slug": "markdown-knowledge-base-composer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mcp-server-authoring-security-capability-pack.mdx",
+    "slug": "mcp-server-authoring-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mcp-server-security-hardening.mdx",
+    "slug": "mcp-server-security-hardening",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mcp-tool-contract-testing.mdx",
+    "slug": "mcp-tool-contract-testing",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/mintlify-documentation-automation.mdx",
+    "slug": "mintlify-documentation-automation",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/model-routing-cost-latency-optimizer.mdx",
+    "slug": "model-routing-cost-latency-optimizer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/n8n-ai-agent-workflow-architect.mdx",
+    "slug": "n8n-ai-agent-workflow-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/n8n-operations-resilience-capability-pack.mdx",
+    "slug": "n8n-operations-resilience-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/n8n-production-security-capability-pack.mdx",
+    "slug": "n8n-production-security-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-agent-ops-hardening.mdx",
+    "slug": "openclaw-agent-ops-hardening",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-operator-capability-pack.mdx",
+    "slug": "openclaw-operator-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/openclaw-skill-authoring-factory-capability-pack.mdx",
+    "slug": "openclaw-skill-authoring-factory-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/opennext-cloudflare-capability-pack.mdx",
+    "slug": "opennext-cloudflare-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/pagespeed-insights-optimizer.mdx",
+    "slug": "pagespeed-insights-optimizer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/playwright-e2e-testing.mdx",
+    "slug": "playwright-e2e-testing",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/playwright-mcp-browser-automation-engineer.mdx",
+    "slug": "playwright-mcp-browser-automation-engineer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/postgresql-query-optimization.mdx",
+    "slug": "postgresql-query-optimization",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/prompt-injection-defense-guardrails.mdx",
+    "slug": "prompt-injection-defense-guardrails",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/proxmox-ve-api-capability-pack.mdx",
+    "slug": "proxmox-ve-api-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/proxmox-ve-api-orchestrator.mdx",
+    "slug": "proxmox-ve-api-orchestrator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/raycast-extension-dev-publish-capability-pack.mdx",
+    "slug": "raycast-extension-dev-publish-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/rest-api-client-harness.mdx",
+    "slug": "rest-api-client-harness",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/saas-pricing-experimentation-engine.mdx",
+    "slug": "saas-pricing-experimentation-engine",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/supabase-realtime-database.mdx",
+    "slug": "supabase-realtime-database",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/svelte-sveltekit-fullstack.mdx",
+    "slug": "svelte-sveltekit-fullstack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/trpc-type-safe-api.mdx",
+    "slug": "trpc-type-safe-api",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/unraid-api-automation-operator.mdx",
+    "slug": "unraid-api-automation-operator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/unraid-api-v2-capability-pack.mdx",
+    "slug": "unraid-api-v2-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/unraid-ca-template-authoring-capability-pack.mdx",
+    "slug": "unraid-ca-template-authoring-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/v0-rapid-prototyping.mdx",
+    "slug": "v0-rapid-prototyping",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/vite-build-optimization.mdx",
+    "slug": "vite-build-optimization",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/webassembly-module-development.mdx",
+    "slug": "webassembly-module-development",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/website-crawler-summarizer.mdx",
+    "slug": "website-crawler-summarizer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/windsurf-collaborative-development.mdx",
+    "slug": "windsurf-collaborative-development",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/zero-budget-saas-launch-capability-pack.mdx",
+    "slug": "zero-budget-saas-launch-capability-pack",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/zod-schema-validator.mdx",
+    "slug": "zod-schema-validator",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/ai-prompt-engineering-expert.mdx",
+    "slug": "ai-prompt-engineering-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/api-design-expert.mdx",
+    "slug": "api-design-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/api-first-development-architect.mdx",
+    "slug": "api-first-development-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/aws-cloud-architect.mdx",
+    "slug": "aws-cloud-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/biome-strict-linting-rules.mdx",
+    "slug": "biome-strict-linting-rules",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/code-review-expert.mdx",
+    "slug": "code-review-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/go-golang-expert.mdx",
+    "slug": "go-golang-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/golang-expert.mdx",
+    "slug": "golang-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/graphql-federation-specialist.mdx",
+    "slug": "graphql-federation-specialist",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/kubernetes-devsecops-engineer.mdx",
+    "slug": "kubernetes-devsecops-engineer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/mobile-app-developer.mdx",
+    "slug": "mobile-app-developer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/mobile-app-development-expert.mdx",
+    "slug": "mobile-app-development-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/monorepo-workspace-manager.mdx",
+    "slug": "monorepo-workspace-manager",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/nextjs-15-performance-architect.mdx",
+    "slug": "nextjs-15-performance-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/production-codebase-auditor.mdx",
+    "slug": "production-codebase-auditor",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/python-data-science-expert.mdx",
+    "slug": "python-data-science-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/python-data-science.mdx",
+    "slug": "python-data-science",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/react-19-concurrent-features-specialist.mdx",
+    "slug": "react-19-concurrent-features-specialist",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/react-expert.mdx",
+    "slug": "react-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/react-next-js-expert.mdx",
+    "slug": "react-next-js-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/react-server-components-expert.mdx",
+    "slug": "react-server-components-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/security-auditor-penetration-tester.mdx",
+    "slug": "security-auditor-penetration-tester",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/security-auditor.mdx",
+    "slug": "security-auditor",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/security-first-react-components.mdx",
+    "slug": "security-first-react-components",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/terraform-infrastructure-architect.mdx",
+    "slug": "terraform-infrastructure-architect",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/test-driven-development-enforcer.mdx",
+    "slug": "test-driven-development-enforcer",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/typescript-5x-strict-mode-expert.mdx",
+    "slug": "typescript-5x-strict-mode-expert",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/wcag-accessibility-auditor.mdx",
+    "slug": "wcag-accessibility-auditor",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "rules",
+    "filePath": "content/rules/windsurf-ai-native-ide-patterns.mdx",
+    "slug": "windsurf-ai-native-ide-patterns",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -678,177 +1839,6 @@
     "category": "commands",
     "filePath": "content/commands/zod-audit.mdx",
     "slug": "zod-audit",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/build-mcp-server.mdx",
-    "slug": "build-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/business-process-automation.mdx",
-    "slug": "business-process-automation",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/chatgpt-migration-guide.mdx",
-    "slug": "chatgpt-migration-guide",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-4-extended-thinking-tutorial.mdx",
-    "slug": "claude-4-extended-thinking-tutorial",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-agent-development-framework.mdx",
-    "slug": "claude-agent-development-framework",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-mcp-server-setup-guide.mdx",
-    "slug": "claude-mcp-server-setup-guide",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-rate-limits-fix.mdx",
-    "slug": "claude-rate-limits-fix",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-vs-codewhisperer-gemini.mdx",
-    "slug": "claude-vs-codewhisperer-gemini",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-vs-copilot-python.mdx",
-    "slug": "claude-vs-copilot-python",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/claude-vs-cursor-codeium.mdx",
-    "slug": "claude-vs-cursor-codeium",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/financial-services-guide.mdx",
-    "slug": "financial-services-guide",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/fix-environment-variables.mdx",
-    "slug": "fix-environment-variables",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/fix-installation-errors.mdx",
-    "slug": "fix-installation-errors",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/fix-mcp-connection-errors.mdx",
-    "slug": "fix-mcp-connection-errors",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/fix-memory-leak-performance.mdx",
-    "slug": "fix-memory-leak-performance",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/healthcare-hipaa-guide.mdx",
-    "slug": "healthcare-hipaa-guide",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/migration-workflow-guide.mdx",
-    "slug": "migration-workflow-guide",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/multi-directory-setup.mdx",
-    "slug": "multi-directory-setup",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "guides",
-    "filePath": "content/guides/wsl-setup-guide.mdx",
-    "slug": "wsl-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
@@ -1449,1251 +2439,261 @@
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/airtable-mcp-server.mdx",
-    "slug": "airtable-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/build-mcp-server.mdx",
+    "slug": "build-mcp-server",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/asana-mcp-server.mdx",
-    "slug": "asana-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/business-process-automation.mdx",
+    "slug": "business-process-automation",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/aws-services-mcp-server.mdx",
-    "slug": "aws-services-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/chatgpt-migration-guide.mdx",
+    "slug": "chatgpt-migration-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/box-mcp-server.mdx",
-    "slug": "box-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-4-extended-thinking-tutorial.mdx",
+    "slug": "claude-4-extended-thinking-tutorial",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/canva-mcp-server.mdx",
-    "slug": "canva-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-agent-development-framework.mdx",
+    "slug": "claude-agent-development-framework",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/clickup-mcp-server.mdx",
-    "slug": "clickup-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-mcp-server-setup-guide.mdx",
+    "slug": "claude-mcp-server-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/cloudflare-mcp-server.mdx",
-    "slug": "cloudflare-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-rate-limits-fix.mdx",
+    "slug": "claude-rate-limits-fix",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/cloudinary-mcp-server.mdx",
-    "slug": "cloudinary-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-vs-codewhisperer-gemini.mdx",
+    "slug": "claude-vs-codewhisperer-gemini",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/contrastapi-mcp-server.mdx",
-    "slug": "contrastapi-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-vs-copilot-python.mdx",
+    "slug": "claude-vs-copilot-python",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/daloopa-mcp-server.mdx",
-    "slug": "daloopa-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/claude-vs-cursor-codeium.mdx",
+    "slug": "claude-vs-cursor-codeium",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/desktop-mcp-setup.mdx",
-    "slug": "desktop-mcp-setup",
+    "category": "guides",
+    "filePath": "content/guides/financial-services-guide.mdx",
+    "slug": "financial-services-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/discord-mcp-server.mdx",
-    "slug": "discord-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/fix-environment-variables.mdx",
+    "slug": "fix-environment-variables",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/docker-mcp-server.mdx",
-    "slug": "docker-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/fix-installation-errors.mdx",
+    "slug": "fix-installation-errors",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/figma-mcp-server.mdx",
-    "slug": "figma-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/fix-mcp-connection-errors.mdx",
+    "slug": "fix-mcp-connection-errors",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/filesystem-mcp-server.mdx",
-    "slug": "filesystem-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/fix-memory-leak-performance.mdx",
+    "slug": "fix-memory-leak-performance",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/fireflies-mcp-server.mdx",
-    "slug": "fireflies-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/healthcare-hipaa-guide.mdx",
+    "slug": "healthcare-hipaa-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/git-mcp-server.mdx",
-    "slug": "git-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/migration-workflow-guide.mdx",
+    "slug": "migration-workflow-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/github-mcp-server.mdx",
-    "slug": "github-mcp-server",
+    "category": "guides",
+    "filePath": "content/guides/multi-directory-setup.mdx",
+    "slug": "multi-directory-setup",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/heyclaude-mcp.mdx",
-    "slug": "heyclaude-mcp",
+    "category": "guides",
+    "filePath": "content/guides/wsl-setup-guide.mdx",
+    "slug": "wsl-setup-guide",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/hubspot-mcp-server.mdx",
-    "slug": "hubspot-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/agent-operator-growth-master-pack.mdx",
+    "slug": "agent-operator-growth-master-pack",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/hugging-face-mcp-server.mdx",
-    "slug": "hugging-face-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/api-development-starter-kit.mdx",
+    "slug": "api-development-starter-kit",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/intercom-mcp-server.mdx",
-    "slug": "intercom-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/aws-cloud-infrastructure-bundle.mdx",
+    "slug": "aws-cloud-infrastructure-bundle",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/invideo-mcp-server.mdx",
-    "slug": "invideo-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/backend-development-suite.mdx",
+    "slug": "backend-development-suite",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/jam-mcp-server.mdx",
-    "slug": "jam-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/code-quality-toolkit.mdx",
+    "slug": "code-quality-toolkit",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/jira-mcp-server.mdx",
-    "slug": "jira-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/content-creation-workflow.mdx",
+    "slug": "content-creation-workflow",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/kubernetes-mcp-server.mdx",
-    "slug": "kubernetes-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/data-engineering-suite.mdx",
+    "slug": "data-engineering-suite",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/linear-mcp-server.mdx",
-    "slug": "linear-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/debugging-troubleshooting-system.mdx",
+    "slug": "debugging-troubleshooting-system",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/monday-mcp-server.mdx",
-    "slug": "monday-mcp-server",
+    "category": "collections",
+    "filePath": "content/collections/developer-productivity-booster.mdx",
+    "slug": "developer-productivity-booster",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
     "issues": []
   },
   {
-    "category": "mcp",
-    "filePath": "content/mcp/netlify-mcp-server.mdx",
-    "slug": "netlify-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/notion-mcp-server.mdx",
-    "slug": "notion-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/paypal-mcp-server.mdx",
-    "slug": "paypal-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/plaid-mcp-server.mdx",
-    "slug": "plaid-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/postgresql-mcp-server.mdx",
-    "slug": "postgresql-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/prompt-to-asset.mdx",
-    "slug": "prompt-to-asset",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/reddit-mcp-buddy.mdx",
-    "slug": "reddit-mcp-buddy",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/redis-mcp-server.mdx",
-    "slug": "redis-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/sentry-mcp-server.mdx",
-    "slug": "sentry-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/socket-mcp-server.mdx",
-    "slug": "socket-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/square-mcp-server.mdx",
-    "slug": "square-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/stripe-mcp-server.mdx",
-    "slug": "stripe-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/stytch-mcp-server.mdx",
-    "slug": "stytch-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/vercel-mcp-server.mdx",
-    "slug": "vercel-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/workato-mcp-server.mdx",
-    "slug": "workato-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "mcp",
-    "filePath": "content/mcp/zapier-mcp-server.mdx",
-    "slug": "zapier-mcp-server",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/ai-prompt-engineering-expert.mdx",
-    "slug": "ai-prompt-engineering-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/api-design-expert.mdx",
-    "slug": "api-design-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/api-first-development-architect.mdx",
-    "slug": "api-first-development-architect",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/aws-cloud-architect.mdx",
-    "slug": "aws-cloud-architect",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/biome-strict-linting-rules.mdx",
-    "slug": "biome-strict-linting-rules",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/code-review-expert.mdx",
-    "slug": "code-review-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/go-golang-expert.mdx",
-    "slug": "go-golang-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/golang-expert.mdx",
-    "slug": "golang-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/graphql-federation-specialist.mdx",
-    "slug": "graphql-federation-specialist",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/kubernetes-devsecops-engineer.mdx",
-    "slug": "kubernetes-devsecops-engineer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/mobile-app-developer.mdx",
-    "slug": "mobile-app-developer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/mobile-app-development-expert.mdx",
-    "slug": "mobile-app-development-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/monorepo-workspace-manager.mdx",
-    "slug": "monorepo-workspace-manager",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/nextjs-15-performance-architect.mdx",
-    "slug": "nextjs-15-performance-architect",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/production-codebase-auditor.mdx",
-    "slug": "production-codebase-auditor",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/python-data-science-expert.mdx",
-    "slug": "python-data-science-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/python-data-science.mdx",
-    "slug": "python-data-science",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/react-19-concurrent-features-specialist.mdx",
-    "slug": "react-19-concurrent-features-specialist",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/react-expert.mdx",
-    "slug": "react-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/react-next-js-expert.mdx",
-    "slug": "react-next-js-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/react-server-components-expert.mdx",
-    "slug": "react-server-components-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/security-auditor-penetration-tester.mdx",
-    "slug": "security-auditor-penetration-tester",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/security-auditor.mdx",
-    "slug": "security-auditor",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/security-first-react-components.mdx",
-    "slug": "security-first-react-components",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/terraform-infrastructure-architect.mdx",
-    "slug": "terraform-infrastructure-architect",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/test-driven-development-enforcer.mdx",
-    "slug": "test-driven-development-enforcer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/typescript-5x-strict-mode-expert.mdx",
-    "slug": "typescript-5x-strict-mode-expert",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/wcag-accessibility-auditor.mdx",
-    "slug": "wcag-accessibility-auditor",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "rules",
-    "filePath": "content/rules/windsurf-ai-native-ide-patterns.mdx",
-    "slug": "windsurf-ai-native-ide-patterns",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/agent-evals-regression-gate.mdx",
-    "slug": "agent-evals-regression-gate",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/ai-agent-observability-incident-response.mdx",
-    "slug": "ai-agent-observability-incident-response",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/ai-business-idea-validation-capability-pack.mdx",
-    "slug": "ai-business-idea-validation-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/ai-search-ranking-content-cluster-strategy.mdx",
-    "slug": "ai-search-ranking-content-cluster-strategy",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/audio-transcription-summarization.mdx",
-    "slug": "audio-transcription-summarization",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/base-l2-smart-contract-launchpad.mdx",
-    "slug": "base-l2-smart-contract-launchpad",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/browser-agent-workflow-automation.mdx",
-    "slug": "browser-agent-workflow-automation",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/bun-runtime-modern-javascript.mdx",
-    "slug": "bun-runtime-modern-javascript",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/cli-data-viz-quickstart.mdx",
-    "slug": "cli-data-viz-quickstart",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/cloudflare-workers-ai-edge.mdx",
-    "slug": "cloudflare-workers-ai-edge",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx",
-    "slug": "cloudflare-workers-d1-kv-r2-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/coderabbit-lite-pr-review-capability-pack.mdx",
-    "slug": "coderabbit-lite-pr-review-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/codex-automations-orchestrator-capability-pack.mdx",
-    "slug": "codex-automations-orchestrator-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/codex-plugin-creator-capability-pack.mdx",
-    "slug": "codex-plugin-creator-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/csv-excel-data-wrangler.mdx",
-    "slug": "csv-excel-data-wrangler",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/cursor-windsurf-ai-ide-setup.mdx",
-    "slug": "cursor-windsurf-ai-ide-setup",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/docker-compose-production-blueprints.mdx",
-    "slug": "docker-compose-production-blueprints",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/docx-report-generator.mdx",
-    "slug": "docx-report-generator",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/ethereum-base-smart-contract-security-capability-pack.mdx",
-    "slug": "ethereum-base-smart-contract-security-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/ethereum-solidity-security-foundry.mdx",
-    "slug": "ethereum-solidity-security-foundry",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/fastapi-python-backend.mdx",
-    "slug": "fastapi-python-backend",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/git-cliff-release-changelog-capability-pack.mdx",
-    "slug": "git-cliff-release-changelog-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/github-actions-ai-cicd.mdx",
-    "slug": "github-actions-ai-cicd",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/github-actions-secure-cicd-capability-pack.mdx",
-    "slug": "github-actions-secure-cicd-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/google-workspace-gemini-automation.mdx",
-    "slug": "google-workspace-gemini-automation",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/husky-commit-governance-capability-pack.mdx",
-    "slug": "husky-commit-governance-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/image-ocr-table-extraction.mdx",
-    "slug": "image-ocr-table-extraction",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/indexnow-search-indexing-accelerator.mdx",
-    "slug": "indexnow-search-indexing-accelerator",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/json-schema-validation-transformation.mdx",
-    "slug": "json-schema-validation-transformation",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/log-parsing-incident-timeline.mdx",
-    "slug": "log-parsing-incident-timeline",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/markdown-knowledge-base-composer.mdx",
-    "slug": "markdown-knowledge-base-composer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/mcp-server-authoring-security-capability-pack.mdx",
-    "slug": "mcp-server-authoring-security-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/mcp-server-security-hardening.mdx",
-    "slug": "mcp-server-security-hardening",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/mcp-tool-contract-testing.mdx",
-    "slug": "mcp-tool-contract-testing",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/mintlify-documentation-automation.mdx",
-    "slug": "mintlify-documentation-automation",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/model-routing-cost-latency-optimizer.mdx",
-    "slug": "model-routing-cost-latency-optimizer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/n8n-ai-agent-workflow-architect.mdx",
-    "slug": "n8n-ai-agent-workflow-architect",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/n8n-operations-resilience-capability-pack.mdx",
-    "slug": "n8n-operations-resilience-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/n8n-production-security-capability-pack.mdx",
-    "slug": "n8n-production-security-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/openclaw-agent-ops-hardening.mdx",
-    "slug": "openclaw-agent-ops-hardening",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/openclaw-operator-capability-pack.mdx",
-    "slug": "openclaw-operator-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/openclaw-skill-authoring-factory-capability-pack.mdx",
-    "slug": "openclaw-skill-authoring-factory-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/opennext-cloudflare-capability-pack.mdx",
-    "slug": "opennext-cloudflare-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/pagespeed-insights-optimizer.mdx",
-    "slug": "pagespeed-insights-optimizer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/playwright-e2e-testing.mdx",
-    "slug": "playwright-e2e-testing",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/playwright-mcp-browser-automation-engineer.mdx",
-    "slug": "playwright-mcp-browser-automation-engineer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/postgresql-query-optimization.mdx",
-    "slug": "postgresql-query-optimization",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/prompt-injection-defense-guardrails.mdx",
-    "slug": "prompt-injection-defense-guardrails",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/proxmox-ve-api-capability-pack.mdx",
-    "slug": "proxmox-ve-api-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/proxmox-ve-api-orchestrator.mdx",
-    "slug": "proxmox-ve-api-orchestrator",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/raycast-extension-dev-publish-capability-pack.mdx",
-    "slug": "raycast-extension-dev-publish-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/rest-api-client-harness.mdx",
-    "slug": "rest-api-client-harness",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/saas-pricing-experimentation-engine.mdx",
-    "slug": "saas-pricing-experimentation-engine",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/supabase-realtime-database.mdx",
-    "slug": "supabase-realtime-database",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/svelte-sveltekit-fullstack.mdx",
-    "slug": "svelte-sveltekit-fullstack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/trpc-type-safe-api.mdx",
-    "slug": "trpc-type-safe-api",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/unraid-api-automation-operator.mdx",
-    "slug": "unraid-api-automation-operator",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/unraid-api-v2-capability-pack.mdx",
-    "slug": "unraid-api-v2-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/unraid-ca-template-authoring-capability-pack.mdx",
-    "slug": "unraid-ca-template-authoring-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/v0-rapid-prototyping.mdx",
-    "slug": "v0-rapid-prototyping",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/vite-build-optimization.mdx",
-    "slug": "vite-build-optimization",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/webassembly-module-development.mdx",
-    "slug": "webassembly-module-development",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/website-crawler-summarizer.mdx",
-    "slug": "website-crawler-summarizer",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/windsurf-collaborative-development.mdx",
-    "slug": "windsurf-collaborative-development",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/zero-budget-saas-launch-capability-pack.mdx",
-    "slug": "zero-budget-saas-launch-capability-pack",
-    "metadataOnly": false,
-    "missingRequired": [],
-    "missingRecommended": [],
-    "issues": []
-  },
-  {
-    "category": "skills",
-    "filePath": "content/skills/zod-schema-validator.mdx",
-    "slug": "zod-schema-validator",
+    "category": "collections",
+    "filePath": "content/collections/production-readiness-toolkit.mdx",
+    "slug": "production-readiness-toolkit",
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],

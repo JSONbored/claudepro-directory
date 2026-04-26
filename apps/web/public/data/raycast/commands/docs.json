@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:docs",
+  "category": "commands",
+  "slug": "docs",
+  "title": "/docs - Docs Generator Command for Claude Code",
+  "copyText": "/docs [options] <file_or_project>",
+  "detailMarkdown": "# /docs - Docs Generator Command for Claude Code\nIntelligent documentation generator with API specs, code examples, tutorials, and interactive guides\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `documentation` `api-docs` `tutorials` `guides` `markdown`\n\n## Install\n```bash\n/docs [options] <file_or_project>\n```\n\n## Usage\n/docs [options] <file_or_project>\n\n## Links\n- https://heyclau.de/commands/docs\n- https://docs.claude.ai/commands/docs",
+  "webUrl": "https://heyclau.de/commands/docs",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.ai/commands/docs"
+}

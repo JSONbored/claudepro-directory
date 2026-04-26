@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "collections",
+    "slug": "backend-development-suite",
+    "title": "Backend Development",
+    "description": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.",
+    "seoTitle": "Backend Development",
+    "seoDescription": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable...",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-10-02",
+    "tags": [
+      "backend",
+      "architecture",
+      "database",
+      "cloud",
+      "aws",
+      "infrastructure"
+    ],
+    "keywords": [
+      "architecture",
+      "aws",
+      "backend",
+      "claude",
+      "cloud",
+      "collections",
+      "database",
+      "development",
+      "infrastructure",
+      "suite",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 0,
+    "cardDescription": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration.",
+    "installable": false,
+    "usageSnippet": "Start with `backend-architect-agent` → `database-specialist-agent` → `aws-services-mcp-server`",
+    "items": [
+      {
+        "slug": "backend-architect-agent",
+        "category": "agents"
+      },
+      {
+        "slug": "database-specialist-agent",
+        "category": "agents"
+      },
+      {
+        "slug": "api-builder-agent",
+        "category": "agents"
+      },
+      {
+        "slug": "aws-services-mcp-server",
+        "category": "mcp"
+      }
+    ],
+    "installationOrder": [
+      "backend-architect-agent",
+      "database-specialist-agent",
+      "aws-services-mcp-server",
+      "api-builder-agent"
+    ],
+    "estimatedSetupTime": "30 minutes",
+    "difficulty": "advanced",
+    "prerequisites": [
+      "Node.js 18 or higher",
+      "AWS account (for AWS MCP server)",
+      "Understanding of backend development concepts",
+      "Database knowledge (SQL or NoSQL)"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.\n\n## Features\n\n- Architecture design and planning\n- Database schema design and optimization\n- Cloud services integration (AWS)\n- API development and documentation\n\n## Use Cases\n\n- Building new backend services from scratch\n- Migrating applications to cloud infrastructure\n- Designing scalable database architectures\n- Implementing microservices patterns\n\n## TL;DR\n\nA complete backend development toolkit featuring API frameworks, database integrations, authentication systems, and Claude-optimized server-side development patterns.\n\n- RESTful and GraphQL API frameworks with best practices\n- Database integration patterns (PostgreSQL, MongoDB, Redis)\n- Authentication, authorization, and session management\n- Serverless and microservices architecture templates\n\nBuild robust backend systems faster with this collection of proven server-side frameworks, database connectors, auth solutions, and Claude Code workflows optimized for API development.\n\n## Collection Overview\n\n**Collection Type:** Backend Development\n**Focus Area:** Server-Side Engineering\n**Skill Level:** Intermediate\n**Time Saving:** 40-60% reduction in API development time\n\n## What's Included\n\n## Collection Contents\n\nEssential backend development resources\n\n- **API Frameworks** (APIs): Express, FastAPI, NestJS, and other modern API frameworks with Claude-optimized boilerplates.\n- **Database Patterns** (Database): ORM configurations, query optimization, migrations, and database design patterns with Claude assistance.\n- **Authentication Systems** (Auth): JWT, OAuth 2.0, session management, and API key authentication with security best practices.\n- **System Design** (Architecture): Microservices patterns, serverless architectures, and scalable backend design with Claude.\n\n## Quick Start\n\nSelect the backend components you need from the collection below. Each resource includes implementation guides and can be combined to build complete backend systems.\n\n## Prerequisites\n\n- Node.js 18 or higher\n- AWS account (for AWS MCP server)\n- Understanding of backend development concepts\n- Database knowledge (SQL or NoSQL)\n\n## Recommended Order\n\n1. `backend-architect-agent`\n2. `database-specialist-agent`\n3. `aws-services-mcp-server`\n4. `api-builder-agent`\n\n## Troubleshooting\n### Multiple agents provide conflicting architectural recommendations\n\nInstall backend-architect-agent first to establish system design. Database and API agents will follow architectural decisions. Enable only one agent at a time when designing new components.\n### AWS MCP server version incompatible with agent-generated code\n\nVerify aws-services-mcp-server supports AWS SDK v3. Check package.json for @aws-sdk version compatibility with generated code. Update MCP server to latest version matching SDK requirements.\n### Database agent schema conflicts with API Builder endpoints\n\nFollow installationOrder: install database-specialist-agent before api-builder-agent. Database agent sets schema first, API agent generates compatible endpoints matching established design.\n### Missing AWS credentials prevent MCP server initialization\n\nConfigure AWS credentials first: run aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Verify with aws sts get-caller-identity then install aws-services-mcp-server.\n### Collection items require different Node.js versions\n\nAll items require Node 18+. Verify with node --version before installation. Use nvm to switch versions: nvm use 18. Reinstall entire collection after activating correct Node version.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Architecture design and planning\n- Database schema design and optimization\n- Cloud services integration (AWS)\n- API development and documentation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Building new backend services from scratch\n- Migrating applications to cloud infrastructure\n- Designing scalable database architectures\n- Implementing microservices patterns",
+        "codeBlocks": []
+      },
+      {
+        "title": "TL;DR",
+        "id": "tldr",
+        "markdown": "A complete backend development toolkit featuring API frameworks, database integrations, authentication systems, and Claude-optimized server-side development patterns.\n\n- RESTful and GraphQL API frameworks with best practices\n- Database integration patterns (PostgreSQL, MongoDB, Redis)\n- Authentication, authorization, and session management\n- Serverless and microservices architecture templates\n\nBuild robust backend systems faster with this collection of proven server-side frameworks, database connectors, auth solutions, and Claude Code workflows optimized for API development.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Overview",
+        "id": "collection-overview",
+        "markdown": "**Collection Type:** Backend Development\n**Focus Area:** Server-Side Engineering\n**Skill Level:** Intermediate\n**Time Saving:** 40-60% reduction in API development time",
+        "codeBlocks": []
+      },
+      {
+        "title": "Collection Contents",
+        "id": "collection-contents",
+        "markdown": "Essential backend development resources\n\n- **API Frameworks** (APIs): Express, FastAPI, NestJS, and other modern API frameworks with Claude-optimized boilerplates.\n- **Database Patterns** (Database): ORM configurations, query optimization, migrations, and database design patterns with Claude assistance.\n- **Authentication Systems** (Auth): JWT, OAuth 2.0, session management, and API key authentication with security best practices.\n- **System Design** (Architecture): Microservices patterns, serverless architectures, and scalable backend design with Claude.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quick Start",
+        "id": "quick-start",
+        "markdown": "Select the backend components you need from the collection below. Each resource includes implementation guides and can be combined to build complete backend systems.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Node.js 18 or higher\n- AWS account (for AWS MCP server)\n- Understanding of backend development concepts\n- Database knowledge (SQL or NoSQL)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Recommended Order",
+        "id": "recommended-order",
+        "markdown": "1. `backend-architect-agent`\n2. `database-specialist-agent`\n3. `aws-services-mcp-server`\n4. `api-builder-agent`",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Multiple agents provide conflicting architectural recommendations\n\nInstall backend-architect-agent first to establish system design. Database and API agents will follow architectural decisions. Enable only one agent at a time when designing new components.\n### AWS MCP server version incompatible with agent-generated code\n\nVerify aws-services-mcp-server supports AWS SDK v3. Check package.json for @aws-sdk version compatibility with generated code. Update MCP server to latest version matching SDK requirements.\n### Database agent schema conflicts with API Builder endpoints\n\nFollow installationOrder: install database-specialist-agent before api-builder-agent. Database agent sets schema first, API agent generates compatible endpoints matching established design.\n### Missing AWS credentials prevent MCP server initialization\n\nConfigure AWS credentials first: run aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Verify with aws sts get-caller-identity then install aws-services-mcp-server.\n### Collection items require different Node.js versions\n\nAll items require Node 18+. Verify with node --version before installation. Use nvm to switch versions: nvm use 18. Reinstall entire collection after activating correct Node version.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "TL;DR",
+        "id": "tldr"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Overview",
+        "id": "collection-overview"
+      },
+      {
+        "depth": 2,
+        "text": "What's Included",
+        "id": "whats-included"
+      },
+      {
+        "depth": 2,
+        "text": "Collection Contents",
+        "id": "collection-contents"
+      },
+      {
+        "depth": 2,
+        "text": "Quick Start",
+        "id": "quick-start"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Recommended Order",
+        "id": "recommended-order"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Multiple agents provide conflicting architectural recommendations",
+        "id": "multiple-agents-provide-conflicting-architectural-recommendations"
+      },
+      {
+        "depth": 3,
+        "text": "AWS MCP server version incompatible with agent-generated code",
+        "id": "aws-mcp-server-version-incompatible-with-agent-generated-code"
+      },
+      {
+        "depth": 3,
+        "text": "Database agent schema conflicts with API Builder endpoints",
+        "id": "database-agent-schema-conflicts-with-api-builder-endpoints"
+      },
+      {
+        "depth": 3,
+        "text": "Missing AWS credentials prevent MCP server initialization",
+        "id": "missing-aws-credentials-prevent-mcp-server-initialization"
+      },
+      {
+        "depth": 3,
+        "text": "Collection items require different Node.js versions",
+        "id": "collection-items-require-different-nodejs-versions"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/collections/backend-development-suite.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/backend-development-suite.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

@@ -19,6 +19,7 @@ import type { DirectoryEntry } from "@/lib/content";
 import {
   compactCount,
   getCopyText,
+  getDistributionBadges,
   getPreviewLine,
 } from "@/lib/entry-presentation";
 import { cn } from "@/lib";
@@ -87,6 +88,10 @@ export function DirectoryEntryCard({
   const previewLine = useMemo(() => getPreviewLine(entry), [entry]);
   const cardDescription = useMemo(() => getCardDescription(entry), [entry]);
   const fullCopyText = useMemo(() => getCopyText(entry), [entry]);
+  const distributionBadges = useMemo(
+    () => getDistributionBadges(entry),
+    [entry],
+  );
   const repoHref = entry.repoUrl || entry.githubUrl;
   const isGitHubRepo = Boolean(repoHref && /github\.com/i.test(repoHref));
   const isGitHubSource = Boolean(
@@ -294,6 +299,18 @@ export function DirectoryEntryCard({
         <p className="directory-description max-w-3xl text-[13px] leading-6 text-muted-foreground">
           {cardDescription}
         </p>
+
+        <div className="flex flex-wrap gap-1.5">
+          {distributionBadges.map((badge) => (
+            <span
+              key={badge.label}
+              className="distribution-badge"
+              title={badge.title}
+            >
+              {badge.label}
+            </span>
+          ))}
+        </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <div className="directory-code-bar">

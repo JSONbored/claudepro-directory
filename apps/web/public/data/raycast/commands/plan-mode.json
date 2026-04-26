@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "commands:plan-mode",
+  "category": "commands",
+  "slug": "plan-mode",
+  "title": "Plan Mode & Extended Thinking for Claude Code",
+  "copyText": "/plan-mode [task] [depth]",
+  "detailMarkdown": "# Plan Mode & Extended Thinking for Claude Code\nActivate Claude's extended thinking mode with multi-level planning depth from 'think' to 'ultrathink' for comprehensive strategy creation before implementation\n**Category:** commands\n**Author:** JSONbored\n**Tags:** `plan-mode` `extended-thinking` `strategy` `architecture` `deep-reasoning` `ultrathink`\n\n## Install\n```bash\n/plan-mode [task] [depth]\n```\n\n## Usage\n/plan-mode [task] [depth]\n\n## Links\n- https://heyclau.de/commands/plan-mode\n- https://docs.claude.com/en/docs/claude-code/extended-thinking",
+  "webUrl": "https://heyclau.de/commands/plan-mode",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.claude.com/en/docs/claude-code/extended-thinking"
+}

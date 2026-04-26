@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "skills",
+    "slug": "browser-agent-workflow-automation",
+    "title": "Browser Agent Workflow Automation Skill",
+    "description": "Build robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.",
+    "seoTitle": "Browser Agent Workflow Automation Skill",
+    "seoDescription": "Reusable skill for AI browser automation with robust selectors, retries, validation checkpoints, and operational safety.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-10",
+    "tags": [
+      "browser-automation",
+      "ai-agents",
+      "playwright",
+      "workflows",
+      "reliability"
+    ],
+    "keywords": [
+      "ai-skill",
+      "browser-agent",
+      "selector-strategy",
+      "retries",
+      "automation-runbooks"
+    ],
+    "readingTime": 7,
+    "difficultyScore": 75,
+    "documentationUrl": "https://playwright.dev/docs/best-practices",
+    "cardDescription": "Design production-ready browser agent workflows with reliable selectors, guardrails, and replayable runbooks.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation",
+    "usageSnippet": "Use this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.",
+    "copySnippet": "# Trigger\n\"Apply browser agent workflow automation skill for this task.\"\n\n# Required output\n1) Step-by-step browser plan with checkpoints\n2) Selector strategy and fallback hierarchy\n3) Retry and timeout policy\n4) Safety boundaries for destructive actions",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "draft",
+    "verifiedAt": "2026-04-10",
+    "retrievalSources": [
+      "https://playwright.dev/docs/best-practices"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "OpenClaw",
+      "Cursor",
+      "Windsurf",
+      "Gemini"
+    ],
+    "prerequisites": [
+      "Target web workflow with clear start and success states",
+      "Ability to run browser automation in local or CI environment",
+      "Access to auth/session strategy if login is required"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/browser-agent-workflow-automation.zip",
+    "downloadTrust": "first-party",
+    "downloadSha256": "6aa6e8c44b99d7cf368236a7567453abefb91476ba74d431c992b409c5cfc8f3",
+    "body": "## Overview\n\nThis skill provides a practical framework for building browser-driven agent workflows that survive real-world UI variability. It prioritizes deterministic automation, explicit checkpoints, and safe failure handling instead of brittle click-recording scripts.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Clearly defined desired outcome and termination condition\n- Stable environment (staging/prod) with acceptable automation policy\n- Credential/session strategy for authenticated steps\n\n## Workflow Blueprint\n\n- Define start state and target success state\n- Use resilient selector hierarchy (semantic selectors first)\n- Add validation checkpoints between major steps\n- Use bounded retries with explicit failure reasons\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nApply browser agent workflow automation skill.\nDeliver:\n1) deterministic step plan,\n2) selector map,\n3) retry/timeout policy,\n4) failure recovery playbook.\n```\n\n### Execution Flow\n\n1. Map the workflow into atomic actions and checks.\n2. Choose reliable selectors and alternates.\n3. Add guardrails for destructive actions (confirmations/human gate).\n4. Instrument logs/screenshots for every failed checkpoint.\n5. Run repeatedly to validate stability before shipping.\n\n## Troubleshooting\n\n**Issue:** Flaky failures on dynamic pages  \n**Fix:** replace brittle selectors with role/label/text anchors and add readiness checks.\n\n**Issue:** Infinite retries hide root cause  \n**Fix:** cap retries and emit structured failure reasons after each attempt.\n\n**Issue:** Automation performs unsafe actions  \n**Fix:** require explicit confirmation gates for irreversible operations.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://playwright.dev/docs/best-practices\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "sections": [
+      {
+        "title": "Overview",
+        "id": "overview",
+        "markdown": "This skill provides a practical framework for building browser-driven agent workflows that survive real-world UI variability. It prioritizes deterministic automation, explicit checkpoints, and safe failure handling instead of brittle click-recording scripts.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Prerequisites",
+        "id": "prerequisites",
+        "markdown": "- Clearly defined desired outcome and termination condition\n- Stable environment (staging/prod) with acceptable automation policy\n- Credential/session strategy for authenticated steps",
+        "codeBlocks": []
+      },
+      {
+        "title": "Workflow Blueprint",
+        "id": "workflow-blueprint",
+        "markdown": "- Define start state and target success state\n- Use resilient selector hierarchy (semantic selectors first)\n- Add validation checkpoints between major steps\n- Use bounded retries with explicit failure reasons",
+        "codeBlocks": []
+      },
+      {
+        "title": "How to Use This Skill",
+        "id": "how-to-use-this-skill",
+        "markdown": "### Prompt Pattern\n\n```text\nApply browser agent workflow automation skill.\nDeliver:\n1) deterministic step plan,\n2) selector map,\n3) retry/timeout policy,\n4) failure recovery playbook.\n```\n\n### Execution Flow\n\n1. Map the workflow into atomic actions and checks.\n2. Choose reliable selectors and alternates.\n3. Add guardrails for destructive actions (confirmations/human gate).\n4. Instrument logs/screenshots for every failed checkpoint.\n5. Run repeatedly to validate stability before shipping.",
+        "codeBlocks": [
+          {
+            "language": "text",
+            "code": "Apply browser agent workflow automation skill.\nDeliver:\n1) deterministic step plan,\n2) selector map,\n3) retry/timeout policy,\n4) failure recovery playbook."
+          }
+        ]
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** Flaky failures on dynamic pages  \n**Fix:** replace brittle selectors with role/label/text anchors and add readiness checks.\n\n**Issue:** Infinite retries hide root cause  \n**Fix:** cap retries and emit structured failure reasons after each attempt.\n\n**Issue:** Automation performs unsafe actions  \n**Fix:** require explicit confirmation gates for irreversible operations.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "Treat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://playwright.dev/docs/best-practices",
+        "codeBlocks": []
+      },
+      {
+        "title": "Output Contract",
+        "id": "output-contract",
+        "markdown": "1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Quality Gates",
+        "id": "quality-gates",
+        "markdown": "- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Overview",
+        "id": "overview"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native",
+        "id": "native"
+      },
+      {
+        "depth": 3,
+        "text": "Manual Adaptation",
+        "id": "manual-adaptation"
+      },
+      {
+        "depth": 2,
+        "text": "Prerequisites",
+        "id": "prerequisites"
+      },
+      {
+        "depth": 2,
+        "text": "Workflow Blueprint",
+        "id": "workflow-blueprint"
+      },
+      {
+        "depth": 2,
+        "text": "How to Use This Skill",
+        "id": "how-to-use-this-skill"
+      },
+      {
+        "depth": 3,
+        "text": "Prompt Pattern",
+        "id": "prompt-pattern"
+      },
+      {
+        "depth": 3,
+        "text": "Execution Flow",
+        "id": "execution-flow"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Output Contract",
+        "id": "output-contract"
+      },
+      {
+        "depth": 2,
+        "text": "Quality Gates",
+        "id": "quality-gates"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "text",
+        "code": "Apply browser agent workflow automation skill.\nDeliver:\n1) deterministic step plan,\n2) selector map,\n3) retry/timeout policy,\n4) failure recovery playbook."
+      }
+    ],
+    "filePath": "content/skills/browser-agent-workflow-automation.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

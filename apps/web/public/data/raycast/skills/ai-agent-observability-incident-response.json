@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:ai-agent-observability-incident-response",
+  "category": "skills",
+  "slug": "ai-agent-observability-incident-response",
+  "title": "AI Agent Observability and Incident Response Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/ai-agent-observability-incident-response.zip -o ai-agent-observability-incident-response.zip && unzip -o ai-agent-observability-incident-response.zip -d ./ai-agent-observability-incident-response\n\nUsage:\nUse this skill to make agent failures diagnosable and tie alerts directly to remediation steps.\n\nAsset:\n# Trigger\n\"Apply AI agent observability and incident response skill to this stack.\"\n\n# Required output\n1) Telemetry schema (traces, metrics, logs, events)\n2) Core SLOs and alert thresholds\n3) Incident triage playbook\n4) Post-incident review template",
+  "detailMarkdown": "# AI Agent Observability and Incident Response Skill\nInstrument AI agent systems with high-signal telemetry and runbook-driven incident response for reliability and safety.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `observability` `incident-response` `reliability` `telemetry` `ai-agents`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/ai-agent-observability-incident-response.zip -o ai-agent-observability-incident-response.zip && unzip -o ai-agent-observability-incident-response.zip -d ./ai-agent-observability-incident-response\n```\n\n## Usage\nUse this skill to make agent failures diagnosable and tie alerts directly to remediation steps.\n\n## Links\n- https://heyclau.de/skills/ai-agent-observability-incident-response\n- https://opentelemetry.io/docs/",
+  "webUrl": "https://heyclau.de/skills/ai-agent-observability-incident-response",
+  "repoUrl": "",
+  "documentationUrl": "https://opentelemetry.io/docs/"
+}

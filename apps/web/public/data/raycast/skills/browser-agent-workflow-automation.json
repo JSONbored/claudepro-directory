@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:browser-agent-workflow-automation",
+  "category": "skills",
+  "slug": "browser-agent-workflow-automation",
+  "title": "Browser Agent Workflow Automation Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation\n\nUsage:\nUse this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.\n\nAsset:\n# Trigger\n\"Apply browser agent workflow automation skill for this task.\"\n\n# Required output\n1) Step-by-step browser plan with checkpoints\n2) Selector strategy and fallback hierarchy\n3) Retry and timeout policy\n4) Safety boundaries for destructive actions",
+  "detailMarkdown": "# Browser Agent Workflow Automation Skill\nBuild robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `browser-automation` `ai-agents` `playwright` `workflows` `reliability`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation\n```\n\n## Usage\nUse this skill for repeatable browser-driven tasks like QA checks, data collection, and operational runbooks.\n\n## Links\n- https://heyclau.de/skills/browser-agent-workflow-automation\n- https://playwright.dev/docs/best-practices",
+  "webUrl": "https://heyclau.de/skills/browser-agent-workflow-automation",
+  "repoUrl": "",
+  "documentationUrl": "https://playwright.dev/docs/best-practices"
+}

@@ -1,0 +1,316 @@
+{
+  "schemaVersion": 1,
+  "entry": {
+    "category": "mcp",
+    "slug": "docker-mcp-server",
+    "title": "Docker MCP Server for Claude",
+    "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+    "seoTitle": "Docker MCP Server for Claude",
+    "seoDescription": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration Discover tools for AI development.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2025-09-16",
+    "tags": [
+      "docker",
+      "containers",
+      "devops",
+      "orchestration",
+      "deployment"
+    ],
+    "keywords": [
+      "claude",
+      "containers",
+      "deployment",
+      "development",
+      "devops",
+      "docker",
+      "mcp",
+      "mcp servers",
+      "orchestration",
+      "server",
+      "tools"
+    ],
+    "readingTime": 1,
+    "difficultyScore": 5,
+    "documentationUrl": "https://docs.docker.com/engine/api/",
+    "cardDescription": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+    "installable": true,
+    "installCommand": "claude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
+    "usageSnippet": "claude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
+    "copySnippet": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "configSnippet": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+    "estimatedSetupTime": "2 minutes",
+    "difficulty": "beginner",
+    "prerequisites": [
+      "Docker installed and running (Docker Desktop for Mac/Windows, Docker Engine for Linux)",
+      "Docker daemon accessible (via Unix socket /var/run/docker.sock or TCP connection)",
+      "User permissions to access Docker daemon socket (user in docker group on Linux: sudo usermod -aG docker $USER)",
+      "Node.js and npm/npx available for running the @docker/mcp-server package",
+      "Internet connection for pulling images from Docker registries (Docker Hub, private registries)",
+      "Claude Desktop 0.7.0+ or Claude Code with MCP support",
+      "Understanding of Docker concepts (containers, images, volumes, networks, Docker Compose)",
+      "Docker API version awareness (default 1.43, configurable via DOCKER_API_VERSION environment variable)",
+      "Registry authentication (for private registries - run docker login to authenticate)",
+      "Understanding of Docker socket security (Unix socket permissions, TLS for remote connections)"
+    ],
+    "hasPrerequisites": false,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/mcp/docker-mcp-server.mcpb",
+    "downloadTrust": "first-party",
+    "downloadSha256": "b426e4d04a6da772ba591f1326d26e4da80e4903e9095ef1d822178889e82b5e",
+    "body": "## Content\n\nEnable your AI assistants to seamlessly interact with Docker environments through comprehensive container lifecycle management, image operations, and Docker Compose orchestration. Automate deployment workflows, monitor container performance, and manage Docker registries directly through natural language commands.\n\n## Features\n\n- Container lifecycle management (start, stop, restart)\n- Image operations (pull, build, push, tag)\n- Docker Compose service management\n- Volume and network administration\n- Real-time container logs and monitoring\n- Registry operations and authentication\n- Advanced Docker container and image management with orchestration support, volume management, and network configuration\n- Batch operations support for efficient bulk container operations, image builds, and deployment workflows with automatic retry logic\n\n## Use Cases\n\n- Deploy and manage containerized applications\n- Build and optimize Docker images\n- Monitor container performance and logs\n- Orchestrate multi-container applications with Compose\n- Manage Docker registry operations\n- Build automated container deployment workflows that sync external systems with Docker for real-time infrastructure management and scaling\n\n## Installation\n\n### Claude Code\n\n1. claude mcp add docker -- npx -y @docker/mcp-server\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status docker\n\n### Claude Desktop\n\n1. Ensure Docker is installed and running on your system\n2. Open Claude Desktop configuration file\n3. Add the Docker MCP server configuration\n4. Restart Claude Desktop\n5. Verify Docker socket access permissions\n\n## Requirements\n\n- Docker installed and running (Docker Desktop for Mac/Windows, Docker Engine for Linux)\n- Docker daemon accessible (via Unix socket /var/run/docker.sock or TCP connection)\n- User permissions to access Docker daemon socket (user in docker group on Linux: sudo usermod -aG docker $USER)\n- Node.js and npm/npx available for running the @docker/mcp-server package\n- Internet connection for pulling images from Docker registries (Docker Hub, private registries)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Docker concepts (containers, images, volumes, networks, Docker Compose)\n- Docker API version awareness (default 1.43, configurable via DOCKER_API_VERSION environment variable)\n- Registry authentication (for private registries - run docker login to authenticate)\n- Understanding of Docker socket security (Unix socket permissions, TLS for remote connections)\n\n## Configuration\n\n```json\n{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Examples\n### List all running containers and their status\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"List all running containers and their status\"\n```\n### Build a Docker image from a Dockerfile\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Build a Docker image from a Dockerfile\"\n```\n### Start a new container with custom configuration\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Start a new container with custom configuration\"\n```\n### View real-time logs from a specific container\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"View real-time logs from a specific container\"\n```\n### Deploy a multi-service application using Docker Co...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a multi-service application using Docker Compose\"\n```\n### Run Container with Environment Variables\nCreate and start a Docker container with environment variables, port mapping, and volume mounts\n```typescript\n// Run Docker container with environment variables\nconst container = await docker.containers.create({\n  image: \"node:18\",\n  env: [\"NODE_ENV=production\", \"PORT=3000\"],\n  ports: [{ host: 8080, container: 3000 }],\n  volumes: [{ host: \"./data\", container: \"/app/data\" }]\n});\nawait container.start();\n```\n\n## Security\n\n- Secure Docker daemon socket access\n- TLS certificate validation for remote connections\n- Registry authentication management\n- Container resource limits and isolation\n- Network security controls\n- Docker socket access grants full system control - ensure Docker socket permissions are restricted and only accessible to trusted processes\n- Docker API credentials and TLS certificates must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Docker container IDs and image names may expose infrastructure architecture and deployment patterns - ensure Docker resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Docker MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Docker webhook configurations and payloads may contain sensitive container and image metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption\n\n## Troubleshooting\n### Permission denied connecting to Docker daemon socket\n\nAdd your user to docker group: sudo usermod -a -G docker $USER, then log out and back in. Alternatively, run sudo systemctl start docker to ensure daemon is running.\n### Cannot connect to Docker daemon - connection refused\n\nStart Docker daemon: sudo systemctl start docker (Linux) or launch Docker Desktop (Mac/Windows). Verify daemon is running: docker ps. Check DOCKER_HOST environment variable points to correct socket.\n### Error: /var/run/docker.sock has wrong permissions\n\nRun sudo chmod 666 /var/run/docker.sock (temporary fix) or add user to docker group (permanent). Verify socket file exists: ls -l /var/run/docker.sock.\n### Docker API version mismatch error\n\nSet DOCKER_API_VERSION environment variable to match your Docker version. Run docker version to check API version. Update MCP server config with correct API version (e.g., 1.43).\n### Container operations fail with authentication errors\n\nRun docker login to authenticate with registry. Verify registry credentials are correct. For private registries, ensure network access and check firewall rules don't block Docker registry ports.\n### Docker MCP server authentication errors with Docker API\n\nVerify Docker API credentials are valid. Check TLS certificate configuration for remote Docker daemon. Ensure Docker socket permissions allow access. For remote connections, verify network connectivity and firewall settings.\n### Docker container creation or start failures\n\nCheck container resource limits (CPU, memory). Verify image exists and is accessible. Ensure port mappings do not conflict. Check Docker daemon logs for detailed error messages. Verify disk space is available.\n### Docker MCP server connection timeouts or network errors\n\nCheck network connectivity to Docker daemon. Verify Docker socket is accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+    "sections": [
+      {
+        "title": "Content",
+        "id": "content",
+        "markdown": "Enable your AI assistants to seamlessly interact with Docker environments through comprehensive container lifecycle management, image operations, and Docker Compose orchestration. Automate deployment workflows, monitor container performance, and manage Docker registries directly through natural language commands.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Features",
+        "id": "features",
+        "markdown": "- Container lifecycle management (start, stop, restart)\n- Image operations (pull, build, push, tag)\n- Docker Compose service management\n- Volume and network administration\n- Real-time container logs and monitoring\n- Registry operations and authentication\n- Advanced Docker container and image management with orchestration support, volume management, and network configuration\n- Batch operations support for efficient bulk container operations, image builds, and deployment workflows with automatic retry logic",
+        "codeBlocks": []
+      },
+      {
+        "title": "Use Cases",
+        "id": "use-cases",
+        "markdown": "- Deploy and manage containerized applications\n- Build and optimize Docker images\n- Monitor container performance and logs\n- Orchestrate multi-container applications with Compose\n- Manage Docker registry operations\n- Build automated container deployment workflows that sync external systems with Docker for real-time infrastructure management and scaling",
+        "codeBlocks": []
+      },
+      {
+        "title": "Installation",
+        "id": "installation",
+        "markdown": "### Claude Code\n\n1. claude mcp add docker -- npx -y @docker/mcp-server\n2. Verify installation: claude mcp list\n3. Test connection: claude mcp status docker\n\n### Claude Desktop\n\n1. Ensure Docker is installed and running on your system\n2. Open Claude Desktop configuration file\n3. Add the Docker MCP server configuration\n4. Restart Claude Desktop\n5. Verify Docker socket access permissions",
+        "codeBlocks": []
+      },
+      {
+        "title": "Requirements",
+        "id": "requirements",
+        "markdown": "- Docker installed and running (Docker Desktop for Mac/Windows, Docker Engine for Linux)\n- Docker daemon accessible (via Unix socket /var/run/docker.sock or TCP connection)\n- User permissions to access Docker daemon socket (user in docker group on Linux: sudo usermod -aG docker $USER)\n- Node.js and npm/npx available for running the @docker/mcp-server package\n- Internet connection for pulling images from Docker registries (Docker Hub, private registries)\n- Claude Desktop 0.7.0+ or Claude Code with MCP support\n- Understanding of Docker concepts (containers, images, volumes, networks, Docker Compose)\n- Docker API version awareness (default 1.43, configurable via DOCKER_API_VERSION environment variable)\n- Registry authentication (for private registries - run docker login to authenticate)\n- Understanding of Docker socket security (Unix socket permissions, TLS for remote connections)",
+        "codeBlocks": []
+      },
+      {
+        "title": "Configuration",
+        "id": "configuration",
+        "markdown": "```json\n{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```",
+        "codeBlocks": [
+          {
+            "language": "json",
+            "code": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+          }
+        ]
+      },
+      {
+        "title": "Examples",
+        "id": "examples",
+        "markdown": "### List all running containers and their status\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"List all running containers and their status\"\n```\n### Build a Docker image from a Dockerfile\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Build a Docker image from a Dockerfile\"\n```\n### Start a new container with custom configuration\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Start a new container with custom configuration\"\n```\n### View real-time logs from a specific container\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"View real-time logs from a specific container\"\n```\n### Deploy a multi-service application using Docker Co...\nCommon usage pattern for this MCP server\n```plaintext\nAsk Claude: \"Deploy a multi-service application using Docker Compose\"\n```\n### Run Container with Environment Variables\nCreate and start a Docker container with environment variables, port mapping, and volume mounts\n```typescript\n// Run Docker container with environment variables\nconst container = await docker.containers.create({\n  image: \"node:18\",\n  env: [\"NODE_ENV=production\", \"PORT=3000\"],\n  ports: [{ host: 8080, container: 3000 }],\n  volumes: [{ host: \"./data\", container: \"/app/data\" }]\n});\nawait container.start();\n```",
+        "codeBlocks": [
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"List all running containers and their status\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Build a Docker image from a Dockerfile\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Start a new container with custom configuration\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"View real-time logs from a specific container\""
+          },
+          {
+            "language": "plaintext",
+            "code": "Ask Claude: \"Deploy a multi-service application using Docker Compose\""
+          },
+          {
+            "language": "typescript",
+            "code": "// Run Docker container with environment variables\nconst container = await docker.containers.create({\n  image: \"node:18\",\n  env: [\"NODE_ENV=production\", \"PORT=3000\"],\n  ports: [{ host: 8080, container: 3000 }],\n  volumes: [{ host: \"./data\", container: \"/app/data\" }]\n});\nawait container.start();"
+          }
+        ]
+      },
+      {
+        "title": "Security",
+        "id": "security",
+        "markdown": "- Secure Docker daemon socket access\n- TLS certificate validation for remote connections\n- Registry authentication management\n- Container resource limits and isolation\n- Network security controls\n- Docker socket access grants full system control - ensure Docker socket permissions are restricted and only accessible to trusted processes\n- Docker API credentials and TLS certificates must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management\n- Docker container IDs and image names may expose infrastructure architecture and deployment patterns - ensure Docker resource identifiers are kept private and not shared in public configurations\n- Rate limiting and API quota management are critical for Docker MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption\n- Docker webhook configurations and payloads may contain sensitive container and image metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "### Permission denied connecting to Docker daemon socket\n\nAdd your user to docker group: sudo usermod -a -G docker $USER, then log out and back in. Alternatively, run sudo systemctl start docker to ensure daemon is running.\n### Cannot connect to Docker daemon - connection refused\n\nStart Docker daemon: sudo systemctl start docker (Linux) or launch Docker Desktop (Mac/Windows). Verify daemon is running: docker ps. Check DOCKER_HOST environment variable points to correct socket.\n### Error: /var/run/docker.sock has wrong permissions\n\nRun sudo chmod 666 /var/run/docker.sock (temporary fix) or add user to docker group (permanent). Verify socket file exists: ls -l /var/run/docker.sock.\n### Docker API version mismatch error\n\nSet DOCKER_API_VERSION environment variable to match your Docker version. Run docker version to check API version. Update MCP server config with correct API version (e.g., 1.43).\n### Container operations fail with authentication errors\n\nRun docker login to authenticate with registry. Verify registry credentials are correct. For private registries, ensure network access and check firewall rules don't block Docker registry ports.\n### Docker MCP server authentication errors with Docker API\n\nVerify Docker API credentials are valid. Check TLS certificate configuration for remote Docker daemon. Ensure Docker socket permissions allow access. For remote connections, verify network connectivity and firewall settings.\n### Docker container creation or start failures\n\nCheck container resource limits (CPU, memory). Verify image exists and is accessible. Ensure port mappings do not conflict. Check Docker daemon logs for detailed error messages. Verify disk space is available.\n### Docker MCP server connection timeouts or network errors\n\nCheck network connectivity to Docker daemon. Verify Docker socket is accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Content",
+        "id": "content"
+      },
+      {
+        "depth": 2,
+        "text": "Features",
+        "id": "features"
+      },
+      {
+        "depth": 2,
+        "text": "Use Cases",
+        "id": "use-cases"
+      },
+      {
+        "depth": 2,
+        "text": "Installation",
+        "id": "installation"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Code",
+        "id": "claude-code"
+      },
+      {
+        "depth": 3,
+        "text": "Claude Desktop",
+        "id": "claude-desktop"
+      },
+      {
+        "depth": 2,
+        "text": "Requirements",
+        "id": "requirements"
+      },
+      {
+        "depth": 2,
+        "text": "Configuration",
+        "id": "configuration"
+      },
+      {
+        "depth": 2,
+        "text": "Examples",
+        "id": "examples"
+      },
+      {
+        "depth": 3,
+        "text": "List all running containers and their status",
+        "id": "list-all-running-containers-and-their-status"
+      },
+      {
+        "depth": 3,
+        "text": "Build a Docker image from a Dockerfile",
+        "id": "build-a-docker-image-from-a-dockerfile"
+      },
+      {
+        "depth": 3,
+        "text": "Start a new container with custom configuration",
+        "id": "start-a-new-container-with-custom-configuration"
+      },
+      {
+        "depth": 3,
+        "text": "View real-time logs from a specific container",
+        "id": "view-real-time-logs-from-a-specific-container"
+      },
+      {
+        "depth": 3,
+        "text": "Deploy a multi-service application using Docker Co...",
+        "id": "deploy-a-multi-service-application-using-docker-co"
+      },
+      {
+        "depth": 3,
+        "text": "Run Container with Environment Variables",
+        "id": "run-container-with-environment-variables"
+      },
+      {
+        "depth": 2,
+        "text": "Security",
+        "id": "security"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      },
+      {
+        "depth": 3,
+        "text": "Permission denied connecting to Docker daemon socket",
+        "id": "permission-denied-connecting-to-docker-daemon-socket"
+      },
+      {
+        "depth": 3,
+        "text": "Cannot connect to Docker daemon - connection refused",
+        "id": "cannot-connect-to-docker-daemon---connection-refused"
+      },
+      {
+        "depth": 3,
+        "text": "Error: /var/run/docker.sock has wrong permissions",
+        "id": "error-varrundockersock-has-wrong-permissions"
+      },
+      {
+        "depth": 3,
+        "text": "Docker API version mismatch error",
+        "id": "docker-api-version-mismatch-error"
+      },
+      {
+        "depth": 3,
+        "text": "Container operations fail with authentication errors",
+        "id": "container-operations-fail-with-authentication-errors"
+      },
+      {
+        "depth": 3,
+        "text": "Docker MCP server authentication errors with Docker API",
+        "id": "docker-mcp-server-authentication-errors-with-docker-api"
+      },
+      {
+        "depth": 3,
+        "text": "Docker container creation or start failures",
+        "id": "docker-container-creation-or-start-failures"
+      },
+      {
+        "depth": 3,
+        "text": "Docker MCP server connection timeouts or network errors",
+        "id": "docker-mcp-server-connection-timeouts-or-network-errors"
+      }
+    ],
+    "codeBlocks": [
+      {
+        "language": "json",
+        "code": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}"
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"List all running containers and their status\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Build a Docker image from a Dockerfile\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Start a new container with custom configuration\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"View real-time logs from a specific container\""
+      },
+      {
+        "language": "plaintext",
+        "code": "Ask Claude: \"Deploy a multi-service application using Docker Compose\""
+      },
+      {
+        "language": "typescript",
+        "code": "// Run Docker container with environment variables\nconst container = await docker.containers.create({\n  image: \"node:18\",\n  env: [\"NODE_ENV=production\", \"PORT=3000\"],\n  ports: [{ host: 8080, container: 3000 }],\n  volumes: [{ host: \"./data\", container: \"/app/data\" }]\n});\nawait container.start();"
+      }
+    ],
+    "filePath": "content/mcp/docker-mcp-server.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

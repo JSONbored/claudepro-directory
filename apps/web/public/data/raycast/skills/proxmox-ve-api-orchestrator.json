@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:proxmox-ve-api-orchestrator",
+  "category": "skills",
+  "slug": "proxmox-ve-api-orchestrator",
+  "title": "Proxmox VE API Orchestrator Skill",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator\n\nUsage:\nUse this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.\n\nAsset:\n# Trigger\n\"Run the Proxmox VE API orchestrator skill for this infrastructure request.\"\n\n# Required output\n1) Pre-flight checks (capacity, node health, locks)\n2) Operation sequence with dependencies\n3) Failure and rollback handling\n4) Post-operation verification report",
+  "detailMarkdown": "# Proxmox VE API Orchestrator Skill\nOrchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.\n**Category:** skills\n**Author:** JSONbored\n**Verification:** draft\n**Download trust:** first-party\n**Tags:** `proxmox` `virtualization` `infrastructure` `api` `homelab`\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator\n```\n\n## Usage\nUse this skill to execute Proxmox infrastructure automations with predictable state transitions and reduced operational risk.\n\n## Links\n- https://heyclau.de/skills/proxmox-ve-api-orchestrator\n- https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
+  "webUrl": "https://heyclau.de/skills/proxmox-ve-api-orchestrator",
+  "repoUrl": "",
+  "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
+}
