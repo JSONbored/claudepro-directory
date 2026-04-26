@@ -3031,7 +3031,12 @@
         "python",
         "custom-servers"
       ],
-      "keywords": [],
+      "keywords": [
+        "build mcp server",
+        "claude mcp tutorial",
+        "model context protocol",
+        "mcp development"
+      ],
       "readingTime": 7,
       "difficultyScore": 87,
       "cardDescription": "Master MCP server development from scratch.",
@@ -3400,7 +3405,12 @@
         "migration",
         "api"
       ],
-      "keywords": [],
+      "keywords": [
+        "chatgpt to claude",
+        "claude migration",
+        "ai assistant migration",
+        "prompt migration"
+      ],
       "readingTime": 3,
       "difficultyScore": 64,
       "cardDescription": "Switch from ChatGPT to Claude in 30 minutes.",
@@ -3493,7 +3503,12 @@
         "api-implementation",
         "production-ready"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude extended thinking",
+        "claude 4 tutorial",
+        "reasoning prompts",
+        "advanced claude workflows"
+      ],
       "readingTime": 4,
       "difficultyScore": 52,
       "cardDescription": "Implement Claude 4 Extended Thinking API in 25 minutes.",
@@ -3530,7 +3545,12 @@
         "agent-development",
         "multi-agent"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude agent framework",
+        "agent development",
+        "claude code agents",
+        "ai agent workflow"
+      ],
       "readingTime": 4,
       "difficultyScore": 39,
       "cardDescription": "Build Claude autonomous agents with 90.2% better performance.",
@@ -3568,7 +3588,12 @@
         "documentation",
         "hipaa"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude healthcare",
+        "hipaa ai workflows",
+        "healthcare automation",
+        "compliant claude usage"
+      ],
       "readingTime": 5,
       "difficultyScore": 73,
       "cardDescription": "Deploy HIPAA-compliant Claude AI for 10-35x faster healthcare documentation.",
@@ -3672,7 +3697,12 @@
         "advanced",
         "automation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude multi directory",
+        "multi project claude setup",
+        "claude workspace setup",
+        "repository workflow"
+      ],
       "readingTime": 5,
       "difficultyScore": 87,
       "cardDescription": "Master Claude Code multi-directory enterprise workflow.",
@@ -3709,7 +3739,12 @@
         "developer tools",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs cursor",
+        "claude vs codeium",
+        "ai ide comparison",
+        "coding assistant tools"
+      ],
       "readingTime": 3,
       "difficultyScore": 18,
       "cardDescription": "Compare Claude Code vs Cursor vs Codeium AI coding assistants.",
@@ -3746,7 +3781,12 @@
         "wsl",
         "windows"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude wsl setup",
+        "windows claude code",
+        "wsl developer setup",
+        "claude windows workflow"
+      ],
       "readingTime": 3,
       "difficultyScore": 60,
       "cardDescription": "Complete Claude Code WSL2 installation tutorial in 30 minutes.",
@@ -3855,7 +3895,12 @@
         "enterprise",
         "advanced"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude financial services",
+        "ai finance workflows",
+        "financial services automation",
+        "compliant ai workflows"
+      ],
       "readingTime": 3,
       "difficultyScore": 15,
       "cardDescription": "Transform financial operations with Claude.",
@@ -3948,7 +3993,12 @@
         "setup",
         "integration"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude mcp setup",
+        "mcp server setup",
+        "claude desktop mcp",
+        "model context protocol setup"
+      ],
       "readingTime": 3,
       "difficultyScore": 55,
       "cardDescription": "Master MCP server installation and configuration for Claude Desktop.",
@@ -4038,7 +4088,12 @@
         "automation",
         "advanced"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude automation",
+        "business process automation",
+        "ai workflow automation",
+        "operations automation"
+      ],
       "readingTime": 6,
       "difficultyScore": 32,
       "cardDescription": "Deploy Claude AI agents for enterprise business process automation.",
@@ -4075,7 +4130,12 @@
         "rate-limits",
         "429-errors"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude rate limits",
+        "fix claude rate limit",
+        "claude usage limits",
+        "claude api throttling"
+      ],
       "readingTime": 4,
       "difficultyScore": 57,
       "cardDescription": "Fix Claude 429 errors and usage limits with proven solutions reducing token consumption by 70%.",
@@ -4112,7 +4172,12 @@
         "aws",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs gemini",
+        "claude vs codewhisperer",
+        "ai coding assistant comparison",
+        "claude code comparison"
+      ],
       "readingTime": 4,
       "difficultyScore": 16,
       "cardDescription": "Compare Claude vs Amazon Q Developer vs Gemini Code for AWS cloud development.",
@@ -4149,7 +4214,12 @@
         "coding-assistants",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs copilot",
+        "python coding assistant",
+        "claude python development",
+        "github copilot alternative"
+      ],
       "readingTime": 3,
       "difficultyScore": 16,
       "cardDescription": "Claude vs GitHub Copilot vs ChatGPT for Python development.",
@@ -5394,7 +5464,12 @@
         "enterprise",
         "automation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude migration workflow",
+        "chatgpt to claude",
+        "enterprise ai migration",
+        "ai platform migration"
+      ],
       "readingTime": 3,
       "difficultyScore": 15,
       "cardDescription": "Complete migration workflow from ChatGPT, Gemini, and Copilot to Claude 4.",
@@ -5619,6 +5694,8 @@
       "slug": "contrastapi-mcp-server",
       "title": "ContrastAPI Security Tools",
       "description": "31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.",
+      "seoTitle": "ContrastAPI MCP Server for Claude Security Research",
+      "seoDescription": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
       "author": "UPinar",
       "dateAdded": "2026-04-20",
       "tags": [
@@ -5630,7 +5707,13 @@
         "domain-audit",
         "dependency-scanner"
       ],
-      "keywords": [],
+      "keywords": [
+        "contrastapi mcp",
+        "claude security mcp",
+        "cve lookup",
+        "threat intelligence",
+        "dependency scanner"
+      ],
       "documentationUrl": "https://api.contrastcyber.com",
       "cardDescription": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",
       "installable": true,
@@ -8315,7 +8398,12 @@
         "debugging",
         "security"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude environment variables",
+        "fix env vars",
+        "mcp environment setup",
+        "api key configuration"
+      ],
       "readingTime": 4,
       "difficultyScore": 100,
       "cardDescription": "Debug Claude Code authentication failures, OAuth errors, and API key configuration issues with platform-specific solutions and automated...",
@@ -8352,7 +8440,12 @@
         "installation",
         "troubleshooting"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude installation errors",
+        "fix claude setup",
+        "mcp install troubleshooting",
+        "claude code install"
+      ],
       "readingTime": 3,
       "difficultyScore": 39,
       "cardDescription": "Install Claude Code correctly in 15-25 minutes.",
@@ -8391,7 +8484,12 @@
         "debugging",
         "context-window"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude performance troubleshooting",
+        "memory leak fix",
+        "mcp performance",
+        "ai workflow performance"
+      ],
       "readingTime": 4,
       "difficultyScore": 67,
       "cardDescription": "Fix Claude Code memory leaks consuming 120GB RAM and performance issues.",
@@ -8428,7 +8526,12 @@
         "connection-errors",
         "solutions"
       ],
-      "keywords": [],
+      "keywords": [
+        "mcp connection errors",
+        "fix mcp server",
+        "claude mcp troubleshooting",
+        "model context protocol errors"
+      ],
       "readingTime": 2,
       "difficultyScore": 12,
       "cardDescription": "Resolve Claude Desktop MCP server connection errors fast.",
@@ -9693,10 +9796,10 @@
     {
       "category": "mcp",
       "slug": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access Claude Pro Directory via MCP",
-      "description": "Access the complete Claude Pro Directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.",
-      "seoTitle": "HeyClaude MCP Server - Access Claude Pro Directory via MCP",
-      "seoDescription": "Access the complete Claude Pro Directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly fro...",
+      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.",
+      "seoTitle": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "seoDescription": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly fro...",
       "author": "HeyClaude Team",
       "authorProfileUrl": "https://heyclau.de",
       "dateAdded": "2025-11-25",
@@ -9729,7 +9832,7 @@
       "readingTime": 1,
       "difficultyScore": 1,
       "documentationUrl": "https://heyclau.de/mcp/heyclaude-mcp",
-      "cardDescription": "Access the complete Claude Pro Directory through HeyClaude's official MCP server.",
+      "cardDescription": "Access the complete HeyClaude directory through HeyClaude's official MCP server.",
       "installable": true,
       "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
       "usageSnippet": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
@@ -14723,6 +14826,8 @@
       "slug": "prompt-to-asset",
       "title": "Prompt-to-asset",
       "description": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+      "seoTitle": "Prompt-to-asset MCP Server for Claude Visual Assets",
+      "seoDescription": "Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.",
       "author": "MohamedAbdallah-14",
       "dateAdded": "2026-04-25",
       "tags": [
@@ -14734,7 +14839,13 @@
         "favicons",
         "og-images"
       ],
-      "keywords": [],
+      "keywords": [
+        "prompt to asset mcp",
+        "claude image generation",
+        "app icon generator",
+        "og image generator",
+        "design tools mcp"
+      ],
       "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
       "cardDescription": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",
       "installable": true,

@@ -3,6 +3,7 @@
   "categoryOrder": [
     "agents",
     "mcp",
+    "tools",
     "skills",
     "rules",
     "commands",
@@ -51,6 +52,12 @@
     "mcp-servers": "mcp",
     "mcp-server-submission": "mcp",
     "mcp-server-content": "mcp",
+    "tool": "tools",
+    "tools": "tools",
+    "app": "tools",
+    "apps": "tools",
+    "service": "tools",
+    "services": "tools",
     "skill": "skills",
     "skills": "skills",
     "hook": "hooks",
@@ -99,6 +106,25 @@
         "Run the install command from a trusted source.",
         "Copy the Claude config into your MCP configuration.",
         "Restart Claude Code and verify the server responds."
+      ]
+    },
+    "tools": {
+      "label": "Tools",
+      "description": "Apps, developer tools, services, and products for Claude-native builders.",
+      "usageHint": "Use this surface for vetted apps and services. Sponsored and affiliate relationships must be disclosed.",
+      "template": "",
+      "contentRequired": ["title", "slug", "description", "cardDescription", "websiteUrl"],
+      "contentRecommended": ["pricingModel", "documentationUrl", "repoUrl", "disclosure"],
+      "submissionRequired": [],
+      "requiresUsageSnippet": false,
+      "requiresAssetContent": false,
+      "supportsSkillMetadata": false,
+      "supportsDownloadUrl": false,
+      "commercialSubmission": true,
+      "quickstart": [
+        "Open the website and verify the product matches your use case.",
+        "Review pricing, source links, and any sponsorship disclosure.",
+        "Submit corrections or request a listing through the tools intake form."
       ]
     },
     "skills": {

@@ -40,11 +40,6 @@ const generatedCategorySpecFile = path.join(
   generatedDir,
   "content-category-spec.json",
 );
-const legacyVoteSeedFile = path.join(contentRoot, "data/legacy-vote-seed.json");
-const generatedLegacyVoteSeedFile = path.join(
-  generatedDir,
-  "legacy-vote-seed.json",
-);
 const skillsDownloadsDir = path.join(
   repoRoot,
   "apps/web/public/downloads/skills",
@@ -321,6 +316,13 @@ async function main() {
         documentationUrl: data.documentationUrl
           ? String(data.documentationUrl)
           : undefined,
+        websiteUrl: data.websiteUrl ? String(data.websiteUrl) : undefined,
+        pricingModel: data.pricingModel ? String(data.pricingModel) : undefined,
+        disclosure: data.disclosure ? String(data.disclosure) : undefined,
+        applicationCategory: data.applicationCategory
+          ? String(data.applicationCategory)
+          : undefined,
+        operatingSystem: data.operatingSystem ? String(data.operatingSystem) : undefined,
         cardDescription: inferred.cardDescription || undefined,
         installable: inferred.installable,
         installCommand: inferred.installCommand || undefined,
@@ -498,20 +500,6 @@ async function main() {
     `${JSON.stringify(categorySpec, null, 2)}\n`,
   );
 
-  const rawLegacySeed = fs.existsSync(legacyVoteSeedFile)
-    ? JSON.parse(fs.readFileSync(legacyVoteSeedFile, "utf8"))
-    : { votes: {} };
-  const votes =
-    rawLegacySeed &&
-    typeof rawLegacySeed === "object" &&
-    typeof rawLegacySeed.votes === "object"
-      ? rawLegacySeed.votes
-      : {};
-  const wroteLegacySeed = writeFileIfChanged(
-    generatedLegacyVoteSeedFile,
-    `${JSON.stringify(votes, null, 2)}\n`,
-  );
-
   console.log(
     `${wroteContentIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, outputFile)}`,
   );
@@ -538,9 +526,6 @@ async function main() {
   );
   console.log(
     `${wroteCategorySpec ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedCategorySpecFile)}`,
-  );
-  console.log(
-    `${wroteLegacySeed ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, generatedLegacyVoteSeedFile)}`,
   );
 }
 

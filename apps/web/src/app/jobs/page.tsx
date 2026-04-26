@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 
+import { JsonLd } from "@/components/json-ld";
 import { JobsDirectory } from "@/components/jobs-directory";
 import { getJobs } from "@/lib/jobs";
 import { buildPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@heyclaude/registry/seo";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = buildPageMetadata({
@@ -15,22 +18,40 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function JobsPage() {
   const jobs = await getJobs();
+  const realJobs = jobs.filter((job) => !job.isPlaceholder);
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      { name: "Jobs", url: `${siteConfig.url}/jobs` },
+    ]),
+    buildItemListJsonLd(
+      realJobs.map((job) => ({
+        name: `${job.title} at ${job.company}`,
+        url: `${siteConfig.url}/jobs/${job.slug}`,
+      })),
+      {
+        name: "HeyClaude jobs",
+        description: "Hiring roles for teams building with Claude and AI-native workflows.",
+      },
+    ),
+  ];
 
   return (
     <div className="container-shell space-y-8 py-12">
+      <JsonLd data={jsonLd} />
       <div className="space-y-4 border-b border-border/80 pb-8">
         <span className="eyebrow">Jobs</span>
-        <h1 className="section-title">Jobs for people building with Claude.</h1>
+        <h1 className="section-title">Hiring roles for Claude builders.</h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
-          Featured roles, sponsorship placements, and opportunities for teams
-          shipping Claude-native products, agents, and MCP infrastructure.
+          Real hiring opportunities for teams shipping Claude-native products,
+          agents, MCP infrastructure, and AI workflow systems.
         </p>
         <div className="flex flex-wrap gap-2">
           <a
             href="/jobs/post?tier=sponsored"
             className="inline-flex items-center rounded-full border border-primary/40 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
           >
-            Post sponsored placement
+            Post sponsored hiring slot
           </a>
           <a
             href="/jobs/post?tier=featured"

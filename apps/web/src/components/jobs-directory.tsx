@@ -52,7 +52,9 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
         />
       </div>
 
-      <div className="text-sm text-muted-foreground">{sortedJobs.length} jobs found</div>
+      <div className="text-sm text-muted-foreground">
+        {sortedJobs.length} hiring {sortedJobs.length === 1 ? "listing" : "listings"} found
+      </div>
 
       <div className="space-y-4">
         {sortedJobs.map((job) => (
@@ -77,7 +79,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                     }
                   >
                     {job.isPlaceholder
-                      ? "Available"
+                      ? "Hiring slot"
                       : job.sponsored
                         ? "Sponsored"
                         : job.featured
@@ -115,7 +117,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   rel={job.applyUrl.startsWith("http") ? "noreferrer" : undefined}
                 >
                   <ArrowUpRight className="size-3.5" />
-                  Apply
+                  {job.isPlaceholder ? "Post role" : "Apply"}
                 </a>
               </div>
             </div>

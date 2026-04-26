@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 
 import { BrowseDirectory } from "@/components/browse-directory";
+import { JsonLd } from "@/components/json-ld";
 import { getDirectoryEntries } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@heyclaude/registry/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Browse the HeyClaude directory",
@@ -24,9 +27,26 @@ type BrowsePageProps = {
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const directoryEntries = await getDirectoryEntries();
   const params = searchParams ? await searchParams : undefined;
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      { name: "Browse", url: `${siteConfig.url}/browse` },
+    ]),
+    buildItemListJsonLd(
+      directoryEntries.slice(0, 100).map((entry) => ({
+        name: entry.title,
+        url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+      })),
+      {
+        name: "HeyClaude browse index",
+        description: "Searchable directory of Claude resources.",
+      },
+    ),
+  ];
 
   return (
     <div className="container-shell max-w-[52rem] space-y-8 py-12">
+      <JsonLd data={jsonLd} />
       <div className="space-y-4 border-b border-border/80 pb-8">
         <span className="eyebrow">Browse</span>
         <h1 className="section-title">Browse the full directory.</h1>

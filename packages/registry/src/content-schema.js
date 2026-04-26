@@ -493,6 +493,27 @@ export function validateEntry(category, data, inferred = {}) {
     }
   }
 
+  if (category === "tools") {
+    const websiteUrl = String(merged.websiteUrl || "").trim();
+    const disclosure = String(merged.disclosure || "editorial").trim().toLowerCase();
+    const pricingModel = String(merged.pricingModel || "").trim().toLowerCase();
+
+    if (websiteUrl && !/^https:\/\//i.test(websiteUrl)) {
+      semanticErrors.push("websiteUrl must use https");
+    }
+    if (disclosure && !["editorial", "affiliate", "sponsored"].includes(disclosure)) {
+      semanticErrors.push("disclosure must be editorial, affiliate, or sponsored");
+    }
+    if (
+      pricingModel &&
+      !["free", "freemium", "paid", "open-source", "subscription", "usage-based", "contact-sales"].includes(
+        pricingModel
+      )
+    ) {
+      semanticErrors.push("pricingModel is not recognized");
+    }
+  }
+
   return { missingRequired, missingRecommended, enumErrors, semanticErrors };
 }
 
@@ -508,8 +529,13 @@ export function orderFrontmatter(data) {
     "author",
     "authorProfileUrl",
     "dateAdded",
+    "websiteUrl",
     "repoUrl",
     "documentationUrl",
+    "pricingModel",
+    "disclosure",
+    "applicationCategory",
+    "operatingSystem",
     "downloadUrl",
     "installable",
     "installCommand",

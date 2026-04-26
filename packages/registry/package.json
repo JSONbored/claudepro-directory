@@ -22,6 +22,10 @@
       "types": "./src/index.d.ts",
       "default": "./src/presentation.js"
     },
+    "./seo": {
+      "types": "./src/index.d.ts",
+      "default": "./src/seo.js"
+    },
     "./submission": {
       "types": "./src/index.d.ts",
       "default": "./src/submission.js"
@@ -29,6 +33,10 @@
     "./artifacts": {
       "types": "./src/index.d.ts",
       "default": "./src/artifacts.js"
+    },
+    "./commercial": {
+      "types": "./src/index.d.ts",
+      "default": "./src/commercial.js"
     },
     "./category-spec.json": "./src/category-spec.json"
   }

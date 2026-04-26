@@ -1665,7 +1665,12 @@
         "python",
         "custom-servers"
       ],
-      "keywords": [],
+      "keywords": [
+        "build mcp server",
+        "claude mcp tutorial",
+        "model context protocol",
+        "mcp development"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -1857,7 +1862,12 @@
         "migration",
         "api"
       ],
-      "keywords": [],
+      "keywords": [
+        "chatgpt to claude",
+        "claude migration",
+        "ai assistant migration",
+        "prompt migration"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -1914,7 +1924,12 @@
         "api-implementation",
         "production-ready"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude extended thinking",
+        "claude 4 tutorial",
+        "reasoning prompts",
+        "advanced claude workflows"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -1935,7 +1950,12 @@
         "agent-development",
         "multi-agent"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude agent framework",
+        "agent development",
+        "claude code agents",
+        "ai agent workflow"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -1957,7 +1977,12 @@
         "documentation",
         "hipaa"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude healthcare",
+        "hipaa ai workflows",
+        "healthcare automation",
+        "compliant claude usage"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2017,7 +2042,12 @@
         "advanced",
         "automation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude multi directory",
+        "multi project claude setup",
+        "claude workspace setup",
+        "repository workflow"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2038,7 +2068,12 @@
         "developer tools",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs cursor",
+        "claude vs codeium",
+        "ai ide comparison",
+        "coding assistant tools"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2059,7 +2094,12 @@
         "wsl",
         "windows"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude wsl setup",
+        "windows claude code",
+        "wsl developer setup",
+        "claude windows workflow"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2118,7 +2158,12 @@
         "enterprise",
         "advanced"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude financial services",
+        "ai finance workflows",
+        "financial services automation",
+        "compliant ai workflows"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2177,7 +2222,12 @@
         "setup",
         "integration"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude mcp setup",
+        "mcp server setup",
+        "claude desktop mcp",
+        "model context protocol setup"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2233,7 +2283,12 @@
         "automation",
         "advanced"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude automation",
+        "business process automation",
+        "ai workflow automation",
+        "operations automation"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2254,7 +2309,12 @@
         "rate-limits",
         "429-errors"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude rate limits",
+        "fix claude rate limit",
+        "claude usage limits",
+        "claude api throttling"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2275,7 +2335,12 @@
         "aws",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs gemini",
+        "claude vs codewhisperer",
+        "ai coding assistant comparison",
+        "claude code comparison"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2296,7 +2361,12 @@
         "coding-assistants",
         "evaluation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude vs copilot",
+        "python coding assistant",
+        "claude python development",
+        "github copilot alternative"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -2949,7 +3019,12 @@
         "enterprise",
         "automation"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude migration workflow",
+        "chatgpt to claude",
+        "enterprise ai migration",
+        "ai platform migration"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -3082,7 +3157,13 @@
         "domain-audit",
         "dependency-scanner"
       ],
-      "keywords": [],
+      "keywords": [
+        "contrastapi mcp",
+        "claude security mcp",
+        "cve lookup",
+        "threat intelligence",
+        "dependency scanner"
+      ],
       "author": "UPinar",
       "dateAdded": "2026-04-20",
       "installable": true,
@@ -4564,7 +4645,12 @@
         "debugging",
         "security"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude environment variables",
+        "fix env vars",
+        "mcp environment setup",
+        "api key configuration"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -4585,7 +4671,12 @@
         "installation",
         "troubleshooting"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude installation errors",
+        "fix claude setup",
+        "mcp install troubleshooting",
+        "claude code install"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -4608,7 +4699,12 @@
         "debugging",
         "context-window"
       ],
-      "keywords": [],
+      "keywords": [
+        "claude performance troubleshooting",
+        "memory leak fix",
+        "mcp performance",
+        "ai workflow performance"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -4629,7 +4725,12 @@
         "connection-errors",
         "solutions"
       ],
-      "keywords": [],
+      "keywords": [
+        "mcp connection errors",
+        "fix mcp server",
+        "claude mcp troubleshooting",
+        "model context protocol errors"
+      ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
       "installable": false,
@@ -5337,8 +5438,8 @@
     {
       "category": "mcp",
       "slug": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access Claude Pro Directory via MCP",
-      "description": "Access the complete Claude Pro Directory through HeyClaude's official MCP server.",
+      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server.",
       "tags": [
         "mcp",
         "directory",
@@ -7968,7 +8069,13 @@
         "favicons",
         "og-images"
       ],
-      "keywords": [],
+      "keywords": [
+        "prompt to asset mcp",
+        "claude image generation",
+        "app icon generator",
+        "og image generator",
+        "design tools mcp"
+      ],
       "author": "MohamedAbdallah-14",
       "dateAdded": "2026-04-25",
       "installable": true,

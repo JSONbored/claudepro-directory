@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { normalizeValue, validateSubmission } from "./submission-issue-lib.mjs";
+import { normalizeValue, validateSubmission } from "@heyclaude/registry/submission";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");

@@ -52,12 +52,12 @@ type JobListingRow = {
 const fallbackJobs: JobListing[] = [
   {
     slug: "sponsored-placement-available",
-    title: "Sponsored placement available",
+    title: "Sponsored hiring slot available",
     company: "HeyClaude",
     location: "Remote",
     description:
-      "Pinned premium placement for teams hiring Claude-native developers, agent builders, and MCP maintainers.",
-    type: "Sponsored placement",
+      "Pinned premium hiring slot for teams recruiting Claude-native developers, agent builders, and MCP maintainers.",
+    type: "Sponsored hiring slot",
     featured: true,
     sponsored: true,
     applyUrl: "/jobs/post",
@@ -67,12 +67,12 @@ const fallbackJobs: JobListing[] = [
   },
   {
     slug: "featured-placement-available",
-    title: "Featured job placement available",
+    title: "Featured hiring slot available",
     company: "HeyClaude",
     location: "Remote",
     description:
-      "Highlighted listing for engineering, AI product, prompt, MCP, and Claude workflow roles.",
-    type: "Featured placement",
+      "Highlighted hiring slot for engineering, AI product, prompt, MCP, and Claude workflow roles.",
+    type: "Featured hiring slot",
     featured: true,
     applyUrl: "/jobs/post",
     tier: "featured",
@@ -81,12 +81,12 @@ const fallbackJobs: JobListing[] = [
   },
   {
     slug: "standard-listing-available",
-    title: "Standard listing available",
+    title: "Standard hiring listing available",
     company: "HeyClaude",
     location: "Remote",
     description:
-      "Main-feed listing for companies looking to reach Claude and AI workflow builders.",
-    type: "Standard placement",
+      "Main-feed hiring listing for companies looking to reach Claude and AI workflow builders.",
+    type: "Standard hiring listing",
     featured: false,
     applyUrl: "/jobs/post",
     tier: "standard",

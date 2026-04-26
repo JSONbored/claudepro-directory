@@ -39,6 +39,7 @@ Use these when applicable:
 ## Category notes
 
 - `mcp`: prefer `installCommand`, `usageSnippet`
+- `tools`: use `websiteUrl`, `pricingModel`, and `disclosure`; products and services should go through `/tools/submit`
 - `skills`: prefer `installCommand`, `usageSnippet`
 - `hooks`: prefer `trigger`, `usageSnippet`, `copySnippet`
 - `statuslines`: prefer `scriptLanguage`, `copySnippet`
@@ -49,9 +50,10 @@ Use these when applicable:
 
 ## Workflow
 
-1. Run `pnpm migrate:content`
+1. Run `pnpm validate:content:strict`
 2. Run `pnpm audit:content`
-3. Run `pnpm --filter web run prebuild` to regenerate registry artifacts
-4. Run `pnpm test:registry-artifacts`
-5. Fix missing fields and semantic audit issues
-6. Regenerate the README with `pnpm generate:readme`
+3. Run `pnpm validate:clean`
+4. Run `pnpm --filter web run prebuild` to regenerate registry artifacts
+5. Run `pnpm test:registry-artifacts`
+6. Fix missing fields and semantic audit issues
+7. Regenerate the README with `pnpm generate:readme`

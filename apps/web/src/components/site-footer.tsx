@@ -60,9 +60,11 @@ export function SiteFooter() {
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Navigation</p>
           <Link href="/browse" className="block transition hover:text-foreground">Browse</Link>
+          <Link href="/tools" className="block transition hover:text-foreground">Tools</Link>
           <Link href="/jobs" className="block transition hover:text-foreground">Jobs</Link>
           <Link href="/about" className="block transition hover:text-foreground">About</Link>
           <Link href="/submit" className="block transition hover:text-foreground">Submit</Link>
+          <Link href="/advertise" className="block transition hover:text-foreground">Advertise</Link>
         </div>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Project</p>

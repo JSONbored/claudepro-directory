@@ -8,6 +8,7 @@ const templateRoot = path.join(repoRoot, ".github/ISSUE_TEMPLATE");
 const contentRoot = path.join(repoRoot, "content");
 const compatibilitySpecPath = path.join(contentRoot, "category-spec.json");
 const failures = [];
+const submissionCategories = new Set(categorySpec.submissionOrder ?? []);
 
 function fail(message) {
   failures.push(message);
@@ -26,6 +27,10 @@ for (const category of categorySpec.categoryOrder) {
 
   if (!Array.isArray(spec.quickstart) || spec.quickstart.length < 2) {
     fail(`${category}: quickstart must include at least two steps`);
+  }
+
+  if (!submissionCategories.has(category)) {
+    continue;
   }
 
   if (!spec.template) {

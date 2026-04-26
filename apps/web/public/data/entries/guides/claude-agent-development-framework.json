@@ -17,7 +17,12 @@
       "agent-development",
       "multi-agent"
     ],
-    "keywords": [],
+    "keywords": [
+      "claude agent framework",
+      "agent development",
+      "claude code agents",
+      "ai agent workflow"
+    ],
     "readingTime": 4,
     "difficultyScore": 39,
     "cardDescription": "Build Claude autonomous agents with 90.2% better performance.",

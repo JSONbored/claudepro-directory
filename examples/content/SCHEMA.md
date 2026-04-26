@@ -1,6 +1,6 @@
 # Content Schema Reference
 
-Canonical validator logic lives in [`scripts/content-schema.mjs`](../../scripts/content-schema.mjs).
+Canonical validator logic lives in [`packages/registry`](../../packages/registry).
 
 ## Global required fields
 
@@ -22,6 +22,7 @@ Every entry should include:
 - `rules`: `copySnippet`
 - `skills`: `installCommand`, `usageSnippet`, `copySnippet`, `downloadUrl`, `skillType`, `skillLevel`, `verificationStatus`, `verifiedAt`, `retrievalSources`, `testedPlatforms`
 - `statuslines`: `scriptLanguage`, `usageSnippet`, `copySnippet`, `configSnippet`, `scriptBody`
+- `tools`: `pricingModel`, `websiteUrl`, `disclosure`
 
 ## Forbidden fields
 
@@ -67,6 +68,7 @@ Run before merging content changes:
 
 ```bash
 pnpm validate:content
+pnpm validate:clean
 pnpm audit:content
 pnpm build
 ```

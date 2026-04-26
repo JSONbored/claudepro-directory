@@ -17,9 +17,9 @@ export default function SubmitPage() {
     <div className="border-b border-border/80">
       <section className="container-shell grid min-h-[calc(100vh-8rem)] gap-12 py-16 lg:grid-cols-[1fr_620px] lg:items-center">
         <div className="space-y-6">
-          <span className="eyebrow">Submit</span>
+          <span className="eyebrow">Free resource submission</span>
           <div className="space-y-4">
-            <h1 className="section-title text-balance">Submit a tool or resource.</h1>
+            <h1 className="section-title text-balance">Submit a free Claude resource.</h1>
             <p className="max-w-xl text-base leading-8 text-muted-foreground">
               Share an agent, MCP server, skill pack, rule set, hook, command,
               or statusline with the HeyClaude community.
@@ -39,6 +39,13 @@ export default function SubmitPage() {
               </a>
               so we can review and publish listings with the right details.
             </p>
+            <p className="max-w-xl text-sm leading-7 text-muted-foreground">
+              Products, hosted apps, services, sponsorships, and affiliate listings use the{" "}
+              <a href="/tools/submit" className="text-primary underline underline-offset-4">
+                tools/app listing flow
+              </a>
+              .
+            </p>
           </div>
 
           <div className="submit-orb-wrap" aria-hidden="true">
@@ -49,10 +56,10 @@ export default function SubmitPage() {
         <div className="space-y-5">
           <div className="space-y-2 text-center lg:text-left">
             <h2 className="text-4xl font-semibold tracking-tight text-foreground">
-              Submit to HeyClaude
+              Submit free content
             </h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              GitHub is the backend here. The form below opens a clean category template
+              GitHub is the backend for free resources. The form below opens a clean category template
               so maintainers can review and import submissions without email back-and-forth.
             </p>
           </div>

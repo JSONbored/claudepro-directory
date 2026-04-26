@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 
 import { BrowseDirectory } from "@/components/browse-directory";
 import { GitHubStarsLive } from "@/components/github-stars-live";
+import { JsonLd } from "@/components/json-ld";
 import { getCategorySummaries, getDirectoryEntries } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
+import { buildItemListJsonLd } from "@heyclaude/registry/seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Discover Claude tools, skills, MCP servers, and workflows",
@@ -27,9 +30,20 @@ export default async function HomePage() {
   ]);
   const initialEntries = directoryEntries.slice(0, 15);
   const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
+  const jsonLd = buildItemListJsonLd(
+    initialEntries.map((entry) => ({
+      name: entry.title,
+      url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+    })),
+    {
+      name: "Featured HeyClaude entries",
+      description: "A starting set of Claude resources from the HeyClaude directory.",
+    },
+  );
 
   return (
     <div className="pb-24">
+      <JsonLd data={jsonLd} />
       <section className="border-b border-border/80">
         <div className="container-shell py-14 text-center sm:py-18">
           <div className="mx-auto max-w-4xl space-y-5">

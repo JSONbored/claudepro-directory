@@ -19,7 +19,8 @@ const categoryHeadings = {
   mcp: "## 🔌 MCP Servers",
   rules: "## 📏 Rules",
   skills: "## 🧠 Skills",
-  statuslines: "## 📟 Statuslines"
+  statuslines: "## 📟 Statuslines",
+  tools: "## 🧰 Tools"
 };
 
 function readEntries(category) {
@@ -45,7 +46,7 @@ const sections = categoryOrder
     if (!entries.length) return "";
 
     const lines = [
-      `${categoryHeadings[category]} (${entries.length})`,
+      `${categoryHeadings[category] ?? `## ${category}`} (${entries.length})`,
       "",
       ...entries.map(
         (entry) =>
@@ -70,8 +71,7 @@ const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-${total}+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
-Formerly Claude Pro Directory.
+${total}+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
 
@@ -101,7 +101,7 @@ Option C (advanced): commit content files directly.
 
 1. Add or update a file under \`content/<category>/\`
 2. Run \`pnpm --filter web run prebuild\`
-3. Run \`pnpm validate:content:strict\`, \`pnpm audit:content\`, and \`pnpm test:registry-artifacts\`
+3. Run \`pnpm validate:content:strict\`, \`pnpm validate:clean\`, \`pnpm audit:content\`, \`pnpm test:registry-artifacts\`, \`pnpm test:seo-jsonld\`, and \`pnpm test:commercial-intake\`
 4. Run \`pnpm generate:readme\`
 5. Commit the README and generated registry artifacts alongside your content changes
 

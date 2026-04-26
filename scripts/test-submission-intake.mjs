@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {
   parseIssueFormBody,
   validateSubmission,
-} from "./submission-issue-lib.mjs";
+} from "@heyclaude/registry/submission";
 
 function issue(body, labels = ["content-submission"]) {
   return { body, labels: labels.map((name) => ({ name })) };

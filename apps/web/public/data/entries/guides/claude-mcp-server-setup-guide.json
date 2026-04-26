@@ -18,7 +18,12 @@
       "setup",
       "integration"
     ],
-    "keywords": [],
+    "keywords": [
+      "claude mcp setup",
+      "mcp server setup",
+      "claude desktop mcp",
+      "model context protocol setup"
+    ],
     "readingTime": 3,
     "difficultyScore": 55,
     "cardDescription": "Master MCP server installation and configuration for Claude Desktop.",

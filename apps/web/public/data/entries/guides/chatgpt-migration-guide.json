@@ -17,7 +17,12 @@
       "migration",
       "api"
     ],
-    "keywords": [],
+    "keywords": [
+      "chatgpt to claude",
+      "claude migration",
+      "ai assistant migration",
+      "prompt migration"
+    ],
     "readingTime": 3,
     "difficultyScore": 64,
     "cardDescription": "Switch from ChatGPT to Claude in 30 minutes.",

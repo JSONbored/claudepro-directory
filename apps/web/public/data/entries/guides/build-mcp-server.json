@@ -19,7 +19,12 @@
       "python",
       "custom-servers"
     ],
-    "keywords": [],
+    "keywords": [
+      "build mcp server",
+      "claude mcp tutorial",
+      "model context protocol",
+      "mcp development"
+    ],
     "readingTime": 7,
     "difficultyScore": 87,
     "cardDescription": "Master MCP server development from scratch.",

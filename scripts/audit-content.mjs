@@ -11,7 +11,7 @@ import {
   inferStructuredFields,
   normalizeBody,
   validateEntry
-} from "./content-schema.mjs";
+} from "@heyclaude/registry/content-schema";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -41,6 +41,26 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
 
     if (String(parsed.data.description ?? "").trim().length > 320) {
       issues.push("description_too_long");
+    }
+
+    if (!String(parsed.data.seoTitle ?? "").trim()) {
+      issues.push("missing_seoTitle");
+    }
+
+    if (!String(parsed.data.seoDescription ?? "").trim()) {
+      issues.push("missing_seoDescription");
+    }
+
+    if (!Array.isArray(parsed.data.keywords) || parsed.data.keywords.length === 0) {
+      issues.push("missing_keywords");
+    }
+
+    if (/claudepro\.directory|Claude Pro Directory/i.test(source)) {
+      issues.push("old_brand_or_domain_reference");
+    }
+
+    if (/\[Script content from first example\]/.test(source)) {
+      issues.push("placeholder_script_marker");
     }
 
     if (parsed.data.category && String(parsed.data.category).trim() !== category) {
@@ -81,6 +101,10 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       category,
       filePath: path.relative(repoRoot, filePath),
       slug: String(parsed.data.slug ?? fileName.replace(/\.mdx$/, "")),
+      sourceType:
+        String(parsed.data.repoUrl ?? "").trim() || String(parsed.data.documentationUrl ?? "").trim()
+          ? "external"
+          : "first_party",
       metadataOnly: !normalizedBody.trim(),
       missingRequired: validation.missingRequired,
       missingRecommended: validation.missingRecommended,

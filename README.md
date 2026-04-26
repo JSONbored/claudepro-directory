@@ -5,8 +5,7 @@
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-326+ file-backed entries covering agents, MCP servers, skills, hooks, rules, commands, guides, collections, and statuslines.
-Formerly Claude Pro Directory.
+326+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
 
@@ -36,7 +35,7 @@ Option C (advanced): commit content files directly.
 
 1. Add or update a file under `content/<category>/`
 2. Run `pnpm --filter web run prebuild`
-3. Run `pnpm validate:content:strict`, `pnpm audit:content`, and `pnpm test:registry-artifacts`
+3. Run `pnpm validate:content:strict`, `pnpm validate:clean`, `pnpm audit:content`, `pnpm test:registry-artifacts`, `pnpm test:seo-jsonld`, and `pnpm test:commercial-intake`
 4. Run `pnpm generate:readme`
 5. Commit the README and generated registry artifacts alongside your content changes
 
@@ -122,7 +121,7 @@ Option C (advanced): commit content files directly.
 - **[Fireflies MCP Server for Claude](https://heyclau.de/mcp/fireflies-mcp-server)** - Extract valuable insights from meeting transcripts and summaries
 - **[Git MCP Server for Claude](https://heyclau.de/mcp/git-mcp-server)** - Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories
 - **[GitHub MCP Server for Claude](https://heyclau.de/mcp/github-mcp-server)** - Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality
-- **[HeyClaude MCP Server - Access Claude Pro Directory via MCP](https://heyclau.de/mcp/heyclaude-mcp)** - Access the complete Claude Pro Directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.
+- **[HeyClaude MCP Server - Access HeyClaude via MCP](https://heyclau.de/mcp/heyclaude-mcp)** - Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.
 - **[Hubspot MCP Server for Claude](https://heyclau.de/mcp/hubspot-mcp-server)** - Access and manage HubSpot CRM data including contacts, companies, and deals
 - **[Hugging Face MCP Server - MCP Servers](https://heyclau.de/mcp/hugging-face-mcp-server)** - Access Hugging Face Hub and Gradio AI applications
 - **[Intercom MCP Server for Claude](https://heyclau.de/mcp/intercom-mcp-server)** - Access customer conversations, tickets, and user data in real-time

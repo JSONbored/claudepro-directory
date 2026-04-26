@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Building2, CalendarDays, MapPin, Wallet } from "lucide-react";
 
+import { JsonLd } from "@/components/json-ld";
 import { getJobBySlug } from "@/lib/jobs";
 import { buildPageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildJobPostingJsonLd } from "@heyclaude/registry/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -56,9 +59,18 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const { slug } = await params;
   const job = await getJobBySlug(slug);
   if (!job) notFound();
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      { name: "Jobs", url: `${siteConfig.url}/jobs` },
+      { name: `${job.title} at ${job.company}`, url: `${siteConfig.url}/jobs/${job.slug}` },
+    ]),
+    buildJobPostingJsonLd(job, { siteUrl: siteConfig.url }),
+  ];
 
   return (
     <div className="container-shell space-y-8 py-12">
+      <JsonLd data={jsonLd} />
       <div className="space-y-4 border-b border-border/80 pb-8">
         <Link href="/jobs" className="eyebrow">
           Jobs

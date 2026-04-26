@@ -5,6 +5,7 @@
   "categoryOrder": [
     "agents",
     "mcp",
+    "tools",
     "skills",
     "rules",
     "commands",
@@ -21,6 +22,10 @@
     "mcp": {
       "count": 44,
       "label": "MCP Servers"
+    },
+    "tools": {
+      "count": 0,
+      "label": "Tools"
     },
     "skills": {
       "count": 66,

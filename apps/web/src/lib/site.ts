@@ -13,7 +13,7 @@ export const siteConfig = {
   name: "HeyClaude",
   shortName: "heyclaude",
   description:
-    "A community-built directory for Claude agents, MCP servers, skills, rules, commands, hooks, guides, collections, and jobs.",
+    "A community-built directory for Claude agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and jobs.",
   url: "https://heyclau.de",
   githubUrl: "https://github.com/JSONbored/claudepro-directory",
   jobsEmail: "jobs@heyclau.de",
@@ -25,6 +25,7 @@ export const siteConfig = {
   polarSponsoredJobUrl: process.env.NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL || "/advertise",
   nav: [
     { href: "/browse", label: "Browse" },
+    { href: "/tools", label: "Tools" },
     { href: "/jobs", label: "Jobs" },
     { href: "/about", label: "About" }
   ],
@@ -59,6 +60,7 @@ export const categoryQuickstarts: Record<string, string[]> = Object.fromEntries(
 export const categoryAccentClasses: Record<string, string> = {
   agents: "text-chart-1 border-border bg-secondary/30",
   mcp: "text-chart-2 border-border bg-secondary/30",
+  tools: "text-primary border-border bg-secondary/30",
   skills: "text-chart-5 border-border bg-secondary/30",
   rules: "text-destructive border-border bg-secondary/30",
   commands: "text-primary border-border bg-secondary/30",

@@ -5,10 +5,12 @@ import Script from "next/script";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { JsonLd } from "@/components/json-ld";
 import { NewsletterPrompt } from "@/components/newsletter-prompt";
 import { RelaunchPrompt } from "@/components/relaunch-prompt";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { siteConfig } from "@/lib/site";
+import { buildOrganizationJsonLd, buildWebsiteJsonLd } from "@heyclaude/registry/seo";
 
 import "./globals.css";
 
@@ -50,9 +52,25 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const siteJsonLd = [
+    buildOrganizationJsonLd({
+      siteUrl: siteConfig.url,
+      name: siteConfig.name,
+      githubUrl: siteConfig.githubUrl,
+      twitterUrl: siteConfig.twitterUrl,
+      discordUrl: siteConfig.discordUrl,
+    }),
+    buildWebsiteJsonLd({
+      siteUrl: siteConfig.url,
+      name: siteConfig.name,
+      description: siteConfig.description,
+    }),
+  ];
+
   return (
     <html lang="en" suppressHydrationWarning className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="antialiased">
+        <JsonLd data={siteJsonLd} />
         <Script id="theme-init" strategy="beforeInteractive">
           {`try {
             const stored = localStorage.getItem("heyclaude-theme");

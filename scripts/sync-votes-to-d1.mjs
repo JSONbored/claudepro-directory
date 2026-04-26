@@ -6,7 +6,6 @@ import matter from "gray-matter";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
-const seedPath = path.join(repoRoot, "content/data/legacy-vote-seed.json");
 const d1Binding = process.env.SITE_D1_BINDING || "SITE_DB";
 
 const modeArg = process.argv.find((arg) => arg.startsWith("--mode=")) ?? "--mode=both";
@@ -22,16 +21,6 @@ const categories = fs
   .map((entry) => entry.name)
   .sort();
 
-const seedVotes = new Map();
-if (fs.existsSync(seedPath)) {
-  const seed = JSON.parse(fs.readFileSync(seedPath, "utf8"));
-  const votes = seed?.votes ?? {};
-  for (const [key, value] of Object.entries(votes)) {
-    const count = Number(value ?? 0);
-    seedVotes.set(String(key), Number.isFinite(count) ? Math.max(0, Math.trunc(count)) : 0);
-  }
-}
-
 const statements = [];
 const preview = [];
 for (const category of categories) {
@@ -44,18 +33,13 @@ for (const category of categories) {
     const { data } = matter(source);
     const slug = String(data.slug ?? fileName.replace(/\.mdx$/, ""));
     const entryKey = `${category}:${slug}`;
-    const fromSeed = seedVotes.get(entryKey);
-    const fallback = Number(data.popularityScore ?? data.viewCount ?? 0);
-    const upvoteCount =
-      fromSeed ?? (Number.isFinite(fallback) ? Math.max(0, Math.trunc(fallback)) : 0);
 
     const safeKey = entryKey.replaceAll("'", "''");
     statements.push(
-      `INSERT INTO votes_entries (entry_key, upvote_count, updated_at) VALUES ('${safeKey}', ${upvoteCount}, CURRENT_TIMESTAMP) ` +
-        "ON CONFLICT(entry_key) DO UPDATE SET upvote_count = excluded.upvote_count, updated_at = CURRENT_TIMESTAMP;"
+      `INSERT OR IGNORE INTO votes_entries (entry_key, upvote_count, updated_at) VALUES ('${safeKey}', 0, CURRENT_TIMESTAMP);`
     );
     if (preview.length < 10) {
-      preview.push({ entryKey, upvoteCount, fromSeed: fromSeed ?? null });
+      preview.push({ entryKey, upvoteCount: 0 });
     }
   }
 }
@@ -90,4 +74,4 @@ function applyMode(runMode) {
 if (mode === "local" || mode === "both") applyMode("local");
 if (mode === "remote" || mode === "both") applyMode("remote");
 
-console.log(`Synced ${statements.length} vote counters to D1 (${mode}).`);
+console.log(`Ensured ${statements.length} vote rows in D1 (${mode}).`);

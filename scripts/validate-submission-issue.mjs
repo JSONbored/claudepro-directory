@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { validateSubmission } from "./submission-issue-lib.mjs";
+import { validateSubmission } from "@heyclaude/registry/submission";
 
 function argValue(flag) {
   const idx = process.argv.indexOf(flag);

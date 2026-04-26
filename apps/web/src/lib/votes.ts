@@ -1,4 +1,3 @@
-import legacyVoteSeed from "@/generated/legacy-vote-seed.json";
 import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
 const D1_SAFE_VARIABLE_BATCH_SIZE = 25;
@@ -11,15 +10,9 @@ export function getVotesDb(): D1DatabaseLike | null {
   return getSiteDb();
 }
 
-function getSeedCount(entryKey: string) {
-  const value = (legacyVoteSeed as Record<string, unknown>)[entryKey];
-  const parsed = Number(value ?? 0);
-  return Number.isFinite(parsed) ? Math.max(0, Math.trunc(parsed)) : 0;
-}
-
 export function getFallbackVoteCounts(keys: string[]) {
   const counts: Record<string, number> = {};
-  for (const key of keys) counts[key] = getSeedCount(key);
+  for (const key of keys) counts[key] = 0;
   return counts;
 }
 
@@ -30,12 +23,11 @@ export function getFallbackClientVotes(keys: string[]) {
 }
 
 async function ensureEntry(db: D1DatabaseLike, entryKey: string) {
-  const baseline = getSeedCount(entryKey);
   await db
     .prepare(
       "INSERT OR IGNORE INTO votes_entries (entry_key, upvote_count, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)"
     )
-    .bind(entryKey, baseline)
+    .bind(entryKey, 0)
     .run();
 }
 
@@ -43,7 +35,7 @@ export async function queryVoteCounts(db: D1DatabaseLike, keys: string[]) {
   if (!keys.length) return {};
 
   const counts: Record<string, number> = {};
-  for (const key of keys) counts[key] = getSeedCount(key);
+  for (const key of keys) counts[key] = 0;
 
   for (let index = 0; index < keys.length; index += D1_SAFE_VARIABLE_BATCH_SIZE) {
     const batch = keys.slice(index, index + D1_SAFE_VARIABLE_BATCH_SIZE);

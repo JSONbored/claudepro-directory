@@ -10,7 +10,7 @@ import {
   inferStructuredFields,
   normalizeBody,
   validateEntry
-} from "./content-schema.mjs";
+} from "@heyclaude/registry/content-schema";
 
 const repoRoot = process.cwd();
 const contentRoot = path.join(repoRoot, "content");
@@ -41,6 +41,14 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
 
     if (!normalizedBody.trim()) {
       failures.push(`${entry}: metadata-only content is not allowed`);
+    }
+
+    if (/claudepro\.directory|Claude Pro Directory/i.test(source)) {
+      failures.push(`${entry}: old brand/domain references are not allowed`);
+    }
+
+    if (/\[Script content from first example\]/.test(source)) {
+      failures.push(`${entry}: placeholder script marker is not allowed`);
     }
 
     if (validation.missingRequired.length > 0) {

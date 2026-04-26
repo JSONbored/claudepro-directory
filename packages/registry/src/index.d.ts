@@ -42,6 +42,11 @@ export type ContentEntry = {
   readingTime?: number;
   difficultyScore?: number;
   documentationUrl?: string;
+  websiteUrl?: string;
+  pricingModel?: string;
+  disclosure?: "editorial" | "affiliate" | "sponsored";
+  applicationCategory?: string;
+  operatingSystem?: string;
   cardDescription?: string;
   installable?: boolean;
   installCommand?: string;
@@ -109,6 +114,44 @@ export type DistributionBadge = {
   title: string;
 };
 
+export type Disclosure = "editorial" | "affiliate" | "sponsored";
+export type CommercialTier = "free" | "standard" | "featured" | "sponsored";
+export type ListingLeadKind = "job" | "tool";
+export type ListingLead = {
+  kind: ListingLeadKind;
+  tierInterest: CommercialTier;
+  contactName: string;
+  contactEmail: string;
+  companyName: string;
+  listingTitle: string;
+  websiteUrl?: string;
+  applyUrl?: string;
+  message?: string;
+};
+export type CommercialPlacement = {
+  targetKind: "job" | "tool" | "entry";
+  targetKey: string;
+  tier: Exclude<CommercialTier, "free">;
+  disclosure: Disclosure;
+  startsAt?: string;
+  expiresAt?: string;
+};
+export type ToolListing = DirectoryEntry & {
+  websiteUrl?: string;
+  pricingModel?: string;
+  disclosure?: Disclosure;
+  placement?: CommercialPlacement;
+  featured?: boolean;
+  sponsored?: boolean;
+};
+export type JsonLdDocument = Record<string, unknown>;
+export type SeoDocument = {
+  title: string;
+  description: string;
+  path: string;
+  jsonLd?: JsonLdDocument[];
+};
+
 export type RegistryEnvelope<T> = {
   schemaVersion: number;
   kind?: string;
@@ -131,6 +174,25 @@ export function buildCollectionSequence(entry: Partial<DirectoryEntry>): string;
 export function getPreviewLine(entry: Partial<DirectoryEntry>): string;
 export function getCopyText(entry: Partial<DirectoryEntry>): string;
 export function getDistributionBadges(entry: Partial<DirectoryEntry>): DistributionBadge[];
+export const LISTING_LEAD_KINDS: string[];
+export const COMMERCIAL_TIERS: string[];
+export const COMMERCIAL_PLACEMENT_TARGETS: string[];
+export const COMMERCIAL_STATUSES: string[];
+export function normalizeCommercialTier(value: unknown): CommercialTier;
+export function normalizeLeadKind(value: unknown): ListingLeadKind;
+export function normalizeDisclosure(value: unknown): Disclosure;
+export function isPaidOrAffiliateDisclosure(value: unknown): boolean;
+export function normalizePricingModel(value: unknown): string;
+export function validateListingLeadPayload(payload: Record<string, unknown>): { ok: boolean; errors: string[]; data: ListingLead };
+
+export function absoluteSiteUrl(siteUrl: string, path?: string): string;
+export function buildOrganizationJsonLd(params?: Record<string, unknown>): JsonLdDocument;
+export function buildWebsiteJsonLd(params?: Record<string, unknown>): JsonLdDocument;
+export function buildBreadcrumbJsonLd(items: Array<{ name: string; url: string }>): JsonLdDocument;
+export function buildItemListJsonLd(items: Array<{ name?: string; title?: string; url: string }>, params?: Record<string, unknown>): JsonLdDocument;
+export function buildEntryJsonLd(entry: Partial<ContentEntry>, params?: Record<string, unknown>): JsonLdDocument;
+export function buildToolSoftwareApplicationJsonLd(tool: Partial<ToolListing>, params?: Record<string, unknown>): JsonLdDocument;
+export function buildJobPostingJsonLd(job: Record<string, unknown>, params?: Record<string, unknown>): JsonLdDocument;
 
 export function generatedAtForEntries(entries: Partial<ContentEntry>[]): string;
 export function buildDirectoryEntries(entries: ContentEntry[]): DirectoryEntry[];

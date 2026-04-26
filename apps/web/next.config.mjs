@@ -9,7 +9,6 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Legacy path redirects from pre-relaunch site structure
       {
         source: "/trending",
         destination: "/browse",
@@ -60,18 +59,6 @@ const nextConfig = {
         source:
           "/guides/:subcategory(comparisons|troubleshooting|tutorials|use-cases)/:slug/llms.txt",
         destination: "/guides/:slug/llms.txt",
-        permanent: true
-      },
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "claudepro.directory" }],
-        destination: "https://heyclau.de/:path*",
-        permanent: true
-      },
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "www.claudepro.directory" }],
-        destination: "https://heyclau.de/:path*",
         permanent: true
       }
     ];

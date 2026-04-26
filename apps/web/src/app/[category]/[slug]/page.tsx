@@ -21,11 +21,13 @@ import { DetailToc } from "@/components/detail-toc";
 import { EntryCopyButton } from "@/components/entry-copy-button";
 import { EntryChecklistCard } from "@/components/entry-checklist-card";
 import { GitHubMark } from "@/components/icons/github-mark";
+import { JsonLd } from "@/components/json-ld";
 import { SnippetCard } from "@/components/snippet-card";
 import { getDirectoryEntries, getEntry } from "@/lib/content";
 import { getDistributionBadges } from "@/lib/entry-presentation";
 import { buildPageMetadata } from "@/lib/seo";
-import { categoryLabels } from "@/lib/site";
+import { categoryLabels, siteConfig } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildEntryJsonLd } from "@heyclaude/registry/seo";
 
 type DetailPageProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -359,6 +361,23 @@ export default async function DetailPage({ params }: DetailPageProps) {
     ? entry.installationOrder
     : [];
   const distributionBadges = getDistributionBadges(entry);
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      {
+        name: categoryLabels[entry.category] ?? entry.category,
+        url: `${siteConfig.url}/${entry.category}`,
+      },
+      {
+        name: entry.title,
+        url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+      },
+    ]),
+    buildEntryJsonLd(entry, {
+      siteUrl: siteConfig.url,
+      siteName: siteConfig.name,
+    }),
+  ];
   const sourceSignals = [
     entry.downloadTrust
       ? {
@@ -384,6 +403,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
   return (
     <div className="container-shell grid gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <JsonLd data={jsonLd} />
       <article className="space-y-8">
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">

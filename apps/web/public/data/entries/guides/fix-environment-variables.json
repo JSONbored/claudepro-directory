@@ -19,7 +19,12 @@
       "debugging",
       "security"
     ],
-    "keywords": [],
+    "keywords": [
+      "claude environment variables",
+      "fix env vars",
+      "mcp environment setup",
+      "api key configuration"
+    ],
     "readingTime": 4,
     "difficultyScore": 100,
     "cardDescription": "Debug Claude Code authentication failures, OAuth errors, and API key configuration issues with platform-specific solutions and automated...",

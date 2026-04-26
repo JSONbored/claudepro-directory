@@ -2,14 +2,17 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { BrowseDirectory } from "@/components/browse-directory";
+import { JsonLd } from "@/components/json-ld";
 import { getDirectoryEntriesByCategory } from "@/lib/content";
 import { buildPageMetadata } from "@/lib/seo";
 import {
   categoryDescriptions,
   categoryLabels,
   categoryQuickstarts,
-  categoryUsageHints
+  categoryUsageHints,
+  siteConfig
 } from "@/lib/site";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@heyclaude/registry/seo";
 
 type CategoryPageProps = {
   params: Promise<{ category: string }>;
@@ -46,8 +49,27 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   if (!directoryEntries.length) notFound();
 
+  const categoryUrl = `${siteConfig.url}/${category}`;
+  const jsonLd = [
+    buildBreadcrumbJsonLd([
+      { name: "Home", url: siteConfig.url },
+      { name: categoryLabels[category] ?? category, url: categoryUrl },
+    ]),
+    buildItemListJsonLd(
+      directoryEntries.slice(0, 100).map((entry) => ({
+        name: entry.title,
+        url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+      })),
+      {
+        name: `${categoryLabels[category] ?? category} directory`,
+        description: categoryDescriptions[category],
+      },
+    ),
+  ];
+
   return (
     <div className="container-shell space-y-8 py-12">
+      <JsonLd data={jsonLd} />
       <div className="space-y-5 border-b border-border/80 pb-8">
         <span className="eyebrow">{categoryLabels[category] ?? category}</span>
         <h1 className="section-title">{categoryLabels[category] ?? category}</h1>
