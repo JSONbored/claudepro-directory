@@ -23,7 +23,6 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function JobsPage() {
   const jobs = await getJobs();
-  const realJobs = jobs.filter((job) => !job.isPlaceholder);
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -38,7 +37,7 @@ export default async function JobsPage() {
       breadcrumbId: `${siteConfig.url}/jobs#breadcrumb`,
     }),
     buildItemListJsonLd(
-      realJobs.map((job) => ({
+      jobs.map((job) => ({
         name: `${job.title} at ${job.company}`,
         url: `${siteConfig.url}/jobs/${job.slug}`,
       })),

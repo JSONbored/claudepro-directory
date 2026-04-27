@@ -49,6 +49,15 @@ describe("Raycast feed helpers", () => {
     assert.deepEqual(parsed.entries, [sampleEntry]);
   });
 
+  it("keeps one-release compatibility with the legacy array feed", () => {
+    const parsed = parseFeed(
+      JSON.stringify([sampleEntry, { category: "mcp" }]),
+    );
+
+    assert.equal(parsed.generatedAt, "");
+    assert.deepEqual(parsed.entries, [sampleEntry]);
+  });
+
   it("treats malformed envelopes as empty feeds", () => {
     assert.deepEqual(parseFeed(JSON.stringify({ entries: null })), {
       entries: [],

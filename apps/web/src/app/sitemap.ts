@@ -57,15 +57,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`,
     }));
 
-  const jobItems = jobs
-    .filter((job) => !job.isPlaceholder)
-    .map((job) => ({
-      url: `${siteConfig.url}/jobs/${job.slug}`,
-      lastModified:
-        job.postedAt && !Number.isNaN(new Date(job.postedAt).getTime())
-          ? new Date(job.postedAt)
-          : undefined,
-    }));
+  const jobItems = jobs.map((job) => ({
+    url: `${siteConfig.url}/jobs/${job.slug}`,
+    lastModified:
+      job.postedAt && !Number.isNaN(new Date(job.postedAt).getTime())
+        ? new Date(job.postedAt)
+        : undefined,
+  }));
 
   const toolItems = tools.map((tool) => ({
     url: `${siteConfig.url}/tools/${tool.slug}`,

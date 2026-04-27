@@ -11,7 +11,7 @@
 
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
-- `SITE_DB` (D1) for durable upvotes, private jobs listings, listing leads, commercial placements, community signals, and future dynamic site state.
+- `SITE_DB` (D1) for durable upvotes, reviewed jobs listings, listing leads, commercial placements, community signals, and future dynamic site state.
 - Shared between `prod` and `dev` environments in the current setup.
 
 ## D1 setup
@@ -19,10 +19,15 @@ Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 1. Create database:
 
 ```bash
-pnpm --filter web exec wrangler d1 create heyclaude-votes
+pnpm --filter web exec wrangler d1 create heyclaude-site-state
 ```
 
-2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for `SITE_DB`.
+2. Set `database_name` and `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for `SITE_DB`.
+
+Existing environments may still point at the historical `heyclaude-votes`
+database name for continuity. The binding is the source of truth; new
+environments should use a site-state name because the same D1 database now
+stores votes, jobs, leads, placements, intents, and community signals.
 
 3. Apply migrations:
 
@@ -39,10 +44,14 @@ pnpm --filter web db:migrate:local
 Current migrations include:
 
 - `0001_votes.sql` for upvotes
-- `0002_jobs.sql` for private jobs listing records
+- `0002_jobs.sql` for reviewed jobs listing records
 - `0003_commercial_leads.sql` for job/tool listing leads and commercial placement windows
 - `0004_intent_events.sql` for privacy-light copy/open/install/download/vote intent counters
 - `0005_community_signals.sql` for used-this, works-for-me, and reported-broken listing signals
+
+The jobs board only renders active rows from `jobs_listings`. A missing,
+unmigrated, or empty `SITE_DB` produces an explicit empty state instead of fake
+listing rows.
 
 ## OpenNext build/deploy commands
 

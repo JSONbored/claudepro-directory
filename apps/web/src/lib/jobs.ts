@@ -29,7 +29,6 @@ export type JobListing = {
   expiresAt?: string;
   isRemote?: boolean;
   isWorldwide?: boolean;
-  isPlaceholder?: boolean;
 };
 
 type JobListingRow = {
@@ -53,52 +52,6 @@ type JobListingRow = {
   is_remote: number | null;
   is_worldwide: number | null;
 };
-
-const fallbackJobs: JobListing[] = [
-  {
-    slug: "sponsored-placement-available",
-    title: "Sponsored hiring slot available",
-    company: "HeyClaude",
-    location: "Remote",
-    description:
-      "Pinned premium hiring slot for teams recruiting Claude-native developers, agent builders, and MCP maintainers.",
-    type: "Sponsored hiring slot",
-    featured: true,
-    sponsored: true,
-    applyUrl: "/jobs/post",
-    tier: "sponsored",
-    status: "active",
-    isPlaceholder: true,
-  },
-  {
-    slug: "featured-placement-available",
-    title: "Featured hiring slot available",
-    company: "HeyClaude",
-    location: "Remote",
-    description:
-      "Highlighted hiring slot for engineering, AI product, prompt, MCP, and Claude workflow roles.",
-    type: "Featured hiring slot",
-    featured: true,
-    applyUrl: "/jobs/post",
-    tier: "featured",
-    status: "active",
-    isPlaceholder: true,
-  },
-  {
-    slug: "standard-listing-available",
-    title: "Standard hiring listing available",
-    company: "HeyClaude",
-    location: "Remote",
-    description:
-      "Main-feed hiring listing for companies looking to reach Claude and AI workflow builders.",
-    type: "Standard hiring listing",
-    featured: false,
-    applyUrl: "/jobs/post",
-    tier: "standard",
-    status: "active",
-    isPlaceholder: true,
-  },
-];
 
 function parseList(value: string | null | undefined) {
   if (!value) return undefined;
@@ -149,14 +102,12 @@ function getJobsDb(): D1DatabaseLike | null {
   return getSiteDb();
 }
 
-export async function getJobs(): Promise<JobListing[]> {
-  const db = getJobsDb();
-  if (!db) return fallbackJobs;
-
-  try {
-    const { results } = await db
-      .prepare(
-        `SELECT
+export async function queryActiveJobs(
+  db: D1DatabaseLike,
+): Promise<JobListing[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT
         slug,
         title,
         company_name,
@@ -187,19 +138,25 @@ export async function getJobs(): Promise<JobListing[]> {
         END DESC,
         datetime(posted_at) DESC,
         datetime(created_at) DESC`,
-      )
-      .bind()
-      .all<JobListingRow>();
+    )
+    .bind()
+    .all<JobListingRow>();
 
-    if (!results.length) return fallbackJobs;
-    return results.map((row) => toJobListing(row));
+  return results.map((row) => toJobListing(row));
+}
+
+export async function getJobs(): Promise<JobListing[]> {
+  const db = getJobsDb();
+  if (!db) return [];
+
+  try {
+    return await queryActiveJobs(db);
   } catch {
-    return fallbackJobs;
+    return [];
   }
 }
 
 export async function getJobBySlug(slug: string): Promise<JobListing | null> {
   const jobs = await getJobs();
-  const job = jobs.find((item) => item.slug === slug) ?? null;
-  return job?.isPlaceholder ? null : job;
+  return jobs.find((item) => item.slug === slug) ?? null;
 }

@@ -93,6 +93,7 @@ export function SubmitForm() {
   const [trigger, setTrigger] = useState("");
   const [scriptLanguage, setScriptLanguage] = useState("bash");
   const [assetContent, setAssetContent] = useState("");
+  const [items, setItems] = useState("");
   const [tags, setTags] = useState("");
   const [skillType, setSkillType] = useState("general");
   const [skillLevel, setSkillLevel] = useState("advanced");
@@ -110,135 +111,140 @@ export function SubmitForm() {
     setSlug(suggestedSlug);
   }, [slugEdited, suggestedSlug]);
 
+  const selectedFieldModel = useMemo(
+    () => (category ? buildSubmissionFieldModel(category) : null),
+    [category],
+  );
+  const selectedFields = selectedFieldModel?.fields ?? [];
+  const selectedFieldIds = useMemo(
+    () => new Set(selectedFields.map((field) => field.id)),
+    [selectedFields],
+  );
+  const requiredFieldIds = useMemo(
+    () =>
+      new Set(
+        selectedFields
+          .filter((field) => field.required)
+          .map((field) => field.id),
+      ),
+    [selectedFields],
+  );
+  const assetField = selectedFields.find(
+    (field) =>
+      field.id === "full_copyable_content" || field.id === "guide_content",
+  );
+  const triggerOptions =
+    selectedFields.find((field) => field.id === "trigger")?.options ?? [];
+  const scriptLanguageOptions =
+    selectedFields.find((field) => field.id === "script_language")?.options ??
+    [];
+
+  const submissionFieldValues = useMemo(
+    () =>
+      ({
+        name: toolName,
+        slug: normalizedSlug,
+        category,
+        github_url: githubUrl,
+        docs_url: docsUrl,
+        download_url: downloadUrl,
+        author,
+        contact_email: email,
+        tags,
+        description,
+        card_description: cardDescription,
+        install_command: installCommand,
+        install_or_usage: installCommand,
+        usage_snippet: usageSnippet || installCommand,
+        command_syntax: commandSyntax,
+        trigger,
+        script_language: scriptLanguage,
+        full_copyable_content: assetContent,
+        guide_content: assetContent,
+        items,
+        skill_type: skillType,
+        skill_level: skillLevel,
+        verification_status: verificationStatus,
+        verified_at: verifiedAt,
+        retrieval_sources: retrievalSources,
+        tested_platforms: testedPlatforms,
+      }) as Record<string, string>,
+    [
+      assetContent,
+      author,
+      cardDescription,
+      category,
+      commandSyntax,
+      description,
+      docsUrl,
+      downloadUrl,
+      email,
+      githubUrl,
+      installCommand,
+      items,
+      normalizedSlug,
+      retrievalSources,
+      scriptLanguage,
+      skillLevel,
+      skillType,
+      tags,
+      testedPlatforms,
+      toolName,
+      trigger,
+      usageSnippet,
+      verificationStatus,
+      verifiedAt,
+    ],
+  );
+
   const issueUrl = useMemo(() => {
     const template = categoryTemplateMap[category] ?? "submit-entry.md";
     const categoryLabel = categoryLabels[category] ?? "Entry";
     const title = `Submit ${categoryLabel}: ${toolName || "New directory entry"}`;
-    const effectiveUsageSnippet = usageSnippet || installCommand;
 
     const params = new URLSearchParams({
       template,
       title,
     });
 
-    if (toolName) params.set("name", toolName);
-    if (normalizedSlug) params.set("slug", normalizedSlug);
-    if (category) params.set("category", category);
-    if (githubUrl) params.set("github_url", githubUrl);
-    if (docsUrl) params.set("docs_url", docsUrl);
-    if (downloadUrl) params.set("download_url", downloadUrl);
-    if (author) params.set("author", author);
-    if (email) params.set("contact_email", email);
-    if (tags) params.set("tags", tags);
-    if (description) params.set("description", description);
-    if (cardDescription) params.set("card_description", cardDescription);
-    if (installCommand) params.set("install_command", installCommand);
+    for (const field of selectedFields) {
+      const value = submissionFieldValues[field.id];
+      if (hasText(value)) params.set(field.id, value);
+    }
     if (installCommand) params.set("install_or_usage", installCommand);
-    if (effectiveUsageSnippet)
-      params.set("usage_snippet", effectiveUsageSnippet);
-    if (commandSyntax) params.set("command_syntax", commandSyntax);
-    if (trigger) params.set("trigger", trigger);
-    if (
-      scriptLanguage &&
-      (category === "hooks" || category === "statuslines")
-    ) {
-      params.set("script_language", scriptLanguage);
-    }
-    if (assetContent) params.set("full_copyable_content", assetContent);
-    if (assetContent) params.set("guide_content_markdown", assetContent);
-    if (category === "skills") {
-      params.set("skill_type", skillType);
-      params.set("skill_level", skillLevel);
-      params.set("verification_status", verificationStatus);
-      if (verifiedAt) params.set("verified_at", verifiedAt);
-      if (retrievalSources) params.set("retrieval_sources", retrievalSources);
-      if (testedPlatforms) params.set("tested_platforms", testedPlatforms);
-    }
 
     return `${siteConfig.githubUrl}/issues/new?${params.toString()}`;
   }, [
-    assetContent,
-    author,
-    cardDescription,
     category,
-    commandSyntax,
-    description,
-    docsUrl,
-    downloadUrl,
-    email,
-    githubUrl,
     installCommand,
-    normalizedSlug,
-    scriptLanguage,
-    skillLevel,
-    skillType,
-    tags,
-    testedPlatforms,
+    selectedFields,
+    submissionFieldValues,
     toolName,
-    trigger,
-    usageSnippet,
-    retrievalSources,
-    verificationStatus,
-    verifiedAt,
   ]);
-
-  const selectedFieldModel = useMemo(
-    () => (category ? buildSubmissionFieldModel(category) : null),
-    [category],
-  );
   const categoryNeedsAsset =
-    selectedFieldModel?.fields.some(
-      (field) => field.id === "full_copyable_content" && field.required,
-    ) ?? categoriesRequiringAssetContent.has(category);
+    Boolean(assetField) || categoriesRequiringAssetContent.has(category);
   const categoryNeedsSkillMetadata =
-    selectedFieldModel?.fields.some((field) => field.id === "skill_type") ??
+    selectedFieldIds.has("skill_type") ||
     categorySpecs[category]?.supportsSkillMetadata === true;
   const categoryNeedsUsage =
-    selectedFieldModel?.fields.some(
+    selectedFields.some(
       (field) => field.id === "usage_snippet" && field.required,
-    ) ?? categoriesRequiringUsageSnippet.has(category);
+    ) || categoriesRequiringUsageSnippet.has(category);
+  const categoryNeedsItems = selectedFieldIds.has("items");
 
   const readinessItems = useMemo(() => {
-    const items = [
-      { label: "Name", ready: hasText(toolName) },
-      { label: "Slug", ready: hasText(normalizedSlug) },
-      { label: "Category", ready: hasText(category) },
-      { label: "Email", ready: hasText(email) },
-      { label: "Description", ready: hasText(description) },
-      { label: "Card description", ready: hasText(cardDescription) },
-    ];
+    const items = selectedFields
+      .filter((field) => field.required)
+      .map((field) => ({
+        label: field.label,
+        ready: hasText(submissionFieldValues[field.id] ?? ""),
+      }));
 
-    if (categoryNeedsUsage) {
-      items.push({
-        label: "Usage snippet",
-        ready: hasText(usageSnippet || installCommand),
-      });
-    }
-    if (categoryNeedsAsset) {
-      items.push({
-        label: "Full copyable asset",
-        ready: hasText(assetContent),
-      });
-    }
-    if (category === "commands") {
-      items.push({ label: "Command syntax", ready: hasText(commandSyntax) });
-    }
-    if (category === "hooks") {
-      items.push({ label: "Hook trigger", ready: hasText(trigger) });
-    }
-    if (category === "mcp") {
-      items.push({ label: "Install command", ready: hasText(installCommand) });
-    }
     if (category === "skills") {
-      items.push(
-        {
-          label: "Install command or download URL",
-          ready: hasText(installCommand) || hasText(downloadUrl),
-        },
-        { label: "Skill type", ready: hasText(skillType) },
-        { label: "Skill level", ready: hasText(skillLevel) },
-        { label: "Verification status", ready: hasText(verificationStatus) },
-      );
+      items.push({
+        label: "Install command or download URL",
+        ready: hasText(installCommand) || hasText(downloadUrl),
+      });
       if (skillType === "capability-pack") {
         items.push(
           { label: "Verified date", ready: hasText(verifiedAt) },
@@ -246,31 +252,15 @@ export function SubmitForm() {
         );
       }
     }
-    if (category === "statuslines") {
-      items.push({ label: "Script language", ready: hasText(scriptLanguage) });
-    }
-
     return items;
   }, [
-    assetContent,
-    cardDescription,
     category,
-    categoryNeedsAsset,
-    categoryNeedsUsage,
-    commandSyntax,
-    description,
     downloadUrl,
-    email,
     installCommand,
-    normalizedSlug,
     retrievalSources,
-    scriptLanguage,
-    skillLevel,
+    selectedFields,
     skillType,
-    toolName,
-    trigger,
-    usageSnippet,
-    verificationStatus,
+    submissionFieldValues,
     verifiedAt,
   ]);
   const missingReadinessItems = readinessItems.filter((item) => !item.ready);
@@ -283,7 +273,7 @@ export function SubmitForm() {
       )
     : 0;
 
-  const isReady = Boolean(category);
+  const isReady = Boolean(category) && missingReadinessItems.length === 0;
 
   return (
     <form
@@ -347,7 +337,7 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-email" className="submit-label">
-          Email
+          Email <span className="text-destructive">*</span>
         </label>
         <input
           id="submit-email"
@@ -374,7 +364,7 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-description" className="submit-label">
-          Description
+          Description <span className="text-destructive">*</span>
         </label>
         <textarea
           id="submit-description"
@@ -387,7 +377,7 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-card-description" className="submit-label">
-          Card description
+          Card description <span className="text-destructive">*</span>
         </label>
         <input
           id="submit-card-description"
@@ -426,10 +416,14 @@ export function SubmitForm() {
         />
       </div>
 
-      {categoriesSupportingDownloads.has(category) ? (
+      {selectedFieldIds.has("download_url") ||
+      categoriesSupportingDownloads.has(category) ? (
         <div className="space-y-1">
           <label htmlFor="submit-download" className="submit-label">
-            Download URL
+            Download URL{" "}
+            {requiredFieldIds.has("download_url") ? (
+              <span className="text-destructive">*</span>
+            ) : null}
           </label>
           <input
             id="submit-download"
@@ -444,7 +438,10 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-install" className="submit-label">
-          Install or usage command
+          Install or usage command{" "}
+          {requiredFieldIds.has("install_command") ? (
+            <span className="text-destructive">*</span>
+          ) : null}
         </label>
         <input
           id="submit-install"
@@ -458,7 +455,10 @@ export function SubmitForm() {
       {categoryNeedsUsage ? (
         <div className="space-y-1">
           <label htmlFor="submit-usage-snippet" className="submit-label">
-            Usage snippet
+            Usage snippet{" "}
+            {requiredFieldIds.has("usage_snippet") ? (
+              <span className="text-destructive">*</span>
+            ) : null}
           </label>
           <textarea
             id="submit-usage-snippet"
@@ -473,7 +473,10 @@ export function SubmitForm() {
       {category === "commands" ? (
         <div className="space-y-1">
           <label htmlFor="submit-command-syntax" className="submit-label">
-            Command syntax
+            Command syntax{" "}
+            {requiredFieldIds.has("command_syntax") ? (
+              <span className="text-destructive">*</span>
+            ) : null}
           </label>
           <input
             id="submit-command-syntax"
@@ -488,22 +491,40 @@ export function SubmitForm() {
       {category === "hooks" ? (
         <div className="space-y-1">
           <label htmlFor="submit-trigger" className="submit-label">
-            Hook trigger
+            Hook trigger <span className="text-destructive">*</span>
           </label>
-          <input
-            id="submit-trigger"
-            value={trigger}
-            onChange={(event) => setTrigger(event.target.value)}
-            placeholder="PreToolUse, PostToolUse, Stop, etc."
-            className="submit-input"
-          />
+          {triggerOptions.length ? (
+            <Select value={trigger} onValueChange={setTrigger}>
+              <SelectTrigger
+                id="submit-trigger"
+                className="submit-select-trigger"
+              >
+                <SelectValue placeholder="Select a trigger" />
+              </SelectTrigger>
+              <SelectContent className="directory-select-content">
+                {triggerOptions.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <input
+              id="submit-trigger"
+              value={trigger}
+              onChange={(event) => setTrigger(event.target.value)}
+              placeholder="PreToolUse, PostToolUse, Stop, etc."
+              className="submit-input"
+            />
+          )}
         </div>
       ) : null}
 
       {category === "statuslines" ? (
         <div className="space-y-1">
           <label htmlFor="submit-script-language" className="submit-label">
-            Script language
+            Script language <span className="text-destructive">*</span>
           </label>
           <Select value={scriptLanguage} onValueChange={setScriptLanguage}>
             <SelectTrigger
@@ -513,12 +534,14 @@ export function SubmitForm() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="directory-select-content">
-              <SelectItem value="bash">bash</SelectItem>
-              <SelectItem value="zsh">zsh</SelectItem>
-              <SelectItem value="fish">fish</SelectItem>
-              <SelectItem value="python">python</SelectItem>
-              <SelectItem value="javascript">javascript</SelectItem>
-              <SelectItem value="other">other</SelectItem>
+              {(scriptLanguageOptions.length
+                ? scriptLanguageOptions
+                : ["bash", "zsh", "fish", "python", "javascript", "other"]
+              ).map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -527,7 +550,10 @@ export function SubmitForm() {
       {categoryNeedsAsset ? (
         <div className="space-y-1">
           <label htmlFor="submit-asset-content" className="submit-label">
-            Full copyable asset content
+            {assetField?.label ?? "Full copyable asset content"}{" "}
+            {assetField?.required ? (
+              <span className="text-destructive">*</span>
+            ) : null}
           </label>
           <textarea
             id="submit-asset-content"
@@ -539,12 +565,30 @@ export function SubmitForm() {
         </div>
       ) : null}
 
+      {categoryNeedsItems ? (
+        <div className="space-y-1">
+          <label htmlFor="submit-items" className="submit-label">
+            Items <span className="text-destructive">*</span>
+          </label>
+          <textarea
+            id="submit-items"
+            value={items}
+            onChange={(event) => setItems(event.target.value)}
+            placeholder={"mcp/example-server\nskills/example-skill"}
+            className="submit-textarea"
+          />
+        </div>
+      ) : null}
+
       {categoryNeedsSkillMetadata ? (
         <>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-1">
               <label htmlFor="submit-skill-type" className="submit-label">
-                Skill type
+                Skill type{" "}
+                {requiredFieldIds.has("skill_type") ? (
+                  <span className="text-destructive">*</span>
+                ) : null}
               </label>
               <Select value={skillType} onValueChange={setSkillType}>
                 <SelectTrigger
@@ -554,16 +598,20 @@ export function SubmitForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="directory-select-content">
-                  <SelectItem value="general">general</SelectItem>
-                  <SelectItem value="capability-pack">
-                    capability-pack
-                  </SelectItem>
+                  {categorySpec.skillTypeValues.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">
               <label htmlFor="submit-skill-level" className="submit-label">
-                Skill level
+                Skill level{" "}
+                {requiredFieldIds.has("skill_level") ? (
+                  <span className="text-destructive">*</span>
+                ) : null}
               </label>
               <Select value={skillLevel} onValueChange={setSkillLevel}>
                 <SelectTrigger
@@ -573,9 +621,11 @@ export function SubmitForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="directory-select-content">
-                  <SelectItem value="foundational">foundational</SelectItem>
-                  <SelectItem value="advanced">advanced</SelectItem>
-                  <SelectItem value="expert">expert</SelectItem>
+                  {categorySpec.skillLevelValues.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -584,7 +634,10 @@ export function SubmitForm() {
                 htmlFor="submit-verification-status"
                 className="submit-label"
               >
-                Verification
+                Verification{" "}
+                {requiredFieldIds.has("verification_status") ? (
+                  <span className="text-destructive">*</span>
+                ) : null}
               </label>
               <Select
                 value={verificationStatus}
@@ -597,9 +650,11 @@ export function SubmitForm() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="directory-select-content">
-                  <SelectItem value="draft">draft</SelectItem>
-                  <SelectItem value="validated">validated</SelectItem>
-                  <SelectItem value="production">production</SelectItem>
+                  {categorySpec.verificationStatusValues.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -685,28 +740,6 @@ export function SubmitForm() {
         This opens a category-specific GitHub issue form. Required fields are
         enforced on GitHub, and anything you entered here is used as prefill
         where supported.
-      </div>
-
-      <div className="rounded-xl border border-border bg-card/80 px-4 py-3 text-xs leading-6 text-muted-foreground">
-        Guides and collections are temporarily handled via direct templates:{" "}
-        <a
-          className="text-primary underline underline-offset-4"
-          href={`${siteConfig.githubUrl}/issues/new?template=submit-guide.md`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          guide
-        </a>
-        {" / "}
-        <a
-          className="text-primary underline underline-offset-4"
-          href={`${siteConfig.githubUrl}/issues/new?template=submit-collection.md`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          collection
-        </a>
-        .
       </div>
 
       <button

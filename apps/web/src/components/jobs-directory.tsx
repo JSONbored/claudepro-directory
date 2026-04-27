@@ -15,6 +15,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
+  const hasJobs = jobs.length > 0;
 
   const filteredJobs = useMemo(() => {
     if (!normalizedQuery) return jobs;
@@ -77,20 +78,16 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                   <span
                     className={
-                      job.isPlaceholder
+                      job.sponsored
                         ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
-                        : job.sponsored
-                          ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
-                          : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
+                        : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
                     }
                   >
-                    {job.isPlaceholder
-                      ? "Hiring slot"
-                      : job.sponsored
-                        ? "Sponsored"
-                        : job.featured
-                          ? "Featured"
-                          : "Role"}
+                    {job.sponsored
+                      ? "Sponsored"
+                      : job.featured
+                        ? "Featured"
+                        : "Role"}
                   </span>
                   {job.featured && !job.sponsored ? (
                     <span className="inline-flex rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
@@ -113,14 +110,12 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {job.isPlaceholder ? null : (
-                  <Link
-                    href={`/jobs/${job.slug}`}
-                    className="directory-link-chip"
-                  >
-                    Details
-                  </Link>
-                )}
+                <Link
+                  href={`/jobs/${job.slug}`}
+                  className="directory-link-chip"
+                >
+                  Details
+                </Link>
                 <a
                   href={job.applyUrl}
                   className="directory-link-chip"
@@ -132,7 +127,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   }
                 >
                   <ArrowUpRight className="size-3.5" />
-                  {job.isPlaceholder ? "Post role" : "Apply"}
+                  Apply
                 </a>
               </div>
             </div>
@@ -140,8 +135,41 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
         ))}
 
         {sortedJobs.length === 0 ? (
-          <div className="surface-panel p-8 text-sm text-muted-foreground">
-            No jobs matched that search.
+          <div className="surface-panel space-y-4 p-8 text-sm text-muted-foreground">
+            <div>
+              <p className="text-base font-medium text-foreground">
+                {hasJobs
+                  ? "No jobs matched that search."
+                  : "No active jobs yet."}
+              </p>
+              <p className="mt-2 max-w-2xl leading-7">
+                {hasJobs
+                  ? "Try another company, location, or role keyword."
+                  : "The jobs board only shows reviewed D1 rows with active status. Posting options are available while the board is empty."}
+              </p>
+            </div>
+            {!hasJobs ? (
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/jobs/post?tier=sponsored"
+                  className="directory-link-chip"
+                >
+                  Sponsored slot
+                </Link>
+                <Link
+                  href="/jobs/post?tier=featured"
+                  className="directory-link-chip"
+                >
+                  Featured job
+                </Link>
+                <Link
+                  href="/jobs/post?tier=standard"
+                  className="directory-link-chip"
+                >
+                  Standard job
+                </Link>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

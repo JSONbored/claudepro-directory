@@ -11,6 +11,7 @@ import {
   queryVotesByClient,
   toggleVote,
 } from "../apps/web/src/lib/votes";
+import { queryActiveJobs } from "../apps/web/src/lib/jobs";
 import { repoRoot } from "./helpers/registry-fixtures";
 import { nextLeadStatus } from "@heyclaude/registry/commercial";
 
@@ -19,6 +20,7 @@ type QueryResult = Record<string, unknown>;
 class FakeD1 implements D1DatabaseLike {
   voteCounts = new Map<string, number>();
   votesByClient = new Set<string>();
+  jobRows: QueryResult[] = [];
 
   prepare(query: string) {
     return {
@@ -86,6 +88,9 @@ class FakeD1 implements D1DatabaseLike {
   }
 
   private all<T>(query: string, values: unknown[]) {
+    if (query.includes("FROM jobs_listings")) {
+      return this.jobRows as T[];
+    }
     if (query.includes("FROM votes_entries")) {
       const keys = values.map(String);
       return keys
@@ -146,10 +151,56 @@ describe("D1 dynamic state helpers", () => {
     });
   });
 
-  it("keeps dynamic-state migrations aligned with votes, leads, intent events, and community signals", () => {
+  it("returns explicit empty jobs state unless active D1 rows exist", async () => {
+    const db = new FakeD1();
+
+    await expect(queryActiveJobs(db)).resolves.toEqual([]);
+
+    db.jobRows = [
+      {
+        slug: "ai-systems-engineer",
+        title: "AI Systems Engineer",
+        company_name: "Example Co",
+        location_text: "Remote",
+        summary: "Build Claude-native workflow systems.",
+        description_md: null,
+        employment_type: "Full-time",
+        posted_at: "2026-04-26T00:00:00Z",
+        compensation_summary: "$150k-$190k",
+        responsibilities_json: JSON.stringify(["Ship integrations"]),
+        requirements_json: JSON.stringify(["TypeScript"]),
+        apply_url: "https://example.com/jobs/ai-systems-engineer",
+        tier: "featured",
+        status: "active",
+        source: "manual",
+        posted_by_email: "jobs@example.com",
+        expires_at: null,
+        is_remote: 1,
+        is_worldwide: 1,
+      },
+    ];
+
+    await expect(queryActiveJobs(db)).resolves.toMatchObject([
+      {
+        slug: "ai-systems-engineer",
+        title: "AI Systems Engineer",
+        company: "Example Co",
+        featured: true,
+        sponsored: false,
+        responsibilities: ["Ship integrations"],
+        requirements: ["TypeScript"],
+      },
+    ]);
+  });
+
+  it("keeps dynamic-state migrations aligned with votes, jobs, leads, intent events, and community signals", () => {
     const migrationsDir = path.join(repoRoot, "apps/web/migrations");
     const votes = fs.readFileSync(
       path.join(migrationsDir, "0001_votes.sql"),
+      "utf8",
+    );
+    const jobs = fs.readFileSync(
+      path.join(migrationsDir, "0002_jobs.sql"),
       "utf8",
     );
     const leads = fs.readFileSync(
@@ -166,6 +217,9 @@ describe("D1 dynamic state helpers", () => {
     );
 
     expect(votes).toContain("votes_entries");
+    expect(jobs).toContain("jobs_listings");
+    expect(jobs).toContain("pending_review");
+    expect(jobs).toContain("is_worldwide");
     expect(leads).toContain("listing_leads");
     expect(leads).toContain("commercial_placements");
     expect(intents).toContain("intent_events");

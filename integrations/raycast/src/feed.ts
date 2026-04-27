@@ -82,6 +82,12 @@ export function isRaycastEntry(value: unknown): value is RaycastEntry {
 
 export function parseFeed(value: string): ParsedFeed {
   const parsed = JSON.parse(value) as unknown;
+  if (Array.isArray(parsed)) {
+    return {
+      entries: parsed.filter(isRaycastEntry),
+      generatedAt: "",
+    };
+  }
 
   const envelope = parsed as {
     schemaVersion?: unknown;

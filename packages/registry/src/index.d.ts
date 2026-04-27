@@ -125,7 +125,12 @@ export type RegistryCategorySpecEntry = {
 export type RegistryCategorySpec = {
   categoryOrder: string[];
   submissionOrder: string[];
+  commonIssueRequiredFields: string[];
+  skillTypeValues: SkillType[];
+  skillLevelValues: SkillLevel[];
+  verificationStatusValues: VerificationStatus[];
   defaultTestedPlatforms: string[];
+  aliases: Record<string, string>;
   categories: Record<string, RegistryCategorySpecEntry>;
 };
 
