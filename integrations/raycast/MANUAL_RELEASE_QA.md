@@ -1,6 +1,7 @@
-# Raycast Manual Smoke Tests
+# Raycast Manual Release QA
 
-Run these before publishing a read-only release.
+Run these after the automated Raycast helper tests, lint, feed validation, and
+distribution build pass.
 
 ## Cold Fetch
 
@@ -39,3 +40,11 @@ Run these before publishing a read-only release.
 1. Open the HeyClaude page for an entry.
 2. Open docs or source when available.
 3. Confirm no action writes to local project files.
+
+## Contribution Actions
+
+1. Run `Contribute Entry`.
+2. Confirm Raycast opens `https://heyclau.de/submit` with category/name/slug prefilled.
+3. Run `Suggest Change`.
+4. Confirm Raycast opens a GitHub issue URL with the category issue template and existing entry fields prefilled.
+5. Confirm no GitHub token, OAuth flow, fork, branch, PR, or local project file write is requested.

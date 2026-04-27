@@ -26,6 +26,22 @@ export type DownloadTrust = "first-party" | "external" | null;
 export type SkillType = "general" | "capability-pack";
 export type SkillLevel = "foundational" | "advanced" | "expert";
 export type VerificationStatus = "draft" | "validated" | "production";
+export type SkillSupportLevel = "native-skill" | "adapter" | "manual-context";
+
+export type SkillPlatformCompatibility = {
+  platform: string;
+  supportLevel: SkillSupportLevel | string;
+  installPath: string;
+  adapterPath?: string;
+  verifiedAt?: string;
+};
+
+export type SkillPackage = {
+  format: "agent-skill" | string;
+  entrypoint: string;
+  downloadUrl: string;
+  sha256?: string | null;
+};
 
 export type ContentEntry = {
   category: string;
@@ -70,6 +86,8 @@ export type ContentEntry = {
   verifiedAt?: string;
   retrievalSources?: string[];
   testedPlatforms?: string[];
+  platformCompatibility?: SkillPlatformCompatibility[];
+  skillPackage?: SkillPackage;
   prerequisites?: string[];
   hasPrerequisites?: boolean;
   hasTroubleshooting?: boolean;
@@ -330,6 +348,7 @@ export const ENTRY_SCHEMA_VERSION: number;
 export const RAYCAST_SCHEMA_VERSION: number;
 export const REGISTRY_ARTIFACT_SCHEMA_VERSION: number;
 export const SITE_URL: string;
+export const RAYCAST_COPY_PREVIEW_LIMIT: number;
 
 export function compactCount(value: number): string;
 export function firstUsefulLine(value?: string | null): string;
@@ -366,6 +385,10 @@ export function buildRegistryArtifactSet(
       value: string;
     }
 >;
+export function buildSkillPlatformCompatibility(
+  entry: ContentEntry,
+): SkillPlatformCompatibility[];
+export function buildCursorSkillAdapter(entry: ContentEntry): string;
 export function summarizePlacementExpiry(
   placements: Array<Record<string, unknown>>,
   now?: Date | string,

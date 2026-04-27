@@ -1,0 +1,14 @@
+---
+description: "Validate AI business ideas with evidence-driven demand checks, positioning tests, and practical go/no-go decisions."
+globs:
+alwaysApply: false
+---
+# AI Business Idea Validation Capability Pack Skill
+Expert business-validation capability pack for testing AI product ideas, market demand, pricing readiness, and launch feasibility.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip -o ai-business-idea-validation-capability-pack.zip && unzip -o ai-business-idea-validation-capability-pack.zip -d ./ai-business-idea-validation-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip

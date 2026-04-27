@@ -1,0 +1,14 @@
+---
+description: "Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team wor..."
+globs:
+alwaysApply: false
+---
+# Windsurf AI-Native Collaborative Development Skill
+Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/windsurf-collaborative-development.zip -o windsurf-collaborative-development.zip && unzip -o windsurf-collaborative-development.zip -d ./windsurf-collaborative-development
+```
+## Source
+https://heyclau.de/downloads/skills/windsurf-collaborative-development.zip

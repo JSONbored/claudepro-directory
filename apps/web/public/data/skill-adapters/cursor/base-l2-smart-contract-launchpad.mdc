@@ -1,0 +1,14 @@
+---
+description: "Practical launch workflow for Base contracts from local build to verified deployment and post-launch operations."
+globs:
+alwaysApply: false
+---
+# Base L2 Smart Contract Launchpad Skill
+Ship smart contracts on Base with secure deployment, verification, environment management, and production-readiness checklists.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/base-l2-smart-contract-launchpad.zip -o base-l2-smart-contract-launchpad.zip && unzip -o base-l2-smart-contract-launchpad.zip -d ./base-l2-smart-contract-launchpad
+```
+## Source
+https://heyclau.de/downloads/skills/base-l2-smart-contract-launchpad.zip

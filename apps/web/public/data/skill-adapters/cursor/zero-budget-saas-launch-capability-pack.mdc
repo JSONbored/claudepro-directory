@@ -1,0 +1,14 @@
+---
+description: "Launch lean SaaS products with free-tier stacks, strict scope control, and measurable traction loops."
+globs:
+alwaysApply: false
+---
+# Zero-Budget SaaS Launch Capability Pack Skill
+Expert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip -o zero-budget-saas-launch-capability-pack.zip && unzip -o zero-budget-saas-launch-capability-pack.zip -d ./zero-budget-saas-launch-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip

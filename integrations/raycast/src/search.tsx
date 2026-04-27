@@ -17,6 +17,8 @@ import {
   FAVORITES_KEY,
   FEED_URL,
   absoluteDataUrl,
+  buildContributeEntryUrl,
+  buildSuggestChangeUrl,
   categoryLabel,
   entryKey,
   fallbackDetail,
@@ -356,6 +358,16 @@ export default function Command() {
                 {sourceUrl ? (
                   <Action.OpenInBrowser title="Open Source" url={sourceUrl} />
                 ) : null}
+                <Action.OpenInBrowser
+                  title="Contribute Entry"
+                  url={buildContributeEntryUrl(entry)}
+                  icon={Icon.Plus}
+                />
+                <Action.OpenInBrowser
+                  title="Suggest Change"
+                  url={buildSuggestChangeUrl(entry)}
+                  icon={Icon.Pencil}
+                />
                 <Action
                   title={isFavorite ? "Remove Favorite" : "Add Favorite"}
                   icon={isFavorite ? Icon.StarDisabled : Icon.Star}
@@ -392,6 +404,11 @@ export default function Command() {
                 title="Refresh Feed"
                 icon={Icon.ArrowClockwise}
                 onAction={() => void refreshEntries(true)}
+              />
+              <Action.OpenInBrowser
+                title="Contribute Entry"
+                url={buildContributeEntryUrl()}
+                icon={Icon.Plus}
               />
             </ActionPanel>
           }

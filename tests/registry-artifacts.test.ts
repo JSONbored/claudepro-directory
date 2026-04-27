@@ -8,10 +8,12 @@ import {
   buildDirectoryEntries,
   buildMcpRegistryFeed,
   buildPluginExportFeed,
+  buildCursorSkillAdapter,
   buildJsonLdSnapshots,
   buildRegistryChangelogFeed,
   buildReadOnlyEcosystemFeed,
   buildRaycastEnvelope,
+  RAYCAST_COPY_PREVIEW_LIMIT,
   buildSearchEntries,
   getCopyText,
 } from "@heyclaude/registry";
@@ -232,7 +234,68 @@ describe("registry artifacts", () => {
         copyText,
       });
       expect(raycastFeedEntry.copyTextLength).toBe(copyText.length);
-      expect(raycastFeedEntry.copyTextTruncated).toBe(copyText.length > 20_000);
+      expect(raycastFeedEntry.copyText.length).toBeLessThanOrEqual(
+        RAYCAST_COPY_PREVIEW_LIMIT + 3,
+      );
+      expect(raycastFeedEntry.copyTextTruncated).toBe(
+        copyText.length > RAYCAST_COPY_PREVIEW_LIMIT,
+      );
+    }
+  });
+
+  it("publishes skill compatibility metadata and Cursor adapters", () => {
+    const skills = contentEntries.filter(
+      (entry) => entry.category === "skills",
+    );
+    expect(skills.length).toBeGreaterThan(0);
+
+    for (const entry of skills) {
+      expect(entry.skillPackage?.format).toBe("agent-skill");
+      expect(entry.skillPackage?.entrypoint).toBe("SKILL.md");
+      expect(entry.platformCompatibility?.map((item) => item.platform)).toEqual(
+        expect.arrayContaining([
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS",
+        ]),
+      );
+      expect(
+        entry.platformCompatibility?.filter(
+          (item) => item.supportLevel === "native-skill",
+        ),
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ platform: "Claude" }),
+          expect.objectContaining({ platform: "Codex" }),
+          expect.objectContaining({ platform: "Windsurf" }),
+        ]),
+      );
+      expect(entry.platformCompatibility).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            platform: "Gemini",
+            supportLevel: "adapter",
+          }),
+          expect.objectContaining({
+            platform: "Cursor",
+            supportLevel: "adapter",
+          }),
+        ]),
+      );
+
+      const cursorAdapterPath = path.join(
+        dataRoot,
+        "skill-adapters",
+        "cursor",
+        `${entry.slug}.mdc`,
+      );
+      expect(fs.existsSync(cursorAdapterPath)).toBe(true);
+      expect(fs.readFileSync(cursorAdapterPath, "utf8").trimEnd()).toBe(
+        buildCursorSkillAdapter(entry),
+      );
     }
   });
 

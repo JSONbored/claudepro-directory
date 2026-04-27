@@ -61,9 +61,54 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/mcp-server-authoring-security-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/mcp-server-authoring-security-capability-pack.zip",
+      "sha256": "88cfe7f7cbd688806926439fcef04929c691deaaa01909a87d5658bbeb8c28bb"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/mcp-server-authoring-security-capability-pack.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "88cfe7f7cbd688806926439fcef04929c691deaaa01909a87d5658bbeb8c28bb",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.\n\n## Retrieval Sources\n\n- https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices\n- https://modelcontextprotocol.io/specification/2025-06-18\n- https://modelcontextprotocol.io/docs/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.\n\n## Core Workflow\n\n1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.\n\n## Overview\n\nThis capability pack teaches agents how to design MCP servers that remain safe under real adversarial conditions. It emphasizes least privilege, explicit contracts, and secure default behavior.\n\n## Capability Scope\n\n- Threat modeling for tool invocation flows\n- Input validation and schema hardening\n- AuthN/AuthZ boundaries for tools and resources\n- Prompt-injection and data exfiltration defenses\n- Audit logging and incident response readiness\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Validate all tool input before execution.\n- Scope each tool to minimal permissions.\n- Deny by default for unsafe/unknown operations.\n- Preserve immutable audit trails for sensitive invocations.\n\n## Troubleshooting\n\n**Issue:** Tool abuse through crafted prompts  \n**Fix:** Add policy layer between prompt interpretation and tool invocation.\n\n**Issue:** Schema drift breaks clients  \n**Fix:** Enforce contract tests and backward compatibility checks.\n\n**Issue:** Difficult to investigate incidents  \n**Fix:** Add structured event logs with actor/tool/input/result correlation.\n\n## Output Contract\n\n1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.\n\n## Validation Checklist\n\n- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.\n\n## Retrieval Sources\n\n- https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices\n- https://modelcontextprotocol.io/specification/2025-06-18\n- https://modelcontextprotocol.io/docs/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.\n\n## Core Workflow\n\n1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.\n\n## Overview\n\nThis capability pack teaches agents how to design MCP servers that remain safe under real adversarial conditions. It emphasizes least privilege, explicit contracts, and secure default behavior.\n\n## Capability Scope\n\n- Threat modeling for tool invocation flows\n- Input validation and schema hardening\n- AuthN/AuthZ boundaries for tools and resources\n- Prompt-injection and data exfiltration defenses\n- Audit logging and incident response readiness\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Validate all tool input before execution.\n- Scope each tool to minimal permissions.\n- Deny by default for unsafe/unknown operations.\n- Preserve immutable audit trails for sensitive invocations.\n\n## Troubleshooting\n\n**Issue:** Tool abuse through crafted prompts  \n**Fix:** Add policy layer between prompt interpretation and tool invocation.\n\n**Issue:** Schema drift breaks clients  \n**Fix:** Enforce contract tests and backward compatibility checks.\n\n**Issue:** Difficult to investigate incidents  \n**Fix:** Add structured event logs with actor/tool/input/result correlation.\n\n## Output Contract\n\n1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.\n\n## Validation Checklist\n\n- Verify all referenced docs/versions before applying changes.\n- Run regression checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -122,7 +167,7 @@
       {
         "title": "Validation Checklist",
         "id": "validation-checklist",
-        "markdown": "- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+        "markdown": "- Verify all referenced docs/versions before applying changes.\n- Run regression checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
         "codeBlocks": []
       }
     ],

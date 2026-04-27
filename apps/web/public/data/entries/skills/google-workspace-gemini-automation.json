@@ -59,6 +59,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/google-workspace-gemini-automation.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/google-workspace-gemini-automation.zip",
+      "sha256": "2795143f0a54328d4335b4119fa51310480f6785dc02234b54d7738e85540db2"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/google-workspace-gemini-automation.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "2795143f0a54328d4335b4119fa51310480f6785dc02234b54d7738e85540db2",
     "body": "## Overview\n\nThis skill helps AI agents build practical Google Workspace automations using Gemini. It focuses on workflows teams actually run: reporting, triage, routing, summarization, and structured content generation.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Defined source systems and destination artifacts\n- Data classification and privacy constraints\n- Human reviewers for quality-sensitive outputs\n\n## What This Skill Delivers\n\n- Workflow decomposition for Docs/Sheets/Gmail/Drive tasks\n- Prompt and schema patterns for reliable output structure\n- Quality gates and approval loops\n- Monitoring plan for failures, drift, and cost anomalies\n\n## How to Use This Skill\n\n1. Map workflow trigger, inputs, and output destination.\n2. Define target schema for generated content.\n3. Add policy checks for sensitive data.\n4. Add human review for high-impact decisions.\n5. Track execution outcomes and iterate prompts safely.\n\n## Troubleshooting\n\n**Issue:** Output quality varies by run  \n**Fix:** Tighten schema constraints and add post-generation validation checks.\n\n**Issue:** Automation creates noisy or irrelevant docs  \n**Fix:** Refine source filtering and enforce clear acceptance criteria.\n\n**Issue:** Costs rise unexpectedly  \n**Fix:** Add workload bucketing and caching for repeat context segments.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://ai.google.dev/gemini-api/docs\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

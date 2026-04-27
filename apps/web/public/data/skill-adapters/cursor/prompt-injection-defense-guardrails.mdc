@@ -1,0 +1,14 @@
+---
+description: "Implement practical prompt injection defenses with policy gates, tool constraints, and adversarial test cases."
+globs:
+alwaysApply: false
+---
+# Prompt Injection Defense Guardrails Skill
+Build layered defenses against prompt injection, data exfiltration, and unsafe tool execution in AI agent systems.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails
+```
+## Source
+https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip

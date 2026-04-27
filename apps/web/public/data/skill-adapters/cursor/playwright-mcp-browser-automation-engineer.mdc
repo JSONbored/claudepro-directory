@@ -1,0 +1,14 @@
+---
+description: "Cross-platform browser task automation for AI agents using Playwright MCP with stability and observability built in."
+globs:
+alwaysApply: false
+---
+# Playwright MCP Browser Automation Engineer Skill
+Build resilient browser automations using Playwright MCP with robust selectors, retries, and deterministic task execution.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/playwright-mcp-browser-automation-engineer.zip -o playwright-mcp-browser-automation-engineer.zip && unzip -o playwright-mcp-browser-automation-engineer.zip -d ./playwright-mcp-browser-automation-engineer
+```
+## Source
+https://heyclau.de/downloads/skills/playwright-mcp-browser-automation-engineer.zip

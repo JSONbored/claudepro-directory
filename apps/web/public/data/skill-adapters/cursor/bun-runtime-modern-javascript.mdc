@@ -1,0 +1,14 @@
+---
+description: "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js."
+globs:
+alwaysApply: false
+---
+# Bun JavaScript Runtime Development Skill
+Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript execution, built-in bundler, test runner, and package manager in a single binary.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip -o bun-runtime-modern-javascript.zip && unzip -o bun-runtime-modern-javascript.zip -d ./bun-runtime-modern-javascript
+```
+## Source
+https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip

@@ -1,0 +1,14 @@
+---
+description: "Build practical Gemini + Workspace automations with safeguards, auditability, and business-ready output quality."
+globs:
+alwaysApply: false
+---
+# Google Workspace Gemini Automation Skill
+Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation
+```
+## Source
+https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip

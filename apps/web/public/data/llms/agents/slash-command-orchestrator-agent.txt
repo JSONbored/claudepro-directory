@@ -521,7 +521,7 @@ Deploy to {{environment}}:
 1. Check current branch is `main`
 2. Verify all CI checks passing
 3. Confirm no open P0 bugs in Linear
-4. Run smoke tests
+4. Run release regression tests
 5. Create git tag: `v$(date +%Y.%m.%d)`
 6. Deploy to production
 7. Monitor error rates for 5 minutes

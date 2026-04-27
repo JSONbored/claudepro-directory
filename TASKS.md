@@ -71,14 +71,14 @@ Gate: from `integrations/raycast`, run `npm ci && npm test && npm run lint && np
 - [x] [raycast] Keep the Raycast extension as a read-only browse, detail, copy, favorite, and open-link channel. Evidence: `npm run build`.
 - [x] [raycast] Keep full copy fetches backed by per-entry Raycast detail payloads. Evidence: `pnpm validate:raycast-feed`.
 - [x] [raycast] Finalize store screenshots, release checklist, and metadata review before submission. Evidence: `cat integrations/raycast/STORE_CHECKLIST.md`.
-- [x] [raycast] Add documented cold fetch, stale cache, malformed feed, favorites, and full-copy manual smoke steps. Evidence: `cat integrations/raycast/SMOKE_TESTS.md`.
+- [x] [raycast] Add documented cold fetch, stale cache, malformed feed, favorites, full-copy, and contribution manual release QA. Evidence: `cat integrations/raycast/MANUAL_RELEASE_QA.md`.
 - [x] [raycast] Defer write/apply workflows until registry contracts and read-only store release are stable. Evidence: `cat integrations/raycast/STORE_CHECKLIST.md`.
 - [x] [raycast] Add pure helper tests for feed parsing, detail payloads, favorites, category filtering, and cache fallback. Evidence: `npm test`.
 - [x] [raycast] Add a reusable Codex skill for Raycast extension engineering and audits. Evidence: `python3 /Users/shadowbook/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/shadowbook/.codex/skills/raycast-extension-engineer`.
 
 ## Commercial Surfaces
 
-Gate: `pnpm test:commercial-intake`, `pnpm test`, and local lead route smoke with `SITE_DB`.
+Gate: `pnpm test:commercial-intake`, `pnpm test`, and local lead route regression checks with `SITE_DB`.
 
 - [x] [commercial] Keep seeded tools/apps/services editorial by default while paid placement and claim requests stay lead-first. Evidence: `pnpm test:commercial-intake`.
 - [x] [commercial] Keep jobs hiring-only and placeholder cards out of `JobPosting` structured data. Evidence: `pnpm test:seo-jsonld`.
@@ -106,11 +106,11 @@ Gate: `pnpm validate:content:strict`, `pnpm test`, `pnpm test:e2e`, `pnpm type-c
 Gate: `pnpm test`, `pnpm test:e2e`, and `trunk check --show-existing --all --no-progress`.
 
 - [x] [test] Use Vitest as the canonical unit and contract runner with JUnit output. Evidence: `pnpm test`.
-- [x] [test] Use Playwright smoke across desktop and mobile for core public routes and registry exports. Evidence: `pnpm test:e2e`.
+- [x] [test] Use Playwright regression coverage across desktop and mobile for core public routes and registry exports. Evidence: `pnpm test:e2e`.
 - [x] [ci] Upload JUnit reports from the job that actually runs tests when Trunk secrets are configured. Evidence: `cat .github/workflows/content-validation.yml`.
 - [x] [trunk] Keep Trunk no-fix check passing without enabling quarantine. Evidence: `trunk check --show-existing --all --no-progress`.
 - [x] [ci] Add branch protection documentation for required validation checks. Evidence: `cat docs/branch-protection.md`.
-- [x] [test] Add D1 integration smoke for lead transitions and vote fallback against local migrations. Evidence: `pnpm test`.
+- [x] [test] Add D1 integration coverage for lead transitions and vote fallback against local migrations. Evidence: `pnpm test`.
 
 ## Future Moat
 

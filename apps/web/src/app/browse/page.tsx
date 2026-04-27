@@ -36,6 +36,7 @@ type BrowsePageProps = {
 
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const directoryEntries = await getDirectoryEntries();
+  const initialEntries = directoryEntries.slice(0, 15);
   const params = searchParams ? await searchParams : undefined;
   const jsonLd = [
     buildBreadcrumbJsonLd([
@@ -76,11 +77,13 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         </p>
       </div>
       <BrowseDirectory
-        entries={directoryEntries}
+        entries={initialEntries}
         initialQuery={params?.q ?? ""}
         initialCategory={params?.category ?? "all"}
         initialUtilityFilter={params?.utility ?? "all"}
         initialSortMode={params?.sort ?? "popular"}
+        limit={15}
+        entriesUrl="/data/directory-index.json"
         syncUrl
       />
     </div>

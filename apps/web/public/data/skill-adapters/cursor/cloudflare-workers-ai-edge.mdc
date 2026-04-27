@@ -1,0 +1,14 @@
+---
+description: "Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share."
+globs:
+alwaysApply: false
+---
+# Cloudflare Workers AI Edge Functions Skill
+Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm install -g wrangler
+```
+## Source
+https://heyclau.de/downloads/skills/cloudflare-workers-ai-edge.zip

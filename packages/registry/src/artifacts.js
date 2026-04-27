@@ -14,6 +14,7 @@ export const ENTRY_SCHEMA_VERSION = 1;
 export const RAYCAST_SCHEMA_VERSION = 2;
 export const REGISTRY_ARTIFACT_SCHEMA_VERSION = 2;
 export const SITE_URL = "https://heyclau.de";
+export const RAYCAST_COPY_PREVIEW_LIMIT = 800;
 
 export function truncateText(value, maxLength) {
   const normalized = String(value || "").trim();
@@ -132,6 +133,90 @@ export function buildArtifactHash(value, type = "json") {
   return sha256Text(type === "json" ? JSON.stringify(value) : String(value));
 }
 
+export function buildSkillPlatformCompatibility(entry) {
+  if (entry.category !== "skills") return [];
+  if (Array.isArray(entry.platformCompatibility)) {
+    return entry.platformCompatibility;
+  }
+
+  const verifiedAt = entry.verifiedAt || entry.dateAdded || "";
+  return [
+    {
+      platform: "Claude",
+      supportLevel: "native-skill",
+      installPath: ".claude/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Codex",
+      supportLevel: "native-skill",
+      installPath: ".agents/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Windsurf",
+      supportLevel: "native-skill",
+      installPath: ".windsurf/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Gemini",
+      supportLevel: "adapter",
+      installPath: ".gemini/commands/<skill-name>.toml or GEMINI.md",
+      verifiedAt,
+    },
+    {
+      platform: "Cursor",
+      supportLevel: "adapter",
+      installPath: ".cursor/rules/<skill-name>.mdc",
+      adapterPath: dataUrl("skill-adapters", "cursor", `${entry.slug}.mdc`),
+      verifiedAt,
+    },
+    {
+      platform: "Generic AGENTS",
+      supportLevel: "manual-context",
+      installPath: "AGENTS.md or tool-specific context file",
+      verifiedAt,
+    },
+  ];
+}
+
+export function buildCursorSkillAdapter(entry) {
+  const description = truncateText(
+    entry.cardDescription || entry.description,
+    240,
+  ).replaceAll('"', '\\"');
+  const install = entry.installCommand || "";
+  const source = entry.downloadUrl
+    ? entry.downloadUrl.startsWith("/")
+      ? `${SITE_URL}${entry.downloadUrl}`
+      : entry.downloadUrl
+    : entry.repoUrl ||
+      entry.documentationUrl ||
+      `${SITE_URL}/skills/${entry.slug}`;
+
+  return [
+    "---",
+    `description: "${description}"`,
+    "globs:",
+    "alwaysApply: false",
+    "---",
+    "",
+    `# ${entry.title}`,
+    "",
+    entry.description,
+    "",
+    "Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.",
+    "",
+    install ? "## Install" : "",
+    install ? codeBlock("bash", install) : "",
+    "## Source",
+    source,
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
+}
+
 export function buildRaycastEntries(entries) {
   return entries.map((entry) => {
     const copyText = getCopyText(entry);
@@ -144,9 +229,9 @@ export function buildRaycastEntries(entries) {
       tags: entry.tags,
       installCommand: entry.installCommand || "",
       configSnippet: entry.configSnippet || "",
-      copyText: truncateText(copyText, 20000),
+      copyText: truncateText(copyText, RAYCAST_COPY_PREVIEW_LIMIT),
       copyTextLength: copyText.length,
-      copyTextTruncated: copyText.length > 20000,
+      copyTextTruncated: copyText.length > RAYCAST_COPY_PREVIEW_LIMIT,
       detailMarkdown: buildRaycastDetailMarkdown(entry),
       detailUrl: dataUrl("raycast", entry.category, `${entry.slug}.json`),
       webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
@@ -154,6 +239,7 @@ export function buildRaycastEntries(entries) {
       documentationUrl: entry.documentationUrl || "",
       downloadTrust: entry.downloadTrust,
       verificationStatus: entry.verificationStatus || "",
+      platformCompatibility: buildSkillPlatformCompatibility(entry),
     };
   });
 }
@@ -300,6 +386,8 @@ export function buildPluginExportFeed(entries) {
     category: entry.category,
     sourceUrl: entry.repoUrl || entry.documentationUrl || entry.githubUrl,
     installCommand: entry.installCommand || entry.commandSyntax || "",
+    platformCompatibility:
+      entry.category === "skills" ? buildSkillPlatformCompatibility(entry) : [],
     heyclaudeUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
   }));
 
@@ -388,6 +476,7 @@ export function buildRegistryManifest(entries, extra = {}) {
       entryDetails: dataUrl("entries"),
       entryLlms: dataUrl("llms"),
       raycastDetails: dataUrl("raycast"),
+      skillAdapters: dataUrl("skill-adapters"),
     },
     artifactContracts: extra.artifactContracts ?? {},
   };
@@ -512,6 +601,14 @@ export function buildRegistryArtifactSet(entries, params = {}) {
         value: buildRaycastDetail(entry),
       },
     );
+
+    if (entry.category === "skills") {
+      files.push({
+        path: `skill-adapters/cursor/${entry.slug}.mdc`,
+        type: "text",
+        value: buildCursorSkillAdapter(entry),
+      });
+    }
   }
 
   const artifactContracts = Object.fromEntries(

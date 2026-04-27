@@ -70,6 +70,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/cursor-windsurf-ai-ide-setup.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/cursor-windsurf-ai-ide-setup.zip",
+      "sha256": "4f8ce19de6069c834ec7a452e8c3dbf1de4ff304ce049d5665a8ad56a0e800fe"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-23"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-23"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2025-10-23"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2025-10-23"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/cursor-windsurf-ai-ide-setup.mdc",
+        "verifiedAt": "2025-10-23"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2025-10-23"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "4f8ce19de6069c834ec7a452e8c3dbf1de4ff304ce049d5665a8ad56a0e800fe",
     "body": "## What This Skill Enables\n\nClaude can help you configure and optimize Cursor or Windsurf AI code editors for maximum productivity. Both editors provide AI-powered code completion, multi-file editing, and intelligent refactoring. Cursor excels with its Agent mode and Composer features, while Windsurf emphasizes collaborative flows and Cascade AI. From initial setup to advanced workflows, Claude handles IDE configuration and optimization.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n**Required:**\n\n- Claude Pro subscription or Claude Code CLI\n- macOS, Windows, or Linux\n- Cursor or Windsurf IDE installed\n- OpenAI API key or Anthropic API key\n- Basic code editor knowledge\n\n**What Claude handles automatically:**\n\n- Configuring API keys and model selection\n- Setting up keybindings for AI features\n- Optimizing editor settings for performance\n- Creating custom rules and context files\n- Configuring agent mode behaviors\n- Setting up workspace-specific settings\n- Implementing best practices for prompting\n- Optimizing token usage and costs\n\n## How to Use This Skill\n\n### Initial Setup & Configuration\n\n**Prompt:** \"Help me set up Cursor with Claude Sonnet model. Configure keybindings for: inline completion (Tab), chat (Cmd+K), composer (Cmd+I), and agent mode. Optimize for React/TypeScript projects.\"\n\nClaude will:\n\n1. Guide API key configuration\n2. Set model to Claude Sonnet\n3. Configure keyboard shortcuts\n4. Add .cursorrules for React/TS\n5. Set up workspace settings\n6. Configure auto-complete behavior\n7. Add project context files\n\n### Optimizing Agent Mode\n\n**Prompt:** \"Configure Cursor Agent mode for: automatic file edits, test generation, refactoring tasks, and documentation. Set guardrails to prevent breaking changes.\"\n\nClaude will:\n\n1. Enable agent mode settings\n2. Configure file permissions\n3. Set up test generation rules\n4. Add refactoring guidelines\n5. Create .cursorrules for safety\n6. Configure approval workflows\n7. Set token limits\n\n### Custom Rules & Context\n\n**Prompt:** \"Create .cursorrules file for Next.js 15 project with: TypeScript strict mode, shadcn/ui components, Tailwind CSS, server actions, and Zod validation. Include coding standards.\"\n\nClaude will:\n\n1. Create .cursorrules file\n2. Specify tech stack versions\n3. Add coding conventions\n4. Include common patterns\n5. Set error handling rules\n6. Add performance guidelines\n7. Document API usage\n\n### Multi-File Refactoring\n\n**Prompt:** \"Set up Windsurf Cascade for: renaming components across files, updating import paths, refactoring prop types, and running type checks. Configure to preview changes before applying.\"\n\nClaude will:\n\n1. Configure Cascade settings\n2. Enable preview mode\n3. Set up diff viewing\n4. Add rollback capability\n5. Configure type checking\n6. Set up batch operations\n7. Add safety confirmations\n\n## Tips for Best Results\n\n1. **Use .cursorrules**: Create project-specific rules file with tech stack, conventions, and patterns. AI reads this for context.\n\n2. **Composer for Large Changes**: Use Cmd+I (Cursor) or Cascade (Windsurf) for multi-file edits. More powerful than inline chat.\n\n3. **@ Mentions for Context**: Use @filename, @folder, @docs to give AI specific context. Reduces hallucinations.\n\n4. **Agent Mode Guardrails**: Set file permissions and review changes. Don't let agent edit critical files unsupervised.\n\n5. **Model Selection**: Claude Sonnet for code quality, GPT-4 for speed. Switch based on task complexity.\n\n6. **Token Optimization**: Use codebase indexing wisely. Exclude node_modules, dist, .next from context.\n\n## Common Workflows\n\n### React Component Refactoring\n\n```\n\"Configure Cursor for React refactoring workflow:\n1. Set up .cursorrules with React 19 patterns\n2. Enable TypeScript strict mode validation\n3. Configure agent mode for component splits\n4. Add rules for shadcn/ui usage\n5. Set up automatic prop-types to TS conversion\n6. Configure test generation with Vitest\n7. Enable preview for all agent changes\n8. Add rollback shortcuts\"\n```\n\n### API Route Generation\n\n```\n\"Set up Windsurf for API development:\n1. Create .cursorrules for FastAPI/Next.js API routes\n2. Configure agent to generate OpenAPI docs\n3. Set up automatic validation with Zod\n4. Add error handling templates\n5. Configure test generation\n6. Set up database query optimization\n7. Enable security scanning\n8. Add rate limiting patterns\"\n```\n\n### Legacy Code Migration\n\n```\n\"Configure Cursor for migrating JS to TS:\n1. Set up .cursorrules for TypeScript migration\n2. Configure agent for file-by-file conversion\n3. Add type inference rules\n4. Set up any type replacement\n5. Configure import path updates\n6. Enable type checking after each file\n7. Add rollback on type errors\n8. Generate migration report\"\n```\n\n### Test Coverage Improvement\n\n```\n\"Set up Windsurf for test generation:\n1. Configure agent for unit test creation\n2. Add .cursorrules for testing patterns\n3. Set up coverage threshold checks\n4. Configure mock generation\n5. Add integration test templates\n6. Set up snapshot testing rules\n7. Enable test runner integration\n8. Generate coverage reports\"\n```\n\n## Troubleshooting\n\n**Issue:** \"AI suggestions are slow or timing out\"\n**Solution:** Reduce context size by excluding large folders in settings. Use @filename for specific context instead of full codebase. Check API rate limits. Switch to faster model (GPT-3.5) for simple edits. Clear index and rebuild.\n\n**Issue:** \"Agent mode making unwanted changes\"\n**Solution:** Add .cursorrules with explicit guidelines. Set file permissions to read-only for critical files. Enable preview mode to review all changes. Use 'explain' prompts before 'do' prompts. Add 'do not modify' comments in code.\n\n**Issue:** \"API costs higher than expected\"\n**Solution:** Exclude unnecessary folders from indexing. Use caching (Cursor's @codebase). Switch to smaller models for simple tasks. Disable auto-complete for comments. Review token usage in settings. Use local models for basic completion.\n\n**Issue:** \"Keybindings conflicting with other extensions\"\n**Solution:** Check keybindings.json for conflicts. Reassign Cursor/Windsurf shortcuts. Disable conflicting extensions. Use Cmd+K+S (Cursor) to view all shortcuts. Export keybindings and version control them.\n\n**Issue:** \"AI not using project context correctly\"\n**Solution:** Create detailed .cursorrules file. Use @docs to reference documentation. Add README with architecture overview. Use @folder for package-specific context. Verify codebase indexing is complete. Rebuild index if stale.\n\n## Learn More\n\n- [Cursor Documentation](https://cursor.sh/docs)\n- [Windsurf by Codeium](https://codeium.com/windsurf)\n- [Cursor Forum](https://forum.cursor.sh/)\n- [AI Coding Best Practices](https://cursor.sh/blog/agent-mode)\n- [Windsurf Cascade Guide](https://codeium.com/blog/windsurf-editor)\n\n## Features\n\n- AI-powered multi-file editing with agent modes\n- Inline code completion with context awareness\n- Chat interface for code explanations and refactoring\n- Composer/Cascade for large-scale code changes\n- Custom rules files (.cursorrules, .windsurfrules) for project-specific guidance\n- Context-aware codebase indexing and retrieval\n- Multi-file refactoring with preview and rollback\n- Performance optimization and resource management with workspace indexing configuration, memory usage tuning, and extension management for optimal IDE responsiveness\n\n## Use Cases\n\n- Configuring AI IDE for specific tech stacks\n- Setting up multi-file refactoring workflows\n- Optimizing token usage and API costs\n- Legacy code migration and modernization\n- Automated test generation and coverage improvement\n- Code review and security scanning workflows",

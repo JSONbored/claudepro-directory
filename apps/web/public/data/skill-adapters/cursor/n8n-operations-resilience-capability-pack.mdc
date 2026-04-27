@@ -1,0 +1,14 @@
+---
+description: "Run n8n in production with retry strategy, failure isolation, and secure credential governance."
+globs:
+alwaysApply: false
+---
+# n8n Operations Resilience Capability Pack Skill
+Expert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip

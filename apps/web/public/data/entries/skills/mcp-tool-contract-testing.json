@@ -59,6 +59,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/mcp-tool-contract-testing.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/mcp-tool-contract-testing.zip",
+      "sha256": "7e8f76baf26241e849bdb0108bf57628864ffb91a056e3878de27247f1d7d352"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/mcp-tool-contract-testing.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "7e8f76baf26241e849bdb0108bf57628864ffb91a056e3878de27247f1d7d352",
     "body": "## Overview\n\nThis skill helps AI agents enforce explicit behavior contracts for MCP tools. It prevents accidental schema drift, unsafe edge-case handling, and hidden regressions when tools evolve.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Contract definitions for high-value tools\n- Stable test inputs and expected outputs\n- Regression thresholds for release decisions\n\n## What This Skill Delivers\n\n- Contract catalog for each tool endpoint\n- Validation suite for payload and response guarantees\n- Safety/negative tests for malformed and adversarial inputs\n- Regression summary for release gating\n\n## How to Use This Skill\n\n1. Define mandatory response fields and allowed ranges.\n2. Build positive and negative test vectors.\n3. Execute against baseline and candidate builds.\n4. Compare behavior and schema diffs.\n5. Block release when contract-critical checks fail.\n\n## Troubleshooting\n\n**Issue:** Tool output changes break downstream clients  \n**Fix:** Add strict backward-compatibility contract checks for public fields.\n\n**Issue:** Tests pass but runtime still fails on edge cases  \n**Fix:** Add adversarial input suites and timeout/error propagation checks.\n\n**Issue:** Frequent false positives in test suite  \n**Fix:** Split deterministic contract checks from heuristic quality checks.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://modelcontextprotocol.io/specification/2025-06-18/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

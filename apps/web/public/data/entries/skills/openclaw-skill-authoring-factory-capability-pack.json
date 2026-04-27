@@ -61,9 +61,54 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip",
+      "sha256": "cf3ec648f0dd4808a709afca8306947b6be5c9bc18e2b481cdf0436e846fe9e3"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/openclaw-skill-authoring-factory-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "cf3ec648f0dd4808a709afca8306947b6be5c9bc18e2b481cdf0436e846fe9e3",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://github.com/openclaw/openclaw\n- https://github.com/openclaw/openclaw/blob/main/README.md\n- https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md\n\n## Core Workflow\n\n1. Define exact user problem, inputs, and expected outputs.\n2. Gather current official docs and mark freshness date.\n3. Build skill content with deterministic sections and constraints.\n4. Validate with smoke runs and failure-path checks.\n5. Package and publish with checksum and metadata integrity.\n\n## Overview\n\nThis skill operationalizes repeatable skill creation for OpenClaw and adjacent agent ecosystems.\n\n## Capability Scope\n\n- Skill spec and scope definition\n- Retrieval-source governance\n- Validation and QA workflow\n- Packaging and checksum controls\n- Catalog publication readiness\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Every skill must include verifiedAt and retrievalSources.\n- Do not publish packages without deterministic checksum verification.\n- Keep scope narrow enough for repeatable real-world execution.\n- Require failure-path examples before marking production.\n\n## Troubleshooting\n\n**Issue:** Skill works in one agent but not another  \n**Fix:** include explicit adaptation notes per non-native platform.\n\n**Issue:** Skill gets stale quickly  \n**Fix:** enforce verifiedAt and retrievalSources refresh policy.\n\n**Issue:** Package integrity is unclear  \n**Fix:** publish deterministic checksum and regenerate only on content changes.\n\n## Output Contract\n\n1. Skill spec with acceptance criteria.\n2. Retrieval/freshness table.\n3. Packaging manifest and checksum.\n4. Validation evidence and known limitations.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://github.com/openclaw/openclaw\n- https://github.com/openclaw/openclaw/blob/main/README.md\n- https://github.com/openclaw/openclaw/blob/main/CONTRIBUTING.md\n\n## Core Workflow\n\n1. Define exact user problem, inputs, and expected outputs.\n2. Gather current official docs and mark freshness date.\n3. Build skill content with deterministic sections and constraints.\n4. Validate with regression runs and failure-path checks.\n5. Package and publish with checksum and metadata integrity.\n\n## Overview\n\nThis skill operationalizes repeatable skill creation for OpenClaw and adjacent agent ecosystems.\n\n## Capability Scope\n\n- Skill spec and scope definition\n- Retrieval-source governance\n- Validation and QA workflow\n- Packaging and checksum controls\n- Catalog publication readiness\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Every skill must include verifiedAt and retrievalSources.\n- Do not publish packages without deterministic checksum verification.\n- Keep scope narrow enough for repeatable real-world execution.\n- Require failure-path examples before marking production.\n\n## Troubleshooting\n\n**Issue:** Skill works in one agent but not another  \n**Fix:** include explicit adaptation notes per non-native platform.\n\n**Issue:** Skill gets stale quickly  \n**Fix:** enforce verifiedAt and retrievalSources refresh policy.\n\n**Issue:** Package integrity is unclear  \n**Fix:** publish deterministic checksum and regenerate only on content changes.\n\n## Output Contract\n\n1. Skill spec with acceptance criteria.\n2. Retrieval/freshness table.\n3. Packaging manifest and checksum.\n4. Validation evidence and known limitations.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -80,7 +125,7 @@
       {
         "title": "Core Workflow",
         "id": "core-workflow",
-        "markdown": "1. Define exact user problem, inputs, and expected outputs.\n2. Gather current official docs and mark freshness date.\n3. Build skill content with deterministic sections and constraints.\n4. Validate with smoke runs and failure-path checks.\n5. Package and publish with checksum and metadata integrity.",
+        "markdown": "1. Define exact user problem, inputs, and expected outputs.\n2. Gather current official docs and mark freshness date.\n3. Build skill content with deterministic sections and constraints.\n4. Validate with regression runs and failure-path checks.\n5. Package and publish with checksum and metadata integrity.",
         "codeBlocks": []
       },
       {

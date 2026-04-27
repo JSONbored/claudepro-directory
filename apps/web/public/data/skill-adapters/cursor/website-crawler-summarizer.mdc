@@ -1,0 +1,14 @@
+---
+description: "Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries."
+globs:
+alwaysApply: false
+---
+# Website Crawler + Summarizer Skill
+Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries. Perfect for research, competitive analysis, and content aggregation.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d ./website-crawler-summarizer
+```
+## Source
+https://heyclau.de/downloads/skills/website-crawler-summarizer.zip

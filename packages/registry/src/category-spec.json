@@ -37,10 +37,10 @@
   "defaultTestedPlatforms": [
     "Claude",
     "Codex",
-    "OpenClaw",
-    "Cursor",
     "Windsurf",
-    "Gemini"
+    "Gemini",
+    "Cursor",
+    "Generic AGENTS"
   ],
   "aliases": {
     "agent": "agents",

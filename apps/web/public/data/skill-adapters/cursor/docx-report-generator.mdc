@@ -1,0 +1,14 @@
+---
+description: "Fill templated DOCX with data to produce reports, invoices, and formatted documents."
+globs:
+alwaysApply: false
+---
+# DOCX Report Generator Skill
+Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator
+```
+## Source
+https://heyclau.de/downloads/skills/docx-report-generator.zip

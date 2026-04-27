@@ -31,8 +31,9 @@ jobs:
   validate-content:
     runs-on: ubuntu-latest
     env:
-      TRUNK_TOKEN: ${{ secrets.TRUNK_TOKEN }}
-      TRUNK_ORG_SLUG: ${{ secrets.TRUNK_ORG_SLUG }}
+      TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN || secrets.TRUNK_TOKEN }}
+      TRUNK_ORG_URL_SLUG: ${{ secrets.TRUNK_ORG_URL_SLUG || secrets.TRUNK_ORG_SLUG }}
+      DEPLOYMENT_ARTIFACT_BASE_URL: ${{ vars.DEPLOYMENT_ARTIFACT_BASE_URL }}
     concurrency:
       group: content-validation-${{ github.ref }}
       cancel-in-progress: true
@@ -54,7 +55,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Clean test reports
-        run: rm -rf reports/junit
+        run: rm -rf reports/junit && mkdir -p reports/junit
 
       - name: Build registry artifacts
         run: pnpm --filter web run prebuild
@@ -71,17 +72,25 @@ jobs:
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run browser smoke
+      - name: Run browser regression suite
         run: pnpm test:e2e
 
+      - name: Install Raycast dependencies
+        working-directory: integrations/raycast
+        run: npm ci
+
+      - name: Test Raycast helpers
+        working-directory: integrations/raycast
+        run: npm run test:junit
+
       - name: Upload test results to Trunk
-        if: ${{ always() && env.TRUNK_TOKEN != '' && env.TRUNK_ORG_SLUG != '' }}
+        if: ${{ always() && env.TRUNK_API_TOKEN != '' && env.TRUNK_ORG_URL_SLUG != '' }}
         continue-on-error: true
         uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa
         with:
           junit-paths: reports/junit/*.xml
-          org-slug: ${{ env.TRUNK_ORG_SLUG }}
-          token: ${{ env.TRUNK_TOKEN }}
+          org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
+          token: ${{ env.TRUNK_API_TOKEN }}
 
       - name: Validate content schema
         run: pnpm validate:content:strict
@@ -97,6 +106,10 @@ jobs:
 
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
+
+      - name: Validate deployed artifact contract
+        if: ${{ env.DEPLOYMENT_ARTIFACT_BASE_URL != '' }}
+        run: pnpm validate:deployment-artifacts -- --base-url "$DEPLOYMENT_ARTIFACT_BASE_URL"
 
       - name: Verify generated registry artifacts are current
         run: git diff --exit-code apps/web/public/data apps/web/src/generated
@@ -114,14 +127,6 @@ jobs:
 
       - name: Build web app
         run: pnpm build
-
-      - name: Install Raycast dependencies
-        working-directory: integrations/raycast
-        run: npm ci
-
-      - name: Test Raycast helpers
-        working-directory: integrations/raycast
-        run: npm test
 
       - name: Lint Raycast extension
         working-directory: integrations/raycast

@@ -1,0 +1,14 @@
+---
+description: "Deep smart contract security skill covering Solidity design, test rigor, deployment hygiene, and post-launch risk controls."
+globs:
+alwaysApply: false
+---
+# Ethereum Base Smart Contract Security Capability Pack Skill
+Expert EVM capability skill for secure contract architecture across Ethereum and Base, including Foundry testing and operational controls.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/ethereum-base-smart-contract-security-capability-pack.zip -o ethereum-base-smart-contract-security-capability-pack.zip && unzip -o ethereum-base-smart-contract-security-capability-pack.zip -d ./ethereum-base-smart-contract-security-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/ethereum-base-smart-contract-security-capability-pack.zip

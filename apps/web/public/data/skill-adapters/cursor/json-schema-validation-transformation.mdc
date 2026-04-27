@@ -1,0 +1,14 @@
+---
+description: "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and trans..."
+globs:
+alwaysApply: false
+---
+# JSON Schema Validate + Transform Skill
+Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation).
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm i ajv
+```
+## Source
+https://heyclau.de/downloads/skills/json-schema-validation-transformation.zip

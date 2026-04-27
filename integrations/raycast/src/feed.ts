@@ -1,4 +1,7 @@
 export const FEED_URL = "https://heyclau.de/data/raycast-index.json";
+export const SUBMIT_URL = "https://heyclau.de/submit";
+export const GITHUB_NEW_ISSUE_URL =
+  "https://github.com/JSONbored/claudepro-directory/issues/new";
 export const CACHE_KEY = "heyclaude-raycast-index";
 export const DETAIL_CACHE_PREFIX = "heyclaude-raycast-detail";
 export const FAVORITES_KEY = "favorite-entry-keys";
@@ -53,6 +56,18 @@ const categoryLabels: Record<string, string> = {
   statuslines: "Statuslines",
 };
 
+const issueTemplateByCategory: Record<string, string> = {
+  agents: "submit-agent.yml",
+  mcp: "submit-mcp.yml",
+  skills: "submit-skill.yml",
+  rules: "submit-rule.yml",
+  commands: "submit-command.yml",
+  hooks: "submit-hook.yml",
+  guides: "submit-guide.yml",
+  collections: "submit-collection.yml",
+  statuslines: "submit-statusline.yml",
+};
+
 export function entryKey(entry: Pick<RaycastEntry, "category" | "slug">) {
   return `${entry.category}:${entry.slug}`;
 }
@@ -63,6 +78,34 @@ export function categoryLabel(category: string) {
 
 export function absoluteDataUrl(value: string, baseUrl = FEED_URL) {
   return new URL(value, baseUrl).toString();
+}
+
+export function buildContributeEntryUrl(entry?: Partial<RaycastEntry>) {
+  const url = new URL(SUBMIT_URL);
+  if (entry?.category) url.searchParams.set("category", entry.category);
+  if (entry?.title) url.searchParams.set("name", entry.title);
+  if (entry?.slug) url.searchParams.set("slug", entry.slug);
+  return url.toString();
+}
+
+export function buildSuggestChangeUrl(entry: RaycastEntry) {
+  const template = issueTemplateByCategory[entry.category] ?? "submit-entry.md";
+  const url = new URL(GITHUB_NEW_ISSUE_URL);
+  url.searchParams.set("template", template);
+  url.searchParams.set(
+    "title",
+    `Update ${categoryLabel(entry.category)}: ${entry.title}`,
+  );
+  url.searchParams.set("name", entry.title);
+  url.searchParams.set("slug", entry.slug);
+  url.searchParams.set("category", entry.category);
+  url.searchParams.set("description", entry.description);
+  url.searchParams.set("card_description", entry.description);
+  if (entry.repoUrl) url.searchParams.set("github_url", entry.repoUrl);
+  if (entry.documentationUrl) {
+    url.searchParams.set("docs_url", entry.documentationUrl);
+  }
+  return url.toString();
 }
 
 export function isRaycastEntry(value: unknown): value is RaycastEntry {

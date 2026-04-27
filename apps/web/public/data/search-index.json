@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "search-index",
   "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 378,
+  "count": 379,
   "entries": [
     {
       "category": "commands",
@@ -6002,6 +6002,33 @@
       "documentationUrl": "https://heyclau.de/mcp/heyclaude-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/heyclaude-mcp"
+    },
+    {
+      "category": "skills",
+      "slug": "heyclaude-skill-submission-factory",
+      "title": "HeyClaude Skill Submission Factory",
+      "description": "Build valid Agent Skills and submit them to HeyClaude through maintainer-reviewed GitHub issues.",
+      "tags": [
+        "heyclaude",
+        "skill-authoring",
+        "agent-skills",
+        "registry",
+        "submissions"
+      ],
+      "keywords": [
+        "create Agent Skill",
+        "submit skill to HeyClaude",
+        "Cursor rule adapter",
+        "SKILL.md package validation"
+      ],
+      "author": "JSONbored",
+      "dateAdded": "2026-04-27",
+      "installable": true,
+      "downloadTrust": "first-party",
+      "verificationStatus": "validated",
+      "documentationUrl": "https://heyclau.de/submit",
+      "repoUrl": "",
+      "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory"
     },
     {
       "category": "commands",

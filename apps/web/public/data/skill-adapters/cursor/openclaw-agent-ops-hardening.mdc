@@ -1,0 +1,14 @@
+---
+description: "Production hardening for OpenClaw deployments, including permissions, network segmentation, and abuse-resistant agent controls."
+globs:
+alwaysApply: false
+---
+# OpenClaw Agent Ops Hardening Skill
+Harden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip -o openclaw-agent-ops-hardening.zip && unzip -o openclaw-agent-ops-hardening.zip -d ./openclaw-agent-ops-hardening
+```
+## Source
+https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip

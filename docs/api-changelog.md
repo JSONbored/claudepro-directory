@@ -1,5 +1,12 @@
 # API Changelog
 
+## 2026-04-27
+
+- Added generated skill platform compatibility metadata for native Agent Skills platforms and adapter targets.
+- Added generated Cursor `.mdc` skill adapters under `/data/skill-adapters/cursor/`.
+- Added deployment artifact validation for preview release candidates.
+- Clarified that registry publishing remains outside the public API.
+
 ## 2026-04-26
 
 - Added read-only registry endpoints for manifest, categories, search, entry detail, and per-entry LLM text.

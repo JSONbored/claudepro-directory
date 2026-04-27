@@ -61,6 +61,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/git-cliff-release-changelog-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/git-cliff-release-changelog-capability-pack.zip",
+      "sha256": "88297534195c8e594486b5e5c230f5c99b1053118e534e7dbf598514e79a4741"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/git-cliff-release-changelog-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "88297534195c8e594486b5e5c230f5c99b1053118e534e7dbf598514e79a4741",
     "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://git-cliff.org/docs/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases\n\n## Core Workflow\n\n1. Validate commit history quality against conventional commit policy.\n2. Determine next version from merged change scope.\n3. Generate changelog draft and remove low-signal noise.\n4. Stage release commit/tag plan with rollback path.\n5. Publish release and verify changelog consistency.\n\n## Overview\n\nThis skill gives agents a deterministic release process that produces readable changelogs without manual rewrite churn.\n\n## Capability Scope\n\n- Commit history normalization\n- Semver recommendation logic\n- Changelog generation and section tuning\n- Release tagging and publication checks\n- Post-release verification and correction\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Enforce conventional commits before changelog generation.\n- Keep release source-of-truth tied to tags on protected branches.\n- Exclude bot-only and merge-noise commits from user-facing notes.\n- Require human review before publishing release artifacts.\n\n## Troubleshooting\n\n**Issue:** Changelog section grouping is noisy  \n**Fix:** tighten commit scopes and skip bots/merge-only commits.\n\n**Issue:** Wrong version bump recommendation  \n**Fix:** map feat/fix/breaking conventions explicitly in config.\n\n**Issue:** Release notes differ from changelog  \n**Fix:** derive both from same generated artifact path.\n\n## Output Contract\n\n1. Proposed version with justification.\n2. Clean changelog text ready for merge.\n3. Tag/release command sequence.\n4. Verification notes and fallback steps.",

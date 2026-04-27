@@ -38,6 +38,19 @@ function unzipList(archivePath) {
   }
 }
 
+function unzipText(archivePath, fileName) {
+  try {
+    return execFileSync("unzip", ["-p", archivePath, fileName], {
+      encoding: "utf8",
+    });
+  } catch {
+    failures.push(
+      `Could not read ${fileName} from ${path.relative(repoRoot, archivePath)}`,
+    );
+    return "";
+  }
+}
+
 function validateSkillArchive(filePath, entry) {
   const names = unzipList(filePath);
   if (!names.length) return;
@@ -50,13 +63,43 @@ function validateSkillArchive(filePath, entry) {
     failures.push(`${entry}: unsafe archive path detected (${invalidPath})`);
   }
 
-  const disallowed = names.find(
-    (name) => !name.toLowerCase().endsWith("skill.md"),
+  const rootFolders = new Set(
+    names.map((name) => name.split("/").filter(Boolean)[0]).filter(Boolean),
   );
+  if (rootFolders.size !== 1) {
+    failures.push(`${entry}: skills archive must contain one root folder`);
+    return;
+  }
+
+  const root = [...rootFolders][0];
+  const skillPath = `${root}/SKILL.md`;
+  if (!names.includes(skillPath)) {
+    failures.push(`${entry}: skills archive must include ${skillPath}`);
+    return;
+  }
+
+  const disallowed = names.find((name) => {
+    if (name.endsWith("/")) return false;
+    if (name === skillPath) return false;
+    if (name.startsWith(`${root}/scripts/`)) return false;
+    if (name.startsWith(`${root}/references/`)) return false;
+    if (name.startsWith(`${root}/assets/`)) return false;
+    if (name === `${root}/agents/openai.yaml`) return false;
+    return true;
+  });
   if (disallowed) {
-    failures.push(
-      `${entry}: skills archive should only include SKILL.md files (found ${disallowed})`,
-    );
+    failures.push(`${entry}: unexpected Agent Skill file (${disallowed})`);
+  }
+
+  const skill = matter(unzipText(filePath, skillPath));
+  const name = String(skill.data?.name || "").trim();
+  const description = String(skill.data?.description || "").trim();
+  if (!name) failures.push(`${entry}: SKILL.md frontmatter missing name`);
+  if (!description) {
+    failures.push(`${entry}: SKILL.md frontmatter missing description`);
+  }
+  if (description.length > 1024) {
+    failures.push(`${entry}: SKILL.md description exceeds 1024 characters`);
   }
 }
 

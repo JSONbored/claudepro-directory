@@ -59,6 +59,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/ethereum-solidity-security-foundry.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/ethereum-solidity-security-foundry.zip",
+      "sha256": "658d185c8a7a5c7981f9d4c0d5bb046f425a567016a35bbd8c8aaaf83284db5e"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/ethereum-solidity-security-foundry.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "658d185c8a7a5c7981f9d4c0d5bb046f425a567016a35bbd8c8aaaf83284db5e",
     "body": "## Overview\n\nThis skill gives AI agents a security-first operating model for Ethereum smart contracts. It combines pragmatic architecture guidance with strict testing discipline and deployment safeguards.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Contract requirements and threat boundaries\n- Access controls and upgrade policy decisions\n- Testnet deployment pipeline\n\n## What This Skill Delivers\n\n- Security-centric contract design review\n- Foundry unit, fuzz, and invariant test strategy\n- Common exploit class defenses (reentrancy, auth, oracle, rounding, griefing)\n- Pre-deploy and post-deploy operational checklist\n\n## How to Use This Skill\n\n1. Define assets, actors, and privileged operations.\n2. Build minimal contract surface area with explicit invariants.\n3. Implement and test against adversarial cases.\n4. Run static/dynamic checks before deployment.\n5. Deploy progressively with monitoring and pause controls.\n\n## Troubleshooting\n\n**Issue:** Tests pass but invariants fail under fuzzing  \n**Fix:** Revisit state transitions and assumptions around edge-case ordering.\n\n**Issue:** Access control too broad  \n**Fix:** Replace role overreach with least-privilege split roles and delayed admin ops.\n\n**Issue:** Upgrades create storage breakage  \n**Fix:** Add storage layout checks and upgrade simulation in CI before release.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://ethereum.org/developers/docs/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

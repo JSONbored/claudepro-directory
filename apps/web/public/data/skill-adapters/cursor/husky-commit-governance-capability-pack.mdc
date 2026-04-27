@@ -1,0 +1,14 @@
+---
+description: "Set up practical pre-commit and commit-msg hooks that improve quality without bloating CI costs."
+globs:
+alwaysApply: false
+---
+# Husky Commit Governance Capability Pack Skill
+Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip

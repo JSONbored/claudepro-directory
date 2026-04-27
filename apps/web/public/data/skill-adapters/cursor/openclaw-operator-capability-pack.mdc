@@ -1,0 +1,14 @@
+---
+description: "Deep operational OpenClaw skill for maintaining secure, reliable, and cost-aware multi-agent systems."
+globs:
+alwaysApply: false
+---
+# OpenClaw Operator Capability Pack Skill
+Expert OpenClaw operator capability skill for secure deployment, policy governance, tool boundaries, and production observability.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/openclaw-operator-capability-pack.zip -o openclaw-operator-capability-pack.zip && unzip -o openclaw-operator-capability-pack.zip -d ./openclaw-operator-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/openclaw-operator-capability-pack.zip

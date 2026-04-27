@@ -80,6 +80,70 @@ export function localDownloadSourcePath(downloadUrl, contentRoot) {
   return null;
 }
 
+function buildDefaultSkillPlatformCompatibility(data, inferred) {
+  const verifiedAt =
+    inferred.verifiedAt || normalizeDateAdded(data.dateAdded) || "";
+  const slug = String(data.slug || "skill").trim() || "skill";
+  return [
+    {
+      platform: "Claude",
+      supportLevel: "native-skill",
+      installPath: ".claude/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Codex",
+      supportLevel: "native-skill",
+      installPath: ".agents/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Windsurf",
+      supportLevel: "native-skill",
+      installPath: ".windsurf/skills/<skill-name>/SKILL.md",
+      verifiedAt,
+    },
+    {
+      platform: "Gemini",
+      supportLevel: "adapter",
+      installPath: ".gemini/commands/<skill-name>.toml or GEMINI.md",
+      verifiedAt,
+    },
+    {
+      platform: "Cursor",
+      supportLevel: "adapter",
+      installPath: ".cursor/rules/<skill-name>.mdc",
+      adapterPath: `/data/skill-adapters/cursor/${slug}.mdc`,
+      verifiedAt,
+    },
+    {
+      platform: "Generic AGENTS",
+      supportLevel: "manual-context",
+      installPath: "AGENTS.md or tool-specific context file",
+      verifiedAt,
+    },
+  ];
+}
+
+function normalizePlatformCompatibility(value, data, inferred) {
+  if (Array.isArray(value) && value.length) {
+    return value
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        return {
+          platform: String(item.platform || "").trim(),
+          supportLevel: String(item.supportLevel || "").trim(),
+          installPath: String(item.installPath || "").trim(),
+          adapterPath: item.adapterPath ? String(item.adapterPath) : undefined,
+          verifiedAt: item.verifiedAt ? String(item.verifiedAt) : undefined,
+        };
+      })
+      .filter((item) => item?.platform && item.supportLevel);
+  }
+
+  return buildDefaultSkillPlatformCompatibility(data, inferred);
+}
+
 export function buildContentEntryFromMdx(params) {
   const {
     category,
@@ -216,6 +280,23 @@ export function buildContentEntryFromMdx(params) {
         ? data.packageVerified
         : undefined,
     downloadUrl,
+    skillPackage:
+      category === "skills" && downloadUrl
+        ? {
+            format: "agent-skill",
+            entrypoint: "SKILL.md",
+            downloadUrl,
+            sha256: downloadSha256,
+          }
+        : undefined,
+    platformCompatibility:
+      category === "skills"
+        ? normalizePlatformCompatibility(
+            data.platformCompatibility,
+            data,
+            inferred,
+          )
+        : undefined,
     downloadTrust,
     downloadSha256,
     body,

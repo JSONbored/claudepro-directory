@@ -65,6 +65,21 @@ const examples = [
     code: "curl https://heyclau.de/data/ecosystem-feed.json",
   },
   {
+    title: "Search Artifact",
+    href: "/data/search-index.json",
+    code: "curl https://heyclau.de/data/search-index.json",
+  },
+  {
+    title: "Raycast Feed",
+    href: "/data/raycast-index.json",
+    code: "curl https://heyclau.de/data/raycast-index.json",
+  },
+  {
+    title: "Skill Cursor Adapter",
+    href: "/data/skill-adapters/cursor/heyclaude-skill-submission-factory.mdc",
+    code: "curl https://heyclau.de/data/skill-adapters/cursor/{skill}.mdc",
+  },
+  {
     title: "Community Signals",
     href: "/api/community-signals?targetKind=tool&targetKey=tool:cursor",
     code: "curl 'https://heyclau.de/api/community-signals?targetKind=tool&targetKey=tool:cursor'",
@@ -131,8 +146,9 @@ export default function ApiDocsPage() {
         <p>
           Content is Git-backed and read-only through the public API. Dynamic
           state such as votes, jobs, leads, community signals, and sponsorship
-          windows stays in the site database and is not part of the editorial
-          registry contract.
+          windows stays in the site database and is tightly limited outside the
+          editorial registry contract. Registry publishing is not exposed as a
+          public API; submissions remain issue-first and maintainer-reviewed.
         </p>
         <p>
           Use <code className="text-foreground">If-None-Match</code> with the

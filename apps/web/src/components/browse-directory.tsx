@@ -42,9 +42,11 @@ const utilityFilterOptions = [
 ] as const;
 const sortModeOptions = ["popular", "newest", "title"] as const;
 
-type DirectoryEntriesPayload = {
-  entries?: DirectoryEntry[];
-};
+type DirectoryEntriesPayload =
+  | DirectoryEntry[]
+  | {
+      entries?: DirectoryEntry[];
+    };
 
 function normalizeCategory(value?: string) {
   const normalized = String(value || "")
@@ -61,6 +63,12 @@ function normalizeUtilityFilter(value?: string) {
   return utilityFilterOptions.some((option) => option.value === normalized)
     ? normalized
     : "all";
+}
+
+function readDirectoryEntries(payload: DirectoryEntriesPayload) {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.entries)) return payload.entries;
+  return [];
 }
 
 function normalizeSortMode(value?: string) {
@@ -155,7 +163,7 @@ export function BrowseDirectory({
       if (!response.ok) return;
 
       const payload = (await response.json()) as DirectoryEntriesPayload;
-      const nextEntries = payload.entries;
+      const nextEntries = readDirectoryEntries(payload);
       if (!Array.isArray(nextEntries) || nextEntries.length === 0) return;
 
       setAllEntries(nextEntries);

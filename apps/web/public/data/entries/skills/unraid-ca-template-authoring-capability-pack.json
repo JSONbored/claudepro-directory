@@ -61,6 +61,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/unraid-ca-template-authoring-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/unraid-ca-template-authoring-capability-pack.zip",
+      "sha256": "e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/unraid-ca-template-authoring-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7",
     "body": "## Knowledge Freshness\n\nThis capability pack is pinned to sources verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://forums.unraid.net/\n- https://github.com/bergware/dynamix\n- https://docs.unraid.net/\n\n## Core Workflow\n\n1. Define intended user profile and operational constraints.\n2. Draft CA XML with complete metadata and accurate support references.\n3. Validate defaults for first-boot safety and recovery behavior.\n4. Add caveats for resource, security, and maintenance tradeoffs.\n5. Complete submission checklist and review pass.\n\n## Overview\n\nThis skill helps agents produce community-ready Unraid templates that are practical for beginners and maintainable for operators.\n\n## Capability Scope\n\n- CA XML metadata completeness\n- Beginner-safe defaults and caveats\n- Support/docs linkage quality\n- Operational tradeoff transparency\n- Submission readiness review\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Maintain accurate CA metadata and reachable support links.\n- Keep defaults beginner-safe with explicit tradeoff notes.\n- Validate networking, storage, and permission assumptions.\n- Treat template updates as user-impacting changes with clear notes.\n\n## Troubleshooting\n\n**Issue:** Template rejected for weak metadata  \n**Fix:** complete Project, Support, TemplateURL, Icon, and Overview fields.\n\n**Issue:** New users fail first boot  \n**Fix:** tighten defaults and add explicit setup prerequisites.\n\n**Issue:** Support load spikes after release  \n**Fix:** publish FAQ + known limitations before submission.\n\n## Output Contract\n\n1. Production-ready CA template metadata.\n2. Safe default config and caveat notes.\n3. Review checklist with unresolved gaps.\n4. Submission package summary.",

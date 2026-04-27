@@ -1,0 +1,14 @@
+---
+description: "Expert Unraid API skill with endpoint behavior, auth flows, error patterns, and production-safe automation guardrails."
+globs:
+alwaysApply: false
+---
+# Unraid API v2 Capability Pack Skill
+Deep, version-pinned Unraid API capability skill covering auth, schema patterns, safe mutations, and operational automation design.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip -o unraid-api-v2-capability-pack.zip && unzip -o unraid-api-v2-capability-pack.zip -d ./unraid-api-v2-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip

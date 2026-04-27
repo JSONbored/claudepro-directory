@@ -61,6 +61,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/codex-automations-orchestrator-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/codex-automations-orchestrator-capability-pack.zip",
+      "sha256": "7e3ee39f61507d249f0b0b5ec49c35c6fc076b5ca2d6f85174eec8664de00867"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/codex-automations-orchestrator-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "7e3ee39f61507d249f0b0b5ec49c35c6fc076b5ca2d6f85174eec8664de00867",
     "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://github.com/openai/codex\n- https://spec.modelcontextprotocol.io/specification/\n- https://www.rfc-editor.org/rfc/rfc5545\n\n## Core Workflow\n\n1. Define automation objective and business value.\n2. Set schedule with explicit risk and blast-radius limits.\n3. Write self-sufficient prompt with output contract.\n4. Add observability, alerts, and runbook actions.\n5. Review periodically and retire low-value automations.\n\n## Overview\n\nThis skill turns ad-hoc recurring tasks into maintainable automations with clear guardrails and measurable outcomes.\n\n## Capability Scope\n\n- Automation scoping and prioritization\n- Schedule and RRULE governance\n- Prompt reliability for unattended runs\n- Alert routing and escalation design\n- Lifecycle management and cleanup\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Every automation must declare bounded scope and expected outputs.\n- Alert only on actionable failures to avoid fatigue.\n- Prevent overlapping destructive runs with single-flight controls.\n- Keep runbooks current for pause, rollback, and recovery actions.\n\n## Troubleshooting\n\n**Issue:** Automation output is inconsistent  \n**Fix:** tighten prompt to fixed output schema and acceptance checks.\n\n**Issue:** Too many alerts  \n**Fix:** only notify on actionable failures, not informational events.\n\n**Issue:** Runs overlap and cause drift  \n**Fix:** enforce single-flight behavior and lock window policy.\n\n## Output Contract\n\n1. Automation definition per task.\n2. Schedule + risk controls.\n3. Alert routing and runbook.\n4. Maintenance cadence and retirement triggers.",

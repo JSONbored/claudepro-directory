@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { RAYCAST_COPY_PREVIEW_LIMIT } from "@heyclaude/registry";
+
 const repoRoot = process.cwd();
 const feedPath = path.join(repoRoot, "apps/web/public/data/raycast-index.json");
 const requiredEntryFields = [
@@ -79,7 +81,7 @@ for (const entry of payload.entries) {
       fail(`${key}: forbidden Raycast field ${field}`);
   }
   if (!Array.isArray(entry.tags)) fail(`${key}: tags must be an array`);
-  if (String(entry.copyText ?? "").length > 20003) {
+  if (String(entry.copyText ?? "").length > RAYCAST_COPY_PREVIEW_LIMIT + 3) {
     fail(`${key}: feed copyText exceeds preview cap`);
   }
 

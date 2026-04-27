@@ -1,0 +1,14 @@
+---
+description: "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type infer..."
+globs:
+alwaysApply: false
+---
+# Zod Schema Validation Skill
+Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm install zod
+```
+## Source
+https://heyclau.de/downloads/skills/zod-schema-validator.zip

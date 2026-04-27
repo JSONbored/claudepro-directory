@@ -1,0 +1,14 @@
+---
+description: "Deep Raycast builder skill for creating, validating, and shipping high-quality extensions to the Raycast ecosystem."
+globs:
+alwaysApply: false
+---
+# Raycast Extension Dev Publish Capability Pack Skill
+Expert Raycast extension capability skill for command design, extension architecture, testing, and store-ready publication workflows.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip

@@ -1,0 +1,14 @@
+---
+description: "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing."
+globs:
+alwaysApply: false
+---
+# Image OCR + Table Extraction Skill
+Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d ./image-ocr-table-extraction
+```
+## Source
+https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip

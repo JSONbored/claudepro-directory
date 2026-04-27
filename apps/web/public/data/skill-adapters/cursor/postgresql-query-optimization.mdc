@@ -1,0 +1,14 @@
+---
+description: "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and executi..."
+globs:
+alwaysApply: false
+---
+# PostgreSQL Query Optimization Skill
+Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/postgresql-query-optimization.zip -o postgresql-query-optimization.zip && unzip -o postgresql-query-optimization.zip -d ./postgresql-query-optimization
+```
+## Source
+https://heyclau.de/downloads/skills/postgresql-query-optimization.zip

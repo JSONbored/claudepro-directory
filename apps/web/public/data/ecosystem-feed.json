@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "ecosystem-feed",
   "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 378,
+  "count": 379,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -6545,6 +6545,41 @@
       }
     },
     {
+      "key": "skills:heyclaude-skill-submission-factory",
+      "category": "skills",
+      "slug": "heyclaude-skill-submission-factory",
+      "title": "HeyClaude Skill Submission Factory",
+      "description": "Build valid Agent Skills and submit them to HeyClaude through maintainer-reviewed GitHub issues.",
+      "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+      "websiteUrl": "",
+      "documentationUrl": "https://heyclau.de/submit",
+      "repoUrl": "",
+      "pricingModel": "",
+      "disclosure": "editorial",
+      "tags": [
+        "heyclaude",
+        "skill-authoring",
+        "agent-skills",
+        "registry",
+        "submissions"
+      ],
+      "qualityScore": 90,
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": true,
+        "sourceUrls": [
+          "https://heyclau.de/submit",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://heyclau.de/submit"
+        ]
+      }
+    },
+    {
       "key": "commands:hooks-generator",
       "category": "commands",
       "slug": "hooks-generator",
@@ -13032,5 +13067,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "2a21986f8bd5392def5964fe83bd68328696f9745112edc9b77d75dcf3ff7e7f"
+  "signature": "2dd49b0d4e11a60b0a42d57b315594f280aac31b45de20712af47622cd51871f"
 }

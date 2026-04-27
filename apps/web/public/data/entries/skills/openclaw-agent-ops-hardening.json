@@ -60,6 +60,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/openclaw-agent-ops-hardening.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/openclaw-agent-ops-hardening.zip",
+      "sha256": "a2287d07c870f3070dc22382f0e2a409b098c5115c844429796bfa4424baf21d"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/openclaw-agent-ops-hardening.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "a2287d07c870f3070dc22382f0e2a409b098c5115c844429796bfa4424baf21d",
     "body": "## Overview\n\nThis skill provides a practical hardening framework for OpenClaw deployments. It focuses on reducing attack surface while preserving developer velocity: least privilege, clear approval paths, and observable failure handling.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Tool and connector inventory\n- Environment separation plan (dev/staging/prod)\n- Centralized logs and alert destination\n\n## What This Skill Delivers\n\n- Threat model tailored to agentic execution\n- Permission and approval policy per tool class\n- Runtime hardening checklist (secrets, network, filesystem, egress)\n- Incident handling runbook for abuse, drift, and data exposure\n\n## How to Use This Skill\n\n1. Identify data classes and protected operations.\n2. Map tools to minimal required permissions.\n3. Add explicit policy checks for sensitive actions.\n4. Add audit logs with correlation IDs.\n5. Validate with adversarial prompts and abuse scenarios.\n\n## Troubleshooting\n\n**Issue:** Agent can execute risky actions too broadly  \n**Fix:** Split capabilities into scoped tools and add approval for privileged operations.\n\n**Issue:** Difficult to trace harmful outputs  \n**Fix:** Add structured logging for prompt, tool call, decision, and result lifecycle.\n\n**Issue:** Secrets exposed in generated output  \n**Fix:** Add redaction middleware and blocklist checks before response emission.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://github.com/openclaw/openclaw\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

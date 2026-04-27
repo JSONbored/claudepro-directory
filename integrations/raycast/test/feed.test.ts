@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 
 import {
   absoluteDataUrl,
+  buildContributeEntryUrl,
+  buildSuggestChangeUrl,
   categoryLabel,
   entryKey,
   fallbackDetail,
@@ -70,6 +72,26 @@ describe("Raycast feed helpers", () => {
       absoluteDataUrl("/data/raycast/mcp/context7.json"),
       "https://heyclau.de/data/raycast/mcp/context7.json",
     );
+  });
+
+  it("builds issue-first contribution URLs without local write targets", () => {
+    const contributeUrl = new URL(buildContributeEntryUrl(sampleEntry));
+    assert.equal(contributeUrl.origin, "https://heyclau.de");
+    assert.equal(contributeUrl.pathname, "/submit");
+    assert.equal(contributeUrl.searchParams.get("category"), "mcp");
+    assert.equal(contributeUrl.searchParams.get("slug"), "context7");
+
+    const suggestUrl = new URL(buildSuggestChangeUrl(sampleEntry));
+    assert.equal(suggestUrl.origin, "https://github.com");
+    assert.equal(
+      suggestUrl.pathname,
+      "/JSONbored/claudepro-directory/issues/new",
+    );
+    assert.equal(suggestUrl.searchParams.get("template"), "submit-mcp.yml");
+    assert.equal(suggestUrl.searchParams.get("category"), "mcp");
+    assert.equal(suggestUrl.searchParams.get("slug"), "context7");
+    assert.match(suggestUrl.toString(), /^https:\/\//);
+    assert.equal(suggestUrl.toString().includes("file:"), false);
   });
 
   it("validates and parses full detail payloads", () => {

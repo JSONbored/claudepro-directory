@@ -61,9 +61,54 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/codex-plugin-creator-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/codex-plugin-creator-capability-pack.zip",
+      "sha256": "7ea59a73540f97320dc9819720d4dc25f6d117f44096d7aa6011a4857cced8f0"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/codex-plugin-creator-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "7ea59a73540f97320dc9819720d4dc25f6d117f44096d7aa6011a4857cced8f0",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://github.com/openai/codex\n- https://github.com/modelcontextprotocol\n- https://spec.modelcontextprotocol.io/specification/\n\n## Core Workflow\n\n1. Define plugin scope, trust boundaries, and runtime dependencies.\n2. Build manifest with minimum required capabilities only.\n3. Validate tool behavior and failure paths with smoke tests.\n4. Add observability and troubleshooting hooks.\n5. Publish with maintenance and compatibility policy.\n\n## Overview\n\nThis skill helps agents build practical plugins that stay secure and maintainable instead of becoming one-off brittle integrations.\n\n## Capability Scope\n\n- Plugin architecture and capability boundaries\n- Manifest quality and permission minimization\n- MCP tool interoperability guidance\n- Error handling and observability setup\n- Release governance and compatibility notes\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Minimize plugin permissions and document each permission reason.\n- Validate tool contracts against strict schema expectations.\n- Keep plugin error handling explicit and observable.\n- Ship updates with backward-compatibility notes when behavior changes.\n\n## Troubleshooting\n\n**Issue:** Plugin has excessive privilege scope  \n**Fix:** reduce manifest permissions to explicit operational minimum.\n\n**Issue:** Tool calls are inconsistent across clients  \n**Fix:** enforce contract tests against expected schema/shape.\n\n**Issue:** Plugin errors are hard to diagnose  \n**Fix:** add request IDs, structured logs, and clear failure categories.\n\n## Output Contract\n\n1. Plugin plan with trust boundaries.\n2. Manifest with justification per permission.\n3. Validation and smoke-test protocol.\n4. Maintenance and deprecation plan.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://github.com/openai/codex\n- https://github.com/modelcontextprotocol\n- https://spec.modelcontextprotocol.io/specification/\n\n## Core Workflow\n\n1. Define plugin scope, trust boundaries, and runtime dependencies.\n2. Build manifest with minimum required capabilities only.\n3. Validate tool behavior and failure paths with regression tests.\n4. Add observability and troubleshooting hooks.\n5. Publish with maintenance and compatibility policy.\n\n## Overview\n\nThis skill helps agents build practical plugins that stay secure and maintainable instead of becoming one-off brittle integrations.\n\n## Capability Scope\n\n- Plugin architecture and capability boundaries\n- Manifest quality and permission minimization\n- MCP tool interoperability guidance\n- Error handling and observability setup\n- Release governance and compatibility notes\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Minimize plugin permissions and document each permission reason.\n- Validate tool contracts against strict schema expectations.\n- Keep plugin error handling explicit and observable.\n- Ship updates with backward-compatibility notes when behavior changes.\n\n## Troubleshooting\n\n**Issue:** Plugin has excessive privilege scope  \n**Fix:** reduce manifest permissions to explicit operational minimum.\n\n**Issue:** Tool calls are inconsistent across clients  \n**Fix:** enforce contract tests against expected schema/shape.\n\n**Issue:** Plugin errors are hard to diagnose  \n**Fix:** add request IDs, structured logs, and clear failure categories.\n\n## Output Contract\n\n1. Plugin plan with trust boundaries.\n2. Manifest with justification per permission.\n3. Validation and regression-test protocol.\n4. Maintenance and deprecation plan.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -80,7 +125,7 @@
       {
         "title": "Core Workflow",
         "id": "core-workflow",
-        "markdown": "1. Define plugin scope, trust boundaries, and runtime dependencies.\n2. Build manifest with minimum required capabilities only.\n3. Validate tool behavior and failure paths with smoke tests.\n4. Add observability and troubleshooting hooks.\n5. Publish with maintenance and compatibility policy.",
+        "markdown": "1. Define plugin scope, trust boundaries, and runtime dependencies.\n2. Build manifest with minimum required capabilities only.\n3. Validate tool behavior and failure paths with regression tests.\n4. Add observability and troubleshooting hooks.\n5. Publish with maintenance and compatibility policy.",
         "codeBlocks": []
       },
       {
@@ -116,7 +161,7 @@
       {
         "title": "Output Contract",
         "id": "output-contract",
-        "markdown": "1. Plugin plan with trust boundaries.\n2. Manifest with justification per permission.\n3. Validation and smoke-test protocol.\n4. Maintenance and deprecation plan.",
+        "markdown": "1. Plugin plan with trust boundaries.\n2. Manifest with justification per permission.\n3. Validation and regression-test protocol.\n4. Maintenance and deprecation plan.",
         "codeBlocks": []
       }
     ],

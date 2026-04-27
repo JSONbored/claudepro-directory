@@ -31,7 +31,7 @@ This skill gives an AI agent a strict, repeatable process for improving PageSpee
 ## Prerequisites
 - A route to test (production, staging, or preview URL)
 - Baseline Lighthouse/PageSpeed run for **mobile and desktop**
-- Ability to run project checks after edits (`type-check`, `build`, smoke tests)
+- Ability to run project checks after edits (`type-check`, `build`, regression tests)
 - Access to deploy and re-test
 
 ## What This Skill Optimizes

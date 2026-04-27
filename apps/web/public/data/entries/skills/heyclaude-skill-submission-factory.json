@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "key": "skills:heyclaude-skill-submission-factory",
+  "entry": {
+    "category": "skills",
+    "slug": "heyclaude-skill-submission-factory",
+    "title": "HeyClaude Skill Submission Factory",
+    "description": "Create portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.",
+    "seoTitle": "HeyClaude Skill Submission Factory Skill",
+    "seoDescription": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
+    "author": "JSONbored",
+    "authorProfileUrl": "https://github.com/JSONbored",
+    "dateAdded": "2026-04-27",
+    "tags": [
+      "heyclaude",
+      "skill-authoring",
+      "agent-skills",
+      "registry",
+      "submissions"
+    ],
+    "keywords": [
+      "create Agent Skill",
+      "submit skill to HeyClaude",
+      "Cursor rule adapter",
+      "SKILL.md package validation"
+    ],
+    "readingTime": 6,
+    "difficultyScore": 68,
+    "documentationUrl": "https://heyclau.de/submit",
+    "cardDescription": "Build valid Agent Skills and submit them to HeyClaude through maintainer-reviewed GitHub issues.",
+    "installable": true,
+    "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip -o heyclaude-skill-submission-factory.zip && unzip -o heyclaude-skill-submission-factory.zip -d ./heyclaude-skill-submission-factory",
+    "usageSnippet": "Use this skill when creating a portable Agent Skill and submitting it to the HeyClaude skills registry.",
+    "copySnippet": "# Trigger\n\"Create a portable Agent Skill and prepare a HeyClaude issue-first submission.\"\n\n# Required output\n1) Valid SKILL.md package\n2) Platform compatibility table\n3) Cursor adapter draft when applicable\n4) HeyClaude submission issue fields",
+    "skillType": "general",
+    "skillLevel": "advanced",
+    "verificationStatus": "validated",
+    "verifiedAt": "2026-04-27",
+    "retrievalSources": [
+      "https://heyclau.de/submit",
+      "https://developers.openai.com/codex/skills",
+      "https://docs.claude.com/en/docs/claude-code/skills",
+      "https://docs.windsurf.com/windsurf/cascade/skills",
+      "https://docs.cursor.com/en/context",
+      "https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md"
+    ],
+    "testedPlatforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "prerequisites": [
+      "Skill topic and target user",
+      "Official docs or source URLs",
+      "Validation commands or acceptance criteria"
+    ],
+    "hasPrerequisites": true,
+    "hasTroubleshooting": true,
+    "hasBreakingChanges": false,
+    "robotsIndex": true,
+    "robotsFollow": true,
+    "packageVerified": true,
+    "downloadUrl": "/downloads/skills/heyclaude-skill-submission-factory.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/heyclaude-skill-submission-factory.zip",
+      "sha256": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-27"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-27"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-27"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-27"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/heyclaude-skill-submission-factory.mdc",
+        "verifiedAt": "2026-04-27"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-27"
+      }
+    ],
+    "downloadTrust": "first-party",
+    "downloadSha256": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c",
+    "body": "## Knowledge Freshness\n\nThis skill is pinned to Agent Skills and HeyClaude submission behavior verified on **2026-04-27**.\n\n## Retrieval Sources\n\n- https://heyclau.de/submit\n- https://developers.openai.com/codex/skills\n- https://docs.claude.com/en/docs/claude-code/skills\n- https://docs.windsurf.com/windsurf/cascade/skills\n- https://docs.cursor.com/en/context\n- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md\n\n## Core Workflow\n\n1. Define the skill user, trigger language, and out-of-scope behavior.\n2. Create a single root folder with `SKILL.md`.\n3. Keep `SKILL.md` concise, with required `name` and `description` frontmatter.\n4. Add only necessary optional resources under `scripts/`, `references/`, `assets/`, or `agents/openai.yaml`.\n5. Generate compatibility notes for native Agent Skills platforms and adapter-only platforms.\n6. Prepare HeyClaude issue fields from the canonical submission form instead of auto-publishing.\n\n## Capability Scope\n\n- Agent Skill package authoring\n- Compatibility metadata\n- Cursor `.mdc` adapter drafting\n- Package validation checklist\n- HeyClaude issue-first submission preparation\n\n## Compatibility\n\n### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/commands/<skill-name>.toml` or `GEMINI.md`\n- Generic AGENTS or tool-specific context files\n\n## Production Rules\n\n- Do not claim native support for a platform unless its current docs support `SKILL.md`-style skills.\n- Do not include private repo names, secrets, credentials, or internal operating details in a public skill.\n- Do not auto-publish registry content; prepare a maintainer-reviewed issue submission.\n- Keep package resources minimal and directly referenced from `SKILL.md`.\n\n## Troubleshooting\n\n**Issue:** The skill is too broad to trigger reliably\n**Fix:** Narrow the description to the exact workflow and add negative scope.\n\n**Issue:** Cursor users ask how to install it\n**Fix:** Generate a Cursor rule adapter and label it as an adapter, not a native skill.",
+    "sections": [
+      {
+        "title": "Knowledge Freshness",
+        "id": "knowledge-freshness",
+        "markdown": "This skill is pinned to Agent Skills and HeyClaude submission behavior verified on **2026-04-27**.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Retrieval Sources",
+        "id": "retrieval-sources",
+        "markdown": "- https://heyclau.de/submit\n- https://developers.openai.com/codex/skills\n- https://docs.claude.com/en/docs/claude-code/skills\n- https://docs.windsurf.com/windsurf/cascade/skills\n- https://docs.cursor.com/en/context\n- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md",
+        "codeBlocks": []
+      },
+      {
+        "title": "Core Workflow",
+        "id": "core-workflow",
+        "markdown": "1. Define the skill user, trigger language, and out-of-scope behavior.\n2. Create a single root folder with `SKILL.md`.\n3. Keep `SKILL.md` concise, with required `name` and `description` frontmatter.\n4. Add only necessary optional resources under `scripts/`, `references/`, `assets/`, or `agents/openai.yaml`.\n5. Generate compatibility notes for native Agent Skills platforms and adapter-only platforms.\n6. Prepare HeyClaude issue fields from the canonical submission form instead of auto-publishing.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Capability Scope",
+        "id": "capability-scope",
+        "markdown": "- Agent Skill package authoring\n- Compatibility metadata\n- Cursor `.mdc` adapter drafting\n- Package validation checklist\n- HeyClaude issue-first submission preparation",
+        "codeBlocks": []
+      },
+      {
+        "title": "Compatibility",
+        "id": "compatibility",
+        "markdown": "### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/commands/<skill-name>.toml` or `GEMINI.md`\n- Generic AGENTS or tool-specific context files",
+        "codeBlocks": []
+      },
+      {
+        "title": "Production Rules",
+        "id": "production-rules",
+        "markdown": "- Do not claim native support for a platform unless its current docs support `SKILL.md`-style skills.\n- Do not include private repo names, secrets, credentials, or internal operating details in a public skill.\n- Do not auto-publish registry content; prepare a maintainer-reviewed issue submission.\n- Keep package resources minimal and directly referenced from `SKILL.md`.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Troubleshooting",
+        "id": "troubleshooting",
+        "markdown": "**Issue:** The skill is too broad to trigger reliably\n**Fix:** Narrow the description to the exact workflow and add negative scope.\n\n**Issue:** Cursor users ask how to install it\n**Fix:** Generate a Cursor rule adapter and label it as an adapter, not a native skill.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Knowledge Freshness",
+        "id": "knowledge-freshness"
+      },
+      {
+        "depth": 2,
+        "text": "Retrieval Sources",
+        "id": "retrieval-sources"
+      },
+      {
+        "depth": 2,
+        "text": "Core Workflow",
+        "id": "core-workflow"
+      },
+      {
+        "depth": 2,
+        "text": "Capability Scope",
+        "id": "capability-scope"
+      },
+      {
+        "depth": 2,
+        "text": "Compatibility",
+        "id": "compatibility"
+      },
+      {
+        "depth": 3,
+        "text": "Native Agent Skills",
+        "id": "native-agent-skills"
+      },
+      {
+        "depth": 3,
+        "text": "Adapter Targets",
+        "id": "adapter-targets"
+      },
+      {
+        "depth": 2,
+        "text": "Production Rules",
+        "id": "production-rules"
+      },
+      {
+        "depth": 2,
+        "text": "Troubleshooting",
+        "id": "troubleshooting"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/skills/heyclaude-skill-submission-factory.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

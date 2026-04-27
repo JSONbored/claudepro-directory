@@ -1,0 +1,14 @@
+---
+description: "Plan and operate recurring agent automations with deterministic prompts, guardrails, and output contracts."
+globs:
+alwaysApply: false
+---
+# Codex Automations Orchestrator Capability Pack Skill
+Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip

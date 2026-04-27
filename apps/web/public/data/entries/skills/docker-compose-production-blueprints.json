@@ -59,6 +59,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/docker-compose-production-blueprints.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/docker-compose-production-blueprints.zip",
+      "sha256": "f755fc12857dee8d1ee1264decb4e2ff342d9ba8ed36f32a7fa723ca0335d59b"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/docker-compose-production-blueprints.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "f755fc12857dee8d1ee1264decb4e2ff342d9ba8ed36f32a7fa723ca0335d59b",
     "body": "## Overview\n\nThis skill provides consistent production patterns for Docker Compose stacks. It helps AI agents avoid common anti-patterns and produce deployment configs that are safer to run and easier to maintain.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Clear service boundaries and ownership\n- Persistent data strategy\n- Operational SLO targets\n\n## What This Skill Delivers\n\n- Compose architecture with profile-aware services\n- Network and privilege minimization guidance\n- Healthchecks, restart policy, and dependency sequencing\n- Safe change rollout and rollback checklist\n\n## How to Use This Skill\n\n1. Model service topology and stateful dependencies.\n2. Define secret strategy and avoid plaintext in repo.\n3. Add healthchecks and startup ordering guards.\n4. Constrain network exposure and privileges.\n5. Validate with restart, failover, and upgrade simulations.\n\n## Troubleshooting\n\n**Issue:** Services start but fail shortly after  \n**Fix:** Add robust healthchecks and delay dependent services until healthy.\n\n**Issue:** Compose changes break unrelated services  \n**Fix:** Use profiles and explicit dependency contracts to scope blast radius.\n\n**Issue:** Secrets leak into logs or env dumps  \n**Fix:** Move sensitive values to secrets manager or runtime-injected env.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://docs.docker.com/compose/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

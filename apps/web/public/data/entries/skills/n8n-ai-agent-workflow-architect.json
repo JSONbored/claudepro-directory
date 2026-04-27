@@ -60,6 +60,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/n8n-ai-agent-workflow-architect.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/n8n-ai-agent-workflow-architect.zip",
+      "sha256": "7b9351535e62d89cea292da665d32ba45eb6e32d4a178b478e054cf8f69b493b"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/n8n-ai-agent-workflow-architect.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "7b9351535e62d89cea292da665d32ba45eb6e32d4a178b478e054cf8f69b493b",
     "body": "## Overview\n\nThis skill helps AI agents design and maintain n8n workflows that are useful in production, not just demos. It prioritizes reliability, traceability, and controlled side effects while still moving quickly.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- Stable trigger definition (webhook, schedule, event queue, inbox)\n- Clear success criteria and expected outputs\n- Error budget and escalation target\n\n## What This Skill Delivers\n\n- n8n workflow architecture with explicit control flow\n- Safe AI usage pattern (classification, extraction, summarization, routing)\n- Retry, dead-letter, and human-review branches\n- Logging and alerting checklist for post-launch operations\n\n## How to Use This Skill\n\n### Prompt Pattern\n\n```text\nUse the n8n AI workflow architect skill for <business process>.\nProduce:\n1) node-by-node workflow design,\n2) failure handling policy,\n3) human approval criteria,\n4) deployment checklist.\n```\n\n### Execution Flow\n\n1. Map trigger, inputs, and downstream systems.\n2. Separate deterministic transforms from probabilistic AI steps.\n3. Add approval gates before irreversible actions.\n4. Add retries, timeouts, and dead-letter path.\n5. Define observability: run IDs, error labels, and incident routing.\n\n## Troubleshooting\n\n**Issue:** Workflow loops or duplicates records  \n**Fix:** Enforce idempotency keys and persistence checks before write operations.\n\n**Issue:** AI node output is inconsistent  \n**Fix:** Use strict output schemas and validation before branching decisions.\n\n**Issue:** Failures are discovered too late  \n**Fix:** Add per-path alerts for retry exhaustion and dead-letter queue growth.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://docs.n8n.io/advanced-ai/\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",

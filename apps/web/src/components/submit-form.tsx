@@ -107,6 +107,22 @@ export function SubmitForm() {
   const normalizedSlug = slug || suggestedSlug;
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nameParam = params.get("name") ?? "";
+    const categoryParam = params.get("category") ?? "";
+    const slugParam = params.get("slug") ?? "";
+
+    if (nameParam) setToolName(nameParam);
+    if (siteConfig.categoryOrder.includes(categoryParam)) {
+      setCategory(categoryParam);
+    }
+    if (slugParam) {
+      setSlug(slugifySubmission(slugParam));
+      setSlugEdited(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (slugEdited) return;
     setSlug(suggestedSlug);
   }, [slugEdited, suggestedSlug]);

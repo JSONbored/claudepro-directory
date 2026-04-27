@@ -61,6 +61,51 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/ai-business-idea-validation-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/ai-business-idea-validation-capability-pack.zip",
+      "sha256": "9955465ac6dea7ab8837ab2ad18bf6a53f6635c72c85c7cff24025a9efbd8cfe"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/ai-business-idea-validation-capability-pack.mdc",
+        "verifiedAt": "2026-04-11"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-11"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "9955465ac6dea7ab8837ab2ad18bf6a53f6635c72c85c7cff24025a9efbd8cfe",
     "body": "## Knowledge Freshness\n\nThis capability pack is pinned to sources verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://www.ycombinator.com/library\n- https://www.lennysnewsletter.com/\n- https://www.indiehackers.com/\n\n## Core Workflow\n\n1. Define target buyer and high-pain workflow.\n2. Validate demand with real user signal, not vanity metrics.\n3. Map alternatives and clear differentiation.\n4. Test pricing and offer framing with constrained experiments.\n5. Decide go/no-go with explicit evidence thresholds.\n\n## Overview\n\nThis skill helps agents pressure-test business ideas before heavy build effort, reducing wasted cycles and weak launches.\n\n## Capability Scope\n\n- Buyer/problem framing\n- Market and alternative analysis\n- Offer and pricing experiment design\n- Validation metric and threshold definition\n- Decision memo generation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Base decisions on direct demand evidence, not social vanity metrics.\n- Keep pricing tests tied to measurable user outcomes.\n- Preserve a clear no-build threshold when evidence is weak.\n- Re-test assumptions whenever segment or offer changes materially.\n\n## Troubleshooting\n\n**Issue:** Validation result is inconclusive  \n**Fix:** narrow segment and run higher-signal interviews/tests.\n\n**Issue:** Competitor map is generic  \n**Fix:** compare by workflow outcome, not feature list.\n\n**Issue:** Pricing feels arbitrary  \n**Fix:** tie price to measurable ROI or time/cost savings.\n\n## Output Contract\n\n1. Evidence-backed demand assessment.\n2. Testable offer and pricing proposal.\n3. Execution scope for first launch.\n4. Go/no-go recommendation with rationale.",

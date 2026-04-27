@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "content-quality-report",
   "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 378,
+  "count": 379,
   "summary": {
     "averageScore": 81,
     "noExternalSourceCount": 101,
@@ -28,7 +28,7 @@
       "warningCount": 0
     },
     "skills": {
-      "count": 66,
+      "count": 67,
       "averageScore": 90,
       "warningCount": 15
     },
@@ -5622,6 +5622,35 @@
         ],
         "externalSourceUrls": [
           "https://heyclau.de/mcp/heyclaude-mcp"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "skills:heyclaude-skill-submission-factory",
+      "category": "skills",
+      "slug": "heyclaude-skill-submission-factory",
+      "title": "HeyClaude Skill Submission Factory",
+      "scores": {
+        "total": 90,
+        "usefulness": 100,
+        "source": 65,
+        "copyability": 85,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": true,
+        "sourceUrls": [
+          "https://heyclau.de/submit",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://heyclau.de/submit"
         ]
       },
       "warnings": []

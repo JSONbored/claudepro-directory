@@ -1,0 +1,14 @@
+---
+description: "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with autom..."
+globs:
+alwaysApply: false
+---
+# Audio Transcription + Summarization Skill
+Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+pip install openai-whisper
+```
+## Source
+https://heyclau.de/downloads/skills/audio-transcription-summarization.zip

@@ -1,0 +1,14 @@
+---
+description: "Design and ship Codex plugins with clean manifests, bounded permissions, and reusable packaging standards."
+globs:
+alwaysApply: false
+---
+# Codex Plugin Creator Capability Pack Skill
+Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip

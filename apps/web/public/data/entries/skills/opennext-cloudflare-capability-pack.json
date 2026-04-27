@@ -61,9 +61,54 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/opennext-cloudflare-capability-pack.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/opennext-cloudflare-capability-pack.zip",
+      "sha256": "0254c5d9edfe925907cfca3f06a24c866ecd42e1e7ef51ad64b2a5518199360c"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/opennext-cloudflare-capability-pack.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "0254c5d9edfe925907cfca3f06a24c866ecd42e1e7ef51ad64b2a5518199360c",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.\n\n## Retrieval Sources\n\n- https://opennext.js.org/cloudflare/get-started\n- https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/\n- https://developers.cloudflare.com/workers/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.\n\n## Core Workflow\n\n1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.\n\n## Overview\n\nThis capability pack teaches agents how to correctly design, deploy, and operate Next.js workloads on Cloudflare Workers using OpenNext. It is tuned for production behavior, not toy deployments.\n\n## Capability Scope\n\n- OpenNext build/runtime model on Workers\n- Binding strategy (D1, KV, R2, secrets, env vars)\n- Cache behavior and invalidation patterns\n- Route-specific security and performance controls\n- Observability, alerting, and rollout safety\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Treat API routes and static routes with separate cache/security policies.\n- Keep secret values out of repo and build output.\n- Verify behavior in dev and prod workers separately.\n- Enforce explicit rollback and incident pathways.\n\n## Troubleshooting\n\n**Issue:** Unexpected cache behavior after deploy  \n**Fix:** Validate cache headers, Cloudflare cache rules, and OpenNext route semantics together.\n\n**Issue:** Local works, Worker fails  \n**Fix:** Check bindings/env parity and runtime-specific API differences.\n\n**Issue:** Deploys are correct but latency is inconsistent  \n**Fix:** Profile critical routes, tighten cache strategy, and isolate expensive dynamic operations.\n\n## Output Contract\n\n1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.\n\n## Validation Checklist\n\n- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-10**.\nWhen upstream docs change, refresh endpoint contracts, examples, and constraints before using this skill for production changes.\n\n## Retrieval Sources\n\n- https://opennext.js.org/cloudflare/get-started\n- https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/\n- https://developers.cloudflare.com/workers/\n\nAlways prefer direct retrieval from official docs/API references over model memory for limits, endpoint signatures, and behavior guarantees.\n\n## Core Workflow\n\n1. Confirm target version/runtime and pull latest official docs for the task scope.\n2. Build an execution plan with explicit read-only discovery before any mutation.\n3. Validate contracts, permissions, and safety constraints before applying changes.\n4. Execute with deterministic checkpoints and rollback criteria.\n5. Produce a verification report with evidence, caveats, and next actions.\n\n## Overview\n\nThis capability pack teaches agents how to correctly design, deploy, and operate Next.js workloads on Cloudflare Workers using OpenNext. It is tuned for production behavior, not toy deployments.\n\n## Capability Scope\n\n- OpenNext build/runtime model on Workers\n- Binding strategy (D1, KV, R2, secrets, env vars)\n- Cache behavior and invalidation patterns\n- Route-specific security and performance controls\n- Observability, alerting, and rollout safety\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Treat API routes and static routes with separate cache/security policies.\n- Keep secret values out of repo and build output.\n- Verify behavior in dev and prod workers separately.\n- Enforce explicit rollback and incident pathways.\n\n## Troubleshooting\n\n**Issue:** Unexpected cache behavior after deploy  \n**Fix:** Validate cache headers, Cloudflare cache rules, and OpenNext route semantics together.\n\n**Issue:** Local works, Worker fails  \n**Fix:** Check bindings/env parity and runtime-specific API differences.\n\n**Issue:** Deploys are correct but latency is inconsistent  \n**Fix:** Profile critical routes, tighten cache strategy, and isolate expensive dynamic operations.\n\n## Output Contract\n\n1. Provide an implementation plan ordered by risk and dependency.\n2. Provide exact production-ready config/commands with no placeholders.\n3. Call out secrets, permissions, and least-privilege requirements.\n4. Include rollback and recovery guidance for each risky step.\n\n## Validation Checklist\n\n- Verify all referenced docs/versions before applying changes.\n- Run regression checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -122,7 +167,7 @@
       {
         "title": "Validation Checklist",
         "id": "validation-checklist",
-        "markdown": "- Verify all referenced docs/versions before applying changes.\n- Run smoke checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
+        "markdown": "- Verify all referenced docs/versions before applying changes.\n- Run regression checks for core user flow and error paths.\n- Confirm observability/logging is enabled for changed components.\n- Confirm security controls (auth, rate limits, input validation) still pass.\n- Record final known limitations and follow-up actions.",
         "codeBlocks": []
       }
     ],

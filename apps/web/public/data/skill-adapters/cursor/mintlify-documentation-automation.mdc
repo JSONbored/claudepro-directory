@@ -1,0 +1,14 @@
+---
+description: "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform."
+globs:
+alwaysApply: false
+---
+# Mintlify AI Documentation Automation Skill
+Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm install -g mintlify
+```
+## Source
+https://heyclau.de/downloads/skills/mintlify-documentation-automation.zip

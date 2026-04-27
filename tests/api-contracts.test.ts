@@ -12,10 +12,16 @@ const apiRoutes = [
   "/api/registry/diff",
   "/api/registry/entries/{category}/{slug}",
   "/api/registry/entries/{category}/{slug}/llms",
+  "/api/votes/query",
+  "/api/votes/toggle",
+  "/api/newsletter/subscribe",
+  "/api/newsletter/webhook",
+  "/api/download",
   "/api/listing-leads",
   "/api/admin/listing-leads",
   "/api/intent-events",
   "/api/community-signals",
+  "/api/github-stats",
 ];
 
 describe("OpenAPI route coverage", () => {
@@ -24,10 +30,16 @@ describe("OpenAPI route coverage", () => {
     "utf8",
   );
 
-  it("documents every public registry and lead route", () => {
+  it("documents every public and limited dynamic API route", () => {
     for (const route of apiRoutes) {
       expect(schema, route).toContain(`${route}:`);
     }
+  });
+
+  it("keeps registry publishing out of the public API", () => {
+    expect(schema).not.toContain("/api/registry/publish:");
+    expect(schema).not.toContain("/api/submissions/import:");
+    expect(schema).toContain("Token-protected lead review/export endpoint");
   });
 
   it("documents D1-backed failure modes for dynamic-state endpoints", () => {

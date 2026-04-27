@@ -188,8 +188,8 @@ copySnippet: >-
           validate: () => this.runHealthChecks(deployment.services)
         },
         {
-          name: 'Smoke Tests',
-          validate: () => this.runSmokeTests(deployment.version)
+          name: 'Release Regression Tests',
+          validate: () => this.runReleaseRegressionTests(deployment.version)
         },
         {
           name: 'Performance Baseline',
@@ -826,8 +826,8 @@ class DeploymentValidator {
         validate: () => this.runHealthChecks(deployment.services),
       },
       {
-        name: "Smoke Tests",
-        validate: () => this.runSmokeTests(deployment.version),
+        name: "Release Regression Tests",
+        validate: () => this.runReleaseRegressionTests(deployment.version),
       },
       {
         name: "Performance Baseline",

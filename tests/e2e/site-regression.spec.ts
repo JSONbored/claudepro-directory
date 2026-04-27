@@ -10,7 +10,7 @@ type DirectoryEnvelope = {
   }>;
 };
 
-function getSmokeEntry() {
+function getRegressionEntry() {
   const payload = JSON.parse(
     fs.readFileSync(
       path.join(process.cwd(), "apps/web/public/data/directory-index.json"),
@@ -20,11 +20,12 @@ function getSmokeEntry() {
   const entry = payload.entries.find(
     (candidate) => candidate.category !== "tools",
   );
-  if (!entry) throw new Error("No registry entry available for smoke test");
+  if (!entry)
+    throw new Error("No registry entry available for regression test");
   return entry;
 }
 
-const entry = getSmokeEntry();
+const entry = getRegressionEntry();
 
 const htmlRoutes = [
   { path: "/", heading: /Discover the best Claude tools/i },
@@ -47,7 +48,7 @@ const htmlRoutes = [
   { path: "/best/claude-native-tools", heading: /Tools for Claude-native/i },
 ];
 
-test.describe("site smoke", () => {
+test.describe("site regression", () => {
   for (const route of htmlRoutes) {
     test(`renders ${route.path}`, async ({ page }) => {
       const response = await page.goto(route.path);
@@ -138,6 +139,16 @@ test.describe("site smoke", () => {
     }
   });
 
+  test("keeps browse HTML payload below the full-directory serialization budget", async ({
+    request,
+  }) => {
+    const response = await request.get("/browse");
+    expect(response.ok()).toBe(true);
+    const html = await response.text();
+    expect(html.length).toBeLessThan(800_000);
+    expect(html).toContain("/data/directory-index.json");
+  });
+
   test("registry API supports ETag revalidation", async ({ request }) => {
     const first = await request.get("/api/registry/manifest");
     expect(first.ok()).toBe(true);
@@ -150,46 +161,59 @@ test.describe("site smoke", () => {
     expect(second.status()).toBe(304);
   });
 
-  test("intent metrics fail open when SITE_DB is unavailable", async ({
+  test("intent metrics accept route events with D1 storage or fail-open fallback", async ({
     request,
   }) => {
     const response = await request.post("/api/intent-events", {
       data: {
         type: "copy",
         entryKey: `${entry.category}:${entry.slug}`,
-        sessionId: "smoke-session",
+        sessionId: "regression-session",
       },
     });
     expect(response.ok()).toBe(true);
     const payload = await response.json();
-    expect(payload).toMatchObject({ ok: false, stored: false });
+    expect(typeof payload.stored).toBe("boolean");
+    if (payload.stored) {
+      expect(payload).toMatchObject({ ok: true, stored: true });
+    } else {
+      expect(payload).toMatchObject({ ok: false, stored: false });
+      expect(["site_db_not_configured", "insert_failed"]).toContain(
+        payload.reason,
+      );
+    }
   });
 
-  test("community signals expose counts and fail open without SITE_DB", async ({
+  test("community signals expose route-backed counts with D1 storage or fallback state", async ({
     request,
   }) => {
     const query =
       "/api/community-signals?targetKind=tool&targetKey=tool:cursor";
     const readResponse = await request.get(query);
     expect(readResponse.ok()).toBe(true);
-    await expect(readResponse.json()).resolves.toMatchObject({
+    const readPayload = await readResponse.json();
+    expect(readPayload).toMatchObject({
       ok: true,
       counts: { used: expect.any(Number), works: expect.any(Number) },
     });
+    expect(typeof readPayload.available).toBe("boolean");
 
     const writeResponse = await request.post("/api/community-signals", {
       data: {
         targetKind: "tool",
         targetKey: "tool:cursor",
         signalType: "used",
-        clientId: "smoke-community-client",
+        clientId: "regression-community-client",
         active: true,
       },
     });
     expect(writeResponse.ok()).toBe(true);
-    await expect(writeResponse.json()).resolves.toMatchObject({
+    const writePayload = await writeResponse.json();
+    expect(writePayload).toMatchObject({
       ok: true,
-      stored: false,
+      stored: expect.any(Boolean),
+      counts: { used: expect.any(Number), works: expect.any(Number) },
     });
+    expect(writePayload.available).toBe(writePayload.stored);
   });
 });

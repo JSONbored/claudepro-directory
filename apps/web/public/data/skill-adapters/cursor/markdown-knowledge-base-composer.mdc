@@ -1,0 +1,14 @@
+---
+description: "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting..."
+globs:
+alwaysApply: false
+---
+# Markdown Knowledge Base Composer Skill
+Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB).
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npm i remark unified
+```
+## Source
+https://heyclau.de/downloads/skills/markdown-knowledge-base-composer.zip

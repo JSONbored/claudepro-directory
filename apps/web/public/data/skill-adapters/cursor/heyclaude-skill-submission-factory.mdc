@@ -1,0 +1,14 @@
+---
+description: "Build valid Agent Skills and submit them to HeyClaude through maintainer-reviewed GitHub issues."
+globs:
+alwaysApply: false
+---
+# HeyClaude Skill Submission Factory
+Create portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip -o heyclaude-skill-submission-factory.zip && unzip -o heyclaude-skill-submission-factory.zip -d ./heyclaude-skill-submission-factory
+```
+## Source
+https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip

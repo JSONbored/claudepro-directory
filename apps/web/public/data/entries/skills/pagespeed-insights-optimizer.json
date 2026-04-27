@@ -66,9 +66,54 @@
     "robotsFollow": true,
     "packageVerified": true,
     "downloadUrl": "/downloads/skills/pagespeed-insights-optimizer.zip",
+    "skillPackage": {
+      "format": "agent-skill",
+      "entrypoint": "SKILL.md",
+      "downloadUrl": "/downloads/skills/pagespeed-insights-optimizer.zip",
+      "sha256": "bcb96e6ace1641db8801d2c105e7491c4ecb18fc181ae9a73378e0578d932fc4"
+    },
+    "platformCompatibility": [
+      {
+        "platform": "Claude",
+        "supportLevel": "native-skill",
+        "installPath": ".claude/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Codex",
+        "supportLevel": "native-skill",
+        "installPath": ".agents/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Windsurf",
+        "supportLevel": "native-skill",
+        "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Gemini",
+        "supportLevel": "adapter",
+        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Cursor",
+        "supportLevel": "adapter",
+        "installPath": ".cursor/rules/<skill-name>.mdc",
+        "adapterPath": "/data/skill-adapters/cursor/pagespeed-insights-optimizer.mdc",
+        "verifiedAt": "2026-04-10"
+      },
+      {
+        "platform": "Generic AGENTS",
+        "supportLevel": "manual-context",
+        "installPath": "AGENTS.md or tool-specific context file",
+        "verifiedAt": "2026-04-10"
+      }
+    ],
     "downloadTrust": "first-party",
     "downloadSha256": "bcb96e6ace1641db8801d2c105e7491c4ecb18fc181ae9a73378e0578d932fc4",
-    "body": "## Overview\n\nThis skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: direct skill package support using `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-format content (`SKILL.md`) and can be used as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.\n\n## Prerequisites\n\n- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, smoke tests)\n- Access to deploy and re-test\n\n## What This Skill Optimizes\n\n- LCP diagnosis and render delay reduction\n- Render-blocking CSS/JS mitigation\n- Unused JavaScript/CSS reduction\n- Third-party script scheduling strategy\n- Cache policy and static asset delivery consistency\n- Regression-safe micro-optimizations for initial route payload\n\n## How to Use This Skill\n\n### Prompt Pattern\n\nUse this prompt:\n\n```text\nApply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas\n```\n\n### Execution Flow\n\n1. Capture baseline metrics and record exact failing audits.\n2. Identify the current LCP element and why it is delayed.\n3. Apply smallest change set that targets top bottlenecks only.\n4. Re-run benchmarks and compare deltas.\n5. If gains are below threshold, stop and report diminishing returns.\n\n## Optimization Playbook\n\n### 1) LCP and above-the-fold path\n\n- Reduce server and render delay for the LCP element.\n- Ensure critical route data and styles load predictably.\n- Move non-critical work after first render.\n\n### 2) Render-blocking resources\n\n- Keep critical CSS minimal.\n- Defer non-critical scripts and low-priority widgets.\n- Avoid introducing blocking dependencies in root layout.\n\n### 3) Bundle pressure\n\n- Defer or split route-noncritical bundles.\n- Remove or gate dead/unused client-side modules.\n- Keep initial route payload focused on first-screen needs.\n\n### 4) Third-party impact\n\n- Delay analytics and low-priority scripts.\n- Verify no third-party library blocks first paint.\n- Keep third-party bytes and main-thread work accountable.\n\n### 5) Cache + delivery checks\n\n- Ensure static assets use long-lived immutable caching where safe.\n- Ensure API and dynamic routes are not accidentally over-cached.\n- Validate cache behavior after deploy.\n\n## Troubleshooting\n\n**Issue:** Score regresses after adding \"helpful\" scripts  \n**Fix:** Prioritize first-view rendering; move non-critical scripts to idle/lazy load.\n\n**Issue:** LCP remains high despite JS reductions  \n**Fix:** Re-check the actual LCP element, image/font loading path, and render delay.\n\n**Issue:** Mobile score volatile between runs  \n**Fix:** Use median over multiple runs and compare stable deltas, not single spikes.\n\n**Issue:** Good lab scores but poor field data  \n**Fix:** Track CrUX trends and verify real-user bottlenecks (device/network mix, third-party load).\n\n## Notes for This Repository\n\n- Use the generated index and existing scripts (`pnpm type-check`, `pnpm build`) after each optimization patch.\n- Keep changes scoped to measurable performance deltas.\n- Preserve the current visual layout and interaction model.",
+    "body": "## Overview\n\nThis skill gives an AI agent a strict, repeatable process for improving PageSpeed Insights and Lighthouse results without changing your visual design or removing product functionality. It is built for real-world optimization work: isolate bottlenecks, apply minimum-safe fixes, re-measure, and stop once gains flatten.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: direct skill package support using `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-format content (`SKILL.md`) and can be used as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and other IDE agents**: use the same `SKILL.md` content as a workflow template or prompt file if native skill import is unavailable.\n\n## Prerequisites\n\n- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, regression tests)\n- Access to deploy and re-test\n\n## What This Skill Optimizes\n\n- LCP diagnosis and render delay reduction\n- Render-blocking CSS/JS mitigation\n- Unused JavaScript/CSS reduction\n- Third-party script scheduling strategy\n- Cache policy and static asset delivery consistency\n- Regression-safe micro-optimizations for initial route payload\n\n## How to Use This Skill\n\n### Prompt Pattern\n\nUse this prompt:\n\n```text\nApply the PageSpeed Insights optimizer skill to <route>.\nConstraints:\n1) No UI/UX redesign or feature removal.\n2) Preserve accessibility and SEO behavior.\n3) Prioritize highest-impact, lowest-risk fixes first.\nDeliverables:\n- Baseline metrics table (mobile + desktop)\n- Ranked bottlenecks and root causes\n- Minimal patch plan\n- Post-change metrics with deltas\n```\n\n### Execution Flow\n\n1. Capture baseline metrics and record exact failing audits.\n2. Identify the current LCP element and why it is delayed.\n3. Apply smallest change set that targets top bottlenecks only.\n4. Re-run benchmarks and compare deltas.\n5. If gains are below threshold, stop and report diminishing returns.\n\n## Optimization Playbook\n\n### 1) LCP and above-the-fold path\n\n- Reduce server and render delay for the LCP element.\n- Ensure critical route data and styles load predictably.\n- Move non-critical work after first render.\n\n### 2) Render-blocking resources\n\n- Keep critical CSS minimal.\n- Defer non-critical scripts and low-priority widgets.\n- Avoid introducing blocking dependencies in root layout.\n\n### 3) Bundle pressure\n\n- Defer or split route-noncritical bundles.\n- Remove or gate dead/unused client-side modules.\n- Keep initial route payload focused on first-screen needs.\n\n### 4) Third-party impact\n\n- Delay analytics and low-priority scripts.\n- Verify no third-party library blocks first paint.\n- Keep third-party bytes and main-thread work accountable.\n\n### 5) Cache + delivery checks\n\n- Ensure static assets use long-lived immutable caching where safe.\n- Ensure API and dynamic routes are not accidentally over-cached.\n- Validate cache behavior after deploy.\n\n## Troubleshooting\n\n**Issue:** Score regresses after adding \"helpful\" scripts  \n**Fix:** Prioritize first-view rendering; move non-critical scripts to idle/lazy load.\n\n**Issue:** LCP remains high despite JS reductions  \n**Fix:** Re-check the actual LCP element, image/font loading path, and render delay.\n\n**Issue:** Mobile score volatile between runs  \n**Fix:** Use median over multiple runs and compare stable deltas, not single spikes.\n\n**Issue:** Good lab scores but poor field data  \n**Fix:** Track CrUX trends and verify real-user bottlenecks (device/network mix, third-party load).\n\n## Notes for This Repository\n\n- Use the generated index and existing scripts (`pnpm type-check`, `pnpm build`) after each optimization patch.\n- Keep changes scoped to measurable performance deltas.\n- Preserve the current visual layout and interaction model.",
     "sections": [
       {
         "title": "Overview",
@@ -85,7 +130,7 @@
       {
         "title": "Prerequisites",
         "id": "prerequisites",
-        "markdown": "- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, smoke tests)\n- Access to deploy and re-test",
+        "markdown": "- A route to test (production, staging, or preview URL)\n- Baseline Lighthouse/PageSpeed run for **mobile and desktop**\n- Ability to run project checks after edits (`type-check`, `build`, regression tests)\n- Access to deploy and re-test",
         "codeBlocks": []
       },
       {

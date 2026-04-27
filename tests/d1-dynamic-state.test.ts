@@ -231,7 +231,7 @@ describe("D1 dynamic state helpers", () => {
     expect(signals).toContain("broken");
   });
 
-  it("smokes lead transitions used by D1-backed admin review", () => {
+  it("enforces lead status transitions used by D1-backed admin review", () => {
     let status = "new";
     status = nextLeadStatus(status, "review");
     expect(status).toBe("pending_review");

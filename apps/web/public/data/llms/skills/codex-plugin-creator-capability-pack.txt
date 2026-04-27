@@ -27,7 +27,7 @@ This capability pack is pinned to documentation verified on **2026-04-11**.
 ## Core Workflow
 1. Define plugin scope, trust boundaries, and runtime dependencies.
 2. Build manifest with minimum required capabilities only.
-3. Validate tool behavior and failure paths with smoke tests.
+3. Validate tool behavior and failure paths with regression tests.
 4. Add observability and troubleshooting hooks.
 5. Publish with maintenance and compatibility policy.
 
@@ -70,5 +70,5 @@ This skill helps agents build practical plugins that stay secure and maintainabl
 ## Output Contract
 1. Plugin plan with trust boundaries.
 2. Manifest with justification per permission.
-3. Validation and smoke-test protocol.
+3. Validation and regression-test protocol.
 4. Maintenance and deprecation plan.

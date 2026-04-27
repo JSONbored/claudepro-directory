@@ -28,7 +28,7 @@ This capability pack is pinned to documentation verified on **2026-04-11**.
 1. Define exact user problem, inputs, and expected outputs.
 2. Gather current official docs and mark freshness date.
 3. Build skill content with deterministic sections and constraints.
-4. Validate with smoke runs and failure-path checks.
+4. Validate with regression runs and failure-path checks.
 5. Package and publish with checksum and metadata integrity.
 
 ## Overview

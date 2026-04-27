@@ -1,0 +1,14 @@
+---
+description: "Revenue optimization skill for designing and evaluating pricing experiments without corrupting core business metrics."
+globs:
+alwaysApply: false
+---
+# SaaS Pricing Experimentation Engine Skill
+Run low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine
+```
+## Source
+https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip

@@ -1,0 +1,14 @@
+---
+description: "Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integrat..."
+globs:
+alwaysApply: false
+---
+# V0 Rapid UI Prototyping Workflow Skill
+Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Vercel's breakthrough AI UI generator that has transformed frontend development in 2025.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+npx shadcn-ui@latest init
+```
+## Source
+https://heyclau.de/downloads/skills/v0-rapid-prototyping.zip

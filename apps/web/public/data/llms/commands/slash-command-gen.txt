@@ -604,7 +604,7 @@ If $1 is "production":
 
 If $1 is "staging":
 
-1. Run smoke tests
+1. Run release regression tests
 2. Deploy immediately
 3. Notify team in Slack
 

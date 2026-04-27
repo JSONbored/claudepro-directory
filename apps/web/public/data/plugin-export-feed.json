@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "plugin-export-feed",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "count": 242,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 243,
   "plugins": [
     {
       "name": "cursor-rules",
@@ -11,6 +11,7 @@
       "category": "commands",
       "sourceUrl": "https://cursor.com/docs/context/rules",
       "installCommand": "/cursor-rules [options] <project_type>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/cursor-rules"
     },
     {
@@ -20,6 +21,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/debug",
       "installCommand": "/debug",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/debug"
     },
     {
@@ -29,6 +31,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/docs",
       "installCommand": "/docs [options] <file_or_project>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/docs"
     },
     {
@@ -38,6 +41,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/explain",
       "installCommand": "/explain [options] <code_or_file>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/explain"
     },
     {
@@ -47,6 +51,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/optimize",
       "installCommand": "/optimize [options] <file_or_function>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/optimize"
     },
     {
@@ -56,6 +61,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/refactor",
       "installCommand": "/refactor [options] <file_or_selection>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/refactor"
     },
     {
@@ -65,6 +71,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/refactor",
       "installCommand": "/refactor [options] <file_or_selection>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/refactor-code"
     },
     {
@@ -74,6 +81,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/review",
       "installCommand": "/review [options] <file_or_directory>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/review"
     },
     {
@@ -83,6 +91,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/security",
       "installCommand": "/security [options] <file_or_project>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/security"
     },
     {
@@ -92,6 +101,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/security-audit",
       "installCommand": "/security-audit [scope]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/security-audit"
     },
     {
@@ -101,6 +111,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/test",
       "installCommand": "/test [options] <file_or_function>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/test-advanced"
     },
     {
@@ -110,6 +121,7 @@
       "category": "commands",
       "sourceUrl": "https://owasp.org/www-project-top-ten/",
       "installCommand": "/zod-audit",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/zod-audit"
     },
     {
@@ -119,6 +131,7 @@
       "category": "hooks",
       "sourceUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/accessibility-checker.sh && chmod +x .claude/hooks/accessibility-checker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/accessibility-checker"
     },
     {
@@ -128,6 +141,45 @@
       "category": "skills",
       "sourceUrl": "https://openai.com/index/new-tools-and-features-in-the-responses-api/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/agent-evals-regression-gate.zip -o agent-evals-regression-gate.zip && unzip -o agent-evals-regression-gate.zip -d ./agent-evals-regression-gate",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/agent-evals-regression-gate.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/agent-evals-regression-gate"
     },
     {
@@ -137,6 +189,7 @@
       "category": "agents",
       "sourceUrl": "https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/agent-skills-framework-engineer"
     },
     {
@@ -146,6 +199,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/skills",
       "installCommand": "/skills-installer [action] [skill-name]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/skills-installer"
     },
     {
@@ -155,6 +209,45 @@
       "category": "skills",
       "sourceUrl": "https://opentelemetry.io/docs/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/ai-agent-observability-incident-response.zip -o ai-agent-observability-incident-response.zip && unzip -o ai-agent-observability-incident-response.zip -d ./ai-agent-observability-incident-response",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/ai-agent-observability-incident-response.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/ai-agent-observability-incident-response"
     },
     {
@@ -164,6 +257,45 @@
       "category": "skills",
       "sourceUrl": "https://www.ycombinator.com/library",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/ai-business-idea-validation-capability-pack.zip -o ai-business-idea-validation-capability-pack.zip && unzip -o ai-business-idea-validation-capability-pack.zip -d ./ai-business-idea-validation-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/ai-business-idea-validation-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack"
     },
     {
@@ -173,6 +305,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ai-code-review-security-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/ai-code-review-security-agent"
     },
     {
@@ -182,6 +315,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ai-devops-automation-engineer-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/ai-devops-automation-engineer-agent"
     },
     {
@@ -191,6 +325,45 @@
       "category": "skills",
       "sourceUrl": "https://developers.google.com/search/docs",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip -o ai-search-ranking-content-cluster-strategy.zip && unzip -o ai-search-ranking-content-cluster-strategy.zip -d ./ai-search-ranking-content-cluster-strategy",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/ai-search-ranking-content-cluster-strategy.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy"
     },
     {
@@ -200,6 +373,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/domdomegg/airtable-mcp-server",
       "installCommand": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/airtable-mcp-server"
     },
     {
@@ -209,6 +383,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/api-builder-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/api-builder-agent"
     },
     {
@@ -218,6 +393,7 @@
       "category": "hooks",
       "sourceUrl": "https://swagger.io/docs/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/api-endpoint-documentation-generator.sh && chmod +x .claude/hooks/api-endpoint-documentation-generator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/api-endpoint-documentation-generator"
     },
     {
@@ -227,6 +403,7 @@
       "category": "mcp",
       "sourceUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
       "installCommand": "claude mcp list && claude mcp status asana",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/asana-mcp-server"
     },
     {
@@ -236,6 +413,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openai/whisper",
       "installCommand": "pip install openai-whisper",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/audio-transcription-summarization.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/audio-transcription-summarization"
     },
     {
@@ -245,6 +461,7 @@
       "category": "hooks",
       "sourceUrl": "https://prettier.io/docs/en/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/auto-code-formatter-hook.sh && chmod +x .claude/hooks/auto-code-formatter-hook.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/auto-code-formatter-hook"
     },
     {
@@ -254,6 +471,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-save-backup.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/auto-save-backup.sh && chmod +x .claude/hooks/auto-save-backup.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/auto-save-backup"
     },
     {
@@ -263,6 +481,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/autogen-conversation-agent-builder.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/autogen-conversation-agent-builder"
     },
     {
@@ -272,6 +491,7 @@
       "category": "commands",
       "sourceUrl": "https://microsoft.github.io/autogen/",
       "installCommand": "/autogen-workflow [options] <workflow_description>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/autogen-workflow"
     },
     {
@@ -281,6 +501,7 @@
       "category": "hooks",
       "sourceUrl": "https://aws.amazon.com/cloudformation/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/aws-cloudformation-validator.sh && chmod +x .claude/hooks/aws-cloudformation-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/aws-cloudformation-validator"
     },
     {
@@ -290,6 +511,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/awslabs/mcp",
       "installCommand": "uvx awslabs.core-mcp-server@latest && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/aws-services-mcp-server"
     },
     {
@@ -299,6 +521,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/backend-architect-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/backend-architect-agent"
     },
     {
@@ -308,6 +531,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.base.org/get-started/deploy-smart-contracts",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/base-l2-smart-contract-launchpad.zip -o base-l2-smart-contract-launchpad.zip && unzip -o base-l2-smart-contract-launchpad.zip -d ./base-l2-smart-contract-launchpad",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/base-l2-smart-contract-launchpad.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/base-l2-smart-contract-launchpad"
     },
     {
@@ -317,6 +579,7 @@
       "category": "mcp",
       "sourceUrl": "https://box.dev/guides/box-mcp/remote/",
       "installCommand": "claude mcp list && claude mcp status box",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/box-mcp-server"
     },
     {
@@ -326,6 +589,45 @@
       "category": "skills",
       "sourceUrl": "https://playwright.dev/docs/best-practices",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/browser-agent-workflow-automation.zip -o browser-agent-workflow-automation.zip && unzip -o browser-agent-workflow-automation.zip -d ./browser-agent-workflow-automation",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/browser-agent-workflow-automation.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/browser-agent-workflow-automation"
     },
     {
@@ -335,6 +637,45 @@
       "category": "skills",
       "sourceUrl": "https://bun.sh/docs",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/bun-runtime-modern-javascript.zip -o bun-runtime-modern-javascript.zip && unzip -o bun-runtime-modern-javascript.zip -d ./bun-runtime-modern-javascript",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/bun-runtime-modern-javascript.mdc",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-23"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/bun-runtime-modern-javascript"
     },
     {
@@ -344,6 +685,7 @@
       "category": "mcp",
       "sourceUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
       "installCommand": "claude mcp list && claude mcp status canva",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/canva-mcp-server"
     },
     {
@@ -353,6 +695,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/checkpointing",
       "installCommand": "/checkpoint-manager [action] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/checkpoint-manager"
     },
     {
@@ -362,6 +705,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx",
       "installCommand": "claude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/desktop-mcp-setup"
     },
     {
@@ -371,6 +715,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.anthropic.com/en/docs/about-claude/models",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/claude-haiku-45-speed-optimizer-agent"
     },
     {
@@ -380,6 +725,7 @@
       "category": "agents",
       "sourceUrl": "https://modelcontextprotocol.io/introduction",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/claude-mcp-skills-integration-agent"
     },
     {
@@ -389,6 +735,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/claude-md",
       "installCommand": "/claudemd-builder [action] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/claudemd-builder"
     },
     {
@@ -398,6 +745,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/custom-instructions",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/claude-md-knowledge-manager-agent"
     },
     {
@@ -407,6 +755,45 @@
       "category": "skills",
       "sourceUrl": "https://matplotlib.org/",
       "installCommand": "npm i vega vega-lite",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/cli-data-viz-quickstart.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/cli-data-viz-quickstart"
     },
     {
@@ -416,6 +803,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/hauptsacheNet/clickup-mcp",
       "installCommand": "claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/clickup-mcp-server"
     },
     {
@@ -425,6 +813,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/cloud-backup-on-session-stop.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/cloud-backup-on-session-stop.sh && chmod +x .claude/hooks/cloud-backup-on-session-stop.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/cloud-backup-on-session-stop"
     },
     {
@@ -434,6 +823,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/cloud-infrastructure-architect-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/cloud-infrastructure-architect-agent"
     },
     {
@@ -443,6 +833,7 @@
       "category": "mcp",
       "sourceUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
       "installCommand": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/cloudflare-mcp-server"
     },
     {
@@ -452,6 +843,45 @@
       "category": "skills",
       "sourceUrl": "https://developers.cloudflare.com/workers-ai/",
       "installCommand": "npm install -g wrangler",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/cloudflare-workers-ai-edge.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/cloudflare-workers-ai-edge"
     },
     {
@@ -461,6 +891,45 @@
       "category": "skills",
       "sourceUrl": "https://developers.cloudflare.com/workers/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/cloudflare-workers-d1-kv-r2-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack"
     },
     {
@@ -470,6 +939,7 @@
       "category": "mcp",
       "sourceUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
       "installCommand": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/cloudinary-mcp-server"
     },
     {
@@ -479,6 +949,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-complexity-alert-monitor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/code-complexity-alert-monitor.sh && chmod +x .claude/hooks/code-complexity-alert-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/code-complexity-alert-monitor"
     },
     {
@@ -488,6 +959,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/coderabbit-lite-pr-review-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack"
     },
     {
@@ -497,6 +1007,7 @@
       "category": "agents",
       "sourceUrl": "https://google.github.io/eng-practices/review/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/code-reviewer-agent"
     },
     {
@@ -506,6 +1017,7 @@
       "category": "hooks",
       "sourceUrl": "https://jestjs.io/docs/getting-started",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/code-test-runner-hook.sh && chmod +x .claude/hooks/code-test-runner-hook.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/code-test-runner-hook"
     },
     {
@@ -515,6 +1027,7 @@
       "category": "agents",
       "sourceUrl": "https://refactoring.guru/refactoring/catalog",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/codebase-migration-refactoring-agent"
     },
     {
@@ -524,6 +1037,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openai/codex",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/codex-automations-orchestrator-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack"
     },
     {
@@ -533,6 +1085,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openai/codex",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/codex-plugin-creator-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/codex-plugin-creator-capability-pack"
     },
     {
@@ -542,6 +1133,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/analysis",
       "installCommand": "/context-analyzer [scope] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/context-analyzer"
     },
     {
@@ -551,6 +1143,7 @@
       "category": "agents",
       "sourceUrl": "https://epoch.ai/data-insights/context-windows",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/context-window-optimizer-agent"
     },
     {
@@ -560,6 +1153,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/UPinar/contrastapi",
       "installCommand": "claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/contrastapi-mcp-server"
     },
     {
@@ -569,6 +1163,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/css-unused-selector-detector.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/css-unused-selector-detector.sh && chmod +x .claude/hooks/css-unused-selector-detector.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/css-unused-selector-detector"
     },
     {
@@ -578,6 +1173,45 @@
       "category": "skills",
       "sourceUrl": "https://pandas.pydata.org/",
       "installCommand": "pip install pandas openpyxl",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/csv-excel-data-wrangler.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/csv-excel-data-wrangler"
     },
     {
@@ -587,6 +1221,45 @@
       "category": "skills",
       "sourceUrl": "https://cursor.sh/docs",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/cursor-windsurf-ai-ide-setup.zip -o cursor-windsurf-ai-ide-setup.zip && unzip -o cursor-windsurf-ai-ide-setup.zip -d ./cursor-windsurf-ai-ide-setup",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/cursor-windsurf-ai-ide-setup.mdc",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-23"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup"
     },
     {
@@ -596,6 +1269,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
       "installCommand": "claude mcp list && claude mcp status daloopa",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/daloopa-mcp-server"
     },
     {
@@ -605,6 +1279,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/data-pipeline-engineering-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/data-pipeline-engineering-agent"
     },
     {
@@ -614,6 +1289,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-connection-cleanup.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/database-connection-cleanup.sh && chmod +x .claude/hooks/database-connection-cleanup.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/database-connection-cleanup"
     },
     {
@@ -623,6 +1299,7 @@
       "category": "agents",
       "sourceUrl": "https://www.postgresql.org/docs/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/database-expert"
     },
     {
@@ -632,6 +1309,7 @@
       "category": "hooks",
       "sourceUrl": "https://knexjs.org/guide/migrations.html",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/database-migration-runner.sh && chmod +x .claude/hooks/database-migration-runner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/database-migration-runner"
     },
     {
@@ -641,6 +1319,7 @@
       "category": "hooks",
       "sourceUrl": "https://www.postgresql.org/docs/current/runtime-config-logging.html",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/database-query-performance-logger.sh && chmod +x .claude/hooks/database-query-performance-logger.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/database-query-performance-logger"
     },
     {
@@ -650,6 +1329,7 @@
       "category": "agents",
       "sourceUrl": "https://www.postgresql.org/docs/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/database-specialist-agent"
     },
     {
@@ -659,6 +1339,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/nadeesha/ts-prune",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/dead-code-eliminator.sh && chmod +x .claude/hooks/dead-code-eliminator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/dead-code-eliminator"
     },
     {
@@ -668,6 +1349,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/debugging-assistant-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/debugging-assistant-agent"
     },
     {
@@ -677,6 +1359,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-security-audit-on-stop.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/dependency-security-audit-on-stop.sh && chmod +x .claude/hooks/dependency-security-audit-on-stop.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/dependency-security-audit-on-stop"
     },
     {
@@ -686,6 +1369,7 @@
       "category": "hooks",
       "sourceUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/dependency-security-scanner.sh && chmod +x .claude/hooks/dependency-security-scanner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/dependency-security-scanner"
     },
     {
@@ -695,6 +1379,7 @@
       "category": "hooks",
       "sourceUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/dependency-update-checker.sh && chmod +x .claude/hooks/dependency-update-checker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/dependency-update-checker"
     },
     {
@@ -704,6 +1389,7 @@
       "category": "agents",
       "sourceUrl": "https://kubernetes.io/docs/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/devops-sre-expert"
     },
     {
@@ -713,6 +1399,7 @@
       "category": "hooks",
       "sourceUrl": "https://discord.com/developers/docs/resources/webhook",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/discord-activity-notifier.sh && chmod +x .claude/hooks/discord-activity-notifier.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/discord-activity-notifier"
     },
     {
@@ -722,6 +1409,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/saseq/discord-mcp",
       "installCommand": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/discord-mcp-server"
     },
     {
@@ -731,6 +1419,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-auto-generator-on-stop.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/documentation-auto-generator-on-stop.sh && chmod +x .claude/hooks/documentation-auto-generator-on-stop.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/documentation-auto-generator-on-stop"
     },
     {
@@ -740,6 +1429,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.docker.com/compose/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/docker-compose-production-blueprints.zip -o docker-compose-production-blueprints.zip && unzip -o docker-compose-production-blueprints.zip -d ./docker-compose-production-blueprints",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/docker-compose-production-blueprints.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/docker-compose-production-blueprints"
     },
     {
@@ -749,6 +1477,7 @@
       "category": "hooks",
       "sourceUrl": "https://docs.docker.com/compose/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/docker-container-auto-rebuild.sh && chmod +x .claude/hooks/docker-container-auto-rebuild.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/docker-container-auto-rebuild"
     },
     {
@@ -758,6 +1487,7 @@
       "category": "hooks",
       "sourceUrl": "https://aquasecurity.github.io/trivy/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/docker-image-security-scanner.sh && chmod +x .claude/hooks/docker-image-security-scanner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/docker-image-security-scanner"
     },
     {
@@ -767,6 +1497,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.docker.com/engine/api/",
       "installCommand": "claude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/docker-mcp-server"
     },
     {
@@ -776,6 +1507,7 @@
       "category": "hooks",
       "sourceUrl": "https://jsdoc.app/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/documentation-coverage-checker.sh && chmod +x .claude/hooks/documentation-coverage-checker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/documentation-coverage-checker"
     },
     {
@@ -785,6 +1517,7 @@
       "category": "hooks",
       "sourceUrl": "https://jsdoc.app/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/documentation-generator.sh && chmod +x .claude/hooks/documentation-generator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/documentation-generator"
     },
     {
@@ -794,6 +1527,45 @@
       "category": "skills",
       "sourceUrl": "https://docxtpl.readthedocs.io/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/docx-report-generator.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/docx-report-generator"
     },
     {
@@ -803,6 +1575,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/domain-specialist-ai-agents.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/domain-specialist-ai-agents"
     },
     {
@@ -812,6 +1585,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-cleanup-handler.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/environment-cleanup-handler.sh && chmod +x .claude/hooks/environment-cleanup-handler.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/environment-cleanup-handler"
     },
     {
@@ -821,6 +1595,7 @@
       "category": "hooks",
       "sourceUrl": "https://12factor.net/config",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/environment-variable-validator.sh && chmod +x .claude/hooks/environment-variable-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/environment-variable-validator"
     },
     {
@@ -830,6 +1605,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/error-rate-monitor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/error-rate-monitor.sh && chmod +x .claude/hooks/error-rate-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/error-rate-monitor"
     },
     {
@@ -839,6 +1615,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.base.org/get-started/deploy-smart-contracts",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/ethereum-base-smart-contract-security-capability-pack.zip -o ethereum-base-smart-contract-security-capability-pack.zip && unzip -o ethereum-base-smart-contract-security-capability-pack.zip -d ./ethereum-base-smart-contract-security-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/ethereum-base-smart-contract-security-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/ethereum-base-smart-contract-security-capability-pack"
     },
     {
@@ -848,6 +1663,45 @@
       "category": "skills",
       "sourceUrl": "https://ethereum.org/developers/docs/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip -o ethereum-solidity-security-foundry.zip && unzip -o ethereum-solidity-security-foundry.zip -d ./ethereum-solidity-security-foundry",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/ethereum-solidity-security-foundry.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/ethereum-solidity-security-foundry"
     },
     {
@@ -857,6 +1711,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/extended-thinking-orchestrator.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/extended-thinking-orchestrator"
     },
     {
@@ -866,6 +1721,45 @@
       "category": "skills",
       "sourceUrl": "https://fastapi.tiangolo.com/",
       "installCommand": "pip install fastapi uvicorn[standard] pydantic sqlalchemy",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/fastapi-python-backend.mdc",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-23"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/fastapi-python-backend"
     },
     {
@@ -875,6 +1769,7 @@
       "category": "mcp",
       "sourceUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
       "installCommand": "claude mcp list && claude mcp status figma",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/figma-mcp-server"
     },
     {
@@ -884,6 +1779,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/file-size-warning-monitor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/file-size-warning-monitor.sh && chmod +x .claude/hooks/file-size-warning-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/file-size-warning-monitor"
     },
     {
@@ -893,6 +1789,7 @@
       "category": "mcp",
       "sourceUrl": "https://modelcontextprotocol.io/examples",
       "installCommand": "claude mcp list && claude mcp status filesystem",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/filesystem-mcp-server"
     },
     {
@@ -902,6 +1799,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/final-bundle-size-reporter.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/final-bundle-size-reporter.sh && chmod +x .claude/hooks/final-bundle-size-reporter.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/final-bundle-size-reporter"
     },
     {
@@ -911,6 +1809,7 @@
       "category": "mcp",
       "sourceUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
       "installCommand": "claude mcp list && claude mcp status fireflies",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/fireflies-mcp-server"
     },
     {
@@ -920,6 +1819,7 @@
       "category": "agents",
       "sourceUrl": "https://react.dev/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/frontend-specialist-agent"
     },
     {
@@ -929,6 +1829,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/full-stack-ai-development-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/full-stack-ai-development-agent"
     },
     {
@@ -938,6 +1839,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.ai/commands/test-gen",
       "installCommand": "/test-gen [options] <file_or_function>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/generate-tests"
     },
     {
@@ -947,6 +1849,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-auto-commit-on-stop.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/git-auto-commit-on-stop.sh && chmod +x .claude/hooks/git-auto-commit-on-stop.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/git-auto-commit-on-stop"
     },
     {
@@ -956,6 +1859,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-branch-protection.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/git-branch-protection.sh && chmod +x .claude/hooks/git-branch-protection.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/git-branch-protection"
     },
     {
@@ -965,6 +1869,7 @@
       "category": "mcp",
       "sourceUrl": "https://modelcontextprotocol.io/examples",
       "installCommand": "claude mcp list && claude mcp status git",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/git-mcp-server"
     },
     {
@@ -974,6 +1879,7 @@
       "category": "hooks",
       "sourceUrl": "https://pre-commit.com/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/git-pre-commit-validator.sh && chmod +x .claude/hooks/git-pre-commit-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/git-pre-commit-validator"
     },
     {
@@ -983,6 +1889,7 @@
       "category": "commands",
       "sourceUrl": "https://www.conventionalcommits.org/",
       "installCommand": "/git-smart-commit [type] [message]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/git-smart-commit"
     },
     {
@@ -992,6 +1899,45 @@
       "category": "skills",
       "sourceUrl": "https://git-cliff.org/docs/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/git-cliff-release-changelog-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack"
     },
     {
@@ -1001,6 +1947,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.github.com/en/actions",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/github-actions-ai-cicd.zip -o github-actions-ai-cicd.zip && unzip -o github-actions-ai-cicd.zip -d ./github-actions-ai-cicd",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/github-actions-ai-cicd.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/github-actions-ai-cicd"
     },
     {
@@ -1010,6 +1995,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.github.com/actions",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/github-actions-secure-cicd-capability-pack.zip -o github-actions-secure-cicd-capability-pack.zip && unzip -o github-actions-secure-cicd-capability-pack.zip -d ./github-actions-secure-cicd-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/github-actions-secure-cicd-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack"
     },
     {
@@ -1019,6 +2043,7 @@
       "category": "hooks",
       "sourceUrl": "https://docs.github.com/en/actions",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/github-actions-workflow-validator.sh && chmod +x .claude/hooks/github-actions-workflow-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/github-actions-workflow-validator"
     },
     {
@@ -1028,6 +2053,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/github-copilot-interop-bridge.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/github-copilot-interop-bridge"
     },
     {
@@ -1037,6 +2063,7 @@
       "category": "mcp",
       "sourceUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
       "installCommand": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/github-mcp-server"
     },
     {
@@ -1046,6 +2073,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/go-module-tidy.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/go-module-tidy.sh && chmod +x .claude/hooks/go-module-tidy.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/go-module-tidy"
     },
     {
@@ -1055,6 +2083,45 @@
       "category": "skills",
       "sourceUrl": "https://ai.google.dev/gemini-api/docs",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/google-workspace-gemini-automation.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/google-workspace-gemini-automation"
     },
     {
@@ -1064,6 +2131,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/graphql-schema-validator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/graphql-schema-validator.sh && chmod +x .claude/hooks/graphql-schema-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/graphql-schema-validator"
     },
     {
@@ -1073,7 +2141,56 @@
       "category": "mcp",
       "sourceUrl": "https://heyclau.de/mcp/heyclaude-mcp",
       "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/heyclaude-mcp"
+    },
+    {
+      "name": "heyclaude-skill-submission-factory",
+      "title": "HeyClaude Skill Submission Factory",
+      "description": "Build valid Agent Skills and submit them to HeyClaude through maintainer-reviewed GitHub issues.",
+      "category": "skills",
+      "sourceUrl": "https://heyclau.de/submit",
+      "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip -o heyclaude-skill-submission-factory.zip && unzip -o heyclaude-skill-submission-factory.zip -d ./heyclaude-skill-submission-factory",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-27"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-27"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-27"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-27"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/heyclaude-skill-submission-factory.mdc",
+          "verifiedAt": "2026-04-27"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-27"
+        }
+      ],
+      "heyclaudeUrl": "https://heyclau.de/skills/heyclaude-skill-submission-factory"
     },
     {
       "name": "hooks-generator",
@@ -1082,6 +2199,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/hooks",
       "installCommand": "/hooks-generator [hook-type] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/hooks-generator"
     },
     {
@@ -1091,6 +2209,7 @@
       "category": "mcp",
       "sourceUrl": "https://developers.hubspot.com/mcp",
       "installCommand": "claude mcp list && claude mcp status hubspot",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/hubspot-mcp-server"
     },
     {
@@ -1100,6 +2219,7 @@
       "category": "mcp",
       "sourceUrl": "https://huggingface.co/settings/mcp",
       "installCommand": "claude mcp list && claude mcp status hugging-face",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/hugging-face-mcp-server"
     },
     {
@@ -1109,6 +2229,45 @@
       "category": "skills",
       "sourceUrl": "https://typicode.github.io/husky/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/husky-commit-governance-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/husky-commit-governance-capability-pack"
     },
     {
@@ -1118,6 +2277,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/i18n-translation-validator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/i18n-translation-validator.sh && chmod +x .claude/hooks/i18n-translation-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/i18n-translation-validator"
     },
     {
@@ -1127,6 +2287,45 @@
       "category": "skills",
       "sourceUrl": "https://tesseract-ocr.github.io/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/image-ocr-table-extraction.zip -o image-ocr-table-extraction.zip && unzip -o image-ocr-table-extraction.zip -d ./image-ocr-table-extraction",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/image-ocr-table-extraction.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/image-ocr-table-extraction"
     },
     {
@@ -1136,6 +2335,45 @@
       "category": "skills",
       "sourceUrl": "https://www.indexnow.org/documentation",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/indexnow-search-indexing-accelerator.zip -o indexnow-search-indexing-accelerator.zip && unzip -o indexnow-search-indexing-accelerator.zip -d ./indexnow-search-indexing-accelerator",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/indexnow-search-indexing-accelerator.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/indexnow-search-indexing-accelerator"
     },
     {
@@ -1145,6 +2383,7 @@
       "category": "mcp",
       "sourceUrl": "https://developers.intercom.com/docs/guides/mcp",
       "installCommand": "claude mcp list && claude mcp status intercom",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/intercom-mcp-server"
     },
     {
@@ -1154,6 +2393,7 @@
       "category": "mcp",
       "sourceUrl": "https://invideo.io/ai/mcp",
       "installCommand": "claude mcp list && claude mcp status invideo",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/invideo-mcp-server"
     },
     {
@@ -1163,6 +2403,7 @@
       "category": "mcp",
       "sourceUrl": "https://jam.dev/docs/debug-a-jam/mcp",
       "installCommand": "claude mcp list && claude mcp status jam",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/jam-mcp-server"
     },
     {
@@ -1172,6 +2413,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/jest-snapshot-auto-updater.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/jest-snapshot-auto-updater.sh && chmod +x .claude/hooks/jest-snapshot-auto-updater.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/jest-snapshot-auto-updater"
     },
     {
@@ -1181,6 +2423,7 @@
       "category": "mcp",
       "sourceUrl": "https://www.atlassian.com/platform/remote-mcp-server",
       "installCommand": "claude mcp list && claude mcp status jira",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/jira-mcp-server"
     },
     {
@@ -1190,6 +2433,45 @@
       "category": "skills",
       "sourceUrl": "https://ajv.js.org/",
       "installCommand": "npm i ajv",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/json-schema-validation-transformation.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/json-schema-validation-transformation"
     },
     {
@@ -1199,6 +2481,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/json-schema-validator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/json-schema-validator.sh && chmod +x .claude/hooks/json-schema-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/json-schema-validator"
     },
     {
@@ -1208,6 +2491,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/kubernetes-manifest-validator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/kubernetes-manifest-validator.sh && chmod +x .claude/hooks/kubernetes-manifest-validator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/kubernetes-manifest-validator"
     },
     {
@@ -1217,6 +2501,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
       "installCommand": "claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/kubernetes-mcp-server"
     },
     {
@@ -1226,6 +2511,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/life-sciences-research-specialist.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/life-sciences-research-specialist"
     },
     {
@@ -1235,6 +2521,7 @@
       "category": "mcp",
       "sourceUrl": "https://linear.app/docs/mcp",
       "installCommand": "claude mcp list && claude mcp status linear",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/linear-mcp-server"
     },
     {
@@ -1244,6 +2531,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/BurntSushi/ripgrep",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/log-parsing-incident-timeline.zip -o log-parsing-incident-timeline.zip && unzip -o log-parsing-incident-timeline.zip -d ./log-parsing-incident-timeline",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/log-parsing-incident-timeline.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/log-parsing-incident-timeline"
     },
     {
@@ -1253,6 +2579,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/remarkjs/remark",
       "installCommand": "npm i remark unified",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/markdown-knowledge-base-composer.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/markdown-knowledge-base-composer"
     },
     {
@@ -1262,6 +2627,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/markdown-link-checker.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/markdown-link-checker.sh && chmod +x .claude/hooks/markdown-link-checker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/markdown-link-checker"
     },
     {
@@ -1271,6 +2637,45 @@
       "category": "skills",
       "sourceUrl": "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/mcp-server-authoring-security-capability-pack.zip -o mcp-server-authoring-security-capability-pack.zip && unzip -o mcp-server-authoring-security-capability-pack.zip -d ./mcp-server-authoring-security-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/mcp-server-authoring-security-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/mcp-server-authoring-security-capability-pack"
     },
     {
@@ -1280,6 +2685,45 @@
       "category": "skills",
       "sourceUrl": "https://modelcontextprotocol.io/specification/2025-06-18",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/mcp-server-security-hardening.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/mcp-server-security-hardening"
     },
     {
@@ -1289,6 +2733,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
       "installCommand": "/mcp-setup [server-type] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/mcp-setup"
     },
     {
@@ -1298,6 +2743,45 @@
       "category": "skills",
       "sourceUrl": "https://modelcontextprotocol.io/specification/2025-06-18/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/mcp-tool-contract-testing.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/mcp-tool-contract-testing"
     },
     {
@@ -1307,6 +2791,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/memory-usage-monitor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/memory-usage-monitor.sh && chmod +x .claude/hooks/memory-usage-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/memory-usage-monitor"
     },
     {
@@ -1316,6 +2801,45 @@
       "category": "skills",
       "sourceUrl": "https://mintlify.com/docs",
       "installCommand": "npm install -g mintlify",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/mintlify-documentation-automation.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/mintlify-documentation-automation"
     },
     {
@@ -1325,6 +2849,7 @@
       "category": "commands",
       "sourceUrl": "https://mintlify.com/docs",
       "installCommand": "/mintlify-docs [options] <documentation_scope>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/mintlify-docs"
     },
     {
@@ -1334,6 +2859,45 @@
       "category": "skills",
       "sourceUrl": "https://platform.openai.com/docs/guides/latency-optimization",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/model-routing-cost-latency-optimizer.zip -o model-routing-cost-latency-optimizer.zip && unzip -o model-routing-cost-latency-optimizer.zip -d ./model-routing-cost-latency-optimizer",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/model-routing-cost-latency-optimizer.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/model-routing-cost-latency-optimizer"
     },
     {
@@ -1343,6 +2907,7 @@
       "category": "mcp",
       "sourceUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
       "installCommand": "claude mcp list && claude mcp status monday",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/monday-mcp-server"
     },
     {
@@ -1352,6 +2917,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/multi-agent-orchestration-specialist.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/multi-agent-orchestration-specialist"
     },
     {
@@ -1361,6 +2927,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.n8n.io/advanced-ai/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/n8n-ai-agent-workflow-architect.zip -o n8n-ai-agent-workflow-architect.zip && unzip -o n8n-ai-agent-workflow-architect.zip -d ./n8n-ai-agent-workflow-architect",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/n8n-ai-agent-workflow-architect.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect"
     },
     {
@@ -1370,6 +2975,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.n8n.io/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/n8n-operations-resilience-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack"
     },
     {
@@ -1379,6 +3023,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.n8n.io/hosting/securing/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip -o n8n-production-security-capability-pack.zip && unzip -o n8n-production-security-capability-pack.zip -d ./n8n-production-security-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/n8n-production-security-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/n8n-production-security-capability-pack"
     },
     {
@@ -1388,6 +3071,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
       "installCommand": "claude mcp list && claude mcp status netlify",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/netlify-mcp-server"
     },
     {
@@ -1397,6 +3081,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/nextjs-route-analyzer.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/nextjs-route-analyzer.sh && chmod +x .claude/hooks/nextjs-route-analyzer.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/nextjs-route-analyzer"
     },
     {
@@ -1406,6 +3091,7 @@
       "category": "mcp",
       "sourceUrl": "https://developers.notion.com/docs/mcp",
       "installCommand": "claude mcp list && claude mcp status notion",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/notion-mcp-server"
     },
     {
@@ -1415,6 +3101,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openclaw/openclaw",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/openclaw-agent-ops-hardening.zip -o openclaw-agent-ops-hardening.zip && unzip -o openclaw-agent-ops-hardening.zip -d ./openclaw-agent-ops-hardening",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/openclaw-agent-ops-hardening.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/openclaw-agent-ops-hardening"
     },
     {
@@ -1424,6 +3149,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openclaw/openclaw",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/openclaw-operator-capability-pack.zip -o openclaw-operator-capability-pack.zip && unzip -o openclaw-operator-capability-pack.zip -d ./openclaw-operator-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/openclaw-operator-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/openclaw-operator-capability-pack"
     },
     {
@@ -1433,6 +3197,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/openclaw/openclaw",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip -o openclaw-skill-authoring-factory-capability-pack.zip && unzip -o openclaw-skill-authoring-factory-capability-pack.zip -d ./openclaw-skill-authoring-factory-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/openclaw-skill-authoring-factory-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack"
     },
     {
@@ -1442,6 +3245,45 @@
       "category": "skills",
       "sourceUrl": "https://opennext.js.org/cloudflare/get-started",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/opennext-cloudflare-capability-pack.zip -o opennext-cloudflare-capability-pack.zip && unzip -o opennext-cloudflare-capability-pack.zip -d ./opennext-cloudflare-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/opennext-cloudflare-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/opennext-cloudflare-capability-pack"
     },
     {
@@ -1451,6 +3293,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/package-vulnerability-scanner.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/package-vulnerability-scanner.sh && chmod +x .claude/hooks/package-vulnerability-scanner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/package-vulnerability-scanner"
     },
     {
@@ -1460,6 +3303,45 @@
       "category": "skills",
       "sourceUrl": "https://web.dev/articles/vitals",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/pagespeed-insights-optimizer.zip -o pagespeed-insights-optimizer.zip && unzip -o pagespeed-insights-optimizer.zip -d ./pagespeed-insights-optimizer",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/pagespeed-insights-optimizer.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/pagespeed-insights-optimizer"
     },
     {
@@ -1469,6 +3351,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/parallel-subagent-distributor"
     },
     {
@@ -1478,6 +3361,7 @@
       "category": "mcp",
       "sourceUrl": "https://www.paypal.ai/",
       "installCommand": "claude mcp list && claude mcp status paypal",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/paypal-mcp-server"
     },
     {
@@ -1487,6 +3371,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-benchmark-report.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/performance-benchmark-report.sh && chmod +x .claude/hooks/performance-benchmark-report.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/performance-benchmark-report"
     },
     {
@@ -1496,6 +3381,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-impact-monitor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/performance-impact-monitor.sh && chmod +x .claude/hooks/performance-impact-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/performance-impact-monitor"
     },
     {
@@ -1505,6 +3391,7 @@
       "category": "hooks",
       "sourceUrl": "https://web.dev/vitals/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/performance-monitor.sh && chmod +x .claude/hooks/performance-monitor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/performance-monitor"
     },
     {
@@ -1514,6 +3401,7 @@
       "category": "agents",
       "sourceUrl": "https://web.dev/performance/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/performance-optimizer-agent"
     },
     {
@@ -1523,6 +3411,7 @@
       "category": "mcp",
       "sourceUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
       "installCommand": "claude mcp list && claude mcp status plaid",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/plaid-mcp-server"
     },
     {
@@ -1532,6 +3421,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/extended-thinking",
       "installCommand": "/plan-mode [task] [depth]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/plan-mode"
     },
     {
@@ -1541,6 +3431,45 @@
       "category": "skills",
       "sourceUrl": "https://playwright.dev/",
       "installCommand": "npx playwright install --with-deps",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/playwright-e2e-testing.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/playwright-e2e-testing"
     },
     {
@@ -1550,6 +3479,45 @@
       "category": "skills",
       "sourceUrl": "https://playwright.dev/docs/getting-started-mcp",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/playwright-mcp-browser-automation-engineer.zip -o playwright-mcp-browser-automation-engineer.zip && unzip -o playwright-mcp-browser-automation-engineer.zip -d ./playwright-mcp-browser-automation-engineer",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/playwright-mcp-browser-automation-engineer.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/playwright-mcp-browser-automation-engineer"
     },
     {
@@ -1559,6 +3527,7 @@
       "category": "hooks",
       "sourceUrl": "https://playwright.dev",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/playwright-test-runner.sh && chmod +x .claude/hooks/playwright-test-runner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/playwright-test-runner"
     },
     {
@@ -1568,6 +3537,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/plugin-ecosystem-architect.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/plugin-ecosystem-architect"
     },
     {
@@ -1577,6 +3547,7 @@
       "category": "mcp",
       "sourceUrl": "https://modelcontextprotocol.io/examples",
       "installCommand": "claude mcp list && claude mcp status postgres",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/postgresql-mcp-server"
     },
     {
@@ -1586,6 +3557,45 @@
       "category": "skills",
       "sourceUrl": "https://www.postgresql.org/docs/current/performance-tips.html",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/postgresql-query-optimization.zip -o postgresql-query-optimization.zip && unzip -o postgresql-query-optimization.zip -d ./postgresql-query-optimization",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/postgresql-query-optimization.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/postgresql-query-optimization"
     },
     {
@@ -1595,6 +3605,7 @@
       "category": "hooks",
       "sourceUrl": "https://www.prisma.io/docs",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/prisma-schema-sync.sh && chmod +x .claude/hooks/prisma-schema-sync.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/prisma-schema-sync"
     },
     {
@@ -1604,6 +3615,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/product-management-ai-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/product-management-ai-agent"
     },
     {
@@ -1613,6 +3625,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/production-reliability-engineer.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/production-reliability-engineer"
     },
     {
@@ -1622,6 +3635,45 @@
       "category": "skills",
       "sourceUrl": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/prompt-injection-defense-guardrails.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/prompt-injection-defense-guardrails"
     },
     {
@@ -1631,6 +3683,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/prompt-optimization-specialist.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/prompt-optimization-specialist"
     },
     {
@@ -1640,6 +3693,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
       "installCommand": "npx -y prompt-to-asset",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/prompt-to-asset"
     },
     {
@@ -1649,6 +3703,45 @@
       "category": "skills",
       "sourceUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/proxmox-ve-api-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/proxmox-ve-api-capability-pack"
     },
     {
@@ -1658,6 +3751,45 @@
       "category": "skills",
       "sourceUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/proxmox-ve-api-orchestrator.zip -o proxmox-ve-api-orchestrator.zip && unzip -o proxmox-ve-api-orchestrator.zip -d ./proxmox-ve-api-orchestrator",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/proxmox-ve-api-orchestrator.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/proxmox-ve-api-orchestrator"
     },
     {
@@ -1667,6 +3799,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-import-optimizer.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/python-import-optimizer.sh && chmod +x .claude/hooks/python-import-optimizer.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/python-import-optimizer"
     },
     {
@@ -1676,6 +3809,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/python-linter-integration.sh && chmod +x .claude/hooks/python-linter-integration.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/python-linter-integration"
     },
     {
@@ -1685,6 +3819,45 @@
       "category": "skills",
       "sourceUrl": "https://developers.raycast.com/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/raycast-extension-dev-publish-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack"
     },
     {
@@ -1694,6 +3867,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/react-component-test-generator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/react-component-test-generator.sh && chmod +x .claude/hooks/react-component-test-generator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/react-component-test-generator"
     },
     {
@@ -1703,6 +3877,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/real-time-activity-tracker.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/real-time-activity-tracker.sh && chmod +x .claude/hooks/real-time-activity-tracker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/real-time-activity-tracker"
     },
     {
@@ -1712,6 +3887,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/karanb192/reddit-mcp-buddy",
       "installCommand": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/reddit-mcp-buddy"
     },
     {
@@ -1721,6 +3897,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/redis-cache-invalidator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/redis-cache-invalidator.sh && chmod +x .claude/hooks/redis-cache-invalidator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/redis-cache-invalidator"
     },
     {
@@ -1730,6 +3907,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/redis/mcp-redis",
       "installCommand": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/redis-mcp-server"
     },
     {
@@ -1739,6 +3917,45 @@
       "category": "skills",
       "sourceUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/rest-api-client-harness.zip -o rest-api-client-harness.zip && unzip -o rest-api-client-harness.zip -d ./rest-api-client-harness",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/rest-api-client-harness.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/rest-api-client-harness"
     },
     {
@@ -1748,6 +3965,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/rust-cargo-check.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/rust-cargo-check.sh && chmod +x .claude/hooks/rust-cargo-check.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/rust-cargo-check"
     },
     {
@@ -1757,6 +3975,45 @@
       "category": "skills",
       "sourceUrl": "https://stripe.com/docs",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/saas-pricing-experimentation-engine.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/saas-pricing-experimentation-engine"
     },
     {
@@ -1766,6 +4023,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/scss-auto-compiler.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/scss-auto-compiler.sh && chmod +x .claude/hooks/scss-auto-compiler.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/scss-auto-compiler"
     },
     {
@@ -1775,6 +4033,7 @@
       "category": "hooks",
       "sourceUrl": "https://owasp.org/www-project-top-ten/",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/security-scanner-hook.sh && chmod +x .claude/hooks/security-scanner-hook.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/security-scanner-hook"
     },
     {
@@ -1784,6 +4043,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/semantic-kernel-enterprise-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/semantic-kernel-enterprise-agent"
     },
     {
@@ -1793,6 +4053,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/sensitive-data-alert-scanner.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/sensitive-data-alert-scanner.sh && chmod +x .claude/hooks/sensitive-data-alert-scanner.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/sensitive-data-alert-scanner"
     },
     {
@@ -1802,6 +4063,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.sentry.io/product/sentry-mcp/",
       "installCommand": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/sentry-mcp-server"
     },
     {
@@ -1811,6 +4073,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/session-metrics-collector.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/session-metrics-collector.sh && chmod +x .claude/hooks/session-metrics-collector.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/session-metrics-collector"
     },
     {
@@ -1820,6 +4083,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/slack-progress-notifier.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/slack-progress-notifier.sh && chmod +x .claude/hooks/slack-progress-notifier.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/slack-progress-notifier"
     },
     {
@@ -1829,6 +4093,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/slash-commands",
       "installCommand": "/slash-command-gen [command-name] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/slash-command-gen"
     },
     {
@@ -1838,6 +4103,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/slash-commands",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/slash-command-orchestrator-agent"
     },
     {
@@ -1847,6 +4113,7 @@
       "category": "mcp",
       "sourceUrl": "https://github.com/SocketDev/socket-mcp",
       "installCommand": "claude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/socket-mcp-server"
     },
     {
@@ -1856,6 +4123,7 @@
       "category": "mcp",
       "sourceUrl": "https://developer.squareup.com/docs/mcp",
       "installCommand": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/square-mcp-server"
     },
     {
@@ -1865,6 +4133,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.stripe.com/mcp",
       "installCommand": "claude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/stripe-mcp-server"
     },
     {
@@ -1874,6 +4143,7 @@
       "category": "mcp",
       "sourceUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
       "installCommand": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/stytch-mcp-server"
     },
     {
@@ -1883,6 +4153,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "installCommand": "/subagent-create [role] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/subagent-create"
     },
     {
@@ -1892,6 +4163,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/subagent-factory-agent"
     },
     {
@@ -1901,6 +4173,45 @@
       "category": "skills",
       "sourceUrl": "https://supabase.com/docs",
       "installCommand": "npm install @supabase/supabase-js",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/supabase-realtime-database.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/supabase-realtime-database"
     },
     {
@@ -1910,6 +4221,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/svelte-component-compiler.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/svelte-component-compiler.sh && chmod +x .claude/hooks/svelte-component-compiler.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/svelte-component-compiler"
     },
     {
@@ -1919,6 +4231,45 @@
       "category": "skills",
       "sourceUrl": "https://kit.svelte.dev/",
       "installCommand": "npm create svelte@latest my-app",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/svelte-sveltekit-fullstack.mdc",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-23"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/svelte-sveltekit-fullstack"
     },
     {
@@ -1928,6 +4279,7 @@
       "category": "commands",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/testing",
       "installCommand": "/tdd-workflow [feature] [options]",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/tdd-workflow"
     },
     {
@@ -1937,6 +4289,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/team-summary-email-generator.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/team-summary-email-generator.sh && chmod +x .claude/hooks/team-summary-email-generator.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/team-summary-email-generator"
     },
     {
@@ -1946,6 +4299,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/technical-documentation-writer-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/technical-documentation-writer-agent"
     },
     {
@@ -1955,6 +4309,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/terraform-plan-executor.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/terraform-plan-executor.sh && chmod +x .claude/hooks/terraform-plan-executor.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/terraform-plan-executor"
     },
     {
@@ -1964,6 +4319,7 @@
       "category": "agents",
       "sourceUrl": "https://playwright.dev/",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/test-automation-engineer-agent"
     },
     {
@@ -1973,6 +4329,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/test-coverage-final-report.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/test-coverage-final-report.sh && chmod +x .claude/hooks/test-coverage-final-report.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/test-coverage-final-report"
     },
     {
@@ -1982,6 +4339,7 @@
       "category": "hooks",
       "sourceUrl": "https://jestjs.io/docs/getting-started",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/test-runner-hook.sh && chmod +x .claude/hooks/test-runner-hook.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/test-runner-hook"
     },
     {
@@ -1991,6 +4349,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/token-cost-budget-optimizer.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/token-cost-budget-optimizer"
     },
     {
@@ -2000,6 +4359,45 @@
       "category": "skills",
       "sourceUrl": "https://trpc.io/docs/",
       "installCommand": "npm install @trpc/server @trpc/client @trpc/react-query zod",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/trpc-type-safe-api.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/trpc-type-safe-api"
     },
     {
@@ -2009,6 +4407,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/typescript-compilation-checker.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/typescript-compilation-checker.sh && chmod +x .claude/hooks/typescript-compilation-checker.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/typescript-compilation-checker"
     },
     {
@@ -2018,6 +4417,7 @@
       "category": "agents",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ui-ux-design-expert-agent.mdx",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/ui-ux-design-expert-agent"
     },
     {
@@ -2027,6 +4427,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.unraid.net/API/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/unraid-api-automation-operator.zip -o unraid-api-automation-operator.zip && unzip -o unraid-api-automation-operator.zip -d ./unraid-api-automation-operator",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/unraid-api-automation-operator.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/unraid-api-automation-operator"
     },
     {
@@ -2036,6 +4475,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.unraid.net/API/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/unraid-api-v2-capability-pack.zip -o unraid-api-v2-capability-pack.zip && unzip -o unraid-api-v2-capability-pack.zip -d ./unraid-api-v2-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/unraid-api-v2-capability-pack.mdc",
+          "verifiedAt": "2026-04-10"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-10"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/unraid-api-v2-capability-pack"
     },
     {
@@ -2045,6 +4523,45 @@
       "category": "skills",
       "sourceUrl": "https://forums.unraid.net/forum/64-docker-engine/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip -o unraid-ca-template-authoring-capability-pack.zip && unzip -o unraid-ca-template-authoring-capability-pack.zip -d ./unraid-ca-template-authoring-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/unraid-ca-template-authoring-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack"
     },
     {
@@ -2054,6 +4571,7 @@
       "category": "commands",
       "sourceUrl": "https://v0.dev/docs",
       "installCommand": "/v0-generate [options] <component_description>",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/commands/v0-generate"
     },
     {
@@ -2063,6 +4581,45 @@
       "category": "skills",
       "sourceUrl": "https://v0.dev/docs",
       "installCommand": "npx shadcn-ui@latest init",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/v0-rapid-prototyping.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/v0-rapid-prototyping"
     },
     {
@@ -2072,6 +4629,7 @@
       "category": "mcp",
       "sourceUrl": "https://vercel.com/docs/mcp/vercel-mcp",
       "installCommand": "claude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/vercel-mcp-server"
     },
     {
@@ -2081,6 +4639,45 @@
       "category": "skills",
       "sourceUrl": "https://vitejs.dev/",
       "installCommand": "npm create vite@latest my-app",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/vite-build-optimization.mdc",
+          "verifiedAt": "2025-10-23"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-23"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/vite-build-optimization"
     },
     {
@@ -2090,6 +4687,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/vue-composition-api-linter.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/vue-composition-api-linter.sh && chmod +x .claude/hooks/vue-composition-api-linter.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/vue-composition-api-linter"
     },
     {
@@ -2099,6 +4697,7 @@
       "category": "agents",
       "sourceUrl": "https://docs.claude.com/en/docs/claude-code/web-interface",
       "installCommand": "",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/agents/web-async-agent-coordinator"
     },
     {
@@ -2108,6 +4707,45 @@
       "category": "skills",
       "sourceUrl": "https://webassembly.org/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/webassembly-module-development.zip -o webassembly-module-development.zip && unzip -o webassembly-module-development.zip -d ./webassembly-module-development",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/webassembly-module-development.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/webassembly-module-development"
     },
     {
@@ -2117,6 +4755,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/webpack-bundle-analyzer.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/webpack-bundle-analyzer.sh && chmod +x .claude/hooks/webpack-bundle-analyzer.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/webpack-bundle-analyzer"
     },
     {
@@ -2126,6 +4765,45 @@
       "category": "skills",
       "sourceUrl": "https://github.com/mozilla/readability",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/website-crawler-summarizer.zip -o website-crawler-summarizer.zip && unzip -o website-crawler-summarizer.zip -d ./website-crawler-summarizer",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/website-crawler-summarizer.mdc",
+          "verifiedAt": "2025-10-15"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-15"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/website-crawler-summarizer"
     },
     {
@@ -2135,6 +4813,45 @@
       "category": "skills",
       "sourceUrl": "https://docs.codeium.com/windsurf",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/windsurf-collaborative-development.zip -o windsurf-collaborative-development.zip && unzip -o windsurf-collaborative-development.zip -d ./windsurf-collaborative-development",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/windsurf-collaborative-development.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/windsurf-collaborative-development"
     },
     {
@@ -2144,6 +4861,7 @@
       "category": "mcp",
       "sourceUrl": "https://docs.workato.com/mcp.html",
       "installCommand": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/workato-mcp-server"
     },
     {
@@ -2153,6 +4871,7 @@
       "category": "hooks",
       "sourceUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/workflow-completion-report.mdx",
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/workflow-completion-report.sh && chmod +x .claude/hooks/workflow-completion-report.sh",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/workflow-completion-report"
     },
     {
@@ -2162,6 +4881,7 @@
       "category": "mcp",
       "sourceUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
       "installCommand": "claude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list",
+      "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/mcp/zapier-mcp-server"
     },
     {
@@ -2171,6 +4891,45 @@
       "category": "skills",
       "sourceUrl": "https://developers.cloudflare.com/workers/",
       "installCommand": "curl -L https://heyclau.de/downloads/skills/zero-budget-saas-launch-capability-pack.zip -o zero-budget-saas-launch-capability-pack.zip && unzip -o zero-budget-saas-launch-capability-pack.zip -d ./zero-budget-saas-launch-capability-pack",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/zero-budget-saas-launch-capability-pack.mdc",
+          "verifiedAt": "2026-04-11"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-11"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack"
     },
     {
@@ -2180,6 +4939,45 @@
       "category": "skills",
       "sourceUrl": "https://zod.dev/",
       "installCommand": "npm install zod",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "adapter",
+          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/zod-schema-validator.mdc",
+          "verifiedAt": "2025-10-16"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2025-10-16"
+        }
+      ],
       "heyclaudeUrl": "https://heyclau.de/skills/zod-schema-validator"
     }
   ]

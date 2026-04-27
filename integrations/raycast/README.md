@@ -12,10 +12,13 @@ Search HeyClaude from Raycast and copy practical Claude assets without opening a
 - Copy or paste the full usable asset.
 - Copy install commands and Claude config snippets separately.
 - Open the HeyClaude page, documentation, or source repository.
+- Open issue-first contribution and change-request URLs in the browser.
 
 ## Read-Only by Design
 
 This first release does not write to project files, `.claude/settings.json`, `.cursor/rules`, hooks, commands, or local skill folders. It only fetches the public HeyClaude feed, stores a local cache, stores local favorites, copies/pastes text, and opens links.
+
+Contribution actions are also read-only in Raycast. They open HeyClaude submit or GitHub issue URLs in the browser and do not request GitHub OAuth, tokens, forks, branches, pull requests, or local project-file access.
 
 ## Data and Privacy
 

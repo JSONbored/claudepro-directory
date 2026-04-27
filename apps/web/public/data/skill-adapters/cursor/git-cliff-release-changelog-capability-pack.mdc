@@ -1,0 +1,14 @@
+---
+description: "Generate stable, high-signal changelogs and release notes with git-cliff and conventional commit discipline."
+globs:
+alwaysApply: false
+---
+# Git-Cliff Release Changelog Capability Pack Skill
+Expert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip -o git-cliff-release-changelog-capability-pack.zip && unzip -o git-cliff-release-changelog-capability-pack.zip -d ./git-cliff-release-changelog-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/git-cliff-release-changelog-capability-pack.zip

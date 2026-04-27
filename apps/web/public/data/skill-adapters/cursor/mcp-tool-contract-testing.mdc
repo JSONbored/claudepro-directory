@@ -1,0 +1,14 @@
+---
+description: "Test-first MCP tool validation for safer integrations, stronger reliability, and lower breakage risk."
+globs:
+alwaysApply: false
+---
+# MCP Tool Contract Testing Skill
+Validate MCP server tools with contract-style tests to catch schema drift, unsafe behavior, and integration regressions early.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing
+```
+## Source
+https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip

@@ -1,0 +1,14 @@
+---
+description: "Run a local, repeatable PR review loop with severity scoring, false-positive control, and fix-ready output."
+globs:
+alwaysApply: false
+---
+# Code Review Automation Capability Pack Skill
+Expert code-review capability pack for deterministic PR audits, risk-ranked findings, and low-noise fix planning without SaaS lock-in.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip -o coderabbit-lite-pr-review-capability-pack.zip && unzip -o coderabbit-lite-pr-review-capability-pack.zip -d ./coderabbit-lite-pr-review-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/coderabbit-lite-pr-review-capability-pack.zip

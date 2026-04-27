@@ -1,0 +1,14 @@
+---
+description: "Deep n8n production security skill for safe AI workflows, credential protection, and incident-ready operations."
+globs:
+alwaysApply: false
+---
+# n8n Production Security Capability Pack Skill
+Expert n8n capability skill focused on secure production operation, workflow isolation, secret hygiene, and abuse-resistant automation design.
+Use this rule when the user asks for this reusable skill workflow in Cursor. Cursor does not natively install Agent Skills from this package, so follow the SKILL.md instructions as a scoped workflow adapter.
+## Install
+```bash
+curl -L https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip -o n8n-production-security-capability-pack.zip && unzip -o n8n-production-security-capability-pack.zip -d ./n8n-production-security-capability-pack
+```
+## Source
+https://heyclau.de/downloads/skills/n8n-production-security-capability-pack.zip

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "jsonld-snapshots",
   "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 378,
+  "count": 379,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -13362,6 +13362,77 @@
           },
           "sameAs": [
             "https://heyclau.de/mcp/heyclaude-mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "skills:heyclaude-skill-submission-factory",
+      "category": "skills",
+      "slug": "heyclaude-skill-submission-factory",
+      "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/skills/heyclaude-skill-submission-factory#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Skills",
+              "item": "https://heyclau.de/skills"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "HeyClaude Skill Submission Factory",
+              "item": "https://heyclau.de/skills/heyclaude-skill-submission-factory"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/skills/heyclaude-skill-submission-factory#webpage",
+          "name": "HeyClaude Skill Submission Factory",
+          "description": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
+          "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/skills/heyclaude-skill-submission-factory#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/skills/heyclaude-skill-submission-factory#entry",
+          "name": "HeyClaude Skill Submission Factory",
+          "headline": "HeyClaude Skill Submission Factory",
+          "description": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
+          "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "create Agent Skill, submit skill to HeyClaude, Cursor rule adapter, SKILL.md package validation, heyclaude, skill-authoring, agent-skills, registry, submissions",
+          "genre": "Skills",
+          "author": {
+            "@type": "Person",
+            "name": "JSONbored",
+            "url": "https://github.com/JSONbored"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://heyclau.de/submit"
           ]
         }
       ]
