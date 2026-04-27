@@ -77,6 +77,57 @@ const forbiddenPatterns = [
   },
 ];
 
+const requiredTaskSections = [
+  "Current Gate",
+  "V2.1 Hardening",
+  "Registry/API",
+  "SEO + Content Quality",
+  "UGC Growth",
+  "Raycast",
+  "Commercial Surfaces",
+  "Testing/CI/Trunk",
+  "Future Moat",
+];
+
+const forbiddenBenchmarkNames = [
+  String.fromCharCode(
+    99,
+    117,
+    114,
+    115,
+    111,
+    114,
+    46,
+    100,
+    105,
+    114,
+    101,
+    99,
+    116,
+    111,
+    114,
+    121,
+  ),
+  String.fromCharCode(
+    67,
+    117,
+    114,
+    115,
+    111,
+    114,
+    32,
+    68,
+    105,
+    114,
+    101,
+    99,
+    116,
+    111,
+    114,
+    121,
+  ),
+];
+
 const failures = [];
 
 for (const relativePath of forbiddenPaths) {
@@ -136,6 +187,56 @@ walk(repoRoot);
 const trunkConfig = path.join(repoRoot, ".trunk", "trunk.yaml");
 if (!fs.existsSync(trunkConfig)) {
   failures.push("Tracked Trunk config is missing: .trunk/trunk.yaml");
+}
+
+const tasksPath = path.join(repoRoot, "TASKS.md");
+if (!fs.existsSync(tasksPath)) {
+  failures.push("TASKS.md is missing");
+} else {
+  const tasks = fs.readFileSync(tasksPath, "utf8");
+  for (const section of requiredTaskSections) {
+    if (!tasks.includes(`## ${section}`)) {
+      failures.push(`TASKS.md is missing section: ${section}`);
+    }
+  }
+  for (const forbiddenName of forbiddenBenchmarkNames) {
+    if (tasks.toLowerCase().includes(forbiddenName.toLowerCase())) {
+      failures.push("TASKS.md contains a forbidden internal benchmark name");
+    }
+  }
+
+  const completedLines = tasks
+    .split("\n")
+    .filter((line) => line.trim().startsWith("- [x]"));
+  for (const line of completedLines) {
+    if (!line.includes("Evidence:") || !line.includes("`")) {
+      failures.push(`Completed TASKS.md item lacks command evidence: ${line}`);
+    }
+  }
+
+  const scriptNames = JSON.parse(
+    fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+  ).scripts;
+  for (const scriptName of [
+    "validate:clean",
+    "validate:content:strict",
+    "validate:category-spec",
+    "validate:packages",
+    "validate:raycast-feed",
+    "test",
+    "test:e2e",
+    "type-check",
+    "build",
+  ]) {
+    if (!scriptNames?.[scriptName]) {
+      failures.push(
+        `package.json is missing TASKS.md gate script: ${scriptName}`,
+      );
+    }
+    if (!tasks.includes(`pnpm ${scriptName}`)) {
+      failures.push(`TASKS.md is missing gate command: pnpm ${scriptName}`);
+    }
+  }
 }
 
 const openApiSchema = fs.existsSync(

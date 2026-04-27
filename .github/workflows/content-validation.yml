@@ -17,6 +17,7 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "playwright.config.ts"
+      - "TASKS.md"
       - "vitest.config.ts"
   workflow_dispatch:
 
