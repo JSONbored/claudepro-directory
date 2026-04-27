@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
-
 function clean(value: string | null, fallback: string, maxLength: number) {
   const normalized = String(value || "")
     .replace(/\s+/g, " ")

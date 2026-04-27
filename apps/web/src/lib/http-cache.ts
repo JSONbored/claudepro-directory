@@ -17,11 +17,14 @@ export async function buildEtag(body: string) {
 }
 
 function hasMatchingEtag(request: Request, etag: string) {
+  const normalize = (value: string) => value.replace(/^W\//, "");
+  const normalizedEtag = normalize(etag);
   return request.headers
     .get("if-none-match")
     ?.split(",")
     .map((value) => value.trim())
-    .includes(etag);
+    .map(normalize)
+    .includes(normalizedEtag);
 }
 
 export async function cachedJsonResponse(

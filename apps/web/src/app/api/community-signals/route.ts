@@ -9,8 +9,6 @@ import {
 import { logApiWarn } from "@/lib/api-logs";
 import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
-export const runtime = "edge";
-
 const SIGNAL_TYPES = ["used", "works", "broken"] as const;
 const TARGET_KINDS = ["entry", "tool"] as const;
 const ZERO_COUNTS = { used: 0, works: 0, broken: 0 };
