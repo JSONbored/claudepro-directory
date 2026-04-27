@@ -220,6 +220,7 @@ if (!fs.existsSync(tasksPath)) {
   for (const scriptName of [
     "validate:clean",
     "validate:content:strict",
+    "validate:issue-templates",
     "validate:category-spec",
     "validate:packages",
     "validate:raycast-feed",
@@ -251,6 +252,7 @@ for (const route of [
   "/api/registry/manifest:",
   "/api/registry/categories:",
   "/api/registry/search:",
+  "/api/registry/diff:",
   "/api/registry/entries/{category}/{slug}:",
   "/api/registry/entries/{category}/{slug}/llms:",
   "/api/listing-leads:",

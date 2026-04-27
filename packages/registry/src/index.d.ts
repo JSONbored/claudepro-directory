@@ -403,6 +403,11 @@ export function isPlacementActive(
   now?: Date | string,
 ): boolean;
 export function linkRelForDisclosure(value: unknown): string;
+export function toolPlacementRank(tool: Record<string, unknown>): number;
+export function compareToolListings(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): number;
 export function nextLeadStatus(currentStatus: unknown, action: unknown): string;
 
 export function absoluteSiteUrl(siteUrl: string, path?: string): string;
@@ -469,6 +474,9 @@ export function buildMcpRegistryFeed(
   entries: ContentEntry[],
 ): Record<string, unknown>;
 export function buildPluginExportFeed(
+  entries: ContentEntry[],
+): Record<string, unknown>;
+export function buildRegistryChangelogFeed(
   entries: ContentEntry[],
 ): Record<string, unknown>;
 export function buildArtifactEnvelope<T>(
@@ -584,6 +592,10 @@ export function recommendedSubmissionLabels(
   report?: Record<string, unknown>,
 ): string[];
 export function submissionQueueStatus(report: Record<string, unknown>): string;
+export const SUBMISSION_BASE_LABELS: string[];
+export const COMMUNITY_CATEGORY_LABELS: Record<string, string>;
+export function submissionLabelsForCategory(category: string): string[];
+export function recommendedLabelsForCategory(category: string): string[];
 export function buildSubmissionQueue(
   issues: Array<Record<string, unknown>>,
 ): SubmissionQueue;

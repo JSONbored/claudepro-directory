@@ -141,6 +141,12 @@ export default function SubmitPage() {
               >
                 Issue templates
               </a>
+              <a
+                href="/submissions"
+                className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-foreground transition hover:border-primary/40"
+              >
+                Submission queue
+              </a>
             </div>
           </div>
         </div>

@@ -5,18 +5,6 @@
   "count": 30,
   "prompts": [
     {
-      "key": "commands:git-smart-commit",
-      "category": "commands",
-      "slug": "git-smart-commit",
-      "title": "Git Smart Commit for Claude Code",
-      "score": 66,
-      "priority": "medium",
-      "prompt": "Improve Git Smart Commit for Claude Code (commands:git-smart-commit). Address: No substantial copyable asset text.",
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
-    },
-    {
       "key": "collections:developer-productivity-booster",
       "category": "collections",
       "slug": "developer-productivity-booster",
@@ -362,6 +350,18 @@
       "score": 69,
       "priority": "medium",
       "prompt": "Improve Content Creation (collections:content-creation-workflow). Address: No install, config, download, or documentation path.",
+      "warnings": [
+        "No install, config, download, or documentation path."
+      ]
+    },
+    {
+      "key": "collections:data-engineering-suite",
+      "category": "collections",
+      "slug": "data-engineering-suite",
+      "title": "Data Engineering Suite",
+      "score": 69,
+      "priority": "medium",
+      "prompt": "Improve Data Engineering Suite (collections:data-engineering-suite). Address: No install, config, download, or documentation path.",
       "warnings": [
         "No install, config, download, or documentation path."
       ]

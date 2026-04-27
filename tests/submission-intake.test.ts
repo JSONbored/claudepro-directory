@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   buildSubmissionQueue,
@@ -8,10 +10,14 @@ import {
   recommendedSubmissionLabels,
   validateSubmission,
 } from "@heyclaude/registry/submission";
+import { categorySpec } from "@heyclaude/registry";
 import {
   buildIssueTemplateSpec,
   buildSubmissionFieldModel,
 } from "@heyclaude/registry/submission-spec";
+import { submissionLabelsForCategory } from "@heyclaude/registry/submission-labels";
+
+const repoRoot = path.resolve(import.meta.dirname, "..");
 
 function issue(body: string, labels = ["content-submission"]) {
   return {
@@ -43,11 +49,37 @@ describe("submission intake", () => {
     const issueTemplate = buildIssueTemplateSpec("mcp");
     expect(issueTemplate).toBeTruthy();
     expect(issueTemplate?.labels).toContain("content-submission");
+    expect(issueTemplate?.labels).toEqual(submissionLabelsForCategory("mcp"));
     expect(
       issueTemplate?.fields.some(
         (field) => field.id === "install_command" && field.required,
       ),
     ).toBe(true);
+  });
+
+  it("keeps checked-in GitHub issue templates aligned with registry specs", () => {
+    for (const category of categorySpec.submissionOrder) {
+      const template = buildIssueTemplateSpec(category);
+      expect(template).toBeTruthy();
+      const templatePath = path.join(
+        repoRoot,
+        ".github",
+        "ISSUE_TEMPLATE",
+        template!.template,
+      );
+      const source = fs.readFileSync(templatePath, "utf8");
+      for (const label of template!.labels) {
+        expect(source).toContain(`  - "${label}"`);
+      }
+      for (const field of template!.fields.filter((field) => field.required)) {
+        expect(source).toContain(`    id: ${field.id}`);
+        expect(source).toContain("      required: true");
+      }
+      expect(source).toContain(
+        "maintainers review and import accepted submissions manually",
+      );
+      expect(source).toContain("not affiliate, referral, or tracking URLs");
+    }
   });
 
   it("normalizes category aliases and slugs", () => {

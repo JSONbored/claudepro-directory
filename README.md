@@ -5,7 +5,7 @@
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-326+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
+378+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
 
@@ -27,16 +27,21 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 
 ### For contributors
 
-Option A (easiest): open [Submit](https://heyclau.de/submit) and use the category issue form.
+Option A (recommended): open [Submit](https://heyclau.de/submit) and use the category issue form.
 
 Option B (direct): open a category issue form in GitHub under `.github/ISSUE_TEMPLATE`.
 
-Option C (advanced): commit content files directly.
+Option C (advanced): open a pull request with content files directly.
+
+Free Claude resources use issue-first intake by default. Maintainers review,
+validate, and import accepted submissions manually before merge. Tool/app/service
+promotion, listing claims, and jobs use the website lead forms instead of GitHub
+content issues.
 
 1. Add or update a file under `content/<category>/`
 2. Run `pnpm --filter web run prebuild`
-3. Run `pnpm validate:content:strict`, `pnpm validate:clean`, `pnpm audit:content`, `pnpm test:registry-artifacts`, `pnpm test:seo-jsonld`, and `pnpm test:commercial-intake`
-4. Run `pnpm generate:readme`
+3. Run `pnpm validate:content:strict`, `pnpm validate:issue-templates`, `pnpm validate:clean`, `pnpm audit:content`, `pnpm test:registry-artifacts`, `pnpm test:seo-jsonld`, and `pnpm test:commercial-intake`
+4. Run `pnpm generate:issue-templates` and `pnpm generate:readme` if registry categories or content counts changed
 5. Commit the README and generated registry artifacts alongside your content changes
 
 ### Schema references
@@ -147,6 +152,61 @@ Option C (advanced): commit content files directly.
 - **[Vercel MCP Server for Claude](https://heyclau.de/mcp/vercel-mcp-server)** - Manage deployments, analyze logs, and control Vercel projects
 - **[Workato MCP Server for Claude](https://heyclau.de/mcp/workato-mcp-server)** - Access any application, workflows, or data via Workato's integration platform
 - **[Zapier MCP Server for Claude](https://heyclau.de/mcp/zapier-mcp-server)** - Connect to nearly 8,000 apps through Zapier's automation platform
+
+## 🧰 Tools (52)
+
+- **[Aider](https://heyclau.de/tools/aider)** - Open-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.
+- **[Apify](https://heyclau.de/tools/apify)** - Web automation and scraping platform with actors, datasets, APIs, and integrations for data extraction workflows.
+- **[Arcade](https://heyclau.de/tools/arcade-ai)** - Tool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.
+- **[Arize Phoenix](https://heyclau.de/tools/arize-phoenix)** - Open-source observability and evaluation tooling for LLM applications, traces, datasets, and experiments.
+- **[Bolt](https://heyclau.de/tools/bolt-new)** - Browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.
+- **[Braintrust](https://heyclau.de/tools/braintrust)** - Evaluation, prompt experimentation, logging, and data platform for production AI application development.
+- **[Browser Use](https://heyclau.de/tools/browser-use)** - Open-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.
+- **[Browserbase](https://heyclau.de/tools/browserbase)** - Cloud browser infrastructure for browser automation, AI agents, scraping workflows, and web interaction at scale.
+- **[Claude Code](https://heyclau.de/tools/claude-code)** - Anthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.
+- **[Cline](https://heyclau.de/tools/cline)** - Open-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.
+- **[Cloudflare Agents SDK](https://heyclau.de/tools/cloudflare-agents-sdk)** - Cloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.
+- **[CodeRabbit](https://heyclau.de/tools/coderabbit)** - AI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.
+- **[Composio](https://heyclau.de/tools/composio)** - Integration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.
+- **[Continue](https://heyclau.de/tools/continue)** - Open-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.
+- **[CrewAI](https://heyclau.de/tools/crewai)** - Framework and platform for building multi-agent workflows, role-based agents, process automation, and AI crews.
+- **[Cursor](https://heyclau.de/tools/cursor)** - AI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.
+- **[Devin](https://heyclau.de/tools/devin)** - AI software engineering agent for planning, coding, debugging, and executing development tasks with autonomous workflows.
+- **[Exa](https://heyclau.de/tools/exa)** - Search and web retrieval API designed for AI applications, agents, research workflows, and semantic web discovery.
+- **[Firecrawl](https://heyclau.de/tools/firecrawl)** - Web scraping and crawling API for turning websites into clean markdown, structured data, and LLM-ready content.
+- **[Garak](https://heyclau.de/tools/garak)** - Open-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.
+- **[Giskard](https://heyclau.de/tools/giskard)** - AI testing platform for evaluating, scanning, and monitoring machine learning and LLM application quality.
+- **[GitHub Copilot](https://heyclau.de/tools/github-copilot)** - AI developer assistant across GitHub, editors, pull requests, chat, code review, and agentic coding workflows.
+- **[Graphite Diamond](https://heyclau.de/tools/graphite-diamond)** - AI code review assistant for pull requests, engineering feedback, and review workflow acceleration inside Graphite.
+- **[Helicone](https://heyclau.de/tools/helicone)** - Open-source LLM observability platform for logging, metrics, cost tracking, feedback, and gateway workflows.
+- **[Hyperbrowser](https://heyclau.de/tools/hyperbrowser)** - Browser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.
+- **[Lakera Guard](https://heyclau.de/tools/lakera-guard)** - AI security platform for detecting prompt injection, unsafe content, data leakage, and LLM application abuse.
+- **[Langfuse](https://heyclau.de/tools/langfuse)** - Open-source LLM engineering platform for tracing, prompt management, evaluation, metrics, and observability.
+- **[LangGraph](https://heyclau.de/tools/langgraph)** - Agent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.
+- **[LangSmith](https://heyclau.de/tools/langsmith)** - Observability, evaluation, tracing, and testing platform for LLM applications and agent workflows.
+- **[Lovable](https://heyclau.de/tools/lovable)** - AI app builder for generating and iterating on web applications from natural language product requests.
+- **[Make](https://heyclau.de/tools/make)** - Visual automation platform for building integrations, scenarios, API workflows, and AI-connected business processes.
+- **[Mastra](https://heyclau.de/tools/mastra)** - TypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.
+- **[Microsoft AutoGen](https://heyclau.de/tools/microsoft-autogen)** - Open-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.
+- **[n8n](https://heyclau.de/tools/n8n)** - Source-available workflow automation platform for self-hosted integrations, AI workflows, triggers, and data pipelines.
+- **[OpenCode](https://heyclau.de/tools/opencode)** - Terminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.
+- **[Pipedream](https://heyclau.de/tools/pipedream)** - Workflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.
+- **[Promptfoo](https://heyclau.de/tools/promptfoo)** - Open-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.
+- **[Protect AI](https://heyclau.de/tools/protect-ai)** - AI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.
+- **[Raycast](https://heyclau.de/tools/raycast)** - macOS launcher and extension platform with AI commands, automations, team workflows, and developer-focused integrations.
+- **[Replit Agent](https://heyclau.de/tools/replit-agent)** - Browser-based AI software builder for generating, editing, deploying, and iterating on applications in Replit.
+- **[Roo Code](https://heyclau.de/tools/roo-code)** - Open-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.
+- **[Smithery](https://heyclau.de/tools/smithery)** - MCP server discovery and deployment platform for finding, installing, and running model context protocol tools.
+- **[Sourcegraph Cody](https://heyclau.de/tools/sourcegraph-cody)** - AI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.
+- **[Stagehand](https://heyclau.de/tools/stagehand)** - Open-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.
+- **[Trigger.dev](https://heyclau.de/tools/trigger-dev)** - Background job and workflow platform for TypeScript applications, long-running tasks, schedules, and durable automation.
+- **[Vercel AI SDK](https://heyclau.de/tools/vercel-ai-sdk)** - TypeScript toolkit for building AI applications with model providers, streaming UI, tools, agents, and framework adapters.
+- **[v0](https://heyclau.de/tools/vercel-v0)** - Vercel AI interface builder for generating, editing, and iterating on React and web UI from prompts.
+- **[Weave](https://heyclau.de/tools/weave)** - Weights and Biases toolkit for tracking, evaluating, and debugging LLM applications and agent workflows.
+- **[Windsurf](https://heyclau.de/tools/windsurf)** - Agentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.
+- **[Workato](https://heyclau.de/tools/workato)** - Enterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.
+- **[Zapier AI](https://heyclau.de/tools/zapier-ai)** - Automation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.
+- **[Zed](https://heyclau.de/tools/zed)** - Collaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.
 
 ## 🧠 Skills (66)
 

@@ -27,6 +27,34 @@ type ToolDetailProps = {
 
 export const dynamic = "force-dynamic";
 
+function disclosureLabel(tool: Awaited<ReturnType<typeof getToolBySlug>>) {
+  if (!tool) return "Editorial";
+  if (tool.sponsored) return "Sponsored";
+  if (tool.disclosure === "affiliate") return "Affiliate";
+  if (tool.disclosure === "heyclaude_pick") return "HeyClaude pick";
+  if (tool.disclosure === "claimed") return "Claimed";
+  if (tool.featured) return "Featured";
+  return "Editorial";
+}
+
+function disclosureDescription(
+  tool: NonNullable<Awaited<ReturnType<typeof getToolBySlug>>>,
+) {
+  if (tool.sponsored) {
+    return "Paid placement. It is visually labeled and does not suppress review or report signals.";
+  }
+  if (tool.disclosure === "affiliate") {
+    return "Editorial listing with an affiliate link. Ranking is not based on payout.";
+  }
+  if (tool.disclosure === "heyclaude_pick") {
+    return "Editorial pick selected for fit with Claude-native workflows.";
+  }
+  if (tool.disclosure === "claimed") {
+    return "Maintainer-reviewed listing with an ownership or update request on file.";
+  }
+  return "Free editorial listing reviewed for usefulness and fit.";
+}
+
 export async function generateMetadata({
   params,
 }: ToolDetailProps): Promise<Metadata> {
@@ -59,6 +87,23 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
     tool.sponsored ? "sponsored" : tool.disclosure,
   );
   const primaryUrl = tool.affiliateUrl || tool.websiteUrl;
+  const visibleDisclosure = disclosureLabel(tool);
+  const sourceLinks = [
+    tool.websiteUrl ? "Official website" : "",
+    tool.documentationUrl ? "Documentation" : "",
+    tool.repoUrl ? "Source repository" : "",
+  ].filter(Boolean);
+  const worksWith = [...(tool.tags ?? [])].slice(0, 5);
+  const setupEffort =
+    tool.estimatedSetupTime ||
+    (tool.pricingModel === "contact-sales"
+      ? "Requires vendor conversation"
+      : "Varies by workspace");
+  const requiredAuth =
+    tool.pricingModel === "open-source" || tool.pricingModel === "free"
+      ? "May support local or free usage; confirm account requirements in the official docs."
+      : "Expect account, billing, API key, or workspace setup before production use.";
+  const lastVerified = tool.verifiedAt || tool.dateAdded || "";
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -96,15 +141,7 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1">
             <BadgeCheck className="mr-1.5 size-3.5" />
-            {tool.disclosure === "affiliate"
-              ? "Affiliate"
-              : tool.disclosure === "heyclaude_pick"
-                ? "HeyClaude pick"
-                : tool.disclosure === "claimed"
-                  ? "Claimed"
-                  : tool.sponsored
-                    ? "Sponsored"
-                    : "Editorial"}
+            {visibleDisclosure}
           </span>
           {tool.pricingModel ? (
             <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1">
@@ -154,6 +191,44 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
             Claim or update listing
           </Link>
         </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2">
+        {[
+          ["Use this when", tool.cardDescription || tool.description],
+          ["Setup effort", setupEffort],
+          ["Required auth", requiredAuth],
+          [
+            "Works with",
+            worksWith.length ? worksWith.join(", ") : "Claude-native teams",
+          ],
+          [
+            "Last verified",
+            lastVerified
+              ? lastVerified.slice(0, 10)
+              : "Review official docs before production use",
+          ],
+          [
+            "Source/provenance",
+            sourceLinks.length
+              ? sourceLinks.join(", ")
+              : "First-party editorial listing",
+          ],
+          ["Disclosure", disclosureDescription(tool)],
+          [
+            "Report broken",
+            "Use the signal panel below to flag broken setup, stale links, or incorrect listing details.",
+          ],
+        ].map(([title, copy]) => (
+          <article key={title} className="surface-panel p-5">
+            <p className="text-xs uppercase tracking-[0.18em] text-primary">
+              {title}
+            </p>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground">
+              {copy}
+            </p>
+          </article>
+        ))}
       </section>
 
       <CommunitySignalPanel targetKind="tool" targetKey={`tool:${tool.slug}`} />

@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "dev": "ray develop",
+    "test": "tsx --test test/feed.test.ts",
     "build": "ray build -e dist",
     "lint": "ray lint",
     "publish": "ray publish"
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
+    "tsx": "4.21.0",
     "typescript": "6.0.2"
   }
 }

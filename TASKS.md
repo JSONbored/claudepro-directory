@@ -11,7 +11,7 @@ Rules:
 
 ## Current Gate
 
-Gate: `pnpm validate:clean`, `pnpm validate:tasks`, `pnpm validate:content:strict`, `pnpm validate:category-spec`, `pnpm validate:packages`, `pnpm validate:raycast-feed`, `pnpm test`, `pnpm test:e2e`, `pnpm type-check`, `pnpm build`, Raycast `npm ci && npm run lint && npm run build`, and `trunk check --show-existing --all --no-progress`.
+Gate: `pnpm validate:clean`, `pnpm validate:tasks`, `pnpm validate:content:strict`, `pnpm validate:issue-templates`, `pnpm validate:category-spec`, `pnpm validate:packages`, `pnpm validate:raycast-feed`, `pnpm test`, `pnpm test:e2e`, `pnpm type-check`, `pnpm build`, Raycast `npm ci && npm test && npm run lint && npm run build`, and `trunk check --show-existing --all --no-progress`.
 
 - [x] [repo] Confirm pnpm monorepo shape for `apps/*` and `packages/*`. Evidence: `cat pnpm-workspace.yaml`.
 - [x] [raycast] Keep `integrations/raycast` as a separate Raycast npm project. Evidence: `cat integrations/raycast/package.json`.
@@ -38,6 +38,7 @@ Gate: `pnpm test:registry-artifacts`, `pnpm test`, and `pnpm build`.
 - [x] [api] Document registry, search, listing lead, and admin lead routes in OpenAPI. Evidence: `pnpm validate:clean`.
 - [x] [api] Add a public API documentation page with examples for manifest, category browse, search, entry detail, and LLMS export. Evidence: `pnpm test:e2e`.
 - [x] [api] Add response hash or ETag headers for static registry API responses. Evidence: `pnpm test:e2e`.
+- [x] [api] Add a registry diff endpoint and changelog feed for downstream sync clients. Evidence: `pnpm test:registry-artifacts`.
 - [x] [api] Package an optional read-only MCP or feed surface after the registry API contract has held stable. Evidence: `pnpm test`.
 
 ## SEO + Content Quality
@@ -56,26 +57,30 @@ Gate: `pnpm test:seo-jsonld`, `pnpm validate:content:strict`, and `pnpm audit:co
 Gate: `pnpm test:submission-intake` and `pnpm validate:content:strict`.
 
 - [x] [ugc] Keep generated submission field models and issue-template parity under test. Evidence: `pnpm test:submission-intake`.
+- [x] [ugc] Generate GitHub issue templates from the registry submission spec and validate them in CI. Evidence: `pnpm validate:issue-templates`.
 - [x] [ugc] Add a dry-run MDX preview and quality score preview to the submit flow. Evidence: `pnpm type-check`.
 - [x] [ugc] Add source/provenance warnings before a contributor opens a GitHub issue. Evidence: `pnpm type-check`.
+- [x] [ugc] Add a public submission status page backed by the submission queue contract. Evidence: `pnpm test:e2e`.
 - [x] [ugc] Add contributor attribution pages that aggregate accepted submissions and source links. Evidence: `pnpm test:e2e`.
 - [x] [ugc] Add claim/update listing intake with maintainer review before any public profile change. Evidence: `pnpm test:e2e`.
 
 ## Raycast
 
-Gate: from `integrations/raycast`, run `npm ci && npm run lint && npm run build`.
+Gate: from `integrations/raycast`, run `npm ci && npm test && npm run lint && npm run build`.
 
 - [x] [raycast] Keep the Raycast extension as a read-only browse, detail, copy, favorite, and open-link channel. Evidence: `npm run build`.
 - [x] [raycast] Keep full copy fetches backed by per-entry Raycast detail payloads. Evidence: `pnpm validate:raycast-feed`.
 - [x] [raycast] Finalize store screenshots, release checklist, and metadata review before submission. Evidence: `cat integrations/raycast/STORE_CHECKLIST.md`.
 - [x] [raycast] Add documented cold fetch, stale cache, malformed feed, favorites, and full-copy manual smoke steps. Evidence: `cat integrations/raycast/SMOKE_TESTS.md`.
 - [x] [raycast] Defer write/apply workflows until registry contracts and read-only store release are stable. Evidence: `cat integrations/raycast/STORE_CHECKLIST.md`.
+- [x] [raycast] Add pure helper tests for feed parsing, detail payloads, favorites, category filtering, and cache fallback. Evidence: `npm test`.
+- [x] [raycast] Add a reusable Codex skill for Raycast extension engineering and audits. Evidence: `python3 /Users/shadowbook/.codex/skills/.system/skill-creator/scripts/quick_validate.py /Users/shadowbook/.codex/skills/raycast-extension-engineer`.
 
 ## Commercial Surfaces
 
 Gate: `pnpm test:commercial-intake`, `pnpm test`, and local lead route smoke with `SITE_DB`.
 
-- [x] [commercial] Keep tools/apps/services intake-only until real listings exist. Evidence: `pnpm test:commercial-intake`.
+- [x] [commercial] Keep seeded tools/apps/services editorial by default while paid placement and claim requests stay lead-first. Evidence: `pnpm test:commercial-intake`.
 - [x] [commercial] Keep jobs hiring-only and placeholder cards out of `JobPosting` structured data. Evidence: `pnpm test:seo-jsonld`.
 - [x] [commercial] Store tool and job leads in `listing_leads` for manual review. Evidence: `pnpm test:commercial-intake`.
 - [x] [commercial] Improve lead-admin export ergonomics with CSV download and status filters. Evidence: `pnpm test`.

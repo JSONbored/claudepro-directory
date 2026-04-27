@@ -1,14 +1,14 @@
-name: "Submit Skill"
-description: "Submit a skills entry for HeyClaude."
-title: "Submit Skill: "
+name: "Submit Guide"
+description: "Submit a guides entry for HeyClaude."
+title: "Submit Guide: "
 labels:
   - "content-submission"
-  - "skills"
+  - "guide"
 body:
   - type: markdown
     attributes:
       value: |
-        Use this form for free, maintainer-reviewed skills submissions.
+        Use this form for free, maintainer-reviewed guides submissions.
         Products, hosted apps, services, paid listings, sponsorships, claims, and jobs use the dedicated website lead forms.
         Include official source/docs URLs only. Contributor affiliate, referral, tracking, or local package-hosting requests are rejected.
   - type: input
@@ -32,7 +32,7 @@ body:
     attributes:
       label: "Category"
       description: "Required."
-      value: "skills"
+      value: "guides"
     validations:
       required: true
   - type: input
@@ -90,68 +90,14 @@ body:
     validations:
       required: true
   - type: textarea
-    id: usage_snippet
+    id: guide_content
     attributes:
-      label: "Usage snippet"
+      label: "Guide content"
       description: "Required."
-      placeholder: "Show the exact command or config someone should run."
+      placeholder: "Paste the full guide content."
       render: "markdown"
     validations:
       required: true
-  - type: dropdown
-    id: skill_type
-    attributes:
-      label: "Skill type"
-      description: "Required."
-      options:
-        - "general"
-        - "capability-pack"
-    validations:
-      required: true
-  - type: dropdown
-    id: skill_level
-    attributes:
-      label: "Skill level"
-      description: "Required."
-      options:
-        - "foundational"
-        - "advanced"
-        - "expert"
-    validations:
-      required: true
-  - type: dropdown
-    id: verification_status
-    attributes:
-      label: "Verification status"
-      description: "Required."
-      options:
-        - "draft"
-        - "validated"
-        - "production"
-    validations:
-      required: true
-  - type: input
-    id: download_url
-    attributes:
-      label: "Download URL"
-      description: "Do not request local /downloads hosting."
-      placeholder: "https://github.com/owner/repo/releases/latest"
-    validations:
-      required: false
-  - type: textarea
-    id: retrieval_sources
-    attributes:
-      label: "Retrieval sources"
-      placeholder: "https://example.com/docs\nhttps://github.com/owner/repo"
-    validations:
-      required: false
-  - type: input
-    id: tested_platforms
-    attributes:
-      label: "Tested platforms"
-      placeholder: "Claude Code, Claude Desktop, Codex"
-    validations:
-      required: false
   - type: checkboxes
     id: acknowledgements
     attributes:

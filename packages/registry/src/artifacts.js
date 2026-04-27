@@ -312,6 +312,40 @@ export function buildPluginExportFeed(entries) {
   };
 }
 
+export function buildRegistryChangelogFeed(entries) {
+  const changes = [...entries]
+    .sort((left, right) => {
+      const dateCompare = String(right.dateAdded || "").localeCompare(
+        String(left.dateAdded || ""),
+      );
+      return dateCompare || left.title.localeCompare(right.title);
+    })
+    .map((entry) => ({
+      key: `${entry.category}:${entry.slug}`,
+      type: "added",
+      category: entry.category,
+      slug: entry.slug,
+      title: entry.title,
+      dateAdded: entry.dateAdded || "",
+      canonicalUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+      artifactHash: buildArtifactHash(buildEntryDetail(entry)),
+    }));
+
+  const payload = {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "registry-changelog",
+    generatedAt: generatedAtForEntries(entries),
+    count: changes.length,
+    entries: changes,
+  };
+
+  return {
+    ...payload,
+    signatureAlgorithm: "sha256",
+    signature: buildArtifactHash(payload),
+  };
+}
+
 export function buildRegistryManifest(entries, extra = {}) {
   const categories = {};
   for (const category of categorySpec.categoryOrder) {
@@ -345,6 +379,7 @@ export function buildRegistryManifest(entries, extra = {}) {
       ecosystemFeed: dataUrl("ecosystem-feed.json"),
       mcpRegistryFeed: dataUrl("mcp-registry-feed.json"),
       pluginExportFeed: dataUrl("plugin-export-feed.json"),
+      registryChangelog: dataUrl("registry-changelog.json"),
       registryManifest: dataUrl("registry-manifest.json"),
       contentQuality: dataUrl("content-quality-report.json"),
       contentQualityPrompts: dataUrl("content-quality-prompts.json"),
@@ -427,6 +462,11 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       path: "plugin-export-feed.json",
       type: "json",
       value: buildPluginExportFeed(entries),
+    },
+    {
+      path: "registry-changelog.json",
+      type: "json",
+      value: buildRegistryChangelogFeed(entries),
     },
     {
       path: "content-quality-report.json",

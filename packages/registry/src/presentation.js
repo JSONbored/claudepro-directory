@@ -182,9 +182,11 @@ export function getCopyText(entry) {
   }
 
   if (entry.category === "commands") {
-    return (
-      entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body
-    );
+    const lines = [];
+    appendLabeledBlock(lines, "Command", entry.commandSyntax);
+    appendLabeledBlock(lines, "Usage", entry.copySnippet || entry.usageSnippet);
+    if (body) appendLabeledBlock(lines, "Reference", body);
+    return lines.join("\n") || entry.description;
   }
 
   if (entry.category === "collections") {

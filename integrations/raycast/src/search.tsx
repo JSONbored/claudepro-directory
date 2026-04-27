@@ -11,63 +11,26 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-
-const FEED_URL = "https://heyclau.de/data/raycast-index.json";
-const CACHE_KEY = "heyclaude-raycast-index";
-const DETAIL_CACHE_PREFIX = "heyclaude-raycast-detail";
-const FAVORITES_KEY = "favorite-entry-keys";
-
-type DownloadTrust = "first-party" | "external" | null;
-
-type RaycastEntry = {
-  category: string;
-  slug: string;
-  title: string;
-  description: string;
-  tags: string[];
-  installCommand: string;
-  configSnippet: string;
-  copyText: string;
-  copyTextLength?: number;
-  copyTextTruncated?: boolean;
-  detailMarkdown: string;
-  detailUrl?: string;
-  webUrl: string;
-  repoUrl: string;
-  documentationUrl: string;
-  downloadTrust: DownloadTrust;
-  verificationStatus: string;
-};
-
-type RaycastDetail = {
-  copyText: string;
-  detailMarkdown: string;
-};
-
-type ParsedFeed = {
-  entries: RaycastEntry[];
-  generatedAt: string;
-};
-
-type CategoryOption = {
-  value: string;
-  title: string;
-};
+import {
+  CACHE_KEY,
+  DETAIL_CACHE_PREFIX,
+  FAVORITES_KEY,
+  FEED_URL,
+  absoluteDataUrl,
+  categoryLabel,
+  entryKey,
+  fallbackDetail,
+  filterEntriesByCategory,
+  isRaycastDetail,
+  parseFavoriteKeys,
+  parseFeed,
+  serializeFavoriteKeys,
+  sortedCategoryOptions,
+  type RaycastDetail,
+  type RaycastEntry,
+} from "./feed";
 
 const cache = new Cache();
-
-const categoryLabels: Record<string, string> = {
-  agents: "Agents",
-  mcp: "MCP Servers",
-  tools: "Tools",
-  skills: "Skills",
-  rules: "Rules",
-  commands: "Commands",
-  hooks: "Hooks",
-  guides: "Guides",
-  collections: "Collections",
-  statuslines: "Statuslines",
-};
 
 const categoryIcons: Record<string, Icon> = {
   agents: Icon.Person,
@@ -82,61 +45,6 @@ const categoryIcons: Record<string, Icon> = {
   statuslines: Icon.BarChart,
 };
 
-function entryKey(entry: RaycastEntry) {
-  return `${entry.category}:${entry.slug}`;
-}
-
-function categoryLabel(category: string) {
-  return categoryLabels[category] ?? category;
-}
-
-function absoluteDataUrl(value: string) {
-  return new URL(value, FEED_URL).toString();
-}
-
-function isRaycastEntry(value: unknown): value is RaycastEntry {
-  const entry = value as Partial<RaycastEntry>;
-  return (
-    Boolean(entry) &&
-    typeof entry.category === "string" &&
-    typeof entry.slug === "string" &&
-    typeof entry.title === "string" &&
-    typeof entry.description === "string" &&
-    Array.isArray(entry.tags) &&
-    typeof entry.copyText === "string" &&
-    typeof entry.detailMarkdown === "string" &&
-    typeof entry.webUrl === "string"
-  );
-}
-
-function parseFeed(value: string): ParsedFeed {
-  const parsed = JSON.parse(value) as unknown;
-
-  const envelope = parsed as {
-    schemaVersion?: unknown;
-    generatedAt?: unknown;
-    entries?: unknown;
-  };
-  if (!Array.isArray(envelope.entries)) {
-    return { entries: [], generatedAt: "" };
-  }
-
-  return {
-    entries: envelope.entries.filter(isRaycastEntry),
-    generatedAt:
-      typeof envelope.generatedAt === "string" ? envelope.generatedAt : "",
-  };
-}
-
-function isRaycastDetail(value: unknown): value is RaycastDetail {
-  const detail = value as Partial<RaycastDetail>;
-  return (
-    Boolean(detail) &&
-    typeof detail.copyText === "string" &&
-    typeof detail.detailMarkdown === "string"
-  );
-}
-
 function loadCachedFeed() {
   const cached = cache.get(CACHE_KEY);
   if (!cached) return { entries: [], generatedAt: "" };
@@ -149,29 +57,12 @@ function loadCachedFeed() {
   }
 }
 
-function sortedCategoryOptions(entries: RaycastEntry[]): CategoryOption[] {
-  const categories = [...new Set(entries.map((entry) => entry.category))].sort(
-    (left, right) => categoryLabel(left).localeCompare(categoryLabel(right)),
-  );
-
-  return [
-    { value: "all", title: "All Categories" },
-    { value: "favorites", title: "Favorites" },
-    ...categories.map((category) => ({
-      value: category,
-      title: categoryLabel(category),
-    })),
-  ];
-}
-
 async function loadFavorites() {
   const raw = await LocalStorage.getItem<string>(FAVORITES_KEY);
   if (!raw) return new Set<string>();
 
   try {
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) return new Set<string>();
-    return new Set(parsed.map(String));
+    return new Set(parseFavoriteKeys(raw));
   } catch {
     await LocalStorage.removeItem(FAVORITES_KEY);
     return new Set<string>();
@@ -179,18 +70,12 @@ async function loadFavorites() {
 }
 
 async function persistFavorites(favorites: Set<string>) {
-  await LocalStorage.setItem(
-    FAVORITES_KEY,
-    JSON.stringify([...favorites].sort()),
-  );
+  await LocalStorage.setItem(FAVORITES_KEY, serializeFavoriteKeys(favorites));
 }
 
 async function loadEntryDetail(entry: RaycastEntry): Promise<RaycastDetail> {
   if (!entry.detailUrl) {
-    return {
-      copyText: entry.copyText,
-      detailMarkdown: entry.detailMarkdown,
-    };
+    return fallbackDetail(entry);
   }
 
   const cacheKey = `${DETAIL_CACHE_PREFIX}:${entryKey(entry)}`;
@@ -325,13 +210,10 @@ export default function Command() {
     () => sortedCategoryOptions(entries),
     [entries],
   );
-  const displayedEntries = useMemo(() => {
-    if (category === "favorites") {
-      return entries.filter((entry) => favorites.has(entryKey(entry)));
-    }
-    if (category === "all") return entries;
-    return entries.filter((entry) => entry.category === category);
-  }, [category, entries, favorites]);
+  const displayedEntries = useMemo(
+    () => filterEntriesByCategory(entries, category, favorites),
+    [category, entries, favorites],
+  );
 
   async function copyFullAsset(entry: RaycastEntry) {
     try {

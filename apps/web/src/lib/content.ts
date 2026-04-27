@@ -145,6 +145,26 @@ export const getRegistryManifest = cache(async () => {
   return loadJsonDataFile<ArtifactManifestV2>("registry-manifest.json");
 });
 
+export const getRegistryChangelog = cache(async () => {
+  return loadJsonDataFile<{
+    schemaVersion: number;
+    kind: "registry-changelog";
+    generatedAt: string;
+    count: number;
+    signature?: string;
+    entries: Array<{
+      key: string;
+      type: "added" | "updated" | "removed";
+      category: string;
+      slug: string;
+      title: string;
+      dateAdded: string;
+      canonicalUrl: string;
+      artifactHash: string;
+    }>;
+  }>("registry-changelog.json");
+});
+
 export const getSearchIndex = cache(async () => {
   return loadJsonDataFile<RegistryEnvelope<SearchDocument>>(
     "search-index.json",

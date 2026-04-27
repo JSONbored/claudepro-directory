@@ -48,12 +48,21 @@ Use these when applicable:
 - `guides`: avoid treating guides as copy-first assets; prioritize structured walkthrough content
 - `collections`: prefer `items`, `installationOrder`, and bundle guidance over `copySnippet`
 
+## Submission paths
+
+- Free Claude resources should start with `/submit` or the generated GitHub issue forms.
+- Pull requests are for advanced contributors who can add MDX directly and run the full gate.
+- Maintainers manually review and import accepted submissions; issue validation is not auto-publish.
+- Tools, apps, services, sponsorships, claims, and jobs use the website lead forms, not content issue templates.
+- Contributor links must be official source/docs/release URLs. Affiliate, referral, tracking, or local package-hosting requests are rejected.
+
 ## Workflow
 
 1. Run `pnpm validate:content:strict`
-2. Run `pnpm audit:content`
-3. Run `pnpm validate:clean`
-4. Run `pnpm --filter web run prebuild` to regenerate registry artifacts
-5. Run `pnpm test:registry-artifacts`
-6. Fix missing fields and semantic audit issues
-7. Regenerate the README with `pnpm generate:readme`
+2. Run `pnpm validate:issue-templates`
+3. Run `pnpm audit:content`
+4. Run `pnpm validate:clean`
+5. Run `pnpm --filter web run prebuild` to regenerate registry artifacts
+6. Run `pnpm test:registry-artifacts`
+7. Fix missing fields and semantic audit issues
+8. Regenerate issue templates and README when category/content counts change

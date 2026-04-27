@@ -32,6 +32,8 @@
     "changelog:preview": "git cliff --unreleased --config .git-cliff.toml",
     "changelog:generate": "git cliff --config .git-cliff.toml",
     "generate:readme": "node scripts/generate-readme.mjs",
+    "generate:issue-templates": "node scripts/generate-issue-templates.mjs",
+    "validate:issue-templates": "node scripts/generate-issue-templates.mjs --check",
     "audit:content": "node scripts/audit-content.mjs",
     "sync:votes:d1": "node scripts/sync-votes-to-d1.mjs --mode=both",
     "verify:votes:d1": "node scripts/verify-d1-votes.mjs --mode=both",

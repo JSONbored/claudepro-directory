@@ -1,18 +1,7 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
+import { recommendedLabelsForCategory } from "./submission-labels.js";
 
 export const CORE_CATEGORIES = categorySpec.categoryOrder;
-
-const COMMUNITY_CATEGORY_LABELS = {
-  agents: "community-agents",
-  collections: "community-collections",
-  commands: "community-commands",
-  guides: "guide",
-  hooks: "community-hooks",
-  mcp: "community-mcp",
-  rules: "community-rules",
-  skills: "skills",
-  statuslines: "community-statuslines",
-};
 
 export const CATEGORY_REQUIREMENTS = Object.fromEntries(
   Object.entries(categorySpec.categories).map(([category, spec]) => [
@@ -324,10 +313,13 @@ export function recommendedSubmissionLabels(
 ) {
   if (!looksLikeSubmissionIssue(issue)) return [];
   const labels = new Set(issueLabels(issue));
-  labels.add("content-submission");
-  labels.add("needs-review");
   if (report?.category && CORE_CATEGORIES.includes(report.category)) {
-    labels.add(COMMUNITY_CATEGORY_LABELS[report.category] || report.category);
+    for (const label of recommendedLabelsForCategory(report.category)) {
+      labels.add(label);
+    }
+  } else {
+    labels.add("content-submission");
+    labels.add("needs-review");
   }
   return [...labels].sort();
 }

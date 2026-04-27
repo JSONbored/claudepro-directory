@@ -89,6 +89,9 @@ jobs:
       - name: Validate category submission spec
         run: pnpm validate:category-spec
 
+      - name: Validate issue templates
+        run: pnpm validate:issue-templates
+
       - name: Validate downloadable packages
         run: pnpm validate:packages
 
@@ -115,6 +118,10 @@ jobs:
       - name: Install Raycast dependencies
         working-directory: integrations/raycast
         run: npm ci
+
+      - name: Test Raycast helpers
+        working-directory: integrations/raycast
+        run: npm test
 
       - name: Lint Raycast extension
         working-directory: integrations/raycast

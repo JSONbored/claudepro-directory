@@ -93,16 +93,21 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 
 ### For contributors
 
-Option A (easiest): open [Submit](https://heyclau.de/submit) and use the category issue form.
+Option A (recommended): open [Submit](https://heyclau.de/submit) and use the category issue form.
 
 Option B (direct): open a category issue form in GitHub under \`.github/ISSUE_TEMPLATE\`.
 
-Option C (advanced): commit content files directly.
+Option C (advanced): open a pull request with content files directly.
+
+Free Claude resources use issue-first intake by default. Maintainers review,
+validate, and import accepted submissions manually before merge. Tool/app/service
+promotion, listing claims, and jobs use the website lead forms instead of GitHub
+content issues.
 
 1. Add or update a file under \`content/<category>/\`
 2. Run \`pnpm --filter web run prebuild\`
-3. Run \`pnpm validate:content:strict\`, \`pnpm validate:clean\`, \`pnpm audit:content\`, \`pnpm test:registry-artifacts\`, \`pnpm test:seo-jsonld\`, and \`pnpm test:commercial-intake\`
-4. Run \`pnpm generate:readme\`
+3. Run \`pnpm validate:content:strict\`, \`pnpm validate:issue-templates\`, \`pnpm validate:clean\`, \`pnpm audit:content\`, \`pnpm test:registry-artifacts\`, \`pnpm test:seo-jsonld\`, and \`pnpm test:commercial-intake\`
+4. Run \`pnpm generate:issue-templates\` and \`pnpm generate:readme\` if registry categories or content counts changed
 5. Commit the README and generated registry artifacts alongside your content changes
 
 ### Schema references

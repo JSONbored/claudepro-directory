@@ -53,6 +53,10 @@ jobs:
         working-directory: integrations/raycast
         run: npm ci
 
+      - name: Test Raycast helpers
+        working-directory: integrations/raycast
+        run: npm test
+
       - name: Lint Raycast extension
         working-directory: integrations/raycast
         run: npm run lint

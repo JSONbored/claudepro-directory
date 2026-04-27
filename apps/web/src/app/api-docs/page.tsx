@@ -45,9 +45,19 @@ const examples = [
     code: "curl https://heyclau.de/api/registry/entries/{category}/{slug}/llms",
   },
   {
+    title: "Diff",
+    href: "/api/registry/diff?since=2026-01-01&limit=10",
+    code: "curl 'https://heyclau.de/api/registry/diff?since=2026-01-01&limit=10'",
+  },
+  {
     title: "Read-Only Feed",
     href: "/api/registry/feed",
     code: "curl https://heyclau.de/api/registry/feed",
+  },
+  {
+    title: "Changelog Feed",
+    href: "/data/registry-changelog.json",
+    code: "curl https://heyclau.de/data/registry-changelog.json",
   },
   {
     title: "Ecosystem Feed",

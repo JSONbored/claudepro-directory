@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { DirectoryEntry, ToolListing } from "@heyclaude/registry";
+import { compareToolListings } from "@heyclaude/registry/commercial";
 
 import { getDirectoryEntriesByCategory } from "@/lib/content";
 import { getSiteDb } from "@/lib/db";
@@ -79,18 +80,7 @@ export async function getTools(): Promise<ToolListing[]> {
         placements.get(`tools:${entry.slug}`) ?? placements.get(entry.slug),
       ),
     )
-    .sort((left, right) => {
-      const leftScore =
-        Number(Boolean(left.sponsored)) * 3 +
-        Number(Boolean(left.featured)) * 2;
-      const rightScore =
-        Number(Boolean(right.sponsored)) * 3 +
-        Number(Boolean(right.featured)) * 2;
-      if (leftScore !== rightScore) return rightScore - leftScore;
-      return String(right.dateAdded || "").localeCompare(
-        String(left.dateAdded || ""),
-      );
-    });
+    .sort(compareToolListings);
 }
 
 export async function getToolBySlug(slug: string): Promise<ToolListing | null> {

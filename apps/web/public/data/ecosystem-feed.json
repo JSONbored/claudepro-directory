@@ -23,7 +23,7 @@
         "context",
         "ai-ide"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -58,7 +58,7 @@
         "diagnostics",
         "fixes"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -93,7 +93,7 @@
         "guides",
         "markdown"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -128,7 +128,7 @@
         "analysis",
         "visualization"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -163,7 +163,7 @@
         "bottleneck",
         "efficiency"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -198,7 +198,7 @@
         "optimization",
         "patterns"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -233,7 +233,7 @@
         "optimization",
         "patterns"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -268,7 +268,7 @@
         "quality",
         "analysis"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -303,7 +303,7 @@
         "threat-analysis",
         "penetration-testing"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -343,7 +343,7 @@
         "scalability",
         "code-quality"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -378,7 +378,7 @@
         "property-based",
         "mutation-testing"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -627,7 +627,7 @@
         "plugins",
         "extensions"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -2257,7 +2257,7 @@
         "session-recovery",
         "safety"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -2842,7 +2842,7 @@
         "onboarding",
         "team-collaboration"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -3711,7 +3711,7 @@
         "refactoring",
         "planning"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -5733,7 +5733,7 @@
         "integration-tests",
         "tdd"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -5936,7 +5936,7 @@
         "version-control",
         "conventional-commits"
       ],
-      "qualityScore": 66,
+      "qualityScore": 76,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -6564,7 +6564,7 @@
         "deterministic",
         "triggers"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -7704,7 +7704,7 @@
         "tools",
         "setup"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -9168,7 +9168,7 @@
         "deep-reasoning",
         "ultrathink"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -11402,7 +11402,7 @@
         "workflows",
         "automation"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -11576,7 +11576,7 @@
         "quality",
         "ai-testing"
       ],
-      "qualityScore": 71,
+      "qualityScore": 81,
       "provenance": {
         "sourceQuality": "docs",
         "hasExternalSource": true,
@@ -13032,5 +13032,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "be7ca8c6b86288b9f7e5b3ca50c40871946c470a4bdbb69b9ea586504b6464ac"
+  "signature": "2a21986f8bd5392def5964fe83bd68328696f9745112edc9b77d75dcf3ff7e7f"
 }

@@ -39,8 +39,8 @@
     },
     "commands": {
       "count": 27,
-      "averageScore": 73,
-      "warningCount": 22
+      "averageScore": 81,
+      "warningCount": 0
     },
     "hooks": {
       "count": 66,
@@ -71,10 +71,10 @@
       "slug": "cursor-rules",
       "title": "/cursor-rules - Cursor Rules Generator for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -92,9 +92,7 @@
           "https://cursor.com/docs/context/rules"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:debug",
@@ -102,10 +100,10 @@
       "slug": "debug",
       "title": "/debug - Debugging Assistant Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -123,9 +121,7 @@
           "https://docs.claude.ai/commands/debug"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:docs",
@@ -133,10 +129,10 @@
       "slug": "docs",
       "title": "/docs - Docs Generator Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -154,9 +150,7 @@
           "https://docs.claude.ai/commands/docs"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:explain",
@@ -164,10 +158,10 @@
       "slug": "explain",
       "title": "/explain - Code Explanation Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -185,9 +179,7 @@
           "https://docs.claude.ai/commands/explain"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:optimize",
@@ -195,10 +187,10 @@
       "slug": "optimize",
       "title": "/optimize - Performance Optimizer Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -216,9 +208,7 @@
           "https://docs.claude.ai/commands/optimize"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:refactor",
@@ -226,10 +216,10 @@
       "slug": "refactor",
       "title": "/refactor - Code Refactoring Command for Claude",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -247,9 +237,7 @@
           "https://docs.claude.ai/commands/refactor"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:refactor-code",
@@ -257,10 +245,10 @@
       "slug": "refactor-code",
       "title": "/refactor-code - Specialized Refactor Commands for Claude",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -278,9 +266,7 @@
           "https://docs.claude.ai/commands/refactor"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:review",
@@ -288,10 +274,10 @@
       "slug": "review",
       "title": "/review - Code Review Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -309,9 +295,7 @@
           "https://docs.claude.ai/commands/review"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:security",
@@ -319,10 +303,10 @@
       "slug": "security",
       "title": "/security - Vulnerability Scan Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -340,9 +324,7 @@
           "https://docs.claude.ai/commands/security"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:security-audit",
@@ -350,10 +332,10 @@
       "slug": "security-audit",
       "title": "/security-audit - Security Scanner Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -371,9 +353,7 @@
           "https://docs.claude.ai/commands/security-audit"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:test-advanced",
@@ -381,10 +361,10 @@
       "slug": "test-advanced",
       "title": "/test-advanced - Test Suite Command for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -402,9 +382,7 @@
           "https://docs.claude.ai/commands/test"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:zod-audit",
@@ -587,10 +565,10 @@
       "slug": "skills-installer",
       "title": "Agent Skills Installer for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -608,9 +586,7 @@
           "https://docs.claude.com/en/docs/claude-code/skills"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:ai-agent-observability-incident-response",
@@ -1975,10 +1951,10 @@
       "slug": "checkpoint-manager",
       "title": "Checkpoint Manager for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -1996,9 +1972,7 @@
           "https://docs.claude.com/en/docs/claude-code/checkpointing"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "guides:claude-4-extended-thinking-tutorial",
@@ -2486,10 +2460,10 @@
       "slug": "claudemd-builder",
       "title": "CLAUDE.md Builder for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -2507,9 +2481,7 @@
           "https://docs.claude.com/en/docs/claude-code/claude-md"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:claude-md-knowledge-manager-agent",
@@ -3227,10 +3199,10 @@
       "slug": "context-analyzer",
       "title": "Context Analyzer for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -3248,9 +3220,7 @@
           "https://docs.claude.com/en/docs/claude-code/analysis"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:context-window-optimizer-agent",
@@ -4967,10 +4937,10 @@
       "slug": "generate-tests",
       "title": "Generate Tests for Claude",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -4988,9 +4958,7 @@
           "https://docs.claude.ai/commands/test-gen"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "tools:giskard",
@@ -5141,10 +5109,10 @@
       "slug": "git-smart-commit",
       "title": "Git Smart Commit for Claude Code",
       "scores": {
-        "total": 66,
+        "total": 76,
         "usefulness": 100,
         "source": 40,
-        "copyability": 10,
+        "copyability": 55,
         "freshness": 85,
         "seo": 100
       },
@@ -5162,9 +5130,7 @@
           "https://www.conventionalcommits.org/"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:git-status-statusline",
@@ -5666,10 +5632,10 @@
       "slug": "hooks-generator",
       "title": "Hooks Generator for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -5687,9 +5653,7 @@
           "https://docs.claude.com/en/docs/claude-code/hooks"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:hubspot-mcp-server",
@@ -6641,10 +6605,10 @@
       "slug": "mcp-setup",
       "title": "MCP Server Setup for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -6662,9 +6626,7 @@
           "https://docs.claude.com/en/docs/claude-code/mcp"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:mcp-server-status-monitor",
@@ -7861,10 +7823,10 @@
       "slug": "plan-mode",
       "title": "Plan Mode & Extended Thinking for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -7882,9 +7844,7 @@
           "https://docs.claude.com/en/docs/claude-code/extended-thinking"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:playwright-e2e-testing",
@@ -9735,10 +9695,10 @@
       "slug": "subagent-create",
       "title": "Subagent Creator for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -9756,9 +9716,7 @@
           "https://docs.claude.com/en/docs/claude-code/sub-agents"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:subagent-factory-agent",
@@ -9881,10 +9839,10 @@
       "slug": "tdd-workflow",
       "title": "TDD Workflow for Claude Code",
       "scores": {
-        "total": 71,
+        "total": 81,
         "usefulness": 100,
         "source": 40,
-        "copyability": 30,
+        "copyability": 75,
         "freshness": 85,
         "seo": 100
       },
@@ -9902,9 +9860,7 @@
           "https://docs.claude.com/en/docs/claude-code/testing"
         ]
       },
-      "warnings": [
-        "No substantial copyable asset text."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:team-summary-email-generator",

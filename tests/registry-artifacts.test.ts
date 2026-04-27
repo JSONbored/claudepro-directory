@@ -9,6 +9,7 @@ import {
   buildMcpRegistryFeed,
   buildPluginExportFeed,
   buildJsonLdSnapshots,
+  buildRegistryChangelogFeed,
   buildReadOnlyEcosystemFeed,
   buildRaycastEnvelope,
   buildSearchEntries,
@@ -131,6 +132,13 @@ describe("registry artifacts", () => {
       count: number;
       plugins: Array<Record<string, unknown>>;
     }>("plugin-export-feed.json");
+    const changelogFeed = readDataJson<{
+      schemaVersion: number;
+      kind: string;
+      count: number;
+      signature: string;
+      entries: Array<Record<string, unknown>>;
+    }>("registry-changelog.json");
 
     expect(ecosystemFeed).toEqual(
       buildReadOnlyEcosystemFeed(contentEntries, {
@@ -139,6 +147,7 @@ describe("registry artifacts", () => {
     );
     expect(mcpFeed).toEqual(buildMcpRegistryFeed(contentEntries));
     expect(pluginFeed).toEqual(buildPluginExportFeed(contentEntries));
+    expect(changelogFeed).toEqual(buildRegistryChangelogFeed(contentEntries));
     expect(ecosystemFeed).toMatchObject({
       schemaVersion: 2,
       kind: "ecosystem-feed",
@@ -147,10 +156,18 @@ describe("registry artifacts", () => {
     expect(ecosystemFeed.signature).toMatch(/^[a-f0-9]{64}$/);
     expect(mcpFeed.kind).toBe("mcp-registry-feed");
     expect(pluginFeed.kind).toBe("plugin-export-feed");
+    expect(changelogFeed.kind).toBe("registry-changelog");
+    expect(changelogFeed.signature).toMatch(/^[a-f0-9]{64}$/);
     expect(manifest.artifactContracts["ecosystem-feed.json"]).toMatchObject({
       path: "/data/ecosystem-feed.json",
       type: "json",
     });
+    expect(manifest.artifactContracts["registry-changelog.json"]).toMatchObject(
+      {
+        path: "/data/registry-changelog.json",
+        type: "json",
+      },
+    );
     expect(manifest.artifactContracts["llms-full.txt"]).toMatchObject({
       path: "/data/llms-full.txt",
       type: "text",

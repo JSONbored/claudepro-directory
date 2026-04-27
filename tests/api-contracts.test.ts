@@ -9,6 +9,7 @@ const apiRoutes = [
   "/api/registry/categories",
   "/api/registry/search",
   "/api/registry/feed",
+  "/api/registry/diff",
   "/api/registry/entries/{category}/{slug}",
   "/api/registry/entries/{category}/{slug}/llms",
   "/api/listing-leads",

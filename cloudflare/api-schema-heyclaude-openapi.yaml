@@ -313,6 +313,67 @@ paths:
           description: Forbidden origin
         "429":
           description: Rate limited
+  /api/registry/diff:
+    get:
+      summary: Fetch registry changes since a known signature or date
+      parameters:
+        - in: query
+          name: since
+          schema:
+            type: string
+          description: Current registry changelog signature or ISO date.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+      responses:
+        "200":
+          description: Static registry diff envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  schemaVersion:
+                    type: integer
+                  kind:
+                    type: string
+                  generatedAt:
+                    type: string
+                    format: date-time
+                  since:
+                    type: string
+                    nullable: true
+                  currentSignature:
+                    type: string
+                  hasChanges:
+                    type: boolean
+                  count:
+                    type: integer
+                  totalAvailable:
+                    type: integer
+                  entries:
+                    type: array
+                    maxItems: 500
+                    items:
+                      type: object
+                      additionalProperties: true
+                required:
+                  - schemaVersion
+                  - kind
+                  - generatedAt
+                  - currentSignature
+                  - hasChanges
+                  - count
+                  - totalAvailable
+                  - entries
+        "403":
+          description: Forbidden origin
+        "429":
+          description: Rate limited
   /api/registry/entries/{category}/{slug}:
     get:
       summary: Fetch one full registry entry

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildPlacementRenewalReminder,
+  compareToolListings,
   isPlacementActive,
   linkRelForDisclosure,
   nextLeadStatus,
@@ -154,5 +155,37 @@ describe("commercial intake contracts", () => {
         "noreferrer",
       );
     }
+  });
+
+  it("does not use affiliate disclosure or affiliate URLs as ranking inputs", () => {
+    const base = {
+      slug: "alpha",
+      title: "Alpha",
+      dateAdded: "2026-04-01",
+      featured: false,
+      sponsored: false,
+    };
+    const affiliate = {
+      ...base,
+      disclosure: "affiliate",
+      affiliateUrl: "https://example.com/?via=heyclaude",
+    };
+    const editorial = {
+      ...base,
+      disclosure: "editorial",
+      affiliateUrl: "",
+    };
+
+    expect(compareToolListings(affiliate, editorial)).toBe(0);
+    expect(compareToolListings(editorial, affiliate)).toBe(0);
+
+    const sponsored = {
+      ...base,
+      slug: "sponsored",
+      title: "Sponsored",
+      sponsored: true,
+      disclosure: "sponsored",
+    };
+    expect(compareToolListings(sponsored, affiliate)).toBeLessThan(0);
   });
 });

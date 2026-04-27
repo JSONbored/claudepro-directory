@@ -1,122 +1,142 @@
-name: Submit statusline
-description: Submit a Claude statusline entry for the directory.
+name: "Submit Statusline"
+description: "Submit a statuslines entry for HeyClaude."
 title: "Submit Statusline: "
 labels:
-  - content-submission
-  - statuslines
+  - "content-submission"
+  - "community-statuslines"
 body:
   - type: markdown
     attributes:
       value: |
-        Include language, usage, and full script/config so users can copy and run quickly.
+        Use this form for free, maintainer-reviewed statuslines submissions.
+        Products, hosted apps, services, paid listings, sponsorships, claims, and jobs use the dedicated website lead forms.
+        Include official source/docs URLs only. Contributor affiliate, referral, tracking, or local package-hosting requests are rejected.
   - type: input
     id: name
     attributes:
-      label: Name
-      placeholder: Minimal Powerline Statusline
+      label: "Name"
+      description: "Required."
+      placeholder: "Human-readable listing name"
     validations:
       required: true
   - type: input
     id: slug
     attributes:
-      label: Slug
-      description: Kebab-case only
-      placeholder: minimal-powerline
+      label: "Slug"
+      description: "Required."
+      placeholder: "kebab-case-slug"
     validations:
       required: true
   - type: input
     id: category
     attributes:
-      label: Category
-      value: statuslines
+      label: "Category"
+      description: "Required."
+      value: "statuslines"
     validations:
       required: true
   - type: input
     id: github_url
     attributes:
-      label: GitHub URL
-      placeholder: https://github.com/owner/repo
+      label: "GitHub URL"
+      description: "Do not use affiliate, referral, or tracking URLs."
+      placeholder: "https://github.com/owner/repo"
     validations:
       required: false
   - type: input
     id: docs_url
     attributes:
-      label: Docs URL
-      placeholder: https://...
+      label: "Docs URL"
+      description: "Do not use affiliate, referral, or tracking URLs."
+      placeholder: "https://example.com/docs"
     validations:
       required: false
   - type: input
     id: author
     attributes:
-      label: Author
-      placeholder: GitHub handle or name
+      label: "Author"
+      placeholder: "GitHub handle, company, or maintainer name"
     validations:
       required: false
   - type: input
     id: contact_email
     attributes:
-      label: Contact email
-      placeholder: you@example.com
+      label: "Contact email"
+      description: "Required."
+      placeholder: "you@example.com"
     validations:
       required: true
   - type: input
     id: tags
     attributes:
-      label: Tags
-      description: Comma-separated
-      placeholder: statusline, shell, cli
+      label: "Tags"
+      placeholder: "claude, mcp, automation"
     validations:
       required: false
   - type: textarea
     id: description
     attributes:
-      label: Description
-      description: 1-3 sentences
-      placeholder: Explain what this statusline shows and why it is useful.
+      label: "Description"
+      description: "Required."
+      placeholder: "Explain what this does, why it matters, and when to use it."
     validations:
       required: true
   - type: textarea
     id: card_description
     attributes:
-      label: Card description
-      description: Short browse preview text
-      placeholder: Short preview users see on browse cards.
+      label: "Card description"
+      description: "Required."
+      placeholder: "Short browse-card preview text."
     validations:
       required: true
   - type: dropdown
     id: script_language
     attributes:
-      label: Script language
+      label: "Script language"
+      description: "Required."
       options:
-        - bash
-        - zsh
-        - fish
-        - python
-        - javascript
-        - other
+        - "bash"
+        - "zsh"
+        - "fish"
+        - "python"
+        - "javascript"
+        - "other"
     validations:
       required: true
   - type: textarea
     id: usage_snippet
     attributes:
-      label: Usage snippet
-      render: markdown
-      placeholder: How to wire this into statusline config.
+      label: "Usage snippet"
+      description: "Required."
+      placeholder: "Show the exact command or config someone should run."
+      render: "markdown"
     validations:
       required: true
   - type: textarea
     id: full_copyable_content
     attributes:
-      label: Full copyable statusline script/config
-      render: markdown
-      placeholder: Paste full script/config.
+      label: "Full copyable content"
+      description: "Required."
+      placeholder: "Paste the complete usable prompt, config, script, or rule."
+      render: "markdown"
     validations:
       required: true
   - type: textarea
     id: config_snippet
     attributes:
-      label: Config snippet (optional)
-      render: markdown
-      placeholder: Optional config block.
+      label: "Config snippet"
+      placeholder: "JSON, TOML, or shell config example."
+      render: "markdown"
     validations:
       required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Submission checks
+      options:
+        - label: I confirm this is a free content submission, not a paid listing, job, product promotion, or claim request.
+          required: true
+        - label: I confirm external links are official source/docs links and not affiliate, referral, or tracking URLs.
+          required: true
+        - label: I understand maintainers review and import accepted submissions manually.
+          required: true

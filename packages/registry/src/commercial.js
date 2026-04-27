@@ -142,6 +142,26 @@ export function linkRelForDisclosure(value) {
     : "noreferrer";
 }
 
+export function toolPlacementRank(tool = {}) {
+  return (
+    Number(Boolean(tool.sponsored)) * 3 + Number(Boolean(tool.featured)) * 2
+  );
+}
+
+export function compareToolListings(left = {}, right = {}) {
+  const rankDelta = toolPlacementRank(right) - toolPlacementRank(left);
+  if (rankDelta !== 0) return rankDelta;
+
+  const dateDelta = String(right.dateAdded || "").localeCompare(
+    String(left.dateAdded || ""),
+  );
+  if (dateDelta !== 0) return dateDelta;
+
+  return String(left.title || left.slug || "").localeCompare(
+    String(right.title || right.slug || ""),
+  );
+}
+
 export function nextLeadStatus(currentStatus, action) {
   const current = normalizeCommercialStatus(currentStatus);
   const normalizedAction = String(action || "")

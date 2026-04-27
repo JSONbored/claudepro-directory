@@ -61,26 +61,7 @@ jobs:
             const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
             if (report.skipped) return;
 
-            const labels = new Set(
-              (context.payload.issue.labels || []).map((label) => label.name)
-            );
-            labels.add("content-submission");
-            labels.add("needs-review");
-            const categoryLabels = {
-              agents: "community-agents",
-              collections: "community-collections",
-              commands: "community-commands",
-              guides: "guide",
-              hooks: "community-hooks",
-              mcp: "community-mcp",
-              rules: "community-rules",
-              skills: "skills",
-              statuslines: "community-statuslines"
-            };
-            if (report.category) {
-              labels.add(categoryLabels[report.category] || report.category);
-            }
-
+            const labels = new Set(report.recommendedLabels || []);
             const nextLabels = [...labels].filter(Boolean);
             try {
               await github.rest.issues.setLabels({

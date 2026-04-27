@@ -34,6 +34,10 @@
       "types": "./src/index.d.ts",
       "default": "./src/submission.js"
     },
+    "./submission-labels": {
+      "types": "./src/index.d.ts",
+      "default": "./src/submission-labels.js"
+    },
     "./submission-spec": {
       "types": "./src/index.d.ts",
       "default": "./src/submission-spec.js"

@@ -68,10 +68,18 @@ Run before merging content changes:
 
 ```bash
 pnpm validate:content
+pnpm validate:issue-templates
 pnpm validate:clean
 pnpm audit:content
 pnpm build
 ```
+
+## Submission workflow
+
+- Use issues first for free Claude resources. The issue validator checks category fields, required copyable assets, slug shape, local package requests, and affiliate/referral URLs.
+- Use pull requests only when you are comfortable adding MDX directly and running the full gate.
+- Maintainers manually import or merge accepted submissions. GitHub issue validation does not auto-publish content.
+- Tool/app/service promotions, listing claims, and jobs use the D1-backed website lead forms, not the free resource issue templates.
 
 For vote-state sync checks:
 
