@@ -29,7 +29,8 @@
       "rules",
       "security",
       "tools",
-      "xss"
+      "xss",
+      "heyclaude"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

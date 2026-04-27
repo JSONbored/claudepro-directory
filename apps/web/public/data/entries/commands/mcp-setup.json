@@ -28,7 +28,9 @@
       "oauth",
       "remote-server",
       "setup",
-      "tools"
+      "tools",
+      "heyclaude",
+      "mcp server setup for claude code"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

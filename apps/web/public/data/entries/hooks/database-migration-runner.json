@@ -28,7 +28,9 @@
       "migration",
       "runner",
       "sql",
-      "tools"
+      "tools",
+      "heyclaude",
+      "database migration runner - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

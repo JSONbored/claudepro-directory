@@ -29,7 +29,8 @@
       "tools",
       "transformation",
       "validation",
-      "zod"
+      "zod",
+      "heyclaude"
     ],
     "readingTime": 5,
     "difficultyScore": 100,

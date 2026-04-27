@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { deriveSeoFields } from "@heyclaude/registry/content-schema";
 import {
   normalizeValue,
   validateSubmission,
@@ -163,6 +164,18 @@ function buildContent(issue, report) {
   const retrievalSources = unique(splitList(fields.retrieval_sources));
   const testedPlatforms = unique(splitList(fields.tested_platforms));
   const downloadUrl = normalizeValue(fields.download_url);
+  const seo = deriveSeoFields(
+    {
+      title: fields.name,
+      description: fields.description,
+      cardDescription: fields.card_description,
+      tags,
+    },
+    category,
+  );
+  const isDraftSkill =
+    category === "skills" &&
+    normalizeValue(fields.verification_status).toLowerCase() === "draft";
 
   const data = {
     title: fields.name,
@@ -170,6 +183,8 @@ function buildContent(issue, report) {
     category,
     description: fields.description,
     cardDescription: fields.card_description,
+    seoTitle: seo.seoTitle,
+    seoDescription: seo.seoDescription,
     author: fields.author,
     dateAdded,
     repoUrl: fields.github_url,
@@ -190,6 +205,9 @@ function buildContent(issue, report) {
     retrievalSources,
     testedPlatforms,
     tags,
+    keywords: seo.keywords,
+    robotsIndex: !isDraftSkill,
+    robotsFollow: true,
   };
 
   return `${frontmatter(data)}\n${buildBody(fields, category)}\n`;

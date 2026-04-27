@@ -29,9 +29,8 @@
       "skills",
       "stack",
       "svelte",
-      "svelte/sveltekit",
-      "sveltekit",
-      "tools"
+      "svelte sveltekit",
+      "sveltekit"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

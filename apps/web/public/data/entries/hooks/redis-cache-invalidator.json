@@ -28,7 +28,9 @@
       "invalidator",
       "performance",
       "redis",
-      "tools"
+      "tools",
+      "heyclaude",
+      "redis cache invalidator - hooks"
     ],
     "readingTime": 4,
     "difficultyScore": 0,

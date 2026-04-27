@@ -121,7 +121,7 @@ function renderIssueTemplate(category) {
     "          required: true",
     "        - label: I confirm external links are official source/docs links and not affiliate, referral, or tracking URLs.",
     "          required: true",
-    "        - label: I understand maintainers review and import accepted submissions manually.",
+    "        - label: I understand maintainers review accepted submissions before an import PR is opened.",
     "          required: true",
   ];
   return `${lines.join("\n")}\n`;

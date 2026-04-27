@@ -26,7 +26,9 @@
       "git",
       "smart",
       "tools",
-      "version-control"
+      "version-control",
+      "heyclaude",
+      "git smart commit for claude code"
     ],
     "readingTime": 2,
     "difficultyScore": 24,

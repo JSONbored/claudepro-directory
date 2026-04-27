@@ -23,7 +23,14 @@
       "model-router",
       "token-cost",
       "latency-optimization",
-      "fallback-strategy"
+      "fallback-strategy",
+      "model-routing",
+      "cost-optimization",
+      "latency",
+      "token-budget",
+      "ai-operations",
+      "skills",
+      "claude"
     ],
     "readingTime": 7,
     "difficultyScore": 79,

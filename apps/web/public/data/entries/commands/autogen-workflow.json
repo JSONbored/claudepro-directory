@@ -26,7 +26,10 @@
       "multi-agent",
       "orchestration",
       "tools",
-      "workflow"
+      "workflow",
+      "ai",
+      "heyclaude",
+      "autogen multi-agent workflow for claude"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

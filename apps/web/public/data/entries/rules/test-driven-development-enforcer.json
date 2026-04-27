@@ -31,8 +31,7 @@
       "test",
       "test-coverage",
       "testing",
-      "tools",
-      "vitest"
+      "tools"
     ],
     "readingTime": 9,
     "difficultyScore": 100,

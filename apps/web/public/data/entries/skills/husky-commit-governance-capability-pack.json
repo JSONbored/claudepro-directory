@@ -22,7 +22,15 @@
       "husky hooks setup",
       "commit governance",
       "local quality gates",
-      "precommit optimization"
+      "precommit optimization",
+      "husky",
+      "git-hooks",
+      "commitlint",
+      "developer-experience",
+      "capability-pack",
+      "skills",
+      "claude",
+      "heyclaude"
     ],
     "readingTime": 8,
     "difficultyScore": 79,

@@ -32,9 +32,7 @@
       "openapi",
       "rest",
       "rules",
-      "schema-first",
-      "tools",
-      "trpc"
+      "schema-first"
     ],
     "readingTime": 11,
     "difficultyScore": 100,

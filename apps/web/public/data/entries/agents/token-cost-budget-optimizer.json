@@ -30,8 +30,7 @@
       "roi",
       "token",
       "token-cost",
-      "tools",
-      "usage-tracking"
+      "tools"
     ],
     "readingTime": 11,
     "difficultyScore": 100,

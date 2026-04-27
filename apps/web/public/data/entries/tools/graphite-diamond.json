@@ -16,7 +16,12 @@
     ],
     "keywords": [
       "ai code review",
-      "graphite diamond"
+      "graphite diamond",
+      "code-review",
+      "pull-requests",
+      "tools",
+      "claude",
+      "heyclaude"
     ],
     "documentationUrl": "https://graphite.dev",
     "websiteUrl": "https://graphite.dev/diamond",

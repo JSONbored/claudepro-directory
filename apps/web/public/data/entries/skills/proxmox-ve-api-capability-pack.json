@@ -22,7 +22,15 @@
       "proxmox api",
       "vm orchestration",
       "lxc automation",
-      "homelab virtualization"
+      "homelab virtualization",
+      "proxmox",
+      "virtualization",
+      "api",
+      "infrastructure",
+      "capability-pack",
+      "skills",
+      "claude",
+      "heyclaude"
     ],
     "readingTime": 9,
     "difficultyScore": 86,

@@ -28,7 +28,9 @@
       "explanation",
       "learning",
       "tools",
-      "visualization"
+      "visualization",
+      "heyclaude",
+      "explain - code explanation command for claude code"
     ],
     "readingTime": 10,
     "difficultyScore": 100,

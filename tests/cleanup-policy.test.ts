@@ -107,6 +107,36 @@ describe("cleanup policy", () => {
     }
   });
 
+  it("keeps branch-era array artifact fallbacks out of active readers", () => {
+    const retiredFallbacks = [
+      {
+        file: "apps/web/src/components/browse-directory.tsx",
+        snippets: [
+          "type DirectoryEntriesPayload =\n  | DirectoryEntry[]",
+          "if (Array.isArray(payload)) return payload;",
+        ],
+      },
+      {
+        file: "scripts/validate-deployment-artifacts.mjs",
+        snippets: ["if (Array.isArray(payload)) return payload;"],
+      },
+      {
+        file: "integrations/raycast/src/feed.ts",
+        snippets: [
+          "if (Array.isArray(parsed))",
+          "parsed.filter(isRaycastEntry)",
+        ],
+      },
+    ];
+
+    for (const { file, snippets } of retiredFallbacks) {
+      const source = fs.readFileSync(path.join(repoRoot, file), "utf8");
+      for (const snippet of snippets) {
+        expect(source).not.toContain(snippet);
+      }
+    }
+  });
+
   it("requires SITE_DB as the only dynamic-state D1 binding", () => {
     const wranglerConfig = fs.readFileSync(
       path.join(repoRoot, "apps/web/wrangler.jsonc"),

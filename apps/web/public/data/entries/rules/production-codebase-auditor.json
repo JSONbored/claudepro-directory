@@ -34,10 +34,7 @@
       "production",
       "rules",
       "security-audit",
-      "tools",
-      "typescript",
-      "validation",
-      "zod"
+      "tools"
     ],
     "readingTime": 2,
     "difficultyScore": 32,

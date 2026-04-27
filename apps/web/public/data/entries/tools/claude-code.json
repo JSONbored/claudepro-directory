@@ -16,7 +16,10 @@
     ],
     "keywords": [
       "claude code",
-      "terminal agent"
+      "terminal agent",
+      "tools",
+      "claude",
+      "heyclaude"
     ],
     "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
     "websiteUrl": "https://www.anthropic.com/claude-code",

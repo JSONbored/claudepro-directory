@@ -27,7 +27,10 @@
       "documentation",
       "mdx",
       "mintlify",
-      "tools"
+      "tools",
+      "ai",
+      "heyclaude",
+      "mintlify documentation generator for claude"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

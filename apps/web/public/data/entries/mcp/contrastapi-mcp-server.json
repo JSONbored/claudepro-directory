@@ -24,7 +24,14 @@
       "claude security mcp",
       "cve lookup",
       "threat intelligence",
-      "dependency scanner"
+      "dependency scanner",
+      "security",
+      "cve",
+      "osint",
+      "ip-reputation",
+      "domain-audit",
+      "mcp servers",
+      "mcp"
     ],
     "documentationUrl": "https://api.contrastcyber.com",
     "cardDescription": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",

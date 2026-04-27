@@ -80,6 +80,9 @@ describe("registry artifacts", () => {
       count: number;
     }>("search-index.json");
 
+    expect(Array.isArray(directoryPayload)).toBe(false);
+    expect(Array.isArray(searchPayload)).toBe(false);
+    expect(Array.isArray(raycastPayload)).toBe(false);
     expect(directoryPayload).toMatchObject({
       schemaVersion: 2,
       kind: "directory-index",

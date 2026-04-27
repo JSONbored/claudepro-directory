@@ -75,6 +75,10 @@ const forbiddenPatterns = [
     pattern: /Array\.isArray\(payload\)\s*\?\s*payload/,
     label: "legacy array registry artifact reader",
   },
+  {
+    pattern: /if\s*\(\s*Array\.isArray\(payload\)\s*\)\s*return\s+payload/,
+    label: "legacy array registry artifact reader",
+  },
 ];
 
 const requiredTaskSections = [
@@ -255,6 +259,7 @@ for (const route of [
   "/api/registry/diff:",
   "/api/registry/entries/{category}/{slug}:",
   "/api/registry/entries/{category}/{slug}/llms:",
+  "/api/submissions:",
   "/api/listing-leads:",
   "/api/admin/listing-leads:",
 ]) {

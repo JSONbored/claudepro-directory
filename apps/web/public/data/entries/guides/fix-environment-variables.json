@@ -23,7 +23,15 @@
       "claude environment variables",
       "fix env vars",
       "mcp environment setup",
-      "api key configuration"
+      "api key configuration",
+      "environment-variables",
+      "configuration",
+      "api-keys",
+      "authentication",
+      "debugging",
+      "security",
+      "guides",
+      "claude"
     ],
     "readingTime": 4,
     "difficultyScore": 100,

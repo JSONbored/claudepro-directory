@@ -16,6 +16,7 @@ const apiRoutes = [
   "/api/votes/toggle",
   "/api/newsletter/subscribe",
   "/api/newsletter/webhook",
+  "/api/submissions",
   "/api/download",
   "/api/listing-leads",
   "/api/admin/listing-leads",

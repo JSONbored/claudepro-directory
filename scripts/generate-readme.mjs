@@ -100,7 +100,8 @@ Option B (direct): open a category issue form in GitHub under \`.github/ISSUE_TE
 Option C (advanced): open a pull request with content files directly.
 
 Free Claude resources use issue-first intake by default. Maintainers review,
-validate, and import accepted submissions manually before merge. Tool/app/service
+validate, and approve accepted submissions before automation opens an import PR.
+Tool/app/service
 promotion, listing claims, and jobs use the website lead forms instead of GitHub
 content issues.
 

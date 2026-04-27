@@ -27,7 +27,9 @@
       "hooks",
       "safety",
       "save",
-      "tools"
+      "tools",
+      "heyclaude",
+      "auto save backup - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

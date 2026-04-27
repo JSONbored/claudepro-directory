@@ -28,7 +28,9 @@
       "tools",
       "translation",
       "validation",
-      "validator"
+      "validator",
+      "heyclaude",
+      "i18n translation validator - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

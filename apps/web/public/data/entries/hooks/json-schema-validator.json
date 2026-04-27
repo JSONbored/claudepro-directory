@@ -28,7 +28,9 @@
       "schema",
       "tools",
       "validation",
-      "validator"
+      "validator",
+      "heyclaude",
+      "json schema validator - hooks"
     ],
     "readingTime": 2,
     "difficultyScore": 0,

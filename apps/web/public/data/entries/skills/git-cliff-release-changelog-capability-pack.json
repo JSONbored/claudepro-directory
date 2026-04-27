@@ -22,7 +22,15 @@
       "git cliff changelog",
       "automated release notes",
       "conventional commits release",
-      "semantic version workflow"
+      "semantic version workflow",
+      "git-cliff",
+      "changelog",
+      "releases",
+      "conventional-commits",
+      "capability-pack",
+      "skills",
+      "claude",
+      "heyclaude"
     ],
     "readingTime": 8,
     "difficultyScore": 84,

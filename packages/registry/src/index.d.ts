@@ -200,6 +200,17 @@ export type SeoDocument = {
   jsonLd?: JsonLdDocument[];
 };
 
+export type DerivedSeoFields = {
+  seoTitle: string;
+  seoDescription: string;
+  keywords: string[];
+};
+
+export function deriveSeoFields(
+  data?: Record<string, unknown>,
+  category?: string,
+): DerivedSeoFields;
+
 export type SourceProvenance = {
   sourceQuality: string;
   hasExternalSource: boolean;
@@ -256,6 +267,35 @@ export type IssueTemplateSpec = {
   labels: string[];
   title: string;
   fields: SubmissionFieldSpec[];
+};
+
+export type SubmissionIssueDraft = {
+  title: string;
+  body: string;
+  labels: string[];
+};
+
+export function normalizeSubmissionPayloadFields(
+  fields?: Record<string, unknown>,
+): Record<string, string>;
+export function buildSubmissionIssueTitle(
+  fields?: Record<string, unknown>,
+): string;
+export function buildSubmissionIssueBody(
+  fields?: Record<string, unknown>,
+): string;
+export function buildSubmissionIssueDraft(
+  fields?: Record<string, unknown>,
+): SubmissionIssueDraft;
+
+export type SubmissionValidationReport = {
+  ok: boolean;
+  skipped: boolean;
+  reason: string;
+  category: string;
+  errors: string[];
+  warnings: string[];
+  fields: Record<string, string>;
 };
 
 export type SubmissionQueueEntry = {
@@ -617,9 +657,11 @@ export function looksLikeSubmissionIssue(
 export function isLikelyAffiliateUrl(value: unknown): boolean;
 export function recommendedSubmissionLabels(
   issue: Record<string, unknown>,
-  report?: Record<string, unknown>,
+  report?: SubmissionValidationReport,
 ): string[];
-export function submissionQueueStatus(report: Record<string, unknown>): string;
+export function submissionQueueStatus(
+  report: SubmissionValidationReport,
+): string;
 export const SUBMISSION_BASE_LABELS: string[];
 export const COMMUNITY_CATEGORY_LABELS: Record<string, string>;
 export function submissionLabelsForCategory(category: string): string[];
@@ -629,4 +671,4 @@ export function buildSubmissionQueue(
 ): SubmissionQueue;
 export function validateSubmission(
   issue: Record<string, unknown>,
-): Record<string, unknown>;
+): SubmissionValidationReport;

@@ -29,7 +29,8 @@
       "react",
       "rules",
       "tools",
-      "typescript"
+      "typescript",
+      "heyclaude"
     ],
     "readingTime": 2,
     "difficultyScore": 20,

@@ -28,7 +28,9 @@
       "optimization",
       "performance",
       "tools",
-      "webpack"
+      "webpack",
+      "heyclaude",
+      "webpack bundle analyzer - hooks"
     ],
     "readingTime": 5,
     "difficultyScore": 0,

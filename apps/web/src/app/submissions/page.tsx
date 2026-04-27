@@ -116,9 +116,9 @@ export default async function SubmissionsPage() {
         <h1 className="section-title">Submission queue.</h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
           This page runs open public GitHub issues through the same registry
-          submission queue contract used by CI. Accepted submissions still
-          require maintainer review and manual import before they appear in the
-          directory.
+          submission queue contract used by CI. Accepted submissions require
+          maintainer approval before automation opens a content import PR for
+          review.
         </p>
         <div className="flex flex-wrap gap-2">
           <Link

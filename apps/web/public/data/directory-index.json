@@ -31,7 +31,9 @@
         "cursor",
         "development",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude",
+        "cursor-rules - cursor rules generator for claude code"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -85,7 +87,9 @@
         "error-analysis",
         "fixes",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude",
+        "debug - debugging assistant command for claude code"
       ],
       "readingTime": 3,
       "difficultyScore": 100,
@@ -138,7 +142,9 @@
         "guides",
         "markdown",
         "tools",
-        "tutorials"
+        "tutorials",
+        "heyclaude",
+        "docs - docs generator command for claude code"
       ],
       "readingTime": 18,
       "difficultyScore": 100,
@@ -192,7 +198,9 @@
         "explanation",
         "learning",
         "tools",
-        "visualization"
+        "visualization",
+        "heyclaude",
+        "explain - code explanation command for claude code"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -246,7 +254,9 @@
         "optimize",
         "performance",
         "profiling",
-        "tools"
+        "tools",
+        "heyclaude",
+        "optimize - performance optimizer command for claude code"
       ],
       "readingTime": 15,
       "difficultyScore": 100,
@@ -299,7 +309,9 @@
         "patterns",
         "refactor",
         "refactoring",
-        "tools"
+        "tools",
+        "heyclaude",
+        "refactor - code refactoring command for claude"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -353,7 +365,8 @@
         "patterns",
         "refactor",
         "refactoring",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -406,7 +419,9 @@
         "quality",
         "review",
         "security",
-        "tools"
+        "tools",
+        "heyclaude",
+        "review - code review command for claude code"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -458,7 +473,9 @@
         "security",
         "threat-analysis",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude",
+        "security - vulnerability scan command for claude code"
       ],
       "readingTime": 14,
       "difficultyScore": 100,
@@ -518,11 +535,7 @@
         "optimization",
         "performance",
         "production",
-        "scalability",
-        "security",
-        "security-audit",
-        "sub-agents",
-        "tools"
+        "scalability"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -576,7 +589,8 @@
         "test",
         "testing",
         "tools",
-        "unit-tests"
+        "unit-tests",
+        "heyclaude"
       ],
       "readingTime": 16,
       "difficultyScore": 100,
@@ -637,10 +651,7 @@
         "schema-validation",
         "security-audit",
         "technical-debt",
-        "tools",
-        "typescript",
-        "validation",
-        "zod"
+        "tools"
       ],
       "readingTime": 3,
       "difficultyScore": 65,
@@ -706,7 +717,9 @@
         "hooks",
         "testing",
         "tools",
-        "wcag"
+        "wcag",
+        "heyclaude",
+        "accessibility checker - claude code hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -821,7 +834,13 @@
         "regression-testing",
         "quality-gates",
         "ci",
-        "reliability"
+        "reliability",
+        "evals",
+        "regression",
+        "ai-agents",
+        "qa",
+        "quality-gate",
+        "skills"
       ],
       "readingTime": 6,
       "difficultyScore": 74,
@@ -918,7 +937,7 @@
       "title": "Agent Operator Growth Master Pack",
       "description": "High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.",
       "seoTitle": "Agent Operator Growth Master Pack",
-      "seoDescription": "End-to-end collection for AI operators combining code review automation, changelog governance, plugin and skill authoring, and zero-budget SaaS growth workflows.",
+      "seoDescription": "End-to-end collection for AI operators combining code review automation, changelog governance, plugin and skill authoring, and zero-budget SaaS growth workfl...",
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
@@ -933,7 +952,15 @@
         "ai operator toolkit",
         "codex automation stack",
         "release governance bundle",
-        "bootstrap growth workflows"
+        "bootstrap growth workflows",
+        "ai-operators",
+        "growth",
+        "automation",
+        "production",
+        "collections",
+        "claude",
+        "heyclaude",
+        "agent operator growth master pack"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -1045,8 +1072,7 @@
         "framework",
         "procedural-knowledge",
         "skills",
-        "skills-framework",
-        "tools"
+        "skills-framework"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -1099,7 +1125,8 @@
         "installer",
         "plugins",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -1148,7 +1175,13 @@
         "slos",
         "alerts",
         "traces",
-        "incident-management"
+        "incident-management",
+        "observability",
+        "incident-response",
+        "reliability",
+        "telemetry",
+        "ai-agents",
+        "skills"
       ],
       "readingTime": 7,
       "difficultyScore": 76,
@@ -1260,7 +1293,15 @@
         "ai startup validation",
         "product market demand",
         "pricing hypothesis",
-        "go to market testing"
+        "go to market testing",
+        "business",
+        "validation",
+        "product-strategy",
+        "growth",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 83,
@@ -1381,7 +1422,8 @@
         "security",
         "static-analysis",
         "tools",
-        "vulnerability-detection"
+        "vulnerability-detection",
+        "ai"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -1432,7 +1474,9 @@
         "devops",
         "engineer",
         "infrastructure",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -1548,7 +1592,9 @@
         "prompt",
         "prompt-engineering",
         "rules",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -1593,7 +1639,15 @@
         "ai seo skill",
         "content cluster strategy",
         "search ranking workflow",
-        "topical authority"
+        "topical authority",
+        "seo",
+        "content-strategy",
+        "growth",
+        "ranking",
+        "publishing",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 68,
@@ -1699,7 +1753,13 @@
       ],
       "keywords": [
         "terminal coding agent",
-        "git ai assistant"
+        "git ai assistant",
+        "terminal-agent",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "aider"
       ],
       "documentationUrl": "https://aider.chat/docs",
       "websiteUrl": "https://aider.chat",
@@ -1748,7 +1808,8 @@
         "mcp servers",
         "server",
         "tables",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -1871,7 +1932,8 @@
         "openapi",
         "rest",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 94,
@@ -1924,7 +1986,8 @@
         "rest",
         "starter",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2005,7 +2068,8 @@
         "hooks",
         "openapi",
         "swagger",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2064,9 +2128,7 @@
         "openapi",
         "rest",
         "rules",
-        "schema-first",
-        "tools",
-        "trpc"
+        "schema-first"
       ],
       "readingTime": 11,
       "difficultyScore": 100,
@@ -2169,7 +2231,13 @@
       ],
       "keywords": [
         "web scraping platform",
-        "automation actors"
+        "automation actors",
+        "web-automation",
+        "data-extraction",
+        "tools",
+        "claude",
+        "heyclaude",
+        "apify"
       ],
       "documentationUrl": "https://docs.apify.com",
       "websiteUrl": "https://apify.com",
@@ -2206,7 +2274,13 @@
       ],
       "keywords": [
         "agent tool calling",
-        "authenticated actions"
+        "authenticated actions",
+        "tool-calling",
+        "agents",
+        "tools",
+        "claude",
+        "heyclaude",
+        "arcade"
       ],
       "documentationUrl": "https://docs.arcade.dev",
       "websiteUrl": "https://www.arcade.dev",
@@ -2243,7 +2317,13 @@
       ],
       "keywords": [
         "llm tracing",
-        "ai evaluation"
+        "ai evaluation",
+        "observability",
+        "evaluation",
+        "tools",
+        "claude",
+        "heyclaude",
+        "arize phoenix"
       ],
       "documentationUrl": "https://arize.com/docs/phoenix",
       "websiteUrl": "https://phoenix.arize.com",
@@ -2292,7 +2372,8 @@
         "tasks",
         "team-collaboration",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2359,7 +2440,9 @@
         "summarization",
         "tools",
         "transcription",
-        "whisper"
+        "whisper",
+        "heyclaude",
+        "audio transcription summarization skill"
       ],
       "readingTime": 3,
       "difficultyScore": 71,
@@ -2482,8 +2565,7 @@
         "formatting",
         "hook",
         "hooks",
-        "prettier",
-        "tools"
+        "prettier"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2537,7 +2619,9 @@
         "hooks",
         "safety",
         "save",
-        "tools"
+        "tools",
+        "heyclaude",
+        "auto save backup - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2641,7 +2725,10 @@
         "multi-agent",
         "orchestration",
         "tools",
-        "workflow"
+        "workflow",
+        "ai",
+        "heyclaude",
+        "autogen multi-agent workflow for claude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -2695,7 +2782,9 @@
         "infrastructure",
         "rules",
         "serverless",
-        "tools"
+        "tools",
+        "heyclaude",
+        "aws cloud architect - claude md rules for claude code"
       ],
       "readingTime": 3,
       "difficultyScore": 100,
@@ -2746,7 +2835,9 @@
         "infrastructure",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "aws cloudformation validator - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2803,7 +2894,8 @@
         "devops",
         "infrastructure",
         "serverless",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -2959,7 +3051,8 @@
         "development",
         "microservices",
         "scalability",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 13,
       "difficultyScore": 100,
@@ -3012,7 +3105,8 @@
         "development",
         "infrastructure",
         "suite",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -3087,7 +3181,15 @@
         "base l2 contract deployment",
         "base smart contracts",
         "ethereum layer2 skill",
-        "contract verification"
+        "contract verification",
+        "base",
+        "layer2",
+        "smart-contracts",
+        "deployment",
+        "web3",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 80,
@@ -3208,7 +3310,8 @@
         "strict",
         "tools",
         "typescript",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -3311,7 +3414,13 @@
       ],
       "keywords": [
         "browser app builder",
-        "ai web development"
+        "ai web development",
+        "app-builder",
+        "prototyping",
+        "tools",
+        "claude",
+        "heyclaude",
+        "bolt"
       ],
       "documentationUrl": "https://support.bolt.new",
       "websiteUrl": "https://bolt.new",
@@ -3360,7 +3469,8 @@
         "mcp servers",
         "server",
         "storage",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -3416,7 +3526,13 @@
       ],
       "keywords": [
         "ai evaluation platform",
-        "prompt experiments"
+        "prompt experiments",
+        "evaluation",
+        "prompt-testing",
+        "tools",
+        "claude",
+        "heyclaude",
+        "braintrust"
       ],
       "documentationUrl": "https://www.braintrust.dev/docs",
       "websiteUrl": "https://www.braintrust.dev",
@@ -3460,7 +3576,14 @@
         "browser-agent",
         "selector-strategy",
         "retries",
-        "automation-runbooks"
+        "automation-runbooks",
+        "browser-automation",
+        "ai-agents",
+        "playwright",
+        "workflows",
+        "reliability",
+        "skills",
+        "claude"
       ],
       "readingTime": 7,
       "difficultyScore": 75,
@@ -3566,7 +3689,13 @@
       ],
       "keywords": [
         "browser agents",
-        "ai web automation"
+        "ai web automation",
+        "browser-automation",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "browser use"
       ],
       "documentationUrl": "https://docs.browser-use.com",
       "websiteUrl": "https://browser-use.com",
@@ -3603,7 +3732,13 @@
       ],
       "keywords": [
         "cloud browser",
-        "browser agents"
+        "browser agents",
+        "browser-automation",
+        "agent-infrastructure",
+        "tools",
+        "claude",
+        "heyclaude",
+        "browserbase"
       ],
       "documentationUrl": "https://docs.browserbase.com",
       "websiteUrl": "https://www.browserbase.com",
@@ -3647,7 +3782,15 @@
         "build mcp server",
         "claude mcp tutorial",
         "model context protocol",
-        "mcp development"
+        "mcp development",
+        "claude-desktop",
+        "api-integration",
+        "typescript",
+        "python",
+        "custom-servers",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 87,
@@ -3696,7 +3839,9 @@
         "runtime",
         "skills",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude",
+        "bun javascript runtime development skill"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -3943,7 +4088,8 @@
         "mcp servers",
         "server",
         "templates",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -4012,7 +4158,9 @@
         "powerline",
         "statuslines",
         "theme",
-        "tools"
+        "tools",
+        "heyclaude",
+        "catppuccin mocha theme - statuslines"
       ],
       "readingTime": 2,
       "difficultyScore": 4,
@@ -4066,7 +4214,15 @@
         "chatgpt to claude",
         "claude migration",
         "ai assistant migration",
-        "prompt migration"
+        "prompt migration",
+        "tutorial",
+        "intermediate",
+        "migration",
+        "api",
+        "guides",
+        "claude",
+        "heyclaude",
+        "chatgpt to claude migration"
       ],
       "readingTime": 3,
       "difficultyScore": 64,
@@ -4164,7 +4320,15 @@
         "claude extended thinking",
         "claude 4 tutorial",
         "reasoning prompts",
-        "advanced claude workflows"
+        "advanced claude workflows",
+        "tutorial",
+        "advanced",
+        "api-implementation",
+        "production-ready",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude 4 extended thinking"
       ],
       "readingTime": 4,
       "difficultyScore": 52,
@@ -4206,7 +4370,14 @@
         "claude agent framework",
         "agent development",
         "claude code agents",
-        "ai agent workflow"
+        "ai agent workflow",
+        "tutorial",
+        "advanced",
+        "multi-agent",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude agent development"
       ],
       "readingTime": 4,
       "difficultyScore": 39,
@@ -4249,7 +4420,15 @@
         "claude healthcare",
         "hipaa ai workflows",
         "healthcare automation",
-        "compliant claude usage"
+        "compliant claude usage",
+        "healthcare",
+        "enterprise",
+        "compliance",
+        "documentation",
+        "hipaa",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 73,
@@ -4286,7 +4465,10 @@
       ],
       "keywords": [
         "claude code",
-        "terminal agent"
+        "terminal agent",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
       "websiteUrl": "https://www.anthropic.com/claude-code",
@@ -4331,7 +4513,7 @@
       "keywords": [
         "claude",
         "claude-code",
-        "CLI",
+        "cli",
         "containers",
         "development",
         "devops",
@@ -4340,8 +4522,7 @@
         "health-check",
         "monitoring",
         "statusline",
-        "statuslines",
-        "tools"
+        "statuslines"
       ],
       "readingTime": 1,
       "difficultyScore": 2,
@@ -4395,7 +4576,15 @@
         "claude multi directory",
         "multi project claude setup",
         "claude workspace setup",
-        "repository workflow"
+        "repository workflow",
+        "workflow",
+        "enterprise development",
+        "advanced",
+        "automation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code multi-directory setup enterprise workflow 2025"
       ],
       "readingTime": 5,
       "difficultyScore": 87,
@@ -4437,7 +4626,15 @@
         "claude vs cursor",
         "claude vs codeium",
         "ai ide comparison",
-        "coding assistant tools"
+        "coding assistant tools",
+        "comparison",
+        "ai coding assistants",
+        "developer tools",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code vs cursor vs codeium complete comparison 2025"
       ],
       "readingTime": 3,
       "difficultyScore": 18,
@@ -4479,7 +4676,15 @@
         "claude wsl setup",
         "windows claude code",
         "wsl developer setup",
-        "claude windows workflow"
+        "claude windows workflow",
+        "tutorial",
+        "intermediate",
+        "wsl",
+        "windows",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code wsl setup 2025"
       ],
       "readingTime": 3,
       "difficultyScore": 60,
@@ -4529,11 +4734,7 @@
         "intermediate",
         "mcp",
         "mcp servers",
-        "mcp-servers",
-        "servers",
-        "setup",
-        "tools",
-        "tutorial"
+        "servers"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -4593,7 +4794,15 @@
         "claude financial services",
         "ai finance workflows",
         "financial services automation",
-        "compliant ai workflows"
+        "compliant ai workflows",
+        "use-case",
+        "financial-services",
+        "enterprise",
+        "advanced",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude for financial services enterprise implementation 2025"
       ],
       "readingTime": 3,
       "difficultyScore": 15,
@@ -4641,12 +4850,11 @@
         "cost-optimization",
         "development",
         "haiku",
-        "haiku-4.5",
+        "haiku-4 5",
         "optimizer",
         "performance",
         "rapid-iteration",
-        "speed",
-        "tools"
+        "speed"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -4691,7 +4899,15 @@
         "claude mcp setup",
         "mcp server setup",
         "claude desktop mcp",
-        "model context protocol setup"
+        "model context protocol setup",
+        "mcp-servers",
+        "configuration",
+        "tutorial",
+        "setup",
+        "integration",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 55,
@@ -4742,7 +4958,8 @@
         "remote-servers",
         "skills",
         "tool-permissions",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -4786,7 +5003,15 @@
         "claude automation",
         "business process automation",
         "ai workflow automation",
-        "operations automation"
+        "operations automation",
+        "use-case",
+        "enterprise",
+        "automation",
+        "advanced",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude process automation"
       ],
       "readingTime": 6,
       "difficultyScore": 32,
@@ -4828,7 +5053,15 @@
         "claude rate limits",
         "fix claude rate limit",
         "claude usage limits",
-        "claude api throttling"
+        "claude api throttling",
+        "tutorial",
+        "advanced",
+        "rate-limits",
+        "429-errors",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude rate limits fix complete optimization guide 2025"
       ],
       "readingTime": 4,
       "difficultyScore": 57,
@@ -4870,7 +5103,15 @@
         "claude vs gemini",
         "claude vs codewhisperer",
         "ai coding assistant comparison",
-        "claude code comparison"
+        "claude code comparison",
+        "comparison",
+        "cloud-development",
+        "aws",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude vs amazon q developer vs gemini code aws guide 2025"
       ],
       "readingTime": 4,
       "difficultyScore": 16,
@@ -4912,7 +5153,15 @@
         "claude vs copilot",
         "python coding assistant",
         "claude python development",
-        "github copilot alternative"
+        "github copilot alternative",
+        "comparison",
+        "python-development",
+        "coding-assistants",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude vs github copilot vs chatgpt for python dev 2025"
       ],
       "readingTime": 3,
       "difficultyScore": 16,
@@ -4956,7 +5205,6 @@
         "builder",
         "claude",
         "claude-md",
-        "claude.md",
         "coding-standards",
         "commands",
         "development",
@@ -4964,7 +5212,8 @@
         "onboarding",
         "project-context",
         "team-collaboration",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -5015,15 +5264,13 @@
         "ai-guidance",
         "claude",
         "claude-md",
-        "claude.md",
         "context-preservation",
         "development",
         "documentation",
         "knowledge",
         "knowledge-management",
         "manager",
-        "project-instructions",
-        "tools"
+        "project-instructions"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -5197,7 +5444,8 @@
         "server",
         "tasks",
         "team-collaboration",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -5253,7 +5501,13 @@
       ],
       "keywords": [
         "vscode coding agent",
-        "open-source ai agent"
+        "open-source ai agent",
+        "vs-code",
+        "coding-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cline"
       ],
       "documentationUrl": "https://docs.cline.bot",
       "websiteUrl": "https://cline.bot",
@@ -5303,7 +5557,8 @@
         "session",
         "stop",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -5399,7 +5654,13 @@
       ],
       "keywords": [
         "ai agents cloudflare",
-        "workers agents"
+        "workers agents",
+        "agent-framework",
+        "cloudflare",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cloudflare agents sdk"
       ],
       "documentationUrl": "https://developers.cloudflare.com/agents/",
       "websiteUrl": "https://developers.cloudflare.com/agents/",
@@ -5448,7 +5709,8 @@
         "mcp servers",
         "security",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 5,
@@ -5516,7 +5778,9 @@
         "serverless",
         "skills",
         "tools",
-        "workers"
+        "workers",
+        "ai",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -5631,7 +5895,15 @@
         "cloudflare d1 kv r2",
         "edge data architecture",
         "workers storage patterns",
-        "serverless data strategy"
+        "serverless data strategy",
+        "cloudflare",
+        "workers",
+        "d1",
+        "kv",
+        "r2",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 10,
       "difficultyScore": 89,
@@ -5752,7 +6024,8 @@
         "media",
         "server",
         "tools",
-        "video"
+        "video",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -5947,7 +6220,15 @@
         "pull request audit",
         "local code review automation",
         "severity scoring",
-        "exploitability analysis"
+        "exploitability analysis",
+        "code-review",
+        "pull-requests",
+        "security",
+        "capability-pack",
+        "automation",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 88,
@@ -6066,7 +6347,9 @@
         "quality",
         "review",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude",
+        "code review expert for claude"
       ],
       "readingTime": 1,
       "difficultyScore": 3,
@@ -6172,8 +6455,7 @@
         "runner",
         "test",
         "testing",
-        "tools",
-        "watch"
+        "tools"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -6273,7 +6555,13 @@
       ],
       "keywords": [
         "ai code review",
-        "pull request review"
+        "pull request review",
+        "code-review",
+        "pull-requests",
+        "tools",
+        "claude",
+        "heyclaude",
+        "coderabbit"
       ],
       "documentationUrl": "https://docs.coderabbit.ai",
       "websiteUrl": "https://www.coderabbit.ai",
@@ -6316,7 +6604,15 @@
         "codex automations",
         "recurring agent workflows",
         "rrule scheduling",
-        "automation governance"
+        "automation governance",
+        "codex",
+        "automation",
+        "orchestration",
+        "scheduling",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 85,
@@ -6430,7 +6726,15 @@
         "codex plugin development",
         "mcp plugin architecture",
         "plugin permission boundaries",
-        "ai tooling extensions"
+        "ai tooling extensions",
+        "codex",
+        "plugins",
+        "mcp",
+        "developer-tooling",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 87,
@@ -6543,7 +6847,15 @@
         "claude migration workflow",
         "chatgpt to claude",
         "enterprise ai migration",
-        "ai platform migration"
+        "ai platform migration",
+        "workflow",
+        "migration",
+        "enterprise",
+        "automation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "complete claude migration playbook from chatgpt copilot"
       ],
       "readingTime": 3,
       "difficultyScore": 15,
@@ -6580,7 +6892,12 @@
       ],
       "keywords": [
         "ai agent tools",
-        "tool integrations"
+        "tool integrations",
+        "agents",
+        "tools",
+        "claude",
+        "heyclaude",
+        "composio"
       ],
       "documentationUrl": "https://docs.composio.dev",
       "websiteUrl": "https://composio.dev",
@@ -6631,7 +6948,8 @@
         "marketing",
         "social-media",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -6775,9 +7093,7 @@
         "optimization",
         "optimizer",
         "summarization",
-        "tools",
-        "truncation-prevention",
-        "window"
+        "tools"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -6816,7 +7132,13 @@
       ],
       "keywords": [
         "open-source ai coding",
-        "custom model routing"
+        "custom model routing",
+        "ai-coding",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "continue"
       ],
       "documentationUrl": "https://docs.continue.dev",
       "websiteUrl": "https://continue.dev",
@@ -6861,7 +7183,14 @@
         "claude security mcp",
         "cve lookup",
         "threat intelligence",
-        "dependency scanner"
+        "dependency scanner",
+        "security",
+        "cve",
+        "osint",
+        "ip-reputation",
+        "domain-audit",
+        "mcp servers",
+        "mcp"
       ],
       "documentationUrl": "https://api.contrastcyber.com",
       "cardDescription": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",
@@ -6897,7 +7226,13 @@
       ],
       "keywords": [
         "multi-agent framework",
-        "ai crews"
+        "ai crews",
+        "agent-framework",
+        "multi-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "crewai"
       ],
       "documentationUrl": "https://docs.crewai.com",
       "websiteUrl": "https://www.crewai.com",
@@ -7113,7 +7448,13 @@
       ],
       "keywords": [
         "claude tools",
-        "ai code editor"
+        "ai code editor",
+        "ai-coding",
+        "code-editor",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cursor"
       ],
       "documentationUrl": "https://docs.cursor.com",
       "websiteUrl": "https://cursor.com",
@@ -7156,7 +7497,7 @@
         "ai-coding",
         "claude",
         "cursor",
-        "cursor/windsurf",
+        "cursor windsurf",
         "development",
         "editor",
         "ide",
@@ -7287,8 +7628,7 @@
         "statuslines",
         "tools",
         "tracker",
-        "usage",
-        "usage-percentage"
+        "usage"
       ],
       "readingTime": 3,
       "difficultyScore": 8,
@@ -7349,7 +7689,8 @@
         "mcp servers",
         "sec-filings",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7419,7 +7760,8 @@
         "etl",
         "sql",
         "suite",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7512,9 +7854,7 @@
         "development",
         "engineering",
         "etl",
-        "pipeline",
-        "streaming",
-        "tools"
+        "pipeline"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -7565,7 +7905,9 @@
         "hooks",
         "resources",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude",
+        "database connection cleanup - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7674,7 +8016,9 @@
         "migration",
         "runner",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude",
+        "database migration runner - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7730,7 +8074,8 @@
         "optimization",
         "performance",
         "query",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7786,7 +8131,8 @@
         "optimization",
         "specialist",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -7894,7 +8240,9 @@
         "problem-solving",
         "system",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude",
+        "debug troubleshoot"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -7970,7 +8318,8 @@
         "error-analysis",
         "problem-solving",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -8021,7 +8370,8 @@
         "stop",
         "stop-hook",
         "tools",
-        "vulnerabilities"
+        "vulnerabilities",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8076,7 +8426,8 @@
         "scanner",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8176,7 +8527,13 @@
       ],
       "keywords": [
         "ai software engineer",
-        "autonomous coding agent"
+        "autonomous coding agent",
+        "coding-agent",
+        "autonomous-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "devin"
       ],
       "documentationUrl": "https://docs.devin.ai",
       "websiteUrl": "https://devin.ai",
@@ -8227,7 +8584,8 @@
         "monitoring",
         "sre",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 21,
@@ -8279,7 +8637,8 @@
         "notifier",
         "team",
         "tools",
-        "webhooks"
+        "webhooks",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8334,7 +8693,8 @@
         "moderation",
         "server",
         "social",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8452,7 +8812,15 @@
         "docker compose production",
         "compose hardening",
         "container operations",
-        "compose blueprints"
+        "compose blueprints",
+        "docker",
+        "docker-compose",
+        "devops",
+        "deployment",
+        "reliability",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 72,
@@ -8570,7 +8938,8 @@
         "docker",
         "hooks",
         "rebuild",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8626,7 +8995,8 @@
         "scanner",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8682,7 +9052,8 @@
         "mcp servers",
         "orchestration",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 5,
@@ -8751,7 +9122,8 @@
         "development",
         "documentation",
         "hooks",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8806,7 +9178,9 @@
         "hooks",
         "jsdoc",
         "markdown",
-        "tools"
+        "tools",
+        "heyclaude",
+        "documentation generator - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -8860,7 +9234,9 @@
         "reports",
         "skills",
         "templating",
-        "tools"
+        "tools",
+        "heyclaude",
+        "docx report generator skill"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -8982,7 +9358,8 @@
         "healthcare",
         "legal",
         "specialist",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 67,
@@ -9033,7 +9410,8 @@
         "optimization",
         "resources",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9088,7 +9466,8 @@
         "tools",
         "validation",
         "validator",
-        "variable"
+        "variable",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9193,7 +9572,15 @@
         "solidity security skill",
         "base smart contract security",
         "foundry invariant testing",
-        "evm protocol hardening"
+        "evm protocol hardening",
+        "ethereum",
+        "base",
+        "solidity",
+        "security",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 10,
       "difficultyScore": 91,
@@ -9308,7 +9695,15 @@
         "ethereum smart contract skill",
         "solidity security",
         "foundry testing",
-        "openzeppelin patterns"
+        "openzeppelin patterns",
+        "ethereum",
+        "solidity",
+        "foundry",
+        "smart-contracts",
+        "security",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 86,
@@ -9414,7 +9809,13 @@
       ],
       "keywords": [
         "ai search api",
-        "web retrieval"
+        "web retrieval",
+        "search",
+        "retrieval",
+        "tools",
+        "claude",
+        "heyclaude",
+        "exa"
       ],
       "documentationUrl": "https://docs.exa.ai",
       "websiteUrl": "https://exa.ai",
@@ -9517,7 +9918,8 @@
         "pydantic",
         "python",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -9638,7 +10040,8 @@
         "mcp servers",
         "server",
         "tools",
-        "ui-ux"
+        "ui-ux",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9708,8 +10111,7 @@
         "optimization",
         "performance",
         "size",
-        "tools",
-        "warning"
+        "tools"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9763,7 +10165,8 @@
         "mcp servers",
         "official",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -9833,8 +10236,7 @@
         "reporter",
         "reporting",
         "size",
-        "stop-hook",
-        "tools"
+        "stop-hook"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9876,7 +10278,13 @@
       ],
       "keywords": [
         "llm crawling",
-        "website to markdown"
+        "website to markdown",
+        "web-crawling",
+        "data-extraction",
+        "tools",
+        "claude",
+        "heyclaude",
+        "firecrawl"
       ],
       "documentationUrl": "https://docs.firecrawl.dev",
       "websiteUrl": "https://www.firecrawl.dev",
@@ -9925,7 +10333,8 @@
         "notes",
         "server",
         "tools",
-        "transcription"
+        "transcription",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -9995,8 +10404,7 @@
         "statuslines",
         "tools",
         "tracker",
-        "usage-limits",
-        "window"
+        "usage-limits"
       ],
       "readingTime": 2,
       "difficultyScore": 4,
@@ -10052,7 +10460,15 @@
         "claude environment variables",
         "fix env vars",
         "mcp environment setup",
-        "api key configuration"
+        "api key configuration",
+        "environment-variables",
+        "configuration",
+        "api-keys",
+        "authentication",
+        "debugging",
+        "security",
+        "guides",
+        "claude"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -10094,7 +10510,15 @@
         "claude installation errors",
         "fix claude setup",
         "mcp install troubleshooting",
-        "claude code install"
+        "claude code install",
+        "tutorial",
+        "beginner",
+        "installation",
+        "troubleshooting",
+        "guides",
+        "claude",
+        "heyclaude",
+        "fix claude code npm errors"
       ],
       "readingTime": 3,
       "difficultyScore": 39,
@@ -10138,7 +10562,15 @@
         "claude performance troubleshooting",
         "memory leak fix",
         "mcp performance",
-        "ai workflow performance"
+        "ai workflow performance",
+        "claude-code",
+        "performance",
+        "memory-leak",
+        "optimization",
+        "debugging",
+        "context-window",
+        "guides",
+        "claude"
       ],
       "readingTime": 4,
       "difficultyScore": 67,
@@ -10180,7 +10612,15 @@
         "mcp connection errors",
         "fix mcp server",
         "claude mcp troubleshooting",
-        "model context protocol errors"
+        "model context protocol errors",
+        "troubleshooting",
+        "mcp-servers",
+        "connection-errors",
+        "solutions",
+        "guides",
+        "claude",
+        "heyclaude",
+        "fix claude mcp error -32000"
       ],
       "readingTime": 2,
       "difficultyScore": 12,
@@ -10230,7 +10670,8 @@
         "specialist",
         "tools",
         "typescript",
-        "ui-ux"
+        "ui-ux",
+        "heyclaude"
       ],
       "readingTime": 12,
       "difficultyScore": 100,
@@ -10324,7 +10765,13 @@
       ],
       "keywords": [
         "llm vulnerability scanner",
-        "ai security testing"
+        "ai security testing",
+        "security",
+        "red-teaming",
+        "tools",
+        "claude",
+        "heyclaude",
+        "garak"
       ],
       "documentationUrl": "https://github.com/NVIDIA/garak",
       "websiteUrl": "https://github.com/NVIDIA/garak",
@@ -10374,7 +10821,8 @@
         "testing",
         "tests",
         "tools",
-        "unit-tests"
+        "unit-tests",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -10415,7 +10863,13 @@
       ],
       "keywords": [
         "ai testing",
-        "llm evaluation"
+        "llm evaluation",
+        "evaluation",
+        "security",
+        "tools",
+        "claude",
+        "heyclaude",
+        "giskard"
       ],
       "documentationUrl": "https://docs.giskard.ai",
       "websiteUrl": "https://www.giskard.ai",
@@ -10465,7 +10919,8 @@
         "stop",
         "stop-hook",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -10518,7 +10973,9 @@
         "protection",
         "safety",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude",
+        "git branch protection - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -10572,7 +11029,8 @@
         "repositories",
         "server",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -10695,7 +11153,9 @@
         "git",
         "smart",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude",
+        "git smart commit for claude code"
       ],
       "readingTime": 2,
       "difficultyScore": 24,
@@ -10812,7 +11272,15 @@
         "git cliff changelog",
         "automated release notes",
         "conventional commits release",
-        "semantic version workflow"
+        "semantic version workflow",
+        "git-cliff",
+        "changelog",
+        "releases",
+        "conventional-commits",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 84,
@@ -10926,7 +11394,6 @@
         "actions",
         "automation",
         "ci-cd",
-        "ci/cd",
         "claude",
         "development",
         "devops",
@@ -10934,7 +11401,8 @@
         "github-actions",
         "powered",
         "skills",
-        "tools"
+        "tools",
+        "ai"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -11049,7 +11517,15 @@
         "github actions security",
         "secure cicd pipelines",
         "workflow hardening",
-        "supply chain security"
+        "supply chain security",
+        "github-actions",
+        "cicd",
+        "security",
+        "devops",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 88,
@@ -11171,8 +11647,7 @@
         "validation",
         "validator",
         "workflow",
-        "workflows",
-        "yaml"
+        "workflows"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -11215,7 +11690,12 @@
       ],
       "keywords": [
         "ai coding assistant",
-        "github copilot"
+        "github copilot",
+        "ai-coding",
+        "code-review",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "documentationUrl": "https://docs.github.com/en/copilot",
       "websiteUrl": "https://github.com/features/copilot",
@@ -11266,8 +11746,7 @@
         "hybrid",
         "integration",
         "interop",
-        "interoperability",
-        "tools"
+        "interoperability"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -11318,7 +11797,8 @@
         "official",
         "repositories",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -11385,7 +11865,10 @@
         "golang",
         "microservices",
         "rules",
-        "tools"
+        "tools",
+        "go",
+        "heyclaude",
+        "go golang expert - claude md rules for claude code"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -11439,7 +11922,8 @@
         "modules",
         "rules",
         "tooling",
-        "tools"
+        "tools",
+        "go"
       ],
       "readingTime": 4,
       "difficultyScore": 100,
@@ -11490,7 +11974,9 @@
         "module",
         "modules",
         "tidy",
-        "tools"
+        "tools",
+        "go",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -11538,7 +12024,15 @@
         "gemini workspace automation",
         "google docs ai workflow",
         "sheets automation ai",
-        "enterprise ai productivity"
+        "enterprise ai productivity",
+        "google-workspace",
+        "gemini",
+        "automation",
+        "productivity",
+        "ai-agents",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 71,
@@ -11644,7 +12138,12 @@
       ],
       "keywords": [
         "ai code review",
-        "graphite diamond"
+        "graphite diamond",
+        "code-review",
+        "pull-requests",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "documentationUrl": "https://graphite.dev",
       "websiteUrl": "https://graphite.dev/diamond",
@@ -11693,7 +12192,9 @@
         "rules",
         "schema",
         "specialist",
-        "tools"
+        "tools",
+        "heyclaude",
+        "graphql federation specialist for claude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -11744,7 +12245,9 @@
         "schema",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "graphql schema validator - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -11786,7 +12289,13 @@
       ],
       "keywords": [
         "llm cost tracking",
-        "llm logs"
+        "llm logs",
+        "observability",
+        "cost-tracking",
+        "tools",
+        "claude",
+        "heyclaude",
+        "helicone"
       ],
       "documentationUrl": "https://docs.helicone.ai",
       "websiteUrl": "https://www.helicone.ai",
@@ -11841,8 +12350,7 @@
         "mcp",
         "mcp servers",
         "search",
-        "server",
-        "tools"
+        "server"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -11901,10 +12409,18 @@
         "submissions"
       ],
       "keywords": [
-        "create Agent Skill",
-        "submit skill to HeyClaude",
-        "Cursor rule adapter",
-        "SKILL.md package validation"
+        "create agent skill",
+        "submit skill to heyclaude",
+        "cursor rule adapter",
+        "skill md package validation",
+        "heyclaude",
+        "skill-authoring",
+        "agent-skills",
+        "registry",
+        "submissions",
+        "skills",
+        "claude",
+        "heyclaude skill submission factory"
       ],
       "readingTime": 6,
       "difficultyScore": 68,
@@ -12029,7 +12545,8 @@
         "lifecycle",
         "tools",
         "triggers",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -12082,7 +12599,8 @@
         "mcp servers",
         "sales",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -12213,7 +12731,15 @@
         "husky hooks setup",
         "commit governance",
         "local quality gates",
-        "precommit optimization"
+        "precommit optimization",
+        "husky",
+        "git-hooks",
+        "commitlint",
+        "developer-experience",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 79,
@@ -12321,7 +12847,13 @@
       ],
       "keywords": [
         "browser automation infrastructure",
-        "ai agents"
+        "ai agents",
+        "browser-automation",
+        "agent-infrastructure",
+        "tools",
+        "claude",
+        "heyclaude",
+        "hyperbrowser"
       ],
       "documentationUrl": "https://docs.hyperbrowser.ai",
       "websiteUrl": "https://www.hyperbrowser.ai",
@@ -12370,7 +12902,9 @@
         "tools",
         "translation",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "i18n translation validator - hooks"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -12541,7 +13075,15 @@
         "indexnow automation",
         "faster indexing",
         "sitemap workflow",
-        "technical seo operations"
+        "technical seo operations",
+        "indexnow",
+        "seo",
+        "indexing",
+        "sitemap",
+        "search",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 66,
@@ -12659,7 +13201,8 @@
         "mcp",
         "mcp servers",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -12727,7 +13270,8 @@
         "media",
         "server",
         "tools",
-        "video"
+        "video",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -12795,7 +13339,8 @@
         "mcp servers",
         "server",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -12919,7 +13464,8 @@
         "mcp servers",
         "project-management",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -12988,7 +13534,8 @@
         "tools",
         "transformation",
         "validation",
-        "zod"
+        "zod",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -13109,7 +13656,9 @@
         "schema",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "json schema validator - hooks"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -13163,7 +13712,9 @@
         "rbac",
         "rules",
         "security",
-        "tools"
+        "tools",
+        "heyclaude",
+        "kubernetes devsecops engineer for claude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -13215,7 +13766,8 @@
         "tools",
         "validation",
         "validator",
-        "yaml"
+        "yaml",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -13269,7 +13821,8 @@
         "mcp servers",
         "orchestration",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 10,
@@ -13325,7 +13878,13 @@
       ],
       "keywords": [
         "prompt injection protection",
-        "ai guardrails"
+        "ai guardrails",
+        "security",
+        "guardrails",
+        "tools",
+        "claude",
+        "heyclaude",
+        "lakera guard"
       ],
       "documentationUrl": "https://docs.lakera.ai",
       "websiteUrl": "https://www.lakera.ai/guard",
@@ -13362,7 +13921,13 @@
       ],
       "keywords": [
         "llm tracing",
-        "prompt management"
+        "prompt management",
+        "observability",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langfuse"
       ],
       "documentationUrl": "https://langfuse.com/docs",
       "websiteUrl": "https://langfuse.com",
@@ -13399,7 +13964,13 @@
       ],
       "keywords": [
         "agent orchestration",
-        "stateful llm workflows"
+        "stateful llm workflows",
+        "agent-framework",
+        "orchestration",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langgraph"
       ],
       "documentationUrl": "https://langchain-ai.github.io/langgraph/",
       "websiteUrl": "https://www.langchain.com/langgraph",
@@ -13436,7 +14007,13 @@
       ],
       "keywords": [
         "llm observability",
-        "agent evaluation"
+        "agent evaluation",
+        "observability",
+        "evaluation",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langsmith"
       ],
       "documentationUrl": "https://docs.smith.langchain.com",
       "websiteUrl": "https://www.langchain.com/langsmith",
@@ -13487,8 +14064,7 @@
         "research-automation",
         "sciences",
         "scientific-analysis",
-        "specialist",
-        "tools"
+        "specialist"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -13538,7 +14114,8 @@
         "project-management",
         "server",
         "tasks",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -13608,8 +14185,7 @@
         "productivity",
         "statuslines",
         "tools",
-        "tracker",
-        "velocity"
+        "tracker"
       ],
       "readingTime": 2,
       "difficultyScore": 5,
@@ -13671,8 +14247,7 @@
         "parsing",
         "ripgrep",
         "skills",
-        "timeline",
-        "tools"
+        "timeline"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -13781,7 +14356,13 @@
       ],
       "keywords": [
         "ai app builder",
-        "web app generation"
+        "web app generation",
+        "app-builder",
+        "prototyping",
+        "tools",
+        "claude",
+        "heyclaude",
+        "lovable"
       ],
       "documentationUrl": "https://docs.lovable.dev",
       "websiteUrl": "https://lovable.dev",
@@ -13818,7 +14399,13 @@
       ],
       "keywords": [
         "visual automation",
-        "business workflows"
+        "business workflows",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "make"
       ],
       "documentationUrl": "https://www.make.com/en/help",
       "websiteUrl": "https://www.make.com",
@@ -13867,7 +14454,8 @@
         "node",
         "remark",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 96,
@@ -13989,7 +14577,8 @@
         "links",
         "markdown",
         "tools",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -14031,7 +14620,13 @@
       ],
       "keywords": [
         "typescript agents",
-        "ai workflow framework"
+        "ai workflow framework",
+        "agent-framework",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "mastra"
       ],
       "documentationUrl": "https://mastra.ai/docs",
       "websiteUrl": "https://mastra.ai",
@@ -14074,7 +14669,15 @@
         "mcp security",
         "mcp server design",
         "tool schema validation",
-        "agent security controls"
+        "agent security controls",
+        "mcp",
+        "security",
+        "server-authoring",
+        "tools",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 90,
@@ -14190,7 +14793,13 @@
         "tool-safety",
         "prompt-injection",
         "server-hardening",
-        "security-checklist"
+        "security-checklist",
+        "mcp",
+        "security",
+        "hardening",
+        "auth",
+        "ai-infrastructure",
+        "skills"
       ],
       "readingTime": 8,
       "difficultyScore": 82,
@@ -14308,7 +14917,9 @@
         "oauth",
         "remote-server",
         "setup",
-        "tools"
+        "tools",
+        "heyclaude",
+        "mcp server setup for claude code"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -14362,7 +14973,8 @@
         "servers",
         "status",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 3,
@@ -14416,7 +15028,15 @@
         "mcp testing",
         "tool contract validation",
         "mcp schema checks",
-        "ai tool reliability"
+        "ai tool reliability",
+        "mcp",
+        "testing",
+        "contracts",
+        "reliability",
+        "api",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 77,
@@ -14535,7 +15155,8 @@
         "performance",
         "resources",
         "tools",
-        "usage"
+        "usage",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -14577,7 +15198,13 @@
       ],
       "keywords": [
         "autogen",
-        "multi-agent ai"
+        "multi-agent ai",
+        "agent-framework",
+        "multi-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "microsoft autogen"
       ],
       "documentationUrl": "https://microsoft.github.io/autogen/",
       "websiteUrl": "https://microsoft.github.io/autogen/",
@@ -14625,7 +15252,9 @@
         "performance",
         "powerline",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude",
+        "minimal powerline - statuslines"
       ],
       "readingTime": 1,
       "difficultyScore": 2,
@@ -14685,7 +15314,9 @@
         "mdx",
         "mintlify",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude",
+        "mintlify ai documentation automation skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -14805,7 +15436,10 @@
         "documentation",
         "mdx",
         "mintlify",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude",
+        "mintlify documentation generator for claude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -14863,8 +15497,7 @@
         "mobile",
         "react-native",
         "rules",
-        "swift",
-        "tools"
+        "swift"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -14919,8 +15552,7 @@
         "mobile",
         "react-native",
         "rules",
-        "swift",
-        "tools"
+        "swift"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -14966,7 +15598,14 @@
         "model-router",
         "token-cost",
         "latency-optimization",
-        "fallback-strategy"
+        "fallback-strategy",
+        "model-routing",
+        "cost-optimization",
+        "latency",
+        "token-budget",
+        "ai-operations",
+        "skills",
+        "claude"
       ],
       "readingTime": 7,
       "difficultyScore": 79,
@@ -15086,8 +15725,7 @@
         "statuslines",
         "switch",
         "switch-history",
-        "tools",
-        "tracker"
+        "tools"
       ],
       "readingTime": 2,
       "difficultyScore": 6,
@@ -15148,7 +15786,8 @@
         "server",
         "team-management",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -15218,7 +15857,8 @@
         "tools",
         "turborepo",
         "workspace",
-        "workspace-management"
+        "workspace-management",
+        "nx"
       ],
       "readingTime": 5,
       "difficultyScore": 100,
@@ -15324,8 +15964,7 @@
         "multi-line",
         "powerline",
         "statusline",
-        "statuslines",
-        "tools"
+        "statuslines"
       ],
       "readingTime": 2,
       "difficultyScore": 4,
@@ -15387,8 +16026,7 @@
         "provider",
         "statuslines",
         "token",
-        "tokens",
-        "tools"
+        "tokens"
       ],
       "readingTime": 2,
       "difficultyScore": 4,
@@ -15451,8 +16089,7 @@
         "session",
         "session-management",
         "statuslines",
-        "tools",
-        "workspace-tracking"
+        "tools"
       ],
       "readingTime": 2,
       "difficultyScore": 6,
@@ -15501,7 +16138,13 @@
       ],
       "keywords": [
         "ai workflow automation",
-        "self-hosted automation"
+        "self-hosted automation",
+        "workflow-automation",
+        "self-hosted",
+        "tools",
+        "claude",
+        "heyclaude",
+        "n8n"
       ],
       "documentationUrl": "https://docs.n8n.io",
       "websiteUrl": "https://n8n.io",
@@ -15545,7 +16188,14 @@
         "ai automation skill",
         "workflow orchestration",
         "n8n agent",
-        "production automation"
+        "production automation",
+        "n8n",
+        "ai-automation",
+        "workflows",
+        "no-code",
+        "operations",
+        "skills",
+        "claude"
       ],
       "readingTime": 7,
       "difficultyScore": 70,
@@ -15657,7 +16307,15 @@
         "n8n production operations",
         "workflow resilience",
         "n8n incident response",
-        "n8n credential security"
+        "n8n credential security",
+        "n8n",
+        "operations",
+        "workflow-automation",
+        "reliability",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 86,
@@ -15771,7 +16429,15 @@
         "n8n security",
         "n8n hardening",
         "workflow security",
-        "credential governance"
+        "credential governance",
+        "n8n",
+        "security",
+        "automation",
+        "ai-workflows",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 85,
@@ -15891,7 +16557,8 @@
         "server",
         "serverless",
         "static-sites",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -15960,7 +16627,8 @@
         "rules",
         "tools",
         "turbopack",
-        "web-vitals"
+        "web-vitals",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -16013,7 +16681,8 @@
         "pages",
         "route",
         "routing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 0,
@@ -16067,7 +16736,8 @@
         "notion",
         "server",
         "tools",
-        "wiki"
+        "wiki",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -16136,7 +16806,9 @@
         "shell-replica",
         "statuslines",
         "tools",
-        "zsh"
+        "zsh",
+        "heyclaude",
+        "oh my zsh robbyrussell - statuslines"
       ],
       "readingTime": 1,
       "difficultyScore": 3,
@@ -16192,7 +16864,14 @@
         "agent hardening",
         "ai ops",
         "least privilege",
-        "agent runtime security"
+        "agent runtime security",
+        "openclaw",
+        "ai-agents",
+        "security",
+        "hardening",
+        "operations",
+        "skills",
+        "claude"
       ],
       "readingTime": 8,
       "difficultyScore": 81,
@@ -16304,7 +16983,15 @@
         "openclaw operations",
         "agent governance",
         "openclaw hardening",
-        "multi-agent reliability"
+        "multi-agent reliability",
+        "openclaw",
+        "ai-agents",
+        "operations",
+        "security",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 87,
@@ -16418,7 +17105,15 @@
         "openclaw skills",
         "skill packaging workflow",
         "capability pack authoring",
-        "ai workflow distribution"
+        "ai workflow distribution",
+        "openclaw",
+        "skill-authoring",
+        "packaging",
+        "ai-agents",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 86,
@@ -16526,7 +17221,13 @@
       ],
       "keywords": [
         "terminal coding agent",
-        "ai development cli"
+        "ai development cli",
+        "terminal-agent",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "opencode"
       ],
       "documentationUrl": "https://opencode.ai",
       "websiteUrl": "https://opencode.ai",
@@ -16569,7 +17270,15 @@
         "opennext cloudflare",
         "nextjs workers deployment",
         "edge runtime patterns",
-        "cloudflare workers nextjs"
+        "cloudflare workers nextjs",
+        "opennext",
+        "cloudflare",
+        "nextjs",
+        "workers",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 10,
       "difficultyScore": 88,
@@ -16745,7 +17454,9 @@
         "performance",
         "optimization",
         "core-web-vitals",
-        "skills"
+        "skills",
+        "web-performance",
+        "claude"
       ],
       "readingTime": 7,
       "difficultyScore": 78,
@@ -16917,7 +17628,8 @@
         "paypal",
         "server",
         "tools",
-        "transactions"
+        "transactions",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -16986,7 +17698,8 @@
         "report",
         "stop-hook",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 0,
@@ -17041,7 +17754,8 @@
         "notification",
         "performance",
         "profiling",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 0,
@@ -17095,7 +17809,9 @@
         "monitoring",
         "optimization",
         "performance",
-        "tools"
+        "tools",
+        "heyclaude",
+        "performance monitor - hooks"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -17151,7 +17867,8 @@
         "performance",
         "profiling",
         "scalability",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -17190,7 +17907,13 @@
       ],
       "keywords": [
         "api automation",
-        "workflow integrations"
+        "workflow integrations",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "pipedream"
       ],
       "documentationUrl": "https://pipedream.com/docs",
       "websiteUrl": "https://pipedream.com",
@@ -17239,7 +17962,8 @@
         "mcp servers",
         "plaid",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -17361,7 +18085,10 @@
         "playwright",
         "skills",
         "testing",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude",
+        "playwright e2e testing automation skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -17476,7 +18203,15 @@
         "playwright mcp",
         "browser automation skill",
         "resilient web automation",
-        "ui workflow automation"
+        "ui workflow automation",
+        "playwright",
+        "mcp",
+        "browser-automation",
+        "testing",
+        "ai-agents",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 75,
@@ -17595,7 +18330,8 @@
         "runner",
         "test",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 0,
@@ -17702,7 +18438,8 @@
         "postgresql",
         "server",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -17770,7 +18507,9 @@
         "query",
         "skills",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude",
+        "postgresql query optimization skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -17891,7 +18630,9 @@
         "prisma",
         "schema",
         "sync",
-        "tools"
+        "tools",
+        "heyclaude",
+        "prisma schema sync - hooks"
       ],
       "readingTime": 3,
       "difficultyScore": 0,
@@ -18004,10 +18745,7 @@
         "production",
         "rules",
         "security-audit",
-        "tools",
-        "typescript",
-        "validation",
-        "zod"
+        "tools"
       ],
       "readingTime": 2,
       "difficultyScore": 32,
@@ -18060,7 +18798,8 @@
         "reliability",
         "self-healing",
         "sre",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -18205,7 +18944,8 @@
         "efficiency",
         "productivity",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 0,
@@ -18290,7 +19030,14 @@
         "prompt-injection-defense",
         "llm-security",
         "tool-safety",
-        "adversarial-testing"
+        "adversarial-testing",
+        "prompt-injection",
+        "guardrails",
+        "security",
+        "ai-safety",
+        "red-teaming",
+        "skills",
+        "claude"
       ],
       "readingTime": 7,
       "difficultyScore": 80,
@@ -18409,7 +19156,8 @@
         "prompt-engineering",
         "specialist",
         "system-prompts",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -18455,7 +19203,14 @@
         "claude image generation",
         "app icon generator",
         "og image generator",
-        "design tools mcp"
+        "design tools mcp",
+        "mcp",
+        "image-generation",
+        "design-tools",
+        "visual-assets",
+        "icons",
+        "favicons",
+        "og-images"
       ],
       "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
       "cardDescription": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",
@@ -18491,7 +19246,12 @@
       ],
       "keywords": [
         "llm red teaming",
-        "prompt testing"
+        "prompt testing",
+        "security",
+        "tools",
+        "claude",
+        "heyclaude",
+        "promptfoo"
       ],
       "documentationUrl": "https://www.promptfoo.dev/docs",
       "websiteUrl": "https://www.promptfoo.dev",
@@ -18528,7 +19288,13 @@
       ],
       "keywords": [
         "ai security",
-        "model security"
+        "model security",
+        "security",
+        "ai-supply-chain",
+        "tools",
+        "claude",
+        "heyclaude",
+        "protect ai"
       ],
       "documentationUrl": "https://docs.protectai.com",
       "websiteUrl": "https://protectai.com",
@@ -18571,7 +19337,15 @@
         "proxmox api",
         "vm orchestration",
         "lxc automation",
-        "homelab virtualization"
+        "homelab virtualization",
+        "proxmox",
+        "virtualization",
+        "api",
+        "infrastructure",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 86,
@@ -18685,7 +19459,15 @@
         "proxmox automation",
         "vm orchestration",
         "lxc automation",
-        "proxmox api"
+        "proxmox api",
+        "proxmox",
+        "virtualization",
+        "infrastructure",
+        "api",
+        "homelab",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 79,
@@ -18860,8 +19642,7 @@
         "python",
         "rules",
         "science",
-        "scikit-learn",
-        "tools"
+        "scikit-learn"
       ],
       "readingTime": 2,
       "difficultyScore": 4,
@@ -18913,7 +19694,8 @@
         "optimization",
         "optimizer",
         "python",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 3,
       "difficultyScore": 0,
@@ -18966,7 +19748,9 @@
         "linting",
         "pylint",
         "python",
-        "tools"
+        "tools",
+        "heyclaude",
+        "python linter integration - hooks"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -19022,7 +19806,8 @@
         "rich",
         "statusline",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 3,
@@ -19071,7 +19856,13 @@
       ],
       "keywords": [
         "raycast ai",
-        "macos productivity"
+        "macos productivity",
+        "launcher",
+        "extensions",
+        "tools",
+        "claude",
+        "heyclaude",
+        "raycast"
       ],
       "documentationUrl": "https://developers.raycast.com",
       "websiteUrl": "https://www.raycast.com",
@@ -19114,7 +19905,15 @@
         "raycast extension development",
         "raycast store publishing",
         "command palette apps",
-        "macos productivity tooling"
+        "macos productivity tooling",
+        "raycast",
+        "extensions",
+        "developer-tools",
+        "publishing",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 76,
@@ -19288,7 +20087,9 @@
         "react",
         "rules",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude",
+        "react expert - claude md rules for claude code"
       ],
       "readingTime": 2,
       "difficultyScore": 20,
@@ -19340,7 +20141,8 @@
         "react",
         "rules",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude"
       ],
       "readingTime": 2,
       "difficultyScore": 20,
@@ -19503,8 +20305,7 @@
         "real",
         "real-time",
         "time",
-        "tools",
-        "tracker"
+        "tools"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -19621,7 +20422,8 @@
         "reddit",
         "search",
         "social-media",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -19689,7 +20491,9 @@
         "invalidator",
         "performance",
         "redis",
-        "tools"
+        "tools",
+        "heyclaude",
+        "redis cache invalidator - hooks"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -19744,7 +20548,8 @@
         "official",
         "redis",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -19800,7 +20605,13 @@
       ],
       "keywords": [
         "ai app builder",
-        "browser ide"
+        "browser ide",
+        "app-builder",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "replit agent"
       ],
       "documentationUrl": "https://docs.replit.com/replitai/agent",
       "websiteUrl": "https://replit.com/ai",
@@ -19850,7 +20661,8 @@
         "node",
         "rest",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -19959,7 +20771,13 @@
       ],
       "keywords": [
         "vscode ai agent",
-        "coding workflow automation"
+        "coding workflow automation",
+        "vs-code",
+        "coding-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "roo code"
       ],
       "documentationUrl": "https://docs.roocode.com",
       "websiteUrl": "https://roocode.com",
@@ -20008,7 +20826,9 @@
         "hooks",
         "linting",
         "rust",
-        "tools"
+        "tools",
+        "heyclaude",
+        "rust cargo check - hooks"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -20056,7 +20876,15 @@
         "saas pricing tests",
         "pricing optimization",
         "conversion experiments",
-        "revenue operations skill"
+        "revenue operations skill",
+        "saas",
+        "pricing",
+        "experimentation",
+        "revenue",
+        "product",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 69,
@@ -20175,7 +21003,8 @@
         "sass",
         "scss",
         "styling",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 0,
@@ -20229,7 +21058,9 @@
         "rules",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude",
+        "security auditor expert - claude md rules for claude code"
       ],
       "readingTime": 2,
       "difficultyScore": 25,
@@ -20334,7 +21165,8 @@
         "scanning",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 0,
@@ -20390,7 +21222,8 @@
         "rules",
         "security",
         "tools",
-        "xss"
+        "xss",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -20445,8 +21278,7 @@
         "microsoft",
         "python",
         "semantic",
-        "semantic-kernel",
-        "tools"
+        "semantic-kernel"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -20498,8 +21330,7 @@
         "scanning",
         "security",
         "sensitive",
-        "sensitive-data",
-        "tools"
+        "sensitive-data"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -20554,7 +21385,8 @@
         "monitoring",
         "sentry",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -20686,7 +21518,8 @@
         "session",
         "statistics",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -20867,7 +21700,8 @@
         "progress",
         "slack",
         "team",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -20924,8 +21758,7 @@
         "slash-commands",
         "team-collaboration",
         "templates",
-        "tools",
-        "workflow-automation"
+        "tools"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -20981,9 +21814,7 @@
         "orchestrator",
         "productivity",
         "slash",
-        "slash-commands",
-        "tools",
-        "workflows"
+        "slash-commands"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -21022,7 +21853,13 @@
       ],
       "keywords": [
         "mcp registry",
-        "mcp servers"
+        "mcp servers",
+        "mcp",
+        "tool-discovery",
+        "tools",
+        "claude",
+        "heyclaude",
+        "smithery"
       ],
       "documentationUrl": "https://smithery.ai/docs",
       "websiteUrl": "https://smithery.ai",
@@ -21128,7 +21965,12 @@
       ],
       "keywords": [
         "codebase ai",
-        "sourcegraph cody"
+        "sourcegraph cody",
+        "ai-coding",
+        "code-search",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "documentationUrl": "https://sourcegraph.com/docs/cody",
       "websiteUrl": "https://sourcegraph.com/cody",
@@ -21177,7 +22019,8 @@
         "pos",
         "server",
         "square",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -21233,7 +22076,13 @@
       ],
       "keywords": [
         "ai browser automation",
-        "browser agents"
+        "browser agents",
+        "browser-automation",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "stagehand"
       ],
       "documentationUrl": "https://docs.stagehand.dev",
       "websiteUrl": "https://www.stagehand.dev",
@@ -21281,7 +22130,9 @@
         "starship",
         "statuslines",
         "theme",
-        "tools"
+        "tools",
+        "heyclaude",
+        "starship powerline theme - statuslines"
       ],
       "readingTime": 1,
       "difficultyScore": 2,
@@ -21341,7 +22192,8 @@
         "server",
         "stripe",
         "subscriptions",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 11,
@@ -21409,7 +22261,8 @@
         "security",
         "server",
         "stytch",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 11,
@@ -21536,8 +22389,7 @@
         "specialized-agents",
         "subagent",
         "subagents",
-        "task-decomposition",
-        "tools"
+        "task-decomposition"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -21588,7 +22440,9 @@
         "realtime",
         "skills",
         "supabase",
-        "tools"
+        "tools",
+        "heyclaude",
+        "supabase realtime database builder skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -21710,7 +22564,8 @@
         "hooks",
         "svelte",
         "tools",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -21765,9 +22620,8 @@
         "skills",
         "stack",
         "svelte",
-        "svelte/sveltekit",
-        "sveltekit",
-        "tools"
+        "svelte sveltekit",
+        "sveltekit"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -21890,7 +22744,8 @@
         "test-automation",
         "testing",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 11,
       "difficultyScore": 100,
@@ -21943,7 +22798,9 @@
         "stop-hook",
         "summary",
         "team",
-        "tools"
+        "tools",
+        "heyclaude",
+        "team summary email generator - hooks"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -21997,7 +22854,8 @@
         "technical",
         "technical-writing",
         "tools",
-        "writer"
+        "writer",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 23,
@@ -22047,7 +22905,9 @@
         "infrastructure",
         "rules",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude",
+        "terraform infrastructure architect for claude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -22099,7 +22959,8 @@
         "infrastructure",
         "plan",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "readingTime": 4,
       "difficultyScore": 0,
@@ -22154,7 +23015,8 @@
         "tdd",
         "test",
         "testing",
-        "tools"
+        "tools",
+        "qa"
       ],
       "readingTime": 10,
       "difficultyScore": 100,
@@ -22322,8 +23184,7 @@
         "test",
         "test-coverage",
         "testing",
-        "tools",
-        "vitest"
+        "tools"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -22377,8 +23238,7 @@
         "roi",
         "token",
         "token-cost",
-        "tools",
-        "usage-tracking"
+        "tools"
       ],
       "readingTime": 11,
       "difficultyScore": 100,
@@ -22417,7 +23277,13 @@
       ],
       "keywords": [
         "background jobs",
-        "ai workflows"
+        "ai workflows",
+        "workflow-automation",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "trigger dev"
       ],
       "documentationUrl": "https://trigger.dev/docs",
       "websiteUrl": "https://trigger.dev",
@@ -22640,7 +23506,9 @@
         "tools",
         "type-safety",
         "typescript",
-        "validation"
+        "validation",
+        "heyclaude",
+        "typescript checker"
       ],
       "readingTime": 5,
       "difficultyScore": 0,
@@ -22693,7 +23561,10 @@
         "expert",
         "interface",
         "tools",
-        "user-experience"
+        "user-experience",
+        "ui",
+        "ux",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -22737,7 +23608,15 @@
         "unraid api automation",
         "homelab ai skill",
         "server operations",
-        "unraid maintenance automation"
+        "unraid maintenance automation",
+        "unraid",
+        "homelab",
+        "automation",
+        "api",
+        "operations",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 7,
       "difficultyScore": 73,
@@ -22849,7 +23728,15 @@
         "unraid api v2",
         "unraid automation",
         "homelab api skill",
-        "server operations"
+        "server operations",
+        "unraid",
+        "api",
+        "homelab",
+        "automation",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 9,
       "difficultyScore": 84,
@@ -22963,7 +23850,15 @@
         "unraid ca template",
         "community apps xml",
         "unraid docker metadata",
-        "ca submission checklist"
+        "ca submission checklist",
+        "unraid",
+        "community-apps",
+        "docker",
+        "templates",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 84,
@@ -23071,7 +23966,13 @@
       ],
       "keywords": [
         "ai ui builder",
-        "react generation"
+        "react generation",
+        "ui-generation",
+        "react",
+        "tools",
+        "claude",
+        "heyclaude",
+        "v0"
       ],
       "documentationUrl": "https://v0.dev/docs",
       "websiteUrl": "https://v0.dev",
@@ -23119,7 +24020,10 @@
         "shadcn",
         "tailwind",
         "tools",
-        "ui-generation"
+        "ui-generation",
+        "v0",
+        "heyclaude",
+        "v0 component generator for claude"
       ],
       "readingTime": 8,
       "difficultyScore": 100,
@@ -23172,7 +24076,10 @@
         "shadcn",
         "skills",
         "tools",
-        "workflow"
+        "workflow",
+        "v0",
+        "ui",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -23281,7 +24188,12 @@
       ],
       "keywords": [
         "ai sdk",
-        "streaming ui"
+        "streaming ui",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "vercel ai sdk"
       ],
       "documentationUrl": "https://ai-sdk.dev/docs",
       "websiteUrl": "https://ai-sdk.dev",
@@ -23330,7 +24242,8 @@
         "mcp servers",
         "server",
         "tools",
-        "vercel"
+        "vercel",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 6,
@@ -23577,7 +24490,9 @@
         "inclusive-design",
         "rules",
         "tools",
-        "wcag"
+        "wcag",
+        "heyclaude",
+        "wcag 2 2 accessibility auditor for claude"
       ],
       "readingTime": 7,
       "difficultyScore": 100,
@@ -23616,7 +24531,13 @@
       ],
       "keywords": [
         "llm tracking",
-        "wandb weave"
+        "wandb weave",
+        "evaluation",
+        "observability",
+        "tools",
+        "claude",
+        "heyclaude",
+        "weave"
       ],
       "documentationUrl": "https://weave-docs.wandb.ai",
       "websiteUrl": "https://wandb.ai/site/weave",
@@ -23667,8 +24588,7 @@
         "development",
         "long-running-tasks",
         "tools",
-        "web",
-        "web-interface"
+        "web"
       ],
       "readingTime": 9,
       "difficultyScore": 100,
@@ -23719,7 +24639,9 @@
         "tools",
         "wasi",
         "wasm",
-        "webassembly"
+        "webassembly",
+        "heyclaude",
+        "webassembly wasm module development skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -23840,7 +24762,9 @@
         "optimization",
         "performance",
         "tools",
-        "webpack"
+        "webpack",
+        "heyclaude",
+        "webpack bundle analyzer - hooks"
       ],
       "readingTime": 5,
       "difficultyScore": 0,
@@ -24004,7 +24928,12 @@
       ],
       "keywords": [
         "claude coding tools",
-        "agentic editor"
+        "agentic editor",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "windsurf"
       ],
       "documentationUrl": "https://docs.windsurf.com",
       "websiteUrl": "https://windsurf.com",
@@ -24054,7 +24983,8 @@
         "skills",
         "tools",
         "windsurf",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 6,
       "difficultyScore": 100,
@@ -24217,7 +25147,13 @@
       ],
       "keywords": [
         "enterprise automation",
-        "business integrations"
+        "business integrations",
+        "workflow-automation",
+        "enterprise",
+        "tools",
+        "claude",
+        "heyclaude",
+        "workato"
       ],
       "documentationUrl": "https://docs.workato.com",
       "websiteUrl": "https://www.workato.com",
@@ -24260,13 +25196,14 @@
         "claude",
         "development",
         "integration",
-        "iPaaS",
+        "ipaas",
         "mcp",
         "mcp servers",
         "server",
         "tools",
         "workato",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 1,
@@ -24335,7 +25272,8 @@
         "stop-hook",
         "summary",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "readingTime": 5,
       "difficultyScore": 0,
@@ -24391,8 +25329,7 @@
         "statuslines",
         "tools",
         "workspace",
-        "workspace-depth",
-        "workspace-tracking"
+        "workspace-depth"
       ],
       "readingTime": 3,
       "difficultyScore": 8,
@@ -24441,7 +25378,13 @@
       ],
       "keywords": [
         "ai automation",
-        "app integrations"
+        "app integrations",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "zapier ai"
       ],
       "documentationUrl": "https://help.zapier.com",
       "websiteUrl": "https://zapier.com/ai",
@@ -24490,7 +25433,8 @@
         "server",
         "tools",
         "workflow",
-        "zapier"
+        "zapier",
+        "heyclaude"
       ],
       "readingTime": 1,
       "difficultyScore": 11,
@@ -24546,7 +25490,13 @@
       ],
       "keywords": [
         "ai code editor",
-        "collaborative editor"
+        "collaborative editor",
+        "code-editor",
+        "collaboration",
+        "tools",
+        "claude",
+        "heyclaude",
+        "zed"
       ],
       "documentationUrl": "https://zed.dev/docs",
       "websiteUrl": "https://zed.dev",
@@ -24589,7 +25539,15 @@
         "zero budget saas",
         "free tier launch",
         "bootstrap product execution",
-        "lean mvp roadmap"
+        "lean mvp roadmap",
+        "saas",
+        "bootstrap",
+        "growth",
+        "cost-optimization",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "readingTime": 8,
       "difficultyScore": 81,
@@ -24709,7 +25667,9 @@
         "typescript",
         "validation",
         "validator",
-        "zod"
+        "zod",
+        "heyclaude",
+        "zod schema validation skill"
       ],
       "readingTime": 6,
       "difficultyScore": 100,

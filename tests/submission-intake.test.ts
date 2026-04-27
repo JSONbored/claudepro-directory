@@ -4,6 +4,7 @@ import path from "node:path";
 
 import {
   buildSubmissionQueue,
+  buildSubmissionIssueDraft,
   isLikelyAffiliateUrl,
   looksLikeSubmissionIssue,
   parseIssueFormBody,
@@ -11,6 +12,7 @@ import {
   validateSubmission,
 } from "@heyclaude/registry/submission";
 import { categorySpec } from "@heyclaude/registry";
+import { deriveSeoFields } from "@heyclaude/registry/content-schema";
 import {
   buildIssueTemplateSpec,
   buildSubmissionFieldModel,
@@ -57,6 +59,32 @@ describe("submission intake", () => {
     ).toBe(true);
   });
 
+  it("builds website submission issues from the canonical field model", () => {
+    const draft = buildSubmissionIssueDraft({
+      name: "Website Intake MCP",
+      slug: "website-intake-mcp",
+      category: "mcp",
+      contact_email: "dev@example.com",
+      docs_url: "https://example.com/docs",
+      description:
+        "MCP server submitted directly through the website intake API.",
+      card_description: "Website intake API coverage.",
+      install_command: "npx -y website-intake-mcp",
+      usage_snippet:
+        "claude mcp add website-intake-mcp -- npx -y website-intake-mcp",
+    });
+
+    expect(draft.title).toBe("Submit MCP Server: Website Intake MCP");
+    expect(draft.body).toContain("### Name");
+    expect(draft.body).toContain("Website Intake MCP");
+    expect(draft.labels).toEqual([
+      "content-submission",
+      "needs-review",
+      "community-mcp",
+    ]);
+    expect(validateSubmission(draft).ok).toBe(true);
+  });
+
   it("keeps checked-in GitHub issue templates aligned with registry specs", () => {
     for (const category of categorySpec.submissionOrder) {
       const template = buildIssueTemplateSpec(category);
@@ -76,7 +104,7 @@ describe("submission intake", () => {
         expect(source).toContain("      required: true");
       }
       expect(source).toContain(
-        "maintainers review and import accepted submissions manually",
+        "maintainers review accepted submissions before an import PR is opened",
       );
       expect(source).toContain("not affiliate, referral, or tracking URLs");
     }
@@ -342,6 +370,57 @@ claude mcp add referral-tool -- npx referral-tool`),
     expect(report.ok).toBe(false);
     expect(report.errors).toContain(
       "Contributor submissions cannot include affiliate/referral URLs: github_url",
+    );
+  });
+
+  it("rejects malformed or non-https contributor URLs", () => {
+    const report = validateSubmission(
+      issue(`### Name
+Insecure URL Tool
+
+### Slug
+insecure-url-tool
+
+### Category
+mcp
+
+### Contact email
+dev@example.com
+
+### GitHub URL
+http://example.com/repo
+
+### Description
+MCP server with an insecure source URL.
+
+### Card description
+Insecure source URL test.
+
+### Install command
+npx insecure-url-tool
+
+### Usage snippet
+claude mcp add insecure-url-tool -- npx insecure-url-tool`),
+    );
+    expect(report.ok).toBe(false);
+    expect(report.errors).toContain("github_url must be a valid https URL");
+  });
+
+  it("derives bounded SEO metadata for imported UGC", () => {
+    const seo = deriveSeoFields(
+      {
+        title: "Website Intake MCP",
+        description:
+          "MCP server submitted directly through the website intake API for reviewable community contributions.",
+        tags: ["mcp", "submission", "community"],
+      },
+      "mcp",
+    );
+
+    expect(seo.seoTitle.length).toBeLessThanOrEqual(70);
+    expect(seo.seoDescription.length).toBeLessThanOrEqual(160);
+    expect(seo.keywords).toEqual(
+      expect.arrayContaining(["mcp", "submission", "community", "claude"]),
     );
   });
 

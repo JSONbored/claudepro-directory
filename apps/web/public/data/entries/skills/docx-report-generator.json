@@ -27,7 +27,9 @@
       "reports",
       "skills",
       "templating",
-      "tools"
+      "tools",
+      "heyclaude",
+      "docx report generator skill"
     ],
     "readingTime": 5,
     "difficultyScore": 100,

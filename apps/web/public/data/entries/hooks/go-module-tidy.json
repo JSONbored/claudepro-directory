@@ -28,7 +28,9 @@
       "module",
       "modules",
       "tidy",
-      "tools"
+      "tools",
+      "go",
+      "heyclaude"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

@@ -27,7 +27,9 @@
       "security",
       "threat-analysis",
       "tools",
-      "vulnerability"
+      "vulnerability",
+      "heyclaude",
+      "security - vulnerability scan command for claude code"
     ],
     "readingTime": 14,
     "difficultyScore": 100,

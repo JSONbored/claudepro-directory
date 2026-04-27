@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Submit a new directory entry",
   description:
-    "Submit agents, MCP servers, skills, rules, hooks, commands, and statuslines through schema-aligned GitHub issue templates.",
+    "Submit agents, MCP servers, skills, rules, hooks, commands, and statuslines through schema-aligned review issues.",
   path: "/submit",
   keywords: [
     "submit claude skill",
@@ -57,8 +57,8 @@ export default function SubmitPage() {
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
               This stays intentionally lightweight. Fill out the form and we
-              open a category-specific GitHub issue template with schema-aligned
-              fields.
+              create a reviewable GitHub issue with schema-aligned fields. The
+              GitHub issue form remains available as a fallback.
             </p>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
               Skill submissions now support both general skills and deep
@@ -98,9 +98,9 @@ export default function SubmitPage() {
               Submit free content
             </h2>
             <p className="text-sm leading-7 text-muted-foreground">
-              GitHub is the backend for free resources. The form below opens a
-              clean category template so maintainers can review and import
-              submissions without email back-and-forth.
+              GitHub is the review queue for free resources. The form below
+              creates a clean category issue so maintainers can validate and
+              approve an import PR without email back-and-forth.
             </p>
           </div>
 

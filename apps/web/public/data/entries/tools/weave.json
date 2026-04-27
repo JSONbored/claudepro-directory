@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "llm tracking",
-      "wandb weave"
+      "wandb weave",
+      "evaluation",
+      "observability",
+      "tools",
+      "claude",
+      "heyclaude",
+      "weave"
     ],
     "documentationUrl": "https://weave-docs.wandb.ai",
     "websiteUrl": "https://wandb.ai/site/weave",

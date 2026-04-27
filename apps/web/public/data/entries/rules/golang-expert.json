@@ -31,7 +31,8 @@
       "modules",
       "rules",
       "tooling",
-      "tools"
+      "tools",
+      "go"
     ],
     "readingTime": 4,
     "difficultyScore": 100,

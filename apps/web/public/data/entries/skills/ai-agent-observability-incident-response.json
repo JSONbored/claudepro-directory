@@ -24,7 +24,13 @@
       "slos",
       "alerts",
       "traces",
-      "incident-management"
+      "incident-management",
+      "observability",
+      "incident-response",
+      "reliability",
+      "telemetry",
+      "ai-agents",
+      "skills"
     ],
     "readingTime": 7,
     "difficultyScore": 76,

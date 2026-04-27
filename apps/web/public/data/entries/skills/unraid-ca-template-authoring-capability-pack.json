@@ -22,7 +22,15 @@
       "unraid ca template",
       "community apps xml",
       "unraid docker metadata",
-      "ca submission checklist"
+      "ca submission checklist",
+      "unraid",
+      "community-apps",
+      "docker",
+      "templates",
+      "capability-pack",
+      "skills",
+      "claude",
+      "heyclaude"
     ],
     "readingTime": 8,
     "difficultyScore": 84,

@@ -28,7 +28,9 @@
       "hooks",
       "linting",
       "rust",
-      "tools"
+      "tools",
+      "heyclaude",
+      "rust cargo check - hooks"
     ],
     "readingTime": 4,
     "difficultyScore": 0,

@@ -42,11 +42,9 @@ const utilityFilterOptions = [
 ] as const;
 const sortModeOptions = ["popular", "newest", "title"] as const;
 
-type DirectoryEntriesPayload =
-  | DirectoryEntry[]
-  | {
-      entries?: DirectoryEntry[];
-    };
+type DirectoryEntriesPayload = {
+  entries?: DirectoryEntry[];
+};
 
 function normalizeCategory(value?: string) {
   const normalized = String(value || "")
@@ -66,7 +64,6 @@ function normalizeUtilityFilter(value?: string) {
 }
 
 function readDirectoryEntries(payload: DirectoryEntriesPayload) {
-  if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload.entries)) return payload.entries;
   return [];
 }

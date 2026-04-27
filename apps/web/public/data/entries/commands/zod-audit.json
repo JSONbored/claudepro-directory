@@ -35,10 +35,7 @@
       "schema-validation",
       "security-audit",
       "technical-debt",
-      "tools",
-      "typescript",
-      "validation",
-      "zod"
+      "tools"
     ],
     "readingTime": 3,
     "difficultyScore": 65,

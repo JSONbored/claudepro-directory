@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "agent tool calling",
-      "authenticated actions"
+      "authenticated actions",
+      "tool-calling",
+      "agents",
+      "tools",
+      "claude",
+      "heyclaude",
+      "arcade"
     ],
     "documentationUrl": "https://docs.arcade.dev",
     "websiteUrl": "https://www.arcade.dev",

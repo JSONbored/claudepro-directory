@@ -29,7 +29,8 @@
       "security",
       "static-analysis",
       "tools",
-      "vulnerability-detection"
+      "vulnerability-detection",
+      "ai"
     ],
     "readingTime": 10,
     "difficultyScore": 100,

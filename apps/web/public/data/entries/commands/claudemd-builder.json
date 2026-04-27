@@ -23,7 +23,6 @@
       "builder",
       "claude",
       "claude-md",
-      "claude.md",
       "coding-standards",
       "commands",
       "development",
@@ -31,7 +30,8 @@
       "onboarding",
       "project-context",
       "team-collaboration",
-      "tools"
+      "tools",
+      "heyclaude"
     ],
     "readingTime": 10,
     "difficultyScore": 100,

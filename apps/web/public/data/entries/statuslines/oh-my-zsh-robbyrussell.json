@@ -29,7 +29,9 @@
       "shell-replica",
       "statuslines",
       "tools",
-      "zsh"
+      "zsh",
+      "heyclaude",
+      "oh my zsh robbyrussell - statuslines"
     ],
     "readingTime": 1,
     "difficultyScore": 3,

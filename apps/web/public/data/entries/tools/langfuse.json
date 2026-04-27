@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "llm tracing",
-      "prompt management"
+      "prompt management",
+      "observability",
+      "open-source",
+      "tools",
+      "claude",
+      "heyclaude",
+      "langfuse"
     ],
     "documentationUrl": "https://langfuse.com/docs",
     "websiteUrl": "https://langfuse.com",

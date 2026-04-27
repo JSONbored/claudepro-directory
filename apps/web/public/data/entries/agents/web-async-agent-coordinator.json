@@ -30,8 +30,7 @@
       "development",
       "long-running-tasks",
       "tools",
-      "web",
-      "web-interface"
+      "web"
     ],
     "readingTime": 9,
     "difficultyScore": 100,

@@ -28,7 +28,9 @@
       "hooks",
       "testing",
       "tools",
-      "wcag"
+      "wcag",
+      "heyclaude",
+      "accessibility checker - claude code hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

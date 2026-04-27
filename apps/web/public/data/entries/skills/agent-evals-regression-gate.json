@@ -24,7 +24,13 @@
       "regression-testing",
       "quality-gates",
       "ci",
-      "reliability"
+      "reliability",
+      "evals",
+      "regression",
+      "ai-agents",
+      "qa",
+      "quality-gate",
+      "skills"
     ],
     "readingTime": 6,
     "difficultyScore": 74,

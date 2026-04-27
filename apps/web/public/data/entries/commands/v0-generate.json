@@ -27,7 +27,10 @@
       "shadcn",
       "tailwind",
       "tools",
-      "ui-generation"
+      "ui-generation",
+      "v0",
+      "heyclaude",
+      "v0 component generator for claude"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

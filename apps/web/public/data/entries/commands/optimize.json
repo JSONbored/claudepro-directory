@@ -28,7 +28,9 @@
       "optimize",
       "performance",
       "profiling",
-      "tools"
+      "tools",
+      "heyclaude",
+      "optimize - performance optimizer command for claude code"
     ],
     "readingTime": 15,
     "difficultyScore": 100,

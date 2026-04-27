@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "prompt injection protection",
-      "ai guardrails"
+      "ai guardrails",
+      "security",
+      "guardrails",
+      "tools",
+      "claude",
+      "heyclaude",
+      "lakera guard"
     ],
     "documentationUrl": "https://docs.lakera.ai",
     "websiteUrl": "https://www.lakera.ai/guard",

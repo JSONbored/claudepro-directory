@@ -28,7 +28,9 @@
       "typescript",
       "validation",
       "validator",
-      "zod"
+      "zod",
+      "heyclaude",
+      "zod schema validation skill"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

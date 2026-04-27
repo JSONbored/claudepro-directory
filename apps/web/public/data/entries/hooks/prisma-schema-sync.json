@@ -28,7 +28,9 @@
       "prisma",
       "schema",
       "sync",
-      "tools"
+      "tools",
+      "heyclaude",
+      "prisma schema sync - hooks"
     ],
     "readingTime": 3,
     "difficultyScore": 0,

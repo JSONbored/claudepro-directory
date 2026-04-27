@@ -28,7 +28,9 @@
       "cursor",
       "development",
       "rules",
-      "tools"
+      "tools",
+      "heyclaude",
+      "cursor-rules - cursor rules generator for claude code"
     ],
     "readingTime": 9,
     "difficultyScore": 100,

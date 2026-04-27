@@ -28,7 +28,9 @@
       "inclusive-design",
       "rules",
       "tools",
-      "wcag"
+      "wcag",
+      "heyclaude",
+      "wcag 2 2 accessibility auditor for claude"
     ],
     "readingTime": 7,
     "difficultyScore": 100,

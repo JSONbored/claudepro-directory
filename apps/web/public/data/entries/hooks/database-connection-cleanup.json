@@ -28,7 +28,9 @@
       "hooks",
       "resources",
       "stop-hook",
-      "tools"
+      "tools",
+      "heyclaude",
+      "database connection cleanup - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

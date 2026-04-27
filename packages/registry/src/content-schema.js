@@ -50,6 +50,82 @@ export function deriveCardDescription(description = "") {
   return `${normalized.slice(0, 137).trimEnd()}...`;
 }
 
+function compactText(value = "") {
+  return String(value).replace(/\s+/g, " ").replace(/[<>]/g, "").trim();
+}
+
+function truncateForSeo(value, maxLength) {
+  const normalized = compactText(value);
+  if (normalized.length <= maxLength) return normalized;
+
+  const sentence = normalized.match(
+    new RegExp(`^(.{40,${maxLength}}[.!?])\\s`),
+  );
+  if (sentence?.[1] && sentence[1].length <= maxLength) {
+    return sentence[1];
+  }
+
+  return `${normalized.slice(0, maxLength - 3).trimEnd()}...`;
+}
+
+function keywordFromValue(value) {
+  return compactText(value)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function keywordKey(value) {
+  return compactText(value)
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
+}
+
+export function deriveSeoFields(data = {}, category = "") {
+  const label = categorySpec.categories[category]?.label || category;
+  const title = compactText(data.title || data.name || data.slug || "Entry");
+  const tags = Array.isArray(data.tags) ? data.tags.map(String) : [];
+  const explicitKeywords = Array.isArray(data.keywords)
+    ? data.keywords.map(String)
+    : [];
+  const titleSuffix = label ? `${title} - ${label} for Claude` : title;
+  const descriptionSource =
+    data.seoDescription ||
+    data.cardDescription ||
+    data.card_description ||
+    data.description ||
+    "";
+
+  const keywords = [
+    ...explicitKeywords,
+    ...tags,
+    label,
+    category,
+    "claude",
+    "heyclaude",
+    title,
+  ]
+    .map(keywordFromValue)
+    .filter(Boolean)
+    .filter(
+      (value, index, list) =>
+        list.findIndex(
+          (candidate) => keywordKey(candidate) === keywordKey(value),
+        ) === index,
+    )
+    .slice(0, 12);
+
+  return {
+    seoTitle: truncateForSeo(data.seoTitle || titleSuffix, 70),
+    seoDescription: truncateForSeo(descriptionSource, 160),
+    keywords,
+  };
+}
+
 export function extractCodeBlocks(body) {
   const matches = [...body.matchAll(/```([\w-]*)\n([\s\S]*?)```/g)];
   return matches.map((match) => ({
@@ -630,6 +706,8 @@ export function orderFrontmatter(data) {
     "prerequisites",
     "tags",
     "keywords",
+    "robotsIndex",
+    "robotsFollow",
     "readingTime",
   ];
 

@@ -23,7 +23,14 @@
       "browser-agent",
       "selector-strategy",
       "retries",
-      "automation-runbooks"
+      "automation-runbooks",
+      "browser-automation",
+      "ai-agents",
+      "playwright",
+      "workflows",
+      "reliability",
+      "skills",
+      "claude"
     ],
     "readingTime": 7,
     "difficultyScore": 75,

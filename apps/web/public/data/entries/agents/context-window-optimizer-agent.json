@@ -31,9 +31,7 @@
       "optimization",
       "optimizer",
       "summarization",
-      "tools",
-      "truncation-prevention",
-      "window"
+      "tools"
     ],
     "readingTime": 9,
     "difficultyScore": 100,

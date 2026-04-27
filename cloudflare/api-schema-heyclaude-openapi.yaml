@@ -164,6 +164,69 @@ paths:
           description: Notification failed
         "503":
           description: Webhook not configured
+  /api/submissions:
+    post:
+      summary: Create a reviewable content submission issue
+      description: Validates schema-aligned UGC fields, applies anti-abuse controls, and creates a GitHub issue for maintainer review. This endpoint never writes content files or publishes registry entries directly.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                fields:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Canonical submission field IDs from the generated issue template spec.
+                turnstileToken:
+                  type: string
+                  maxLength: 4096
+                honeypot:
+                  type: string
+                  maxLength: 512
+              required:
+                - fields
+      responses:
+        "200":
+          description: GitHub issue created, or honeypot discard accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  ok:
+                    type: boolean
+                  issueUrl:
+                    type: string
+                    format: uri
+                  issueNumber:
+                    type: integer
+                  category:
+                    type: string
+                  slug:
+                    type: string
+                required:
+                  - ok
+        "400":
+          description: Invalid JSON, invalid submission, or Turnstile failure
+        "403":
+          description: Forbidden origin
+        "409":
+          description: Duplicate slug
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+        "502":
+          description: GitHub provider error
+        "503":
+          description: GitHub issue creation not configured
   /api/download:
     get:
       parameters:

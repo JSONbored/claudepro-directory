@@ -27,7 +27,9 @@
       "summarization",
       "tools",
       "transcription",
-      "whisper"
+      "whisper",
+      "heyclaude",
+      "audio transcription summarization skill"
     ],
     "readingTime": 3,
     "difficultyScore": 71,

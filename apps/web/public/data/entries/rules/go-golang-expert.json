@@ -27,7 +27,10 @@
       "golang",
       "microservices",
       "rules",
-      "tools"
+      "tools",
+      "go",
+      "heyclaude",
+      "go golang expert - claude md rules for claude code"
     ],
     "readingTime": 4,
     "difficultyScore": 100,

@@ -26,7 +26,9 @@
         "cursor",
         "development",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude",
+        "cursor-rules - cursor rules generator for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -59,7 +61,9 @@
         "error-analysis",
         "fixes",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude",
+        "debug - debugging assistant command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -92,7 +96,9 @@
         "guides",
         "markdown",
         "tools",
-        "tutorials"
+        "tutorials",
+        "heyclaude",
+        "docs - docs generator command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -125,7 +131,9 @@
         "explanation",
         "learning",
         "tools",
-        "visualization"
+        "visualization",
+        "heyclaude",
+        "explain - code explanation command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -158,7 +166,9 @@
         "optimize",
         "performance",
         "profiling",
-        "tools"
+        "tools",
+        "heyclaude",
+        "optimize - performance optimizer command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -191,7 +201,9 @@
         "patterns",
         "refactor",
         "refactoring",
-        "tools"
+        "tools",
+        "heyclaude",
+        "refactor - code refactoring command for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -225,7 +237,8 @@
         "patterns",
         "refactor",
         "refactoring",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -258,7 +271,9 @@
         "quality",
         "review",
         "security",
-        "tools"
+        "tools",
+        "heyclaude",
+        "review - code review command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -290,7 +305,9 @@
         "security",
         "threat-analysis",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude",
+        "security - vulnerability scan command for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -330,11 +347,7 @@
         "optimization",
         "performance",
         "production",
-        "scalability",
-        "security",
-        "security-audit",
-        "sub-agents",
-        "tools"
+        "scalability"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -368,7 +381,8 @@
         "test",
         "testing",
         "tools",
-        "unit-tests"
+        "unit-tests",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -408,10 +422,7 @@
         "schema-validation",
         "security-audit",
         "technical-debt",
-        "tools",
-        "typescript",
-        "validation",
-        "zod"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-26",
@@ -444,7 +455,9 @@
         "hooks",
         "testing",
         "tools",
-        "wcag"
+        "wcag",
+        "heyclaude",
+        "accessibility checker - claude code hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -509,7 +522,13 @@
         "regression-testing",
         "quality-gates",
         "ci",
-        "reliability"
+        "reliability",
+        "evals",
+        "regression",
+        "ai-agents",
+        "qa",
+        "quality-gate",
+        "skills"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -536,7 +555,15 @@
         "ai operator toolkit",
         "codex automation stack",
         "release governance bundle",
-        "bootstrap growth workflows"
+        "bootstrap growth workflows",
+        "ai-operators",
+        "growth",
+        "automation",
+        "production",
+        "collections",
+        "claude",
+        "heyclaude",
+        "agent operator growth master pack"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -571,8 +598,7 @@
         "framework",
         "procedural-knowledge",
         "skills",
-        "skills-framework",
-        "tools"
+        "skills-framework"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -607,7 +633,8 @@
         "installer",
         "plugins",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -636,7 +663,13 @@
         "slos",
         "alerts",
         "traces",
-        "incident-management"
+        "incident-management",
+        "observability",
+        "incident-response",
+        "reliability",
+        "telemetry",
+        "ai-agents",
+        "skills"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -663,7 +696,15 @@
         "ai startup validation",
         "product market demand",
         "pricing hypothesis",
-        "go to market testing"
+        "go to market testing",
+        "business",
+        "validation",
+        "product-strategy",
+        "growth",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -697,7 +738,8 @@
         "security",
         "static-analysis",
         "tools",
-        "vulnerability-detection"
+        "vulnerability-detection",
+        "ai"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -730,7 +772,9 @@
         "devops",
         "engineer",
         "infrastructure",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -800,7 +844,9 @@
         "prompt",
         "prompt-engineering",
         "rules",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -827,7 +873,15 @@
         "ai seo skill",
         "content cluster strategy",
         "search ranking workflow",
-        "topical authority"
+        "topical authority",
+        "seo",
+        "content-strategy",
+        "growth",
+        "ranking",
+        "publishing",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -849,7 +903,13 @@
       ],
       "keywords": [
         "terminal coding agent",
-        "git ai assistant"
+        "git ai assistant",
+        "terminal-agent",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "aider"
       ],
       "author": "Aider",
       "dateAdded": "2026-04-27",
@@ -883,7 +943,8 @@
         "mcp servers",
         "server",
         "tables",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "domdomegg",
       "dateAdded": "2025-09-18",
@@ -954,7 +1015,8 @@
         "openapi",
         "rest",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -989,7 +1051,8 @@
         "rest",
         "starter",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -1023,7 +1086,8 @@
         "hooks",
         "openapi",
         "swagger",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -1060,9 +1124,7 @@
         "openapi",
         "rest",
         "rules",
-        "schema-first",
-        "tools",
-        "trpc"
+        "schema-first"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -1119,7 +1181,13 @@
       ],
       "keywords": [
         "web scraping platform",
-        "automation actors"
+        "automation actors",
+        "web-automation",
+        "data-extraction",
+        "tools",
+        "claude",
+        "heyclaude",
+        "apify"
       ],
       "author": "Apify",
       "dateAdded": "2026-04-27",
@@ -1141,7 +1209,13 @@
       ],
       "keywords": [
         "agent tool calling",
-        "authenticated actions"
+        "authenticated actions",
+        "tool-calling",
+        "agents",
+        "tools",
+        "claude",
+        "heyclaude",
+        "arcade"
       ],
       "author": "Arcade",
       "dateAdded": "2026-04-27",
@@ -1163,7 +1237,13 @@
       ],
       "keywords": [
         "llm tracing",
-        "ai evaluation"
+        "ai evaluation",
+        "observability",
+        "evaluation",
+        "tools",
+        "claude",
+        "heyclaude",
+        "arize phoenix"
       ],
       "author": "Arize AI",
       "dateAdded": "2026-04-27",
@@ -1197,7 +1277,8 @@
         "tasks",
         "team-collaboration",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "Asana",
       "dateAdded": "2025-09-18",
@@ -1229,7 +1310,9 @@
         "summarization",
         "tools",
         "transcription",
-        "whisper"
+        "whisper",
+        "heyclaude",
+        "audio transcription summarization skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -1264,8 +1347,7 @@
         "formatting",
         "hook",
         "hooks",
-        "prettier",
-        "tools"
+        "prettier"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -1297,7 +1379,9 @@
         "hooks",
         "safety",
         "save",
-        "tools"
+        "tools",
+        "heyclaude",
+        "auto save backup - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -1363,7 +1447,10 @@
         "multi-agent",
         "orchestration",
         "tools",
-        "workflow"
+        "workflow",
+        "ai",
+        "heyclaude",
+        "autogen multi-agent workflow for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -1396,7 +1483,9 @@
         "infrastructure",
         "rules",
         "serverless",
-        "tools"
+        "tools",
+        "heyclaude",
+        "aws cloud architect - claude md rules for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -1429,7 +1518,9 @@
         "infrastructure",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "aws cloudformation validator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -1464,7 +1555,8 @@
         "devops",
         "infrastructure",
         "serverless",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -1533,7 +1625,8 @@
         "development",
         "microservices",
         "scalability",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -1568,7 +1661,8 @@
         "development",
         "infrastructure",
         "suite",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -1595,7 +1689,15 @@
         "base l2 contract deployment",
         "base smart contracts",
         "ethereum layer2 skill",
-        "contract verification"
+        "contract verification",
+        "base",
+        "layer2",
+        "smart-contracts",
+        "deployment",
+        "web3",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -1631,7 +1733,8 @@
         "strict",
         "tools",
         "typescript",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -1689,7 +1792,13 @@
       ],
       "keywords": [
         "browser app builder",
-        "ai web development"
+        "ai web development",
+        "app-builder",
+        "prototyping",
+        "tools",
+        "claude",
+        "heyclaude",
+        "bolt"
       ],
       "author": "StackBlitz",
       "dateAdded": "2026-04-27",
@@ -1723,7 +1832,8 @@
         "mcp servers",
         "server",
         "storage",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Box",
       "dateAdded": "2025-09-18",
@@ -1745,7 +1855,13 @@
       ],
       "keywords": [
         "ai evaluation platform",
-        "prompt experiments"
+        "prompt experiments",
+        "evaluation",
+        "prompt-testing",
+        "tools",
+        "claude",
+        "heyclaude",
+        "braintrust"
       ],
       "author": "Braintrust",
       "dateAdded": "2026-04-27",
@@ -1773,7 +1889,14 @@
         "browser-agent",
         "selector-strategy",
         "retries",
-        "automation-runbooks"
+        "automation-runbooks",
+        "browser-automation",
+        "ai-agents",
+        "playwright",
+        "workflows",
+        "reliability",
+        "skills",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -1795,7 +1918,13 @@
       ],
       "keywords": [
         "browser agents",
-        "ai web automation"
+        "ai web automation",
+        "browser-automation",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "browser use"
       ],
       "author": "Browser Use",
       "dateAdded": "2026-04-27",
@@ -1817,7 +1946,13 @@
       ],
       "keywords": [
         "cloud browser",
-        "browser agents"
+        "browser agents",
+        "browser-automation",
+        "agent-infrastructure",
+        "tools",
+        "claude",
+        "heyclaude",
+        "browserbase"
       ],
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
@@ -1845,7 +1980,15 @@
         "build mcp server",
         "claude mcp tutorial",
         "model context protocol",
-        "mcp development"
+        "mcp development",
+        "claude-desktop",
+        "api-integration",
+        "typescript",
+        "python",
+        "custom-servers",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -1878,7 +2021,9 @@
         "runtime",
         "skills",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude",
+        "bun javascript runtime development skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -1982,7 +2127,8 @@
         "mcp servers",
         "server",
         "templates",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Canva",
       "dateAdded": "2025-09-18",
@@ -2016,7 +2162,9 @@
         "powerline",
         "statuslines",
         "theme",
-        "tools"
+        "tools",
+        "heyclaude",
+        "catppuccin mocha theme - statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -2042,7 +2190,15 @@
         "chatgpt to claude",
         "claude migration",
         "ai assistant migration",
-        "prompt migration"
+        "prompt migration",
+        "tutorial",
+        "intermediate",
+        "migration",
+        "api",
+        "guides",
+        "claude",
+        "heyclaude",
+        "chatgpt to claude migration"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2104,7 +2260,15 @@
         "claude extended thinking",
         "claude 4 tutorial",
         "reasoning prompts",
-        "advanced claude workflows"
+        "advanced claude workflows",
+        "tutorial",
+        "advanced",
+        "api-implementation",
+        "production-ready",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude 4 extended thinking"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2130,7 +2294,14 @@
         "claude agent framework",
         "agent development",
         "claude code agents",
-        "ai agent workflow"
+        "ai agent workflow",
+        "tutorial",
+        "advanced",
+        "multi-agent",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude agent development"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2157,7 +2328,15 @@
         "claude healthcare",
         "hipaa ai workflows",
         "healthcare automation",
-        "compliant claude usage"
+        "compliant claude usage",
+        "healthcare",
+        "enterprise",
+        "compliance",
+        "documentation",
+        "hipaa",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2179,7 +2358,10 @@
       ],
       "keywords": [
         "claude code",
-        "terminal agent"
+        "terminal agent",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "author": "Anthropic",
       "dateAdded": "2026-04-27",
@@ -2208,7 +2390,7 @@
       "keywords": [
         "claude",
         "claude-code",
-        "CLI",
+        "cli",
         "containers",
         "development",
         "devops",
@@ -2217,8 +2399,7 @@
         "health-check",
         "monitoring",
         "statusline",
-        "statuslines",
-        "tools"
+        "statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -2244,7 +2425,15 @@
         "claude multi directory",
         "multi project claude setup",
         "claude workspace setup",
-        "repository workflow"
+        "repository workflow",
+        "workflow",
+        "enterprise development",
+        "advanced",
+        "automation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code multi-directory setup enterprise workflow 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2270,7 +2459,15 @@
         "claude vs cursor",
         "claude vs codeium",
         "ai ide comparison",
-        "coding assistant tools"
+        "coding assistant tools",
+        "comparison",
+        "ai coding assistants",
+        "developer tools",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code vs cursor vs codeium complete comparison 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2296,7 +2493,15 @@
         "claude wsl setup",
         "windows claude code",
         "wsl developer setup",
-        "claude windows workflow"
+        "claude windows workflow",
+        "tutorial",
+        "intermediate",
+        "wsl",
+        "windows",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude code wsl setup 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2330,11 +2535,7 @@
         "intermediate",
         "mcp",
         "mcp servers",
-        "mcp-servers",
-        "servers",
-        "setup",
-        "tools",
-        "tutorial"
+        "servers"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2360,7 +2561,15 @@
         "claude financial services",
         "ai finance workflows",
         "financial services automation",
-        "compliant ai workflows"
+        "compliant ai workflows",
+        "use-case",
+        "financial-services",
+        "enterprise",
+        "advanced",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude for financial services enterprise implementation 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2392,12 +2601,11 @@
         "cost-optimization",
         "development",
         "haiku",
-        "haiku-4.5",
+        "haiku-4 5",
         "optimizer",
         "performance",
         "rapid-iteration",
-        "speed",
-        "tools"
+        "speed"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -2424,7 +2632,15 @@
         "claude mcp setup",
         "mcp server setup",
         "claude desktop mcp",
-        "model context protocol setup"
+        "model context protocol setup",
+        "mcp-servers",
+        "configuration",
+        "tutorial",
+        "setup",
+        "integration",
+        "guides",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2459,7 +2675,8 @@
         "remote-servers",
         "skills",
         "tool-permissions",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -2485,7 +2702,15 @@
         "claude automation",
         "business process automation",
         "ai workflow automation",
-        "operations automation"
+        "operations automation",
+        "use-case",
+        "enterprise",
+        "automation",
+        "advanced",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude process automation"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2511,7 +2736,15 @@
         "claude rate limits",
         "fix claude rate limit",
         "claude usage limits",
-        "claude api throttling"
+        "claude api throttling",
+        "tutorial",
+        "advanced",
+        "rate-limits",
+        "429-errors",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude rate limits fix complete optimization guide 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2537,7 +2770,15 @@
         "claude vs gemini",
         "claude vs codewhisperer",
         "ai coding assistant comparison",
-        "claude code comparison"
+        "claude code comparison",
+        "comparison",
+        "cloud-development",
+        "aws",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude vs amazon q developer vs gemini code aws guide 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2563,7 +2804,15 @@
         "claude vs copilot",
         "python coding assistant",
         "claude python development",
-        "github copilot alternative"
+        "github copilot alternative",
+        "comparison",
+        "python-development",
+        "coding-assistants",
+        "evaluation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "claude vs github copilot vs chatgpt for python dev 2025"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -2591,7 +2840,6 @@
         "builder",
         "claude",
         "claude-md",
-        "claude.md",
         "coding-standards",
         "commands",
         "development",
@@ -2599,7 +2847,8 @@
         "onboarding",
         "project-context",
         "team-collaboration",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -2629,15 +2878,13 @@
         "ai-guidance",
         "claude",
         "claude-md",
-        "claude.md",
         "context-preservation",
         "development",
         "documentation",
         "knowledge",
         "knowledge-management",
         "manager",
-        "project-instructions",
-        "tools"
+        "project-instructions"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -2705,7 +2952,8 @@
         "server",
         "tasks",
         "team-collaboration",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "hauptsacheNet",
       "dateAdded": "2025-09-18",
@@ -2727,7 +2975,13 @@
       ],
       "keywords": [
         "vscode coding agent",
-        "open-source ai agent"
+        "open-source ai agent",
+        "vs-code",
+        "coding-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cline"
       ],
       "author": "Cline",
       "dateAdded": "2026-04-27",
@@ -2761,7 +3015,8 @@
         "session",
         "stop",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -2819,7 +3074,13 @@
       ],
       "keywords": [
         "ai agents cloudflare",
-        "workers agents"
+        "workers agents",
+        "agent-framework",
+        "cloudflare",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cloudflare agents sdk"
       ],
       "author": "Cloudflare",
       "dateAdded": "2026-04-27",
@@ -2853,7 +3114,8 @@
         "mcp servers",
         "security",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Cloudflare",
       "dateAdded": "2025-09-18",
@@ -2886,7 +3148,9 @@
         "serverless",
         "skills",
         "tools",
-        "workers"
+        "workers",
+        "ai",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -2913,7 +3177,15 @@
         "cloudflare d1 kv r2",
         "edge data architecture",
         "workers storage patterns",
-        "serverless data strategy"
+        "serverless data strategy",
+        "cloudflare",
+        "workers",
+        "d1",
+        "kv",
+        "r2",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -2947,7 +3219,8 @@
         "media",
         "server",
         "tools",
-        "video"
+        "video",
+        "heyclaude"
       ],
       "author": "Cloudinary",
       "dateAdded": "2025-09-18",
@@ -3044,7 +3317,15 @@
         "pull request audit",
         "local code review automation",
         "severity scoring",
-        "exploitability analysis"
+        "exploitability analysis",
+        "code-review",
+        "pull-requests",
+        "security",
+        "capability-pack",
+        "automation",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -3076,7 +3357,9 @@
         "quality",
         "review",
         "rules",
-        "tools"
+        "tools",
+        "heyclaude",
+        "code review expert for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -3146,8 +3429,7 @@
         "runner",
         "test",
         "testing",
-        "tools",
-        "watch"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -3207,7 +3489,13 @@
       ],
       "keywords": [
         "ai code review",
-        "pull request review"
+        "pull request review",
+        "code-review",
+        "pull-requests",
+        "tools",
+        "claude",
+        "heyclaude",
+        "coderabbit"
       ],
       "author": "CodeRabbit",
       "dateAdded": "2026-04-27",
@@ -3234,7 +3522,15 @@
         "codex automations",
         "recurring agent workflows",
         "rrule scheduling",
-        "automation governance"
+        "automation governance",
+        "codex",
+        "automation",
+        "orchestration",
+        "scheduling",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -3261,7 +3557,15 @@
         "codex plugin development",
         "mcp plugin architecture",
         "plugin permission boundaries",
-        "ai tooling extensions"
+        "ai tooling extensions",
+        "codex",
+        "plugins",
+        "mcp",
+        "developer-tooling",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -3287,7 +3591,15 @@
         "claude migration workflow",
         "chatgpt to claude",
         "enterprise ai migration",
-        "ai platform migration"
+        "ai platform migration",
+        "workflow",
+        "migration",
+        "enterprise",
+        "automation",
+        "guides",
+        "claude",
+        "heyclaude",
+        "complete claude migration playbook from chatgpt copilot"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -3309,7 +3621,12 @@
       ],
       "keywords": [
         "ai agent tools",
-        "tool integrations"
+        "tool integrations",
+        "agents",
+        "tools",
+        "claude",
+        "heyclaude",
+        "composio"
       ],
       "author": "Composio",
       "dateAdded": "2026-04-27",
@@ -3344,7 +3661,8 @@
         "marketing",
         "social-media",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -3416,9 +3734,7 @@
         "optimization",
         "optimizer",
         "summarization",
-        "tools",
-        "truncation-prevention",
-        "window"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -3440,7 +3756,13 @@
       ],
       "keywords": [
         "open-source ai coding",
-        "custom model routing"
+        "custom model routing",
+        "ai-coding",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "continue"
       ],
       "author": "Continue",
       "dateAdded": "2026-04-27",
@@ -3470,7 +3792,14 @@
         "claude security mcp",
         "cve lookup",
         "threat intelligence",
-        "dependency scanner"
+        "dependency scanner",
+        "security",
+        "cve",
+        "osint",
+        "ip-reputation",
+        "domain-audit",
+        "mcp servers",
+        "mcp"
       ],
       "author": "UPinar",
       "dateAdded": "2026-04-20",
@@ -3492,7 +3821,13 @@
       ],
       "keywords": [
         "multi-agent framework",
-        "ai crews"
+        "ai crews",
+        "agent-framework",
+        "multi-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "crewai"
       ],
       "author": "CrewAI",
       "dateAdded": "2026-04-27",
@@ -3584,7 +3919,13 @@
       ],
       "keywords": [
         "claude tools",
-        "ai code editor"
+        "ai code editor",
+        "ai-coding",
+        "code-editor",
+        "tools",
+        "claude",
+        "heyclaude",
+        "cursor"
       ],
       "author": "Cursor",
       "dateAdded": "2026-04-27",
@@ -3611,7 +3952,7 @@
         "ai-coding",
         "claude",
         "cursor",
-        "cursor/windsurf",
+        "cursor windsurf",
         "development",
         "editor",
         "ide",
@@ -3654,8 +3995,7 @@
         "statuslines",
         "tools",
         "tracker",
-        "usage",
-        "usage-percentage"
+        "usage"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -3689,7 +4029,8 @@
         "mcp servers",
         "sec-filings",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Daloopa",
       "dateAdded": "2025-09-18",
@@ -3724,7 +4065,8 @@
         "etl",
         "sql",
         "suite",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -3760,9 +4102,7 @@
         "development",
         "engineering",
         "etl",
-        "pipeline",
-        "streaming",
-        "tools"
+        "pipeline"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -3795,7 +4135,9 @@
         "hooks",
         "resources",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude",
+        "database connection cleanup - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -3865,7 +4207,9 @@
         "migration",
         "runner",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude",
+        "database migration runner - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -3899,7 +4243,8 @@
         "optimization",
         "performance",
         "query",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -3933,7 +4278,8 @@
         "optimization",
         "specialist",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -4001,7 +4347,9 @@
         "problem-solving",
         "system",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude",
+        "debug troubleshoot"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -4035,7 +4383,8 @@
         "error-analysis",
         "problem-solving",
         "tools",
-        "troubleshooting"
+        "troubleshooting",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -4069,7 +4418,8 @@
         "stop",
         "stop-hook",
         "tools",
-        "vulnerabilities"
+        "vulnerabilities",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4103,7 +4453,8 @@
         "scanner",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -4160,7 +4511,13 @@
       ],
       "keywords": [
         "ai software engineer",
-        "autonomous coding agent"
+        "autonomous coding agent",
+        "coding-agent",
+        "autonomous-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "devin"
       ],
       "author": "Cognition",
       "dateAdded": "2026-04-27",
@@ -4195,7 +4552,8 @@
         "monitoring",
         "sre",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -4229,7 +4587,8 @@
         "notifier",
         "team",
         "tools",
-        "webhooks"
+        "webhooks",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4263,7 +4622,8 @@
         "moderation",
         "server",
         "social",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "saseq",
       "dateAdded": "2025-09-20",
@@ -4325,7 +4685,15 @@
         "docker compose production",
         "compose hardening",
         "container operations",
-        "compose blueprints"
+        "compose blueprints",
+        "docker",
+        "docker-compose",
+        "devops",
+        "deployment",
+        "reliability",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -4358,7 +4726,8 @@
         "docker",
         "hooks",
         "rebuild",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4392,7 +4761,8 @@
         "scanner",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -4426,7 +4796,8 @@
         "mcp servers",
         "orchestration",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -4460,7 +4831,8 @@
         "development",
         "documentation",
         "hooks",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-19",
@@ -4493,7 +4865,9 @@
         "hooks",
         "jsdoc",
         "markdown",
-        "tools"
+        "tools",
+        "heyclaude",
+        "documentation generator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -4525,7 +4899,9 @@
         "reports",
         "skills",
         "templating",
-        "tools"
+        "tools",
+        "heyclaude",
+        "docx report generator skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -4559,7 +4935,8 @@
         "healthcare",
         "legal",
         "specialist",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -4593,7 +4970,8 @@
         "optimization",
         "resources",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4627,7 +5005,8 @@
         "tools",
         "validation",
         "validator",
-        "variable"
+        "variable",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -4689,7 +5068,15 @@
         "solidity security skill",
         "base smart contract security",
         "foundry invariant testing",
-        "evm protocol hardening"
+        "evm protocol hardening",
+        "ethereum",
+        "base",
+        "solidity",
+        "security",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -4716,7 +5103,15 @@
         "ethereum smart contract skill",
         "solidity security",
         "foundry testing",
-        "openzeppelin patterns"
+        "openzeppelin patterns",
+        "ethereum",
+        "solidity",
+        "foundry",
+        "smart-contracts",
+        "security",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -4738,7 +5133,13 @@
       ],
       "keywords": [
         "ai search api",
-        "web retrieval"
+        "web retrieval",
+        "search",
+        "retrieval",
+        "tools",
+        "claude",
+        "heyclaude",
+        "exa"
       ],
       "author": "Exa",
       "dateAdded": "2026-04-27",
@@ -4807,7 +5208,8 @@
         "pydantic",
         "python",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -4841,7 +5243,8 @@
         "mcp servers",
         "server",
         "tools",
-        "ui-ux"
+        "ui-ux",
+        "heyclaude"
       ],
       "author": "Figma",
       "dateAdded": "2025-09-18",
@@ -4876,8 +5279,7 @@
         "optimization",
         "performance",
         "size",
-        "tools",
-        "warning"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4911,7 +5313,8 @@
         "mcp servers",
         "official",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Anthropic",
       "dateAdded": "2025-09-15",
@@ -4946,8 +5349,7 @@
         "reporter",
         "reporting",
         "size",
-        "stop-hook",
-        "tools"
+        "stop-hook"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -4969,7 +5371,13 @@
       ],
       "keywords": [
         "llm crawling",
-        "website to markdown"
+        "website to markdown",
+        "web-crawling",
+        "data-extraction",
+        "tools",
+        "claude",
+        "heyclaude",
+        "firecrawl"
       ],
       "author": "Firecrawl",
       "dateAdded": "2026-04-27",
@@ -5003,7 +5411,8 @@
         "notes",
         "server",
         "tools",
-        "transcription"
+        "transcription",
+        "heyclaude"
       ],
       "author": "Fireflies",
       "dateAdded": "2025-09-18",
@@ -5038,8 +5447,7 @@
         "statuslines",
         "tools",
         "tracker",
-        "usage-limits",
-        "window"
+        "usage-limits"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -5067,7 +5475,15 @@
         "claude environment variables",
         "fix env vars",
         "mcp environment setup",
-        "api key configuration"
+        "api key configuration",
+        "environment-variables",
+        "configuration",
+        "api-keys",
+        "authentication",
+        "debugging",
+        "security",
+        "guides",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -5093,7 +5509,15 @@
         "claude installation errors",
         "fix claude setup",
         "mcp install troubleshooting",
-        "claude code install"
+        "claude code install",
+        "tutorial",
+        "beginner",
+        "installation",
+        "troubleshooting",
+        "guides",
+        "claude",
+        "heyclaude",
+        "fix claude code npm errors"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -5121,7 +5545,15 @@
         "claude performance troubleshooting",
         "memory leak fix",
         "mcp performance",
-        "ai workflow performance"
+        "ai workflow performance",
+        "claude-code",
+        "performance",
+        "memory-leak",
+        "optimization",
+        "debugging",
+        "context-window",
+        "guides",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -5147,7 +5579,15 @@
         "mcp connection errors",
         "fix mcp server",
         "claude mcp troubleshooting",
-        "model context protocol errors"
+        "model context protocol errors",
+        "troubleshooting",
+        "mcp-servers",
+        "connection-errors",
+        "solutions",
+        "guides",
+        "claude",
+        "heyclaude",
+        "fix claude mcp error -32000"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-27",
@@ -5181,7 +5621,8 @@
         "specialist",
         "tools",
         "typescript",
-        "ui-ux"
+        "ui-ux",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -5239,7 +5680,13 @@
       ],
       "keywords": [
         "llm vulnerability scanner",
-        "ai security testing"
+        "ai security testing",
+        "security",
+        "red-teaming",
+        "tools",
+        "claude",
+        "heyclaude",
+        "garak"
       ],
       "author": "NVIDIA",
       "dateAdded": "2026-04-27",
@@ -5273,7 +5720,8 @@
         "testing",
         "tests",
         "tools",
-        "unit-tests"
+        "unit-tests",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -5295,7 +5743,13 @@
       ],
       "keywords": [
         "ai testing",
-        "llm evaluation"
+        "llm evaluation",
+        "evaluation",
+        "security",
+        "tools",
+        "claude",
+        "heyclaude",
+        "giskard"
       ],
       "author": "Giskard",
       "dateAdded": "2026-04-27",
@@ -5329,7 +5783,8 @@
         "stop",
         "stop-hook",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -5361,7 +5816,9 @@
         "protection",
         "safety",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude",
+        "git branch protection - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -5395,7 +5852,8 @@
         "repositories",
         "server",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude"
       ],
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
@@ -5461,7 +5919,9 @@
         "git",
         "smart",
         "tools",
-        "version-control"
+        "version-control",
+        "heyclaude",
+        "git smart commit for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -5524,7 +5984,15 @@
         "git cliff changelog",
         "automated release notes",
         "conventional commits release",
-        "semantic version workflow"
+        "semantic version workflow",
+        "git-cliff",
+        "changelog",
+        "releases",
+        "conventional-commits",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -5551,7 +6019,6 @@
         "actions",
         "automation",
         "ci-cd",
-        "ci/cd",
         "claude",
         "development",
         "devops",
@@ -5559,7 +6026,8 @@
         "github-actions",
         "powered",
         "skills",
-        "tools"
+        "tools",
+        "ai"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -5586,7 +6054,15 @@
         "github actions security",
         "secure cicd pipelines",
         "workflow hardening",
-        "supply chain security"
+        "supply chain security",
+        "github-actions",
+        "cicd",
+        "security",
+        "devops",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -5621,8 +6097,7 @@
         "validation",
         "validator",
         "workflow",
-        "workflows",
-        "yaml"
+        "workflows"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -5644,7 +6119,12 @@
       ],
       "keywords": [
         "ai coding assistant",
-        "github copilot"
+        "github copilot",
+        "ai-coding",
+        "code-review",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "author": "GitHub",
       "dateAdded": "2026-04-27",
@@ -5679,8 +6159,7 @@
         "hybrid",
         "integration",
         "interop",
-        "interoperability",
-        "tools"
+        "interoperability"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -5714,7 +6193,8 @@
         "official",
         "repositories",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "GitHub",
       "dateAdded": "2025-09-18",
@@ -5746,7 +6226,10 @@
         "golang",
         "microservices",
         "rules",
-        "tools"
+        "tools",
+        "go",
+        "heyclaude",
+        "go golang expert - claude md rules for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -5782,7 +6265,8 @@
         "modules",
         "rules",
         "tooling",
-        "tools"
+        "tools",
+        "go"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -5815,7 +6299,9 @@
         "module",
         "modules",
         "tidy",
-        "tools"
+        "tools",
+        "go",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -5842,7 +6328,15 @@
         "gemini workspace automation",
         "google docs ai workflow",
         "sheets automation ai",
-        "enterprise ai productivity"
+        "enterprise ai productivity",
+        "google-workspace",
+        "gemini",
+        "automation",
+        "productivity",
+        "ai-agents",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -5864,7 +6358,12 @@
       ],
       "keywords": [
         "ai code review",
-        "graphite diamond"
+        "graphite diamond",
+        "code-review",
+        "pull-requests",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "author": "Graphite",
       "dateAdded": "2026-04-27",
@@ -5897,7 +6396,9 @@
         "rules",
         "schema",
         "specialist",
-        "tools"
+        "tools",
+        "heyclaude",
+        "graphql federation specialist for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -5930,7 +6431,9 @@
         "schema",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "graphql schema validator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -5952,7 +6455,13 @@
       ],
       "keywords": [
         "llm cost tracking",
-        "llm logs"
+        "llm logs",
+        "observability",
+        "cost-tracking",
+        "tools",
+        "claude",
+        "heyclaude",
+        "helicone"
       ],
       "author": "Helicone",
       "dateAdded": "2026-04-27",
@@ -5991,8 +6500,7 @@
         "mcp",
         "mcp servers",
         "search",
-        "server",
-        "tools"
+        "server"
       ],
       "author": "HeyClaude Team",
       "dateAdded": "2025-11-25",
@@ -6016,10 +6524,18 @@
         "submissions"
       ],
       "keywords": [
-        "create Agent Skill",
-        "submit skill to HeyClaude",
-        "Cursor rule adapter",
-        "SKILL.md package validation"
+        "create agent skill",
+        "submit skill to heyclaude",
+        "cursor rule adapter",
+        "skill md package validation",
+        "heyclaude",
+        "skill-authoring",
+        "agent-skills",
+        "registry",
+        "submissions",
+        "skills",
+        "claude",
+        "heyclaude skill submission factory"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-27",
@@ -6054,7 +6570,8 @@
         "lifecycle",
         "tools",
         "triggers",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -6088,7 +6605,8 @@
         "mcp servers",
         "sales",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "HubSpot",
       "dateAdded": "2025-09-18",
@@ -6150,7 +6668,15 @@
         "husky hooks setup",
         "commit governance",
         "local quality gates",
-        "precommit optimization"
+        "precommit optimization",
+        "husky",
+        "git-hooks",
+        "commitlint",
+        "developer-experience",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -6172,7 +6698,13 @@
       ],
       "keywords": [
         "browser automation infrastructure",
-        "ai agents"
+        "ai agents",
+        "browser-automation",
+        "agent-infrastructure",
+        "tools",
+        "claude",
+        "heyclaude",
+        "hyperbrowser"
       ],
       "author": "Hyperbrowser",
       "dateAdded": "2026-04-27",
@@ -6205,7 +6737,9 @@
         "tools",
         "translation",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "i18n translation validator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -6267,7 +6801,15 @@
         "indexnow automation",
         "faster indexing",
         "sitemap workflow",
-        "technical seo operations"
+        "technical seo operations",
+        "indexnow",
+        "seo",
+        "indexing",
+        "sitemap",
+        "search",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -6301,7 +6843,8 @@
         "mcp",
         "mcp servers",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Intercom",
       "dateAdded": "2025-09-18",
@@ -6335,7 +6878,8 @@
         "media",
         "server",
         "tools",
-        "video"
+        "video",
+        "heyclaude"
       ],
       "author": "invideo",
       "dateAdded": "2025-09-18",
@@ -6369,7 +6913,8 @@
         "mcp servers",
         "server",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Jam",
       "dateAdded": "2025-09-18",
@@ -6438,7 +6983,8 @@
         "mcp servers",
         "project-management",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Atlassian",
       "dateAdded": "2025-09-18",
@@ -6472,7 +7018,8 @@
         "tools",
         "transformation",
         "validation",
-        "zod"
+        "zod",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -6505,7 +7052,9 @@
         "schema",
         "tools",
         "validation",
-        "validator"
+        "validator",
+        "heyclaude",
+        "json schema validator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -6538,7 +7087,9 @@
         "rbac",
         "rules",
         "security",
-        "tools"
+        "tools",
+        "heyclaude",
+        "kubernetes devsecops engineer for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -6572,7 +7123,8 @@
         "tools",
         "validation",
         "validator",
-        "yaml"
+        "yaml",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -6606,7 +7158,8 @@
         "mcp servers",
         "orchestration",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "feiskyer",
       "dateAdded": "2025-09-20",
@@ -6628,7 +7181,13 @@
       ],
       "keywords": [
         "prompt injection protection",
-        "ai guardrails"
+        "ai guardrails",
+        "security",
+        "guardrails",
+        "tools",
+        "claude",
+        "heyclaude",
+        "lakera guard"
       ],
       "author": "Lakera",
       "dateAdded": "2026-04-27",
@@ -6650,7 +7209,13 @@
       ],
       "keywords": [
         "llm tracing",
-        "prompt management"
+        "prompt management",
+        "observability",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langfuse"
       ],
       "author": "Langfuse",
       "dateAdded": "2026-04-27",
@@ -6672,7 +7237,13 @@
       ],
       "keywords": [
         "agent orchestration",
-        "stateful llm workflows"
+        "stateful llm workflows",
+        "agent-framework",
+        "orchestration",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langgraph"
       ],
       "author": "LangChain",
       "dateAdded": "2026-04-27",
@@ -6694,7 +7265,13 @@
       ],
       "keywords": [
         "llm observability",
-        "agent evaluation"
+        "agent evaluation",
+        "observability",
+        "evaluation",
+        "tools",
+        "claude",
+        "heyclaude",
+        "langsmith"
       ],
       "author": "LangChain",
       "dateAdded": "2026-04-27",
@@ -6729,8 +7306,7 @@
         "research-automation",
         "sciences",
         "scientific-analysis",
-        "specialist",
-        "tools"
+        "specialist"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -6764,7 +7340,8 @@
         "project-management",
         "server",
         "tasks",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Linear",
       "dateAdded": "2025-09-18",
@@ -6799,8 +7376,7 @@
         "productivity",
         "statuslines",
         "tools",
-        "tracker",
-        "velocity"
+        "tracker"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -6834,8 +7410,7 @@
         "parsing",
         "ripgrep",
         "skills",
-        "timeline",
-        "tools"
+        "timeline"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -6857,7 +7432,13 @@
       ],
       "keywords": [
         "ai app builder",
-        "web app generation"
+        "web app generation",
+        "app-builder",
+        "prototyping",
+        "tools",
+        "claude",
+        "heyclaude",
+        "lovable"
       ],
       "author": "Lovable",
       "dateAdded": "2026-04-27",
@@ -6879,7 +7460,13 @@
       ],
       "keywords": [
         "visual automation",
-        "business workflows"
+        "business workflows",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "make"
       ],
       "author": "Make",
       "dateAdded": "2026-04-27",
@@ -6912,7 +7499,8 @@
         "node",
         "remark",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -6946,7 +7534,8 @@
         "links",
         "markdown",
         "tools",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -6968,7 +7557,13 @@
       ],
       "keywords": [
         "typescript agents",
-        "ai workflow framework"
+        "ai workflow framework",
+        "agent-framework",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "mastra"
       ],
       "author": "Mastra",
       "dateAdded": "2026-04-27",
@@ -6995,7 +7590,15 @@
         "mcp security",
         "mcp server design",
         "tool schema validation",
-        "agent security controls"
+        "agent security controls",
+        "mcp",
+        "security",
+        "server-authoring",
+        "tools",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7024,7 +7627,13 @@
         "tool-safety",
         "prompt-injection",
         "server-hardening",
-        "security-checklist"
+        "security-checklist",
+        "mcp",
+        "security",
+        "hardening",
+        "auth",
+        "ai-infrastructure",
+        "skills"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7057,7 +7666,9 @@
         "oauth",
         "remote-server",
         "setup",
-        "tools"
+        "tools",
+        "heyclaude",
+        "mcp server setup for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -7091,7 +7702,8 @@
         "servers",
         "status",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -7118,7 +7730,15 @@
         "mcp testing",
         "tool contract validation",
         "mcp schema checks",
-        "ai tool reliability"
+        "ai tool reliability",
+        "mcp",
+        "testing",
+        "contracts",
+        "reliability",
+        "api",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7152,7 +7772,8 @@
         "performance",
         "resources",
         "tools",
-        "usage"
+        "usage",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -7174,7 +7795,13 @@
       ],
       "keywords": [
         "autogen",
-        "multi-agent ai"
+        "multi-agent ai",
+        "agent-framework",
+        "multi-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "microsoft autogen"
       ],
       "author": "Microsoft",
       "dateAdded": "2026-04-27",
@@ -7206,7 +7833,9 @@
         "performance",
         "powerline",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude",
+        "minimal powerline - statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-01",
@@ -7238,7 +7867,9 @@
         "mdx",
         "mintlify",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude",
+        "mintlify ai documentation automation skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -7270,7 +7901,10 @@
         "documentation",
         "mdx",
         "mintlify",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude",
+        "mintlify documentation generator for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -7307,8 +7941,7 @@
         "mobile",
         "react-native",
         "rules",
-        "swift",
-        "tools"
+        "swift"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -7345,8 +7978,7 @@
         "mobile",
         "react-native",
         "rules",
-        "swift",
-        "tools"
+        "swift"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -7374,7 +8006,14 @@
         "model-router",
         "token-cost",
         "latency-optimization",
-        "fallback-strategy"
+        "fallback-strategy",
+        "model-routing",
+        "cost-optimization",
+        "latency",
+        "token-budget",
+        "ai-operations",
+        "skills",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7409,8 +8048,7 @@
         "statuslines",
         "switch",
         "switch-history",
-        "tools",
-        "tracker"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -7444,7 +8082,8 @@
         "server",
         "team-management",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "Monday.com",
       "dateAdded": "2025-09-18",
@@ -7479,7 +8118,8 @@
         "tools",
         "turborepo",
         "workspace",
-        "workspace-management"
+        "workspace-management",
+        "nx"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -7550,8 +8190,7 @@
         "multi-line",
         "powerline",
         "statusline",
-        "statuslines",
-        "tools"
+        "statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-01",
@@ -7586,8 +8225,7 @@
         "provider",
         "statuslines",
         "token",
-        "tokens",
-        "tools"
+        "tokens"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -7622,8 +8260,7 @@
         "session",
         "session-management",
         "statuslines",
-        "tools",
-        "workspace-tracking"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -7645,7 +8282,13 @@
       ],
       "keywords": [
         "ai workflow automation",
-        "self-hosted automation"
+        "self-hosted automation",
+        "workflow-automation",
+        "self-hosted",
+        "tools",
+        "claude",
+        "heyclaude",
+        "n8n"
       ],
       "author": "n8n",
       "dateAdded": "2026-04-27",
@@ -7673,7 +8316,14 @@
         "ai automation skill",
         "workflow orchestration",
         "n8n agent",
-        "production automation"
+        "production automation",
+        "n8n",
+        "ai-automation",
+        "workflows",
+        "no-code",
+        "operations",
+        "skills",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7700,7 +8350,15 @@
         "n8n production operations",
         "workflow resilience",
         "n8n incident response",
-        "n8n credential security"
+        "n8n credential security",
+        "n8n",
+        "operations",
+        "workflow-automation",
+        "reliability",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -7727,7 +8385,15 @@
         "n8n security",
         "n8n hardening",
         "workflow security",
-        "credential governance"
+        "credential governance",
+        "n8n",
+        "security",
+        "automation",
+        "ai-workflows",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7761,7 +8427,8 @@
         "server",
         "serverless",
         "static-sites",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Netlify",
       "dateAdded": "2025-09-18",
@@ -7795,7 +8462,8 @@
         "rules",
         "tools",
         "turbopack",
-        "web-vitals"
+        "web-vitals",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -7829,7 +8497,8 @@
         "pages",
         "route",
         "routing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -7863,7 +8532,8 @@
         "notion",
         "server",
         "tools",
-        "wiki"
+        "wiki",
+        "heyclaude"
       ],
       "author": "Notion",
       "dateAdded": "2025-09-18",
@@ -7897,7 +8567,9 @@
         "shell-replica",
         "statuslines",
         "tools",
-        "zsh"
+        "zsh",
+        "heyclaude",
+        "oh my zsh robbyrussell - statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -7925,7 +8597,14 @@
         "agent hardening",
         "ai ops",
         "least privilege",
-        "agent runtime security"
+        "agent runtime security",
+        "openclaw",
+        "ai-agents",
+        "security",
+        "hardening",
+        "operations",
+        "skills",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7952,7 +8631,15 @@
         "openclaw operations",
         "agent governance",
         "openclaw hardening",
-        "multi-agent reliability"
+        "multi-agent reliability",
+        "openclaw",
+        "ai-agents",
+        "operations",
+        "security",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -7979,7 +8666,15 @@
         "openclaw skills",
         "skill packaging workflow",
         "capability pack authoring",
-        "ai workflow distribution"
+        "ai workflow distribution",
+        "openclaw",
+        "skill-authoring",
+        "packaging",
+        "ai-agents",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -8001,7 +8696,13 @@
       ],
       "keywords": [
         "terminal coding agent",
-        "ai development cli"
+        "ai development cli",
+        "terminal-agent",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "opencode"
       ],
       "author": "SST",
       "dateAdded": "2026-04-27",
@@ -8028,7 +8729,15 @@
         "opennext cloudflare",
         "nextjs workers deployment",
         "edge runtime patterns",
-        "cloudflare workers nextjs"
+        "cloudflare workers nextjs",
+        "opennext",
+        "cloudflare",
+        "nextjs",
+        "workers",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -8096,7 +8805,9 @@
         "performance",
         "optimization",
         "core-web-vitals",
-        "skills"
+        "skills",
+        "web-performance",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -8165,7 +8876,8 @@
         "paypal",
         "server",
         "tools",
-        "transactions"
+        "transactions",
+        "heyclaude"
       ],
       "author": "PayPal",
       "dateAdded": "2025-09-18",
@@ -8199,7 +8911,8 @@
         "report",
         "stop-hook",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -8233,7 +8946,8 @@
         "notification",
         "performance",
         "profiling",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -8266,7 +8980,9 @@
         "monitoring",
         "optimization",
         "performance",
-        "tools"
+        "tools",
+        "heyclaude",
+        "performance monitor - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -8300,7 +9016,8 @@
         "performance",
         "profiling",
         "scalability",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -8322,7 +9039,13 @@
       ],
       "keywords": [
         "api automation",
-        "workflow integrations"
+        "workflow integrations",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "pipedream"
       ],
       "author": "Pipedream",
       "dateAdded": "2026-04-27",
@@ -8356,7 +9079,8 @@
         "mcp servers",
         "plaid",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Plaid",
       "dateAdded": "2025-09-18",
@@ -8423,7 +9147,10 @@
         "playwright",
         "skills",
         "testing",
-        "tools"
+        "tools",
+        "ai",
+        "heyclaude",
+        "playwright e2e testing automation skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -8450,7 +9177,15 @@
         "playwright mcp",
         "browser automation skill",
         "resilient web automation",
-        "ui workflow automation"
+        "ui workflow automation",
+        "playwright",
+        "mcp",
+        "browser-automation",
+        "testing",
+        "ai-agents",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -8484,7 +9219,8 @@
         "runner",
         "test",
         "testing",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -8553,7 +9289,8 @@
         "postgresql",
         "server",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
@@ -8586,7 +9323,9 @@
         "query",
         "skills",
         "sql",
-        "tools"
+        "tools",
+        "heyclaude",
+        "postgresql query optimization skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -8619,7 +9358,9 @@
         "prisma",
         "schema",
         "sync",
-        "tools"
+        "tools",
+        "heyclaude",
+        "prisma schema sync - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -8693,10 +9434,7 @@
         "production",
         "rules",
         "security-audit",
-        "tools",
-        "typescript",
-        "validation",
-        "zod"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-26",
@@ -8731,7 +9469,8 @@
         "reliability",
         "self-healing",
         "sre",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -8801,7 +9540,8 @@
         "efficiency",
         "productivity",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-02",
@@ -8829,7 +9569,14 @@
         "prompt-injection-defense",
         "llm-security",
         "tool-safety",
-        "adversarial-testing"
+        "adversarial-testing",
+        "prompt-injection",
+        "guardrails",
+        "security",
+        "ai-safety",
+        "red-teaming",
+        "skills",
+        "claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -8863,7 +9610,8 @@
         "prompt-engineering",
         "specialist",
         "system-prompts",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -8893,7 +9641,14 @@
         "claude image generation",
         "app icon generator",
         "og image generator",
-        "design tools mcp"
+        "design tools mcp",
+        "mcp",
+        "image-generation",
+        "design-tools",
+        "visual-assets",
+        "icons",
+        "favicons",
+        "og-images"
       ],
       "author": "MohamedAbdallah-14",
       "dateAdded": "2026-04-25",
@@ -8915,7 +9670,12 @@
       ],
       "keywords": [
         "llm red teaming",
-        "prompt testing"
+        "prompt testing",
+        "security",
+        "tools",
+        "claude",
+        "heyclaude",
+        "promptfoo"
       ],
       "author": "Promptfoo",
       "dateAdded": "2026-04-27",
@@ -8937,7 +9697,13 @@
       ],
       "keywords": [
         "ai security",
-        "model security"
+        "model security",
+        "security",
+        "ai-supply-chain",
+        "tools",
+        "claude",
+        "heyclaude",
+        "protect ai"
       ],
       "author": "Protect AI",
       "dateAdded": "2026-04-27",
@@ -8964,7 +9730,15 @@
         "proxmox api",
         "vm orchestration",
         "lxc automation",
-        "homelab virtualization"
+        "homelab virtualization",
+        "proxmox",
+        "virtualization",
+        "api",
+        "infrastructure",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -8991,7 +9765,15 @@
         "proxmox automation",
         "vm orchestration",
         "lxc automation",
-        "proxmox api"
+        "proxmox api",
+        "proxmox",
+        "virtualization",
+        "infrastructure",
+        "api",
+        "homelab",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -9063,8 +9845,7 @@
         "python",
         "rules",
         "science",
-        "scikit-learn",
-        "tools"
+        "scikit-learn"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -9098,7 +9879,8 @@
         "optimization",
         "optimizer",
         "python",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9130,7 +9912,9 @@
         "linting",
         "pylint",
         "python",
-        "tools"
+        "tools",
+        "heyclaude",
+        "python linter integration - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9165,7 +9949,8 @@
         "rich",
         "statusline",
         "statuslines",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-01",
@@ -9187,7 +9972,13 @@
       ],
       "keywords": [
         "raycast ai",
-        "macos productivity"
+        "macos productivity",
+        "launcher",
+        "extensions",
+        "tools",
+        "claude",
+        "heyclaude",
+        "raycast"
       ],
       "author": "Raycast",
       "dateAdded": "2026-04-27",
@@ -9214,7 +10005,15 @@
         "raycast extension development",
         "raycast store publishing",
         "command palette apps",
-        "macos productivity tooling"
+        "macos productivity tooling",
+        "raycast",
+        "extensions",
+        "developer-tools",
+        "publishing",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -9282,7 +10081,9 @@
         "react",
         "rules",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude",
+        "react expert - claude md rules for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -9316,7 +10117,8 @@
         "react",
         "rules",
         "tools",
-        "typescript"
+        "typescript",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -9421,8 +10223,7 @@
         "real",
         "real-time",
         "time",
-        "tools",
-        "tracker"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9491,7 +10292,8 @@
         "reddit",
         "search",
         "social-media",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "karanb192",
       "dateAdded": "2025-09-27",
@@ -9524,7 +10326,9 @@
         "invalidator",
         "performance",
         "redis",
-        "tools"
+        "tools",
+        "heyclaude",
+        "redis cache invalidator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9558,7 +10362,8 @@
         "official",
         "redis",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Redis",
       "dateAdded": "2025-09-20",
@@ -9580,7 +10385,13 @@
       ],
       "keywords": [
         "ai app builder",
-        "browser ide"
+        "browser ide",
+        "app-builder",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "replit agent"
       ],
       "author": "Replit",
       "dateAdded": "2026-04-27",
@@ -9614,7 +10425,8 @@
         "node",
         "rest",
         "skills",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-15",
@@ -9636,7 +10448,13 @@
       ],
       "keywords": [
         "vscode ai agent",
-        "coding workflow automation"
+        "coding workflow automation",
+        "vs-code",
+        "coding-agent",
+        "tools",
+        "claude",
+        "heyclaude",
+        "roo code"
       ],
       "author": "Roo Code",
       "dateAdded": "2026-04-27",
@@ -9669,7 +10487,9 @@
         "hooks",
         "linting",
         "rust",
-        "tools"
+        "tools",
+        "heyclaude",
+        "rust cargo check - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9696,7 +10516,15 @@
         "saas pricing tests",
         "pricing optimization",
         "conversion experiments",
-        "revenue operations skill"
+        "revenue operations skill",
+        "saas",
+        "pricing",
+        "experimentation",
+        "revenue",
+        "product",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -9730,7 +10558,8 @@
         "sass",
         "scss",
         "styling",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9763,7 +10592,9 @@
         "rules",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude",
+        "security auditor expert - claude md rules for claude code"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -9832,7 +10663,8 @@
         "scanning",
         "security",
         "tools",
-        "vulnerability"
+        "vulnerability",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -9866,7 +10698,8 @@
         "rules",
         "security",
         "tools",
-        "xss"
+        "xss",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -9902,8 +10735,7 @@
         "microsoft",
         "python",
         "semantic",
-        "semantic-kernel",
-        "tools"
+        "semantic-kernel"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -9938,8 +10770,7 @@
         "scanning",
         "security",
         "sensitive",
-        "sensitive-data",
-        "tools"
+        "sensitive-data"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -9973,7 +10804,8 @@
         "monitoring",
         "sentry",
         "server",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Sentry",
       "dateAdded": "2025-09-18",
@@ -10042,7 +10874,8 @@
         "session",
         "statistics",
         "stop-hook",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -10148,7 +10981,8 @@
         "progress",
         "slack",
         "team",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -10184,8 +11018,7 @@
         "slash-commands",
         "team-collaboration",
         "templates",
-        "tools",
-        "workflow-automation"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -10221,9 +11054,7 @@
         "orchestrator",
         "productivity",
         "slash",
-        "slash-commands",
-        "tools",
-        "workflows"
+        "slash-commands"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -10245,7 +11076,13 @@
       ],
       "keywords": [
         "mcp registry",
-        "mcp servers"
+        "mcp servers",
+        "mcp",
+        "tool-discovery",
+        "tools",
+        "claude",
+        "heyclaude",
+        "smithery"
       ],
       "author": "Smithery",
       "dateAdded": "2026-04-27",
@@ -10302,7 +11139,12 @@
       ],
       "keywords": [
         "codebase ai",
-        "sourcegraph cody"
+        "sourcegraph cody",
+        "ai-coding",
+        "code-search",
+        "tools",
+        "claude",
+        "heyclaude"
       ],
       "author": "Sourcegraph",
       "dateAdded": "2026-04-27",
@@ -10336,7 +11178,8 @@
         "pos",
         "server",
         "square",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Square",
       "dateAdded": "2025-09-18",
@@ -10358,7 +11201,13 @@
       ],
       "keywords": [
         "ai browser automation",
-        "browser agents"
+        "browser agents",
+        "browser-automation",
+        "open-source",
+        "tools",
+        "claude",
+        "heyclaude",
+        "stagehand"
       ],
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
@@ -10390,7 +11239,9 @@
         "starship",
         "statuslines",
         "theme",
-        "tools"
+        "tools",
+        "heyclaude",
+        "starship powerline theme - statuslines"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -10424,7 +11275,8 @@
         "server",
         "stripe",
         "subscriptions",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Stripe",
       "dateAdded": "2025-09-18",
@@ -10458,7 +11310,8 @@
         "security",
         "server",
         "stytch",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "Stytch",
       "dateAdded": "2025-09-18",
@@ -10530,8 +11383,7 @@
         "specialized-agents",
         "subagent",
         "subagents",
-        "task-decomposition",
-        "tools"
+        "task-decomposition"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -10564,7 +11416,9 @@
         "realtime",
         "skills",
         "supabase",
-        "tools"
+        "tools",
+        "heyclaude",
+        "supabase realtime database builder skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -10598,7 +11452,8 @@
         "hooks",
         "svelte",
         "tools",
-        "validation"
+        "validation",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -10632,9 +11487,8 @@
         "skills",
         "stack",
         "svelte",
-        "svelte/sveltekit",
-        "sveltekit",
-        "tools"
+        "svelte sveltekit",
+        "sveltekit"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-23",
@@ -10669,7 +11523,8 @@
         "test-automation",
         "testing",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -10702,7 +11557,9 @@
         "stop-hook",
         "summary",
         "team",
-        "tools"
+        "tools",
+        "heyclaude",
+        "team summary email generator - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -10735,7 +11592,8 @@
         "technical",
         "technical-writing",
         "tools",
-        "writer"
+        "writer",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -10768,7 +11626,9 @@
         "infrastructure",
         "rules",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude",
+        "terraform infrastructure architect for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -10802,7 +11662,8 @@
         "infrastructure",
         "plan",
         "terraform",
-        "tools"
+        "tools",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -10836,7 +11697,8 @@
         "tdd",
         "test",
         "testing",
-        "tools"
+        "tools",
+        "qa"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-16",
@@ -10942,8 +11804,7 @@
         "test",
         "test-coverage",
         "testing",
-        "tools",
-        "vitest"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -10978,8 +11839,7 @@
         "roi",
         "token",
         "token-cost",
-        "tools",
-        "usage-tracking"
+        "tools"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -11001,7 +11861,13 @@
       ],
       "keywords": [
         "background jobs",
-        "ai workflows"
+        "ai workflows",
+        "workflow-automation",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "trigger dev"
       ],
       "author": "Trigger.dev",
       "dateAdded": "2026-04-27",
@@ -11102,7 +11968,9 @@
         "tools",
         "type-safety",
         "typescript",
-        "validation"
+        "validation",
+        "heyclaude",
+        "typescript checker"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -11134,7 +12002,10 @@
         "expert",
         "interface",
         "tools",
-        "user-experience"
+        "user-experience",
+        "ui",
+        "ux",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-15",
@@ -11161,7 +12032,15 @@
         "unraid api automation",
         "homelab ai skill",
         "server operations",
-        "unraid maintenance automation"
+        "unraid maintenance automation",
+        "unraid",
+        "homelab",
+        "automation",
+        "api",
+        "operations",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -11188,7 +12067,15 @@
         "unraid api v2",
         "unraid automation",
         "homelab api skill",
-        "server operations"
+        "server operations",
+        "unraid",
+        "api",
+        "homelab",
+        "automation",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-10",
@@ -11215,7 +12102,15 @@
         "unraid ca template",
         "community apps xml",
         "unraid docker metadata",
-        "ca submission checklist"
+        "ca submission checklist",
+        "unraid",
+        "community-apps",
+        "docker",
+        "templates",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -11237,7 +12132,13 @@
       ],
       "keywords": [
         "ai ui builder",
-        "react generation"
+        "react generation",
+        "ui-generation",
+        "react",
+        "tools",
+        "claude",
+        "heyclaude",
+        "v0"
       ],
       "author": "Vercel",
       "dateAdded": "2026-04-27",
@@ -11269,7 +12170,10 @@
         "shadcn",
         "tailwind",
         "tools",
-        "ui-generation"
+        "ui-generation",
+        "v0",
+        "heyclaude",
+        "v0 component generator for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -11301,7 +12205,10 @@
         "shadcn",
         "skills",
         "tools",
-        "workflow"
+        "workflow",
+        "v0",
+        "ui",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -11323,7 +12230,12 @@
       ],
       "keywords": [
         "ai sdk",
-        "streaming ui"
+        "streaming ui",
+        "typescript",
+        "tools",
+        "claude",
+        "heyclaude",
+        "vercel ai sdk"
       ],
       "author": "Vercel",
       "dateAdded": "2026-04-27",
@@ -11357,7 +12269,8 @@
         "mcp servers",
         "server",
         "tools",
-        "vercel"
+        "vercel",
+        "heyclaude"
       ],
       "author": "Vercel",
       "dateAdded": "2025-09-18",
@@ -11460,7 +12373,9 @@
         "inclusive-design",
         "rules",
         "tools",
-        "wcag"
+        "wcag",
+        "heyclaude",
+        "wcag 2 2 accessibility auditor for claude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -11482,7 +12397,13 @@
       ],
       "keywords": [
         "llm tracking",
-        "wandb weave"
+        "wandb weave",
+        "evaluation",
+        "observability",
+        "tools",
+        "claude",
+        "heyclaude",
+        "weave"
       ],
       "author": "Weights and Biases",
       "dateAdded": "2026-04-27",
@@ -11517,8 +12438,7 @@
         "development",
         "long-running-tasks",
         "tools",
-        "web",
-        "web-interface"
+        "web"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -11551,7 +12471,9 @@
         "tools",
         "wasi",
         "wasm",
-        "webassembly"
+        "webassembly",
+        "heyclaude",
+        "webassembly wasm module development skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -11584,7 +12506,9 @@
         "optimization",
         "performance",
         "tools",
-        "webpack"
+        "webpack",
+        "heyclaude",
+        "webpack bundle analyzer - hooks"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -11640,7 +12564,12 @@
       ],
       "keywords": [
         "claude coding tools",
-        "agentic editor"
+        "agentic editor",
+        "ai-coding",
+        "tools",
+        "claude",
+        "heyclaude",
+        "windsurf"
       ],
       "author": "Windsurf",
       "dateAdded": "2026-04-27",
@@ -11674,7 +12603,8 @@
         "skills",
         "tools",
         "windsurf",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",
@@ -11731,7 +12661,13 @@
       ],
       "keywords": [
         "enterprise automation",
-        "business integrations"
+        "business integrations",
+        "workflow-automation",
+        "enterprise",
+        "tools",
+        "claude",
+        "heyclaude",
+        "workato"
       ],
       "author": "Workato",
       "dateAdded": "2026-04-27",
@@ -11759,13 +12695,14 @@
         "claude",
         "development",
         "integration",
-        "iPaaS",
+        "ipaas",
         "mcp",
         "mcp servers",
         "server",
         "tools",
         "workato",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "Workato",
       "dateAdded": "2025-09-18",
@@ -11799,7 +12736,8 @@
         "stop-hook",
         "summary",
         "tools",
-        "workflow"
+        "workflow",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-09-19",
@@ -11834,8 +12772,7 @@
         "statuslines",
         "tools",
         "workspace",
-        "workspace-depth",
-        "workspace-tracking"
+        "workspace-depth"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-25",
@@ -11857,7 +12794,13 @@
       ],
       "keywords": [
         "ai automation",
-        "app integrations"
+        "app integrations",
+        "workflow-automation",
+        "integrations",
+        "tools",
+        "claude",
+        "heyclaude",
+        "zapier ai"
       ],
       "author": "Zapier",
       "dateAdded": "2026-04-27",
@@ -11891,7 +12834,8 @@
         "server",
         "tools",
         "workflow",
-        "zapier"
+        "zapier",
+        "heyclaude"
       ],
       "author": "Zapier",
       "dateAdded": "2025-09-18",
@@ -11913,7 +12857,13 @@
       ],
       "keywords": [
         "ai code editor",
-        "collaborative editor"
+        "collaborative editor",
+        "code-editor",
+        "collaboration",
+        "tools",
+        "claude",
+        "heyclaude",
+        "zed"
       ],
       "author": "Zed Industries",
       "dateAdded": "2026-04-27",
@@ -11940,7 +12890,15 @@
         "zero budget saas",
         "free tier launch",
         "bootstrap product execution",
-        "lean mvp roadmap"
+        "lean mvp roadmap",
+        "saas",
+        "bootstrap",
+        "growth",
+        "cost-optimization",
+        "capability-pack",
+        "skills",
+        "claude",
+        "heyclaude"
       ],
       "author": "JSONbored",
       "dateAdded": "2026-04-11",
@@ -11973,7 +12931,9 @@
         "typescript",
         "validation",
         "validator",
-        "zod"
+        "zod",
+        "heyclaude",
+        "zod schema validation skill"
       ],
       "author": "JSONbored",
       "dateAdded": "2025-10-16",

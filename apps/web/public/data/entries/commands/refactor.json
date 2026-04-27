@@ -28,7 +28,9 @@
       "patterns",
       "refactor",
       "refactoring",
-      "tools"
+      "tools",
+      "heyclaude",
+      "refactor - code refactoring command for claude"
     ],
     "readingTime": 4,
     "difficultyScore": 100,

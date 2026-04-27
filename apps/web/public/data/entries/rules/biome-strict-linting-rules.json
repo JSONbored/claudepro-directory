@@ -31,7 +31,8 @@
       "strict",
       "tools",
       "typescript",
-      "validation"
+      "validation",
+      "heyclaude"
     ],
     "readingTime": 5,
     "difficultyScore": 100,

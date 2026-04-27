@@ -27,7 +27,9 @@
       "linting",
       "pylint",
       "python",
-      "tools"
+      "tools",
+      "heyclaude",
+      "python linter integration - hooks"
     ],
     "readingTime": 4,
     "difficultyScore": 0,

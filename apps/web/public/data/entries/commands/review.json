@@ -28,7 +28,9 @@
       "quality",
       "review",
       "security",
-      "tools"
+      "tools",
+      "heyclaude",
+      "review - code review command for claude code"
     ],
     "readingTime": 8,
     "difficultyScore": 100,

@@ -1,5 +1,6 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
 import { recommendedLabelsForCategory } from "./submission-labels.js";
+import { buildSubmissionFieldModel } from "./submission-spec.js";
 
 export const CORE_CATEGORIES = categorySpec.categoryOrder;
 
@@ -235,6 +236,74 @@ export function normalizeParsedFields(fields) {
   return normalized;
 }
 
+export function normalizeSubmissionPayloadFields(fields = {}) {
+  const normalized = {};
+  for (const [key, value] of Object.entries(fields || {})) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      normalized[key] = value.map(String).join(", ");
+      continue;
+    }
+    if (typeof value === "object") continue;
+    normalized[key] = String(value);
+  }
+  return normalizeParsedFields(normalized);
+}
+
+export function buildSubmissionIssueTitle(fields = {}) {
+  const normalized = normalizeSubmissionPayloadFields(fields);
+  const category = normalizeCategory(normalized.category);
+  const label = categorySpec.categories[category]?.label?.replace(/s$/, "");
+  return `Submit ${label || "Entry"}: ${normalizeValue(normalized.name) || "New directory entry"}`;
+}
+
+export function buildSubmissionIssueBody(fields = {}) {
+  const normalized = normalizeSubmissionPayloadFields(fields);
+  const category = normalizeCategory(normalized.category);
+  const model = buildSubmissionFieldModel(category);
+  const fieldIds = model?.fields?.map((field) => field.id) ?? [
+    "name",
+    "slug",
+    "category",
+    "github_url",
+    "docs_url",
+    "author",
+    "contact_email",
+    "tags",
+    "description",
+    "card_description",
+  ];
+  const labelsById = new Map(
+    (model?.fields ?? []).map((field) => [field.id, field.label || field.id]),
+  );
+  const allFieldIds = [
+    ...fieldIds,
+    ...Object.keys(normalized).filter((id) => !fieldIds.includes(id)),
+  ];
+  const lines = [];
+
+  for (const id of allFieldIds) {
+    const value = normalizeValue(normalized[id]);
+    if (!value && id !== "category") continue;
+    const label = labelsById.get(id) || id.replaceAll("_", " ");
+    lines.push(`### ${label}`, "", value || category, "");
+  }
+
+  return lines.join("\n").trimEnd();
+}
+
+export function buildSubmissionIssueDraft(fields = {}) {
+  const normalized = normalizeSubmissionPayloadFields(fields);
+  const category = normalizeCategory(normalized.category);
+  return {
+    title: buildSubmissionIssueTitle(normalized),
+    body: buildSubmissionIssueBody(normalized),
+    labels: CORE_CATEGORIES.includes(category)
+      ? recommendedLabelsForCategory(category)
+      : ["content-submission", "needs-review"],
+  };
+}
+
 export function issueLabels(issue) {
   return Array.isArray(issue.labels)
     ? issue.labels
@@ -305,6 +374,17 @@ export function isLikelyAffiliateUrl(value) {
   }
 
   return false;
+}
+
+function isHttpsUrl(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) return true;
+  try {
+    const url = new URL(normalized);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
 export function recommendedSubmissionLabels(
@@ -439,6 +519,17 @@ export function validateSubmission(issue) {
     errors.push("Invalid contact email format");
   }
 
+  if (fields.description && normalizeValue(fields.description).length < 12) {
+    errors.push("Description is too short for review");
+  }
+
+  if (
+    fields.card_description &&
+    normalizeValue(fields.card_description).length < 8
+  ) {
+    errors.push("Card description is too short for review");
+  }
+
   if (
     String(fields.download_url ?? "")
       .trim()
@@ -450,6 +541,9 @@ export function validateSubmission(issue) {
   }
 
   for (const field of ["github_url", "docs_url", "download_url"]) {
+    if (!isHttpsUrl(fields[field])) {
+      errors.push(`${field} must be a valid https URL`);
+    }
     if (isLikelyAffiliateUrl(fields[field])) {
       errors.push(
         `Contributor submissions cannot include affiliate/referral URLs: ${field}`,

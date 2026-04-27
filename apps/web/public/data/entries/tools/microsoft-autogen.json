@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "autogen",
-      "multi-agent ai"
+      "multi-agent ai",
+      "agent-framework",
+      "multi-agent",
+      "tools",
+      "claude",
+      "heyclaude",
+      "microsoft autogen"
     ],
     "documentationUrl": "https://microsoft.github.io/autogen/",
     "websiteUrl": "https://microsoft.github.io/autogen/",

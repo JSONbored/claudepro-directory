@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "llm observability",
-      "agent evaluation"
+      "agent evaluation",
+      "observability",
+      "evaluation",
+      "tools",
+      "claude",
+      "heyclaude",
+      "langsmith"
     ],
     "documentationUrl": "https://docs.smith.langchain.com",
     "websiteUrl": "https://www.langchain.com/langsmith",

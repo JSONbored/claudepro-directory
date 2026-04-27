@@ -23,7 +23,14 @@
       "prompt-injection-defense",
       "llm-security",
       "tool-safety",
-      "adversarial-testing"
+      "adversarial-testing",
+      "prompt-injection",
+      "guardrails",
+      "security",
+      "ai-safety",
+      "red-teaming",
+      "skills",
+      "claude"
     ],
     "readingTime": 7,
     "difficultyScore": 80,

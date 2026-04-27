@@ -28,7 +28,9 @@
       "error-analysis",
       "fixes",
       "tools",
-      "troubleshooting"
+      "troubleshooting",
+      "heyclaude",
+      "debug - debugging assistant command for claude code"
     ],
     "readingTime": 3,
     "difficultyScore": 100,

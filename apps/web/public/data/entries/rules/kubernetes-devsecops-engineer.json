@@ -28,7 +28,9 @@
       "rbac",
       "rules",
       "security",
-      "tools"
+      "tools",
+      "heyclaude",
+      "kubernetes devsecops engineer for claude"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

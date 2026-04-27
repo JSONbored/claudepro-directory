@@ -28,7 +28,9 @@
       "hooks",
       "jsdoc",
       "markdown",
-      "tools"
+      "tools",
+      "heyclaude",
+      "documentation generator - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,

@@ -24,7 +24,13 @@
       "tool-safety",
       "prompt-injection",
       "server-hardening",
-      "security-checklist"
+      "security-checklist",
+      "mcp",
+      "security",
+      "hardening",
+      "auth",
+      "ai-infrastructure",
+      "skills"
     ],
     "readingTime": 8,
     "difficultyScore": 82,

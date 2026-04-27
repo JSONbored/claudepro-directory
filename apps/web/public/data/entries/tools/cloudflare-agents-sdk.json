@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "ai agents cloudflare",
-      "workers agents"
+      "workers agents",
+      "agent-framework",
+      "cloudflare",
+      "tools",
+      "claude",
+      "heyclaude",
+      "cloudflare agents sdk"
     ],
     "documentationUrl": "https://developers.cloudflare.com/agents/",
     "websiteUrl": "https://developers.cloudflare.com/agents/",

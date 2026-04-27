@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "llm vulnerability scanner",
-      "ai security testing"
+      "ai security testing",
+      "security",
+      "red-teaming",
+      "tools",
+      "claude",
+      "heyclaude",
+      "garak"
     ],
     "documentationUrl": "https://github.com/NVIDIA/garak",
     "websiteUrl": "https://github.com/NVIDIA/garak",

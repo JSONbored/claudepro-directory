@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Select,
@@ -61,6 +61,25 @@ const categoriesSupportingDownloads = new Set(
 
 const defaultTestedPlatforms = categorySpec.defaultTestedPlatforms.join(", ");
 
+type SubmitStatus =
+  | { state: "idle" }
+  | { state: "submitting" }
+  | { state: "success"; issueUrl: string }
+  | { state: "error"; message: string; fallbackUrl: string };
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        element: HTMLElement,
+        options: Record<string, unknown>,
+      ) => string;
+      reset: (widgetId?: string) => void;
+      remove?: (widgetId: string) => void;
+    };
+  }
+}
+
 function slugifySubmission(value: string) {
   return value
     .trim()
@@ -76,6 +95,7 @@ function hasText(value: string) {
 }
 
 export function SubmitForm() {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const [toolName, setToolName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -103,6 +123,13 @@ export function SubmitForm() {
   const [testedPlatforms, setTestedPlatforms] = useState(
     defaultTestedPlatforms,
   );
+  const [honeypot, setHoneypot] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>({
+    state: "idle",
+  });
+  const turnstileRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetId = useRef<string | null>(null);
   const suggestedSlug = useMemo(() => slugifySubmission(toolName), [toolName]);
   const normalizedSlug = slug || suggestedSlug;
 
@@ -126,6 +153,57 @@ export function SubmitForm() {
     if (slugEdited) return;
     setSlug(suggestedSlug);
   }, [slugEdited, suggestedSlug]);
+
+  useEffect(() => {
+    if (!turnstileSiteKey || !turnstileRef.current) return;
+
+    let cancelled = false;
+    const renderTurnstile = () => {
+      if (
+        cancelled ||
+        !turnstileRef.current ||
+        !window.turnstile ||
+        turnstileWidgetId.current
+      ) {
+        return;
+      }
+      turnstileWidgetId.current = window.turnstile.render(
+        turnstileRef.current,
+        {
+          sitekey: turnstileSiteKey,
+          callback: (token: string) => setTurnstileToken(token),
+          "expired-callback": () => setTurnstileToken(""),
+          "error-callback": () => setTurnstileToken(""),
+        },
+      );
+    };
+
+    if (window.turnstile) {
+      renderTurnstile();
+    } else {
+      const existing = document.getElementById("cf-turnstile-script");
+      if (!existing) {
+        const script = document.createElement("script");
+        script.id = "cf-turnstile-script";
+        script.src =
+          "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        script.async = true;
+        script.defer = true;
+        script.onload = renderTurnstile;
+        document.head.appendChild(script);
+      } else {
+        existing.addEventListener("load", renderTurnstile, { once: true });
+      }
+    }
+
+    return () => {
+      cancelled = true;
+      if (turnstileWidgetId.current && window.turnstile?.remove) {
+        window.turnstile.remove(turnstileWidgetId.current);
+        turnstileWidgetId.current = null;
+      }
+    };
+  }, [turnstileSiteKey]);
 
   const selectedFieldModel = useMemo(
     () => (category ? buildSubmissionFieldModel(category) : null),
@@ -291,13 +369,74 @@ export function SubmitForm() {
 
   const isReady = Boolean(category) && missingReadinessItems.length === 0;
 
+  const resetTurnstile = () => {
+    setTurnstileToken("");
+    if (turnstileWidgetId.current) {
+      window.turnstile?.reset(turnstileWidgetId.current);
+    }
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!isReady || submitStatus.state === "submitting") return;
+
+    setSubmitStatus({ state: "submitting" });
+    try {
+      const response = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          fields: submissionFieldValues,
+          honeypot,
+          turnstileToken,
+        }),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        issueUrl?: string;
+        fallbackUrl?: string;
+        error?: string;
+        errors?: string[];
+      };
+
+      if (response.ok && result.issueUrl) {
+        setSubmitStatus({ state: "success", issueUrl: result.issueUrl });
+        resetTurnstile();
+        return;
+      }
+
+      const message =
+        result.errors?.join(", ") ||
+        result.error ||
+        `Submission failed with status ${response.status}`;
+      setSubmitStatus({
+        state: "error",
+        message,
+        fallbackUrl: result.fallbackUrl || issueUrl,
+      });
+      resetTurnstile();
+    } catch {
+      setSubmitStatus({
+        state: "error",
+        message: "Submission endpoint is temporarily unavailable.",
+        fallbackUrl: issueUrl,
+      });
+      resetTurnstile();
+    }
+  };
+
   return (
-    <form
-      className="submit-form-card"
-      action={issueUrl}
-      method="get"
-      target="_blank"
-    >
+    <form className="submit-form-card" onSubmit={handleSubmit}>
+      <div aria-hidden="true" className="hidden">
+        <label htmlFor="submit-company-website">Company website</label>
+        <input
+          id="submit-company-website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={(event) => setHoneypot(event.target.value)}
+        />
+      </div>
+
       <div className="space-y-1">
         <label htmlFor="tool-name" className="submit-label">
           Name <span className="text-destructive">*</span>
@@ -753,18 +892,61 @@ export function SubmitForm() {
       />
 
       <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
-        This opens a category-specific GitHub issue form. Required fields are
-        enforced on GitHub, and anything you entered here is used as prefill
-        where supported.
+        This creates a reviewable GitHub issue from the website. If the direct
+        submission endpoint is unavailable, use the fallback link below to open
+        the same schema-aligned issue body in GitHub.
       </div>
+
+      {turnstileSiteKey ? <div ref={turnstileRef} /> : null}
+
+      {submitStatus.state === "success" ? (
+        <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm leading-7 text-foreground">
+          Submission issue created:{" "}
+          <a
+            href={submitStatus.issueUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary underline underline-offset-4"
+          >
+            view on GitHub
+          </a>
+          .
+        </div>
+      ) : null}
+
+      {submitStatus.state === "error" ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm leading-7 text-foreground">
+          {submitStatus.message}{" "}
+          <a
+            href={submitStatus.fallbackUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-primary underline underline-offset-4"
+          >
+            Open GitHub fallback
+          </a>
+          .
+        </div>
+      ) : null}
 
       <button
         type="submit"
         className="submit-primary-button"
-        disabled={!isReady}
+        disabled={!isReady || submitStatus.state === "submitting"}
       >
-        Open GitHub Issue
+        {submitStatus.state === "submitting"
+          ? "Submitting..."
+          : "Submit for review"}
       </button>
+
+      <a
+        href={issueUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex justify-center text-sm font-medium text-primary underline underline-offset-4"
+      >
+        Open GitHub issue form instead
+      </a>
     </form>
   );
 }

@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "agent orchestration",
-      "stateful llm workflows"
+      "stateful llm workflows",
+      "agent-framework",
+      "orchestration",
+      "tools",
+      "claude",
+      "heyclaude",
+      "langgraph"
     ],
     "documentationUrl": "https://langchain-ai.github.io/langgraph/",
     "websiteUrl": "https://www.langchain.com/langgraph",

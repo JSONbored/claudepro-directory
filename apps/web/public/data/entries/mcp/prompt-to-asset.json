@@ -24,7 +24,14 @@
       "claude image generation",
       "app icon generator",
       "og image generator",
-      "design tools mcp"
+      "design tools mcp",
+      "mcp",
+      "image-generation",
+      "design-tools",
+      "visual-assets",
+      "icons",
+      "favicons",
+      "og-images"
     ],
     "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
     "cardDescription": "Generate app icons, favicons, OG images, and logos via 30+ image models. No API key required for first run.",

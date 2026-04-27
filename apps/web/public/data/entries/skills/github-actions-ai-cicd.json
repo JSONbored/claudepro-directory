@@ -22,7 +22,6 @@
       "actions",
       "automation",
       "ci-cd",
-      "ci/cd",
       "claude",
       "development",
       "devops",
@@ -30,7 +29,8 @@
       "github-actions",
       "powered",
       "skills",
-      "tools"
+      "tools",
+      "ai"
     ],
     "readingTime": 5,
     "difficultyScore": 100,

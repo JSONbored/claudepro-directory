@@ -5,7 +5,7 @@
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-378+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
+379+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
 
@@ -34,7 +34,8 @@ Option B (direct): open a category issue form in GitHub under `.github/ISSUE_TEM
 Option C (advanced): open a pull request with content files directly.
 
 Free Claude resources use issue-first intake by default. Maintainers review,
-validate, and import accepted submissions manually before merge. Tool/app/service
+validate, and approve accepted submissions before automation opens an import PR.
+Tool/app/service
 promotion, listing claims, and jobs use the website lead forms instead of GitHub
 content issues.
 
@@ -208,7 +209,7 @@ content issues.
 - **[Zapier AI](https://heyclau.de/tools/zapier-ai)** - Automation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.
 - **[Zed](https://heyclau.de/tools/zed)** - Collaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.
 
-## 🧠 Skills (66)
+## 🧠 Skills (67)
 
 - **[Agent Evals Regression Gate Skill](https://heyclau.de/skills/agent-evals-regression-gate)** - Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.
 - **[AI Agent Observability and Incident Response Skill](https://heyclau.de/skills/ai-agent-observability-incident-response)** - Instrument AI agent systems with high-signal telemetry and runbook-driven incident response for reliability and safety.
@@ -235,6 +236,7 @@ content issues.
 - **[GitHub Actions AI-Powered CI/CD Automation Skill](https://heyclau.de/skills/github-actions-ai-cicd)** - Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
 - **[GitHub Actions Secure CI/CD Capability Pack Skill](https://heyclau.de/skills/github-actions-secure-cicd-capability-pack)** - Expert GitHub Actions capability skill for secure workflow architecture, token minimization, supply-chain controls, and CI reliability.
 - **[Google Workspace Gemini Automation Skill](https://heyclau.de/skills/google-workspace-gemini-automation)** - Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.
+- **[HeyClaude Skill Submission Factory](https://heyclau.de/skills/heyclaude-skill-submission-factory)** - Create portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.
 - **[Husky Commit Governance Capability Pack Skill](https://heyclau.de/skills/husky-commit-governance-capability-pack)** - Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.
 - **[Image OCR + Table Extraction Skill](https://heyclau.de/skills/image-ocr-table-extraction)** - Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.
 - **[IndexNow Search Indexing Accelerator Skill](https://heyclau.de/skills/indexnow-search-indexing-accelerator)** - Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.

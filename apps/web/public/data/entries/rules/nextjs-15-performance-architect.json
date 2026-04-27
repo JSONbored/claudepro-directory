@@ -29,7 +29,8 @@
       "rules",
       "tools",
       "turbopack",
-      "web-vitals"
+      "web-vitals",
+      "heyclaude"
     ],
     "readingTime": 7,
     "difficultyScore": 100,

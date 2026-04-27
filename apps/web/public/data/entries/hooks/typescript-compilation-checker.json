@@ -26,7 +26,9 @@
       "tools",
       "type-safety",
       "typescript",
-      "validation"
+      "validation",
+      "heyclaude",
+      "typescript checker"
     ],
     "readingTime": 5,
     "difficultyScore": 0,

@@ -3,6 +3,7 @@ import path from "node:path";
 import matter from "gray-matter";
 
 import {
+  deriveSeoFields,
   extractCodeBlocks,
   extractHeadings,
   extractSections,
@@ -163,6 +164,19 @@ export function buildContentEntryFromMdx(params) {
   const sectionFlags = inferSectionBooleans(body);
   const repoUrl = inferred.repoUrl ? String(inferred.repoUrl) : "";
   const githubRepo = parseGitHubRepo(repoUrl);
+  const title = String(data.title ?? fileName.replace(/\.mdx$/, ""));
+  const description = String(data.description ?? "");
+  const tags = Array.isArray(data.tags) ? data.tags.map(String) : [];
+  const seo = deriveSeoFields(
+    {
+      ...data,
+      title,
+      description,
+      tags,
+      cardDescription: inferred.cardDescription,
+    },
+    category,
+  );
   const downloadUrl = normalizeDownloadUrl(
     data.downloadUrl ? String(data.downloadUrl) : "",
   );
@@ -182,19 +196,17 @@ export function buildContentEntryFromMdx(params) {
   return {
     category,
     slug: String(data.slug ?? fileName.replace(/\.mdx$/, "")),
-    title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
-    description: String(data.description ?? ""),
-    seoTitle: data.seoTitle ? String(data.seoTitle) : undefined,
-    seoDescription: data.seoDescription
-      ? String(data.seoDescription)
-      : undefined,
+    title,
+    description,
+    seoTitle: seo.seoTitle || undefined,
+    seoDescription: seo.seoDescription || undefined,
     author: data.author ? String(data.author) : undefined,
     authorProfileUrl: data.authorProfileUrl
       ? String(data.authorProfileUrl)
       : undefined,
     dateAdded: normalizeDateAdded(data.dateAdded),
-    tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-    keywords: Array.isArray(data.keywords) ? data.keywords.map(String) : [],
+    tags,
+    keywords: seo.keywords,
     readingTime:
       typeof data.readingTime === "number" ? data.readingTime : undefined,
     difficultyScore:

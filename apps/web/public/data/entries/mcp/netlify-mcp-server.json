@@ -28,7 +28,8 @@
       "server",
       "serverless",
       "static-sites",
-      "tools"
+      "tools",
+      "heyclaude"
     ],
     "readingTime": 1,
     "difficultyScore": 6,

@@ -30,7 +30,8 @@
       "openapi",
       "rest",
       "rules",
-      "tools"
+      "tools",
+      "heyclaude"
     ],
     "readingTime": 3,
     "difficultyScore": 94,

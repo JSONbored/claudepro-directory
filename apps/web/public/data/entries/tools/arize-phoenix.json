@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "llm tracing",
-      "ai evaluation"
+      "ai evaluation",
+      "observability",
+      "evaluation",
+      "tools",
+      "claude",
+      "heyclaude",
+      "arize phoenix"
     ],
     "documentationUrl": "https://arize.com/docs/phoenix",
     "websiteUrl": "https://phoenix.arize.com",

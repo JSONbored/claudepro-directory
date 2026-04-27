@@ -30,7 +30,8 @@
       "tools",
       "turborepo",
       "workspace",
-      "workspace-management"
+      "workspace-management",
+      "nx"
     ],
     "readingTime": 5,
     "difficultyScore": 100,

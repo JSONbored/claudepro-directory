@@ -25,15 +25,13 @@
       "ai-guidance",
       "claude",
       "claude-md",
-      "claude.md",
       "context-preservation",
       "development",
       "documentation",
       "knowledge",
       "knowledge-management",
       "manager",
-      "project-instructions",
-      "tools"
+      "project-instructions"
     ],
     "readingTime": 10,
     "difficultyScore": 100,

@@ -16,7 +16,12 @@
     ],
     "keywords": [
       "codebase ai",
-      "sourcegraph cody"
+      "sourcegraph cody",
+      "ai-coding",
+      "code-search",
+      "tools",
+      "claude",
+      "heyclaude"
     ],
     "documentationUrl": "https://sourcegraph.com/docs/cody",
     "websiteUrl": "https://sourcegraph.com/cody",

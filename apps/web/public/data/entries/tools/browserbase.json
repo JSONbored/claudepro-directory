@@ -16,7 +16,13 @@
     ],
     "keywords": [
       "cloud browser",
-      "browser agents"
+      "browser agents",
+      "browser-automation",
+      "agent-infrastructure",
+      "tools",
+      "claude",
+      "heyclaude",
+      "browserbase"
     ],
     "documentationUrl": "https://docs.browserbase.com",
     "websiteUrl": "https://www.browserbase.com",

@@ -28,7 +28,9 @@
       "rules",
       "schema",
       "specialist",
-      "tools"
+      "tools",
+      "heyclaude",
+      "graphql federation specialist for claude"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

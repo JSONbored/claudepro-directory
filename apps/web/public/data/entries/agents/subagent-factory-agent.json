@@ -31,8 +31,7 @@
       "specialized-agents",
       "subagent",
       "subagents",
-      "task-decomposition",
-      "tools"
+      "task-decomposition"
     ],
     "readingTime": 10,
     "difficultyScore": 100,

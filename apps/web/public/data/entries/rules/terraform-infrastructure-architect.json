@@ -28,7 +28,9 @@
       "infrastructure",
       "rules",
       "terraform",
-      "tools"
+      "tools",
+      "heyclaude",
+      "terraform infrastructure architect for claude"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

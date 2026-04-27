@@ -28,7 +28,9 @@
       "tools",
       "wasi",
       "wasm",
-      "webassembly"
+      "webassembly",
+      "heyclaude",
+      "webassembly wasm module development skill"
     ],
     "readingTime": 6,
     "difficultyScore": 100,

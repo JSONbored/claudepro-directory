@@ -38,7 +38,6 @@ async function fetchJson(baseUrl, pathname) {
 }
 
 function readEntries(payload) {
-  if (Array.isArray(payload)) return payload;
   if (payload && Array.isArray(payload.entries)) return payload.entries;
   return null;
 }
@@ -63,10 +62,7 @@ for (const pathname of requiredPaths) {
       continue;
     }
     const entries = readEntries(payload);
-    if (pathname === "/data/directory-index.json" && Array.isArray(entries)) {
-      continue;
-    }
-    if (!payload || !Array.isArray(payload.entries)) {
+    if (!Array.isArray(entries)) {
       fail(`${pathname} must return an envelope with entries`);
     }
   } catch (error) {

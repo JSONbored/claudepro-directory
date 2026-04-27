@@ -28,7 +28,9 @@
       "schema",
       "tools",
       "validation",
-      "validator"
+      "validator",
+      "heyclaude",
+      "graphql schema validator - hooks"
     ],
     "readingTime": 1,
     "difficultyScore": 0,
