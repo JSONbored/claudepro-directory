@@ -433,3 +433,11 @@ Thanks to everyone who has contributed to making HeyClaude better.
 [Website](https://heyclau.de) • [GitHub](https://github.com/JSONbored/claudepro-directory) • [Discord](https://discord.gg/Ax3Py4YDrq) • [Twitter](https://x.com/jsonbored) • [License](LICENSE)
 
 </div>
+
+## 💰 Bounty Contribution
+
+- **Task:** [Submit]: ZKProofport MCP - Zero-knowledge identity proofs for AI agents
+- **Reward:** $402
+- **Source:** GitHub-Paid
+- **Date:** 2026-04-27
+
