@@ -20,6 +20,8 @@ on:
       - "TASKS.md"
       - "vitest.config.ts"
   workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * 1"
 
 permissions:
   contents: read
@@ -59,6 +61,9 @@ jobs:
 
       - name: Validate cleanup policy
         run: pnpm validate:clean
+
+      - name: Validate task tracker
+        run: pnpm validate:tasks
 
       - name: Run Vitest suite
         run: pnpm test

@@ -14,8 +14,23 @@ import {
 import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 
-const ALLOWED_KINDS = new Set(["job", "tool"]);
+const ALLOWED_KINDS = new Set(["job", "tool", "claim"]);
 const MAX_LIMIT = 100;
+const CSV_COLUMNS = [
+  "id",
+  "kind",
+  "status",
+  "tier_interest",
+  "contact_name",
+  "contact_email",
+  "company_name",
+  "listing_title",
+  "website_url",
+  "apply_url",
+  "message",
+  "created_at",
+  "updated_at",
+] as const;
 
 function getAdminToken() {
   try {
@@ -60,6 +75,22 @@ function normalizeKind(value: string | null) {
   return ALLOWED_KINDS.has(normalized) ? normalized : "";
 }
 
+function csvEscape(value: unknown) {
+  const normalized = String(value ?? "");
+  return /[",\n\r]/.test(normalized)
+    ? `"${normalized.replaceAll('"', '""')}"`
+    : normalized;
+}
+
+function leadsToCsv(rows: Record<string, unknown>[]) {
+  return [
+    CSV_COLUMNS.join(","),
+    ...rows.map((row) =>
+      CSV_COLUMNS.map((column) => csvEscape(row[column])).join(","),
+    ),
+  ].join("\n");
+}
+
 export async function GET(request: Request) {
   if (!isAllowedOrigin(request)) {
     logApiWarn(request, "admin.listing_leads.forbidden_origin");
@@ -96,6 +127,9 @@ export async function GET(request: Request) {
   const kind = normalizeKind(url.searchParams.get("kind"));
   const status = normalizeCommercialStatus(url.searchParams.get("status"));
   const limit = normalizeLimit(url.searchParams.get("limit"));
+  const format = String(url.searchParams.get("format") ?? "")
+    .trim()
+    .toLowerCase();
 
   const where = [];
   const values: unknown[] = [];
@@ -132,6 +166,20 @@ export async function GET(request: Request) {
     )
     .bind(...values, limit)
     .all();
+
+  if (format === "csv") {
+    return new Response(
+      `${leadsToCsv(results as Record<string, unknown>[])}\n`,
+      {
+        headers: {
+          "cache-control": "no-store",
+          "content-disposition":
+            'attachment; filename="heyclaude-listing-leads.csv"',
+          "content-type": "text/csv; charset=utf-8",
+        },
+      },
+    );
+  }
 
   return NextResponse.json(
     {

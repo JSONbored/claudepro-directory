@@ -9,8 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import categorySpec from "@heyclaude/registry/category-spec.json";
+import { categorySpec } from "@heyclaude/registry";
 import { categoryLabels, siteConfig } from "@/lib/site";
+import { SubmitPreviewCard } from "@/components/submit-preview-card";
+import { SubmitReadinessCard } from "@/components/submit-readiness-card";
 import { buildSubmissionFieldModel } from "@heyclaude/registry/submission-spec";
 
 type SubmissionCategorySpec = {
@@ -273,6 +275,13 @@ export function SubmitForm() {
   ]);
   const missingReadinessItems = readinessItems.filter((item) => !item.ready);
   const sourceWarning = !hasText(githubUrl) && !hasText(docsUrl);
+  const readinessScore = readinessItems.length
+    ? Math.round(
+        ((readinessItems.length - missingReadinessItems.length) /
+          readinessItems.length) *
+          100,
+      )
+    : 0;
 
   const isReady = Boolean(category);
 
@@ -650,46 +659,27 @@ export function SubmitForm() {
         />
       </div>
 
-      <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-medium text-foreground">
-            Submission readiness
-          </span>
-          <span>
-            {category
-              ? missingReadinessItems.length === 0
-                ? "Likely to pass required field checks"
-                : `${missingReadinessItems.length} required field${
-                    missingReadinessItems.length === 1 ? "" : "s"
-                  } missing`
-              : "Select a category to preview required fields"}
-          </span>
-        </div>
-        {readinessItems.length ? (
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {readinessItems.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between gap-2 rounded-lg border border-border/70 bg-card/70 px-3 py-2"
-              >
-                <span>{item.label}</span>
-                <span
-                  className={item.ready ? "text-primary" : "text-destructive"}
-                >
-                  {item.ready ? "ready" : "missing"}
-                </span>
-              </div>
-            ))}
-          </div>
-        ) : null}
-        {sourceWarning ? (
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            Source URL is not currently required by the validator, but
-            submissions without GitHub or docs links are harder to review and
-            may need follow-up.
-          </p>
-        ) : null}
-      </div>
+      <SubmitReadinessCard
+        category={category}
+        items={readinessItems}
+        sourceWarning={sourceWarning}
+      />
+
+      <SubmitPreviewCard
+        title={toolName}
+        slug={normalizedSlug}
+        category={category}
+        author={author}
+        description={description}
+        cardDescription={cardDescription}
+        tags={tags}
+        githubUrl={githubUrl}
+        docsUrl={docsUrl}
+        installCommand={installCommand}
+        assetContent={assetContent || usageSnippet || installCommand}
+        readinessScore={readinessScore}
+        sourceWarning={sourceWarning}
+      />
 
       <div className="rounded-xl border border-border bg-background px-4 py-3 text-xs leading-6 text-muted-foreground">
         This opens a category-specific GitHub issue form. Required fields are

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { BrowseDirectory } from "@/components/browse-directory";
 import { GitHubStarsLive } from "@/components/github-stars-live";
 import { JsonLd } from "@/components/json-ld";
 import { getCategorySummaries, getDirectoryEntries } from "@/lib/content";
+import { getGrowthSurfaces } from "@/lib/growth-surfaces";
 import { buildPageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 import { buildItemListJsonLd } from "@heyclaude/registry/seo";
@@ -24,9 +26,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function HomePage() {
-  const [directoryEntries, categories] = await Promise.all([
+  const [directoryEntries, categories, growthSurfaces] = await Promise.all([
     getDirectoryEntries(),
     getCategorySummaries(),
+    getGrowthSurfaces(),
   ]);
   const initialEntries = directoryEntries.slice(0, 15);
   const totalEntries = categories.reduce(
@@ -88,6 +91,29 @@ export default async function HomePage() {
             />
           </div>
         </div>
+      </section>
+      <section className="container-shell grid gap-4 py-10 md:grid-cols-3">
+        {[
+          ["Trending", "/trending", growthSurfaces.trendingCandidates.length],
+          ["Newly added", "/browse?sort=newest", growthSurfaces.newest.length],
+          ["API", "/api-docs", directoryEntries.length],
+        ].map(([label, href, count]) => (
+          <Link
+            key={href}
+            href={String(href)}
+            className="surface-panel p-5 transition hover:border-primary/45"
+          >
+            <p className="text-xs uppercase tracking-[0.18em] text-primary">
+              {label}
+            </p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+              {Number(count).toLocaleString()}
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Open this discovery surface
+            </p>
+          </Link>
+        ))}
       </section>
     </div>
   );

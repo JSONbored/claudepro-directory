@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 
 import type { D1DatabaseLike, D1RunResult } from "../apps/web/src/lib/db";
 import {
@@ -9,6 +11,8 @@ import {
   queryVotesByClient,
   toggleVote,
 } from "../apps/web/src/lib/votes";
+import { repoRoot } from "./helpers/registry-fixtures";
+import { nextLeadStatus } from "@heyclaude/registry/commercial";
 
 type QueryResult = Record<string, unknown>;
 
@@ -140,5 +144,40 @@ describe("D1 dynamic state helpers", () => {
       count: 0,
       voted: false,
     });
+  });
+
+  it("keeps dynamic-state migrations aligned with votes, leads, and intent events", () => {
+    const migrationsDir = path.join(repoRoot, "apps/web/migrations");
+    const votes = fs.readFileSync(
+      path.join(migrationsDir, "0001_votes.sql"),
+      "utf8",
+    );
+    const leads = fs.readFileSync(
+      path.join(migrationsDir, "0003_commercial_leads.sql"),
+      "utf8",
+    );
+    const intents = fs.readFileSync(
+      path.join(migrationsDir, "0004_intent_events.sql"),
+      "utf8",
+    );
+
+    expect(votes).toContain("votes_entries");
+    expect(leads).toContain("listing_leads");
+    expect(leads).toContain("commercial_placements");
+    expect(intents).toContain("intent_events");
+    expect(intents).toContain("copy");
+    expect(intents).toContain("open");
+  });
+
+  it("smokes lead transitions used by D1-backed admin review", () => {
+    let status = "new";
+    status = nextLeadStatus(status, "review");
+    expect(status).toBe("pending_review");
+    status = nextLeadStatus(status, "approve");
+    expect(status).toBe("approved");
+    status = nextLeadStatus(status, "activate");
+    expect(status).toBe("active");
+    status = nextLeadStatus(status, "expire");
+    expect(status).toBe("expired");
   });
 });

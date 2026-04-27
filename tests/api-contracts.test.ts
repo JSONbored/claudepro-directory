@@ -8,10 +8,12 @@ const apiRoutes = [
   "/api/registry/manifest",
   "/api/registry/categories",
   "/api/registry/search",
+  "/api/registry/feed",
   "/api/registry/entries/{category}/{slug}",
   "/api/registry/entries/{category}/{slug}/llms",
   "/api/listing-leads",
   "/api/admin/listing-leads",
+  "/api/intent-events",
 ];
 
 describe("OpenAPI route coverage", () => {

@@ -38,6 +38,11 @@ const htmlRoutes = [
   { path: "/jobs/post", heading: /Post/i },
   { path: "/tools", heading: /Tools/i },
   { path: "/tools/submit", heading: /Submit|Promote/i },
+  { path: "/api-docs", heading: /Registry API/i },
+  { path: "/claim", heading: /Claim|update/i },
+  { path: "/contributors", heading: /Accepted contributor profiles/i },
+  { path: "/trending", heading: /Popular|trending/i },
+  { path: "/ecosystem", heading: /Ecosystem/i },
 ];
 
 test.describe("site smoke", () => {
@@ -62,9 +67,97 @@ test.describe("site smoke", () => {
       "/api/registry/search?q=claude&limit=5",
       `/api/registry/entries/${entry.category}/${entry.slug}`,
       `/api/registry/entries/${entry.category}/${entry.slug}/llms`,
+      "/api/registry/feed",
     ]) {
       const response = await page.goto(route);
       expect(response?.ok(), route).toBe(true);
     }
+  });
+
+  test("renders JSON-LD and canonical metadata that matches visible page content", async ({
+    page,
+  }) => {
+    await page.goto(`/${entry.category}/${entry.slug}`);
+    await expect(
+      page.getByRole("heading", { name: entry.title }),
+    ).toBeVisible();
+
+    const jsonLdDocuments = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluateAll((scripts) =>
+        scripts.flatMap((script) => {
+          const parsed = JSON.parse(script.textContent || "null");
+          return Array.isArray(parsed) ? parsed : [parsed];
+        }),
+      );
+    expect(
+      jsonLdDocuments.some(
+        (document: any) => document?.["@type"] === "BreadcrumbList",
+      ),
+    ).toBe(true);
+    expect(
+      jsonLdDocuments.some(
+        (document: any) => document?.["@type"] === "WebPage",
+      ),
+    ).toBe(true);
+    expect(
+      jsonLdDocuments.some(
+        (document: any) =>
+          document?.name === entry.title || document?.headline === entry.title,
+      ),
+    ).toBe(true);
+
+    const canonical = await page
+      .locator('link[rel="canonical"]')
+      .getAttribute("href");
+    expect(canonical).toBe(
+      `https://heyclau.de/${entry.category}/${entry.slug}`,
+    );
+  });
+
+  test("keeps sitemap coverage for canonical public routes", async ({
+    request,
+  }) => {
+    const response = await request.get("/sitemap.xml");
+    expect(response.ok()).toBe(true);
+    const sitemap = await response.text();
+    for (const route of [
+      "https://heyclau.de/",
+      "https://heyclau.de/browse",
+      "https://heyclau.de/api-docs",
+      "https://heyclau.de/claim",
+      "https://heyclau.de/contributors",
+      "https://heyclau.de/trending",
+      `https://heyclau.de/${entry.category}/${entry.slug}`,
+    ]) {
+      expect(sitemap).toContain(route);
+    }
+  });
+
+  test("registry API supports ETag revalidation", async ({ request }) => {
+    const first = await request.get("/api/registry/manifest");
+    expect(first.ok()).toBe(true);
+    const etag = first.headers()["etag"];
+    expect(etag).toBeTruthy();
+
+    const second = await request.get("/api/registry/manifest", {
+      headers: { "if-none-match": etag },
+    });
+    expect(second.status()).toBe(304);
+  });
+
+  test("intent metrics fail open when SITE_DB is unavailable", async ({
+    request,
+  }) => {
+    const response = await request.post("/api/intent-events", {
+      data: {
+        type: "copy",
+        entryKey: `${entry.category}:${entry.slug}`,
+        sessionId: "smoke-session",
+      },
+    });
+    expect(response.ok()).toBe(true);
+    const payload = await response.json();
+    expect(payload).toMatchObject({ ok: false, stored: false });
   });
 });

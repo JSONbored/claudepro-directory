@@ -1,4 +1,4 @@
-export const LISTING_LEAD_KINDS = ["job", "tool"];
+export const LISTING_LEAD_KINDS = ["job", "tool", "claim"];
 export const COMMERCIAL_TIERS = ["free", "standard", "featured", "sponsored"];
 export const COMMERCIAL_PLACEMENT_TARGETS = ["job", "tool", "entry"];
 export const COMMERCIAL_STATUSES = [
@@ -84,8 +84,11 @@ export function validateListingLeadPayload(payload = {}) {
   }
   if (!companyName) errors.push("companyName is required");
   if (!listingTitle) errors.push("listingTitle is required");
-  if (kind === "tool" && !/^https:\/\//i.test(websiteUrl)) {
-    errors.push("tool leads require an https websiteUrl");
+  if (
+    (kind === "tool" || kind === "claim") &&
+    !/^https:\/\//i.test(websiteUrl)
+  ) {
+    errors.push(`${kind} leads require an https websiteUrl`);
   }
   if (kind === "job" && applyUrl && !/^https:\/\//i.test(applyUrl)) {
     errors.push("job applyUrl must use https when provided");
@@ -174,4 +177,57 @@ export function nextLeadStatus(currentStatus, action) {
   };
 
   return transitions[current]?.[normalizedAction] ?? current;
+}
+
+export function summarizePlacementExpiry(
+  placements = [],
+  now = new Date(),
+  reminderWindowDays = 14,
+) {
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  const windowMs = reminderWindowDays * 86_400_000;
+
+  return placements
+    .map((placement) => {
+      const expiresAt = placement.expiresAt || placement.expires_at;
+      const expiryTime = expiresAt ? new Date(expiresAt).getTime() : null;
+      const daysUntilExpiry =
+        expiryTime && Number.isFinite(expiryTime)
+          ? Math.ceil((expiryTime - nowTime) / 86_400_000)
+          : null;
+      const status = normalizeCommercialStatus(placement.status || "active");
+
+      return {
+        targetKind: placement.targetKind || placement.target_kind || "",
+        targetKey: placement.targetKey || placement.target_key || "",
+        tier: normalizeCommercialTier(placement.tier),
+        status,
+        expiresAt: expiresAt || "",
+        daysUntilExpiry,
+        needsRenewalReminder:
+          status === "active" &&
+          daysUntilExpiry !== null &&
+          daysUntilExpiry >= 0 &&
+          daysUntilExpiry <= Math.ceil(windowMs / 86_400_000),
+        expired:
+          status === "active" &&
+          daysUntilExpiry !== null &&
+          daysUntilExpiry < 0,
+      };
+    })
+    .sort((left, right) => {
+      const leftDays = left.daysUntilExpiry ?? Number.POSITIVE_INFINITY;
+      const rightDays = right.daysUntilExpiry ?? Number.POSITIVE_INFINITY;
+      return (
+        leftDays - rightDays || left.targetKey.localeCompare(right.targetKey)
+      );
+    });
+}
+
+export function buildPlacementRenewalReminder(summary) {
+  if (!summary?.needsRenewalReminder) return "";
+  return [
+    `${summary.tier} ${summary.targetKind} placement ${summary.targetKey} expires in ${summary.daysUntilExpiry} day${summary.daysUntilExpiry === 1 ? "" : "s"}.`,
+    "Review performance, confirm disclosure remains accurate, and contact the sponsor before expiry.",
+  ].join(" ");
 }

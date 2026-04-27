@@ -41,6 +41,7 @@ Current migrations include:
 - `0001_votes.sql` for upvotes
 - `0002_jobs.sql` for private jobs listing records
 - `0003_commercial_leads.sql` for job/tool listing leads and commercial placement windows
+- `0004_intent_events.sql` for privacy-light copy/open/install/download/vote intent counters
 
 ## OpenNext build/deploy commands
 

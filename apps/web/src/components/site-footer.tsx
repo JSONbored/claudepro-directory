@@ -108,6 +108,36 @@ export function SiteFooter() {
           >
             Advertise
           </Link>
+          <Link
+            href="/api-docs"
+            className="block transition hover:text-foreground"
+          >
+            API
+          </Link>
+          <Link
+            href="/contributors"
+            className="block transition hover:text-foreground"
+          >
+            Contributors
+          </Link>
+          <Link
+            href="/trending"
+            className="block transition hover:text-foreground"
+          >
+            Trending
+          </Link>
+          <Link
+            href="/ecosystem"
+            className="block transition hover:text-foreground"
+          >
+            Ecosystem
+          </Link>
+          <Link
+            href="/claim"
+            className="block transition hover:text-foreground"
+          >
+            Claim/update
+          </Link>
         </div>
         <div className="space-y-3 text-sm text-muted-foreground">
           <p className="font-medium text-foreground">Project</p>

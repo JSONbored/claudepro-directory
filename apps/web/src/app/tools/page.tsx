@@ -13,6 +13,15 @@ import {
   buildItemListJsonLd,
 } from "@heyclaude/registry/seo";
 
+const toolCategories = [
+  "Infrastructure",
+  "Data",
+  "Productivity",
+  "Payments",
+  "Agent orchestration",
+  "Documentation",
+];
+
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -88,6 +97,21 @@ export default async function ToolsPage() {
           </Link>
         </div>
       </div>
+      <section className="surface-panel p-5">
+        <p className="text-xs uppercase tracking-[0.18em] text-primary">
+          Tool taxonomy
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {toolCategories.map((category) => (
+            <span
+              key={category}
+              className="rounded-full border border-border bg-background px-3 py-1 text-sm text-muted-foreground"
+            >
+              {category}
+            </span>
+          ))}
+        </div>
+      </section>
       <ToolsDirectory tools={tools} />
     </div>
   );

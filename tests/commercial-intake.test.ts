@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildPlacementRenewalReminder,
   isPlacementActive,
   linkRelForDisclosure,
   nextLeadStatus,
   normalizeCommercialTier,
   normalizeDisclosure,
   normalizeLeadKind,
+  summarizePlacementExpiry,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
 
@@ -92,5 +94,42 @@ describe("commercial intake contracts", () => {
     });
     expect(job.ok).toBe(true);
     expect(job.data.kind).toBe("job");
+
+    const claim = validateListingLeadPayload({
+      kind: "claim",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "Example MCP",
+      websiteUrl: "https://example.com/proof",
+      message: "Claiming an existing listing with source proof.",
+    });
+    expect(claim.ok).toBe(true);
+    expect(claim.data.kind).toBe("claim");
+  });
+
+  it("summarizes placement expiry and renewal reminders", () => {
+    const [summary] = summarizePlacementExpiry(
+      [
+        {
+          targetKind: "tool",
+          targetKey: "tools:example",
+          tier: "sponsored",
+          status: "active",
+          expiresAt: "2026-05-03T00:00:00Z",
+        },
+      ],
+      new Date("2026-04-26T00:00:00Z"),
+      14,
+    );
+
+    expect(summary).toMatchObject({
+      targetKey: "tools:example",
+      needsRenewalReminder: true,
+      daysUntilExpiry: 7,
+    });
+    expect(buildPlacementRenewalReminder(summary)).toContain(
+      "expires in 7 days",
+    );
   });
 });

@@ -167,6 +167,7 @@ describe("cleanup policy", () => {
       "validate:raycast-feed",
       "test",
       "test:e2e",
+      "validate:tasks",
       "type-check",
       "build",
     ]) {

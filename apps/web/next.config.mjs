@@ -21,11 +21,6 @@ const nextConfig = {
         permanent: true,
       },
       {
-        source: "/trending",
-        destination: "/browse",
-        permanent: true,
-      },
-      {
         source: "/community",
         destination: "/browse",
         permanent: true,

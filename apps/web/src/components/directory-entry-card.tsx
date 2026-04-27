@@ -162,7 +162,12 @@ export function DirectoryEntryCard({
       await navigator.clipboard.writeText(normalized);
       setCopiedAction(action);
       window.dispatchEvent(
-        new CustomEvent("heyclaude:intent", { detail: { type: "copy" } }),
+        new CustomEvent("heyclaude:intent", {
+          detail: {
+            type: action === "install" ? "install" : "copy",
+            entryKey: `${entry.category}:${entry.slug}`,
+          },
+        }),
       );
       pushToast({
         variant: "success",
@@ -224,6 +229,16 @@ export function DirectoryEntryCard({
               <Link
                 href={`/${entry.category}/${entry.slug}`}
                 className="directory-title block font-semibold tracking-tight text-foreground transition group-hover:text-primary"
+                onClick={() =>
+                  window.dispatchEvent(
+                    new CustomEvent("heyclaude:intent", {
+                      detail: {
+                        type: "open",
+                        entryKey: `${entry.category}:${entry.slug}`,
+                      },
+                    }),
+                  )
+                }
               >
                 {entry.title}
               </Link>
@@ -451,6 +466,16 @@ export function DirectoryEntryCard({
             <Link
               href={`/${entry.category}/${entry.slug}`}
               className="directory-link-chip"
+              onClick={() =>
+                window.dispatchEvent(
+                  new CustomEvent("heyclaude:intent", {
+                    detail: {
+                      type: "open",
+                      entryKey: `${entry.category}:${entry.slug}`,
+                    },
+                  }),
+                )
+              }
             >
               <ArrowUpRight className="size-3.5" />
               Open

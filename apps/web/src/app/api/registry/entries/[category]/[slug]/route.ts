@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
 import { getEntry, isSafeContentPathPart } from "@/lib/content";
+import { cachedJsonResponse } from "@/lib/http-cache";
 
 type EntryApiRouteProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -36,16 +37,9 @@ export async function GET(request: Request, { params }: EntryApiRouteProps) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  return NextResponse.json(
-    {
-      schemaVersion: 1,
-      key: `${category}:${slug}`,
-      entry,
-    },
-    {
-      headers: {
-        "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-      },
-    },
-  );
+  return cachedJsonResponse(request, {
+    schemaVersion: 1,
+    key: `${category}:${slug}`,
+    entry,
+  });
 }

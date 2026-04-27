@@ -150,6 +150,15 @@ export default async function DetailPage({ params }: DetailPageProps) {
     ? entry.installationOrder
     : [];
   const distributionBadges = getDistributionBadges(entry);
+  const qualityBadges = [
+    entry.repoUrl || entry.documentationUrl ? "External source" : "",
+    entry.downloadTrust === "first-party" ? "Verified package" : "",
+    entry.installCommand || entry.downloadUrl ? "Install path" : "",
+    entry.configSnippet || entry.scriptBody || primarySnippet
+      ? "Copy-ready"
+      : "",
+    entry.author ? "Attributed" : "First-party editorial",
+  ].filter(Boolean);
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -220,6 +229,16 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 title={badge.title}
               >
                 {badge.label}
+              </span>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {qualityBadges.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-border bg-card/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+              >
+                {badge}
               </span>
             ))}
           </div>
@@ -438,6 +457,24 @@ export default async function DetailPage({ params }: DetailPageProps) {
                   Open source
                 </a>
               ) : null}
+              <Link
+                href="/claim"
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+              >
+                Claim/update listing
+              </Link>
+              <a
+                href={`/api/registry/entries/${entry.category}/${entry.slug}`}
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+              >
+                API detail
+              </a>
+              <a
+                href={`/api/registry/entries/${entry.category}/${entry.slug}/llms`}
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+              >
+                LLM text
+              </a>
             </div>
 
             {entry.downloadUrl ? (

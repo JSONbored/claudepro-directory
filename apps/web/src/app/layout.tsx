@@ -6,6 +6,7 @@ import Script from "next/script";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { JsonLd } from "@/components/json-ld";
+import { IntentEventReporter } from "@/components/intent-event-reporter";
 import { NewsletterPrompt } from "@/components/newsletter-prompt";
 import { RelaunchPrompt } from "@/components/relaunch-prompt";
 import { ToastProvider } from "@/components/ui/toast-provider";
@@ -98,6 +99,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <SiteFooter />
           <NewsletterPrompt />
           <RelaunchPrompt />
+          <IntentEventReporter />
         </ToastProvider>
       </body>
     </html>

@@ -109,6 +109,25 @@ export type CategorySummary = {
   description: string;
 };
 
+export type RegistryCategorySpecEntry = {
+  label: string;
+  description: string;
+  usageHint: string;
+  quickstart?: string[];
+  template: string;
+  requiresAssetContent: boolean;
+  requiresUsageSnippet: boolean;
+  supportsSkillMetadata: boolean;
+  supportsDownloadUrl: boolean;
+};
+
+export type RegistryCategorySpec = {
+  categoryOrder: string[];
+  submissionOrder: string[];
+  defaultTestedPlatforms: string[];
+  categories: Record<string, RegistryCategorySpecEntry>;
+};
+
 export type DistributionBadge = {
   label: string;
   title: string;
@@ -116,7 +135,7 @@ export type DistributionBadge = {
 
 export type Disclosure = "editorial" | "affiliate" | "sponsored";
 export type CommercialTier = "free" | "standard" | "featured" | "sponsored";
-export type ListingLeadKind = "job" | "tool";
+export type ListingLeadKind = "job" | "tool" | "claim";
 export type ListingLead = {
   kind: ListingLeadKind;
   tierInterest: CommercialTier;
@@ -176,6 +195,17 @@ export type EntryQualityReport = {
     seo: number;
   };
   provenance: SourceProvenance;
+  warnings: string[];
+};
+
+export type ContentQualityPrompt = {
+  key: string;
+  category: string;
+  slug: string;
+  title: string;
+  score: number;
+  priority: "high" | "medium" | "low";
+  prompt: string;
   warnings: string[];
 };
 
@@ -241,8 +271,8 @@ export type RegistryEnvelope<T> = {
   entries: T[];
 };
 
-export const categorySpec: Record<string, unknown>;
-export const registryCategorySpec: Record<string, unknown>;
+export const categorySpec: RegistryCategorySpec;
+export const registryCategorySpec: RegistryCategorySpec;
 export const ENTRY_SCHEMA_VERSION: number;
 export const RAYCAST_SCHEMA_VERSION: number;
 export const REGISTRY_ARTIFACT_SCHEMA_VERSION: number;
@@ -257,6 +287,53 @@ export function getCopyText(entry: Partial<DirectoryEntry>): string;
 export function getDistributionBadges(
   entry: Partial<DirectoryEntry>,
 ): DistributionBadge[];
+export function buildContentPromptArtifact(entries: ContentEntry[]): {
+  schemaVersion: number;
+  kind: string;
+  generatedAt: string;
+  count: number;
+  prompts: ContentQualityPrompt[];
+};
+export function buildRegistryArtifactSet(
+  entries: ContentEntry[],
+  params?: {
+    siteUrl?: string;
+    siteName?: string;
+    siteDescription?: string;
+  },
+): Array<
+  | {
+      path: string;
+      type: "json";
+      value: unknown;
+    }
+  | {
+      path: string;
+      type: "text";
+      value: string;
+    }
+>;
+export function summarizePlacementExpiry(
+  placements: Array<Record<string, unknown>>,
+  now?: Date | string,
+  reminderWindowDays?: number,
+): Array<{
+  targetKind: string;
+  targetKey: string;
+  tier: CommercialTier;
+  status: string;
+  expiresAt: string;
+  daysUntilExpiry: number | null;
+  needsRenewalReminder: boolean;
+  expired: boolean;
+}>;
+export function buildPlacementRenewalReminder(summary: {
+  targetKind: string;
+  targetKey: string;
+  tier: CommercialTier;
+  daysUntilExpiry: number | null;
+  needsRenewalReminder: boolean;
+}): string;
 export const LISTING_LEAD_KINDS: string[];
 export const COMMERCIAL_TIERS: string[];
 export const COMMERCIAL_PLACEMENT_TARGETS: string[];

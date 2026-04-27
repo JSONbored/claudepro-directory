@@ -12,6 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { DirectoryEntry } from "@/lib/content";
+import { useBrowseUrlSync } from "@/hooks/use-browse-url-sync";
+import { useClientId } from "@/hooks/use-client-id";
 import { categoryLabels, siteConfig } from "@/lib/site";
 
 type BrowseDirectoryProps = {
@@ -124,7 +126,7 @@ export function BrowseDirectory({
   const [utilityFilter, setUtilityFilter] = useState(initialUtilityFilter);
   const [sortMode, setSortMode] = useState(initialSortMode);
   const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
-  const [clientId, setClientId] = useState("");
+  const [clientId, setClientId] = useClientId("heyclaude-client-id");
   const [votesAvailable, setVotesAvailable] = useState(true);
   const [voteCounts, setVoteCounts] = useState<Record<string, number>>({});
   const [popularSortSnapshot, setPopularSortSnapshot] = useState<
@@ -132,7 +134,6 @@ export function BrowseDirectory({
   >({});
   const [votedByMe, setVotedByMe] = useState<Record<string, boolean>>({});
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const hasHydratedUrlState = useRef(false);
   const deferredQuery = useDeferredValue(query);
   const normalizedQuery = deferredQuery.trim().toLowerCase();
 
@@ -174,71 +175,20 @@ export function BrowseDirectory({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entriesUrl, isDefaultQuery]);
 
-  useEffect(() => {
-    if (!syncUrl) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const nextQuery = params.get("q");
-    const nextCategory = normalizeCategory(params.get("category") ?? undefined);
-    const nextUtility = normalizeUtilityFilter(
-      params.get("utility") ?? undefined,
-    );
-    const nextSort = normalizeSortMode(params.get("sort") ?? undefined);
-
-    if (nextQuery !== null) setQuery(nextQuery);
-    setCategory(nextCategory);
-    setUtilityFilter(nextUtility);
-    setSortMode(nextSort);
-    hasHydratedUrlState.current = true;
-  }, [syncUrl]);
-
-  useEffect(() => {
-    if (!syncUrl || !hasHydratedUrlState.current) return;
-
-    const params = new URLSearchParams(window.location.search);
-    const normalized = query.trim();
-
-    if (normalized) {
-      params.set("q", normalized);
-    } else {
-      params.delete("q");
-    }
-
-    if (category !== "all") {
-      params.set("category", category);
-    } else {
-      params.delete("category");
-    }
-
-    if (utilityFilter !== "all") {
-      params.set("utility", utilityFilter);
-    } else {
-      params.delete("utility");
-    }
-
-    if (sortMode !== "popular") {
-      params.set("sort", sortMode);
-    } else {
-      params.delete("sort");
-    }
-
-    const search = params.toString();
-    const nextUrl = `${window.location.pathname}${search ? `?${search}` : ""}`;
-    window.history.replaceState(null, "", nextUrl);
-  }, [category, query, sortMode, syncUrl, utilityFilter]);
-
-  useEffect(() => {
-    const storageKey = "heyclaude-client-id";
-    const existing = window.localStorage.getItem(storageKey);
-    if (existing) {
-      setClientId(existing);
-      return;
-    }
-
-    const generated = crypto.randomUUID();
-    window.localStorage.setItem(storageKey, generated);
-    setClientId(generated);
-  }, []);
+  useBrowseUrlSync({
+    enabled: syncUrl,
+    query,
+    category,
+    utilityFilter,
+    sortMode,
+    normalizeCategory,
+    normalizeUtilityFilter,
+    normalizeSortMode,
+    setQuery,
+    setCategory,
+    setUtilityFilter,
+    setSortMode,
+  });
 
   useEffect(() => {
     const baseScores: Record<string, number> = {};
@@ -479,7 +429,9 @@ export function BrowseDirectory({
         [key]: Boolean(payload.voted),
       }));
       window.dispatchEvent(
-        new CustomEvent("heyclaude:intent", { detail: { type: "vote" } }),
+        new CustomEvent("heyclaude:intent", {
+          detail: { type: "vote", entryKey: key },
+        }),
       );
 
       return {

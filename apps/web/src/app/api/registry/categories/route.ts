@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
 import { getCategorySummaries, getRegistryManifest } from "@/lib/content";
+import { cachedJsonResponse } from "@/lib/http-cache";
 
 export async function GET(request: Request) {
   if (!isAllowedOrigin(request)) {
@@ -27,17 +28,10 @@ export async function GET(request: Request) {
     getCategorySummaries(),
   ]);
 
-  return NextResponse.json(
-    {
-      schemaVersion: 1,
-      generatedAt: manifest.generatedAt,
-      count: categories.length,
-      entries: categories,
-    },
-    {
-      headers: {
-        "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-      },
-    },
-  );
+  return cachedJsonResponse(request, {
+    schemaVersion: 1,
+    generatedAt: manifest.generatedAt,
+    count: categories.length,
+    entries: categories,
+  });
 }

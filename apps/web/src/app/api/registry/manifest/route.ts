@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
 import { getRegistryManifest } from "@/lib/content";
+import { cachedJsonResponse } from "@/lib/http-cache";
 
 export async function GET(request: Request) {
   if (!isAllowedOrigin(request)) {
@@ -22,9 +23,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
 
-  return NextResponse.json(await getRegistryManifest(), {
-    headers: {
-      "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-    },
-  });
+  return cachedJsonResponse(request, await getRegistryManifest());
 }

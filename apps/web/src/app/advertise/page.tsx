@@ -111,6 +111,38 @@ export default function AdvertisePage() {
           );
         })}
       </section>
+
+      <section className="surface-panel space-y-4 p-6">
+        <p className="text-xs uppercase tracking-[0.18em] text-primary">
+          Disclosure examples
+        </p>
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            [
+              "Editorial",
+              "Free listing reviewed for usefulness and fit. Ranking is not paid.",
+            ],
+            [
+              "Featured",
+              "Paid or manually selected highlight. The card is labeled Featured.",
+            ],
+            [
+              "Sponsored",
+              "Paid placement. Outbound links use sponsored/no-follow treatment.",
+            ],
+          ].map(([title, copy]) => (
+            <div
+              key={title}
+              className="rounded-xl border border-border bg-background p-4"
+            >
+              <p className="text-sm font-medium text-foreground">{title}</p>
+              <p className="mt-2 text-xs leading-6 text-muted-foreground">
+                {copy}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

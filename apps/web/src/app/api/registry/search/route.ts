@@ -4,6 +4,7 @@ import type { SearchDocument } from "@heyclaude/registry";
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
 import { getSearchIndex } from "@/lib/content";
+import { cachedJsonResponse } from "@/lib/http-cache";
 
 function normalizeLimit(value: string | null) {
   const parsed = Number(value ?? 20);
@@ -68,7 +69,8 @@ export async function GET(request: Request) {
     .filter((entry) => matchesQuery(entry, query))
     .slice(0, limit);
 
-  return NextResponse.json(
+  return cachedJsonResponse(
+    request,
     {
       schemaVersion: 1,
       query,

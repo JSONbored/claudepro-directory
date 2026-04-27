@@ -6,7 +6,7 @@ import { ArrowUpRight, Mail } from "lucide-react";
 
 import { siteConfig } from "@/lib/site";
 
-type ListingLeadKind = "job" | "tool";
+type ListingLeadKind = "job" | "tool" | "claim";
 type ListingLeadFormProps = {
   kind: ListingLeadKind;
   tier?: "free" | "standard" | "featured" | "sponsored";
@@ -40,6 +40,20 @@ const labels = {
       "What it does, who it is for, pricing model, affiliate/referral details, and preferred placement.",
     submit: "Send listing lead",
     subject: "HeyClaude tool/app listing lead",
+  },
+  claim: {
+    eyebrow: "Claim/update lead",
+    title: "Listing or profile name",
+    titlePlaceholder: "Example MCP Server",
+    websiteLabel: "Canonical URL",
+    websitePlaceholder: "https://example.com",
+    applyLabel: "Existing HeyClaude URL",
+    applyPlaceholder: "https://heyclau.de/mcp/example",
+    messageLabel: "Requested update",
+    messagePlaceholder:
+      "Which listing you own, what should change, and what source proves the change.",
+    submit: "Send claim/update lead",
+    subject: "HeyClaude claim/update listing lead",
   },
 } as const;
 

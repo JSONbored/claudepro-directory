@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildContentQualityArtifact,
+  buildContentPromptArtifact,
   buildDirectoryEntries,
   buildJsonLdSnapshots,
   buildRaycastEnvelope,
@@ -36,6 +37,10 @@ describe("registry artifacts", () => {
   const qualityPayload = readDataJson<{ schemaVersion: number; count: number }>(
     "content-quality-report.json",
   );
+  const qualityPromptsPayload = readDataJson<{
+    schemaVersion: number;
+    count: number;
+  }>("content-quality-prompts.json");
   const jsonLdSnapshotsPayload = readDataJson<{
     schemaVersion: number;
     count: number;
@@ -81,6 +86,9 @@ describe("registry artifacts", () => {
       raycastPayload.entries,
     );
     expect(buildContentQualityArtifact(contentEntries)).toEqual(qualityPayload);
+    expect(buildContentPromptArtifact(contentEntries)).toEqual(
+      qualityPromptsPayload,
+    );
     expect(
       JSON.parse(
         JSON.stringify(
@@ -164,6 +172,9 @@ describe("registry artifacts", () => {
       totalEntries: contentEntries.length,
     });
     expect(manifest.artifacts.llmsFull).toBe("/data/llms-full.txt");
+    expect(manifest.artifacts.contentQualityPrompts).toBe(
+      "/data/content-quality-prompts.json",
+    );
     expect(
       fs.existsSync(
         path.join(

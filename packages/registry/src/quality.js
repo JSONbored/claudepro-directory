@@ -269,3 +269,44 @@ export function buildContentQualityReport(entries) {
     entries: entryReports,
   };
 }
+
+export function buildContentPromptReport(entries, maxPrompts = 30) {
+  const quality = buildContentQualityReport(entries);
+  const prompts = quality.entries
+    .filter((entry) => entry.warnings.length > 0 || entry.scores.total < 80)
+    .sort(
+      (left, right) =>
+        left.scores.total - right.scores.total ||
+        right.warnings.length - left.warnings.length ||
+        left.key.localeCompare(right.key),
+    )
+    .slice(0, maxPrompts)
+    .map((entry) => ({
+      key: entry.key,
+      category: entry.category,
+      slug: entry.slug,
+      title: entry.title,
+      score: entry.scores.total,
+      priority:
+        entry.scores.total < 60
+          ? "high"
+          : entry.scores.total < 75
+            ? "medium"
+            : "low",
+      prompt: [
+        `Improve ${entry.title} (${entry.key}).`,
+        entry.warnings.length
+          ? `Address: ${entry.warnings.join(" ")}`
+          : "Tighten usefulness, source, copyability, freshness, or SEO metadata.",
+      ].join(" "),
+      warnings: entry.warnings,
+    }));
+
+  return {
+    schemaVersion: QUALITY_REPORT_SCHEMA_VERSION,
+    kind: "content-quality-prompts",
+    generatedAt: quality.generatedAt,
+    count: prompts.length,
+    prompts,
+  };
+}

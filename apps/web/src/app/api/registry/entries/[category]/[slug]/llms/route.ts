@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
 import { getEntryLlmsText, isSafeContentPathPart } from "@/lib/content";
+import { cachedTextResponse } from "@/lib/http-cache";
 
 type EntryLlmsApiRouteProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -39,10 +40,5 @@ export async function GET(
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
-  return new Response(text, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-    },
-  });
+  return cachedTextResponse(request, text);
 }

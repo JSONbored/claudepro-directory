@@ -1,15 +1,17 @@
 import type { MetadataRoute } from "next";
 
 import { getDirectoryEntries } from "@/lib/content";
+import { getContributors } from "@/lib/contributors";
 import { getJobs } from "@/lib/jobs";
 import { getTools } from "@/lib/tools";
 import { siteConfig } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [entries, jobs, tools] = await Promise.all([
+  const [entries, jobs, tools, contributors] = await Promise.all([
     getDirectoryEntries(),
     getJobs(),
     getTools(),
+    getContributors(),
   ]);
   const staticPaths = [
     "",
@@ -21,6 +23,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/jobs/post",
     "/submit",
     "/advertise",
+    "/api-docs",
+    "/claim",
+    "/contributors",
+    "/ecosystem",
+    "/trending",
     "/llms.txt",
     "/llms-full.txt",
     ...siteConfig.categoryOrder
@@ -65,11 +72,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : undefined,
   }));
 
+  const contributorItems = contributors.map((contributor) => ({
+    url: `${siteConfig.url}/contributors/${contributor.slug}`,
+  }));
+
   return [
     ...staticItems,
     ...entryItems,
     ...entryLlmsItems,
     ...jobItems,
     ...toolItems,
+    ...contributorItems,
   ];
 }

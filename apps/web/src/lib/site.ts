@@ -1,4 +1,4 @@
-import categorySpec from "@heyclaude/registry/category-spec.json";
+import { categorySpec } from "@heyclaude/registry";
 
 type CategorySpecEntry = {
   label: string;

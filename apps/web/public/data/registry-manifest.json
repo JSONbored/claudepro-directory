@@ -62,6 +62,7 @@
     "raycast": "/data/raycast-index.json",
     "registryManifest": "/data/registry-manifest.json",
     "contentQuality": "/data/content-quality-report.json",
+    "contentQualityPrompts": "/data/content-quality-prompts.json",
     "jsonLdSnapshots": "/data/jsonld-snapshots.json",
     "llmsFull": "/data/llms-full.txt",
     "entryDetails": "/data/entries",

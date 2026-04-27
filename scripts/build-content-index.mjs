@@ -3,20 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 
-import {
-  buildArtifactEnvelope,
-  buildDirectoryEntries,
-  buildEntryDetail,
-  buildEntryLlmsArtifact,
-  buildContentQualityArtifact,
-  buildCorpusLlmsArtifact,
-  buildJsonLdSnapshots,
-  buildRaycastDetail,
-  buildRaycastEnvelope,
-  buildRegistryManifest,
-  buildSearchEntries,
-  categorySpec,
-} from "@heyclaude/registry";
+import { categorySpec, buildRegistryArtifactSet } from "@heyclaude/registry";
 import {
   buildContentEntryFromMdx,
   DEFAULT_DIRECTORY_REPO_URL,
@@ -28,22 +15,6 @@ const repoRoot = path.resolve(scriptDir, "..");
 const contentRoot = path.join(repoRoot, "content");
 const generatedDir = path.join(repoRoot, "apps/web/src/generated");
 const publicDataDir = path.join(repoRoot, "apps/web/public/data");
-const directoryOutputFile = path.join(publicDataDir, "directory-index.json");
-const searchOutputFile = path.join(publicDataDir, "search-index.json");
-const registryManifestOutputFile = path.join(
-  publicDataDir,
-  "registry-manifest.json",
-);
-const contentQualityOutputFile = path.join(
-  publicDataDir,
-  "content-quality-report.json",
-);
-const jsonLdSnapshotsOutputFile = path.join(
-  publicDataDir,
-  "jsonld-snapshots.json",
-);
-const llmsFullOutputFile = path.join(publicDataDir, "llms-full.txt");
-const raycastOutputFile = path.join(publicDataDir, "raycast-index.json");
 const entryDataDir = path.join(publicDataDir, "entries");
 const entryLlmsDir = path.join(publicDataDir, "llms");
 const raycastDetailDir = path.join(publicDataDir, "raycast");
@@ -261,77 +232,24 @@ async function main() {
 
   entries.sort((left, right) => left.title.localeCompare(right.title));
 
-  const directoryEntries = buildDirectoryEntries(entries);
-  const searchEntries = buildSearchEntries(entries);
-
   resetGeneratedJsonDir(entryDataDir);
   resetGeneratedJsonDir(entryLlmsDir);
   resetGeneratedJsonDir(raycastDetailDir);
-  let entryDetailCount = 0;
-  let entryLlmsCount = 0;
-  let raycastDetailCount = 0;
 
-  for (const entry of entries) {
-    writeJsonFile(
-      path.join(entryDataDir, entry.category, `${entry.slug}.json`),
-      buildEntryDetail(entry),
-    );
-    writeTextFile(
-      path.join(entryLlmsDir, entry.category, `${entry.slug}.txt`),
-      buildEntryLlmsArtifact(entry, { siteUrl: "https://heyclau.de" }),
-    );
-    writeJsonFile(
-      path.join(raycastDetailDir, entry.category, `${entry.slug}.json`),
-      buildRaycastDetail(entry),
-    );
-    entryDetailCount += 1;
-    entryLlmsCount += 1;
-    raycastDetailCount += 1;
-  }
-
-  const directoryPayload = `${JSON.stringify(buildArtifactEnvelope("directory-index", directoryEntries), null, 2)}\n`;
-  const wroteDirectoryIndex = writeFileIfChanged(
-    directoryOutputFile,
-    directoryPayload,
-  );
-  const searchPayload = `${JSON.stringify(buildArtifactEnvelope("search-index", searchEntries), null, 2)}\n`;
-  const wroteSearchIndex = writeFileIfChanged(searchOutputFile, searchPayload);
-  const raycastPayload = `${JSON.stringify(buildRaycastEnvelope(entries), null, 2)}\n`;
-  const wroteRaycastIndex = writeFileIfChanged(
-    raycastOutputFile,
-    raycastPayload,
-  );
-  const registryManifestPayload = `${JSON.stringify(buildRegistryManifest(entries), null, 2)}\n`;
-  const wroteRegistryManifest = writeFileIfChanged(
-    registryManifestOutputFile,
-    registryManifestPayload,
-  );
-  const contentQualityPayload = `${JSON.stringify(buildContentQualityArtifact(entries), null, 2)}\n`;
-  const wroteContentQuality = writeFileIfChanged(
-    contentQualityOutputFile,
-    contentQualityPayload,
-  );
-  const jsonLdSnapshotsPayload = `${JSON.stringify(
-    buildJsonLdSnapshots(entries, {
-      siteUrl: "https://heyclau.de",
-      siteName: "HeyClaude",
-    }),
-    null,
-    2,
-  )}\n`;
-  const wroteJsonLdSnapshots = writeFileIfChanged(
-    jsonLdSnapshotsOutputFile,
-    jsonLdSnapshotsPayload,
-  );
-  const wroteLlmsFull = writeTextFile(
-    llmsFullOutputFile,
-    buildCorpusLlmsArtifact(entries, {
-      siteUrl: "https://heyclau.de",
-      siteName: "HeyClaude",
-      siteDescription:
-        "The Claude directory for agents, MCP servers, skills, commands, hooks, rules, guides, collections, and statuslines.",
-    }),
-  );
+  const artifactFiles = buildRegistryArtifactSet(entries, {
+    siteUrl: "https://heyclau.de",
+    siteName: "HeyClaude",
+    siteDescription:
+      "The Claude directory for agents, MCP servers, skills, commands, hooks, rules, guides, collections, and statuslines.",
+  });
+  const artifactResults = artifactFiles.map((file) => {
+    const outputPath = path.join(publicDataDir, file.path);
+    const wrote =
+      file.type === "json"
+        ? writeJsonFile(outputPath, file.value)
+        : writeTextFile(outputPath, file.value);
+    return { ...file, wrote, outputPath };
+  });
 
   const directoryStats = directoryRepo
     ? repoStats.get(directoryRepo.key)
@@ -346,35 +264,21 @@ async function main() {
     siteStatsFile,
     `${JSON.stringify(siteStatsPayload, null, 2)}\n`,
   );
+  for (const result of artifactResults.filter(
+    (file) => !file.path.includes("/"),
+  )) {
+    console.log(
+      `${result.wrote ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, result.outputPath)}`,
+    );
+  }
   console.log(
-    `${wroteDirectoryIndex ? "Wrote" : "Unchanged"} ${directoryEntries.length} entries to ${path.relative(repoRoot, directoryOutputFile)}`,
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("entries/")).length} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,
   );
   console.log(
-    `${wroteSearchIndex ? "Wrote" : "Unchanged"} ${searchEntries.length} entries to ${path.relative(repoRoot, searchOutputFile)}`,
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("llms/")).length} entry LLM files to ${path.relative(repoRoot, entryLlmsDir)}`,
   );
   console.log(
-    `${wroteRaycastIndex ? "Wrote" : "Unchanged"} ${entries.length} entries to ${path.relative(repoRoot, raycastOutputFile)}`,
-  );
-  console.log(
-    `${wroteRegistryManifest ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, registryManifestOutputFile)}`,
-  );
-  console.log(
-    `${wroteContentQuality ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, contentQualityOutputFile)}`,
-  );
-  console.log(
-    `${wroteJsonLdSnapshots ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, jsonLdSnapshotsOutputFile)}`,
-  );
-  console.log(
-    `${wroteLlmsFull ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, llmsFullOutputFile)}`,
-  );
-  console.log(
-    `Wrote ${entryDetailCount} entry detail files to ${path.relative(repoRoot, entryDataDir)}`,
-  );
-  console.log(
-    `Wrote ${entryLlmsCount} entry LLM files to ${path.relative(repoRoot, entryLlmsDir)}`,
-  );
-  console.log(
-    `Wrote ${raycastDetailCount} Raycast detail files to ${path.relative(repoRoot, raycastDetailDir)}`,
+    `Wrote ${artifactResults.filter((file) => file.path.startsWith("raycast/")).length} Raycast detail files to ${path.relative(repoRoot, raycastDetailDir)}`,
   );
   console.log(
     `${wroteSiteStats ? "Wrote" : "Unchanged"} ${path.relative(repoRoot, siteStatsFile)}`,

@@ -1,6 +1,9 @@
 import { getCopyText } from "./presentation.js";
 import categorySpec from "./category-spec.json" with { type: "json" };
-import { buildContentQualityReport } from "./quality.js";
+import {
+  buildContentPromptReport,
+  buildContentQualityReport,
+} from "./quality.js";
 import { renderCorpusLlms, renderEntryLlms } from "./llms.js";
 import { buildEntryJsonLdSnapshot } from "./seo.js";
 
@@ -219,6 +222,7 @@ export function buildRegistryManifest(entries) {
       raycast: dataUrl("raycast-index.json"),
       registryManifest: dataUrl("registry-manifest.json"),
       contentQuality: dataUrl("content-quality-report.json"),
+      contentQualityPrompts: dataUrl("content-quality-prompts.json"),
       jsonLdSnapshots: dataUrl("jsonld-snapshots.json"),
       llmsFull: dataUrl("llms-full.txt"),
       entryDetails: dataUrl("entries"),
@@ -234,6 +238,10 @@ export function buildArtifactManifestV2(entries, extra = {}) {
 
 export function buildContentQualityArtifact(entries) {
   return buildContentQualityReport(entries);
+}
+
+export function buildContentPromptArtifact(entries) {
+  return buildContentPromptReport(entries);
 }
 
 export function buildJsonLdSnapshots(entries, params = {}) {
@@ -252,4 +260,83 @@ export function buildEntryLlmsArtifact(entry, params = {}) {
 
 export function buildCorpusLlmsArtifact(entries, params = {}) {
   return renderCorpusLlms(entries, params);
+}
+
+export function buildRegistryArtifactSet(entries, params = {}) {
+  const siteUrl = params.siteUrl ?? SITE_URL;
+  const siteName = params.siteName ?? "HeyClaude";
+  const siteDescription =
+    params.siteDescription ??
+    "The Claude directory for agents, MCP servers, skills, commands, hooks, rules, guides, collections, and statuslines.";
+  const files = [
+    {
+      path: "directory-index.json",
+      type: "json",
+      value: buildArtifactEnvelope(
+        "directory-index",
+        buildDirectoryEntries(entries),
+      ),
+    },
+    {
+      path: "search-index.json",
+      type: "json",
+      value: buildArtifactEnvelope("search-index", buildSearchEntries(entries)),
+    },
+    {
+      path: "raycast-index.json",
+      type: "json",
+      value: buildRaycastEnvelope(entries),
+    },
+    {
+      path: "registry-manifest.json",
+      type: "json",
+      value: buildRegistryManifest(entries),
+    },
+    {
+      path: "content-quality-report.json",
+      type: "json",
+      value: buildContentQualityArtifact(entries),
+    },
+    {
+      path: "content-quality-prompts.json",
+      type: "json",
+      value: buildContentPromptArtifact(entries),
+    },
+    {
+      path: "jsonld-snapshots.json",
+      type: "json",
+      value: buildJsonLdSnapshots(entries, { siteUrl, siteName }),
+    },
+    {
+      path: "llms-full.txt",
+      type: "text",
+      value: buildCorpusLlmsArtifact(entries, {
+        siteUrl,
+        siteName,
+        siteDescription,
+      }),
+    },
+  ];
+
+  for (const entry of entries) {
+    files.push(
+      {
+        path: `entries/${entry.category}/${entry.slug}.json`,
+        type: "json",
+        value: buildEntryDetail(entry),
+      },
+      {
+        path: `llms/${entry.category}/${entry.slug}.txt`,
+        type: "text",
+        value: buildEntryLlmsArtifact(entry, { siteUrl }),
+      },
+      {
+        path: `raycast/${entry.category}/${entry.slug}.json`,
+        type: "json",
+        value: buildRaycastDetail(entry),
+      },
+    );
+  }
+
+  return files;
 }
