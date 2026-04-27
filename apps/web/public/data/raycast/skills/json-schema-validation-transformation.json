@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "skills:json-schema-validation-transformation",
   "category": "skills",
   "slug": "json-schema-validation-transformation",

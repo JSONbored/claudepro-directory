@@ -1,0 +1,18 @@
+# GitHub Copilot
+URL: https://heyclau.de/tools/github-copilot
+Category: tools
+Author: GitHub
+Date added: 2026-04-27
+Documentation: https://docs.github.com/en/copilot
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/github-copilot.mdx
+## Summary
+AI developer assistant across GitHub, editors, pull requests, chat, code review, and agentic coding workflows.
+## Tags
+- ai-coding
+- code-review
+## Content
+## Editorial notes
+GitHub Copilot is useful for teams that want AI assistance tied directly to repository hosting, pull requests, and editor workflows.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

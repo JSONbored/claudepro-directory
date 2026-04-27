@@ -1,0 +1,18 @@
+# Protect AI
+URL: https://heyclau.de/tools/protect-ai
+Category: tools
+Author: Protect AI
+Date added: 2026-04-27
+Documentation: https://docs.protectai.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/protect-ai.mdx
+## Summary
+AI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.
+## Tags
+- security
+- ai-supply-chain
+## Content
+## Editorial notes
+Protect AI is relevant for organizations that treat AI systems as a security and supply-chain surface, not only a product feature.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

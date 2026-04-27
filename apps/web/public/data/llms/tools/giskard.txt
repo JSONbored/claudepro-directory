@@ -1,0 +1,19 @@
+# Giskard
+URL: https://heyclau.de/tools/giskard
+Category: tools
+Author: Giskard
+Date added: 2026-04-27
+Documentation: https://docs.giskard.ai
+Repository: https://github.com/Giskard-AI/giskard
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/giskard.mdx
+## Summary
+AI testing platform for evaluating, scanning, and monitoring machine learning and LLM application quality.
+## Tags
+- evaluation
+- security
+## Content
+## Editorial notes
+Giskard fits teams that want testing and monitoring workflows for LLM and machine learning system quality.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

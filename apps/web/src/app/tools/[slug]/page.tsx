@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { CommunitySignalPanel } from "@/components/community-signal-panel";
 import { JsonLd } from "@/components/json-ld";
 import { getToolBySlug } from "@/lib/tools";
 import { buildPageMetadata } from "@/lib/seo";
@@ -57,6 +58,7 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
   const linkRel = linkRelForDisclosure(
     tool.sponsored ? "sponsored" : tool.disclosure,
   );
+  const primaryUrl = tool.affiliateUrl || tool.websiteUrl;
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -96,9 +98,13 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
             <BadgeCheck className="mr-1.5 size-3.5" />
             {tool.disclosure === "affiliate"
               ? "Affiliate"
-              : tool.sponsored
-                ? "Sponsored"
-                : "Editorial"}
+              : tool.disclosure === "heyclaude_pick"
+                ? "HeyClaude pick"
+                : tool.disclosure === "claimed"
+                  ? "Claimed"
+                  : tool.sponsored
+                    ? "Sponsored"
+                    : "Editorial"}
           </span>
           {tool.pricingModel ? (
             <span className="inline-flex items-center rounded-full border border-border bg-card px-3 py-1">
@@ -117,15 +123,17 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
           {tool.cardDescription || tool.description}
         </p>
         <div className="flex flex-wrap gap-2">
-          {tool.websiteUrl ? (
+          {primaryUrl ? (
             <a
-              href={tool.websiteUrl}
+              href={primaryUrl}
               target="_blank"
               rel={linkRel}
               className="inline-flex items-center rounded-full border border-primary/40 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
             >
               <ArrowUpRight className="mr-1.5 size-4" />
-              Open website
+              {tool.disclosure === "affiliate"
+                ? "Open affiliate link"
+                : "Open website"}
             </a>
           ) : null}
           {tool.documentationUrl ? (
@@ -147,6 +155,8 @@ export default async function ToolDetailPage({ params }: ToolDetailProps) {
           </Link>
         </div>
       </section>
+
+      <CommunitySignalPanel targetKind="tool" targetKey={`tool:${tool.slug}`} />
     </div>
   );
 }

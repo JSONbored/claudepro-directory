@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import { getDirectoryEntries } from "@/lib/content";
 import { getContributors } from "@/lib/contributors";
 import { getJobs } from "@/lib/jobs";
+import { getSeoClusterDefinitions } from "@/lib/seo-clusters";
 import { getTools } from "@/lib/tools";
 import { siteConfig } from "@/lib/site";
 
@@ -30,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/trending",
     "/llms.txt",
     "/llms-full.txt",
+    ...getSeoClusterDefinitions().map((cluster) => `/best/${cluster.slug}`),
     ...siteConfig.categoryOrder
       .filter((category) => category !== "tools")
       .map((category) => `/${category}`),

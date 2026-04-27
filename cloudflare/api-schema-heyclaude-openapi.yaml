@@ -525,47 +525,6 @@ paths:
           description: Rate limited
         "503":
           description: Site DB not configured
-  /api/intent-events:
-    post:
-      summary: Record privacy-light user intent metrics
-      description: Stores copy/open/install/download/vote intent events in D1 when SITE_DB is configured. Fail-open responses avoid breaking user flows.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: false
-              properties:
-                type:
-                  type: string
-                  enum:
-                    - copy
-                    - open
-                    - install
-                    - download
-                    - vote
-                entryKey:
-                  type: string
-                  pattern: "^[a-z0-9-]+:[a-z0-9-]+$"
-                sessionId:
-                  type: string
-                  maxLength: 128
-              required:
-                - type
-      responses:
-        "200":
-          description: Event accepted or safely ignored when SITE_DB is unavailable
-        "400":
-          description: Invalid payload
-        "403":
-          description: Forbidden origin
-        "413":
-          description: Payload too large
-        "415":
-          description: Invalid content type
-        "429":
-          description: Rate limited
     patch:
       summary: Apply a lead status transition
       description: Moves a listing lead through the manual review status transition model.
@@ -611,6 +570,119 @@ paths:
           description: Invalid content type
         "503":
           description: Site DB not configured
+  /api/community-signals:
+    get:
+      summary: Fetch aggregate community signals for one entry or tool
+      parameters:
+        - in: query
+          name: targetKind
+          required: true
+          schema:
+            type: string
+            enum:
+              - entry
+              - tool
+        - in: query
+          name: targetKey
+          required: true
+          schema:
+            type: string
+            pattern: "^(entry|tool):[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)?$"
+      responses:
+        "200":
+          description: Signal counts, or zero counts when SITE_DB is unavailable
+        "400":
+          description: Invalid query
+    post:
+      summary: Record or remove a privacy-light community signal
+      description: Stores used-this, works-for-me, and reported-broken signals in D1. Responses fail open when SITE_DB is unavailable or D1 insert failed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                targetKind:
+                  type: string
+                  enum:
+                    - entry
+                    - tool
+                targetKey:
+                  type: string
+                  pattern: "^(entry|tool):[a-z0-9][a-z0-9-]*(/[a-z0-9][a-z0-9-]*)?$"
+                signalType:
+                  type: string
+                  enum:
+                    - used
+                    - works
+                    - broken
+                clientId:
+                  type: string
+                  minLength: 16
+                  maxLength: 96
+                active:
+                  type: boolean
+              required:
+                - targetKind
+                - targetKey
+                - signalType
+                - clientId
+      responses:
+        "200":
+          description: Signal accepted, or safely ignored when SITE_DB is unavailable
+        "400":
+          description: Invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
+  /api/intent-events:
+    post:
+      summary: Record privacy-light user intent metrics
+      description: Stores copy/open/install/download/vote intent events in D1 when SITE_DB is configured. Fail-open responses avoid breaking user flows.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - copy
+                    - open
+                    - install
+                    - download
+                    - vote
+                entryKey:
+                  type: string
+                  pattern: "^[a-z0-9-]+:[a-z0-9-]+$"
+                sessionId:
+                  type: string
+                  maxLength: 128
+              required:
+                - type
+      responses:
+        "200":
+          description: Event accepted or safely ignored when SITE_DB is unavailable
+        "400":
+          description: Invalid payload
+        "403":
+          description: Forbidden origin
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
+        "429":
+          description: Rate limited
   /api/github-stats:
     get:
       responses:

@@ -59,6 +59,7 @@ const cache = new Cache();
 const categoryLabels: Record<string, string> = {
   agents: "Agents",
   mcp: "MCP Servers",
+  tools: "Tools",
   skills: "Skills",
   rules: "Rules",
   commands: "Commands",
@@ -71,6 +72,7 @@ const categoryLabels: Record<string, string> = {
 const categoryIcons: Record<string, Icon> = {
   agents: Icon.Person,
   mcp: Icon.Network,
+  tools: Icon.AppWindow,
   skills: Icon.Hammer,
   rules: Icon.TextDocument,
   commands: Icon.Terminal,

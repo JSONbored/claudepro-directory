@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:performance-monitor",
   "category": "hooks",
   "slug": "performance-monitor",

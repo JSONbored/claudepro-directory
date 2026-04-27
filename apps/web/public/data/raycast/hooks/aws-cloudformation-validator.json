@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:aws-cloudformation-validator",
   "category": "hooks",
   "slug": "aws-cloudformation-validator",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:session-metrics-collector",
   "category": "hooks",
   "slug": "session-metrics-collector",

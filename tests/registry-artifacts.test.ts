@@ -6,7 +6,10 @@ import {
   buildContentQualityArtifact,
   buildContentPromptArtifact,
   buildDirectoryEntries,
+  buildMcpRegistryFeed,
+  buildPluginExportFeed,
   buildJsonLdSnapshots,
+  buildReadOnlyEcosystemFeed,
   buildRaycastEnvelope,
   buildSearchEntries,
   getCopyText,
@@ -27,12 +30,21 @@ describe("registry artifacts", () => {
   const searchEntries = loadSearchEntries();
   const raycastPayload = readDataJson<{
     schemaVersion: number;
+    kind: string;
+    count: number;
     entries: any[];
   }>("raycast-index.json");
   const manifest = readDataJson<{
     schemaVersion: number;
+    kind: string;
     totalEntries: number;
     artifacts: Record<string, string>;
+    routes: Array<{ key: string; canonicalUrl: string }>;
+    qualitySummary: Record<string, unknown>;
+    artifactContracts: Record<
+      string,
+      { path: string; type: "json" | "text"; sha256: string }
+    >;
   }>("registry-manifest.json");
   const qualityPayload = readDataJson<{ schemaVersion: number; count: number }>(
     "content-quality-report.json",
@@ -82,9 +94,7 @@ describe("registry artifacts", () => {
   it("derives all generated aggregate artifacts from registry builders", () => {
     expect(buildDirectoryEntries(contentEntries)).toEqual(directoryEntries);
     expect(buildSearchEntries(contentEntries)).toEqual(searchEntries);
-    expect(buildRaycastEnvelope(contentEntries).entries).toEqual(
-      raycastPayload.entries,
-    );
+    expect(buildRaycastEnvelope(contentEntries)).toEqual(raycastPayload);
     expect(buildContentQualityArtifact(contentEntries)).toEqual(qualityPayload);
     expect(buildContentPromptArtifact(contentEntries)).toEqual(
       qualityPromptsPayload,
@@ -99,6 +109,55 @@ describe("registry artifacts", () => {
         ),
       ),
     ).toEqual(jsonLdSnapshotsPayload);
+  });
+
+  it("publishes registry moat feeds with deterministic contract hashes", () => {
+    const ecosystemFeed = readDataJson<{
+      schemaVersion: number;
+      kind: string;
+      count: number;
+      signature: string;
+      entries: Array<Record<string, unknown>>;
+    }>("ecosystem-feed.json");
+    const mcpFeed = readDataJson<{
+      schemaVersion: number;
+      kind: string;
+      count: number;
+      servers: Array<Record<string, unknown>>;
+    }>("mcp-registry-feed.json");
+    const pluginFeed = readDataJson<{
+      schemaVersion: number;
+      kind: string;
+      count: number;
+      plugins: Array<Record<string, unknown>>;
+    }>("plugin-export-feed.json");
+
+    expect(ecosystemFeed).toEqual(
+      buildReadOnlyEcosystemFeed(contentEntries, {
+        siteUrl: "https://heyclau.de",
+      }),
+    );
+    expect(mcpFeed).toEqual(buildMcpRegistryFeed(contentEntries));
+    expect(pluginFeed).toEqual(buildPluginExportFeed(contentEntries));
+    expect(ecosystemFeed).toMatchObject({
+      schemaVersion: 2,
+      kind: "ecosystem-feed",
+      count: contentEntries.length,
+    });
+    expect(ecosystemFeed.signature).toMatch(/^[a-f0-9]{64}$/);
+    expect(mcpFeed.kind).toBe("mcp-registry-feed");
+    expect(pluginFeed.kind).toBe("plugin-export-feed");
+    expect(manifest.artifactContracts["ecosystem-feed.json"]).toMatchObject({
+      path: "/data/ecosystem-feed.json",
+      type: "json",
+    });
+    expect(manifest.artifactContracts["llms-full.txt"]).toMatchObject({
+      path: "/data/llms-full.txt",
+      type: "text",
+    });
+    for (const contract of Object.values(manifest.artifactContracts)) {
+      expect(contract.sha256).toMatch(/^[a-f0-9]{64}$/);
+    }
   });
 
   it("keeps full body fields out of compact indexes", () => {
@@ -151,7 +210,7 @@ describe("registry artifacts", () => {
       expect(fs.existsSync(entryLlmsPath)).toBe(true);
       expect(raycastFeedEntry).toBeTruthy();
       expect(raycastDetail).toMatchObject({
-        schemaVersion: 1,
+        schemaVersion: 2,
         key,
         copyText,
       });
@@ -169,8 +228,14 @@ describe("registry artifacts", () => {
     );
     expect(manifest).toMatchObject({
       schemaVersion: 2,
+      kind: "registry-manifest",
       totalEntries: contentEntries.length,
     });
+    expect(manifest.routes).toHaveLength(contentEntries.length);
+    expect(manifest.routes[0]?.canonicalUrl).toMatch(
+      /^https:\/\/heyclau\.de\//,
+    );
+    expect(manifest.qualitySummary).toBeTruthy();
     expect(manifest.artifacts.llmsFull).toBe("/data/llms-full.txt");
     expect(manifest.artifacts.contentQualityPrompts).toBe(
       "/data/content-quality-prompts.json",

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:devin",
+  "category": "tools",
+  "slug": "devin",
+  "title": "Devin",
+  "copyText": "## Editorial notes\n\nDevin represents the more autonomous end of coding-agent workflows and is worth tracking separately from editor assistants.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Devin\nAI software engineering agent for planning, coding, debugging, and executing development tasks with autonomous workflows.\n**Category:** tools\n**Author:** Cognition\n**Tags:** `coding-agent` `autonomous-agent`\n\n## Links\n- https://heyclau.de/tools/devin\n- https://docs.devin.ai",
+  "webUrl": "https://heyclau.de/tools/devin",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.devin.ai"
+}

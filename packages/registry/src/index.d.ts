@@ -43,8 +43,9 @@ export type ContentEntry = {
   difficultyScore?: number;
   documentationUrl?: string;
   websiteUrl?: string;
+  affiliateUrl?: string;
   pricingModel?: string;
-  disclosure?: "editorial" | "affiliate" | "sponsored";
+  disclosure?: Disclosure;
   applicationCategory?: string;
   operatingSystem?: string;
   cardDescription?: string;
@@ -133,7 +134,12 @@ export type DistributionBadge = {
   title: string;
 };
 
-export type Disclosure = "editorial" | "affiliate" | "sponsored";
+export type Disclosure =
+  | "editorial"
+  | "heyclaude_pick"
+  | "affiliate"
+  | "sponsored"
+  | "claimed";
 export type CommercialTier = "free" | "standard" | "featured" | "sponsored";
 export type ListingLeadKind = "job" | "tool" | "claim";
 export type ListingLead = {
@@ -229,6 +235,36 @@ export type IssueTemplateSpec = {
   fields: SubmissionFieldSpec[];
 };
 
+export type SubmissionQueueEntry = {
+  number: number | null;
+  title: string;
+  url: string;
+  author: string;
+  updatedAt: string;
+  labels: string[];
+  recommendedLabels: string[];
+  status: "import_ready" | "needs_changes" | "skipped";
+  category: string;
+  slug: string;
+  name: string;
+  errors: string[];
+  warnings: string[];
+  importPath: string;
+};
+
+export type SubmissionQueue = {
+  schemaVersion: number;
+  kind: "submission-queue";
+  generatedAt: string;
+  count: number;
+  summary: {
+    importReady: number;
+    needsChanges: number;
+    skipped: number;
+  };
+  entries: SubmissionQueueEntry[];
+};
+
 export type JsonLdSnapshot = {
   key: string;
   category: string;
@@ -256,11 +292,23 @@ export type SearchDocument = {
 
 export type ArtifactManifestV2 = {
   schemaVersion: number;
+  kind?: string;
   generatedAt: string;
   totalEntries: number;
   categoryOrder: string[];
   categories: Record<string, { count: number; label: string }>;
   artifacts: Record<string, string>;
+  routes?: Array<{
+    key: string;
+    category: string;
+    slug: string;
+    canonicalUrl: string;
+  }>;
+  qualitySummary?: Record<string, unknown>;
+  artifactContracts?: Record<
+    string,
+    { path: string; type: string; sha256: string }
+  >;
 };
 
 export type RegistryEnvelope<T> = {
@@ -337,6 +385,7 @@ export function buildPlacementRenewalReminder(summary: {
 export const LISTING_LEAD_KINDS: string[];
 export const COMMERCIAL_TIERS: string[];
 export const COMMERCIAL_PLACEMENT_TARGETS: string[];
+export const DISCLOSURE_STATES: string[];
 export const COMMERCIAL_STATUSES: string[];
 export function normalizeCommercialTier(value: unknown): CommercialTier;
 export function normalizeLeadKind(value: unknown): ListingLeadKind;
@@ -406,6 +455,20 @@ export function buildRaycastDetail(
   entry: ContentEntry,
 ): Record<string, unknown>;
 export function buildRaycastEnvelope(
+  entries: ContentEntry[],
+): Record<string, unknown>;
+export function buildArtifactHash(
+  value: unknown,
+  type?: "json" | "text",
+): string;
+export function buildReadOnlyEcosystemFeed(
+  entries: ContentEntry[],
+  params?: Record<string, unknown>,
+): Record<string, unknown>;
+export function buildMcpRegistryFeed(
+  entries: ContentEntry[],
+): Record<string, unknown>;
+export function buildPluginExportFeed(
   entries: ContentEntry[],
 ): Record<string, unknown>;
 export function buildArtifactEnvelope<T>(
@@ -512,6 +575,18 @@ export function normalizeParsedFields(
   fields: Record<string, string>,
 ): Record<string, string>;
 export function issueLabels(issue: Record<string, unknown>): string[];
+export function looksLikeSubmissionIssue(
+  issue: Record<string, unknown>,
+): boolean;
+export function isLikelyAffiliateUrl(value: unknown): boolean;
+export function recommendedSubmissionLabels(
+  issue: Record<string, unknown>,
+  report?: Record<string, unknown>,
+): string[];
+export function submissionQueueStatus(report: Record<string, unknown>): string;
+export function buildSubmissionQueue(
+  issues: Array<Record<string, unknown>>,
+): SubmissionQueue;
 export function validateSubmission(
   issue: Record<string, unknown>,
 ): Record<string, unknown>;

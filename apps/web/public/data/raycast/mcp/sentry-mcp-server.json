@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "mcp:sentry-mcp-server",
   "category": "mcp",
   "slug": "sentry-mcp-server",

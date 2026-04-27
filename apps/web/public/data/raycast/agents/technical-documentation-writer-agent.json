@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:technical-documentation-writer-agent",
   "category": "agents",
   "slug": "technical-documentation-writer-agent",

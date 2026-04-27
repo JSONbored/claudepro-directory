@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:weave",
+  "category": "tools",
+  "slug": "weave",
+  "title": "Weave",
+  "copyText": "## Editorial notes\n\nWeave belongs in the directory for teams already using W&B or needing experiment tracking around LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Weave\nWeights and Biases toolkit for tracking, evaluating, and debugging LLM applications and agent workflows.\n**Category:** tools\n**Author:** Weights and Biases\n**Tags:** `evaluation` `observability`\n\n## Links\n- https://heyclau.de/tools/weave\n- https://weave-docs.wandb.ai",
+  "webUrl": "https://heyclau.de/tools/weave",
+  "repoUrl": "",
+  "documentationUrl": "https://weave-docs.wandb.ai"
+}

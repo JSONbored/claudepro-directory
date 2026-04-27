@@ -49,6 +49,16 @@ const examples = [
     href: "/api/registry/feed",
     code: "curl https://heyclau.de/api/registry/feed",
   },
+  {
+    title: "Ecosystem Feed",
+    href: "/data/ecosystem-feed.json",
+    code: "curl https://heyclau.de/data/ecosystem-feed.json",
+  },
+  {
+    title: "Community Signals",
+    href: "/api/community-signals?targetKind=tool&targetKey=tool:cursor",
+    code: "curl 'https://heyclau.de/api/community-signals?targetKind=tool&targetKey=tool:cursor'",
+  },
 ];
 
 export default function ApiDocsPage() {
@@ -77,7 +87,9 @@ export default function ApiDocsPage() {
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
           HeyClaude exposes stable, envelope-versioned endpoints for search,
           category browse, entry detail, and LLM-ready text. Responses include
-          cache headers and ETags so downstream clients can poll cheaply.
+          cache headers and ETags so downstream clients can poll cheaply. The
+          registry feed links the manifest, hashes, public feeds, and quality
+          summary for downstream consumers.
         </p>
       </div>
 
@@ -108,8 +120,9 @@ export default function ApiDocsPage() {
         </h2>
         <p>
           Content is Git-backed and read-only through the public API. Dynamic
-          state such as votes, jobs, leads, and sponsorship windows stays in the
-          site database and is not part of the editorial registry contract.
+          state such as votes, jobs, leads, community signals, and sponsorship
+          windows stays in the site database and is not part of the editorial
+          registry contract.
         </p>
         <p>
           Use <code className="text-foreground">If-None-Match</code> with the

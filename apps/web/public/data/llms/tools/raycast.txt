@@ -1,0 +1,18 @@
+# Raycast
+URL: https://heyclau.de/tools/raycast
+Category: tools
+Author: Raycast
+Date added: 2026-04-27
+Documentation: https://developers.raycast.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/raycast.mdx
+## Summary
+macOS launcher and extension platform with AI commands, automations, team workflows, and developer-focused integrations.
+## Tags
+- launcher
+- extensions
+## Content
+## Editorial notes
+Raycast is relevant for Claude-native users because it provides a daily launcher surface for extensions, commands, and AI workflows.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

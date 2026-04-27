@@ -1,0 +1,18 @@
+# Smithery
+URL: https://heyclau.de/tools/smithery
+Category: tools
+Author: Smithery
+Date added: 2026-04-27
+Documentation: https://smithery.ai/docs
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/smithery.mdx
+## Summary
+MCP server discovery and deployment platform for finding, installing, and running model context protocol tools.
+## Tags
+- mcp
+- tool-discovery
+## Content
+## Editorial notes
+Smithery is relevant to HeyClaude users because MCP server discovery, installation, and trust scoring are central to agent workflows.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:frontend-specialist-agent",
   "category": "agents",
   "slug": "frontend-specialist-agent",

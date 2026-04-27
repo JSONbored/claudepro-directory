@@ -141,6 +141,7 @@ export function buildContentEntryFromMdx(params) {
       ? String(data.documentationUrl)
       : undefined,
     websiteUrl: data.websiteUrl ? String(data.websiteUrl) : undefined,
+    affiliateUrl: data.affiliateUrl ? String(data.affiliateUrl) : undefined,
     pricingModel: data.pricingModel ? String(data.pricingModel) : undefined,
     disclosure: data.disclosure ? String(data.disclosure) : undefined,
     applicationCategory: data.applicationCategory

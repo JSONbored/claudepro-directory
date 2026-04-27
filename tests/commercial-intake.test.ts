@@ -11,6 +11,7 @@ import {
   summarizePlacementExpiry,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
+import { loadContentEntries } from "./helpers/registry-fixtures";
 
 describe("commercial intake contracts", () => {
   it("normalizes commercial listing fields", () => {
@@ -19,6 +20,8 @@ describe("commercial intake contracts", () => {
     expect(normalizeCommercialTier("sponsored")).toBe("sponsored");
     expect(normalizeCommercialTier("unknown")).toBe("free");
     expect(normalizeDisclosure("affiliate")).toBe("affiliate");
+    expect(normalizeDisclosure("heyclaude_pick")).toBe("heyclaude_pick");
+    expect(normalizeDisclosure("claimed")).toBe("claimed");
     expect(normalizeDisclosure("")).toBe("editorial");
     expect(linkRelForDisclosure("sponsored")).toBe(
       "sponsored nofollow noreferrer",
@@ -131,5 +134,25 @@ describe("commercial intake contracts", () => {
     expect(buildPlacementRenewalReminder(summary)).toContain(
       "expires in 7 days",
     );
+  });
+
+  it("keeps seeded tools editorial and free of hidden affiliate ranking", () => {
+    const tools = loadContentEntries().filter(
+      (entry) => entry.category === "tools",
+    );
+    expect(tools.length).toBeGreaterThanOrEqual(50);
+
+    for (const tool of tools) {
+      expect(tool.websiteUrl).toMatch(/^https:\/\//);
+      expect(tool.disclosure).toMatch(
+        /^(editorial|heyclaude_pick|affiliate|sponsored|claimed)$/,
+      );
+      if (tool.disclosure !== "affiliate") {
+        expect(tool.affiliateUrl || "").toBe("");
+      }
+      expect(linkRelForDisclosure(tool.disclosure || "editorial")).toContain(
+        "noreferrer",
+      );
+    }
   });
 });

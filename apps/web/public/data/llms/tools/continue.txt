@@ -1,0 +1,19 @@
+# Continue
+URL: https://heyclau.de/tools/continue
+Category: tools
+Author: Continue
+Date added: 2026-04-27
+Documentation: https://docs.continue.dev
+Repository: https://github.com/continuedev/continue
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/continue.mdx
+## Summary
+Open-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.
+## Tags
+- ai-coding
+- open-source
+## Content
+## Editorial notes
+Continue is useful when teams need self-directed model choices, local configuration, and open-source control over AI coding workflows.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

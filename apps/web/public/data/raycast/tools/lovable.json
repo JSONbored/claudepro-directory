@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:lovable",
+  "category": "tools",
+  "slug": "lovable",
+  "title": "Lovable",
+  "copyText": "## Editorial notes\n\nLovable fits product teams that want rapid web app scaffolding and AI-driven iteration before deeper engineering hardening.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Lovable\nAI app builder for generating and iterating on web applications from natural language product requests.\n**Category:** tools\n**Author:** Lovable\n**Tags:** `app-builder` `prototyping`\n\n## Links\n- https://heyclau.de/tools/lovable\n- https://docs.lovable.dev",
+  "webUrl": "https://heyclau.de/tools/lovable",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.lovable.dev"
+}

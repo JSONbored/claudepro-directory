@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:arize-phoenix",
+  "category": "tools",
+  "slug": "arize-phoenix",
+  "title": "Arize Phoenix",
+  "copyText": "## Editorial notes\n\nPhoenix is useful for teams that want open-source tracing and evaluation workflows around agent and LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Arize Phoenix\nOpen-source observability and evaluation tooling for LLM applications, traces, datasets, and experiments.\n**Category:** tools\n**Author:** Arize AI\n**Tags:** `observability` `evaluation`\n\n## Links\n- https://heyclau.de/tools/arize-phoenix\n- https://arize.com/docs/phoenix\n- https://github.com/Arize-ai/phoenix",
+  "webUrl": "https://heyclau.de/tools/arize-phoenix",
+  "repoUrl": "https://github.com/Arize-ai/phoenix",
+  "documentationUrl": "https://arize.com/docs/phoenix"
+}

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:ai-code-review-security-agent",
   "category": "agents",
   "slug": "ai-code-review-security-agent",

@@ -1,0 +1,18 @@
+# CodeRabbit
+URL: https://heyclau.de/tools/coderabbit
+Category: tools
+Author: CodeRabbit
+Date added: 2026-04-27
+Documentation: https://docs.coderabbit.ai
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/coderabbit.mdx
+## Summary
+AI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.
+## Tags
+- code-review
+- pull-requests
+## Content
+## Editorial notes
+CodeRabbit fits teams that want AI review support directly in the pull request loop rather than only inside an editor.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

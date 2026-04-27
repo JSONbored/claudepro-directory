@@ -1,6 +1,9 @@
+import crypto from "node:crypto";
+
 import { getCopyText } from "./presentation.js";
 import categorySpec from "./category-spec.json" with { type: "json" };
 import {
+  buildEntryQuality,
   buildContentPromptReport,
   buildContentQualityReport,
 } from "./quality.js";
@@ -8,7 +11,7 @@ import { renderCorpusLlms, renderEntryLlms } from "./llms.js";
 import { buildEntryJsonLdSnapshot } from "./seo.js";
 
 export const ENTRY_SCHEMA_VERSION = 1;
-export const RAYCAST_SCHEMA_VERSION = 1;
+export const RAYCAST_SCHEMA_VERSION = 2;
 export const REGISTRY_ARTIFACT_SCHEMA_VERSION = 2;
 export const SITE_URL = "https://heyclau.de";
 
@@ -121,6 +124,14 @@ export function buildSearchEntries(entries) {
   }));
 }
 
+function sha256Text(value) {
+  return crypto.createHash("sha256").update(String(value)).digest("hex");
+}
+
+export function buildArtifactHash(value, type = "json") {
+  return sha256Text(type === "json" ? JSON.stringify(value) : String(value));
+}
+
 export function buildRaycastEntries(entries) {
   return entries.map((entry) => {
     const copyText = getCopyText(entry);
@@ -193,12 +204,115 @@ export function buildEnvelopeEntries(payload) {
 export function buildRaycastEnvelope(entries) {
   return {
     schemaVersion: RAYCAST_SCHEMA_VERSION,
+    kind: "raycast-index",
     generatedAt: generatedAtForEntries(entries),
+    count: entries.length,
     entries: buildRaycastEntries(entries),
   };
 }
 
-export function buildRegistryManifest(entries) {
+export function buildReadOnlyEcosystemFeed(entries, params = {}) {
+  const siteUrl = params.siteUrl ?? SITE_URL;
+  const payload = {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "ecosystem-feed",
+    generatedAt: generatedAtForEntries(entries),
+    count: entries.length,
+    entries: entries.map((entry) => {
+      const quality = buildEntryQuality(entry);
+      return {
+        key: `${entry.category}:${entry.slug}`,
+        category: entry.category,
+        slug: entry.slug,
+        title: entry.title,
+        description: entry.cardDescription || entry.description,
+        url: `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`,
+        websiteUrl: entry.websiteUrl || "",
+        documentationUrl: entry.documentationUrl || "",
+        repoUrl: entry.repoUrl || "",
+        pricingModel: entry.pricingModel || "",
+        disclosure: entry.disclosure || "editorial",
+        tags: entry.tags || [],
+        qualityScore: quality.scores.total,
+        provenance: quality.provenance,
+      };
+    }),
+  };
+
+  return {
+    ...payload,
+    signatureAlgorithm: "sha256",
+    signature: buildArtifactHash(payload),
+  };
+}
+
+function inferRepositorySource(repoUrl) {
+  try {
+    const hostname = new URL(repoUrl).hostname.toLowerCase();
+    if (hostname === "github.com" || hostname.endsWith(".github.com")) {
+      return "github";
+    }
+    if (hostname === "gitlab.com" || hostname.endsWith(".gitlab.com")) {
+      return "gitlab";
+    }
+    if (hostname === "bitbucket.org" || hostname.endsWith(".bitbucket.org")) {
+      return "bitbucket";
+    }
+    return hostname;
+  } catch {
+    return "unknown";
+  }
+}
+
+export function buildMcpRegistryFeed(entries) {
+  const mcpEntries = entries.filter((entry) => entry.category === "mcp");
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "mcp-registry-feed",
+    generatedAt: generatedAtForEntries(mcpEntries),
+    count: mcpEntries.length,
+    servers: mcpEntries.map((entry) => ({
+      name: entry.slug,
+      title: entry.title,
+      description: entry.description,
+      websiteUrl: entry.websiteUrl || entry.documentationUrl || "",
+      repository: entry.repoUrl
+        ? {
+            url: entry.repoUrl,
+            source: inferRepositorySource(entry.repoUrl),
+          }
+        : undefined,
+      installCommand: entry.installCommand || "",
+      configSnippet: entry.configSnippet || "",
+      heyclaudeUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    })),
+  };
+}
+
+export function buildPluginExportFeed(entries) {
+  const pluginEntries = entries.filter((entry) =>
+    ["agents", "commands", "hooks", "mcp", "skills"].includes(entry.category),
+  );
+  const plugins = pluginEntries.map((entry) => ({
+    name: entry.slug,
+    title: entry.title,
+    description: entry.cardDescription || entry.description,
+    category: entry.category,
+    sourceUrl: entry.repoUrl || entry.documentationUrl || entry.githubUrl,
+    installCommand: entry.installCommand || entry.commandSyntax || "",
+    heyclaudeUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+  }));
+
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "plugin-export-feed",
+    generatedAt: generatedAtForEntries(pluginEntries),
+    count: plugins.length,
+    plugins,
+  };
+}
+
+export function buildRegistryManifest(entries, extra = {}) {
   const categories = {};
   for (const category of categorySpec.categoryOrder) {
     const categoryEntries = entries.filter(
@@ -212,14 +326,25 @@ export function buildRegistryManifest(entries) {
 
   return {
     schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "registry-manifest",
     generatedAt: generatedAtForEntries(entries),
     totalEntries: entries.length,
     categoryOrder: categorySpec.categoryOrder,
     categories,
+    routes: entries.map((entry) => ({
+      key: `${entry.category}:${entry.slug}`,
+      category: entry.category,
+      slug: entry.slug,
+      canonicalUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    })),
+    qualitySummary: buildContentQualityReport(entries).summary,
     artifacts: {
       directory: dataUrl("directory-index.json"),
       search: dataUrl("search-index.json"),
       raycast: dataUrl("raycast-index.json"),
+      ecosystemFeed: dataUrl("ecosystem-feed.json"),
+      mcpRegistryFeed: dataUrl("mcp-registry-feed.json"),
+      pluginExportFeed: dataUrl("plugin-export-feed.json"),
       registryManifest: dataUrl("registry-manifest.json"),
       contentQuality: dataUrl("content-quality-report.json"),
       contentQualityPrompts: dataUrl("content-quality-prompts.json"),
@@ -229,6 +354,7 @@ export function buildRegistryManifest(entries) {
       entryLlms: dataUrl("llms"),
       raycastDetails: dataUrl("raycast"),
     },
+    artifactContracts: extra.artifactContracts ?? {},
   };
 }
 
@@ -288,9 +414,19 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       value: buildRaycastEnvelope(entries),
     },
     {
-      path: "registry-manifest.json",
+      path: "ecosystem-feed.json",
       type: "json",
-      value: buildRegistryManifest(entries),
+      value: buildReadOnlyEcosystemFeed(entries, { siteUrl }),
+    },
+    {
+      path: "mcp-registry-feed.json",
+      type: "json",
+      value: buildMcpRegistryFeed(entries),
+    },
+    {
+      path: "plugin-export-feed.json",
+      type: "json",
+      value: buildPluginExportFeed(entries),
     },
     {
       path: "content-quality-report.json",
@@ -337,6 +473,23 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       },
     );
   }
+
+  const artifactContracts = Object.fromEntries(
+    files.map((file) => [
+      file.path,
+      {
+        path: dataUrl(file.path),
+        type: file.type,
+        sha256: buildArtifactHash(file.value, file.type),
+      },
+    ]),
+  );
+
+  files.push({
+    path: "registry-manifest.json",
+    type: "json",
+    value: buildRegistryManifest(entries, { artifactContracts }),
+  });
 
   return files;
 }

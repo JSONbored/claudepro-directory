@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:cloud-infrastructure-architect-agent",
   "category": "agents",
   "slug": "cloud-infrastructure-architect-agent",

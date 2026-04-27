@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildSubmissionQueue,
+  isLikelyAffiliateUrl,
+  looksLikeSubmissionIssue,
   parseIssueFormBody,
+  recommendedSubmissionLabels,
   validateSubmission,
 } from "@heyclaude/registry/submission";
 import {
@@ -10,7 +14,15 @@ import {
 } from "@heyclaude/registry/submission-spec";
 
 function issue(body: string, labels = ["content-submission"]) {
-  return { body, labels: labels.map((name) => ({ name })) };
+  return {
+    body,
+    labels: labels.map((name) => ({ name })),
+    title: "Submit MCP: example",
+    number: 1,
+    url: "https://github.com/owner/repo/issues/1",
+    author: { login: "contributor" },
+    updatedAt: "2026-04-26T00:00:00Z",
+  };
 }
 
 describe("submission intake", () => {
@@ -103,6 +115,94 @@ claude mcp add contrastapi -- npx -y contrastapi`,
     expect(report.fields.slug).toBe("contrastapi");
   });
 
+  it("detects and labels unlabeled submission-shaped issues", () => {
+    const unlabeled = issue(
+      `### Name
+Prompt-to-asset
+
+### Slug
+Prompt-to-asset
+
+### Category
+Mcp
+
+### Contact email
+dev@example.com
+
+### Description
+MCP server that generates visual assets.
+
+### Card description
+Generate app icons and favicons.
+
+### Install command
+npx -y prompt-to-asset
+
+### Usage snippet
+claude mcp add prompt-to-asset -- npx -y prompt-to-asset`,
+      [],
+    );
+    expect(looksLikeSubmissionIssue(unlabeled)).toBe(true);
+    expect(validateSubmission(unlabeled).ok).toBe(true);
+    expect(recommendedSubmissionLabels(unlabeled)).toEqual([
+      "community-mcp",
+      "content-submission",
+      "needs-review",
+    ]);
+  });
+
+  it("builds a maintainer submission queue", () => {
+    const valid = issue(`### Name
+ContrastAPI
+
+### Slug
+contrastapi
+
+### Category
+mcp
+
+### Contact email
+dev@example.com
+
+### Description
+Security MCP.
+
+### Card description
+Security MCP.
+
+### Install command
+claude mcp add contrastapi --transport http https://example.com/mcp
+
+### Usage snippet
+claude mcp list`);
+    const invalid = issue(`### Name
+Unslop
+
+### Slug
+unslop
+
+### Category
+skills
+
+### Contact email
+dev@example.com
+
+### Description
+Writing cleanup.
+
+### Card description
+Writing cleanup.
+
+### Usage snippet
+npx unslop --help`);
+    const queue = buildSubmissionQueue([valid, invalid, { title: "Question" }]);
+    expect(queue.count).toBe(2);
+    expect(queue.summary.importReady).toBe(1);
+    expect(queue.summary.needsChanges).toBe(1);
+    expect(queue.entries[0].status).toBe("import_ready");
+    expect(queue.entries[0].importPath).toBe("content/mcp/contrastapi.mdx");
+  });
+
   it("rejects missing required category fields", () => {
     const report = validateSubmission(
       issue(`### Name
@@ -172,6 +272,44 @@ Use it.`),
     expect(report.ok).toBe(false);
     expect(report.errors).toContain(
       "Community submissions cannot request local /downloads hosting",
+    );
+  });
+
+  it("rejects contributor affiliate and referral URLs", () => {
+    expect(isLikelyAffiliateUrl("https://example.com/?affiliate=creator")).toBe(
+      true,
+    );
+    const report = validateSubmission(
+      issue(`### Name
+Referral Tool
+
+### Slug
+referral-tool
+
+### Category
+mcp
+
+### Contact email
+dev@example.com
+
+### GitHub URL
+https://github.com/example/referral-tool?referral=affiliate
+
+### Description
+Referral test.
+
+### Card description
+Referral test.
+
+### Install command
+npx referral-tool
+
+### Usage snippet
+claude mcp add referral-tool -- npx referral-tool`),
+    );
+    expect(report.ok).toBe(false);
+    expect(report.errors).toContain(
+      "Contributor submissions cannot include affiliate/referral URLs: github_url",
     );
   });
 

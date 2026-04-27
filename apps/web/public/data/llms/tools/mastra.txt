@@ -1,0 +1,19 @@
+# Mastra
+URL: https://heyclau.de/tools/mastra
+Category: tools
+Author: Mastra
+Date added: 2026-04-27
+Documentation: https://mastra.ai/docs
+Repository: https://github.com/mastra-ai/mastra
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/mastra.mdx
+## Summary
+TypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.
+## Tags
+- agent-framework
+- typescript
+## Content
+## Editorial notes
+Mastra is useful for JavaScript and TypeScript teams building agent products with workflow, memory, and tool abstractions.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

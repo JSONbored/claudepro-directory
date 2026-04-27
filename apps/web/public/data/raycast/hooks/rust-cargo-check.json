@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:rust-cargo-check",
   "category": "hooks",
   "slug": "rust-cargo-check",

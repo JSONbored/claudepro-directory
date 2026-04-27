@@ -1,19 +1,30 @@
 {
   "schemaVersion": 2,
   "kind": "content-quality-prompts",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
   "count": 30,
   "prompts": [
+    {
+      "key": "commands:git-smart-commit",
+      "category": "commands",
+      "slug": "git-smart-commit",
+      "title": "Git Smart Commit for Claude Code",
+      "score": 66,
+      "priority": "medium",
+      "prompt": "Improve Git Smart Commit for Claude Code (commands:git-smart-commit). Address: No substantial copyable asset text.",
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
+    },
     {
       "key": "collections:developer-productivity-booster",
       "category": "collections",
       "slug": "developer-productivity-booster",
       "title": "Productivity Booster",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Productivity Booster (collections:developer-productivity-booster). Address: No external docs/repo source; label as editorial first-party content. Description is long for browse/search display. No install, config, download, or documentation path.",
+      "prompt": "Improve Productivity Booster (collections:developer-productivity-booster). Address: Description is long for browse/search display. No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display.",
         "No install, config, download, or documentation path."
       ]
@@ -23,11 +34,10 @@
       "category": "collections",
       "slug": "production-readiness-toolkit",
       "title": "Production Toolkit",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Production Toolkit (collections:production-readiness-toolkit). Address: No external docs/repo source; label as editorial first-party content. Description is long for browse/search display. No install, config, download, or documentation path.",
+      "prompt": "Improve Production Toolkit (collections:production-readiness-toolkit). Address: Description is long for browse/search display. No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display.",
         "No install, config, download, or documentation path."
       ]
@@ -37,11 +47,10 @@
       "category": "agents",
       "slug": "ai-code-review-security-agent",
       "title": "AI Code Review Security Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve AI Code Review Security Agent - Agents (agents:ai-code-review-security-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve AI Code Review Security Agent - Agents (agents:ai-code-review-security-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -50,11 +59,10 @@
       "category": "agents",
       "slug": "ai-devops-automation-engineer-agent",
       "title": "AI DevOps Engineer Agent - Automate Infrastructure & CI/CD",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve AI DevOps Engineer Agent - Automate Infrastructure & CI/CD (agents:ai-devops-automation-engineer-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve AI DevOps Engineer Agent - Automate Infrastructure & CI/CD (agents:ai-devops-automation-engineer-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -63,11 +71,10 @@
       "category": "agents",
       "slug": "api-builder-agent",
       "title": "API Builder Agent for Claude",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve API Builder Agent for Claude (agents:api-builder-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve API Builder Agent for Claude (agents:api-builder-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -76,11 +83,10 @@
       "category": "agents",
       "slug": "autogen-conversation-agent-builder",
       "title": "Autogen Conversation Agent Builder - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Autogen Conversation Agent Builder - Agents (agents:autogen-conversation-agent-builder). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Autogen Conversation Agent Builder - Agents (agents:autogen-conversation-agent-builder). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -89,11 +95,10 @@
       "category": "agents",
       "slug": "backend-architect-agent",
       "title": "Backend Architect Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Backend Architect Agent - Agents (agents:backend-architect-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Backend Architect Agent - Agents (agents:backend-architect-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -102,11 +107,10 @@
       "category": "agents",
       "slug": "cloud-infrastructure-architect-agent",
       "title": "Cloud Infrastructure Architect Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Cloud Infrastructure Architect Agent - Agents (agents:cloud-infrastructure-architect-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Cloud Infrastructure Architect Agent - Agents (agents:cloud-infrastructure-architect-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -115,11 +119,10 @@
       "category": "agents",
       "slug": "data-pipeline-engineering-agent",
       "title": "Data Pipeline Engineering Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Data Pipeline Engineering Agent - Agents (agents:data-pipeline-engineering-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Data Pipeline Engineering Agent - Agents (agents:data-pipeline-engineering-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -128,11 +131,10 @@
       "category": "agents",
       "slug": "debugging-assistant-agent",
       "title": "Debugging Assistant Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Debugging Assistant Agent - Agents (agents:debugging-assistant-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Debugging Assistant Agent - Agents (agents:debugging-assistant-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -141,11 +143,10 @@
       "category": "agents",
       "slug": "domain-specialist-ai-agents",
       "title": "Domain Specialist AI Agents - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Domain Specialist AI Agents - Agents (agents:domain-specialist-ai-agents). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Domain Specialist AI Agents - Agents (agents:domain-specialist-ai-agents). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -154,11 +155,10 @@
       "category": "agents",
       "slug": "extended-thinking-orchestrator",
       "title": "Extended Thinking Orchestrator - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Extended Thinking Orchestrator - Agents (agents:extended-thinking-orchestrator). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Extended Thinking Orchestrator - Agents (agents:extended-thinking-orchestrator). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -167,11 +167,10 @@
       "category": "agents",
       "slug": "full-stack-ai-development-agent",
       "title": "Full Stack AI Development Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Full Stack AI Development Agent - Agents (agents:full-stack-ai-development-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Full Stack AI Development Agent - Agents (agents:full-stack-ai-development-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -180,11 +179,10 @@
       "category": "agents",
       "slug": "github-copilot-interop-bridge",
       "title": "Github Copilot Interop Bridge - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Github Copilot Interop Bridge - Agents (agents:github-copilot-interop-bridge). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Github Copilot Interop Bridge - Agents (agents:github-copilot-interop-bridge). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -193,11 +191,10 @@
       "category": "agents",
       "slug": "life-sciences-research-specialist",
       "title": "Life Sciences Research Specialist - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Life Sciences Research Specialist - Agents (agents:life-sciences-research-specialist). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Life Sciences Research Specialist - Agents (agents:life-sciences-research-specialist). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -206,11 +203,10 @@
       "category": "agents",
       "slug": "multi-agent-orchestration-specialist",
       "title": "Multi Agent Orchestration Specialist - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Multi Agent Orchestration Specialist - Agents (agents:multi-agent-orchestration-specialist). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Multi Agent Orchestration Specialist - Agents (agents:multi-agent-orchestration-specialist). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -219,11 +215,10 @@
       "category": "agents",
       "slug": "plugin-ecosystem-architect",
       "title": "Plugin Ecosystem Architect - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Plugin Ecosystem Architect - Agents (agents:plugin-ecosystem-architect). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Plugin Ecosystem Architect - Agents (agents:plugin-ecosystem-architect). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -232,11 +227,10 @@
       "category": "agents",
       "slug": "product-management-ai-agent",
       "title": "Product Management AI Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Product Management AI Agent - Agents (agents:product-management-ai-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Product Management AI Agent - Agents (agents:product-management-ai-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -245,11 +239,10 @@
       "category": "agents",
       "slug": "production-reliability-engineer",
       "title": "Production Reliability Engineer - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Production Reliability Engineer - Agents (agents:production-reliability-engineer). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Production Reliability Engineer - Agents (agents:production-reliability-engineer). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -258,11 +251,10 @@
       "category": "agents",
       "slug": "prompt-optimization-specialist",
       "title": "Prompt Optimization Specialist - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Prompt Optimization Specialist - Agents (agents:prompt-optimization-specialist). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Prompt Optimization Specialist - Agents (agents:prompt-optimization-specialist). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -271,11 +263,10 @@
       "category": "agents",
       "slug": "semantic-kernel-enterprise-agent",
       "title": "Semantic Kernel Enterprise Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Semantic Kernel Enterprise Agent - Agents (agents:semantic-kernel-enterprise-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Semantic Kernel Enterprise Agent - Agents (agents:semantic-kernel-enterprise-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -284,11 +275,10 @@
       "category": "agents",
       "slug": "technical-documentation-writer-agent",
       "title": "Technical Doc Writer",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Technical Doc Writer (agents:technical-documentation-writer-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Technical Doc Writer (agents:technical-documentation-writer-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -297,11 +287,10 @@
       "category": "agents",
       "slug": "token-cost-budget-optimizer",
       "title": "Token Cost Budget Optimizer - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Token Cost Budget Optimizer - Agents (agents:token-cost-budget-optimizer). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Token Cost Budget Optimizer - Agents (agents:token-cost-budget-optimizer). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -310,11 +299,10 @@
       "category": "agents",
       "slug": "ui-ux-design-expert-agent",
       "title": "UI UX Design Expert Agent - Agents",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve UI UX Design Expert Agent - Agents (agents:ui-ux-design-expert-agent). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve UI UX Design Expert Agent - Agents (agents:ui-ux-design-expert-agent). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -323,11 +311,10 @@
       "category": "collections",
       "slug": "api-development-starter-kit",
       "title": "API Development Kit",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve API Development Kit (collections:api-development-starter-kit). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve API Development Kit (collections:api-development-starter-kit). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -336,11 +323,10 @@
       "category": "collections",
       "slug": "aws-cloud-infrastructure-bundle",
       "title": "AWS Infra Bundle",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve AWS Infra Bundle (collections:aws-cloud-infrastructure-bundle). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve AWS Infra Bundle (collections:aws-cloud-infrastructure-bundle). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -349,11 +335,10 @@
       "category": "collections",
       "slug": "backend-development-suite",
       "title": "Backend Development",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Backend Development (collections:backend-development-suite). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Backend Development (collections:backend-development-suite). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -362,11 +347,10 @@
       "category": "collections",
       "slug": "code-quality-toolkit",
       "title": "Code Quality & Review",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Code Quality & Review (collections:code-quality-toolkit). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Code Quality & Review (collections:code-quality-toolkit). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -375,24 +359,10 @@
       "category": "collections",
       "slug": "content-creation-workflow",
       "title": "Content Creation",
-      "score": 65,
+      "score": 69,
       "priority": "medium",
-      "prompt": "Improve Content Creation (collections:content-creation-workflow). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
+      "prompt": "Improve Content Creation (collections:content-creation-workflow). Address: No install, config, download, or documentation path.",
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
-        "No install, config, download, or documentation path."
-      ]
-    },
-    {
-      "key": "collections:data-engineering-suite",
-      "category": "collections",
-      "slug": "data-engineering-suite",
-      "title": "Data Engineering Suite",
-      "score": 65,
-      "priority": "medium",
-      "prompt": "Improve Data Engineering Suite (collections:data-engineering-suite). Address: No external docs/repo source; label as editorial first-party content. No install, config, download, or documentation path.",
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     }

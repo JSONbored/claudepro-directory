@@ -1,0 +1,19 @@
+# Arize Phoenix
+URL: https://heyclau.de/tools/arize-phoenix
+Category: tools
+Author: Arize AI
+Date added: 2026-04-27
+Documentation: https://arize.com/docs/phoenix
+Repository: https://github.com/Arize-ai/phoenix
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx
+## Summary
+Open-source observability and evaluation tooling for LLM applications, traces, datasets, and experiments.
+## Tags
+- observability
+- evaluation
+## Content
+## Editorial notes
+Phoenix is useful for teams that want open-source tracing and evaluation workflows around agent and LLM behavior.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

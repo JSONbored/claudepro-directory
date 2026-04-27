@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:token-cost-budget-optimizer",
   "category": "agents",
   "slug": "token-cost-budget-optimizer",

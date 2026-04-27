@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:cloudflare-agents-sdk",
+  "category": "tools",
+  "slug": "cloudflare-agents-sdk",
+  "title": "Cloudflare Agents SDK",
+  "copyText": "## Editorial notes\n\nCloudflare Agents SDK is relevant for teams that want agent runtimes close to edge compute, durable objects, and serverless deployment.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Cloudflare Agents SDK\nCloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.\n**Category:** tools\n**Author:** Cloudflare\n**Tags:** `agent-framework` `cloudflare`\n\n## Links\n- https://heyclau.de/tools/cloudflare-agents-sdk\n- https://developers.cloudflare.com/agents/\n- https://github.com/cloudflare/agents",
+  "webUrl": "https://heyclau.de/tools/cloudflare-agents-sdk",
+  "repoUrl": "https://github.com/cloudflare/agents",
+  "documentationUrl": "https://developers.cloudflare.com/agents/"
+}

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:devops-sre-expert",
   "category": "agents",
   "slug": "devops-sre-expert",

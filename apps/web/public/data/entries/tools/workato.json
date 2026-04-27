@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "key": "tools:workato",
+  "entry": {
+    "category": "tools",
+    "slug": "workato",
+    "title": "Workato",
+    "description": "Enterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.",
+    "seoTitle": "Workato enterprise automation platform",
+    "seoDescription": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
+    "author": "Workato",
+    "dateAdded": "2026-04-27",
+    "tags": [
+      "workflow-automation",
+      "enterprise"
+    ],
+    "keywords": [
+      "enterprise automation",
+      "business integrations"
+    ],
+    "documentationUrl": "https://docs.workato.com",
+    "websiteUrl": "https://www.workato.com",
+    "pricingModel": "paid",
+    "disclosure": "editorial",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "cardDescription": "Enterprise automation platform for business workflows.",
+    "installable": false,
+    "hasPrerequisites": false,
+    "hasTroubleshooting": false,
+    "downloadUrl": "",
+    "downloadTrust": null,
+    "downloadSha256": null,
+    "body": "## Editorial notes\n\nWorkato belongs in the directory for enterprise teams evaluating AI-connected automation across business systems.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+    "sections": [
+      {
+        "title": "Editorial notes",
+        "id": "editorial-notes",
+        "markdown": "Workato belongs in the directory for enterprise teams evaluating AI-connected automation across business systems.",
+        "codeBlocks": []
+      },
+      {
+        "title": "Disclosure",
+        "id": "disclosure",
+        "markdown": "Editorial listing. No paid placement or affiliate link is used.",
+        "codeBlocks": []
+      }
+    ],
+    "headings": [
+      {
+        "depth": 2,
+        "text": "Editorial notes",
+        "id": "editorial-notes"
+      },
+      {
+        "depth": 2,
+        "text": "Disclosure",
+        "id": "disclosure"
+      }
+    ],
+    "codeBlocks": [],
+    "filePath": "content/tools/workato.mdx",
+    "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/workato.mdx",
+    "repoUrl": null,
+    "githubStars": null,
+    "githubForks": null,
+    "repoUpdatedAt": null
+  }
+}

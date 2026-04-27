@@ -14,6 +14,7 @@ const apiRoutes = [
   "/api/listing-leads",
   "/api/admin/listing-leads",
   "/api/intent-events",
+  "/api/community-signals",
 ];
 
 describe("OpenAPI route coverage", () => {

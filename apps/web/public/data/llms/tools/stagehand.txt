@@ -1,0 +1,19 @@
+# Stagehand
+URL: https://heyclau.de/tools/stagehand
+Category: tools
+Author: Browserbase
+Date added: 2026-04-27
+Documentation: https://docs.stagehand.dev
+Repository: https://github.com/browserbase/stagehand
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/stagehand.mdx
+## Summary
+Open-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.
+## Tags
+- browser-automation
+- open-source
+## Content
+## Editorial notes
+Stagehand is a strong fit for agent workflows that need deterministic browser automation with optional AI assistance.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

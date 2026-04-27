@@ -1,19 +1,21 @@
 {
   "schemaVersion": 2,
   "kind": "content-quality-report",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "count": 326,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 378,
   "summary": {
-    "averageScore": 80,
+    "averageScore": 81,
     "noExternalSourceCount": 101,
+    "firstPartyEditorialCount": 100,
+    "unprovenancedSourceCount": 0,
     "missingSeoCount": 0,
-    "duplicateBodyGroupCount": 5
+    "duplicateBodyGroupCount": 0
   },
   "categoryBreakdown": {
     "agents": {
       "count": 39,
-      "averageScore": 70,
-      "warningCount": 44
+      "averageScore": 72,
+      "warningCount": 22
     },
     "mcp": {
       "count": 44,
@@ -21,8 +23,8 @@
       "warningCount": 2
     },
     "tools": {
-      "count": 0,
-      "averageScore": 0,
+      "count": 52,
+      "averageScore": 79,
       "warningCount": 0
     },
     "skills": {
@@ -42,107 +44,26 @@
     },
     "hooks": {
       "count": 66,
-      "averageScore": 79,
-      "warningCount": 57
+      "averageScore": 82,
+      "warningCount": 14
     },
     "guides": {
       "count": 19,
-      "averageScore": 67,
-      "warningCount": 38
+      "averageScore": 69,
+      "warningCount": 19
     },
     "collections": {
       "count": 10,
-      "averageScore": 65,
-      "warningCount": 22
+      "averageScore": 69,
+      "warningCount": 12
     },
     "statuslines": {
       "count": 26,
-      "averageScore": 79,
-      "warningCount": 6
+      "averageScore": 80,
+      "warningCount": 0
     }
   },
-  "duplicateBodyGroups": [
-    [
-      {
-        "key": "commands:refactor",
-        "category": "commands",
-        "slug": "refactor",
-        "title": "/refactor - Code Refactoring Command for Claude",
-        "normalizedLength": 2414
-      },
-      {
-        "key": "commands:refactor-code",
-        "category": "commands",
-        "slug": "refactor-code",
-        "title": "/refactor-code - Specialized Refactor Commands for Claude",
-        "normalizedLength": 2414
-      }
-    ],
-    [
-      {
-        "key": "rules:mobile-app-developer",
-        "category": "rules",
-        "slug": "mobile-app-developer",
-        "title": "Mobile App Dev - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1527
-      },
-      {
-        "key": "rules:mobile-app-development-expert",
-        "category": "rules",
-        "slug": "mobile-app-development-expert",
-        "title": "Mobile App Dev Expert - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1527
-      }
-    ],
-    [
-      {
-        "key": "rules:python-data-science",
-        "category": "rules",
-        "slug": "python-data-science",
-        "title": "Python Data Science - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1454
-      },
-      {
-        "key": "rules:python-data-science-expert",
-        "category": "rules",
-        "slug": "python-data-science-expert",
-        "title": "Python Data Science Expert - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1454
-      }
-    ],
-    [
-      {
-        "key": "rules:react-expert",
-        "category": "rules",
-        "slug": "react-expert",
-        "title": "React Expert - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1768
-      },
-      {
-        "key": "rules:react-next-js-expert",
-        "category": "rules",
-        "slug": "react-next-js-expert",
-        "title": "React Next.js Expert - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 1768
-      }
-    ],
-    [
-      {
-        "key": "rules:security-auditor",
-        "category": "rules",
-        "slug": "security-auditor",
-        "title": "Security Auditor Expert - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 2136
-      },
-      {
-        "key": "rules:security-auditor-penetration-tester",
-        "category": "rules",
-        "slug": "security-auditor-penetration-tester",
-        "title": "Security Auditor Pentester - CLAUDE.md Rules for Claude Code",
-        "normalizedLength": 2136
-      }
-    ]
-  ],
+  "duplicateBodyGroups": [],
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -609,9 +530,9 @@
       "slug": "agent-operator-growth-master-pack",
       "title": "Agent Operator Growth Master Pack",
       "scores": {
-        "total": 67,
+        "total": 71,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 100,
         "seo": 100
@@ -628,7 +549,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -756,9 +676,9 @@
       "slug": "ai-code-review-security-agent",
       "title": "AI Code Review Security Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -775,7 +695,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -785,9 +704,9 @@
       "slug": "ai-devops-automation-engineer-agent",
       "title": "AI DevOps Engineer Agent - Automate Infrastructure & CI/CD",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -804,7 +723,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -896,6 +814,39 @@
       "warnings": []
     },
     {
+      "key": "tools:aider",
+      "category": "tools",
+      "slug": "aider",
+      "title": "Aider",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://aider.chat/docs",
+          "https://github.com/Aider-AI/aider",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx",
+          "https://aider.chat"
+        ],
+        "externalSourceUrls": [
+          "https://aider.chat/docs",
+          "https://github.com/Aider-AI/aider",
+          "https://aider.chat"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:airtable-mcp-server",
       "category": "mcp",
       "slug": "airtable-mcp-server",
@@ -932,9 +883,9 @@
       "slug": "api-builder-agent",
       "title": "API Builder Agent for Claude",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -951,7 +902,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -990,9 +940,9 @@
       "slug": "api-development-starter-kit",
       "title": "API Development Kit",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -1009,7 +959,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1096,6 +1045,101 @@
         ],
         "externalSourceUrls": [
           "https://docs.claude.com/en/docs/claude-code/statusline"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:apify",
+      "category": "tools",
+      "slug": "apify",
+      "title": "Apify",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.apify.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/apify.mdx",
+          "https://apify.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.apify.com",
+          "https://apify.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:arcade-ai",
+      "category": "tools",
+      "slug": "arcade-ai",
+      "title": "Arcade",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.arcade.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arcade-ai.mdx",
+          "https://www.arcade.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.arcade.dev",
+          "https://www.arcade.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:arize-phoenix",
+      "category": "tools",
+      "slug": "arize-phoenix",
+      "title": "Arize Phoenix",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://arize.com/docs/phoenix",
+          "https://github.com/Arize-ai/phoenix",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx",
+          "https://phoenix.arize.com"
+        ],
+        "externalSourceUrls": [
+          "https://arize.com/docs/phoenix",
+          "https://github.com/Arize-ai/phoenix",
+          "https://phoenix.arize.com"
         ]
       },
       "warnings": []
@@ -1197,9 +1241,9 @@
       "slug": "auto-save-backup",
       "title": "Auto Save Backup - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -1216,7 +1260,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display."
       ]
     },
@@ -1226,9 +1269,9 @@
       "slug": "autogen-conversation-agent-builder",
       "title": "Autogen Conversation Agent Builder - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -1245,7 +1288,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1342,9 +1384,9 @@
       "slug": "aws-cloud-infrastructure-bundle",
       "title": "AWS Infra Bundle",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -1361,7 +1403,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1402,9 +1443,9 @@
       "slug": "backend-architect-agent",
       "title": "Backend Architect Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -1421,7 +1462,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1431,9 +1471,9 @@
       "slug": "backend-development-suite",
       "title": "Backend Development",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -1450,7 +1490,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1542,6 +1581,37 @@
       "warnings": []
     },
     {
+      "key": "tools:bolt-new",
+      "category": "tools",
+      "slug": "bolt-new",
+      "title": "Bolt",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://support.bolt.new",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx",
+          "https://bolt.new"
+        ],
+        "externalSourceUrls": [
+          "https://support.bolt.new",
+          "https://bolt.new"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:box-mcp-server",
       "category": "mcp",
       "slug": "box-mcp-server",
@@ -1566,6 +1636,37 @@
         ],
         "externalSourceUrls": [
           "https://box.dev/guides/box-mcp/remote/"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:braintrust",
+      "category": "tools",
+      "slug": "braintrust",
+      "title": "Braintrust",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://www.braintrust.dev/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/braintrust.mdx",
+          "https://www.braintrust.dev"
+        ],
+        "externalSourceUrls": [
+          "https://www.braintrust.dev/docs",
+          "https://www.braintrust.dev"
         ]
       },
       "warnings": []
@@ -1600,16 +1701,80 @@
       "warnings": []
     },
     {
+      "key": "tools:browser-use",
+      "category": "tools",
+      "slug": "browser-use",
+      "title": "Browser Use",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.browser-use.com",
+          "https://github.com/browser-use/browser-use",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/browser-use.mdx",
+          "https://browser-use.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.browser-use.com",
+          "https://github.com/browser-use/browser-use",
+          "https://browser-use.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:browserbase",
+      "category": "tools",
+      "slug": "browserbase",
+      "title": "Browserbase",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.browserbase.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/browserbase.mdx",
+          "https://www.browserbase.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.browserbase.com",
+          "https://www.browserbase.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "guides:build-mcp-server",
       "category": "guides",
       "slug": "build-mcp-server",
       "title": "Build Claude MCP Servers",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1624,7 +1789,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1783,11 +1947,11 @@
       "slug": "chatgpt-migration-guide",
       "title": "ChatGPT to Claude Migration",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1802,7 +1966,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1843,11 +2006,11 @@
       "slug": "claude-4-extended-thinking-tutorial",
       "title": "Claude 4 Extended Thinking",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1862,7 +2025,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1872,11 +2034,11 @@
       "slug": "claude-agent-development-framework",
       "title": "Claude Agent Development",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1891,7 +2053,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1901,11 +2062,11 @@
       "slug": "healthcare-hipaa-guide",
       "title": "Claude AI Healthcare HIPAA-Compliant Documentation Guide 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1920,9 +2081,39 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
+    },
+    {
+      "key": "tools:claude-code",
+      "category": "tools",
+      "slug": "claude-code",
+      "title": "Claude Code",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.anthropic.com/en/docs/claude-code/overview",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx",
+          "https://www.anthropic.com/claude-code"
+        ],
+        "externalSourceUrls": [
+          "https://docs.anthropic.com/en/docs/claude-code/overview",
+          "https://www.anthropic.com/claude-code"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "statuslines:docker-health-statusline",
@@ -1959,11 +2150,11 @@
       "slug": "multi-directory-setup",
       "title": "Claude Code Multi-Directory Setup Enterprise Workflow 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -1978,7 +2169,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -1988,11 +2178,11 @@
       "slug": "claude-vs-cursor-codeium",
       "title": "Claude Code vs Cursor vs Codeium Complete Comparison 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2007,7 +2197,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2017,11 +2206,11 @@
       "slug": "wsl-setup-guide",
       "title": "Claude Code WSL Setup 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2036,7 +2225,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2046,11 +2234,11 @@
       "slug": "desktop-mcp-setup",
       "title": "Claude Desktop MCP Setup",
       "scores": {
-        "total": 87,
+        "total": 85,
         "usefulness": 100,
         "source": 35,
         "copyability": 100,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2072,11 +2260,11 @@
       "slug": "financial-services-guide",
       "title": "Claude for Financial Services Enterprise Implementation 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2091,7 +2279,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2130,11 +2317,11 @@
       "slug": "claude-mcp-server-setup-guide",
       "title": "Claude MCP Server Setup 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2149,7 +2336,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2188,11 +2374,11 @@
       "slug": "business-process-automation",
       "title": "Claude Process Automation",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2207,7 +2393,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2217,11 +2402,11 @@
       "slug": "claude-rate-limits-fix",
       "title": "Claude Rate Limits Fix: Complete Optimization Guide 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2236,7 +2421,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2246,11 +2430,11 @@
       "slug": "claude-vs-codewhisperer-gemini",
       "title": "Claude vs Amazon Q Developer vs Gemini Code AWS Guide 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2265,7 +2449,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2275,11 +2458,11 @@
       "slug": "claude-vs-copilot-python",
       "title": "Claude vs GitHub Copilot vs ChatGPT for Python Dev 2025",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2294,7 +2477,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2421,14 +2603,47 @@
       "warnings": []
     },
     {
+      "key": "tools:cline",
+      "category": "tools",
+      "slug": "cline",
+      "title": "Cline",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.cline.bot",
+          "https://github.com/cline/cline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cline.mdx",
+          "https://cline.bot"
+        ],
+        "externalSourceUrls": [
+          "https://docs.cline.bot",
+          "https://github.com/cline/cline",
+          "https://cline.bot"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "hooks:cloud-backup-on-session-stop",
       "category": "hooks",
       "slug": "cloud-backup-on-session-stop",
       "title": "Cloud Backup On Session Stop - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -2444,9 +2659,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:cloud-infrastructure-architect-agent",
@@ -2454,9 +2667,9 @@
       "slug": "cloud-infrastructure-architect-agent",
       "title": "Cloud Infrastructure Architect Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -2473,9 +2686,41 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
+    },
+    {
+      "key": "tools:cloudflare-agents-sdk",
+      "category": "tools",
+      "slug": "cloudflare-agents-sdk",
+      "title": "Cloudflare Agents SDK",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/agents/",
+          "https://github.com/cloudflare/agents",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx",
+          "https://developers.cloudflare.com/agents/"
+        ],
+        "externalSourceUrls": [
+          "https://developers.cloudflare.com/agents/",
+          "https://github.com/cloudflare/agents",
+          "https://developers.cloudflare.com/agents/"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "mcp:cloudflare-mcp-server",
@@ -2601,9 +2846,9 @@
       "slug": "code-complexity-alert-monitor",
       "title": "Code Complexity Alert Monitor - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -2619,9 +2864,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "collections:code-quality-toolkit",
@@ -2629,9 +2872,9 @@
       "slug": "code-quality-toolkit",
       "title": "Code Quality & Review",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -2648,7 +2891,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2798,6 +3040,37 @@
       "warnings": []
     },
     {
+      "key": "tools:coderabbit",
+      "category": "tools",
+      "slug": "coderabbit",
+      "title": "CodeRabbit",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.coderabbit.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/coderabbit.mdx",
+          "https://www.coderabbit.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.coderabbit.ai",
+          "https://www.coderabbit.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "skills:codex-automations-orchestrator-capability-pack",
       "category": "skills",
       "slug": "codex-automations-orchestrator-capability-pack",
@@ -2865,11 +3138,11 @@
       "slug": "migration-workflow-guide",
       "title": "Complete Claude Migration Playbook from ChatGPT & Copilot",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -2884,9 +3157,41 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
+    },
+    {
+      "key": "tools:composio",
+      "category": "tools",
+      "slug": "composio",
+      "title": "Composio",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.composio.dev",
+          "https://github.com/ComposioHQ/composio",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/composio.mdx",
+          "https://composio.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.composio.dev",
+          "https://github.com/ComposioHQ/composio",
+          "https://composio.dev"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "collections:content-creation-workflow",
@@ -2894,9 +3199,9 @@
       "slug": "content-creation-workflow",
       "title": "Content Creation",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -2913,7 +3218,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -2978,6 +3282,39 @@
       "warnings": []
     },
     {
+      "key": "tools:continue",
+      "category": "tools",
+      "slug": "continue",
+      "title": "Continue",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.continue.dev",
+          "https://github.com/continuedev/continue",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/continue.mdx",
+          "https://continue.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.continue.dev",
+          "https://github.com/continuedev/continue",
+          "https://continue.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:contrastapi-mcp-server",
       "category": "mcp",
       "slug": "contrastapi-mcp-server",
@@ -3011,14 +3348,47 @@
       ]
     },
     {
+      "key": "tools:crewai",
+      "category": "tools",
+      "slug": "crewai",
+      "title": "CrewAI",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.crewai.com",
+          "https://github.com/crewAIInc/crewAI",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx",
+          "https://www.crewai.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.crewai.com",
+          "https://github.com/crewAIInc/crewAI",
+          "https://www.crewai.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "hooks:css-unused-selector-detector",
       "category": "hooks",
       "slug": "css-unused-selector-detector",
       "title": "CSS Unused Selector Detector - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3035,7 +3405,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display."
       ]
     },
@@ -3069,6 +3438,37 @@
       "warnings": [
         "Description is long for browse/search display."
       ]
+    },
+    {
+      "key": "tools:cursor",
+      "category": "tools",
+      "slug": "cursor",
+      "title": "Cursor",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.cursor.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cursor.mdx",
+          "https://cursor.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.cursor.com",
+          "https://cursor.com"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "skills:cursor-windsurf-ai-ide-setup",
@@ -3165,9 +3565,9 @@
       "slug": "data-engineering-suite",
       "title": "Data Engineering Suite",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -3184,7 +3584,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -3194,9 +3593,9 @@
       "slug": "data-pipeline-engineering-agent",
       "title": "Data Pipeline Engineering Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -3213,7 +3612,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -3223,9 +3621,9 @@
       "slug": "database-connection-cleanup",
       "title": "Database Connection Cleanup - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3241,9 +3639,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:database-expert",
@@ -3400,9 +3796,9 @@
       "slug": "debugging-troubleshooting-system",
       "title": "Debug & Troubleshoot",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -3419,7 +3815,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -3429,9 +3824,9 @@
       "slug": "debugging-assistant-agent",
       "title": "Debugging Assistant Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -3448,7 +3843,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -3458,9 +3852,9 @@
       "slug": "dependency-security-audit-on-stop",
       "title": "Dependency Security Audit",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3476,9 +3870,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:dependency-security-scanner",
@@ -3541,6 +3933,37 @@
       "warnings": [
         "Description is long for browse/search display."
       ]
+    },
+    {
+      "key": "tools:devin",
+      "category": "tools",
+      "slug": "devin",
+      "title": "Devin",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.devin.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/devin.mdx",
+          "https://devin.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.devin.ai",
+          "https://devin.ai"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "agents:devops-sre-expert",
@@ -3639,9 +4062,9 @@
       "slug": "documentation-auto-generator-on-stop",
       "title": "Doc Auto Generator",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3657,9 +4080,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:docker-compose-production-blueprints",
@@ -3880,9 +4301,9 @@
       "slug": "domain-specialist-ai-agents",
       "title": "Domain Specialist AI Agents - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -3899,7 +4320,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -3909,9 +4329,9 @@
       "slug": "environment-cleanup-handler",
       "title": "Environment Cleanup Handler - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3928,7 +4348,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display."
       ]
     },
@@ -3967,9 +4386,9 @@
       "slug": "error-rate-monitor",
       "title": "Error Rate Monitor - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -3986,7 +4405,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display."
       ]
     },
@@ -4049,14 +4467,45 @@
       "warnings": []
     },
     {
+      "key": "tools:exa",
+      "category": "tools",
+      "slug": "exa",
+      "title": "Exa",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.exa.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/exa.mdx",
+          "https://exa.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.exa.ai",
+          "https://exa.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "agents:extended-thinking-orchestrator",
       "category": "agents",
       "slug": "extended-thinking-orchestrator",
       "title": "Extended Thinking Orchestrator - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -4073,7 +4522,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4143,9 +4591,9 @@
       "slug": "file-size-warning-monitor",
       "title": "File Size Warning Monitor - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -4162,7 +4610,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display."
       ]
     },
@@ -4201,9 +4648,9 @@
       "slug": "final-bundle-size-reporter",
       "title": "Final Bundle Size Reporter - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -4219,9 +4666,40 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
+    },
+    {
+      "key": "tools:firecrawl",
+      "category": "tools",
+      "slug": "firecrawl",
+      "title": "Firecrawl",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.firecrawl.dev",
+          "https://github.com/mendableai/firecrawl",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/firecrawl.mdx",
+          "https://www.firecrawl.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.firecrawl.dev",
+          "https://github.com/mendableai/firecrawl",
+          "https://www.firecrawl.dev"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "mcp:fireflies-mcp-server",
@@ -4287,11 +4765,11 @@
       "slug": "fix-environment-variables",
       "title": "Fix Claude Code Environment Variable Configuration Errors",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -4306,7 +4784,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4316,11 +4793,11 @@
       "slug": "fix-installation-errors",
       "title": "Fix Claude Code npm Errors",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -4335,7 +4812,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4345,11 +4821,11 @@
       "slug": "fix-memory-leak-performance",
       "title": "Fix Claude Code Performance",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -4364,7 +4840,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4374,11 +4849,11 @@
       "slug": "fix-mcp-connection-errors",
       "title": "Fix Claude MCP Error -32000",
       "scores": {
-        "total": 67,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
-        "freshness": 100,
+        "freshness": 85,
         "seo": 100
       },
       "provenance": {
@@ -4393,7 +4868,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4432,9 +4906,9 @@
       "slug": "full-stack-ai-development-agent",
       "title": "Full Stack AI Development Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -4451,9 +4925,41 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
+    },
+    {
+      "key": "tools:garak",
+      "category": "tools",
+      "slug": "garak",
+      "title": "Garak",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://github.com/NVIDIA/garak",
+          "https://github.com/NVIDIA/garak",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx",
+          "https://github.com/NVIDIA/garak"
+        ],
+        "externalSourceUrls": [
+          "https://github.com/NVIDIA/garak",
+          "https://github.com/NVIDIA/garak",
+          "https://github.com/NVIDIA/garak"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "commands:generate-tests",
@@ -4487,14 +4993,47 @@
       ]
     },
     {
+      "key": "tools:giskard",
+      "category": "tools",
+      "slug": "giskard",
+      "title": "Giskard",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.giskard.ai",
+          "https://github.com/Giskard-AI/giskard",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/giskard.mdx",
+          "https://www.giskard.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.giskard.ai",
+          "https://github.com/Giskard-AI/giskard",
+          "https://www.giskard.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "hooks:git-auto-commit-on-stop",
       "category": "hooks",
       "slug": "git-auto-commit-on-stop",
       "title": "Git Auto Commit On Stop - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -4510,9 +5049,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:git-branch-protection",
@@ -4520,9 +5057,9 @@
       "slug": "git-branch-protection",
       "title": "Git Branch Protection - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -4538,9 +5075,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:git-mcp-server",
@@ -4777,14 +5312,45 @@
       "warnings": []
     },
     {
+      "key": "tools:github-copilot",
+      "category": "tools",
+      "slug": "github-copilot",
+      "title": "GitHub Copilot",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.github.com/en/copilot",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/github-copilot.mdx",
+          "https://github.com/features/copilot"
+        ],
+        "externalSourceUrls": [
+          "https://docs.github.com/en/copilot",
+          "https://github.com/features/copilot"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "agents:github-copilot-interop-bridge",
       "category": "agents",
       "slug": "github-copilot-interop-bridge",
       "title": "Github Copilot Interop Bridge - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -4801,7 +5367,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -4898,9 +5463,9 @@
       "slug": "go-module-tidy",
       "title": "Go Module Tidy - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -4916,9 +5481,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:google-workspace-gemini-automation",
@@ -4945,6 +5508,37 @@
         ],
         "externalSourceUrls": [
           "https://ai.google.dev/gemini-api/docs"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:graphite-diamond",
+      "category": "tools",
+      "slug": "graphite-diamond",
+      "title": "Graphite Diamond",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://graphite.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/graphite-diamond.mdx",
+          "https://graphite.dev/diamond"
+        ],
+        "externalSourceUrls": [
+          "https://graphite.dev",
+          "https://graphite.dev/diamond"
         ]
       },
       "warnings": []
@@ -4984,9 +5578,9 @@
       "slug": "graphql-schema-validator",
       "title": "GraphQL Schema Validator - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5002,9 +5596,40 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
+    },
+    {
+      "key": "tools:helicone",
+      "category": "tools",
+      "slug": "helicone",
+      "title": "Helicone",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.helicone.ai",
+          "https://github.com/Helicone/helicone",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx",
+          "https://www.helicone.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.helicone.ai",
+          "https://github.com/Helicone/helicone",
+          "https://www.helicone.ai"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "mcp:heyclaude-mcp",
@@ -5154,14 +5779,45 @@
       "warnings": []
     },
     {
+      "key": "tools:hyperbrowser",
+      "category": "tools",
+      "slug": "hyperbrowser",
+      "title": "Hyperbrowser",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.hyperbrowser.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/hyperbrowser.mdx",
+          "https://www.hyperbrowser.ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.hyperbrowser.ai",
+          "https://www.hyperbrowser.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "hooks:i18n-translation-validator",
       "category": "hooks",
       "slug": "i18n-translation-validator",
       "title": "I18n Translation Validator - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5177,9 +5833,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:image-ocr-table-extraction",
@@ -5334,9 +5988,9 @@
       "slug": "jest-snapshot-auto-updater",
       "title": "Jest Snapshot Auto Updater - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5352,9 +6006,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:jira-mcp-server",
@@ -5422,9 +6074,9 @@
       "slug": "json-schema-validator",
       "title": "JSON Schema Validator - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5440,9 +6092,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "rules:kubernetes-devsecops-engineer",
@@ -5479,9 +6129,9 @@
       "slug": "kubernetes-manifest-validator",
       "title": "Kubernetes Manifest Validator - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5497,9 +6147,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:kubernetes-mcp-server",
@@ -5533,14 +6181,142 @@
       "warnings": []
     },
     {
+      "key": "tools:lakera-guard",
+      "category": "tools",
+      "slug": "lakera-guard",
+      "title": "Lakera Guard",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.lakera.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lakera-guard.mdx",
+          "https://www.lakera.ai/guard"
+        ],
+        "externalSourceUrls": [
+          "https://docs.lakera.ai",
+          "https://www.lakera.ai/guard"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:langfuse",
+      "category": "tools",
+      "slug": "langfuse",
+      "title": "Langfuse",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://langfuse.com/docs",
+          "https://github.com/langfuse/langfuse",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langfuse.mdx",
+          "https://langfuse.com"
+        ],
+        "externalSourceUrls": [
+          "https://langfuse.com/docs",
+          "https://github.com/langfuse/langfuse",
+          "https://langfuse.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:langgraph",
+      "category": "tools",
+      "slug": "langgraph",
+      "title": "LangGraph",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://langchain-ai.github.io/langgraph/",
+          "https://github.com/langchain-ai/langgraph",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langgraph.mdx",
+          "https://www.langchain.com/langgraph"
+        ],
+        "externalSourceUrls": [
+          "https://langchain-ai.github.io/langgraph/",
+          "https://github.com/langchain-ai/langgraph",
+          "https://www.langchain.com/langgraph"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:langsmith",
+      "category": "tools",
+      "slug": "langsmith",
+      "title": "LangSmith",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.smith.langchain.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx",
+          "https://www.langchain.com/langsmith"
+        ],
+        "externalSourceUrls": [
+          "https://docs.smith.langchain.com",
+          "https://www.langchain.com/langsmith"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "agents:life-sciences-research-specialist",
       "category": "agents",
       "slug": "life-sciences-research-specialist",
       "title": "Life Sciences Research Specialist - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -5557,7 +6333,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -5651,6 +6426,68 @@
       "warnings": []
     },
     {
+      "key": "tools:lovable",
+      "category": "tools",
+      "slug": "lovable",
+      "title": "Lovable",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.lovable.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lovable.mdx",
+          "https://lovable.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.lovable.dev",
+          "https://lovable.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:make",
+      "category": "tools",
+      "slug": "make",
+      "title": "Make",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://www.make.com/en/help",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/make.mdx",
+          "https://www.make.com"
+        ],
+        "externalSourceUrls": [
+          "https://www.make.com/en/help",
+          "https://www.make.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "skills:markdown-knowledge-base-composer",
       "category": "skills",
       "slug": "markdown-knowledge-base-composer",
@@ -5687,9 +6524,9 @@
       "slug": "markdown-link-checker",
       "title": "Markdown Link Checker - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5705,9 +6542,40 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
+    },
+    {
+      "key": "tools:mastra",
+      "category": "tools",
+      "slug": "mastra",
+      "title": "Mastra",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://mastra.ai/docs",
+          "https://github.com/mastra-ai/mastra",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/mastra.mdx",
+          "https://mastra.ai"
+        ],
+        "externalSourceUrls": [
+          "https://mastra.ai/docs",
+          "https://github.com/mastra-ai/mastra",
+          "https://mastra.ai"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "skills:mcp-server-authoring-security-capability-pack",
@@ -5804,9 +6672,9 @@
       "slug": "mcp-server-status-monitor",
       "title": "MCP Server Status Monitor - Statuslines",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -5822,9 +6690,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:mcp-tool-contract-testing",
@@ -5861,9 +6727,9 @@
       "slug": "memory-usage-monitor",
       "title": "Memory Usage Monitor - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -5879,9 +6745,40 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
+    },
+    {
+      "key": "tools:microsoft-autogen",
+      "category": "tools",
+      "slug": "microsoft-autogen",
+      "title": "Microsoft AutoGen",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://microsoft.github.io/autogen/",
+          "https://github.com/microsoft/autogen",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx",
+          "https://microsoft.github.io/autogen/"
+        ],
+        "externalSourceUrls": [
+          "https://microsoft.github.io/autogen/",
+          "https://github.com/microsoft/autogen",
+          "https://microsoft.github.io/autogen/"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "statuslines:minimal-powerline",
@@ -6152,9 +7049,9 @@
       "slug": "multi-agent-orchestration-specialist",
       "title": "Multi Agent Orchestration Specialist - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -6171,7 +7068,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -6181,9 +7077,9 @@
       "slug": "multi-line-statusline",
       "title": "Multi Line Statusline - Statuslines",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -6199,9 +7095,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:multi-provider-token-counter",
@@ -6257,6 +7151,39 @@
         ],
         "externalSourceUrls": [
           "https://docs.claude.com/en/docs/claude-code/statusline"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:n8n",
+      "category": "tools",
+      "slug": "n8n",
+      "title": "n8n",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.n8n.io",
+          "https://github.com/n8n-io/n8n",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/n8n.mdx",
+          "https://n8n.io"
+        ],
+        "externalSourceUrls": [
+          "https://docs.n8n.io",
+          "https://github.com/n8n-io/n8n",
+          "https://n8n.io"
         ]
       },
       "warnings": []
@@ -6412,9 +7339,9 @@
       "slug": "nextjs-route-analyzer",
       "title": "Nextjs Route Analyzer - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -6430,9 +7357,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:notion-mcp-server",
@@ -6586,6 +7511,39 @@
       "warnings": []
     },
     {
+      "key": "tools:opencode",
+      "category": "tools",
+      "slug": "opencode",
+      "title": "OpenCode",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://opencode.ai",
+          "https://github.com/sst/opencode",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx",
+          "https://opencode.ai"
+        ],
+        "externalSourceUrls": [
+          "https://opencode.ai",
+          "https://github.com/sst/opencode",
+          "https://opencode.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "skills:opennext-cloudflare-capability-pack",
       "category": "skills",
       "slug": "opennext-cloudflare-capability-pack",
@@ -6620,9 +7578,9 @@
       "slug": "package-vulnerability-scanner",
       "title": "Package Vulnerability Scanner - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -6638,9 +7596,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:pagespeed-insights-optimizer",
@@ -6735,9 +7691,9 @@
       "slug": "performance-benchmark-report",
       "title": "Performance Benchmark Report - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -6753,9 +7709,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:performance-impact-monitor",
@@ -6763,9 +7717,9 @@
       "slug": "performance-impact-monitor",
       "title": "Performance Impact Monitor - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -6781,9 +7735,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:performance-monitor",
@@ -6839,6 +7791,37 @@
         ],
         "externalSourceUrls": [
           "https://web.dev/performance/"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:pipedream",
+      "category": "tools",
+      "slug": "pipedream",
+      "title": "Pipedream",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://pipedream.com/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx",
+          "https://pipedream.com"
+        ],
+        "externalSourceUrls": [
+          "https://pipedream.com/docs",
+          "https://pipedream.com"
         ]
       },
       "warnings": []
@@ -6996,9 +7979,9 @@
       "slug": "plugin-ecosystem-architect",
       "title": "Plugin Ecosystem Architect - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7015,7 +7998,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -7112,9 +8094,9 @@
       "slug": "product-management-ai-agent",
       "title": "Product Management AI Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7131,7 +8113,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -7170,9 +8151,9 @@
       "slug": "production-reliability-engineer",
       "title": "Production Reliability Engineer - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7189,7 +8170,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -7199,9 +8179,9 @@
       "slug": "production-readiness-toolkit",
       "title": "Production Toolkit",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7218,7 +8198,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display.",
         "No install, config, download, or documentation path."
       ]
@@ -7229,9 +8208,9 @@
       "slug": "developer-productivity-booster",
       "title": "Productivity Booster",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7248,7 +8227,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "Description is long for browse/search display.",
         "No install, config, download, or documentation path."
       ]
@@ -7288,9 +8266,9 @@
       "slug": "prompt-optimization-specialist",
       "title": "Prompt Optimization Specialist - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -7307,7 +8285,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -7343,6 +8320,70 @@
       "warnings": [
         "Description is long for browse/search display."
       ]
+    },
+    {
+      "key": "tools:promptfoo",
+      "category": "tools",
+      "slug": "promptfoo",
+      "title": "Promptfoo",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://www.promptfoo.dev/docs",
+          "https://github.com/promptfoo/promptfoo",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/promptfoo.mdx",
+          "https://www.promptfoo.dev"
+        ],
+        "externalSourceUrls": [
+          "https://www.promptfoo.dev/docs",
+          "https://github.com/promptfoo/promptfoo",
+          "https://www.promptfoo.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:protect-ai",
+      "category": "tools",
+      "slug": "protect-ai",
+      "title": "Protect AI",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.protectai.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/protect-ai.mdx",
+          "https://protectai.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.protectai.com",
+          "https://protectai.com"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "skills:proxmox-ve-api-capability-pack",
@@ -7466,9 +8507,9 @@
       "slug": "python-import-optimizer",
       "title": "Python Import Optimizer - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7484,9 +8525,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:python-linter-integration",
@@ -7494,9 +8533,9 @@
       "slug": "python-linter-integration",
       "title": "Python Linter Integration - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7512,9 +8551,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:python-rich-statusline",
@@ -7541,6 +8578,37 @@
         ],
         "externalSourceUrls": [
           "https://rich.readthedocs.io/"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:raycast",
+      "category": "tools",
+      "slug": "raycast",
+      "title": "Raycast",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://developers.raycast.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/raycast.mdx",
+          "https://www.raycast.com"
+        ],
+        "externalSourceUrls": [
+          "https://developers.raycast.com",
+          "https://www.raycast.com"
         ]
       },
       "warnings": []
@@ -7696,9 +8764,9 @@
       "slug": "react-component-test-generator",
       "title": "React Test Generator",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7714,9 +8782,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:real-time-activity-tracker",
@@ -7724,9 +8790,9 @@
       "slug": "real-time-activity-tracker",
       "title": "Real Time Activity Tracker - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7742,9 +8808,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:real-time-cost-tracker",
@@ -7752,9 +8816,9 @@
       "slug": "real-time-cost-tracker",
       "title": "Real Time Cost Tracker - Statuslines",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -7770,9 +8834,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:reddit-mcp-buddy",
@@ -7811,9 +8873,9 @@
       "slug": "redis-cache-invalidator",
       "title": "Redis Cache Invalidator - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7829,9 +8891,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:redis-mcp-server",
@@ -7860,6 +8920,37 @@
         "externalSourceUrls": [
           "https://github.com/redis/mcp-redis",
           "https://github.com/redis/mcp-redis"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:replit-agent",
+      "category": "tools",
+      "slug": "replit-agent",
+      "title": "Replit Agent",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.replit.com/replitai/agent",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/replit-agent.mdx",
+          "https://replit.com/ai"
+        ],
+        "externalSourceUrls": [
+          "https://docs.replit.com/replitai/agent",
+          "https://replit.com/ai"
         ]
       },
       "warnings": []
@@ -7896,14 +8987,47 @@
       ]
     },
     {
+      "key": "tools:roo-code",
+      "category": "tools",
+      "slug": "roo-code",
+      "title": "Roo Code",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.roocode.com",
+          "https://github.com/RooCodeInc/Roo-Code",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/roo-code.mdx",
+          "https://roocode.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.roocode.com",
+          "https://github.com/RooCodeInc/Roo-Code",
+          "https://roocode.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "hooks:rust-cargo-check",
       "category": "hooks",
       "slug": "rust-cargo-check",
       "title": "Rust Cargo Check - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7919,9 +9043,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:saas-pricing-experimentation-engine",
@@ -7958,9 +9080,9 @@
       "slug": "scss-auto-compiler",
       "title": "SCSS Auto Compiler - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -7976,9 +9098,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "rules:security-auditor",
@@ -8102,9 +9222,9 @@
       "slug": "semantic-kernel-enterprise-agent",
       "title": "Semantic Kernel Enterprise Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -8121,7 +9241,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -8131,9 +9250,9 @@
       "slug": "sensitive-data-alert-scanner",
       "title": "Sensitive Data Alert Scanner - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8149,9 +9268,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:sentry-mcp-server",
@@ -8217,9 +9334,9 @@
       "slug": "session-metrics-collector",
       "title": "Session Metrics Collector - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8235,9 +9352,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:session-timer-statusline",
@@ -8245,9 +9360,9 @@
       "slug": "session-timer-statusline",
       "title": "Session Timer",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -8263,9 +9378,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:simple-text-statusline",
@@ -8273,9 +9386,9 @@
       "slug": "simple-text-statusline",
       "title": "Simple Text Statusline - Statuslines",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -8291,9 +9404,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:slack-progress-notifier",
@@ -8301,9 +9412,9 @@
       "slug": "slack-progress-notifier",
       "title": "Slack Progress Notifier - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8319,9 +9430,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "commands:slash-command-gen",
@@ -8382,6 +9491,37 @@
       "warnings": []
     },
     {
+      "key": "tools:smithery",
+      "category": "tools",
+      "slug": "smithery",
+      "title": "Smithery",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://smithery.ai/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/smithery.mdx",
+          "https://smithery.ai"
+        ],
+        "externalSourceUrls": [
+          "https://smithery.ai/docs",
+          "https://smithery.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:socket-mcp-server",
       "category": "mcp",
       "slug": "socket-mcp-server",
@@ -8408,6 +9548,37 @@
         "externalSourceUrls": [
           "https://github.com/SocketDev/socket-mcp",
           "https://github.com/SocketDev/socket-mcp"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:sourcegraph-cody",
+      "category": "tools",
+      "slug": "sourcegraph-cody",
+      "title": "Sourcegraph Cody",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://sourcegraph.com/docs/cody",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx",
+          "https://sourcegraph.com/cody"
+        ],
+        "externalSourceUrls": [
+          "https://sourcegraph.com/docs/cody",
+          "https://sourcegraph.com/cody"
         ]
       },
       "warnings": []
@@ -8442,14 +9613,47 @@
       "warnings": []
     },
     {
+      "key": "tools:stagehand",
+      "category": "tools",
+      "slug": "stagehand",
+      "title": "Stagehand",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.stagehand.dev",
+          "https://github.com/browserbase/stagehand",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/stagehand.mdx",
+          "https://www.stagehand.dev"
+        ],
+        "externalSourceUrls": [
+          "https://docs.stagehand.dev",
+          "https://github.com/browserbase/stagehand",
+          "https://www.stagehand.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "statuslines:starship-powerline-theme",
       "category": "statuslines",
       "slug": "starship-powerline-theme",
       "title": "Starship Powerline Theme - Statuslines",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 70,
         "freshness": 85,
         "seo": 100
@@ -8465,9 +9669,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "mcp:stripe-mcp-server",
@@ -8622,9 +9824,9 @@
       "slug": "svelte-component-compiler",
       "title": "Svelte Component Compiler - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8640,9 +9842,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:svelte-sveltekit-fullstack",
@@ -8712,9 +9912,9 @@
       "slug": "team-summary-email-generator",
       "title": "Team Summary Email Generator - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8730,9 +9930,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:technical-documentation-writer-agent",
@@ -8740,9 +9938,9 @@
       "slug": "technical-documentation-writer-agent",
       "title": "Technical Doc Writer",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -8759,7 +9957,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -8798,9 +9995,9 @@
       "slug": "terraform-plan-executor",
       "title": "Terraform Plan Executor - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8816,9 +10013,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:test-automation-engineer-agent",
@@ -8855,9 +10050,9 @@
       "slug": "test-coverage-final-report",
       "title": "Test Coverage Final Report - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -8873,9 +10068,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "hooks:test-runner-hook",
@@ -8941,9 +10134,9 @@
       "slug": "token-cost-budget-optimizer",
       "title": "Token Cost Budget Optimizer - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -8960,9 +10153,41 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
+    },
+    {
+      "key": "tools:trigger-dev",
+      "category": "tools",
+      "slug": "trigger-dev",
+      "title": "Trigger.dev",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://trigger.dev/docs",
+          "https://github.com/triggerdotdev/trigger.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/trigger-dev.mdx",
+          "https://trigger.dev"
+        ],
+        "externalSourceUrls": [
+          "https://trigger.dev/docs",
+          "https://github.com/triggerdotdev/trigger.dev",
+          "https://trigger.dev"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "skills:trpc-type-safe-api",
@@ -9030,9 +10255,9 @@
       "slug": "typescript-compilation-checker",
       "title": "TypeScript Checker",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -9048,9 +10273,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "agents:ui-ux-design-expert-agent",
@@ -9058,9 +10281,9 @@
       "slug": "ui-ux-design-expert-agent",
       "title": "UI UX Design Expert Agent - Agents",
       "scores": {
-        "total": 65,
+        "total": 69,
         "usefulness": 80,
-        "source": 10,
+        "source": 30,
         "copyability": 55,
         "freshness": 85,
         "seo": 100
@@ -9077,7 +10300,6 @@
         "externalSourceUrls": []
       },
       "warnings": [
-        "No external docs/repo source; label as editorial first-party content.",
         "No install, config, download, or documentation path."
       ]
     },
@@ -9169,6 +10391,37 @@
       "warnings": []
     },
     {
+      "key": "tools:vercel-v0",
+      "category": "tools",
+      "slug": "vercel-v0",
+      "title": "v0",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://v0.dev/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx",
+          "https://v0.dev"
+        ],
+        "externalSourceUrls": [
+          "https://v0.dev/docs",
+          "https://v0.dev"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "commands:v0-generate",
       "category": "commands",
       "slug": "v0-generate",
@@ -9227,6 +10480,39 @@
       "warnings": [
         "Description is long for browse/search display."
       ]
+    },
+    {
+      "key": "tools:vercel-ai-sdk",
+      "category": "tools",
+      "slug": "vercel-ai-sdk",
+      "title": "Vercel AI SDK",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://ai-sdk.dev/docs",
+          "https://github.com/vercel/ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx",
+          "https://ai-sdk.dev"
+        ],
+        "externalSourceUrls": [
+          "https://ai-sdk.dev/docs",
+          "https://github.com/vercel/ai",
+          "https://ai-sdk.dev"
+        ]
+      },
+      "warnings": []
     },
     {
       "key": "mcp:vercel-mcp-server",
@@ -9292,9 +10578,9 @@
       "slug": "vue-composition-api-linter",
       "title": "Vue Composition API Linter - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -9310,9 +10596,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "rules:wcag-accessibility-auditor",
@@ -9339,6 +10623,37 @@
         ],
         "externalSourceUrls": [
           "https://www.w3.org/WAI/WCAG22/quickref/"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:weave",
+      "category": "tools",
+      "slug": "weave",
+      "title": "Weave",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://weave-docs.wandb.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/weave.mdx",
+          "https://wandb.ai/site/weave"
+        ],
+        "externalSourceUrls": [
+          "https://weave-docs.wandb.ai",
+          "https://wandb.ai/site/weave"
         ]
       },
       "warnings": []
@@ -9409,9 +10724,9 @@
       "slug": "webpack-bundle-analyzer",
       "title": "Webpack Bundle Analyzer - Hooks",
       "scores": {
-        "total": 74,
+        "total": 78,
         "usefulness": 85,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -9427,9 +10742,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "skills:website-crawler-summarizer",
@@ -9458,6 +10771,37 @@
         "externalSourceUrls": [
           "https://github.com/mozilla/readability",
           "https://github.com/mozilla/readability"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:windsurf",
+      "category": "tools",
+      "slug": "windsurf",
+      "title": "Windsurf",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.windsurf.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/windsurf.mdx",
+          "https://windsurf.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.windsurf.com",
+          "https://windsurf.com"
         ]
       },
       "warnings": []
@@ -9521,6 +10865,37 @@
       "warnings": []
     },
     {
+      "key": "tools:workato",
+      "category": "tools",
+      "slug": "workato",
+      "title": "Workato",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.workato.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/workato.mdx",
+          "https://www.workato.com"
+        ],
+        "externalSourceUrls": [
+          "https://docs.workato.com",
+          "https://www.workato.com"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:workato-mcp-server",
       "category": "mcp",
       "slug": "workato-mcp-server",
@@ -9555,9 +10930,9 @@
       "slug": "workflow-completion-report",
       "title": "Workflow Completion Report - Hooks",
       "scores": {
-        "total": 78,
+        "total": 82,
         "usefulness": 100,
-        "source": 10,
+        "source": 30,
         "copyability": 90,
         "freshness": 85,
         "seo": 100
@@ -9573,9 +10948,7 @@
         ],
         "externalSourceUrls": []
       },
-      "warnings": [
-        "No external docs/repo source; label as editorial first-party content."
-      ]
+      "warnings": []
     },
     {
       "key": "statuslines:workspace-project-depth-indicator",
@@ -9607,6 +10980,37 @@
       "warnings": []
     },
     {
+      "key": "tools:zapier-ai",
+      "category": "tools",
+      "slug": "zapier-ai",
+      "title": "Zapier AI",
+      "scores": {
+        "total": 76,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://help.zapier.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx",
+          "https://zapier.com/ai"
+        ],
+        "externalSourceUrls": [
+          "https://help.zapier.com",
+          "https://zapier.com/ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
       "key": "mcp:zapier-mcp-server",
       "category": "mcp",
       "slug": "zapier-mcp-server",
@@ -9631,6 +11035,39 @@
         ],
         "externalSourceUrls": [
           "https://help.zapier.com/hc/en-us/articles/36265392843917"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "tools:zed",
+      "category": "tools",
+      "slug": "zed",
+      "title": "Zed",
+      "scores": {
+        "total": 83,
+        "usefulness": 100,
+        "source": 75,
+        "copyability": 45,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "repo-and-docs",
+        "hasExternalSource": true,
+        "hasRepository": true,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://zed.dev/docs",
+          "https://github.com/zed-industries/zed",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zed.mdx",
+          "https://zed.dev"
+        ],
+        "externalSourceUrls": [
+          "https://zed.dev/docs",
+          "https://github.com/zed-industries/zed",
+          "https://zed.dev"
         ]
       },
       "warnings": []

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:nextjs-15-performance-architect",
   "category": "rules",
   "slug": "nextjs-15-performance-architect",

@@ -6,6 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { ToolsDirectory } from "@/components/tools-directory";
 import { getTools } from "@/lib/tools";
 import { buildPageMetadata } from "@/lib/seo";
+import { getSeoClusterDefinitions } from "@/lib/seo-clusters";
 import { siteConfig } from "@/lib/site";
 import {
   buildBreadcrumbJsonLd,
@@ -34,6 +35,9 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function ToolsPage() {
   const tools = await getTools();
+  const clusterLinks = getSeoClusterDefinitions().filter((cluster) =>
+    cluster.categories.includes("tools"),
+  );
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -109,6 +113,22 @@ export default async function ToolsPage() {
             >
               {category}
             </span>
+          ))}
+        </div>
+      </section>
+      <section className="surface-panel p-5">
+        <p className="text-xs uppercase tracking-[0.18em] text-primary">
+          Editorial clusters
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {clusterLinks.map((cluster) => (
+            <Link
+              key={cluster.slug}
+              href={`/best/${cluster.slug}`}
+              className="rounded-lg border border-border bg-background px-4 py-3 text-sm font-medium text-foreground transition hover:border-primary/40"
+            >
+              {cluster.title}
+            </Link>
           ))}
         </div>
       </section>

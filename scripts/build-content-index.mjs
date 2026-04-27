@@ -25,9 +25,58 @@ const skillsDownloadsDir = path.join(
 );
 const mcpDownloadsDir = path.join(repoRoot, "apps/web/public/downloads/mcp");
 const ENABLE_GITHUB_REPO_STATS = process.env.ENABLE_GITHUB_REPO_STATS === "1";
+const buildLockDir = path.join(repoRoot, ".build-content-index.lock");
 const categories = categorySpec.categoryOrder.filter((category) =>
   fs.existsSync(path.join(contentRoot, category)),
 );
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function withBuildLock(callback) {
+  const staleAfterMs = 10 * 60 * 1000;
+  const startedAt = Date.now();
+
+  while (true) {
+    try {
+      fs.mkdirSync(buildLockDir);
+      fs.writeFileSync(
+        path.join(buildLockDir, "owner.json"),
+        `${JSON.stringify({ pid: process.pid, createdAt: new Date().toISOString() }, null, 2)}\n`,
+      );
+
+      try {
+        return await callback();
+      } finally {
+        fs.rmSync(buildLockDir, { recursive: true, force: true });
+      }
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+
+      let lockIsStale = false;
+      try {
+        const stats = fs.statSync(buildLockDir);
+        lockIsStale = Date.now() - stats.mtimeMs > staleAfterMs;
+      } catch {
+        lockIsStale = true;
+      }
+
+      if (lockIsStale) {
+        fs.rmSync(buildLockDir, { recursive: true, force: true });
+        continue;
+      }
+
+      if (Date.now() - startedAt > staleAfterMs) {
+        throw new Error("Timed out waiting for build-content-index lock");
+      }
+
+      await sleep(250);
+    }
+  }
+}
 
 async function fetchGitHubRepoStats(repo) {
   const headers = {
@@ -285,4 +334,4 @@ async function main() {
   );
 }
 
-await main();
+await withBuildLock(main);

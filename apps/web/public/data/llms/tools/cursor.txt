@@ -1,0 +1,18 @@
+# Cursor
+URL: https://heyclau.de/tools/cursor
+Category: tools
+Author: Cursor
+Date added: 2026-04-27
+Documentation: https://docs.cursor.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cursor.mdx
+## Summary
+AI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.
+## Tags
+- ai-coding
+- code-editor
+## Content
+## Editorial notes
+Cursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

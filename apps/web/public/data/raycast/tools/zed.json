@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:zed",
+  "category": "tools",
+  "slug": "zed",
+  "title": "Zed",
+  "copyText": "## Editorial notes\n\nZed belongs in the directory because AI coding workflows increasingly depend on low-latency editor collaboration and shared context.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Zed\nCollaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.\n**Category:** tools\n**Author:** Zed Industries\n**Tags:** `code-editor` `collaboration`\n\n## Links\n- https://heyclau.de/tools/zed\n- https://zed.dev/docs\n- https://github.com/zed-industries/zed",
+  "webUrl": "https://heyclau.de/tools/zed",
+  "repoUrl": "https://github.com/zed-industries/zed",
+  "documentationUrl": "https://zed.dev/docs"
+}

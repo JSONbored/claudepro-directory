@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "statuslines:multi-line-statusline",
   "category": "statuslines",
   "slug": "multi-line-statusline",

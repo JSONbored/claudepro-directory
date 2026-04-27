@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:biome-strict-linting-rules",
   "category": "rules",
   "slug": "biome-strict-linting-rules",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:codebase-migration-refactoring-agent",
   "category": "agents",
   "slug": "codebase-migration-refactoring-agent",

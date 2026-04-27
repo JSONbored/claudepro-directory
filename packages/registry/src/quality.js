@@ -111,8 +111,16 @@ export function buildEntryQuality(entry, referenceDate) {
     clean(entry.downloadUrl) ||
     clean(entry.documentationUrl),
   );
+  const hasExplicitEditorialProvenance = [
+    "local-editorial-source",
+    "source-free-first-party",
+  ].includes(provenance.sourceQuality);
 
-  if (!provenance.hasExternalSource && !provenance.hasFirstPartyPackage) {
+  if (
+    !provenance.hasExternalSource &&
+    !provenance.hasFirstPartyPackage &&
+    !hasExplicitEditorialProvenance
+  ) {
     warnings.push(
       "No external docs/repo source; label as editorial first-party content.",
     );
@@ -138,6 +146,7 @@ export function buildEntryQuality(entry, referenceDate) {
     (provenance.hasRepository ? 35 : 0) +
       (provenance.hasDocumentation ? 30 : 0) +
       (provenance.hasFirstPartyPackage ? 25 : 0) +
+      (hasExplicitEditorialProvenance ? 20 : 0) +
       (clean(entry.githubUrl) ? 10 : 0),
   );
   const copyability = clampScore(
@@ -217,6 +226,19 @@ export function buildContentQualityReport(entries) {
   const noExternalSourceCount = entryReports.filter(
     (entry) => !entry.provenance.hasExternalSource,
   ).length;
+  const firstPartyEditorialCount = entryReports.filter((entry) =>
+    ["local-editorial-source", "source-free-first-party"].includes(
+      entry.provenance.sourceQuality,
+    ),
+  ).length;
+  const unprovenancedSourceCount = entryReports.filter(
+    (entry) =>
+      !entry.provenance.hasExternalSource &&
+      !entry.provenance.hasFirstPartyPackage &&
+      !["local-editorial-source", "source-free-first-party"].includes(
+        entry.provenance.sourceQuality,
+      ),
+  ).length;
   const missingSeoCount = entryReports.filter((entry) =>
     entry.warnings.some((warning) =>
       warning.startsWith("Missing explicit seo"),
@@ -261,6 +283,8 @@ export function buildContentQualityReport(entries) {
           )
         : 0,
       noExternalSourceCount,
+      firstPartyEditorialCount,
+      unprovenancedSourceCount,
       missingSeoCount,
       duplicateBodyGroupCount: duplicateBodyGroups.length,
     },

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:aider",
+  "category": "tools",
+  "slug": "aider",
+  "title": "Aider",
+  "copyText": "## Editorial notes\n\nAider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Aider\nOpen-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.\n**Category:** tools\n**Author:** Aider\n**Tags:** `terminal-agent` `open-source`\n\n## Links\n- https://heyclau.de/tools/aider\n- https://aider.chat/docs\n- https://github.com/Aider-AI/aider",
+  "webUrl": "https://heyclau.de/tools/aider",
+  "repoUrl": "https://github.com/Aider-AI/aider",
+  "documentationUrl": "https://aider.chat/docs"
+}

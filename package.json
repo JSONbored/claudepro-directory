@@ -20,6 +20,7 @@
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
     "validate:tasks": "node scripts/validate-tasks.mjs",
+    "submission:queue": "node scripts/build-submission-queue.mjs",
     "test": "vitest run",
     "test:e2e": "env -u NO_COLOR playwright test",
     "test:seo-jsonld": "vitest run tests/seo-jsonld.test.ts",

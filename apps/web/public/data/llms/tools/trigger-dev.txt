@@ -1,0 +1,19 @@
+# Trigger.dev
+URL: https://heyclau.de/tools/trigger-dev
+Category: tools
+Author: Trigger.dev
+Date added: 2026-04-27
+Documentation: https://trigger.dev/docs
+Repository: https://github.com/triggerdotdev/trigger.dev
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/trigger-dev.mdx
+## Summary
+Background job and workflow platform for TypeScript applications, long-running tasks, schedules, and durable automation.
+## Tags
+- workflow-automation
+- typescript
+## Content
+## Editorial notes
+Trigger.dev is useful for AI products that need durable background jobs, retries, scheduled work, and observable workflow execution.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

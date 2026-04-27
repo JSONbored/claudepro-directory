@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "statuslines:session-health-score",
   "category": "statuslines",
   "slug": "session-health-score",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:debugging-assistant-agent",
   "category": "agents",
   "slug": "debugging-assistant-agent",

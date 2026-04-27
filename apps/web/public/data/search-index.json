@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "search-index",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "count": 326,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 378,
   "entries": [
     {
       "category": "commands",
@@ -839,6 +839,28 @@
       "url": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy"
     },
     {
+      "category": "tools",
+      "slug": "aider",
+      "title": "Aider",
+      "description": "Terminal AI coding assistant for Git repositories.",
+      "tags": [
+        "terminal-agent",
+        "open-source"
+      ],
+      "keywords": [
+        "terminal coding agent",
+        "git ai assistant"
+      ],
+      "author": "Aider",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://aider.chat/docs",
+      "repoUrl": "https://github.com/Aider-AI/aider",
+      "url": "https://heyclau.de/tools/aider"
+    },
+    {
       "category": "mcp",
       "slug": "airtable-mcp-server",
       "title": "Airtable MCP Server for Claude",
@@ -1085,6 +1107,72 @@
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/api-latency-breakdown"
+    },
+    {
+      "category": "tools",
+      "slug": "apify",
+      "title": "Apify",
+      "description": "Web automation and scraping platform.",
+      "tags": [
+        "web-automation",
+        "data-extraction"
+      ],
+      "keywords": [
+        "web scraping platform",
+        "automation actors"
+      ],
+      "author": "Apify",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.apify.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/apify"
+    },
+    {
+      "category": "tools",
+      "slug": "arcade-ai",
+      "title": "Arcade",
+      "description": "Authenticated tool-calling platform for agents.",
+      "tags": [
+        "tool-calling",
+        "agents"
+      ],
+      "keywords": [
+        "agent tool calling",
+        "authenticated actions"
+      ],
+      "author": "Arcade",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.arcade.dev",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/arcade-ai"
+    },
+    {
+      "category": "tools",
+      "slug": "arize-phoenix",
+      "title": "Arize Phoenix",
+      "description": "Open-source LLM observability and evaluation tooling.",
+      "tags": [
+        "observability",
+        "evaluation"
+      ],
+      "keywords": [
+        "llm tracing",
+        "ai evaluation"
+      ],
+      "author": "Arize AI",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://arize.com/docs/phoenix",
+      "repoUrl": "https://github.com/Arize-ai/phoenix",
+      "url": "https://heyclau.de/tools/arize-phoenix"
     },
     {
       "category": "mcp",
@@ -1591,6 +1679,28 @@
       "url": "https://heyclau.de/statuslines/block-timer-tracker"
     },
     {
+      "category": "tools",
+      "slug": "bolt-new",
+      "title": "Bolt",
+      "description": "Browser AI app builder for web projects.",
+      "tags": [
+        "app-builder",
+        "prototyping"
+      ],
+      "keywords": [
+        "browser app builder",
+        "ai web development"
+      ],
+      "author": "StackBlitz",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://support.bolt.new",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/bolt-new"
+    },
+    {
       "category": "mcp",
       "slug": "box-mcp-server",
       "title": "Box MCP Server for Claude",
@@ -1625,6 +1735,28 @@
       "url": "https://heyclau.de/mcp/box-mcp-server"
     },
     {
+      "category": "tools",
+      "slug": "braintrust",
+      "title": "Braintrust",
+      "description": "Evaluation and logging platform for AI applications.",
+      "tags": [
+        "evaluation",
+        "prompt-testing"
+      ],
+      "keywords": [
+        "ai evaluation platform",
+        "prompt experiments"
+      ],
+      "author": "Braintrust",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://www.braintrust.dev/docs",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/braintrust"
+    },
+    {
       "category": "skills",
       "slug": "browser-agent-workflow-automation",
       "title": "Browser Agent Workflow Automation Skill",
@@ -1651,6 +1783,50 @@
       "documentationUrl": "https://playwright.dev/docs/best-practices",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/browser-agent-workflow-automation"
+    },
+    {
+      "category": "tools",
+      "slug": "browser-use",
+      "title": "Browser Use",
+      "description": "Open-source browser automation for AI agents.",
+      "tags": [
+        "browser-automation",
+        "open-source"
+      ],
+      "keywords": [
+        "browser agents",
+        "ai web automation"
+      ],
+      "author": "Browser Use",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.browser-use.com",
+      "repoUrl": "https://github.com/browser-use/browser-use",
+      "url": "https://heyclau.de/tools/browser-use"
+    },
+    {
+      "category": "tools",
+      "slug": "browserbase",
+      "title": "Browserbase",
+      "description": "Cloud browser infrastructure for AI agents.",
+      "tags": [
+        "browser-automation",
+        "agent-infrastructure"
+      ],
+      "keywords": [
+        "cloud browser",
+        "browser agents"
+      ],
+      "author": "Browserbase",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.browserbase.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/browserbase"
     },
     {
       "category": "guides",
@@ -1991,6 +2167,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/healthcare-hipaa-guide"
+    },
+    {
+      "category": "tools",
+      "slug": "claude-code",
+      "title": "Claude Code",
+      "description": "Terminal coding agent for Claude-powered development.",
+      "tags": [
+        "claude-code",
+        "terminal-agent"
+      ],
+      "keywords": [
+        "claude code",
+        "terminal agent"
+      ],
+      "author": "Anthropic",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/claude-code"
     },
     {
       "category": "statuslines",
@@ -2519,6 +2717,28 @@
       "url": "https://heyclau.de/mcp/clickup-mcp-server"
     },
     {
+      "category": "tools",
+      "slug": "cline",
+      "title": "Cline",
+      "description": "Open-source autonomous coding agent for VS Code.",
+      "tags": [
+        "vs-code",
+        "coding-agent"
+      ],
+      "keywords": [
+        "vscode coding agent",
+        "open-source ai agent"
+      ],
+      "author": "Cline",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.cline.bot",
+      "repoUrl": "https://github.com/cline/cline",
+      "url": "https://heyclau.de/tools/cline"
+    },
+    {
       "category": "hooks",
       "slug": "cloud-backup-on-session-stop",
       "title": "Cloud Backup On Session Stop - Hooks",
@@ -2587,6 +2807,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/cloud-infrastructure-architect-agent"
+    },
+    {
+      "category": "tools",
+      "slug": "cloudflare-agents-sdk",
+      "title": "Cloudflare Agents SDK",
+      "description": "Framework for building AI agents on Cloudflare Workers.",
+      "tags": [
+        "agent-framework",
+        "cloudflare"
+      ],
+      "keywords": [
+        "ai agents cloudflare",
+        "workers agents"
+      ],
+      "author": "Cloudflare",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://developers.cloudflare.com/agents/",
+      "repoUrl": "https://github.com/cloudflare/agents",
+      "url": "https://heyclau.de/tools/cloudflare-agents-sdk"
     },
     {
       "category": "mcp",
@@ -2955,6 +3197,28 @@
       "url": "https://heyclau.de/agents/codebase-migration-refactoring-agent"
     },
     {
+      "category": "tools",
+      "slug": "coderabbit",
+      "title": "CodeRabbit",
+      "description": "AI code review platform for pull requests.",
+      "tags": [
+        "code-review",
+        "pull-requests"
+      ],
+      "keywords": [
+        "ai code review",
+        "pull request review"
+      ],
+      "author": "CodeRabbit",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.coderabbit.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/coderabbit"
+    },
+    {
       "category": "skills",
       "slug": "codex-automations-orchestrator-capability-pack",
       "title": "Codex Automations Orchestrator Capability Pack Skill",
@@ -3033,6 +3297,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/migration-workflow-guide"
+    },
+    {
+      "category": "tools",
+      "slug": "composio",
+      "title": "Composio",
+      "description": "Tool integration platform for AI agents.",
+      "tags": [
+        "tool-integrations",
+        "agents"
+      ],
+      "keywords": [
+        "ai agent tools",
+        "tool integrations"
+      ],
+      "author": "Composio",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.composio.dev",
+      "repoUrl": "https://github.com/ComposioHQ/composio",
+      "url": "https://heyclau.de/tools/composio"
     },
     {
       "category": "collections",
@@ -3144,6 +3430,28 @@
       "url": "https://heyclau.de/agents/context-window-optimizer-agent"
     },
     {
+      "category": "tools",
+      "slug": "continue",
+      "title": "Continue",
+      "description": "Open-source AI coding assistant with model control.",
+      "tags": [
+        "ai-coding",
+        "open-source"
+      ],
+      "keywords": [
+        "open-source ai coding",
+        "custom model routing"
+      ],
+      "author": "Continue",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.continue.dev",
+      "repoUrl": "https://github.com/continuedev/continue",
+      "url": "https://heyclau.de/tools/continue"
+    },
+    {
       "category": "mcp",
       "slug": "contrastapi-mcp-server",
       "title": "ContrastAPI Security Tools",
@@ -3172,6 +3480,28 @@
       "documentationUrl": "https://api.contrastcyber.com",
       "repoUrl": "https://github.com/UPinar/contrastapi",
       "url": "https://heyclau.de/mcp/contrastapi-mcp-server"
+    },
+    {
+      "category": "tools",
+      "slug": "crewai",
+      "title": "CrewAI",
+      "description": "Multi-agent workflow framework and platform.",
+      "tags": [
+        "agent-framework",
+        "multi-agent"
+      ],
+      "keywords": [
+        "multi-agent framework",
+        "ai crews"
+      ],
+      "author": "CrewAI",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.crewai.com",
+      "repoUrl": "https://github.com/crewAIInc/crewAI",
+      "url": "https://heyclau.de/tools/crewai"
     },
     {
       "category": "hooks",
@@ -3242,6 +3572,28 @@
       "documentationUrl": "https://pandas.pydata.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/csv-excel-data-wrangler"
+    },
+    {
+      "category": "tools",
+      "slug": "cursor",
+      "title": "Cursor",
+      "description": "Codebase-aware AI editor for agent-assisted development.",
+      "tags": [
+        "ai-coding",
+        "code-editor"
+      ],
+      "keywords": [
+        "claude tools",
+        "ai code editor"
+      ],
+      "author": "Cursor",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.cursor.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/cursor"
     },
     {
       "category": "skills",
@@ -3796,6 +4148,28 @@
       "documentationUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/dependency-update-checker"
+    },
+    {
+      "category": "tools",
+      "slug": "devin",
+      "title": "Devin",
+      "description": "AI software engineering agent for development tasks.",
+      "tags": [
+        "coding-agent",
+        "autonomous-agent"
+      ],
+      "keywords": [
+        "ai software engineer",
+        "autonomous coding agent"
+      ],
+      "author": "Cognition",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.devin.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/devin"
     },
     {
       "category": "agents",
@@ -4354,6 +4728,28 @@
       "url": "https://heyclau.de/skills/ethereum-solidity-security-foundry"
     },
     {
+      "category": "tools",
+      "slug": "exa",
+      "title": "Exa",
+      "description": "Search and retrieval API for AI agents.",
+      "tags": [
+        "search",
+        "retrieval"
+      ],
+      "keywords": [
+        "ai search api",
+        "web retrieval"
+      ],
+      "author": "Exa",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.exa.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/exa"
+    },
+    {
       "category": "agents",
       "slug": "extended-thinking-orchestrator",
       "title": "Extended Thinking Orchestrator - Agents",
@@ -4561,6 +4957,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/final-bundle-size-reporter"
+    },
+    {
+      "category": "tools",
+      "slug": "firecrawl",
+      "title": "Firecrawl",
+      "description": "Web crawling API for LLM-ready content.",
+      "tags": [
+        "web-crawling",
+        "data-extraction"
+      ],
+      "keywords": [
+        "llm crawling",
+        "website to markdown"
+      ],
+      "author": "Firecrawl",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.firecrawl.dev",
+      "repoUrl": "https://github.com/mendableai/firecrawl",
+      "url": "https://heyclau.de/tools/firecrawl"
     },
     {
       "category": "mcp",
@@ -4811,6 +5229,28 @@
       "url": "https://heyclau.de/agents/full-stack-ai-development-agent"
     },
     {
+      "category": "tools",
+      "slug": "garak",
+      "title": "Garak",
+      "description": "Open-source LLM vulnerability scanner.",
+      "tags": [
+        "security",
+        "red-teaming"
+      ],
+      "keywords": [
+        "llm vulnerability scanner",
+        "ai security testing"
+      ],
+      "author": "NVIDIA",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://github.com/NVIDIA/garak",
+      "repoUrl": "https://github.com/NVIDIA/garak",
+      "url": "https://heyclau.de/tools/garak"
+    },
+    {
       "category": "commands",
       "slug": "generate-tests",
       "title": "Generate Tests for Claude",
@@ -4843,6 +5283,28 @@
       "documentationUrl": "https://docs.claude.ai/commands/test-gen",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/generate-tests"
+    },
+    {
+      "category": "tools",
+      "slug": "giskard",
+      "title": "Giskard",
+      "description": "AI testing platform for LLM and ML quality.",
+      "tags": [
+        "evaluation",
+        "security"
+      ],
+      "keywords": [
+        "ai testing",
+        "llm evaluation"
+      ],
+      "author": "Giskard",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.giskard.ai",
+      "repoUrl": "https://github.com/Giskard-AI/giskard",
+      "url": "https://heyclau.de/tools/giskard"
     },
     {
       "category": "hooks",
@@ -5172,6 +5634,28 @@
       "url": "https://heyclau.de/hooks/github-actions-workflow-validator"
     },
     {
+      "category": "tools",
+      "slug": "github-copilot",
+      "title": "GitHub Copilot",
+      "description": "AI developer assistant across GitHub and editors.",
+      "tags": [
+        "ai-coding",
+        "code-review"
+      ],
+      "keywords": [
+        "ai coding assistant",
+        "github copilot"
+      ],
+      "author": "GitHub",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.github.com/en/copilot",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/github-copilot"
+    },
+    {
       "category": "agents",
       "slug": "github-copilot-interop-bridge",
       "title": "Github Copilot Interop Bridge - Agents",
@@ -5370,6 +5854,28 @@
       "url": "https://heyclau.de/skills/google-workspace-gemini-automation"
     },
     {
+      "category": "tools",
+      "slug": "graphite-diamond",
+      "title": "Graphite Diamond",
+      "description": "AI code review assistant inside Graphite workflows.",
+      "tags": [
+        "code-review",
+        "pull-requests"
+      ],
+      "keywords": [
+        "ai code review",
+        "graphite diamond"
+      ],
+      "author": "Graphite",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://graphite.dev",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/graphite-diamond"
+    },
+    {
       "category": "rules",
       "slug": "graphql-federation-specialist",
       "title": "GraphQL Federation Specialist for Claude",
@@ -5434,6 +5940,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/graphql-schema-validator"
+    },
+    {
+      "category": "tools",
+      "slug": "helicone",
+      "title": "Helicone",
+      "description": "LLM observability and cost tracking platform.",
+      "tags": [
+        "observability",
+        "cost-tracking"
+      ],
+      "keywords": [
+        "llm cost tracking",
+        "llm logs"
+      ],
+      "author": "Helicone",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.helicone.ai",
+      "repoUrl": "https://github.com/Helicone/helicone",
+      "url": "https://heyclau.de/tools/helicone"
     },
     {
       "category": "mcp",
@@ -5605,6 +6133,28 @@
       "documentationUrl": "https://typicode.github.io/husky/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/husky-commit-governance-capability-pack"
+    },
+    {
+      "category": "tools",
+      "slug": "hyperbrowser",
+      "title": "Hyperbrowser",
+      "description": "Browser automation infrastructure for AI workflows.",
+      "tags": [
+        "browser-automation",
+        "agent-infrastructure"
+      ],
+      "keywords": [
+        "browser automation infrastructure",
+        "ai agents"
+      ],
+      "author": "Hyperbrowser",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.hyperbrowser.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/hyperbrowser"
     },
     {
       "category": "hooks",
@@ -6041,6 +6591,94 @@
       "url": "https://heyclau.de/mcp/kubernetes-mcp-server"
     },
     {
+      "category": "tools",
+      "slug": "lakera-guard",
+      "title": "Lakera Guard",
+      "description": "AI security guardrails for LLM applications.",
+      "tags": [
+        "security",
+        "guardrails"
+      ],
+      "keywords": [
+        "prompt injection protection",
+        "ai guardrails"
+      ],
+      "author": "Lakera",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.lakera.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/lakera-guard"
+    },
+    {
+      "category": "tools",
+      "slug": "langfuse",
+      "title": "Langfuse",
+      "description": "Open-source LLM tracing and evaluation platform.",
+      "tags": [
+        "observability",
+        "open-source"
+      ],
+      "keywords": [
+        "llm tracing",
+        "prompt management"
+      ],
+      "author": "Langfuse",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://langfuse.com/docs",
+      "repoUrl": "https://github.com/langfuse/langfuse",
+      "url": "https://heyclau.de/tools/langfuse"
+    },
+    {
+      "category": "tools",
+      "slug": "langgraph",
+      "title": "LangGraph",
+      "description": "Stateful orchestration framework for LLM agents.",
+      "tags": [
+        "agent-framework",
+        "orchestration"
+      ],
+      "keywords": [
+        "agent orchestration",
+        "stateful llm workflows"
+      ],
+      "author": "LangChain",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://langchain-ai.github.io/langgraph/",
+      "repoUrl": "https://github.com/langchain-ai/langgraph",
+      "url": "https://heyclau.de/tools/langgraph"
+    },
+    {
+      "category": "tools",
+      "slug": "langsmith",
+      "title": "LangSmith",
+      "description": "Observability and evaluation platform for LLM apps.",
+      "tags": [
+        "observability",
+        "evaluation"
+      ],
+      "keywords": [
+        "llm observability",
+        "agent evaluation"
+      ],
+      "author": "LangChain",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.smith.langchain.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/langsmith"
+    },
+    {
       "category": "agents",
       "slug": "life-sciences-research-specialist",
       "title": "Life Sciences Research Specialist - Agents",
@@ -6182,6 +6820,50 @@
       "url": "https://heyclau.de/skills/log-parsing-incident-timeline"
     },
     {
+      "category": "tools",
+      "slug": "lovable",
+      "title": "Lovable",
+      "description": "AI app builder for prompt-driven web products.",
+      "tags": [
+        "app-builder",
+        "prototyping"
+      ],
+      "keywords": [
+        "ai app builder",
+        "web app generation"
+      ],
+      "author": "Lovable",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.lovable.dev",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/lovable"
+    },
+    {
+      "category": "tools",
+      "slug": "make",
+      "title": "Make",
+      "description": "Visual automation platform for integrations and AI workflows.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "keywords": [
+        "visual automation",
+        "business workflows"
+      ],
+      "author": "Make",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://www.make.com/en/help",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/make"
+    },
+    {
       "category": "skills",
       "slug": "markdown-knowledge-base-composer",
       "title": "Markdown Knowledge Base Composer Skill",
@@ -6247,6 +6929,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/markdown-link-checker"
+    },
+    {
+      "category": "tools",
+      "slug": "mastra",
+      "title": "Mastra",
+      "description": "TypeScript framework for agents and AI workflows.",
+      "tags": [
+        "agent-framework",
+        "typescript"
+      ],
+      "keywords": [
+        "typescript agents",
+        "ai workflow framework"
+      ],
+      "author": "Mastra",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://mastra.ai/docs",
+      "repoUrl": "https://github.com/mastra-ai/mastra",
+      "url": "https://heyclau.de/tools/mastra"
     },
     {
       "category": "skills",
@@ -6431,6 +7135,28 @@
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/memory-usage-monitor"
+    },
+    {
+      "category": "tools",
+      "slug": "microsoft-autogen",
+      "title": "Microsoft AutoGen",
+      "description": "Open-source framework for multi-agent AI applications.",
+      "tags": [
+        "agent-framework",
+        "multi-agent"
+      ],
+      "keywords": [
+        "autogen",
+        "multi-agent ai"
+      ],
+      "author": "Microsoft",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://microsoft.github.io/autogen/",
+      "repoUrl": "https://github.com/microsoft/autogen",
+      "url": "https://heyclau.de/tools/microsoft-autogen"
     },
     {
       "category": "statuslines",
@@ -6882,6 +7608,28 @@
       "url": "https://heyclau.de/statuslines/multi-session-overlap-indicator"
     },
     {
+      "category": "tools",
+      "slug": "n8n",
+      "title": "n8n",
+      "description": "Self-hostable workflow automation for AI operations.",
+      "tags": [
+        "workflow-automation",
+        "self-hosted"
+      ],
+      "keywords": [
+        "ai workflow automation",
+        "self-hosted automation"
+      ],
+      "author": "n8n",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.n8n.io",
+      "repoUrl": "https://github.com/n8n-io/n8n",
+      "url": "https://heyclau.de/tools/n8n"
+    },
+    {
       "category": "skills",
       "slug": "n8n-ai-agent-workflow-architect",
       "title": "n8n AI Agent Workflow Architect Skill",
@@ -7216,6 +7964,28 @@
       "url": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack"
     },
     {
+      "category": "tools",
+      "slug": "opencode",
+      "title": "OpenCode",
+      "description": "Terminal-first AI coding agent for local development.",
+      "tags": [
+        "terminal-agent",
+        "ai-coding"
+      ],
+      "keywords": [
+        "terminal coding agent",
+        "ai development cli"
+      ],
+      "author": "SST",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://opencode.ai",
+      "repoUrl": "https://github.com/sst/opencode",
+      "url": "https://heyclau.de/tools/opencode"
+    },
+    {
       "category": "skills",
       "slug": "opennext-cloudflare-capability-pack",
       "title": "OpenNext Cloudflare Capability Pack Skill",
@@ -7513,6 +8283,28 @@
       "documentationUrl": "https://web.dev/performance/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/performance-optimizer-agent"
+    },
+    {
+      "category": "tools",
+      "slug": "pipedream",
+      "title": "Pipedream",
+      "description": "Developer workflow automation and API integration platform.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "keywords": [
+        "api automation",
+        "workflow integrations"
+      ],
+      "author": "Pipedream",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://pipedream.com/docs",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/pipedream"
     },
     {
       "category": "mcp",
@@ -8086,6 +8878,50 @@
       "url": "https://heyclau.de/mcp/prompt-to-asset"
     },
     {
+      "category": "tools",
+      "slug": "promptfoo",
+      "title": "Promptfoo",
+      "description": "Open-source prompt testing and red-teaming framework.",
+      "tags": [
+        "prompt-testing",
+        "security"
+      ],
+      "keywords": [
+        "llm red teaming",
+        "prompt testing"
+      ],
+      "author": "Promptfoo",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://www.promptfoo.dev/docs",
+      "repoUrl": "https://github.com/promptfoo/promptfoo",
+      "url": "https://heyclau.de/tools/promptfoo"
+    },
+    {
+      "category": "tools",
+      "slug": "protect-ai",
+      "title": "Protect AI",
+      "description": "AI security platform for models and applications.",
+      "tags": [
+        "security",
+        "ai-supply-chain"
+      ],
+      "keywords": [
+        "ai security",
+        "model security"
+      ],
+      "author": "Protect AI",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.protectai.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/protect-ai"
+    },
+    {
       "category": "skills",
       "slug": "proxmox-ve-api-capability-pack",
       "title": "Proxmox VE API Capability Pack Skill",
@@ -8312,6 +9148,28 @@
       "documentationUrl": "https://rich.readthedocs.io/",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/python-rich-statusline"
+    },
+    {
+      "category": "tools",
+      "slug": "raycast",
+      "title": "Raycast",
+      "description": "macOS launcher and extension platform with AI workflows.",
+      "tags": [
+        "launcher",
+        "extensions"
+      ],
+      "keywords": [
+        "raycast ai",
+        "macos productivity"
+      ],
+      "author": "Raycast",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://developers.raycast.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/raycast"
     },
     {
       "category": "skills",
@@ -8685,6 +9543,28 @@
       "url": "https://heyclau.de/mcp/redis-mcp-server"
     },
     {
+      "category": "tools",
+      "slug": "replit-agent",
+      "title": "Replit Agent",
+      "description": "Browser-based AI app builder inside Replit.",
+      "tags": [
+        "app-builder",
+        "ai-coding"
+      ],
+      "keywords": [
+        "ai app builder",
+        "browser ide"
+      ],
+      "author": "Replit",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.replit.com/replitai/agent",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/replit-agent"
+    },
+    {
       "category": "skills",
       "slug": "rest-api-client-harness",
       "title": "REST API Client Harness Skill",
@@ -8717,6 +9597,28 @@
       "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/rest-api-client-harness"
+    },
+    {
+      "category": "tools",
+      "slug": "roo-code",
+      "title": "Roo Code",
+      "description": "VS Code coding agent with planning and workflow modes.",
+      "tags": [
+        "vs-code",
+        "coding-agent"
+      ],
+      "keywords": [
+        "vscode ai agent",
+        "coding workflow automation"
+      ],
+      "author": "Roo Code",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.roocode.com",
+      "repoUrl": "https://github.com/RooCodeInc/Roo-Code",
+      "url": "https://heyclau.de/tools/roo-code"
     },
     {
       "category": "hooks",
@@ -9306,6 +10208,28 @@
       "url": "https://heyclau.de/agents/slash-command-orchestrator-agent"
     },
     {
+      "category": "tools",
+      "slug": "smithery",
+      "title": "Smithery",
+      "description": "MCP server discovery and deployment platform.",
+      "tags": [
+        "mcp",
+        "tool-discovery"
+      ],
+      "keywords": [
+        "mcp registry",
+        "mcp servers"
+      ],
+      "author": "Smithery",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://smithery.ai/docs",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/smithery"
+    },
+    {
       "category": "mcp",
       "slug": "socket-mcp-server",
       "title": "Socket MCP Server for Claude",
@@ -9341,6 +10265,28 @@
       "url": "https://heyclau.de/mcp/socket-mcp-server"
     },
     {
+      "category": "tools",
+      "slug": "sourcegraph-cody",
+      "title": "Sourcegraph Cody",
+      "description": "AI coding assistant for large codebase context.",
+      "tags": [
+        "ai-coding",
+        "code-search"
+      ],
+      "keywords": [
+        "codebase ai",
+        "sourcegraph cody"
+      ],
+      "author": "Sourcegraph",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://sourcegraph.com/docs/cody",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/sourcegraph-cody"
+    },
+    {
       "category": "mcp",
       "slug": "square-mcp-server",
       "title": "Square MCP Server for Claude",
@@ -9373,6 +10319,28 @@
       "documentationUrl": "https://developer.squareup.com/docs/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/square-mcp-server"
+    },
+    {
+      "category": "tools",
+      "slug": "stagehand",
+      "title": "Stagehand",
+      "description": "AI-assisted browser automation framework.",
+      "tags": [
+        "browser-automation",
+        "open-source"
+      ],
+      "keywords": [
+        "ai browser automation",
+        "browser agents"
+      ],
+      "author": "Browserbase",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.stagehand.dev",
+      "repoUrl": "https://github.com/browserbase/stagehand",
+      "url": "https://heyclau.de/tools/stagehand"
     },
     {
       "category": "statuslines",
@@ -9996,6 +10964,28 @@
       "url": "https://heyclau.de/agents/token-cost-budget-optimizer"
     },
     {
+      "category": "tools",
+      "slug": "trigger-dev",
+      "title": "Trigger.dev",
+      "description": "Background jobs and workflows for TypeScript apps.",
+      "tags": [
+        "workflow-automation",
+        "typescript"
+      ],
+      "keywords": [
+        "background jobs",
+        "ai workflows"
+      ],
+      "author": "Trigger.dev",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://trigger.dev/docs",
+      "repoUrl": "https://github.com/triggerdotdev/trigger.dev",
+      "url": "https://heyclau.de/tools/trigger-dev"
+    },
+    {
       "category": "skills",
       "slug": "trpc-type-safe-api",
       "title": "tRPC Type-Safe API Builder Skill",
@@ -10210,6 +11200,28 @@
       "url": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack"
     },
     {
+      "category": "tools",
+      "slug": "vercel-v0",
+      "title": "v0",
+      "description": "AI interface builder for React and web UI.",
+      "tags": [
+        "ui-generation",
+        "react"
+      ],
+      "keywords": [
+        "ai ui builder",
+        "react generation"
+      ],
+      "author": "Vercel",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://v0.dev/docs",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/vercel-v0"
+    },
+    {
       "category": "commands",
       "slug": "v0-generate",
       "title": "V0 Component Generator for Claude",
@@ -10272,6 +11284,28 @@
       "documentationUrl": "https://v0.dev/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/v0-rapid-prototyping"
+    },
+    {
+      "category": "tools",
+      "slug": "vercel-ai-sdk",
+      "title": "Vercel AI SDK",
+      "description": "TypeScript toolkit for AI apps and streaming UI.",
+      "tags": [
+        "ai-sdk",
+        "typescript"
+      ],
+      "keywords": [
+        "ai sdk",
+        "streaming ui"
+      ],
+      "author": "Vercel",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://ai-sdk.dev/docs",
+      "repoUrl": "https://github.com/vercel/ai",
+      "url": "https://heyclau.de/tools/vercel-ai-sdk"
     },
     {
       "category": "mcp",
@@ -10411,6 +11445,28 @@
       "url": "https://heyclau.de/rules/wcag-accessibility-auditor"
     },
     {
+      "category": "tools",
+      "slug": "weave",
+      "title": "Weave",
+      "description": "Tracking and evaluation toolkit for LLM applications.",
+      "tags": [
+        "evaluation",
+        "observability"
+      ],
+      "keywords": [
+        "llm tracking",
+        "wandb weave"
+      ],
+      "author": "Weights and Biases",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://weave-docs.wandb.ai",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/weave"
+    },
+    {
       "category": "agents",
       "slug": "web-async-agent-coordinator",
       "title": "Web Async Agent Coordinator - Agents",
@@ -10547,6 +11603,28 @@
       "url": "https://heyclau.de/skills/website-crawler-summarizer"
     },
     {
+      "category": "tools",
+      "slug": "windsurf",
+      "title": "Windsurf",
+      "description": "Agentic coding environment for multi-file AI development.",
+      "tags": [
+        "ai-coding",
+        "agentic-editor"
+      ],
+      "keywords": [
+        "claude coding tools",
+        "agentic editor"
+      ],
+      "author": "Windsurf",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.windsurf.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/windsurf"
+    },
+    {
       "category": "skills",
       "slug": "windsurf-collaborative-development",
       "title": "Windsurf AI-Native Collaborative Development Skill",
@@ -10614,6 +11692,28 @@
       "documentationUrl": "https://docs.codeium.com/windsurf",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/windsurf-ai-native-ide-patterns"
+    },
+    {
+      "category": "tools",
+      "slug": "workato",
+      "title": "Workato",
+      "description": "Enterprise automation platform for business workflows.",
+      "tags": [
+        "workflow-automation",
+        "enterprise"
+      ],
+      "keywords": [
+        "enterprise automation",
+        "business integrations"
+      ],
+      "author": "Workato",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://docs.workato.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/workato"
     },
     {
       "category": "mcp",
@@ -10720,6 +11820,28 @@
       "url": "https://heyclau.de/statuslines/workspace-project-depth-indicator"
     },
     {
+      "category": "tools",
+      "slug": "zapier-ai",
+      "title": "Zapier AI",
+      "description": "AI-assisted automation across business apps.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "keywords": [
+        "ai automation",
+        "app integrations"
+      ],
+      "author": "Zapier",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://help.zapier.com",
+      "repoUrl": "",
+      "url": "https://heyclau.de/tools/zapier-ai"
+    },
+    {
       "category": "mcp",
       "slug": "zapier-mcp-server",
       "title": "Zapier MCP Server for Claude",
@@ -10752,6 +11874,28 @@
       "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/zapier-mcp-server"
+    },
+    {
+      "category": "tools",
+      "slug": "zed",
+      "title": "Zed",
+      "description": "Fast collaborative code editor with AI assistance.",
+      "tags": [
+        "code-editor",
+        "collaboration"
+      ],
+      "keywords": [
+        "ai code editor",
+        "collaborative editor"
+      ],
+      "author": "Zed Industries",
+      "dateAdded": "2026-04-27",
+      "installable": false,
+      "downloadTrust": null,
+      "verificationStatus": "",
+      "documentationUrl": "https://zed.dev/docs",
+      "repoUrl": "https://github.com/zed-industries/zed",
+      "url": "https://heyclau.de/tools/zed"
     },
     {
       "category": "skills",

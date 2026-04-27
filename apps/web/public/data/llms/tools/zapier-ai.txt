@@ -1,0 +1,18 @@
+# Zapier AI
+URL: https://heyclau.de/tools/zapier-ai
+Category: tools
+Author: Zapier
+Date added: 2026-04-27
+Documentation: https://help.zapier.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx
+## Summary
+Automation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.
+## Tags
+- workflow-automation
+- integrations
+## Content
+## Editorial notes
+Zapier AI is relevant for non-engineering and operations teams that need AI-assisted workflows across existing business apps.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

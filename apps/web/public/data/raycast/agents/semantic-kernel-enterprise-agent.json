@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:semantic-kernel-enterprise-agent",
   "category": "agents",
   "slug": "semantic-kernel-enterprise-agent",

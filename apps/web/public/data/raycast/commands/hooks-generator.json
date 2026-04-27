@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "commands:hooks-generator",
   "category": "commands",
   "slug": "hooks-generator",

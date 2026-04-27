@@ -1,0 +1,19 @@
+# Promptfoo
+URL: https://heyclau.de/tools/promptfoo
+Category: tools
+Author: Promptfoo
+Date added: 2026-04-27
+Documentation: https://www.promptfoo.dev/docs
+Repository: https://github.com/promptfoo/promptfoo
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/promptfoo.mdx
+## Summary
+Open-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.
+## Tags
+- prompt-testing
+- security
+## Content
+## Editorial notes
+Promptfoo is a practical fit for teams that want repeatable prompt tests, security checks, and evaluation gates in CI.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

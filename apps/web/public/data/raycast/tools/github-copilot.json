@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:github-copilot",
+  "category": "tools",
+  "slug": "github-copilot",
+  "title": "GitHub Copilot",
+  "copyText": "## Editorial notes\n\nGitHub Copilot is useful for teams that want AI assistance tied directly to repository hosting, pull requests, and editor workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# GitHub Copilot\nAI developer assistant across GitHub, editors, pull requests, chat, code review, and agentic coding workflows.\n**Category:** tools\n**Author:** GitHub\n**Tags:** `ai-coding` `code-review`\n\n## Links\n- https://heyclau.de/tools/github-copilot\n- https://docs.github.com/en/copilot",
+  "webUrl": "https://heyclau.de/tools/github-copilot",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.github.com/en/copilot"
+}

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:bolt-new",
+  "category": "tools",
+  "slug": "bolt-new",
+  "title": "Bolt",
+  "copyText": "## Editorial notes\n\nBolt is relevant for users who want prompt-to-running-app workflows in a browser environment with deployment-oriented iteration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Bolt\nBrowser-based AI app builder for creating, editing, running, and deploying web projects from prompts.\n**Category:** tools\n**Author:** StackBlitz\n**Tags:** `app-builder` `prototyping`\n\n## Links\n- https://heyclau.de/tools/bolt-new\n- https://support.bolt.new",
+  "webUrl": "https://heyclau.de/tools/bolt-new",
+  "repoUrl": "",
+  "documentationUrl": "https://support.bolt.new"
+}

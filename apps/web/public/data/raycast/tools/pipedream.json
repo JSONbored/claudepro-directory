@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:pipedream",
+  "category": "tools",
+  "slug": "pipedream",
+  "title": "Pipedream",
+  "copyText": "## Editorial notes\n\nPipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Pipedream\nWorkflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.\n**Category:** tools\n**Author:** Pipedream\n**Tags:** `workflow-automation` `integrations`\n\n## Links\n- https://heyclau.de/tools/pipedream\n- https://pipedream.com/docs",
+  "webUrl": "https://heyclau.de/tools/pipedream",
+  "repoUrl": "",
+  "documentationUrl": "https://pipedream.com/docs"
+}

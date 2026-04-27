@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:performance-optimizer-agent",
   "category": "agents",
   "slug": "performance-optimizer-agent",

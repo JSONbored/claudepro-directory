@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:team-summary-email-generator",
   "category": "hooks",
   "slug": "team-summary-email-generator",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:autogen-conversation-agent-builder",
   "category": "agents",
   "slug": "autogen-conversation-agent-builder",

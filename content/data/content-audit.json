@@ -830,6 +830,526 @@
     "issues": []
   },
   {
+    "category": "tools",
+    "filePath": "content/tools/aider.mdx",
+    "slug": "aider",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/apify.mdx",
+    "slug": "apify",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/arcade-ai.mdx",
+    "slug": "arcade-ai",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/arize-phoenix.mdx",
+    "slug": "arize-phoenix",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/bolt-new.mdx",
+    "slug": "bolt-new",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/braintrust.mdx",
+    "slug": "braintrust",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/browser-use.mdx",
+    "slug": "browser-use",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/browserbase.mdx",
+    "slug": "browserbase",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/claude-code.mdx",
+    "slug": "claude-code",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/cline.mdx",
+    "slug": "cline",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/cloudflare-agents-sdk.mdx",
+    "slug": "cloudflare-agents-sdk",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/coderabbit.mdx",
+    "slug": "coderabbit",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/composio.mdx",
+    "slug": "composio",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/continue.mdx",
+    "slug": "continue",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/crewai.mdx",
+    "slug": "crewai",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/cursor.mdx",
+    "slug": "cursor",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/devin.mdx",
+    "slug": "devin",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/exa.mdx",
+    "slug": "exa",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/firecrawl.mdx",
+    "slug": "firecrawl",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/garak.mdx",
+    "slug": "garak",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/giskard.mdx",
+    "slug": "giskard",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/github-copilot.mdx",
+    "slug": "github-copilot",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/graphite-diamond.mdx",
+    "slug": "graphite-diamond",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/helicone.mdx",
+    "slug": "helicone",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/hyperbrowser.mdx",
+    "slug": "hyperbrowser",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/lakera-guard.mdx",
+    "slug": "lakera-guard",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/langfuse.mdx",
+    "slug": "langfuse",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/langgraph.mdx",
+    "slug": "langgraph",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/langsmith.mdx",
+    "slug": "langsmith",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/lovable.mdx",
+    "slug": "lovable",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/make.mdx",
+    "slug": "make",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/mastra.mdx",
+    "slug": "mastra",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/microsoft-autogen.mdx",
+    "slug": "microsoft-autogen",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/n8n.mdx",
+    "slug": "n8n",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/opencode.mdx",
+    "slug": "opencode",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/pipedream.mdx",
+    "slug": "pipedream",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/promptfoo.mdx",
+    "slug": "promptfoo",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/protect-ai.mdx",
+    "slug": "protect-ai",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/raycast.mdx",
+    "slug": "raycast",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/replit-agent.mdx",
+    "slug": "replit-agent",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/roo-code.mdx",
+    "slug": "roo-code",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/smithery.mdx",
+    "slug": "smithery",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/sourcegraph-cody.mdx",
+    "slug": "sourcegraph-cody",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/stagehand.mdx",
+    "slug": "stagehand",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/trigger-dev.mdx",
+    "slug": "trigger-dev",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/vercel-ai-sdk.mdx",
+    "slug": "vercel-ai-sdk",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/vercel-v0.mdx",
+    "slug": "vercel-v0",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/weave.mdx",
+    "slug": "weave",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/windsurf.mdx",
+    "slug": "windsurf",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/workato.mdx",
+    "slug": "workato",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/zapier-ai.mdx",
+    "slug": "zapier-ai",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "tools",
+    "filePath": "content/tools/zed.mdx",
+    "slug": "zed",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
     "category": "skills",
     "filePath": "content/skills/agent-evals-regression-gate.mdx",
     "slug": "agent-evals-regression-gate",

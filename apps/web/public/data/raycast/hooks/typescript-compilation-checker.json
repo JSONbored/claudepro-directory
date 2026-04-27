@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:typescript-compilation-checker",
   "category": "hooks",
   "slug": "typescript-compilation-checker",

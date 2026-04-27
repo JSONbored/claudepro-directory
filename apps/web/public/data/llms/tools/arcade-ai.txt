@@ -1,0 +1,18 @@
+# Arcade
+URL: https://heyclau.de/tools/arcade-ai
+Category: tools
+Author: Arcade
+Date added: 2026-04-27
+Documentation: https://docs.arcade.dev
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arcade-ai.mdx
+## Summary
+Tool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.
+## Tags
+- tool-calling
+- agents
+## Content
+## Editorial notes
+Arcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

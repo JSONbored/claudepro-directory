@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:workflow-completion-report",
   "category": "hooks",
   "slug": "workflow-completion-report",

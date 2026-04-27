@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:test-driven-development-enforcer",
   "category": "rules",
   "slug": "test-driven-development-enforcer",

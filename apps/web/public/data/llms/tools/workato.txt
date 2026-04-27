@@ -1,0 +1,18 @@
+# Workato
+URL: https://heyclau.de/tools/workato
+Category: tools
+Author: Workato
+Date added: 2026-04-27
+Documentation: https://docs.workato.com
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/workato.mdx
+## Summary
+Enterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.
+## Tags
+- workflow-automation
+- enterprise
+## Content
+## Editorial notes
+Workato belongs in the directory for enterprise teams evaluating AI-connected automation across business systems.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

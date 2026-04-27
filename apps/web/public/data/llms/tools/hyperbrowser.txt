@@ -1,0 +1,18 @@
+# Hyperbrowser
+URL: https://heyclau.de/tools/hyperbrowser
+Category: tools
+Author: Hyperbrowser
+Date added: 2026-04-27
+Documentation: https://docs.hyperbrowser.ai
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/hyperbrowser.mdx
+## Summary
+Browser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.
+## Tags
+- browser-automation
+- agent-infrastructure
+## Content
+## Editorial notes
+Hyperbrowser belongs in the agent infrastructure category for teams running browser automation beyond local developer machines.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

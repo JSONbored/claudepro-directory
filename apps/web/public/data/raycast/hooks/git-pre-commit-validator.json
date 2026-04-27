@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:git-pre-commit-validator",
   "category": "hooks",
   "slug": "git-pre-commit-validator",

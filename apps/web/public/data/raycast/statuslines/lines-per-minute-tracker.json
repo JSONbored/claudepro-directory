@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "statuslines:lines-per-minute-tracker",
   "category": "statuslines",
   "slug": "lines-per-minute-tracker",

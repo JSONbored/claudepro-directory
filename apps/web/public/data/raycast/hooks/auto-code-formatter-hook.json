@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:auto-code-formatter-hook",
   "category": "hooks",
   "slug": "auto-code-formatter-hook",

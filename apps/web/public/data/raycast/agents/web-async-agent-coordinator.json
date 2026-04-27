@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:web-async-agent-coordinator",
   "category": "agents",
   "slug": "web-async-agent-coordinator",

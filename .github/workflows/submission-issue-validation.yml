@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   validate-submission:
-    if: contains(github.event.issue.labels.*.name, 'content-submission') || contains(github.event.issue.labels.*.name, 'submission')
+    if: contains(github.event.issue.labels.*.name, 'content-submission') || contains(github.event.issue.labels.*.name, 'submission') || startsWith(github.event.issue.title, 'Submit') || startsWith(github.event.issue.title, '[Submit]') || contains(github.event.issue.body, '### Category') || contains(github.event.issue.body, '**Category:**')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -49,6 +49,48 @@ jobs:
         if: always()
         run: |
           test -f .github/tmp/submission-validation.json
+
+      - name: Auto-label submission issue
+        if: always()
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
+        with:
+          script: |
+            const fs = require("node:fs");
+            const reportPath = ".github/tmp/submission-validation.json";
+            if (!fs.existsSync(reportPath)) return;
+            const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
+            if (report.skipped) return;
+
+            const labels = new Set(
+              (context.payload.issue.labels || []).map((label) => label.name)
+            );
+            labels.add("content-submission");
+            labels.add("needs-review");
+            const categoryLabels = {
+              agents: "community-agents",
+              collections: "community-collections",
+              commands: "community-commands",
+              guides: "guide",
+              hooks: "community-hooks",
+              mcp: "community-mcp",
+              rules: "community-rules",
+              skills: "skills",
+              statuslines: "community-statuslines"
+            };
+            if (report.category) {
+              labels.add(categoryLabels[report.category] || report.category);
+            }
+
+            const nextLabels = [...labels].filter(Boolean);
+            try {
+              await github.rest.issues.setLabels({
+                ...context.repo,
+                issue_number: context.issue.number,
+                labels: nextLabels
+              });
+            } catch (error) {
+              core.warning(`Could not apply submission labels: ${error.message}`);
+            }
 
       - name: Preview import output
         if: always()

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:arcade-ai",
+  "category": "tools",
+  "slug": "arcade-ai",
+  "title": "Arcade",
+  "copyText": "## Editorial notes\n\nArcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Arcade\nTool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.\n**Category:** tools\n**Author:** Arcade\n**Tags:** `tool-calling` `agents`\n\n## Links\n- https://heyclau.de/tools/arcade-ai\n- https://docs.arcade.dev",
+  "webUrl": "https://heyclau.de/tools/arcade-ai",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.arcade.dev"
+}

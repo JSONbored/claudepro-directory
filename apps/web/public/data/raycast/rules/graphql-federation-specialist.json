@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:graphql-federation-specialist",
   "category": "rules",
   "slug": "graphql-federation-specialist",

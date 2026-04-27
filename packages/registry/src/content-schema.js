@@ -538,6 +538,7 @@ export function validateEntry(category, data, inferred = {}) {
 
   if (category === "tools") {
     const websiteUrl = String(merged.websiteUrl || "").trim();
+    const affiliateUrl = String(merged.affiliateUrl || "").trim();
     const disclosure = String(merged.disclosure || "editorial")
       .trim()
       .toLowerCase();
@@ -548,13 +549,25 @@ export function validateEntry(category, data, inferred = {}) {
     if (websiteUrl && !/^https:\/\//i.test(websiteUrl)) {
       semanticErrors.push("websiteUrl must use https");
     }
+    if (affiliateUrl && !/^https:\/\//i.test(affiliateUrl)) {
+      semanticErrors.push("affiliateUrl must use https");
+    }
     if (
       disclosure &&
-      !["editorial", "affiliate", "sponsored"].includes(disclosure)
+      ![
+        "editorial",
+        "heyclaude_pick",
+        "affiliate",
+        "sponsored",
+        "claimed",
+      ].includes(disclosure)
     ) {
       semanticErrors.push(
-        "disclosure must be editorial, affiliate, or sponsored",
+        "disclosure must be editorial, heyclaude_pick, affiliate, sponsored, or claimed",
       );
+    }
+    if (disclosure === "affiliate" && !affiliateUrl) {
+      semanticErrors.push("affiliate tool listings must include affiliateUrl");
     }
     if (
       pricingModel &&
@@ -588,6 +601,7 @@ export function orderFrontmatter(data) {
     "authorProfileUrl",
     "dateAdded",
     "websiteUrl",
+    "affiliateUrl",
     "repoUrl",
     "documentationUrl",
     "pricingModel",

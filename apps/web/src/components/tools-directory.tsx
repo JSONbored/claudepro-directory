@@ -10,6 +10,8 @@ type ToolsDirectoryProps = {
 function disclosureLabel(tool: ToolListing) {
   if (tool.sponsored) return "Sponsored";
   if (tool.disclosure === "affiliate") return "Affiliate";
+  if (tool.disclosure === "heyclaude_pick") return "HeyClaude pick";
+  if (tool.disclosure === "claimed") return "Claimed";
   if (tool.featured) return "Featured";
   return "Editorial";
 }
@@ -53,6 +55,7 @@ export function ToolsDirectory({ tools }: ToolsDirectoryProps) {
         const linkRel = linkRelForDisclosure(
           tool.sponsored ? "sponsored" : tool.disclosure,
         );
+        const primaryUrl = tool.affiliateUrl || tool.websiteUrl;
         return (
           <article
             key={tool.slug}
@@ -95,15 +98,17 @@ export function ToolsDirectory({ tools }: ToolsDirectoryProps) {
                 >
                   Details
                 </Link>
-                {tool.websiteUrl ? (
+                {primaryUrl ? (
                   <a
-                    href={tool.websiteUrl}
+                    href={primaryUrl}
                     target="_blank"
                     rel={linkRel}
                     className="directory-link-chip"
                   >
                     <ArrowUpRight className="size-3.5" />
-                    Website
+                    {tool.disclosure === "affiliate"
+                      ? "Affiliate link"
+                      : "Website"}
                   </a>
                 ) : null}
               </div>

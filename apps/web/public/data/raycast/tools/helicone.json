@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:helicone",
+  "category": "tools",
+  "slug": "helicone",
+  "title": "Helicone",
+  "copyText": "## Editorial notes\n\nHelicone is useful when cost visibility, request logging, and feedback capture are central to LLM operations.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Helicone\nOpen-source LLM observability platform for logging, metrics, cost tracking, feedback, and gateway workflows.\n**Category:** tools\n**Author:** Helicone\n**Tags:** `observability` `cost-tracking`\n\n## Links\n- https://heyclau.de/tools/helicone\n- https://docs.helicone.ai\n- https://github.com/Helicone/helicone",
+  "webUrl": "https://heyclau.de/tools/helicone",
+  "repoUrl": "https://github.com/Helicone/helicone",
+  "documentationUrl": "https://docs.helicone.ai"
+}

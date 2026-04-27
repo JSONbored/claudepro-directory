@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:final-bundle-size-reporter",
   "category": "hooks",
   "slug": "final-bundle-size-reporter",

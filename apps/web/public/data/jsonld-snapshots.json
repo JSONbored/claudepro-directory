@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "jsonld-snapshots",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "count": 326,
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 378,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -1774,6 +1774,77 @@
       ]
     },
     {
+      "key": "tools:aider",
+      "category": "tools",
+      "slug": "aider",
+      "url": "https://heyclau.de/tools/aider",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/aider#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Aider",
+              "item": "https://heyclau.de/tools/aider"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/aider#webpage",
+          "name": "Aider",
+          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows.",
+          "url": "https://heyclau.de/tools/aider",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/aider#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/aider#entry",
+          "name": "Aider",
+          "headline": "Aider",
+          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows.",
+          "url": "https://heyclau.de/tools/aider",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "terminal coding agent, git ai assistant, terminal-agent, open-source",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Aider"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://aider.chat/docs",
+            "https://github.com/Aider-AI/aider"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:airtable-mcp-server",
       "category": "mcp",
       "slug": "airtable-mcp-server",
@@ -2262,6 +2333,217 @@
           },
           "sameAs": [
             "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:apify",
+      "category": "tools",
+      "slug": "apify",
+      "url": "https://heyclau.de/tools/apify",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/apify#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Apify",
+              "item": "https://heyclau.de/tools/apify"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/apify#webpage",
+          "name": "Apify",
+          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows.",
+          "url": "https://heyclau.de/tools/apify",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/apify#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/apify#entry",
+          "name": "Apify",
+          "headline": "Apify",
+          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows.",
+          "url": "https://heyclau.de/tools/apify",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "web scraping platform, automation actors, web-automation, data-extraction",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Apify"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.apify.com"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:arcade-ai",
+      "category": "tools",
+      "slug": "arcade-ai",
+      "url": "https://heyclau.de/tools/arcade-ai",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/arcade-ai#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Arcade",
+              "item": "https://heyclau.de/tools/arcade-ai"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/arcade-ai#webpage",
+          "name": "Arcade",
+          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents.",
+          "url": "https://heyclau.de/tools/arcade-ai",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/arcade-ai#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/arcade-ai#entry",
+          "name": "Arcade",
+          "headline": "Arcade",
+          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents.",
+          "url": "https://heyclau.de/tools/arcade-ai",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "agent tool calling, authenticated actions, tool-calling, agents",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Arcade"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.arcade.dev"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:arize-phoenix",
+      "category": "tools",
+      "slug": "arize-phoenix",
+      "url": "https://heyclau.de/tools/arize-phoenix",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/arize-phoenix#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Arize Phoenix",
+              "item": "https://heyclau.de/tools/arize-phoenix"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/arize-phoenix#webpage",
+          "name": "Arize Phoenix",
+          "description": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
+          "url": "https://heyclau.de/tools/arize-phoenix",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/arize-phoenix#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/arize-phoenix#entry",
+          "name": "Arize Phoenix",
+          "headline": "Arize Phoenix",
+          "description": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
+          "url": "https://heyclau.de/tools/arize-phoenix",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm tracing, ai evaluation, observability, evaluation",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Arize AI"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://arize.com/docs/phoenix",
+            "https://github.com/Arize-ai/phoenix"
           ]
         }
       ]
@@ -3322,6 +3604,76 @@
       ]
     },
     {
+      "key": "tools:bolt-new",
+      "category": "tools",
+      "slug": "bolt-new",
+      "url": "https://heyclau.de/tools/bolt-new",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/bolt-new#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Bolt",
+              "item": "https://heyclau.de/tools/bolt-new"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/bolt-new#webpage",
+          "name": "Bolt",
+          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
+          "url": "https://heyclau.de/tools/bolt-new",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/bolt-new#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/bolt-new#entry",
+          "name": "Bolt",
+          "headline": "Bolt",
+          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
+          "url": "https://heyclau.de/tools/bolt-new",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "browser app builder, ai web development, app-builder, prototyping",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "StackBlitz"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://support.bolt.new"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:box-mcp-server",
       "category": "mcp",
       "slug": "box-mcp-server",
@@ -3387,6 +3739,76 @@
           },
           "sameAs": [
             "https://box.dev/guides/box-mcp/remote/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:braintrust",
+      "category": "tools",
+      "slug": "braintrust",
+      "url": "https://heyclau.de/tools/braintrust",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/braintrust#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Braintrust",
+              "item": "https://heyclau.de/tools/braintrust"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/braintrust#webpage",
+          "name": "Braintrust",
+          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications.",
+          "url": "https://heyclau.de/tools/braintrust",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/braintrust#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/braintrust#entry",
+          "name": "Braintrust",
+          "headline": "Braintrust",
+          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications.",
+          "url": "https://heyclau.de/tools/braintrust",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai evaluation platform, prompt experiments, evaluation, prompt-testing",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Braintrust"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://www.braintrust.dev/docs"
           ]
         }
       ]
@@ -3458,6 +3880,147 @@
           },
           "sameAs": [
             "https://playwright.dev/docs/best-practices"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:browser-use",
+      "category": "tools",
+      "slug": "browser-use",
+      "url": "https://heyclau.de/tools/browser-use",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/browser-use#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Browser Use",
+              "item": "https://heyclau.de/tools/browser-use"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/browser-use#webpage",
+          "name": "Browser Use",
+          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites.",
+          "url": "https://heyclau.de/tools/browser-use",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/browser-use#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/browser-use#entry",
+          "name": "Browser Use",
+          "headline": "Browser Use",
+          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites.",
+          "url": "https://heyclau.de/tools/browser-use",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "browser agents, ai web automation, browser-automation, open-source",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Browser Use"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.browser-use.com",
+            "https://github.com/browser-use/browser-use"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:browserbase",
+      "category": "tools",
+      "slug": "browserbase",
+      "url": "https://heyclau.de/tools/browserbase",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/browserbase#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Browserbase",
+              "item": "https://heyclau.de/tools/browserbase"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/browserbase#webpage",
+          "name": "Browserbase",
+          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction.",
+          "url": "https://heyclau.de/tools/browserbase",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/browserbase#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/browserbase#entry",
+          "name": "Browserbase",
+          "headline": "Browserbase",
+          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction.",
+          "url": "https://heyclau.de/tools/browserbase",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "cloud browser, browser agents, browser-automation, agent-infrastructure",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Browserbase"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.browserbase.com"
           ]
         }
       ]
@@ -4230,6 +4793,76 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:claude-code",
+      "category": "tools",
+      "slug": "claude-code",
+      "url": "https://heyclau.de/tools/claude-code",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/claude-code#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Claude Code",
+              "item": "https://heyclau.de/tools/claude-code"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/claude-code#webpage",
+          "name": "Claude Code",
+          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows.",
+          "url": "https://heyclau.de/tools/claude-code",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/claude-code#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/claude-code#entry",
+          "name": "Claude Code",
+          "headline": "Claude Code",
+          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows.",
+          "url": "https://heyclau.de/tools/claude-code",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "claude code, terminal agent, claude-code, terminal-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Anthropic"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.anthropic.com/en/docs/claude-code/overview"
+          ]
         }
       ]
     },
@@ -5421,6 +6054,77 @@
       ]
     },
     {
+      "key": "tools:cline",
+      "category": "tools",
+      "slug": "cline",
+      "url": "https://heyclau.de/tools/cline",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/cline#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Cline",
+              "item": "https://heyclau.de/tools/cline"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/cline#webpage",
+          "name": "Cline",
+          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools.",
+          "url": "https://heyclau.de/tools/cline",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/cline#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/cline#entry",
+          "name": "Cline",
+          "headline": "Cline",
+          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools.",
+          "url": "https://heyclau.de/tools/cline",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "vscode coding agent, open-source ai agent, vs-code, coding-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Cline"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.cline.bot",
+            "https://github.com/cline/cline"
+          ]
+        }
+      ]
+    },
+    {
       "key": "hooks:cloud-backup-on-session-stop",
       "category": "hooks",
       "slug": "cloud-backup-on-session-stop",
@@ -5555,6 +6259,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:cloudflare-agents-sdk",
+      "category": "tools",
+      "slug": "cloudflare-agents-sdk",
+      "url": "https://heyclau.de/tools/cloudflare-agents-sdk",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Cloudflare Agents SDK",
+              "item": "https://heyclau.de/tools/cloudflare-agents-sdk"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#webpage",
+          "name": "Cloudflare Agents SDK",
+          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives.",
+          "url": "https://heyclau.de/tools/cloudflare-agents-sdk",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#entry",
+          "name": "Cloudflare Agents SDK",
+          "headline": "Cloudflare Agents SDK",
+          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives.",
+          "url": "https://heyclau.de/tools/cloudflare-agents-sdk",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai agents cloudflare, workers agents, agent-framework, cloudflare",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Cloudflare"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://developers.cloudflare.com/agents/",
+            "https://github.com/cloudflare/agents"
+          ]
         }
       ]
     },
@@ -6334,6 +7109,76 @@
       ]
     },
     {
+      "key": "tools:coderabbit",
+      "category": "tools",
+      "slug": "coderabbit",
+      "url": "https://heyclau.de/tools/coderabbit",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/coderabbit#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "CodeRabbit",
+              "item": "https://heyclau.de/tools/coderabbit"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/coderabbit#webpage",
+          "name": "CodeRabbit",
+          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops.",
+          "url": "https://heyclau.de/tools/coderabbit",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/coderabbit#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/coderabbit#entry",
+          "name": "CodeRabbit",
+          "headline": "CodeRabbit",
+          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops.",
+          "url": "https://heyclau.de/tools/coderabbit",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai code review, pull request review, code-review, pull-requests",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "CodeRabbit"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.coderabbit.ai"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:codex-automations-orchestrator-capability-pack",
       "category": "skills",
       "slug": "codex-automations-orchestrator-capability-pack",
@@ -6543,6 +7388,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:composio",
+      "category": "tools",
+      "slug": "composio",
+      "url": "https://heyclau.de/tools/composio",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/composio#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Composio",
+              "item": "https://heyclau.de/tools/composio"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/composio#webpage",
+          "name": "Composio",
+          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations.",
+          "url": "https://heyclau.de/tools/composio",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/composio#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/composio#entry",
+          "name": "Composio",
+          "headline": "Composio",
+          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations.",
+          "url": "https://heyclau.de/tools/composio",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai agent tools, tool integrations, tool-integrations, agents",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Composio"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.composio.dev",
+            "https://github.com/ComposioHQ/composio"
+          ]
         }
       ]
     },
@@ -6758,6 +7674,77 @@
       ]
     },
     {
+      "key": "tools:continue",
+      "category": "tools",
+      "slug": "continue",
+      "url": "https://heyclau.de/tools/continue",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/continue#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Continue",
+              "item": "https://heyclau.de/tools/continue"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/continue#webpage",
+          "name": "Continue",
+          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows.",
+          "url": "https://heyclau.de/tools/continue",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/continue#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/continue#entry",
+          "name": "Continue",
+          "headline": "Continue",
+          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows.",
+          "url": "https://heyclau.de/tools/continue",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "open-source ai coding, custom model routing, ai-coding, open-source",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Continue"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.continue.dev",
+            "https://github.com/continuedev/continue"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:contrastapi-mcp-server",
       "category": "mcp",
       "slug": "contrastapi-mcp-server",
@@ -6824,6 +7811,77 @@
           "sameAs": [
             "https://api.contrastcyber.com",
             "https://github.com/UPinar/contrastapi"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:crewai",
+      "category": "tools",
+      "slug": "crewai",
+      "url": "https://heyclau.de/tools/crewai",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/crewai#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "CrewAI",
+              "item": "https://heyclau.de/tools/crewai"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/crewai#webpage",
+          "name": "CrewAI",
+          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems.",
+          "url": "https://heyclau.de/tools/crewai",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/crewai#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/crewai#entry",
+          "name": "CrewAI",
+          "headline": "CrewAI",
+          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems.",
+          "url": "https://heyclau.de/tools/crewai",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "multi-agent framework, ai crews, agent-framework, multi-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "CrewAI"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.crewai.com",
+            "https://github.com/crewAIInc/crewAI"
           ]
         }
       ]
@@ -6964,6 +8022,76 @@
           },
           "sameAs": [
             "https://pandas.pydata.org/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:cursor",
+      "category": "tools",
+      "slug": "cursor",
+      "url": "https://heyclau.de/tools/cursor",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/cursor#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Cursor",
+              "item": "https://heyclau.de/tools/cursor"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/cursor#webpage",
+          "name": "Cursor",
+          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows.",
+          "url": "https://heyclau.de/tools/cursor",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/cursor#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/cursor#entry",
+          "name": "Cursor",
+          "headline": "Cursor",
+          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows.",
+          "url": "https://heyclau.de/tools/cursor",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "claude tools, ai code editor, ai-coding, code-editor",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Cursor"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.cursor.com"
           ]
         }
       ]
@@ -8088,6 +9216,76 @@
           },
           "sameAs": [
             "https://docs.npmjs.com/cli/v8/commands/npm-audit"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:devin",
+      "category": "tools",
+      "slug": "devin",
+      "url": "https://heyclau.de/tools/devin",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/devin#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Devin",
+              "item": "https://heyclau.de/tools/devin"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/devin#webpage",
+          "name": "Devin",
+          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks.",
+          "url": "https://heyclau.de/tools/devin",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/devin#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/devin#entry",
+          "name": "Devin",
+          "headline": "Devin",
+          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks.",
+          "url": "https://heyclau.de/tools/devin",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai software engineer, autonomous coding agent, coding-agent, autonomous-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Cognition"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.devin.ai"
           ]
         }
       ]
@@ -9292,6 +10490,76 @@
       ]
     },
     {
+      "key": "tools:exa",
+      "category": "tools",
+      "slug": "exa",
+      "url": "https://heyclau.de/tools/exa",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/exa#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Exa",
+              "item": "https://heyclau.de/tools/exa"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/exa#webpage",
+          "name": "Exa",
+          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery.",
+          "url": "https://heyclau.de/tools/exa",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/exa#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/exa#entry",
+          "name": "Exa",
+          "headline": "Exa",
+          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery.",
+          "url": "https://heyclau.de/tools/exa",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai search api, web retrieval, search, retrieval",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Exa"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.exa.ai"
+          ]
+        }
+      ]
+    },
+    {
       "key": "agents:extended-thinking-orchestrator",
       "category": "agents",
       "slug": "extended-thinking-orchestrator",
@@ -9706,6 +10974,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:firecrawl",
+      "category": "tools",
+      "slug": "firecrawl",
+      "url": "https://heyclau.de/tools/firecrawl",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/firecrawl#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Firecrawl",
+              "item": "https://heyclau.de/tools/firecrawl"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/firecrawl#webpage",
+          "name": "Firecrawl",
+          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications.",
+          "url": "https://heyclau.de/tools/firecrawl",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/firecrawl#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/firecrawl#entry",
+          "name": "Firecrawl",
+          "headline": "Firecrawl",
+          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications.",
+          "url": "https://heyclau.de/tools/firecrawl",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm crawling, website to markdown, web-crawling, data-extraction",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Firecrawl"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.firecrawl.dev",
+            "https://github.com/mendableai/firecrawl"
+          ]
         }
       ]
     },
@@ -10267,6 +11606,77 @@
       ]
     },
     {
+      "key": "tools:garak",
+      "category": "tools",
+      "slug": "garak",
+      "url": "https://heyclau.de/tools/garak",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/garak#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Garak",
+              "item": "https://heyclau.de/tools/garak"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/garak#webpage",
+          "name": "Garak",
+          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
+          "url": "https://heyclau.de/tools/garak",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/garak#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/garak#entry",
+          "name": "Garak",
+          "headline": "Garak",
+          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
+          "url": "https://heyclau.de/tools/garak",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm vulnerability scanner, ai security testing, security, red-teaming",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "NVIDIA"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://github.com/NVIDIA/garak",
+            "https://github.com/NVIDIA/garak"
+          ]
+        }
+      ]
+    },
+    {
       "key": "commands:generate-tests",
       "category": "commands",
       "slug": "generate-tests",
@@ -10333,6 +11743,77 @@
           },
           "sameAs": [
             "https://docs.claude.ai/commands/test-gen"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:giskard",
+      "category": "tools",
+      "slug": "giskard",
+      "url": "https://heyclau.de/tools/giskard",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/giskard#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Giskard",
+              "item": "https://heyclau.de/tools/giskard"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/giskard#webpage",
+          "name": "Giskard",
+          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality.",
+          "url": "https://heyclau.de/tools/giskard",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/giskard#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/giskard#entry",
+          "name": "Giskard",
+          "headline": "Giskard",
+          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality.",
+          "url": "https://heyclau.de/tools/giskard",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai testing, llm evaluation, evaluation, security",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Giskard"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.giskard.ai",
+            "https://github.com/Giskard-AI/giskard"
           ]
         }
       ]
@@ -11043,6 +12524,76 @@
       ]
     },
     {
+      "key": "tools:github-copilot",
+      "category": "tools",
+      "slug": "github-copilot",
+      "url": "https://heyclau.de/tools/github-copilot",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/github-copilot#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "GitHub Copilot",
+              "item": "https://heyclau.de/tools/github-copilot"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/github-copilot#webpage",
+          "name": "GitHub Copilot",
+          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors.",
+          "url": "https://heyclau.de/tools/github-copilot",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/github-copilot#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/github-copilot#entry",
+          "name": "GitHub Copilot",
+          "headline": "GitHub Copilot",
+          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors.",
+          "url": "https://heyclau.de/tools/github-copilot",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai coding assistant, github copilot, ai-coding, code-review",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "GitHub"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.github.com/en/copilot"
+          ]
+        }
+      ]
+    },
+    {
       "key": "agents:github-copilot-interop-bridge",
       "category": "agents",
       "slug": "github-copilot-interop-bridge",
@@ -11464,6 +13015,76 @@
       ]
     },
     {
+      "key": "tools:graphite-diamond",
+      "category": "tools",
+      "slug": "graphite-diamond",
+      "url": "https://heyclau.de/tools/graphite-diamond",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/graphite-diamond#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Graphite Diamond",
+              "item": "https://heyclau.de/tools/graphite-diamond"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/graphite-diamond#webpage",
+          "name": "Graphite Diamond",
+          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows.",
+          "url": "https://heyclau.de/tools/graphite-diamond",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/graphite-diamond#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/graphite-diamond#entry",
+          "name": "Graphite Diamond",
+          "headline": "Graphite Diamond",
+          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows.",
+          "url": "https://heyclau.de/tools/graphite-diamond",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai code review, graphite diamond, code-review, pull-requests",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Graphite"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://graphite.dev"
+          ]
+        }
+      ]
+    },
+    {
       "key": "rules:graphql-federation-specialist",
       "category": "rules",
       "slug": "graphql-federation-specialist",
@@ -11600,6 +13221,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:helicone",
+      "category": "tools",
+      "slug": "helicone",
+      "url": "https://heyclau.de/tools/helicone",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/helicone#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Helicone",
+              "item": "https://heyclau.de/tools/helicone"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/helicone#webpage",
+          "name": "Helicone",
+          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications.",
+          "url": "https://heyclau.de/tools/helicone",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/helicone#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/helicone#entry",
+          "name": "Helicone",
+          "headline": "Helicone",
+          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications.",
+          "url": "https://heyclau.de/tools/helicone",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm cost tracking, llm logs, observability, cost-tracking",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Helicone"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.helicone.ai",
+            "https://github.com/Helicone/helicone"
+          ]
         }
       ]
     },
@@ -11952,6 +13644,76 @@
           },
           "sameAs": [
             "https://typicode.github.io/husky/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:hyperbrowser",
+      "category": "tools",
+      "slug": "hyperbrowser",
+      "url": "https://heyclau.de/tools/hyperbrowser",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/hyperbrowser#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Hyperbrowser",
+              "item": "https://heyclau.de/tools/hyperbrowser"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/hyperbrowser#webpage",
+          "name": "Hyperbrowser",
+          "description": "Hyperbrowser provides browser automation infrastructure for AI agents, web scraping, browser sessions, and web workflows.",
+          "url": "https://heyclau.de/tools/hyperbrowser",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/hyperbrowser#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/hyperbrowser#entry",
+          "name": "Hyperbrowser",
+          "headline": "Hyperbrowser",
+          "description": "Hyperbrowser provides browser automation infrastructure for AI agents, web scraping, browser sessions, and web workflows.",
+          "url": "https://heyclau.de/tools/hyperbrowser",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "browser automation infrastructure, ai agents, browser-automation, agent-infrastructure",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Hyperbrowser"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.hyperbrowser.ai"
           ]
         }
       ]
@@ -12868,6 +14630,288 @@
       ]
     },
     {
+      "key": "tools:lakera-guard",
+      "category": "tools",
+      "slug": "lakera-guard",
+      "url": "https://heyclau.de/tools/lakera-guard",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/lakera-guard#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Lakera Guard",
+              "item": "https://heyclau.de/tools/lakera-guard"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/lakera-guard#webpage",
+          "name": "Lakera Guard",
+          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications.",
+          "url": "https://heyclau.de/tools/lakera-guard",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/lakera-guard#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/lakera-guard#entry",
+          "name": "Lakera Guard",
+          "headline": "Lakera Guard",
+          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications.",
+          "url": "https://heyclau.de/tools/lakera-guard",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "prompt injection protection, ai guardrails, security, guardrails",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Lakera"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.lakera.ai"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:langfuse",
+      "category": "tools",
+      "slug": "langfuse",
+      "url": "https://heyclau.de/tools/langfuse",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/langfuse#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Langfuse",
+              "item": "https://heyclau.de/tools/langfuse"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/langfuse#webpage",
+          "name": "Langfuse",
+          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation.",
+          "url": "https://heyclau.de/tools/langfuse",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/langfuse#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/langfuse#entry",
+          "name": "Langfuse",
+          "headline": "Langfuse",
+          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation.",
+          "url": "https://heyclau.de/tools/langfuse",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm tracing, prompt management, observability, open-source",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Langfuse"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://langfuse.com/docs",
+            "https://github.com/langfuse/langfuse"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:langgraph",
+      "category": "tools",
+      "slug": "langgraph",
+      "url": "https://heyclau.de/tools/langgraph",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/langgraph#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "LangGraph",
+              "item": "https://heyclau.de/tools/langgraph"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/langgraph#webpage",
+          "name": "LangGraph",
+          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
+          "url": "https://heyclau.de/tools/langgraph",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/langgraph#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/langgraph#entry",
+          "name": "LangGraph",
+          "headline": "LangGraph",
+          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
+          "url": "https://heyclau.de/tools/langgraph",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "agent orchestration, stateful llm workflows, agent-framework, orchestration",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "LangChain"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://langchain-ai.github.io/langgraph/",
+            "https://github.com/langchain-ai/langgraph"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:langsmith",
+      "category": "tools",
+      "slug": "langsmith",
+      "url": "https://heyclau.de/tools/langsmith",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/langsmith#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "LangSmith",
+              "item": "https://heyclau.de/tools/langsmith"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/langsmith#webpage",
+          "name": "LangSmith",
+          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents.",
+          "url": "https://heyclau.de/tools/langsmith",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/langsmith#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/langsmith#entry",
+          "name": "LangSmith",
+          "headline": "LangSmith",
+          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents.",
+          "url": "https://heyclau.de/tools/langsmith",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm observability, agent evaluation, observability, evaluation",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "LangChain"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.smith.langchain.com"
+          ]
+        }
+      ]
+    },
+    {
       "key": "agents:life-sciences-research-specialist",
       "category": "agents",
       "slug": "life-sciences-research-specialist",
@@ -13150,6 +15194,146 @@
       ]
     },
     {
+      "key": "tools:lovable",
+      "category": "tools",
+      "slug": "lovable",
+      "url": "https://heyclau.de/tools/lovable",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/lovable#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Lovable",
+              "item": "https://heyclau.de/tools/lovable"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/lovable#webpage",
+          "name": "Lovable",
+          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests.",
+          "url": "https://heyclau.de/tools/lovable",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/lovable#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/lovable#entry",
+          "name": "Lovable",
+          "headline": "Lovable",
+          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests.",
+          "url": "https://heyclau.de/tools/lovable",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai app builder, web app generation, app-builder, prototyping",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Lovable"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.lovable.dev"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:make",
+      "category": "tools",
+      "slug": "make",
+      "url": "https://heyclau.de/tools/make",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/make#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Make",
+              "item": "https://heyclau.de/tools/make"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/make#webpage",
+          "name": "Make",
+          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes.",
+          "url": "https://heyclau.de/tools/make",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/make#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/make#entry",
+          "name": "Make",
+          "headline": "Make",
+          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes.",
+          "url": "https://heyclau.de/tools/make",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "visual automation, business workflows, workflow-automation, integrations",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Make"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://www.make.com/en/help"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:markdown-knowledge-base-composer",
       "category": "skills",
       "slug": "markdown-knowledge-base-composer",
@@ -13287,6 +15471,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:mastra",
+      "category": "tools",
+      "slug": "mastra",
+      "url": "https://heyclau.de/tools/mastra",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/mastra#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Mastra",
+              "item": "https://heyclau.de/tools/mastra"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/mastra#webpage",
+          "name": "Mastra",
+          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
+          "url": "https://heyclau.de/tools/mastra",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/mastra#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/mastra#entry",
+          "name": "Mastra",
+          "headline": "Mastra",
+          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
+          "url": "https://heyclau.de/tools/mastra",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "typescript agents, ai workflow framework, agent-framework, typescript",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Mastra"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://mastra.ai/docs",
+            "https://github.com/mastra-ai/mastra"
+          ]
         }
       ]
     },
@@ -13709,6 +15964,77 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": []
+        }
+      ]
+    },
+    {
+      "key": "tools:microsoft-autogen",
+      "category": "tools",
+      "slug": "microsoft-autogen",
+      "url": "https://heyclau.de/tools/microsoft-autogen",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/microsoft-autogen#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Microsoft AutoGen",
+              "item": "https://heyclau.de/tools/microsoft-autogen"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/microsoft-autogen#webpage",
+          "name": "Microsoft AutoGen",
+          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems.",
+          "url": "https://heyclau.de/tools/microsoft-autogen",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/microsoft-autogen#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/microsoft-autogen#entry",
+          "name": "Microsoft AutoGen",
+          "headline": "Microsoft AutoGen",
+          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems.",
+          "url": "https://heyclau.de/tools/microsoft-autogen",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "autogen, multi-agent ai, agent-framework, multi-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Microsoft"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://microsoft.github.io/autogen/",
+            "https://github.com/microsoft/autogen"
+          ]
         }
       ]
     },
@@ -14632,6 +16958,77 @@
       ]
     },
     {
+      "key": "tools:n8n",
+      "category": "tools",
+      "slug": "n8n",
+      "url": "https://heyclau.de/tools/n8n",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/n8n#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "n8n",
+              "item": "https://heyclau.de/tools/n8n"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/n8n#webpage",
+          "name": "n8n",
+          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines.",
+          "url": "https://heyclau.de/tools/n8n",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/n8n#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/n8n#entry",
+          "name": "n8n",
+          "headline": "n8n",
+          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines.",
+          "url": "https://heyclau.de/tools/n8n",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai workflow automation, self-hosted automation, workflow-automation, self-hosted",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "n8n"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.n8n.io",
+            "https://github.com/n8n-io/n8n"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:n8n-ai-agent-workflow-architect",
       "category": "skills",
       "slug": "n8n-ai-agent-workflow-architect",
@@ -15412,6 +17809,77 @@
       ]
     },
     {
+      "key": "tools:opencode",
+      "category": "tools",
+      "slug": "opencode",
+      "url": "https://heyclau.de/tools/opencode",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/opencode#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "OpenCode",
+              "item": "https://heyclau.de/tools/opencode"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/opencode#webpage",
+          "name": "OpenCode",
+          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation.",
+          "url": "https://heyclau.de/tools/opencode",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/opencode#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/opencode#entry",
+          "name": "OpenCode",
+          "headline": "OpenCode",
+          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation.",
+          "url": "https://heyclau.de/tools/opencode",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "terminal coding agent, ai development cli, terminal-agent, ai-coding",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "SST"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://opencode.ai",
+            "https://github.com/sst/opencode"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:opennext-cloudflare-capability-pack",
       "category": "skills",
       "slug": "opennext-cloudflare-capability-pack",
@@ -16039,6 +18507,76 @@
           },
           "sameAs": [
             "https://web.dev/performance/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:pipedream",
+      "category": "tools",
+      "slug": "pipedream",
+      "url": "https://heyclau.de/tools/pipedream",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/pipedream#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Pipedream",
+              "item": "https://heyclau.de/tools/pipedream"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/pipedream#webpage",
+          "name": "Pipedream",
+          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations.",
+          "url": "https://heyclau.de/tools/pipedream",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/pipedream#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/pipedream#entry",
+          "name": "Pipedream",
+          "headline": "Pipedream",
+          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations.",
+          "url": "https://heyclau.de/tools/pipedream",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "api automation, workflow integrations, workflow-automation, integrations",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Pipedream"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://pipedream.com/docs"
           ]
         }
       ]
@@ -17237,6 +19775,147 @@
       ]
     },
     {
+      "key": "tools:promptfoo",
+      "category": "tools",
+      "slug": "promptfoo",
+      "url": "https://heyclau.de/tools/promptfoo",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/promptfoo#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Promptfoo",
+              "item": "https://heyclau.de/tools/promptfoo"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/promptfoo#webpage",
+          "name": "Promptfoo",
+          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks.",
+          "url": "https://heyclau.de/tools/promptfoo",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/promptfoo#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/promptfoo#entry",
+          "name": "Promptfoo",
+          "headline": "Promptfoo",
+          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks.",
+          "url": "https://heyclau.de/tools/promptfoo",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm red teaming, prompt testing, prompt-testing, security",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Promptfoo"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://www.promptfoo.dev/docs",
+            "https://github.com/promptfoo/promptfoo"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:protect-ai",
+      "category": "tools",
+      "slug": "protect-ai",
+      "url": "https://heyclau.de/tools/protect-ai",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/protect-ai#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Protect AI",
+              "item": "https://heyclau.de/tools/protect-ai"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/protect-ai#webpage",
+          "name": "Protect AI",
+          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure.",
+          "url": "https://heyclau.de/tools/protect-ai",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/protect-ai#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/protect-ai#entry",
+          "name": "Protect AI",
+          "headline": "Protect AI",
+          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure.",
+          "url": "https://heyclau.de/tools/protect-ai",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai security, model security, security, ai-supply-chain",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Protect AI"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.protectai.com"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:proxmox-ve-api-capability-pack",
       "category": "skills",
       "slug": "proxmox-ve-api-capability-pack",
@@ -17725,6 +20404,76 @@
           },
           "sameAs": [
             "https://rich.readthedocs.io/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:raycast",
+      "category": "tools",
+      "slug": "raycast",
+      "url": "https://heyclau.de/tools/raycast",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/raycast#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Raycast",
+              "item": "https://heyclau.de/tools/raycast"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/raycast#webpage",
+          "name": "Raycast",
+          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations.",
+          "url": "https://heyclau.de/tools/raycast",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/raycast#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/raycast#entry",
+          "name": "Raycast",
+          "headline": "Raycast",
+          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations.",
+          "url": "https://heyclau.de/tools/raycast",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "raycast ai, macos productivity, launcher, extensions",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Raycast"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://developers.raycast.com"
           ]
         }
       ]
@@ -18505,6 +21254,76 @@
       ]
     },
     {
+      "key": "tools:replit-agent",
+      "category": "tools",
+      "slug": "replit-agent",
+      "url": "https://heyclau.de/tools/replit-agent",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/replit-agent#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Replit Agent",
+              "item": "https://heyclau.de/tools/replit-agent"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/replit-agent#webpage",
+          "name": "Replit Agent",
+          "description": "Replit Agent helps build, edit, deploy, and iterate on applications through Replit's browser-based development platform.",
+          "url": "https://heyclau.de/tools/replit-agent",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/replit-agent#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/replit-agent#entry",
+          "name": "Replit Agent",
+          "headline": "Replit Agent",
+          "description": "Replit Agent helps build, edit, deploy, and iterate on applications through Replit's browser-based development platform.",
+          "url": "https://heyclau.de/tools/replit-agent",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai app builder, browser ide, app-builder, ai-coding",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Replit"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.replit.com/replitai/agent"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:rest-api-client-harness",
       "category": "skills",
       "slug": "rest-api-client-harness",
@@ -18571,6 +21390,77 @@
           },
           "sameAs": [
             "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:roo-code",
+      "category": "tools",
+      "slug": "roo-code",
+      "url": "https://heyclau.de/tools/roo-code",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/roo-code#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Roo Code",
+              "item": "https://heyclau.de/tools/roo-code"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/roo-code#webpage",
+          "name": "Roo Code",
+          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation.",
+          "url": "https://heyclau.de/tools/roo-code",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/roo-code#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/roo-code#entry",
+          "name": "Roo Code",
+          "headline": "Roo Code",
+          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation.",
+          "url": "https://heyclau.de/tools/roo-code",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "vscode ai agent, coding workflow automation, vs-code, coding-agent",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Roo Code"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.roocode.com",
+            "https://github.com/RooCodeInc/Roo-Code"
           ]
         }
       ]
@@ -19767,6 +22657,76 @@
       ]
     },
     {
+      "key": "tools:smithery",
+      "category": "tools",
+      "slug": "smithery",
+      "url": "https://heyclau.de/tools/smithery",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/smithery#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Smithery",
+              "item": "https://heyclau.de/tools/smithery"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/smithery#webpage",
+          "name": "Smithery",
+          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows.",
+          "url": "https://heyclau.de/tools/smithery",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/smithery#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/smithery#entry",
+          "name": "Smithery",
+          "headline": "Smithery",
+          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows.",
+          "url": "https://heyclau.de/tools/smithery",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "mcp registry, mcp servers, mcp, tool-discovery",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Smithery"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://smithery.ai/docs"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:socket-mcp-server",
       "category": "mcp",
       "slug": "socket-mcp-server",
@@ -19838,6 +22798,76 @@
       ]
     },
     {
+      "key": "tools:sourcegraph-cody",
+      "category": "tools",
+      "slug": "sourcegraph-cody",
+      "url": "https://heyclau.de/tools/sourcegraph-cody",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/sourcegraph-cody#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Sourcegraph Cody",
+              "item": "https://heyclau.de/tools/sourcegraph-cody"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/sourcegraph-cody#webpage",
+          "name": "Sourcegraph Cody",
+          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search.",
+          "url": "https://heyclau.de/tools/sourcegraph-cody",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/sourcegraph-cody#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/sourcegraph-cody#entry",
+          "name": "Sourcegraph Cody",
+          "headline": "Sourcegraph Cody",
+          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search.",
+          "url": "https://heyclau.de/tools/sourcegraph-cody",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "codebase ai, sourcegraph cody, ai-coding, code-search",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Sourcegraph"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://sourcegraph.com/docs/cody"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:square-mcp-server",
       "category": "mcp",
       "slug": "square-mcp-server",
@@ -19903,6 +22933,77 @@
           },
           "sameAs": [
             "https://developer.squareup.com/docs/mcp"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:stagehand",
+      "category": "tools",
+      "slug": "stagehand",
+      "url": "https://heyclau.de/tools/stagehand",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/stagehand#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Stagehand",
+              "item": "https://heyclau.de/tools/stagehand"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/stagehand#webpage",
+          "name": "Stagehand",
+          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions.",
+          "url": "https://heyclau.de/tools/stagehand",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/stagehand#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/stagehand#entry",
+          "name": "Stagehand",
+          "headline": "Stagehand",
+          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions.",
+          "url": "https://heyclau.de/tools/stagehand",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai browser automation, browser agents, browser-automation, open-source",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Browserbase"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.stagehand.dev",
+            "https://github.com/browserbase/stagehand"
           ]
         }
       ]
@@ -21170,6 +24271,77 @@
       ]
     },
     {
+      "key": "tools:trigger-dev",
+      "category": "tools",
+      "slug": "trigger-dev",
+      "url": "https://heyclau.de/tools/trigger-dev",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/trigger-dev#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Trigger.dev",
+              "item": "https://heyclau.de/tools/trigger-dev"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/trigger-dev#webpage",
+          "name": "Trigger.dev",
+          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
+          "url": "https://heyclau.de/tools/trigger-dev",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/trigger-dev#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/trigger-dev#entry",
+          "name": "Trigger.dev",
+          "headline": "Trigger.dev",
+          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
+          "url": "https://heyclau.de/tools/trigger-dev",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "background jobs, ai workflows, workflow-automation, typescript",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Trigger.dev"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://trigger.dev/docs",
+            "https://github.com/triggerdotdev/trigger.dev"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:trpc-type-safe-api",
       "category": "skills",
       "slug": "trpc-type-safe-api",
@@ -21663,6 +24835,76 @@
       ]
     },
     {
+      "key": "tools:vercel-v0",
+      "category": "tools",
+      "slug": "vercel-v0",
+      "url": "https://heyclau.de/tools/vercel-v0",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/vercel-v0#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "v0",
+              "item": "https://heyclau.de/tools/vercel-v0"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/vercel-v0#webpage",
+          "name": "v0",
+          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
+          "url": "https://heyclau.de/tools/vercel-v0",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/vercel-v0#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/vercel-v0#entry",
+          "name": "v0",
+          "headline": "v0",
+          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
+          "url": "https://heyclau.de/tools/vercel-v0",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai ui builder, react generation, ui-generation, react",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Vercel"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://v0.dev/docs"
+          ]
+        }
+      ]
+    },
+    {
       "key": "commands:v0-generate",
       "category": "commands",
       "slug": "v0-generate",
@@ -21800,6 +25042,77 @@
           },
           "sameAs": [
             "https://v0.dev/docs"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:vercel-ai-sdk",
+      "category": "tools",
+      "slug": "vercel-ai-sdk",
+      "url": "https://heyclau.de/tools/vercel-ai-sdk",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/vercel-ai-sdk#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Vercel AI SDK",
+              "item": "https://heyclau.de/tools/vercel-ai-sdk"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/vercel-ai-sdk#webpage",
+          "name": "Vercel AI SDK",
+          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
+          "url": "https://heyclau.de/tools/vercel-ai-sdk",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/vercel-ai-sdk#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/vercel-ai-sdk#entry",
+          "name": "Vercel AI SDK",
+          "headline": "Vercel AI SDK",
+          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
+          "url": "https://heyclau.de/tools/vercel-ai-sdk",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai sdk, streaming ui, ai-sdk, typescript",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Vercel"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://ai-sdk.dev/docs",
+            "https://github.com/vercel/ai"
           ]
         }
       ]
@@ -22081,6 +25394,76 @@
           },
           "sameAs": [
             "https://www.w3.org/WAI/WCAG22/quickref/"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:weave",
+      "category": "tools",
+      "slug": "weave",
+      "url": "https://heyclau.de/tools/weave",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/weave#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Weave",
+              "item": "https://heyclau.de/tools/weave"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/weave#webpage",
+          "name": "Weave",
+          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling.",
+          "url": "https://heyclau.de/tools/weave",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/weave#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/weave#entry",
+          "name": "Weave",
+          "headline": "Weave",
+          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling.",
+          "url": "https://heyclau.de/tools/weave",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "llm tracking, wandb weave, evaluation, observability",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Weights and Biases"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://weave-docs.wandb.ai"
           ]
         }
       ]
@@ -22369,6 +25752,76 @@
       ]
     },
     {
+      "key": "tools:windsurf",
+      "category": "tools",
+      "slug": "windsurf",
+      "url": "https://heyclau.de/tools/windsurf",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/windsurf#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Windsurf",
+              "item": "https://heyclau.de/tools/windsurf"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/windsurf#webpage",
+          "name": "Windsurf",
+          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows.",
+          "url": "https://heyclau.de/tools/windsurf",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/windsurf#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/windsurf#entry",
+          "name": "Windsurf",
+          "headline": "Windsurf",
+          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows.",
+          "url": "https://heyclau.de/tools/windsurf",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "claude coding tools, agentic editor, ai-coding, agentic-editor",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Windsurf"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.windsurf.com"
+          ]
+        }
+      ]
+    },
+    {
       "key": "skills:windsurf-collaborative-development",
       "category": "skills",
       "slug": "windsurf-collaborative-development",
@@ -22506,6 +25959,76 @@
           },
           "sameAs": [
             "https://docs.codeium.com/windsurf"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:workato",
+      "category": "tools",
+      "slug": "workato",
+      "url": "https://heyclau.de/tools/workato",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/workato#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Workato",
+              "item": "https://heyclau.de/tools/workato"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/workato#webpage",
+          "name": "Workato",
+          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
+          "url": "https://heyclau.de/tools/workato",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/workato#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/workato#entry",
+          "name": "Workato",
+          "headline": "Workato",
+          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
+          "url": "https://heyclau.de/tools/workato",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "enterprise automation, business integrations, workflow-automation, enterprise",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Workato"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.workato.com"
           ]
         }
       ]
@@ -22721,6 +26244,76 @@
       ]
     },
     {
+      "key": "tools:zapier-ai",
+      "category": "tools",
+      "slug": "zapier-ai",
+      "url": "https://heyclau.de/tools/zapier-ai",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/zapier-ai#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Zapier AI",
+              "item": "https://heyclau.de/tools/zapier-ai"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/zapier-ai#webpage",
+          "name": "Zapier AI",
+          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation.",
+          "url": "https://heyclau.de/tools/zapier-ai",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/zapier-ai#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/zapier-ai#entry",
+          "name": "Zapier AI",
+          "headline": "Zapier AI",
+          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation.",
+          "url": "https://heyclau.de/tools/zapier-ai",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai automation, app integrations, workflow-automation, integrations",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Zapier"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://help.zapier.com"
+          ]
+        }
+      ]
+    },
+    {
       "key": "mcp:zapier-mcp-server",
       "category": "mcp",
       "slug": "zapier-mcp-server",
@@ -22786,6 +26379,77 @@
           },
           "sameAs": [
             "https://help.zapier.com/hc/en-us/articles/36265392843917"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "tools:zed",
+      "category": "tools",
+      "slug": "zed",
+      "url": "https://heyclau.de/tools/zed",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/tools/zed#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Tools",
+              "item": "https://heyclau.de/tools"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Zed",
+              "item": "https://heyclau.de/tools/zed"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/tools/zed#webpage",
+          "name": "Zed",
+          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows.",
+          "url": "https://heyclau.de/tools/zed",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/tools/zed#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "CreativeWork",
+          "@id": "https://heyclau.de/tools/zed#entry",
+          "name": "Zed",
+          "headline": "Zed",
+          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows.",
+          "url": "https://heyclau.de/tools/zed",
+          "datePublished": "2026-04-27",
+          "dateModified": "2026-04-27",
+          "keywords": "ai code editor, collaborative editor, code-editor, collaboration",
+          "genre": "Tools",
+          "author": {
+            "@type": "Person",
+            "name": "Zed Industries"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://zed.dev/docs",
+            "https://github.com/zed-industries/zed"
           ]
         }
       ]

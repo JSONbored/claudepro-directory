@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:context-window-optimizer-agent",
   "category": "agents",
   "slug": "context-window-optimizer-agent",

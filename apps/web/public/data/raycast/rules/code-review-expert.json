@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:code-review-expert",
   "category": "rules",
   "slug": "code-review-expert",

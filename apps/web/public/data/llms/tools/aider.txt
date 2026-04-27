@@ -1,0 +1,19 @@
+# Aider
+URL: https://heyclau.de/tools/aider
+Category: tools
+Author: Aider
+Date added: 2026-04-27
+Documentation: https://aider.chat/docs
+Repository: https://github.com/Aider-AI/aider
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx
+## Summary
+Open-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.
+## Tags
+- terminal-agent
+- open-source
+## Content
+## Editorial notes
+Aider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

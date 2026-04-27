@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:docker-image-security-scanner",
   "category": "hooks",
   "slug": "docker-image-security-scanner",

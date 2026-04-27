@@ -633,3 +633,9 @@ const styles = StyleSheet.create({
   }),
 });
 ```
+
+## Expert Positioning
+Use this rule when Claude should behave like a senior mobile architecture
+reviewer across product, platform, testing, release, and store-readiness
+concerns. It is broader than a single implementation prompt and should push
+for platform-specific tradeoffs, lifecycle risks, and release quality gates.

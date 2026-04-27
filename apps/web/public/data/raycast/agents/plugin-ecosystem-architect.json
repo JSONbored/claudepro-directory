@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:plugin-ecosystem-architect",
   "category": "agents",
   "slug": "plugin-ecosystem-architect",

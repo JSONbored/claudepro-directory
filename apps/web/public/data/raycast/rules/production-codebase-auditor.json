@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:production-codebase-auditor",
   "category": "rules",
   "slug": "production-codebase-auditor",

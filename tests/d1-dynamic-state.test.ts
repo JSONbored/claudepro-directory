@@ -146,7 +146,7 @@ describe("D1 dynamic state helpers", () => {
     });
   });
 
-  it("keeps dynamic-state migrations aligned with votes, leads, and intent events", () => {
+  it("keeps dynamic-state migrations aligned with votes, leads, intent events, and community signals", () => {
     const migrationsDir = path.join(repoRoot, "apps/web/migrations");
     const votes = fs.readFileSync(
       path.join(migrationsDir, "0001_votes.sql"),
@@ -160,6 +160,10 @@ describe("D1 dynamic state helpers", () => {
       path.join(migrationsDir, "0004_intent_events.sql"),
       "utf8",
     );
+    const signals = fs.readFileSync(
+      path.join(migrationsDir, "0005_community_signals.sql"),
+      "utf8",
+    );
 
     expect(votes).toContain("votes_entries");
     expect(leads).toContain("listing_leads");
@@ -167,6 +171,10 @@ describe("D1 dynamic state helpers", () => {
     expect(intents).toContain("intent_events");
     expect(intents).toContain("copy");
     expect(intents).toContain("open");
+    expect(signals).toContain("community_signals");
+    expect(signals).toContain("used");
+    expect(signals).toContain("works");
+    expect(signals).toContain("broken");
   });
 
   it("smokes lead transitions used by D1-backed admin review", () => {

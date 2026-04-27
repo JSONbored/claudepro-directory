@@ -1,0 +1,18 @@
+# Pipedream
+URL: https://heyclau.de/tools/pipedream
+Category: tools
+Author: Pipedream
+Date added: 2026-04-27
+Documentation: https://pipedream.com/docs
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx
+## Summary
+Workflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.
+## Tags
+- workflow-automation
+- integrations
+## Content
+## Editorial notes
+Pipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

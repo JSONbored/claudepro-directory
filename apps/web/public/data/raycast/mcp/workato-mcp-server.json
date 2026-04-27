@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "mcp:workato-mcp-server",
   "category": "mcp",
   "slug": "workato-mcp-server",

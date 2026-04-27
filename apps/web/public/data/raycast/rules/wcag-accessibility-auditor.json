@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "rules:wcag-accessibility-auditor",
   "category": "rules",
   "slug": "wcag-accessibility-auditor",

@@ -128,8 +128,9 @@
       "contentRecommended": [
         "pricingModel",
         "documentationUrl",
-        "repoUrl",
-        "disclosure"
+        "disclosure",
+        "applicationCategory",
+        "operatingSystem"
       ],
       "submissionRequired": [],
       "requiresUsageSnippet": false,

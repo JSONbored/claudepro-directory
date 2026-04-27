@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:apify",
+  "category": "tools",
+  "slug": "apify",
+  "title": "Apify",
+  "copyText": "## Editorial notes\n\nApify is useful for agent builders who need reusable data extraction workflows, web automation actors, and hosted datasets.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Apify\nWeb automation and scraping platform with actors, datasets, APIs, and integrations for data extraction workflows.\n**Category:** tools\n**Author:** Apify\n**Tags:** `web-automation` `data-extraction`\n\n## Links\n- https://heyclau.de/tools/apify\n- https://docs.apify.com",
+  "webUrl": "https://heyclau.de/tools/apify",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.apify.com"
+}

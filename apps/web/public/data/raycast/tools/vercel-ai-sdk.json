@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:vercel-ai-sdk",
+  "category": "tools",
+  "slug": "vercel-ai-sdk",
+  "title": "Vercel AI SDK",
+  "copyText": "## Editorial notes\n\nVercel AI SDK is a core building block for TypeScript teams shipping AI interfaces and streaming model interactions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Vercel AI SDK\nTypeScript toolkit for building AI applications with model providers, streaming UI, tools, agents, and framework adapters.\n**Category:** tools\n**Author:** Vercel\n**Tags:** `ai-sdk` `typescript`\n\n## Links\n- https://heyclau.de/tools/vercel-ai-sdk\n- https://ai-sdk.dev/docs\n- https://github.com/vercel/ai",
+  "webUrl": "https://heyclau.de/tools/vercel-ai-sdk",
+  "repoUrl": "https://github.com/vercel/ai",
+  "documentationUrl": "https://ai-sdk.dev/docs"
+}

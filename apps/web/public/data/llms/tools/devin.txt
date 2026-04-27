@@ -1,0 +1,18 @@
+# Devin
+URL: https://heyclau.de/tools/devin
+Category: tools
+Author: Cognition
+Date added: 2026-04-27
+Documentation: https://docs.devin.ai
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/devin.mdx
+## Summary
+AI software engineering agent for planning, coding, debugging, and executing development tasks with autonomous workflows.
+## Tags
+- coding-agent
+- autonomous-agent
+## Content
+## Editorial notes
+Devin represents the more autonomous end of coding-agent workflows and is worth tracking separately from editor assistants.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

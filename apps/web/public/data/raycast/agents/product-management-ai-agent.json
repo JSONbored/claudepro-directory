@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:product-management-ai-agent",
   "category": "agents",
   "slug": "product-management-ai-agent",

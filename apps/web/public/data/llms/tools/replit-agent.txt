@@ -1,0 +1,18 @@
+# Replit Agent
+URL: https://heyclau.de/tools/replit-agent
+Category: tools
+Author: Replit
+Date added: 2026-04-27
+Documentation: https://docs.replit.com/replitai/agent
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/replit-agent.mdx
+## Summary
+Browser-based AI software builder for generating, editing, deploying, and iterating on applications in Replit.
+## Tags
+- app-builder
+- ai-coding
+## Content
+## Editorial notes
+Replit Agent is relevant for users who want AI generation, hosting, and iteration in one browser-based environment.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

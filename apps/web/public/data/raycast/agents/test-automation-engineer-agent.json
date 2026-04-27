@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:test-automation-engineer-agent",
   "category": "agents",
   "slug": "test-automation-engineer-agent",

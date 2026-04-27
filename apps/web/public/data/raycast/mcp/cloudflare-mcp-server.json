@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "mcp:cloudflare-mcp-server",
   "category": "mcp",
   "slug": "cloudflare-mcp-server",

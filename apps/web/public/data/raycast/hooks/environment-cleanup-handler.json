@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:environment-cleanup-handler",
   "category": "hooks",
   "slug": "environment-cleanup-handler",

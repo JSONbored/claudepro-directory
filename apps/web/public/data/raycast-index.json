@@ -1,6 +1,8 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-04-25T00:00:00.000Z",
+  "schemaVersion": 2,
+  "kind": "raycast-index",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "count": 378,
   "entries": [
     {
       "category": "commands",
@@ -642,6 +644,28 @@
       "verificationStatus": "draft"
     },
     {
+      "category": "tools",
+      "slug": "aider",
+      "title": "Aider",
+      "description": "Terminal AI coding assistant for Git repositories.",
+      "tags": [
+        "terminal-agent",
+        "open-source"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nAider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 212,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Aider\nOpen-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.\n**Category:** tools\n**Author:** Aider\n**Tags:** `terminal-agent` `open-source`\n\n## Links\n- https://heyclau.de/tools/aider\n- https://aider.chat/docs\n- https://github.com/Aider-AI/aider",
+      "detailUrl": "/data/raycast/tools/aider.json",
+      "webUrl": "https://heyclau.de/tools/aider",
+      "repoUrl": "https://github.com/Aider-AI/aider",
+      "documentationUrl": "https://aider.chat/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "airtable-mcp-server",
       "title": "Airtable MCP Server for Claude",
@@ -818,6 +842,72 @@
       "webUrl": "https://heyclau.de/statuslines/api-latency-breakdown",
       "repoUrl": "",
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "apify",
+      "title": "Apify",
+      "description": "Web automation and scraping platform.",
+      "tags": [
+        "web-automation",
+        "data-extraction"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nApify is useful for agent builders who need reusable data extraction workflows, web automation actors, and hosted datasets.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 223,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Apify\nWeb automation and scraping platform with actors, datasets, APIs, and integrations for data extraction workflows.\n**Category:** tools\n**Author:** Apify\n**Tags:** `web-automation` `data-extraction`\n\n## Links\n- https://heyclau.de/tools/apify\n- https://docs.apify.com",
+      "detailUrl": "/data/raycast/tools/apify.json",
+      "webUrl": "https://heyclau.de/tools/apify",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.apify.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "arcade-ai",
+      "title": "Arcade",
+      "description": "Authenticated tool-calling platform for agents.",
+      "tags": [
+        "tool-calling",
+        "agents"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nArcade fits agent builders that need explicit auth, user approvals, and reliable action execution across services.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 214,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Arcade\nTool-calling platform for AI agents with authenticated actions, user approvals, and external service integrations.\n**Category:** tools\n**Author:** Arcade\n**Tags:** `tool-calling` `agents`\n\n## Links\n- https://heyclau.de/tools/arcade-ai\n- https://docs.arcade.dev",
+      "detailUrl": "/data/raycast/tools/arcade-ai.json",
+      "webUrl": "https://heyclau.de/tools/arcade-ai",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.arcade.dev",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "arize-phoenix",
+      "title": "Arize Phoenix",
+      "description": "Open-source LLM observability and evaluation tooling.",
+      "tags": [
+        "observability",
+        "evaluation"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nPhoenix is useful for teams that want open-source tracing and evaluation workflows around agent and LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 213,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Arize Phoenix\nOpen-source observability and evaluation tooling for LLM applications, traces, datasets, and experiments.\n**Category:** tools\n**Author:** Arize AI\n**Tags:** `observability` `evaluation`\n\n## Links\n- https://heyclau.de/tools/arize-phoenix\n- https://arize.com/docs/phoenix\n- https://github.com/Arize-ai/phoenix",
+      "detailUrl": "/data/raycast/tools/arize-phoenix.json",
+      "webUrl": "https://heyclau.de/tools/arize-phoenix",
+      "repoUrl": "https://github.com/Arize-ai/phoenix",
+      "documentationUrl": "https://arize.com/docs/phoenix",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -1200,6 +1290,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "bolt-new",
+      "title": "Bolt",
+      "description": "Browser AI app builder for web projects.",
+      "tags": [
+        "app-builder",
+        "prototyping"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nBolt is relevant for users who want prompt-to-running-app workflows in a browser environment with deployment-oriented iteration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 228,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Bolt\nBrowser-based AI app builder for creating, editing, running, and deploying web projects from prompts.\n**Category:** tools\n**Author:** StackBlitz\n**Tags:** `app-builder` `prototyping`\n\n## Links\n- https://heyclau.de/tools/bolt-new\n- https://support.bolt.new",
+      "detailUrl": "/data/raycast/tools/bolt-new.json",
+      "webUrl": "https://heyclau.de/tools/bolt-new",
+      "repoUrl": "",
+      "documentationUrl": "https://support.bolt.new",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "box-mcp-server",
       "title": "Box MCP Server for Claude",
@@ -1222,6 +1334,28 @@
       "repoUrl": "",
       "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
       "downloadTrust": "first-party",
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "braintrust",
+      "title": "Braintrust",
+      "description": "Evaluation and logging platform for AI applications.",
+      "tags": [
+        "evaluation",
+        "prompt-testing"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nBraintrust is relevant when teams need structured evaluation, experiment tracking, and logging for AI product quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 218,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Braintrust\nEvaluation, prompt experimentation, logging, and data platform for production AI application development.\n**Category:** tools\n**Author:** Braintrust\n**Tags:** `evaluation` `prompt-testing`\n\n## Links\n- https://heyclau.de/tools/braintrust\n- https://www.braintrust.dev/docs",
+      "detailUrl": "/data/raycast/tools/braintrust.json",
+      "webUrl": "https://heyclau.de/tools/braintrust",
+      "repoUrl": "",
+      "documentationUrl": "https://www.braintrust.dev/docs",
+      "downloadTrust": null,
       "verificationStatus": ""
     },
     {
@@ -1248,6 +1382,50 @@
       "documentationUrl": "https://playwright.dev/docs/best-practices",
       "downloadTrust": "first-party",
       "verificationStatus": "draft"
+    },
+    {
+      "category": "tools",
+      "slug": "browser-use",
+      "title": "Browser Use",
+      "description": "Open-source browser automation for AI agents.",
+      "tags": [
+        "browser-automation",
+        "open-source"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nBrowser Use is relevant for builders who need programmatic browser interaction as part of AI agent workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 209,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Browser Use\nOpen-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.\n**Category:** tools\n**Author:** Browser Use\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/browser-use\n- https://docs.browser-use.com\n- https://github.com/browser-use/browser-use",
+      "detailUrl": "/data/raycast/tools/browser-use.json",
+      "webUrl": "https://heyclau.de/tools/browser-use",
+      "repoUrl": "https://github.com/browser-use/browser-use",
+      "documentationUrl": "https://docs.browser-use.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "browserbase",
+      "title": "Browserbase",
+      "description": "Cloud browser infrastructure for AI agents.",
+      "tags": [
+        "browser-automation",
+        "agent-infrastructure"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nBrowserbase is useful when AI agents need reliable hosted browser sessions, debugging, and web automation infrastructure.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 221,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Browserbase\nCloud browser infrastructure for browser automation, AI agents, scraping workflows, and web interaction at scale.\n**Category:** tools\n**Author:** Browserbase\n**Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/browserbase\n- https://docs.browserbase.com",
+      "detailUrl": "/data/raycast/tools/browserbase.json",
+      "webUrl": "https://heyclau.de/tools/browserbase",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.browserbase.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
     },
     {
       "category": "guides",
@@ -1521,6 +1699,28 @@
       "webUrl": "https://heyclau.de/guides/healthcare-hipaa-guide",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "claude-code",
+      "title": "Claude Code",
+      "description": "Terminal coding agent for Claude-powered development.",
+      "tags": [
+        "claude-code",
+        "terminal-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nClaude Code is a core reference point for agentic coding workflows and fits teams that already live in the terminal.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 216,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Claude Code\nAnthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.\n**Category:** tools\n**Author:** Anthropic\n**Tags:** `claude-code` `terminal-agent`\n\n## Links\n- https://heyclau.de/tools/claude-code\n- https://docs.anthropic.com/en/docs/claude-code/overview",
+      "detailUrl": "/data/raycast/tools/claude-code.json",
+      "webUrl": "https://heyclau.de/tools/claude-code",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -1947,6 +2147,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "cline",
+      "title": "Cline",
+      "description": "Open-source autonomous coding agent for VS Code.",
+      "tags": [
+        "vs-code",
+        "coding-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCline is useful for users who want a visible agent loop inside VS Code with command execution and file-editing control.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 219,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Cline\nOpen-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.\n**Category:** tools\n**Author:** Cline\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/cline\n- https://docs.cline.bot\n- https://github.com/cline/cline",
+      "detailUrl": "/data/raycast/tools/cline.json",
+      "webUrl": "https://heyclau.de/tools/cline",
+      "repoUrl": "https://github.com/cline/cline",
+      "documentationUrl": "https://docs.cline.bot",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "hooks",
       "slug": "cloud-backup-on-session-stop",
       "title": "Cloud Backup On Session Stop - Hooks",
@@ -1994,6 +2216,28 @@
       "webUrl": "https://heyclau.de/agents/cloud-infrastructure-architect-agent",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "cloudflare-agents-sdk",
+      "title": "Cloudflare Agents SDK",
+      "description": "Framework for building AI agents on Cloudflare Workers.",
+      "tags": [
+        "agent-framework",
+        "cloudflare"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCloudflare Agents SDK is relevant for teams that want agent runtimes close to edge compute, durable objects, and serverless deployment.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 235,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Cloudflare Agents SDK\nCloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.\n**Category:** tools\n**Author:** Cloudflare\n**Tags:** `agent-framework` `cloudflare`\n\n## Links\n- https://heyclau.de/tools/cloudflare-agents-sdk\n- https://developers.cloudflare.com/agents/\n- https://github.com/cloudflare/agents",
+      "detailUrl": "/data/raycast/tools/cloudflare-agents-sdk.json",
+      "webUrl": "https://heyclau.de/tools/cloudflare-agents-sdk",
+      "repoUrl": "https://github.com/cloudflare/agents",
+      "documentationUrl": "https://developers.cloudflare.com/agents/",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -2275,6 +2519,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "coderabbit",
+      "title": "CodeRabbit",
+      "description": "AI code review platform for pull requests.",
+      "tags": [
+        "code-review",
+        "pull-requests"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCodeRabbit fits teams that want AI review support directly in the pull request loop rather than only inside an editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 218,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# CodeRabbit\nAI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.\n**Category:** tools\n**Author:** CodeRabbit\n**Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/coderabbit\n- https://docs.coderabbit.ai",
+      "detailUrl": "/data/raycast/tools/coderabbit.json",
+      "webUrl": "https://heyclau.de/tools/coderabbit",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.coderabbit.ai",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "codex-automations-orchestrator-capability-pack",
       "title": "Codex Automations Orchestrator Capability Pack Skill",
@@ -2345,6 +2611,28 @@
       "webUrl": "https://heyclau.de/guides/migration-workflow-guide",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "composio",
+      "title": "Composio",
+      "description": "Tool integration platform for AI agents.",
+      "tags": [
+        "tool-integrations",
+        "agents"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nComposio is relevant when agent products need durable integrations, auth flows, and action execution across third-party tools.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 226,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Composio\nIntegration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.\n**Category:** tools\n**Author:** Composio\n**Tags:** `tool-integrations` `agents`\n\n## Links\n- https://heyclau.de/tools/composio\n- https://docs.composio.dev\n- https://github.com/ComposioHQ/composio",
+      "detailUrl": "/data/raycast/tools/composio.json",
+      "webUrl": "https://heyclau.de/tools/composio",
+      "repoUrl": "https://github.com/ComposioHQ/composio",
+      "documentationUrl": "https://docs.composio.dev",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -2427,6 +2715,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "continue",
+      "title": "Continue",
+      "description": "Open-source AI coding assistant with model control.",
+      "tags": [
+        "ai-coding",
+        "open-source"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nContinue is useful when teams need self-directed model choices, local configuration, and open-source control over AI coding workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 234,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Continue\nOpen-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.\n**Category:** tools\n**Author:** Continue\n**Tags:** `ai-coding` `open-source`\n\n## Links\n- https://heyclau.de/tools/continue\n- https://docs.continue.dev\n- https://github.com/continuedev/continue",
+      "detailUrl": "/data/raycast/tools/continue.json",
+      "webUrl": "https://heyclau.de/tools/continue",
+      "repoUrl": "https://github.com/continuedev/continue",
+      "documentationUrl": "https://docs.continue.dev",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "contrastapi-mcp-server",
       "title": "ContrastAPI Security Tools",
@@ -2450,6 +2760,28 @@
       "webUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
       "repoUrl": "https://github.com/UPinar/contrastapi",
       "documentationUrl": "https://api.contrastcyber.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "crewai",
+      "title": "CrewAI",
+      "description": "Multi-agent workflow framework and platform.",
+      "tags": [
+        "agent-framework",
+        "multi-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCrewAI is relevant for users exploring role-based multi-agent systems and process automation patterns.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 202,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# CrewAI\nFramework and platform for building multi-agent workflows, role-based agents, process automation, and AI crews.\n**Category:** tools\n**Author:** CrewAI\n**Tags:** `agent-framework` `multi-agent`\n\n## Links\n- https://heyclau.de/tools/crewai\n- https://docs.crewai.com\n- https://github.com/crewAIInc/crewAI",
+      "detailUrl": "/data/raycast/tools/crewai.json",
+      "webUrl": "https://heyclau.de/tools/crewai",
+      "repoUrl": "https://github.com/crewAIInc/crewAI",
+      "documentationUrl": "https://docs.crewai.com",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -2502,6 +2834,28 @@
       "documentationUrl": "https://pandas.pydata.org/",
       "downloadTrust": "first-party",
       "verificationStatus": "draft"
+    },
+    {
+      "category": "tools",
+      "slug": "cursor",
+      "title": "Cursor",
+      "description": "Codebase-aware AI editor for agent-assisted development.",
+      "tags": [
+        "ai-coding",
+        "code-editor"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 224,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Cursor\nAI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.\n**Category:** tools\n**Author:** Cursor\n**Tags:** `ai-coding` `code-editor`\n\n## Links\n- https://heyclau.de/tools/cursor\n- https://docs.cursor.com",
+      "detailUrl": "/data/raycast/tools/cursor.json",
+      "webUrl": "https://heyclau.de/tools/cursor",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.cursor.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
     },
     {
       "category": "skills",
@@ -2904,6 +3258,28 @@
       "webUrl": "https://heyclau.de/hooks/dependency-update-checker",
       "repoUrl": "",
       "documentationUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "devin",
+      "title": "Devin",
+      "description": "AI software engineering agent for development tasks.",
+      "tags": [
+        "coding-agent",
+        "autonomous-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nDevin represents the more autonomous end of coding-agent workflows and is worth tracking separately from editor assistants.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 223,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Devin\nAI software engineering agent for planning, coding, debugging, and executing development tasks with autonomous workflows.\n**Category:** tools\n**Author:** Cognition\n**Tags:** `coding-agent` `autonomous-agent`\n\n## Links\n- https://heyclau.de/tools/devin\n- https://docs.devin.ai",
+      "detailUrl": "/data/raycast/tools/devin.json",
+      "webUrl": "https://heyclau.de/tools/devin",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.devin.ai",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -3332,6 +3708,28 @@
       "verificationStatus": "draft"
     },
     {
+      "category": "tools",
+      "slug": "exa",
+      "title": "Exa",
+      "description": "Search and retrieval API for AI agents.",
+      "tags": [
+        "search",
+        "retrieval"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nExa is relevant for agents and research workflows that need search results shaped for AI consumption rather than generic SERPs.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 227,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Exa\nSearch and web retrieval API designed for AI applications, agents, research workflows, and semantic web discovery.\n**Category:** tools\n**Author:** Exa\n**Tags:** `search` `retrieval`\n\n## Links\n- https://heyclau.de/tools/exa\n- https://docs.exa.ai",
+      "detailUrl": "/data/raycast/tools/exa.json",
+      "webUrl": "https://heyclau.de/tools/exa",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.exa.ai",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "agents",
       "slug": "extended-thinking-orchestrator",
       "title": "Extended Thinking Orchestrator - Agents",
@@ -3478,6 +3876,28 @@
       "webUrl": "https://heyclau.de/hooks/final-bundle-size-reporter",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "firecrawl",
+      "title": "Firecrawl",
+      "description": "Web crawling API for LLM-ready content.",
+      "tags": [
+        "web-crawling",
+        "data-extraction"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nFirecrawl is useful when agent and RAG workflows need cleaner web ingestion than raw scraping or ad hoc parsing.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 212,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Firecrawl\nWeb scraping and crawling API for turning websites into clean markdown, structured data, and LLM-ready content.\n**Category:** tools\n**Author:** Firecrawl\n**Tags:** `web-crawling` `data-extraction`\n\n## Links\n- https://heyclau.de/tools/firecrawl\n- https://docs.firecrawl.dev\n- https://github.com/mendableai/firecrawl",
+      "detailUrl": "/data/raycast/tools/firecrawl.json",
+      "webUrl": "https://heyclau.de/tools/firecrawl",
+      "repoUrl": "https://github.com/mendableai/firecrawl",
+      "documentationUrl": "https://docs.firecrawl.dev",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -3683,6 +4103,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "garak",
+      "title": "Garak",
+      "description": "Open-source LLM vulnerability scanner.",
+      "tags": [
+        "security",
+        "red-teaming"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nGarak is useful for security teams that need repeatable checks for model, prompt, and application-level LLM risks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 214,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Garak\nOpen-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.\n**Category:** tools\n**Author:** NVIDIA\n**Tags:** `security` `red-teaming`\n\n## Links\n- https://heyclau.de/tools/garak\n- https://github.com/NVIDIA/garak\n- https://github.com/NVIDIA/garak",
+      "detailUrl": "/data/raycast/tools/garak.json",
+      "webUrl": "https://heyclau.de/tools/garak",
+      "repoUrl": "https://github.com/NVIDIA/garak",
+      "documentationUrl": "https://github.com/NVIDIA/garak",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "commands",
       "slug": "generate-tests",
       "title": "Generate Tests for Claude",
@@ -3704,6 +4146,28 @@
       "webUrl": "https://heyclau.de/commands/generate-tests",
       "repoUrl": "",
       "documentationUrl": "https://docs.claude.ai/commands/test-gen",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "giskard",
+      "title": "Giskard",
+      "description": "AI testing platform for LLM and ML quality.",
+      "tags": [
+        "evaluation",
+        "security"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nGiskard fits teams that want testing and monitoring workflows for LLM and machine learning system quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 206,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Giskard\nAI testing platform for evaluating, scanning, and monitoring machine learning and LLM application quality.\n**Category:** tools\n**Author:** Giskard\n**Tags:** `evaluation` `security`\n\n## Links\n- https://heyclau.de/tools/giskard\n- https://docs.giskard.ai\n- https://github.com/Giskard-AI/giskard",
+      "detailUrl": "/data/raycast/tools/giskard.json",
+      "webUrl": "https://heyclau.de/tools/giskard",
+      "repoUrl": "https://github.com/Giskard-AI/giskard",
+      "documentationUrl": "https://docs.giskard.ai",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -3957,6 +4421,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "github-copilot",
+      "title": "GitHub Copilot",
+      "description": "AI developer assistant across GitHub and editors.",
+      "tags": [
+        "ai-coding",
+        "code-review"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nGitHub Copilot is useful for teams that want AI assistance tied directly to repository hosting, pull requests, and editor workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 232,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# GitHub Copilot\nAI developer assistant across GitHub, editors, pull requests, chat, code review, and agentic coding workflows.\n**Category:** tools\n**Author:** GitHub\n**Tags:** `ai-coding` `code-review`\n\n## Links\n- https://heyclau.de/tools/github-copilot\n- https://docs.github.com/en/copilot",
+      "detailUrl": "/data/raycast/tools/github-copilot.json",
+      "webUrl": "https://heyclau.de/tools/github-copilot",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.github.com/en/copilot",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "agents",
       "slug": "github-copilot-interop-bridge",
       "title": "Github Copilot Interop Bridge - Agents",
@@ -4109,6 +4595,28 @@
       "verificationStatus": "draft"
     },
     {
+      "category": "tools",
+      "slug": "graphite-diamond",
+      "title": "Graphite Diamond",
+      "description": "AI code review assistant inside Graphite workflows.",
+      "tags": [
+        "code-review",
+        "pull-requests"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nGraphite Diamond is relevant for teams already adopting stacked pull request workflows and looking for AI review acceleration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 226,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Graphite Diamond\nAI code review assistant for pull requests, engineering feedback, and review workflow acceleration inside Graphite.\n**Category:** tools\n**Author:** Graphite\n**Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/graphite-diamond\n- https://graphite.dev",
+      "detailUrl": "/data/raycast/tools/graphite-diamond.json",
+      "webUrl": "https://heyclau.de/tools/graphite-diamond",
+      "repoUrl": "",
+      "documentationUrl": "https://graphite.dev",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "rules",
       "slug": "graphql-federation-specialist",
       "title": "GraphQL Federation Specialist for Claude",
@@ -4155,6 +4663,28 @@
       "webUrl": "https://heyclau.de/hooks/graphql-schema-validator",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "helicone",
+      "title": "Helicone",
+      "description": "LLM observability and cost tracking platform.",
+      "tags": [
+        "observability",
+        "cost-tracking"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nHelicone is useful when cost visibility, request logging, and feedback capture are central to LLM operations.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 209,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Helicone\nOpen-source LLM observability platform for logging, metrics, cost tracking, feedback, and gateway workflows.\n**Category:** tools\n**Author:** Helicone\n**Tags:** `observability` `cost-tracking`\n\n## Links\n- https://heyclau.de/tools/helicone\n- https://docs.helicone.ai\n- https://github.com/Helicone/helicone",
+      "detailUrl": "/data/raycast/tools/helicone.json",
+      "webUrl": "https://heyclau.de/tools/helicone",
+      "repoUrl": "https://github.com/Helicone/helicone",
+      "documentationUrl": "https://docs.helicone.ai",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -4287,6 +4817,28 @@
       "documentationUrl": "https://typicode.github.io/husky/",
       "downloadTrust": "first-party",
       "verificationStatus": "validated"
+    },
+    {
+      "category": "tools",
+      "slug": "hyperbrowser",
+      "title": "Hyperbrowser",
+      "description": "Browser automation infrastructure for AI workflows.",
+      "tags": [
+        "browser-automation",
+        "agent-infrastructure"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nHyperbrowser belongs in the agent infrastructure category for teams running browser automation beyond local developer machines.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 227,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Hyperbrowser\nBrowser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.\n**Category:** tools\n**Author:** Hyperbrowser\n**Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/hyperbrowser\n- https://docs.hyperbrowser.ai",
+      "detailUrl": "/data/raycast/tools/hyperbrowser.json",
+      "webUrl": "https://heyclau.de/tools/hyperbrowser",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.hyperbrowser.ai",
+      "downloadTrust": null,
+      "verificationStatus": ""
     },
     {
       "category": "hooks",
@@ -4614,6 +5166,94 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "lakera-guard",
+      "title": "Lakera Guard",
+      "description": "AI security guardrails for LLM applications.",
+      "tags": [
+        "security",
+        "guardrails"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nLakera Guard is relevant for teams that need runtime protection and policy checks around LLM application inputs and outputs.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 224,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Lakera Guard\nAI security platform for detecting prompt injection, unsafe content, data leakage, and LLM application abuse.\n**Category:** tools\n**Author:** Lakera\n**Tags:** `security` `guardrails`\n\n## Links\n- https://heyclau.de/tools/lakera-guard\n- https://docs.lakera.ai",
+      "detailUrl": "/data/raycast/tools/lakera-guard.json",
+      "webUrl": "https://heyclau.de/tools/lakera-guard",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.lakera.ai",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "langfuse",
+      "title": "Langfuse",
+      "description": "Open-source LLM tracing and evaluation platform.",
+      "tags": [
+        "observability",
+        "open-source"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nLangfuse is a strong option when teams want open-source LLM observability with self-hosting and prompt lifecycle support.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 221,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Langfuse\nOpen-source LLM engineering platform for tracing, prompt management, evaluation, metrics, and observability.\n**Category:** tools\n**Author:** Langfuse\n**Tags:** `observability` `open-source`\n\n## Links\n- https://heyclau.de/tools/langfuse\n- https://langfuse.com/docs\n- https://github.com/langfuse/langfuse",
+      "detailUrl": "/data/raycast/tools/langfuse.json",
+      "webUrl": "https://heyclau.de/tools/langfuse",
+      "repoUrl": "https://github.com/langfuse/langfuse",
+      "documentationUrl": "https://langfuse.com/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "langgraph",
+      "title": "LangGraph",
+      "description": "Stateful orchestration framework for LLM agents.",
+      "tags": [
+        "agent-framework",
+        "orchestration"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nLangGraph is a strong fit for teams building non-trivial agent workflows that need state, branching, and controllable execution.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 228,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# LangGraph\nAgent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.\n**Category:** tools\n**Author:** LangChain\n**Tags:** `agent-framework` `orchestration`\n\n## Links\n- https://heyclau.de/tools/langgraph\n- https://langchain-ai.github.io/langgraph/\n- https://github.com/langchain-ai/langgraph",
+      "detailUrl": "/data/raycast/tools/langgraph.json",
+      "webUrl": "https://heyclau.de/tools/langgraph",
+      "repoUrl": "https://github.com/langchain-ai/langgraph",
+      "documentationUrl": "https://langchain-ai.github.io/langgraph/",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "langsmith",
+      "title": "LangSmith",
+      "description": "Observability and evaluation platform for LLM apps.",
+      "tags": [
+        "observability",
+        "evaluation"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nLangSmith is useful for teams that need traceability, regression testing, and evaluation around LLM and agent systems.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 218,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# LangSmith\nObservability, evaluation, tracing, and testing platform for LLM applications and agent workflows.\n**Category:** tools\n**Author:** LangChain\n**Tags:** `observability` `evaluation`\n\n## Links\n- https://heyclau.de/tools/langsmith\n- https://docs.smith.langchain.com",
+      "detailUrl": "/data/raycast/tools/langsmith.json",
+      "webUrl": "https://heyclau.de/tools/langsmith",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.smith.langchain.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "agents",
       "slug": "life-sciences-research-specialist",
       "title": "Life Sciences Research Specialist - Agents",
@@ -4713,6 +5353,50 @@
       "verificationStatus": "draft"
     },
     {
+      "category": "tools",
+      "slug": "lovable",
+      "title": "Lovable",
+      "description": "AI app builder for prompt-driven web products.",
+      "tags": [
+        "app-builder",
+        "prototyping"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nLovable fits product teams that want rapid web app scaffolding and AI-driven iteration before deeper engineering hardening.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 223,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Lovable\nAI app builder for generating and iterating on web applications from natural language product requests.\n**Category:** tools\n**Author:** Lovable\n**Tags:** `app-builder` `prototyping`\n\n## Links\n- https://heyclau.de/tools/lovable\n- https://docs.lovable.dev",
+      "detailUrl": "/data/raycast/tools/lovable.json",
+      "webUrl": "https://heyclau.de/tools/lovable",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.lovable.dev",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "make",
+      "title": "Make",
+      "description": "Visual automation platform for integrations and AI workflows.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nMake fits teams that prefer visual automation scenarios and integration workflows for AI-adjacent business processes.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 217,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Make\nVisual automation platform for building integrations, scenarios, API workflows, and AI-connected business processes.\n**Category:** tools\n**Author:** Make\n**Tags:** `workflow-automation` `integrations`\n\n## Links\n- https://heyclau.de/tools/make\n- https://www.make.com/en/help",
+      "detailUrl": "/data/raycast/tools/make.json",
+      "webUrl": "https://heyclau.de/tools/make",
+      "repoUrl": "",
+      "documentationUrl": "https://www.make.com/en/help",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "markdown-knowledge-base-composer",
       "title": "Markdown Knowledge Base Composer Skill",
@@ -4758,6 +5442,28 @@
       "webUrl": "https://heyclau.de/hooks/markdown-link-checker",
       "repoUrl": "",
       "documentationUrl": "",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "mastra",
+      "title": "Mastra",
+      "description": "TypeScript framework for agents and AI workflows.",
+      "tags": [
+        "agent-framework",
+        "typescript"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nMastra is useful for JavaScript and TypeScript teams building agent products with workflow, memory, and tool abstractions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 222,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Mastra\nTypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.\n**Category:** tools\n**Author:** Mastra\n**Tags:** `agent-framework` `typescript`\n\n## Links\n- https://heyclau.de/tools/mastra\n- https://mastra.ai/docs\n- https://github.com/mastra-ai/mastra",
+      "detailUrl": "/data/raycast/tools/mastra.json",
+      "webUrl": "https://heyclau.de/tools/mastra",
+      "repoUrl": "https://github.com/mastra-ai/mastra",
+      "documentationUrl": "https://mastra.ai/docs",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -4913,6 +5619,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "microsoft-autogen",
+      "title": "Microsoft AutoGen",
+      "description": "Open-source framework for multi-agent AI applications.",
+      "tags": [
+        "agent-framework",
+        "multi-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nAutoGen is a useful reference for multi-agent application patterns, especially where conversation loops and coordination matter.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 228,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Microsoft AutoGen\nOpen-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.\n**Category:** tools\n**Author:** Microsoft\n**Tags:** `agent-framework` `multi-agent`\n\n## Links\n- https://heyclau.de/tools/microsoft-autogen\n- https://microsoft.github.io/autogen/\n- https://github.com/microsoft/autogen",
+      "detailUrl": "/data/raycast/tools/microsoft-autogen.json",
+      "webUrl": "https://heyclau.de/tools/microsoft-autogen",
+      "repoUrl": "https://github.com/microsoft/autogen",
+      "documentationUrl": "https://microsoft.github.io/autogen/",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "statuslines",
       "slug": "minimal-powerline",
       "title": "Minimal Powerline - Statuslines",
@@ -5030,8 +5758,8 @@
       ],
       "installCommand": "",
       "configSnippet": "",
-      "copyText": "You are a mobile development expert with comprehensive knowledge of native and cross-platform frameworks.\n\n## iOS Development (Swift/SwiftUI)\n\n### SwiftUI Modern Patterns\n\n```swift\nimport SwiftUI\nimport Combine\n\n@MainActor\nclass UserViewModel: ObservableObject {\n    @Published var users: [User] = []\n    @Published var isLoading = false\n    @Published var error: Error?\n\n    private var cancellables = Set<AnyCancellable>()\n    private let service: UserService\n\n    init(service: UserService = .shared) {\n        self.service = service\n    }\n\n    func loadUsers() async {\n        isLoading = true\n        defer { isLoading = false }\n\n        do {\n            users = try await service.fetchUsers()\n        } catch {\n            self.error = error\n        }\n    }\n}\n\nstruct UserListView: View {\n    @StateObject private var viewModel = UserViewModel()\n    @Environment(\\.colorScheme) var colorScheme\n\n    var body: some View {\n        NavigationStack {\n            List(viewModel.users) { user in\n                NavigationLink(value: user) {\n                    UserRow(user: user)\n                }\n            }\n            .navigationTitle(\"Users\")\n            .navigationDestination(for: User.self) { user in\n                UserDetailView(user: user)\n            }\n            .refreshable {\n                await viewModel.loadUsers()\n            }\n            .overlay {\n                if viewModel.isLoading {\n                    ProgressView()\n                }\n            }\n        }\n        .task {\n            await viewModel.loadUsers()\n        }\n    }\n}\n```\n\n### iOS Architecture Patterns\n\n- **MVVM-C**: Model-View-ViewModel with Coordinators\n- **TCA**: The Composable Architecture\n- **VIPER**: View-Interactor-Presenter-Entity-Router\n- **Clean Architecture**: Domain-driven design\n\n## Android Development (Kotlin/Jetpack Compose)\n\n### Jetpack Compose Modern UI\n\n```kotlin\n@Composable\nfun UserListScreen(\n    viewModel: UserViewModel = hiltViewModel(),\n    onNavigateToDetail: (User) -> Unit\n) {\n    val uiState by viewModel.uiState.collectAsStateWithLifecycle()\n\n    LazyColumn(\n        modifier = Modifier.fillMaxSize(),\n        contentPadding = PaddingValues(16.dp),\n        verticalArrangement = Arrangement.spacedBy(8.dp)\n    ) {\n        when (uiState) {\n            is UiState.Loading -> {\n                item {\n                    Box(\n                        modifier = Modifier.fillMaxWidth(),\n                        contentAlignment = Alignment.Center\n                    ) {\n                        CircularProgressIndicator()\n                    }\n                }\n            }\n            is UiState.Success -> {\n                items(\n                    items = uiState.users,\n                    key = { it.id }\n                ) { user ->\n                    UserCard(\n                        user = user,\n                        onClick = { onNavigateToDetail(user) }\n                    )\n                }\n            }\n            is UiState.Error -> {\n                item {\n                    ErrorMessage(\n                        message = uiState.message,\n                        onRetry = viewModel::loadUsers\n                    )\n                }\n            }\n        }\n    }\n}\n\n@HiltViewModel\nclass UserViewModel @Inject constructor(\n    private val userRepository: UserRepository\n) : ViewModel() {\n\n    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)\n    val uiState: StateFlow<UiState> = _uiState.asStateFlow()\n\n    init {\n        loadUsers()\n    }\n\n    fun loadUsers() {\n        viewModelScope.launch {\n            userRepository.getUsers()\n                .flowOn(Dispatchers.IO)\n                .catch { e ->\n                    _uiState.value = UiState.Error(e.message ?: \"Unknown error\")\n                }\n                .collect { users ->\n                    _uiState.value = UiState.Success(users)\n                }\n        }\n    }\n}\n```\n\n## React Native Development\n\n### Modern React Native with TypeScript\n\n```typescript\nimport React, { useEffect } from 'react';\nimport {\n  FlatList,\n  RefreshControl,\n  StyleSheet,\n  View,\n} from 'react-native';\nimport { useQuery, useMutation } from '@tanstack/react-query';\nimport { useNavigation } from '@react-navigation/native';\n\ninterface User {\n  id: string;\n  name: string;\n  email: string;\n  avatar: string;\n}\n\nexport const UserListScreen: React.FC = () => {\n  const navigation = useNavigation();\n\n  const { data, isLoading, refetch, error } = useQuery<User[]>({\n    queryKey: ['users'],\n    queryFn: fetchUsers,\n  });\n\n  const renderUser = ({ item }: { item: User }) => (\n    <UserCard\n      user={item}\n      onPress={() => navigation.navigate('UserDetail', { userId: item.id })}\n    />\n  );\n\n  return (\n    <View style={styles.container}>\n      <FlatList\n        data={data}\n        renderItem={renderUser}\n        keyExtractor={(item) => item.id}\n        refreshControl={\n          <RefreshControl refreshing={isLoading} onRefresh={refetch} />\n        }\n        contentContainerStyle={styles.list}\n      />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#f5f5f5',\n  },\n  list: {\n    padding: 16,\n  },\n});\n```\n\n### React Native Performance\n\n- **Hermes Engine**: Enable for better performance\n- **Reanimated 3**: Smooth 60fps animations\n- **FlashList**: Optimized list rendering\n- **MMKV**: Fast key-value storage\n- **Fast Image**: Optimized image loading\n\n## Flutter Development\n\n### Flutter with Clean Architecture\n\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_bloc/flutter_bloc.dart';\nimport 'package:get_it/get_it.dart';\n\nclass UserListPage extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return BlocProvider(\n      create: (_) => GetIt.I<UserListCubit>()..loadUsers(),\n      child: UserListView(),\n    );\n  }\n}\n\nclass UserListView extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: Text('Users'),\n        actions: [\n          IconButton(\n            icon: Icon(Icons.search),\n            onPressed: () => _showSearch(context),\n          ),\n        ],\n      ),\n      body: BlocBuilder<UserListCubit, UserListState>(\n        builder: (context, state) {\n          return switch (state) {\n            UserListLoading() => Center(\n              child: CircularProgressIndicator(),\n            ),\n            UserListLoaded(:final users) => RefreshIndicator(\n              onRefresh: () => context.read<UserListCubit>().loadUsers(),\n              child: ListView.builder(\n                itemCount: users.length,\n                itemBuilder: (context, index) {\n                  final user = users[index];\n                  return ListTile(\n                    leading: CircleAvatar(\n                      backgroundImage: NetworkImage(user.avatar),\n                    ),\n                    title: Text(user.name),\n                    subtitle: Text(user.email),\n                    onTap: () => _navigateToDetail(context, user),\n                  );\n                },\n              ),\n            ),\n            UserListError(:final message) => Center(\n              child: Column(\n                mainAxisAlignment: MainAxisAlignment.center,\n                children: [\n                  Text(message),\n                  ElevatedButton(\n                    onPressed: () => context.read<UserListCubit>().loadUsers(),\n                    child: Text('Retry'),\n                  ),\n                ],\n              ),\n            ),\n          };\n        },\n      ),\n    );\n  }\n}\n```\n\n## Cross-Platform Considerations\n\n### Platform-Specific Code\n\n```typescript\n// React Native\nimport { Platform } from \"react-native\";\n\nconst styles = StyleSheet.create({\n  shadow: Platform.select({\n    ios: {\n      shadowColor: \"#000\",\n      shadowOffset: { width: 0, height: 2 },\n      shadowOpacity: 0.1,\n      shadowRadius: 4,\n    },\n    android: {\n      elevation: 4,\n    },\n  }),\n});\n```\n\n### App Performance\n\n1. **Bundle Size**: Code splitting, tree shaking\n2. **Startup Time**: Lazy loading, splash optimization\n3. **Memory Usage**: Image optimization, list virtualization\n4. **Battery Life**: Background task optimization\n5. **Network**: Caching, offline support, request batching\n\n### Testing Strategies\n\n- **Unit Tests**: Business logic, utilities\n- **Widget/Component Tests**: UI components\n- **Integration Tests**: API integration, navigation\n- **E2E Tests**: Detox, Appium, Maestro\n- **Performance Tests**: Profiling, memory leaks\n\n### App Store Optimization\n\n1. **Metadata**: Keywords, descriptions, screenshots\n2. **Reviews**: In-app review prompts, response strategy\n3. **A/B Testing**: Feature flags, gradual rollouts\n4. **Analytics**: Firebase, Amplitude, Mixpanel\n5. **Crash Reporting**: Crashlytics, Sentry, Bugsnag",
-      "copyTextLength": 8852,
+      "copyText": "You are a mobile development expert with comprehensive knowledge of native and cross-platform frameworks.\n\n## iOS Development (Swift/SwiftUI)\n\n### SwiftUI Modern Patterns\n\n```swift\nimport SwiftUI\nimport Combine\n\n@MainActor\nclass UserViewModel: ObservableObject {\n    @Published var users: [User] = []\n    @Published var isLoading = false\n    @Published var error: Error?\n\n    private var cancellables = Set<AnyCancellable>()\n    private let service: UserService\n\n    init(service: UserService = .shared) {\n        self.service = service\n    }\n\n    func loadUsers() async {\n        isLoading = true\n        defer { isLoading = false }\n\n        do {\n            users = try await service.fetchUsers()\n        } catch {\n            self.error = error\n        }\n    }\n}\n\nstruct UserListView: View {\n    @StateObject private var viewModel = UserViewModel()\n    @Environment(\\.colorScheme) var colorScheme\n\n    var body: some View {\n        NavigationStack {\n            List(viewModel.users) { user in\n                NavigationLink(value: user) {\n                    UserRow(user: user)\n                }\n            }\n            .navigationTitle(\"Users\")\n            .navigationDestination(for: User.self) { user in\n                UserDetailView(user: user)\n            }\n            .refreshable {\n                await viewModel.loadUsers()\n            }\n            .overlay {\n                if viewModel.isLoading {\n                    ProgressView()\n                }\n            }\n        }\n        .task {\n            await viewModel.loadUsers()\n        }\n    }\n}\n```\n\n### iOS Architecture Patterns\n\n- **MVVM-C**: Model-View-ViewModel with Coordinators\n- **TCA**: The Composable Architecture\n- **VIPER**: View-Interactor-Presenter-Entity-Router\n- **Clean Architecture**: Domain-driven design\n\n## Android Development (Kotlin/Jetpack Compose)\n\n### Jetpack Compose Modern UI\n\n```kotlin\n@Composable\nfun UserListScreen(\n    viewModel: UserViewModel = hiltViewModel(),\n    onNavigateToDetail: (User) -> Unit\n) {\n    val uiState by viewModel.uiState.collectAsStateWithLifecycle()\n\n    LazyColumn(\n        modifier = Modifier.fillMaxSize(),\n        contentPadding = PaddingValues(16.dp),\n        verticalArrangement = Arrangement.spacedBy(8.dp)\n    ) {\n        when (uiState) {\n            is UiState.Loading -> {\n                item {\n                    Box(\n                        modifier = Modifier.fillMaxWidth(),\n                        contentAlignment = Alignment.Center\n                    ) {\n                        CircularProgressIndicator()\n                    }\n                }\n            }\n            is UiState.Success -> {\n                items(\n                    items = uiState.users,\n                    key = { it.id }\n                ) { user ->\n                    UserCard(\n                        user = user,\n                        onClick = { onNavigateToDetail(user) }\n                    )\n                }\n            }\n            is UiState.Error -> {\n                item {\n                    ErrorMessage(\n                        message = uiState.message,\n                        onRetry = viewModel::loadUsers\n                    )\n                }\n            }\n        }\n    }\n}\n\n@HiltViewModel\nclass UserViewModel @Inject constructor(\n    private val userRepository: UserRepository\n) : ViewModel() {\n\n    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)\n    val uiState: StateFlow<UiState> = _uiState.asStateFlow()\n\n    init {\n        loadUsers()\n    }\n\n    fun loadUsers() {\n        viewModelScope.launch {\n            userRepository.getUsers()\n                .flowOn(Dispatchers.IO)\n                .catch { e ->\n                    _uiState.value = UiState.Error(e.message ?: \"Unknown error\")\n                }\n                .collect { users ->\n                    _uiState.value = UiState.Success(users)\n                }\n        }\n    }\n}\n```\n\n## React Native Development\n\n### Modern React Native with TypeScript\n\n```typescript\nimport React, { useEffect } from 'react';\nimport {\n  FlatList,\n  RefreshControl,\n  StyleSheet,\n  View,\n} from 'react-native';\nimport { useQuery, useMutation } from '@tanstack/react-query';\nimport { useNavigation } from '@react-navigation/native';\n\ninterface User {\n  id: string;\n  name: string;\n  email: string;\n  avatar: string;\n}\n\nexport const UserListScreen: React.FC = () => {\n  const navigation = useNavigation();\n\n  const { data, isLoading, refetch, error } = useQuery<User[]>({\n    queryKey: ['users'],\n    queryFn: fetchUsers,\n  });\n\n  const renderUser = ({ item }: { item: User }) => (\n    <UserCard\n      user={item}\n      onPress={() => navigation.navigate('UserDetail', { userId: item.id })}\n    />\n  );\n\n  return (\n    <View style={styles.container}>\n      <FlatList\n        data={data}\n        renderItem={renderUser}\n        keyExtractor={(item) => item.id}\n        refreshControl={\n          <RefreshControl refreshing={isLoading} onRefresh={refetch} />\n        }\n        contentContainerStyle={styles.list}\n      />\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#f5f5f5',\n  },\n  list: {\n    padding: 16,\n  },\n});\n```\n\n### React Native Performance\n\n- **Hermes Engine**: Enable for better performance\n- **Reanimated 3**: Smooth 60fps animations\n- **FlashList**: Optimized list rendering\n- **MMKV**: Fast key-value storage\n- **Fast Image**: Optimized image loading\n\n## Flutter Development\n\n### Flutter with Clean Architecture\n\n```dart\nimport 'package:flutter/material.dart';\nimport 'package:flutter_bloc/flutter_bloc.dart';\nimport 'package:get_it/get_it.dart';\n\nclass UserListPage extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return BlocProvider(\n      create: (_) => GetIt.I<UserListCubit>()..loadUsers(),\n      child: UserListView(),\n    );\n  }\n}\n\nclass UserListView extends StatelessWidget {\n  @override\n  Widget build(BuildContext context) {\n    return Scaffold(\n      appBar: AppBar(\n        title: Text('Users'),\n        actions: [\n          IconButton(\n            icon: Icon(Icons.search),\n            onPressed: () => _showSearch(context),\n          ),\n        ],\n      ),\n      body: BlocBuilder<UserListCubit, UserListState>(\n        builder: (context, state) {\n          return switch (state) {\n            UserListLoading() => Center(\n              child: CircularProgressIndicator(),\n            ),\n            UserListLoaded(:final users) => RefreshIndicator(\n              onRefresh: () => context.read<UserListCubit>().loadUsers(),\n              child: ListView.builder(\n                itemCount: users.length,\n                itemBuilder: (context, index) {\n                  final user = users[index];\n                  return ListTile(\n                    leading: CircleAvatar(\n                      backgroundImage: NetworkImage(user.avatar),\n                    ),\n                    title: Text(user.name),\n                    subtitle: Text(user.email),\n                    onTap: () => _navigateToDetail(context, user),\n                  );\n                },\n              ),\n            ),\n            UserListError(:final message) => Center(\n              child: Column(\n                mainAxisAlignment: MainAxisAlignment.center,\n                children: [\n                  Text(message),\n                  ElevatedButton(\n                    onPressed: () => context.read<UserListCubit>().loadUsers(),\n                    child: Text('Retry'),\n                  ),\n                ],\n              ),\n            ),\n          };\n        },\n      ),\n    );\n  }\n}\n```\n\n## Cross-Platform Considerations\n\n### Platform-Specific Code\n\n```typescript\n// React Native\nimport { Platform } from \"react-native\";\n\nconst styles = StyleSheet.create({\n  shadow: Platform.select({\n    ios: {\n      shadowColor: \"#000\",\n      shadowOffset: { width: 0, height: 2 },\n      shadowOpacity: 0.1,\n      shadowRadius: 4,\n    },\n    android: {\n      elevation: 4,\n    },\n  }),\n});\n```\n\n### App Performance\n\n1. **Bundle Size**: Code splitting, tree shaking\n2. **Startup Time**: Lazy loading, splash optimization\n3. **Memory Usage**: Image optimization, list virtualization\n4. **Battery Life**: Background task optimization\n5. **Network**: Caching, offline support, request batching\n\n### Testing Strategies\n\n- **Unit Tests**: Business logic, utilities\n- **Widget/Component Tests**: UI components\n- **Integration Tests**: API integration, navigation\n- **E2E Tests**: Detox, Appium, Maestro\n- **Performance Tests**: Profiling, memory leaks\n\n### App Store Optimization\n\n1. **Metadata**: Keywords, descriptions, screenshots\n2. **Reviews**: In-app review prompts, response strategy\n3. **A/B Testing**: Feature flags, gradual rollouts\n4. **Analytics**: Firebase, Amplitude, Mixpanel\n5. **Crash Reporting**: Crashlytics, Sentry, Bugsnag\n\n## Expert Positioning\n\nUse this rule when Claude should behave like a senior mobile architecture\nreviewer across product, platform, testing, release, and store-readiness\nconcerns. It is broader than a single implementation prompt and should push\nfor platform-specific tradeoffs, lifecycle risks, and release quality gates.",
+      "copyTextLength": 9176,
       "copyTextTruncated": false,
       "detailMarkdown": "# Mobile App Dev Expert - CLAUDE.md Rules for Claude Code\nExpert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks\n**Category:** rules\n**Author:** JSONbored\n**Tags:** `mobile` `ios` `android` `react-native` `flutter` `swift` `kotlin`\n\n## Usage\nYou are a mobile development expert with comprehensive knowledge of native and cross-platform frameworks.\n\n## Links\n- https://heyclau.de/rules/mobile-app-development-expert\n- https://developer.apple.com/documentation/",
       "detailUrl": "/data/raycast/rules/mobile-app-development-expert.json",
@@ -5240,6 +5968,28 @@
       "webUrl": "https://heyclau.de/statuslines/multi-session-overlap-indicator",
       "repoUrl": "",
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "n8n",
+      "title": "n8n",
+      "description": "Self-hostable workflow automation for AI operations.",
+      "tags": [
+        "workflow-automation",
+        "self-hosted"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nn8n is valuable for teams that want workflow automation with self-hosting options and AI integration steps.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 207,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# n8n\nSource-available workflow automation platform for self-hosted integrations, AI workflows, triggers, and data pipelines.\n**Category:** tools\n**Author:** n8n\n**Tags:** `workflow-automation` `self-hosted`\n\n## Links\n- https://heyclau.de/tools/n8n\n- https://docs.n8n.io\n- https://github.com/n8n-io/n8n",
+      "detailUrl": "/data/raycast/tools/n8n.json",
+      "webUrl": "https://heyclau.de/tools/n8n",
+      "repoUrl": "https://github.com/n8n-io/n8n",
+      "documentationUrl": "https://docs.n8n.io",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -5520,6 +6270,28 @@
       "verificationStatus": "validated"
     },
     {
+      "category": "tools",
+      "slug": "opencode",
+      "title": "OpenCode",
+      "description": "Terminal-first AI coding agent for local development.",
+      "tags": [
+        "terminal-agent",
+        "ai-coding"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nOpenCode fits developers who want local terminal workflows and flexible model usage for coding tasks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 201,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# OpenCode\nTerminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.\n**Category:** tools\n**Author:** SST\n**Tags:** `terminal-agent` `ai-coding`\n\n## Links\n- https://heyclau.de/tools/opencode\n- https://opencode.ai\n- https://github.com/sst/opencode",
+      "detailUrl": "/data/raycast/tools/opencode.json",
+      "webUrl": "https://heyclau.de/tools/opencode",
+      "repoUrl": "https://github.com/sst/opencode",
+      "documentationUrl": "https://opencode.ai",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "opennext-cloudflare-capability-pack",
       "title": "OpenNext Cloudflare Capability Pack Skill",
@@ -5741,6 +6513,28 @@
       "webUrl": "https://heyclau.de/agents/performance-optimizer-agent",
       "repoUrl": "",
       "documentationUrl": "https://web.dev/performance/",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "pipedream",
+      "title": "Pipedream",
+      "description": "Developer workflow automation and API integration platform.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nPipedream is useful when agent workflows need event triggers, API glue, and custom code steps without building a full backend.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 226,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Pipedream\nWorkflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.\n**Category:** tools\n**Author:** Pipedream\n**Tags:** `workflow-automation` `integrations`\n\n## Links\n- https://heyclau.de/tools/pipedream\n- https://pipedream.com/docs",
+      "detailUrl": "/data/raycast/tools/pipedream.json",
+      "webUrl": "https://heyclau.de/tools/pipedream",
+      "repoUrl": "",
+      "documentationUrl": "https://pipedream.com/docs",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -6179,6 +6973,50 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "promptfoo",
+      "title": "Promptfoo",
+      "description": "Open-source prompt testing and red-teaming framework.",
+      "tags": [
+        "prompt-testing",
+        "security"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nPromptfoo is a practical fit for teams that want repeatable prompt tests, security checks, and evaluation gates in CI.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 218,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Promptfoo\nOpen-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.\n**Category:** tools\n**Author:** Promptfoo\n**Tags:** `prompt-testing` `security`\n\n## Links\n- https://heyclau.de/tools/promptfoo\n- https://www.promptfoo.dev/docs\n- https://github.com/promptfoo/promptfoo",
+      "detailUrl": "/data/raycast/tools/promptfoo.json",
+      "webUrl": "https://heyclau.de/tools/promptfoo",
+      "repoUrl": "https://github.com/promptfoo/promptfoo",
+      "documentationUrl": "https://www.promptfoo.dev/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "protect-ai",
+      "title": "Protect AI",
+      "description": "AI security platform for models and applications.",
+      "tags": [
+        "security",
+        "ai-supply-chain"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nProtect AI is relevant for organizations that treat AI systems as a security and supply-chain surface, not only a product feature.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 230,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Protect AI\nAI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.\n**Category:** tools\n**Author:** Protect AI\n**Tags:** `security` `ai-supply-chain`\n\n## Links\n- https://heyclau.de/tools/protect-ai\n- https://docs.protectai.com",
+      "detailUrl": "/data/raycast/tools/protect-ai.json",
+      "webUrl": "https://heyclau.de/tools/protect-ai",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.protectai.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "proxmox-ve-api-capability-pack",
       "title": "Proxmox VE API Capability Pack Skill",
@@ -6269,8 +7107,8 @@
       ],
       "installCommand": "",
       "configSnippet": "",
-      "copyText": "You are a Python data science expert with deep knowledge of modern data analysis and machine learning techniques.\n\n## Core Expertise\n\n### Data Analysis Stack\n\n- **Pandas 2.2+**: DataFrames, Series, MultiIndex, time series analysis\n- **NumPy**: Array operations, broadcasting, linear algebra\n- **Polars**: High-performance DataFrame operations\n- **DuckDB**: SQL analytics on DataFrames\n- **Vaex**: Out-of-core DataFrames for big data\n\n### Visualization\n\n- **Plotly**: Interactive visualizations and dashboards\n- **Matplotlib/Seaborn**: Statistical visualizations\n- **Altair**: Declarative visualization grammar\n- **Streamlit/Gradio**: Interactive data apps\n\n### Machine Learning\n\n- **Scikit-learn**: Classical ML algorithms and pipelines\n- **XGBoost/LightGBM/CatBoost**: Gradient boosting\n- **PyTorch/TensorFlow**: Deep learning frameworks\n- **Hugging Face Transformers**: Pre-trained models\n- **MLflow**: Experiment tracking and model registry\n\n### Statistical Analysis\n\n- **SciPy**: Statistical tests and distributions\n- **Statsmodels**: Time series and econometrics\n- **Pingouin**: Statistical tests with effect sizes\n- **PyMC**: Bayesian statistical modeling\n\n### Best Practices\n\n- Always perform EDA before modeling\n- Use cross-validation for model evaluation\n- Handle missing data appropriately\n- Check for data leakage in pipelines\n- Document assumptions and limitations\n- Version control data and models\n\n### Code Standards\n\n- Type hints for function signatures\n- Docstrings with examples\n- Unit tests for data transformations\n- Reproducible random seeds\n- Memory-efficient operations",
-      "copyTextLength": 1591,
+      "copyText": "You are a Python data science expert with deep knowledge of modern data analysis and machine learning techniques.\n\n## Core Expertise\n\n### Data Analysis Stack\n\n- **Pandas 2.2+**: DataFrames, Series, MultiIndex, time series analysis\n- **NumPy**: Array operations, broadcasting, linear algebra\n- **Polars**: High-performance DataFrame operations\n- **DuckDB**: SQL analytics on DataFrames\n- **Vaex**: Out-of-core DataFrames for big data\n\n### Visualization\n\n- **Plotly**: Interactive visualizations and dashboards\n- **Matplotlib/Seaborn**: Statistical visualizations\n- **Altair**: Declarative visualization grammar\n- **Streamlit/Gradio**: Interactive data apps\n\n### Machine Learning\n\n- **Scikit-learn**: Classical ML algorithms and pipelines\n- **XGBoost/LightGBM/CatBoost**: Gradient boosting\n- **PyTorch/TensorFlow**: Deep learning frameworks\n- **Hugging Face Transformers**: Pre-trained models\n- **MLflow**: Experiment tracking and model registry\n\n### Statistical Analysis\n\n- **SciPy**: Statistical tests and distributions\n- **Statsmodels**: Time series and econometrics\n- **Pingouin**: Statistical tests with effect sizes\n- **PyMC**: Bayesian statistical modeling\n\n### Best Practices\n\n- Always perform EDA before modeling\n- Use cross-validation for model evaluation\n- Handle missing data appropriately\n- Check for data leakage in pipelines\n- Document assumptions and limitations\n- Version control data and models\n\n### Code Standards\n\n- Type hints for function signatures\n- Docstrings with examples\n- Unit tests for data transformations\n- Reproducible random seeds\n- Memory-efficient operations\n\n## Expert Positioning\n\nUse this rule for end-to-end data science work where Claude must challenge\ndataset assumptions, model evaluation, reproducibility, leakage risk, and\nexplainability. It is intentionally broader than a library checklist and should\nproduce defensible analysis plans, not just notebook snippets.",
+      "copyTextLength": 1907,
       "copyTextTruncated": false,
       "detailMarkdown": "# Python Data Science Expert - CLAUDE.md Rules for Claude Code\nTransform Claude into a data science specialist with expertise in Python, machine learning, and data analysis\n**Category:** rules\n**Author:** JSONbored\n**Tags:** `python` `data-science` `machine-learning` `pandas` `numpy` `scikit-learn`\n\n## Usage\nYou are a Python data science expert with deep knowledge of modern data analysis and machine learning techniques.\n\n## Links\n- https://heyclau.de/rules/python-data-science-expert\n- https://pandas.pydata.org/docs/",
       "detailUrl": "/data/raycast/rules/python-data-science-expert.json",
@@ -6352,6 +7190,28 @@
       "webUrl": "https://heyclau.de/statuslines/python-rich-statusline",
       "repoUrl": "",
       "documentationUrl": "https://rich.readthedocs.io/",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "raycast",
+      "title": "Raycast",
+      "description": "macOS launcher and extension platform with AI workflows.",
+      "tags": [
+        "launcher",
+        "extensions"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nRaycast is relevant for Claude-native users because it provides a daily launcher surface for extensions, commands, and AI workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 232,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Raycast\nmacOS launcher and extension platform with AI commands, automations, team workflows, and developer-focused integrations.\n**Category:** tools\n**Author:** Raycast\n**Tags:** `launcher` `extensions`\n\n## Links\n- https://heyclau.de/tools/raycast\n- https://developers.raycast.com",
+      "detailUrl": "/data/raycast/tools/raycast.json",
+      "webUrl": "https://heyclau.de/tools/raycast",
+      "repoUrl": "",
+      "documentationUrl": "https://developers.raycast.com",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -6444,8 +7304,8 @@
       ],
       "installCommand": "",
       "configSnippet": "",
-      "copyText": "You are an expert React and Next.js developer with comprehensive knowledge of modern web development. Follow these principles:\n\n## Core Expertise\n\n### React 19+ Patterns\n\n- Use React Server Components by default in Next.js 15+\n- Implement proper Suspense boundaries with streaming SSR\n- Utilize the new use() hook for data fetching\n- Apply React Compiler optimizations automatically\n- Use Actions for form handling and mutations\n\n### Next.js 15+ Best Practices\n\n- App Router with nested layouts and parallel routes\n- Partial Prerendering (PPR) for optimal performance\n- Server Actions for secure data mutations\n- Middleware for authentication and redirects\n- Turbopack for faster development builds\n\n### Performance Optimization\n\n- Implement proper code splitting with dynamic imports\n- Use React.memo and useMemo strategically\n- Optimize bundle size with tree shaking\n- Implement proper image optimization with next/image\n- Use ISR and on-demand revalidation\n\n### TypeScript Integration\n\n- Strict type checking enabled\n- Proper generic component types\n- Zod for runtime validation\n- Type-safe API routes and server actions\n\n### State Management\n\n- Server state with React Query/TanStack Query v5\n- Client state with Zustand or Jotai\n- Form state with React Hook Form v7\n- URL state with nuqs\n\n### Testing Strategy\n\n- Component testing with React Testing Library\n- E2E testing with Playwright\n- Visual regression with Chromatic\n- API testing with MSW 2.0\n\n### Styling Approaches\n\n- Tailwind CSS v4 with CSS variables\n- CSS Modules for component isolation\n- Styled-components for dynamic styles\n- Framer Motion for animations\n\n## Code Standards\n\n- Always use functional components\n- Implement proper error boundaries\n- Follow accessibility guidelines (WCAG 2.2)\n- Use semantic HTML elements\n- Implement proper SEO with metadata API",
-      "copyTextLength": 1830,
+      "copyText": "You are an expert React and Next.js developer with comprehensive knowledge of modern web development. Follow these principles:\n\n## Core Expertise\n\n### React 19+ Patterns\n\n- Use React Server Components by default in Next.js 15+\n- Implement proper Suspense boundaries with streaming SSR\n- Utilize the new use() hook for data fetching\n- Apply React Compiler optimizations automatically\n- Use Actions for form handling and mutations\n\n### Next.js 15+ Best Practices\n\n- App Router with nested layouts and parallel routes\n- Partial Prerendering (PPR) for optimal performance\n- Server Actions for secure data mutations\n- Middleware for authentication and redirects\n- Turbopack for faster development builds\n\n### Performance Optimization\n\n- Implement proper code splitting with dynamic imports\n- Use React.memo and useMemo strategically\n- Optimize bundle size with tree shaking\n- Implement proper image optimization with next/image\n- Use ISR and on-demand revalidation\n\n### TypeScript Integration\n\n- Strict type checking enabled\n- Proper generic component types\n- Zod for runtime validation\n- Type-safe API routes and server actions\n\n### State Management\n\n- Server state with React Query/TanStack Query v5\n- Client state with Zustand or Jotai\n- Form state with React Hook Form v7\n- URL state with nuqs\n\n### Testing Strategy\n\n- Component testing with React Testing Library\n- E2E testing with Playwright\n- Visual regression with Chromatic\n- API testing with MSW 2.0\n\n### Styling Approaches\n\n- Tailwind CSS v4 with CSS variables\n- CSS Modules for component isolation\n- Styled-components for dynamic styles\n- Framer Motion for animations\n\n## Code Standards\n\n- Always use functional components\n- Implement proper error boundaries\n- Follow accessibility guidelines (WCAG 2.2)\n- Use semantic HTML elements\n- Implement proper SEO with metadata API\n\n## Next.js Positioning\n\nUse this rule when React guidance must account for the Next.js App Router,\nserver/client boundaries, caching, metadata, route handlers, edge runtime\ntradeoffs, and deploy behavior. It should bias toward production architecture\nand page performance instead of component-only advice.",
+      "copyTextLength": 2137,
       "copyTextTruncated": false,
       "detailMarkdown": "# React Next.js Expert - CLAUDE.md Rules for Claude Code\nTransform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices\n**Category:** rules\n**Author:** JSONbored\n**Tags:** `react` `nextjs` `frontend` `typescript` `performance`\n\n## Usage\nYou are an expert React and Next.js developer with comprehensive knowledge of modern web development. Follow these principles:\n\n## Links\n- https://heyclau.de/rules/react-next-js-expert\n- https://nextjs.org/docs",
       "detailUrl": "/data/raycast/rules/react-next-js-expert.json",
@@ -6631,6 +7491,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "replit-agent",
+      "title": "Replit Agent",
+      "description": "Browser-based AI app builder inside Replit.",
+      "tags": [
+        "app-builder",
+        "ai-coding"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nReplit Agent is relevant for users who want AI generation, hosting, and iteration in one browser-based environment.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 215,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Replit Agent\nBrowser-based AI software builder for generating, editing, deploying, and iterating on applications in Replit.\n**Category:** tools\n**Author:** Replit\n**Tags:** `app-builder` `ai-coding`\n\n## Links\n- https://heyclau.de/tools/replit-agent\n- https://docs.replit.com/replitai/agent",
+      "detailUrl": "/data/raycast/tools/replit-agent.json",
+      "webUrl": "https://heyclau.de/tools/replit-agent",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.replit.com/replitai/agent",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "rest-api-client-harness",
       "title": "REST API Client Harness Skill",
@@ -6654,6 +7536,28 @@
       "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
       "downloadTrust": "first-party",
       "verificationStatus": "draft"
+    },
+    {
+      "category": "tools",
+      "slug": "roo-code",
+      "title": "Roo Code",
+      "description": "VS Code coding agent with planning and workflow modes.",
+      "tags": [
+        "vs-code",
+        "coding-agent"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nRoo Code is a good fit when users want mode-specific agent behavior for planning, code edits, debugging, and routine project work.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 230,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Roo Code\nOpen-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.\n**Category:** tools\n**Author:** Roo Code\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/roo-code\n- https://docs.roocode.com\n- https://github.com/RooCodeInc/Roo-Code",
+      "detailUrl": "/data/raycast/tools/roo-code.json",
+      "webUrl": "https://heyclau.de/tools/roo-code",
+      "repoUrl": "https://github.com/RooCodeInc/Roo-Code",
+      "documentationUrl": "https://docs.roocode.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
     },
     {
       "category": "hooks",
@@ -6769,8 +7673,8 @@
       ],
       "installCommand": "",
       "configSnippet": "",
-      "copyText": "You are a security auditor and ethical hacker focused on identifying and fixing vulnerabilities.\n\n## Security Assessment Framework\n\n### OWASP Top 10 (2025)\n\n1. **Broken Access Control**: Check authorization at every level\n2. **Cryptographic Failures**: Validate encryption implementations\n3. **Injection**: SQL, NoSQL, OS, LDAP injection prevention\n4. **Insecure Design**: Threat modeling and secure architecture\n5. **Security Misconfiguration**: Default credentials, verbose errors\n6. **Vulnerable Components**: Dependency scanning and updates\n7. **Authentication Failures**: MFA, session management, passwords\n8. **Data Integrity Failures**: Deserialization, CI/CD security\n9. **Logging Failures**: Audit trails and monitoring\n10. **Server-Side Request Forgery**: SSRF prevention\n\n### Code Review Focus\n\n- **Input Validation**: All user inputs must be sanitized\n- **Authentication**: JWT security, OAuth2 implementation\n- **Authorization**: RBAC, ABAC, principle of least privilege\n- **Cryptography**: Use established libraries, no custom crypto\n- **Session Management**: Secure cookies, CSRF tokens\n- **Error Handling**: No sensitive data in error messages\n- **API Security**: Rate limiting, API keys, OAuth scopes\n\n### Infrastructure Security\n\n- **Network**: Firewall rules, VPC configuration, TLS everywhere\n- **Containers**: Distroless images, non-root users, security scanning\n- **Kubernetes**: PSPs, Network Policies, RBAC, admission controllers\n- **Cloud**: IAM policies, encryption at rest, audit logging\n- **CI/CD**: Secret management, SAST/DAST integration, supply chain\n\n### Security Tools\n\n- **SAST**: Semgrep, SonarQube, CodeQL\n- **DAST**: OWASP ZAP, Burp Suite\n- **Dependencies**: Dependabot, Snyk, OWASP Dependency Check\n- **Secrets**: GitLeaks, TruffleHog, detect-secrets\n- **Infrastructure**: Terraform security, CloudFormation Guard\n\n### Incident Response\n\n1. **Preparation**: Runbooks, contact lists, tools\n2. **Identification**: Log analysis, threat detection\n3. **Containment**: Isolate affected systems\n4. **Eradication**: Remove threat, patch vulnerabilities\n5. **Recovery**: Restore services, verify integrity\n6. **Lessons Learned**: Post-mortem, update procedures\n\n### Compliance Standards\n\n- **PCI DSS**: Payment card security\n- **GDPR/CCPA**: Data privacy regulations\n- **SOC 2**: Security controls attestation\n- **ISO 27001**: Information security management\n- **NIST**: Cybersecurity framework",
-      "copyTextLength": 2424,
+      "copyText": "You are a security auditor and ethical hacker focused on identifying and fixing vulnerabilities.\n\n## Security Assessment Framework\n\n### OWASP Top 10 (2025)\n\n1. **Broken Access Control**: Check authorization at every level\n2. **Cryptographic Failures**: Validate encryption implementations\n3. **Injection**: SQL, NoSQL, OS, LDAP injection prevention\n4. **Insecure Design**: Threat modeling and secure architecture\n5. **Security Misconfiguration**: Default credentials, verbose errors\n6. **Vulnerable Components**: Dependency scanning and updates\n7. **Authentication Failures**: MFA, session management, passwords\n8. **Data Integrity Failures**: Deserialization, CI/CD security\n9. **Logging Failures**: Audit trails and monitoring\n10. **Server-Side Request Forgery**: SSRF prevention\n\n### Code Review Focus\n\n- **Input Validation**: All user inputs must be sanitized\n- **Authentication**: JWT security, OAuth2 implementation\n- **Authorization**: RBAC, ABAC, principle of least privilege\n- **Cryptography**: Use established libraries, no custom crypto\n- **Session Management**: Secure cookies, CSRF tokens\n- **Error Handling**: No sensitive data in error messages\n- **API Security**: Rate limiting, API keys, OAuth scopes\n\n### Infrastructure Security\n\n- **Network**: Firewall rules, VPC configuration, TLS everywhere\n- **Containers**: Distroless images, non-root users, security scanning\n- **Kubernetes**: PSPs, Network Policies, RBAC, admission controllers\n- **Cloud**: IAM policies, encryption at rest, audit logging\n- **CI/CD**: Secret management, SAST/DAST integration, supply chain\n\n### Security Tools\n\n- **SAST**: Semgrep, SonarQube, CodeQL\n- **DAST**: OWASP ZAP, Burp Suite\n- **Dependencies**: Dependabot, Snyk, OWASP Dependency Check\n- **Secrets**: GitLeaks, TruffleHog, detect-secrets\n- **Infrastructure**: Terraform security, CloudFormation Guard\n\n### Incident Response\n\n1. **Preparation**: Runbooks, contact lists, tools\n2. **Identification**: Log analysis, threat detection\n3. **Containment**: Isolate affected systems\n4. **Eradication**: Remove threat, patch vulnerabilities\n5. **Recovery**: Restore services, verify integrity\n6. **Lessons Learned**: Post-mortem, update procedures\n\n### Compliance Standards\n\n- **PCI DSS**: Payment card security\n- **GDPR/CCPA**: Data privacy regulations\n- **SOC 2**: Security controls attestation\n- **ISO 27001**: Information security management\n- **NIST**: Cybersecurity framework\n\n## Penetration Testing Positioning\n\nUse this rule when Claude should move beyond static audit observations into a\ncontrolled test plan with scoped probes, reproducible evidence, risk ranking,\nand remediation validation. It should keep authorization boundaries explicit\nand avoid exploit instructions outside a sanctioned assessment context.",
+      "copyTextLength": 2766,
       "copyTextTruncated": false,
       "detailMarkdown": "# Security Auditor Pentester - CLAUDE.md Rules for Claude Code\nConfigure Claude as a security expert for vulnerability assessment, penetration testing, and security best practices\n**Category:** rules\n**Author:** JSONbored\n**Tags:** `security` `penetration-testing` `vulnerability` `owasp` `audit`\n\n## Usage\nYou are a security auditor and ethical hacker focused on identifying and fixing vulnerabilities.\n\n## Links\n- https://heyclau.de/rules/security-auditor-penetration-tester\n- https://owasp.org/www-project-top-ten/",
       "detailUrl": "/data/raycast/rules/security-auditor-penetration-tester.json",
@@ -7086,6 +7990,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "smithery",
+      "title": "Smithery",
+      "description": "MCP server discovery and deployment platform.",
+      "tags": [
+        "mcp",
+        "tool-discovery"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nSmithery is relevant to HeyClaude users because MCP server discovery, installation, and trust scoring are central to agent workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 233,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Smithery\nMCP server discovery and deployment platform for finding, installing, and running model context protocol tools.\n**Category:** tools\n**Author:** Smithery\n**Tags:** `mcp` `tool-discovery`\n\n## Links\n- https://heyclau.de/tools/smithery\n- https://smithery.ai/docs",
+      "detailUrl": "/data/raycast/tools/smithery.json",
+      "webUrl": "https://heyclau.de/tools/smithery",
+      "repoUrl": "",
+      "documentationUrl": "https://smithery.ai/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "socket-mcp-server",
       "title": "Socket MCP Server for Claude",
@@ -7111,6 +8037,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "sourcegraph-cody",
+      "title": "Sourcegraph Cody",
+      "description": "AI coding assistant for large codebase context.",
+      "tags": [
+        "ai-coding",
+        "code-search"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nCody is strongest when repository-scale context and search quality matter more than one-off prompt completion.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 210,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Sourcegraph Cody\nAI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.\n**Category:** tools\n**Author:** Sourcegraph\n**Tags:** `ai-coding` `code-search`\n\n## Links\n- https://heyclau.de/tools/sourcegraph-cody\n- https://sourcegraph.com/docs/cody",
+      "detailUrl": "/data/raycast/tools/sourcegraph-cody.json",
+      "webUrl": "https://heyclau.de/tools/sourcegraph-cody",
+      "repoUrl": "",
+      "documentationUrl": "https://sourcegraph.com/docs/cody",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "square-mcp-server",
       "title": "Square MCP Server for Claude",
@@ -7133,6 +8081,28 @@
       "repoUrl": "",
       "documentationUrl": "https://developer.squareup.com/docs/mcp",
       "downloadTrust": "first-party",
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "stagehand",
+      "title": "Stagehand",
+      "description": "AI-assisted browser automation framework.",
+      "tags": [
+        "browser-automation",
+        "open-source"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nStagehand is a strong fit for agent workflows that need deterministic browser automation with optional AI assistance.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 217,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Stagehand\nOpen-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.\n**Category:** tools\n**Author:** Browserbase\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/stagehand\n- https://docs.stagehand.dev\n- https://github.com/browserbase/stagehand",
+      "detailUrl": "/data/raycast/tools/stagehand.json",
+      "webUrl": "https://heyclau.de/tools/stagehand",
+      "repoUrl": "https://github.com/browserbase/stagehand",
+      "documentationUrl": "https://docs.stagehand.dev",
+      "downloadTrust": null,
       "verificationStatus": ""
     },
     {
@@ -7589,6 +8559,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "trigger-dev",
+      "title": "Trigger.dev",
+      "description": "Background jobs and workflows for TypeScript apps.",
+      "tags": [
+        "workflow-automation",
+        "typescript"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nTrigger.dev is useful for AI products that need durable background jobs, retries, scheduled work, and observable workflow execution.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 232,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Trigger.dev\nBackground job and workflow platform for TypeScript applications, long-running tasks, schedules, and durable automation.\n**Category:** tools\n**Author:** Trigger.dev\n**Tags:** `workflow-automation` `typescript`\n\n## Links\n- https://heyclau.de/tools/trigger-dev\n- https://trigger.dev/docs\n- https://github.com/triggerdotdev/trigger.dev",
+      "detailUrl": "/data/raycast/tools/trigger-dev.json",
+      "webUrl": "https://heyclau.de/tools/trigger-dev",
+      "repoUrl": "https://github.com/triggerdotdev/trigger.dev",
+      "documentationUrl": "https://trigger.dev/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "trpc-type-safe-api",
       "title": "tRPC Type-Safe API Builder Skill",
@@ -7763,6 +8755,28 @@
       "verificationStatus": "validated"
     },
     {
+      "category": "tools",
+      "slug": "vercel-v0",
+      "title": "v0",
+      "description": "AI interface builder for React and web UI.",
+      "tags": [
+        "ui-generation",
+        "react"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nv0 is useful when the task is interface generation, component iteration, and React-first product UI exploration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 212,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# v0\nVercel AI interface builder for generating, editing, and iterating on React and web UI from prompts.\n**Category:** tools\n**Author:** Vercel\n**Tags:** `ui-generation` `react`\n\n## Links\n- https://heyclau.de/tools/vercel-v0\n- https://v0.dev/docs",
+      "detailUrl": "/data/raycast/tools/vercel-v0.json",
+      "webUrl": "https://heyclau.de/tools/vercel-v0",
+      "repoUrl": "",
+      "documentationUrl": "https://v0.dev/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "commands",
       "slug": "v0-generate",
       "title": "V0 Component Generator for Claude",
@@ -7811,6 +8825,28 @@
       "documentationUrl": "https://v0.dev/docs",
       "downloadTrust": "first-party",
       "verificationStatus": "draft"
+    },
+    {
+      "category": "tools",
+      "slug": "vercel-ai-sdk",
+      "title": "Vercel AI SDK",
+      "description": "TypeScript toolkit for AI apps and streaming UI.",
+      "tags": [
+        "ai-sdk",
+        "typescript"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nVercel AI SDK is a core building block for TypeScript teams shipping AI interfaces and streaming model interactions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 216,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Vercel AI SDK\nTypeScript toolkit for building AI applications with model providers, streaming UI, tools, agents, and framework adapters.\n**Category:** tools\n**Author:** Vercel\n**Tags:** `ai-sdk` `typescript`\n\n## Links\n- https://heyclau.de/tools/vercel-ai-sdk\n- https://ai-sdk.dev/docs\n- https://github.com/vercel/ai",
+      "detailUrl": "/data/raycast/tools/vercel-ai-sdk.json",
+      "webUrl": "https://heyclau.de/tools/vercel-ai-sdk",
+      "repoUrl": "https://github.com/vercel/ai",
+      "documentationUrl": "https://ai-sdk.dev/docs",
+      "downloadTrust": null,
+      "verificationStatus": ""
     },
     {
       "category": "mcp",
@@ -7909,6 +8945,28 @@
       "webUrl": "https://heyclau.de/rules/wcag-accessibility-auditor",
       "repoUrl": "",
       "documentationUrl": "https://www.w3.org/WAI/WCAG22/quickref/",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "weave",
+      "title": "Weave",
+      "description": "Tracking and evaluation toolkit for LLM applications.",
+      "tags": [
+        "evaluation",
+        "observability"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nWeave belongs in the directory for teams already using W&B or needing experiment tracking around LLM behavior.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 210,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Weave\nWeights and Biases toolkit for tracking, evaluating, and debugging LLM applications and agent workflows.\n**Category:** tools\n**Author:** Weights and Biases\n**Tags:** `evaluation` `observability`\n\n## Links\n- https://heyclau.de/tools/weave\n- https://weave-docs.wandb.ai",
+      "detailUrl": "/data/raycast/tools/weave.json",
+      "webUrl": "https://heyclau.de/tools/weave",
+      "repoUrl": "",
+      "documentationUrl": "https://weave-docs.wandb.ai",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -8012,6 +9070,28 @@
       "verificationStatus": "draft"
     },
     {
+      "category": "tools",
+      "slug": "windsurf",
+      "title": "Windsurf",
+      "description": "Agentic coding environment for multi-file AI development.",
+      "tags": [
+        "ai-coding",
+        "agentic-editor"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nWindsurf belongs in Claude-native tool stacks where the priority is editor-native agent flow and coordinated edits.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 215,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Windsurf\nAgentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.\n**Category:** tools\n**Author:** Windsurf\n**Tags:** `ai-coding` `agentic-editor`\n\n## Links\n- https://heyclau.de/tools/windsurf\n- https://docs.windsurf.com",
+      "detailUrl": "/data/raycast/tools/windsurf.json",
+      "webUrl": "https://heyclau.de/tools/windsurf",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.windsurf.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "skills",
       "slug": "windsurf-collaborative-development",
       "title": "Windsurf AI-Native Collaborative Development Skill",
@@ -8058,6 +9138,28 @@
       "webUrl": "https://heyclau.de/rules/windsurf-ai-native-ide-patterns",
       "repoUrl": "",
       "documentationUrl": "https://docs.codeium.com/windsurf",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "workato",
+      "title": "Workato",
+      "description": "Enterprise automation platform for business workflows.",
+      "tags": [
+        "workflow-automation",
+        "enterprise"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nWorkato belongs in the directory for enterprise teams evaluating AI-connected automation across business systems.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 213,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Workato\nEnterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.\n**Category:** tools\n**Author:** Workato\n**Tags:** `workflow-automation` `enterprise`\n\n## Links\n- https://heyclau.de/tools/workato\n- https://docs.workato.com",
+      "detailUrl": "/data/raycast/tools/workato.json",
+      "webUrl": "https://heyclau.de/tools/workato",
+      "repoUrl": "",
+      "documentationUrl": "https://docs.workato.com",
       "downloadTrust": null,
       "verificationStatus": ""
     },
@@ -8137,6 +9239,28 @@
       "verificationStatus": ""
     },
     {
+      "category": "tools",
+      "slug": "zapier-ai",
+      "title": "Zapier AI",
+      "description": "AI-assisted automation across business apps.",
+      "tags": [
+        "workflow-automation",
+        "integrations"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nZapier AI is relevant for non-engineering and operations teams that need AI-assisted workflows across existing business apps.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 225,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Zapier AI\nAutomation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.\n**Category:** tools\n**Author:** Zapier\n**Tags:** `workflow-automation` `integrations`\n\n## Links\n- https://heyclau.de/tools/zapier-ai\n- https://help.zapier.com",
+      "detailUrl": "/data/raycast/tools/zapier-ai.json",
+      "webUrl": "https://heyclau.de/tools/zapier-ai",
+      "repoUrl": "",
+      "documentationUrl": "https://help.zapier.com",
+      "downloadTrust": null,
+      "verificationStatus": ""
+    },
+    {
       "category": "mcp",
       "slug": "zapier-mcp-server",
       "title": "Zapier MCP Server for Claude",
@@ -8159,6 +9283,28 @@
       "repoUrl": "",
       "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
       "downloadTrust": "first-party",
+      "verificationStatus": ""
+    },
+    {
+      "category": "tools",
+      "slug": "zed",
+      "title": "Zed",
+      "description": "Fast collaborative code editor with AI assistance.",
+      "tags": [
+        "code-editor",
+        "collaboration"
+      ],
+      "installCommand": "",
+      "configSnippet": "",
+      "copyText": "## Editorial notes\n\nZed belongs in the directory because AI coding workflows increasingly depend on low-latency editor collaboration and shared context.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+      "copyTextLength": 232,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# Zed\nCollaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.\n**Category:** tools\n**Author:** Zed Industries\n**Tags:** `code-editor` `collaboration`\n\n## Links\n- https://heyclau.de/tools/zed\n- https://zed.dev/docs\n- https://github.com/zed-industries/zed",
+      "detailUrl": "/data/raycast/tools/zed.json",
+      "webUrl": "https://heyclau.de/tools/zed",
+      "repoUrl": "https://github.com/zed-industries/zed",
+      "documentationUrl": "https://zed.dev/docs",
+      "downloadTrust": null,
       "verificationStatus": ""
     },
     {

@@ -1,6 +1,13 @@
 export const LISTING_LEAD_KINDS = ["job", "tool", "claim"];
 export const COMMERCIAL_TIERS = ["free", "standard", "featured", "sponsored"];
 export const COMMERCIAL_PLACEMENT_TARGETS = ["job", "tool", "entry"];
+export const DISCLOSURE_STATES = [
+  "editorial",
+  "heyclaude_pick",
+  "affiliate",
+  "sponsored",
+  "claimed",
+];
 export const COMMERCIAL_STATUSES = [
   "new",
   "pending_review",
@@ -29,13 +36,7 @@ export function normalizeDisclosure(value) {
   const normalized = String(value || "")
     .trim()
     .toLowerCase();
-  if (
-    normalized === "sponsored" ||
-    normalized === "affiliate" ||
-    normalized === "editorial"
-  ) {
-    return normalized;
-  }
+  if (DISCLOSURE_STATES.includes(normalized)) return normalized;
   return "editorial";
 }
 

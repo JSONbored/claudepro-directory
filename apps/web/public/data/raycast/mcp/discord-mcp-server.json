@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "mcp:discord-mcp-server",
   "category": "mcp",
   "slug": "discord-mcp-server",

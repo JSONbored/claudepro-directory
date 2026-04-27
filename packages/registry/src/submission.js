@@ -2,6 +2,18 @@ import categorySpec from "./category-spec.json" with { type: "json" };
 
 export const CORE_CATEGORIES = categorySpec.categoryOrder;
 
+const COMMUNITY_CATEGORY_LABELS = {
+  agents: "community-agents",
+  collections: "community-collections",
+  commands: "community-commands",
+  guides: "guide",
+  hooks: "community-hooks",
+  mcp: "community-mcp",
+  rules: "community-rules",
+  skills: "skills",
+  statuslines: "community-statuslines",
+};
+
 export const CATEGORY_REQUIREMENTS = Object.fromEntries(
   Object.entries(categorySpec.categories).map(([category, spec]) => [
     category,
@@ -247,6 +259,142 @@ export function issueLabels(issue) {
     : [];
 }
 
+export function looksLikeSubmissionIssue(issue = {}) {
+  const labels = issueLabels(issue);
+  if (labels.includes("content-submission") || labels.includes("submission")) {
+    return true;
+  }
+
+  const title = String(issue.title || "").trim();
+  const body = String(issue.body || "");
+  if (/^\[?submit\b/i.test(title)) return true;
+  if (
+    /^submit\s+(agent|command|collection|guide|hook|mcp|rule|skill|statusline)/i.test(
+      title,
+    )
+  ) {
+    return true;
+  }
+
+  const normalizedBody = body.toLowerCase();
+  return (
+    (normalizedBody.includes("### category") ||
+      normalizedBody.includes("**category:**") ||
+      normalizedBody.includes("content type")) &&
+    (normalizedBody.includes("### name") ||
+      normalizedBody.includes("**name:**") ||
+      normalizedBody.includes("json data"))
+  );
+}
+
+export function isLikelyAffiliateUrl(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) return false;
+
+  try {
+    const url = new URL(normalized);
+    const affiliateParams = new Set([
+      "aff",
+      "affiliate",
+      "affiliate_id",
+      "campaign",
+      "coupon",
+      "irclickid",
+      "partner",
+      "referral",
+      "referral_code",
+      "via",
+    ]);
+
+    for (const key of url.searchParams.keys()) {
+      const normalizedKey = key.trim().toLowerCase();
+      if (normalizedKey.startsWith("utm_")) return true;
+      if (affiliateParams.has(normalizedKey)) return true;
+    }
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
+export function recommendedSubmissionLabels(
+  issue,
+  report = validateSubmission(issue),
+) {
+  if (!looksLikeSubmissionIssue(issue)) return [];
+  const labels = new Set(issueLabels(issue));
+  labels.add("content-submission");
+  labels.add("needs-review");
+  if (report?.category && CORE_CATEGORIES.includes(report.category)) {
+    labels.add(COMMUNITY_CATEGORY_LABELS[report.category] || report.category);
+  }
+  return [...labels].sort();
+}
+
+export function submissionQueueStatus(report) {
+  if (report?.skipped) return "skipped";
+  return report?.ok ? "import_ready" : "needs_changes";
+}
+
+export function buildSubmissionQueue(issues = []) {
+  const entries = issues
+    .filter(looksLikeSubmissionIssue)
+    .map((issue) => {
+      const report = validateSubmission(issue);
+      const status = submissionQueueStatus(report);
+      return {
+        number: issue.number ?? null,
+        title: String(issue.title || ""),
+        url: String(issue.url || ""),
+        author:
+          typeof issue.author === "string"
+            ? issue.author
+            : String(issue.author?.login || ""),
+        updatedAt: String(issue.updatedAt || issue.updated_at || ""),
+        labels: issueLabels(issue),
+        recommendedLabels: recommendedSubmissionLabels(issue, report),
+        status,
+        category: report.category || "",
+        slug: report.fields?.slug || "",
+        name: report.fields?.name || "",
+        errors: report.errors || [],
+        warnings: report.warnings || [],
+        importPath:
+          status === "import_ready" && report.category && report.fields?.slug
+            ? `content/${report.category}/${report.fields.slug}.mdx`
+            : "",
+      };
+    })
+    .sort((left, right) => {
+      const statusOrder = {
+        import_ready: 0,
+        needs_changes: 1,
+        skipped: 2,
+      };
+      return (
+        (statusOrder[left.status] ?? 99) - (statusOrder[right.status] ?? 99) ||
+        right.updatedAt.localeCompare(left.updatedAt) ||
+        Number(left.number ?? 0) - Number(right.number ?? 0)
+      );
+    });
+
+  return {
+    schemaVersion: 1,
+    kind: "submission-queue",
+    generatedAt: new Date().toISOString(),
+    count: entries.length,
+    summary: {
+      importReady: entries.filter((entry) => entry.status === "import_ready")
+        .length,
+      needsChanges: entries.filter((entry) => entry.status === "needs_changes")
+        .length,
+      skipped: entries.filter((entry) => entry.status === "skipped").length,
+    },
+    entries,
+  };
+}
+
 export function validateSubmission(issue) {
   const labels = issueLabels(issue);
   const fields = parseIssueFormBody(issue.body ?? "");
@@ -307,6 +455,14 @@ export function validateSubmission(issue) {
     errors.push(
       "Community submissions cannot request local /downloads hosting",
     );
+  }
+
+  for (const field of ["github_url", "docs_url", "download_url"]) {
+    if (isLikelyAffiliateUrl(fields[field])) {
+      errors.push(
+        `Contributor submissions cannot include affiliate/referral URLs: ${field}`,
+      );
+    }
   }
 
   if (

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:braintrust",
+  "category": "tools",
+  "slug": "braintrust",
+  "title": "Braintrust",
+  "copyText": "## Editorial notes\n\nBraintrust is relevant when teams need structured evaluation, experiment tracking, and logging for AI product quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Braintrust\nEvaluation, prompt experimentation, logging, and data platform for production AI application development.\n**Category:** tools\n**Author:** Braintrust\n**Tags:** `evaluation` `prompt-testing`\n\n## Links\n- https://heyclau.de/tools/braintrust\n- https://www.braintrust.dev/docs",
+  "webUrl": "https://heyclau.de/tools/braintrust",
+  "repoUrl": "",
+  "documentationUrl": "https://www.braintrust.dev/docs"
+}

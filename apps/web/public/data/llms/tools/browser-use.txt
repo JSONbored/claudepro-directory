@@ -1,0 +1,19 @@
+# Browser Use
+URL: https://heyclau.de/tools/browser-use
+Category: tools
+Author: Browser Use
+Date added: 2026-04-27
+Documentation: https://docs.browser-use.com
+Repository: https://github.com/browser-use/browser-use
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/browser-use.mdx
+## Summary
+Open-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.
+## Tags
+- browser-automation
+- open-source
+## Content
+## Editorial notes
+Browser Use is relevant for builders who need programmatic browser interaction as part of AI agent workflows.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

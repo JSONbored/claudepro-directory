@@ -43,6 +43,7 @@ const htmlRoutes = [
   { path: "/contributors", heading: /Accepted contributor profiles/i },
   { path: "/trending", heading: /Popular|trending/i },
   { path: "/ecosystem", heading: /Ecosystem/i },
+  { path: "/best/claude-native-tools", heading: /Tools for Claude-native/i },
 ];
 
 test.describe("site smoke", () => {
@@ -128,6 +129,7 @@ test.describe("site smoke", () => {
       "https://heyclau.de/claim",
       "https://heyclau.de/contributors",
       "https://heyclau.de/trending",
+      "https://heyclau.de/best/claude-native-tools",
       `https://heyclau.de/${entry.category}/${entry.slug}`,
     ]) {
       expect(sitemap).toContain(route);
@@ -159,5 +161,33 @@ test.describe("site smoke", () => {
     expect(response.ok()).toBe(true);
     const payload = await response.json();
     expect(payload).toMatchObject({ ok: false, stored: false });
+  });
+
+  test("community signals expose counts and fail open without SITE_DB", async ({
+    request,
+  }) => {
+    const query =
+      "/api/community-signals?targetKind=tool&targetKey=tool:cursor";
+    const readResponse = await request.get(query);
+    expect(readResponse.ok()).toBe(true);
+    await expect(readResponse.json()).resolves.toMatchObject({
+      ok: true,
+      counts: { used: expect.any(Number), works: expect.any(Number) },
+    });
+
+    const writeResponse = await request.post("/api/community-signals", {
+      data: {
+        targetKind: "tool",
+        targetKey: "tool:cursor",
+        signalType: "used",
+        clientId: "smoke-community-client",
+        active: true,
+      },
+    });
+    expect(writeResponse.ok()).toBe(true);
+    await expect(writeResponse.json()).resolves.toMatchObject({
+      ok: true,
+      stored: false,
+    });
   });
 });

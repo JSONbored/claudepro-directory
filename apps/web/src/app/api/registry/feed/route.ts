@@ -44,8 +44,14 @@ export async function GET(request: Request) {
       search: "/api/registry/search?q={query}&category={category}&limit=20",
       entry: "/api/registry/entries/{category}/{slug}",
       entryLlms: "/api/registry/entries/{category}/{slug}/llms",
+      ecosystemFeed: "/data/ecosystem-feed.json",
+      mcpRegistryFeed: "/data/mcp-registry-feed.json",
+      pluginExportFeed: "/data/plugin-export-feed.json",
+      raycastFeed: "/data/raycast-index.json",
     },
     artifacts: manifest.artifacts,
+    artifactContracts: manifest.artifactContracts,
+    qualitySummary: manifest.qualitySummary,
     categories,
   });
 }

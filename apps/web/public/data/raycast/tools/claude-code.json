@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 2,
+  "key": "tools:claude-code",
+  "category": "tools",
+  "slug": "claude-code",
+  "title": "Claude Code",
+  "copyText": "## Editorial notes\n\nClaude Code is a core reference point for agentic coding workflows and fits teams that already live in the terminal.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
+  "detailMarkdown": "# Claude Code\nAnthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.\n**Category:** tools\n**Author:** Anthropic\n**Tags:** `claude-code` `terminal-agent`\n\n## Links\n- https://heyclau.de/tools/claude-code\n- https://docs.anthropic.com/en/docs/claude-code/overview",
+  "webUrl": "https://heyclau.de/tools/claude-code",
+  "repoUrl": "",
+  "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview"
+}

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "skills:agent-evals-regression-gate",
   "category": "skills",
   "slug": "agent-evals-regression-gate",

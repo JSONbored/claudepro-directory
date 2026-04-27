@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:github-actions-workflow-validator",
   "category": "hooks",
   "slug": "github-actions-workflow-validator",

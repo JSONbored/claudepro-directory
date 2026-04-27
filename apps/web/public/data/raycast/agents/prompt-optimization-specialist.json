@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:prompt-optimization-specialist",
   "category": "agents",
   "slug": "prompt-optimization-specialist",

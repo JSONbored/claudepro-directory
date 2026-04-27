@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "skills:zod-schema-validator",
   "category": "skills",
   "slug": "zod-schema-validator",

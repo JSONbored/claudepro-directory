@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "skills:ai-agent-observability-incident-response",
   "category": "skills",
   "slug": "ai-agent-observability-incident-response",

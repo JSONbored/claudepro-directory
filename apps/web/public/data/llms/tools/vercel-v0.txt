@@ -1,0 +1,18 @@
+# v0
+URL: https://heyclau.de/tools/vercel-v0
+Category: tools
+Author: Vercel
+Date added: 2026-04-27
+Documentation: https://v0.dev/docs
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx
+## Summary
+Vercel AI interface builder for generating, editing, and iterating on React and web UI from prompts.
+## Tags
+- ui-generation
+- react
+## Content
+## Editorial notes
+v0 is useful when the task is interface generation, component iteration, and React-first product UI exploration.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

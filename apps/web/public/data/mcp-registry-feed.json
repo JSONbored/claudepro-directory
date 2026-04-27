@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 2,
+  "kind": "mcp-registry-feed",
+  "generatedAt": "2026-04-25T00:00:00.000Z",
+  "count": 44,
+  "servers": [
+    {
+      "name": "airtable-mcp-server",
+      "title": "Airtable MCP Server for Claude",
+      "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
+      "websiteUrl": "https://github.com/domdomegg/airtable-mcp-server",
+      "repository": {
+        "url": "https://github.com/domdomegg/airtable-mcp-server",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add airtable --env AIRTABLE_API_KEY=YOUR_KEY -- npx -y airtable-mcp-server && claude mcp list",
+      "configSnippet": "{\n  \"airtable\": {\n    \"env\": {\n      \"AIRTABLE_API_KEY\": \"${AIRTABLE_API_KEY}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"airtable-mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/airtable-mcp-server"
+    },
+    {
+      "name": "asana-mcp-server",
+      "title": "Asana MCP Server for Claude",
+      "description": "Interact with Asana workspaces to manage projects and tasks",
+      "websiteUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+      "installCommand": "claude mcp list && claude mcp status asana",
+      "configSnippet": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/asana-mcp-server"
+    },
+    {
+      "name": "aws-services-mcp-server",
+      "title": "AWS Services MCP Server - MCP Servers",
+      "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
+      "websiteUrl": "https://github.com/awslabs/mcp",
+      "repository": {
+        "url": "https://github.com/awslabs/mcp",
+        "source": "github"
+      },
+      "installCommand": "uvx awslabs.core-mcp-server@latest && claude mcp list",
+      "configSnippet": "{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/aws-services-mcp-server"
+    },
+    {
+      "name": "box-mcp-server",
+      "title": "Box MCP Server for Claude",
+      "description": "Access enterprise content, analyze unstructured data, and automate workflows",
+      "websiteUrl": "https://box.dev/guides/box-mcp/remote/",
+      "installCommand": "claude mcp list && claude mcp status box",
+      "configSnippet": "{\n  \"box\": {\n    \"url\": \"https://mcp.box.com/\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/box-mcp-server"
+    },
+    {
+      "name": "canva-mcp-server",
+      "title": "Canva MCP Server for Claude",
+      "description": "Browse, summarize, and generate Canva designs directly from Claude",
+      "websiteUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+      "installCommand": "claude mcp list && claude mcp status canva",
+      "configSnippet": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/canva-mcp-server"
+    },
+    {
+      "name": "desktop-mcp-setup",
+      "title": "Claude Desktop MCP Setup",
+      "description": "Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.",
+      "websiteUrl": "",
+      "installCommand": "claude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list",
+      "configSnippet": "{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/Users/username/Documents\"]\n    }\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/desktop-mcp-setup"
+    },
+    {
+      "name": "clickup-mcp-server",
+      "title": "Clickup MCP Server for Claude",
+      "description": "Task management and project tracking with ClickUp integration",
+      "websiteUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+      "repository": {
+        "url": "https://github.com/hauptsacheNet/clickup-mcp",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add clickup --env CLICKUP_API_KEY=YOUR_KEY --env CLICKUP_TEAM_ID=YOUR_TEAM_ID -- npx -y @hauptsache.net/clickup-mcp && claude mcp list",
+      "configSnippet": "{\n  \"clickup\": {\n    \"env\": {\n      \"CLICKUP_API_KEY\": \"${CLICKUP_API_KEY}\",\n      \"CLICKUP_TEAM_ID\": \"${CLICKUP_TEAM_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@hauptsache.net/clickup-mcp\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/clickup-mcp-server"
+    },
+    {
+      "name": "cloudflare-mcp-server",
+      "title": "Cloudflare MCP Server - MCP Servers",
+      "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
+      "websiteUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+      "installCommand": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
+      "configSnippet": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/cloudflare-mcp-server"
+    },
+    {
+      "name": "cloudinary-mcp-server",
+      "title": "Cloudinary MCP Server - MCP Servers",
+      "description": "Upload, manage, transform, and analyze media assets in the cloud",
+      "websiteUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+      "installCommand": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET",
+      "configSnippet": "{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/cloudinary-mcp-server"
+    },
+    {
+      "name": "contrastapi-mcp-server",
+      "title": "ContrastAPI Security Tools",
+      "description": "31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.",
+      "websiteUrl": "https://api.contrastcyber.com",
+      "repository": {
+        "url": "https://github.com/UPinar/contrastapi",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/",
+      "configSnippet": "{\n  \"contrastapi\": {\n    \"url\": \"https://api.contrastcyber.com/mcp/\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/contrastapi-mcp-server"
+    },
+    {
+      "name": "daloopa-mcp-server",
+      "title": "Daloopa MCP Server for Claude",
+      "description": "Access high-quality fundamental financial data from SEC filings and investor presentations",
+      "websiteUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
+      "installCommand": "claude mcp list && claude mcp status daloopa",
+      "configSnippet": "{\n  \"daloopa\": {\n    \"url\": \"https://mcp.daloopa.com/server/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/daloopa-mcp-server"
+    },
+    {
+      "name": "discord-mcp-server",
+      "title": "Discord MCP Server for Claude",
+      "description": "Discord bot integration for community management, moderation, and server automation",
+      "websiteUrl": "https://github.com/saseq/discord-mcp",
+      "repository": {
+        "url": "https://github.com/saseq/discord-mcp",
+        "source": "github"
+      },
+      "installCommand": "npx -y @smithery/cli@latest install @SaseQ/discord-mcp --client claude && claude mcp list",
+      "configSnippet": "{\n  \"discord-mcp\": {\n    \"env\": {\n      \"DISCORD_TOKEN\": \"${DISCORD_TOKEN}\",\n      \"DISCORD_GUILD_ID\": \"${DISCORD_GUILD_ID}\"\n    },\n    \"args\": [\n      \"-jar\",\n      \"/absolute/path/to/discord-mcp-0.0.1-SNAPSHOT.jar\"\n    ],\n    \"command\": \"java\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/discord-mcp-server"
+    },
+    {
+      "name": "docker-mcp-server",
+      "title": "Docker MCP Server for Claude",
+      "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
+      "websiteUrl": "https://docs.docker.com/engine/api/",
+      "installCommand": "claude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
+      "configSnippet": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/docker-mcp-server"
+    },
+    {
+      "name": "figma-mcp-server",
+      "title": "Figma MCP Server for Claude",
+      "description": "Access designs, export assets, and interact with Figma files through Claude",
+      "websiteUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+      "installCommand": "claude mcp list && claude mcp status figma",
+      "configSnippet": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/figma-mcp-server"
+    },
+    {
+      "name": "filesystem-mcp-server",
+      "title": "Filesystem MCP Server - MCP Servers",
+      "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
+      "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "installCommand": "claude mcp list && claude mcp status filesystem",
+      "configSnippet": "{\n  \"filesystem\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-filesystem\",\n      \"/path/to/allowed/directory\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/filesystem-mcp-server"
+    },
+    {
+      "name": "fireflies-mcp-server",
+      "title": "Fireflies MCP Server for Claude",
+      "description": "Extract valuable insights from meeting transcripts and summaries",
+      "websiteUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+      "installCommand": "claude mcp list && claude mcp status fireflies",
+      "configSnippet": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/fireflies-mcp-server"
+    },
+    {
+      "name": "git-mcp-server",
+      "title": "Git MCP Server for Claude",
+      "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
+      "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "installCommand": "claude mcp list && claude mcp status git",
+      "configSnippet": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/git-mcp-server"
+    },
+    {
+      "name": "github-mcp-server",
+      "title": "GitHub MCP Server for Claude",
+      "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
+      "websiteUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+      "installCommand": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
+      "configSnippet": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/github-mcp-server"
+    },
+    {
+      "name": "heyclaude-mcp",
+      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.",
+      "websiteUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
+      "configSnippet": "{\n  \"heyclaude-mcp\": {\n    \"url\": \"https://mcp.heyclau.de/mcp\",\n    \"oauth\": {\n      \"scopes\": [\n        \"mcp:tools\"\n      ],\n      \"resource\": \"https://mcp.heyclau.de/mcp\",\n      \"tokenEndpoint\": \"https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token\",\n      \"authorizationEndpoint\": \"https://mcp.heyclau.de/oauth/authorize\"\n    },\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/heyclaude-mcp"
+    },
+    {
+      "name": "hubspot-mcp-server",
+      "title": "Hubspot MCP Server for Claude",
+      "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
+      "websiteUrl": "https://developers.hubspot.com/mcp",
+      "installCommand": "claude mcp list && claude mcp status hubspot",
+      "configSnippet": "{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/hubspot-mcp-server"
+    },
+    {
+      "name": "hugging-face-mcp-server",
+      "title": "Hugging Face MCP Server - MCP Servers",
+      "description": "Access Hugging Face Hub and Gradio AI applications",
+      "websiteUrl": "https://huggingface.co/settings/mcp",
+      "installCommand": "claude mcp list && claude mcp status hugging-face",
+      "configSnippet": "{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/hugging-face-mcp-server"
+    },
+    {
+      "name": "intercom-mcp-server",
+      "title": "Intercom MCP Server for Claude",
+      "description": "Access customer conversations, tickets, and user data in real-time",
+      "websiteUrl": "https://developers.intercom.com/docs/guides/mcp",
+      "installCommand": "claude mcp list && claude mcp status intercom",
+      "configSnippet": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/intercom-mcp-server"
+    },
+    {
+      "name": "invideo-mcp-server",
+      "title": "Invideo MCP Server for Claude",
+      "description": "Build video creation capabilities into your applications",
+      "websiteUrl": "https://invideo.io/ai/mcp",
+      "installCommand": "claude mcp list && claude mcp status invideo",
+      "configSnippet": "{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/invideo-mcp-server"
+    },
+    {
+      "name": "jam-mcp-server",
+      "title": "Jam MCP Server for Claude",
+      "description": "Debug faster with AI agents that access video recordings, console logs, and network requests",
+      "websiteUrl": "https://jam.dev/docs/debug-a-jam/mcp",
+      "installCommand": "claude mcp list && claude mcp status jam",
+      "configSnippet": "{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/jam-mcp-server"
+    },
+    {
+      "name": "jira-mcp-server",
+      "title": "Jira MCP Server for Claude",
+      "description": "Manage Jira tickets and Confluence documentation",
+      "websiteUrl": "https://www.atlassian.com/platform/remote-mcp-server",
+      "installCommand": "claude mcp list && claude mcp status jira",
+      "configSnippet": "{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/jira-mcp-server"
+    },
+    {
+      "name": "kubernetes-mcp-server",
+      "title": "Kubernetes MCP Server - MCP Servers",
+      "description": "Kubernetes cluster management and container orchestration through MCP integration",
+      "websiteUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
+      "repository": {
+        "url": "https://github.com/feiskyer/mcp-kubernetes-server",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add kubernetes --env KUBECONFIG=/path/to/your/kubeconfig -- uvx mcp-kubernetes-server && claude mcp list",
+      "configSnippet": "{\n  \"kubernetes\": {\n    \"env\": {\n      \"KUBECONFIG\": \"${KUBECONFIG:-~/.kube/config}\"\n    },\n    \"args\": [\n      \"mcp-kubernetes-server\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/kubernetes-mcp-server"
+    },
+    {
+      "name": "linear-mcp-server",
+      "title": "Linear MCP Server for Claude",
+      "description": "Integrate with Linear's issue tracking and project management system",
+      "websiteUrl": "https://linear.app/docs/mcp",
+      "installCommand": "claude mcp list && claude mcp status linear",
+      "configSnippet": "{\n  \"linear\": {\n    \"url\": \"https://mcp.linear.app/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/linear-mcp-server"
+    },
+    {
+      "name": "monday-mcp-server",
+      "title": "Monday MCP Server for Claude",
+      "description": "Manage monday.com boards, items, and CRM activities",
+      "websiteUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+      "installCommand": "claude mcp list && claude mcp status monday",
+      "configSnippet": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/monday-mcp-server"
+    },
+    {
+      "name": "netlify-mcp-server",
+      "title": "Netlify MCP Server for Claude",
+      "description": "Create, deploy, and manage websites on Netlify platform",
+      "websiteUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+      "installCommand": "claude mcp list && claude mcp status netlify",
+      "configSnippet": "{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/netlify-mcp-server"
+    },
+    {
+      "name": "notion-mcp-server",
+      "title": "Notion MCP Server for Claude",
+      "description": "Read docs, update pages, and manage tasks in Notion workspaces",
+      "websiteUrl": "https://developers.notion.com/docs/mcp",
+      "installCommand": "claude mcp list && claude mcp status notion",
+      "configSnippet": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/notion-mcp-server"
+    },
+    {
+      "name": "paypal-mcp-server",
+      "title": "Paypal MCP Server for Claude",
+      "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
+      "websiteUrl": "https://www.paypal.ai/",
+      "installCommand": "claude mcp list && claude mcp status paypal",
+      "configSnippet": "{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/paypal-mcp-server"
+    },
+    {
+      "name": "plaid-mcp-server",
+      "title": "Plaid MCP Server for Claude",
+      "description": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking",
+      "websiteUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+      "installCommand": "claude mcp list && claude mcp status plaid",
+      "configSnippet": "{\n  \"plaid\": {\n    \"url\": \"https://api.dashboard.plaid.com/mcp/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/plaid-mcp-server"
+    },
+    {
+      "name": "postgresql-mcp-server",
+      "title": "Postgresql MCP Server - MCP Servers",
+      "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
+      "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "installCommand": "claude mcp list && claude mcp status postgres",
+      "configSnippet": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/postgresql-mcp-server"
+    },
+    {
+      "name": "prompt-to-asset",
+      "title": "Prompt-to-asset",
+      "description": "MCP server that generates production-ready visual assets by routing requests across 30+ image generation models. Handles app icons, favicons, OG images, logos, and wordmarks. Validates output for WCAG contrast and palette consistency. Zero API key required for first run via Pollinations and Stable Horde free tiers.",
+      "websiteUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
+      "repository": {
+        "url": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+        "source": "github"
+      },
+      "installCommand": "npx -y prompt-to-asset",
+      "configSnippet": "{\n  \"mcpServers\": {\n    \"prompt-to-asset\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"prompt-to-asset\"]\n    }\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/prompt-to-asset"
+    },
+    {
+      "name": "reddit-mcp-buddy",
+      "title": "Reddit MCP Buddy for Claude",
+      "description": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
+      "websiteUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+      "repository": {
+        "url": "https://github.com/karanb192/reddit-mcp-buddy",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
+      "configSnippet": "{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/reddit-mcp-buddy"
+    },
+    {
+      "name": "redis-mcp-server",
+      "title": "Redis MCP Server for Claude",
+      "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
+      "websiteUrl": "https://github.com/redis/mcp-redis",
+      "repository": {
+        "url": "https://github.com/redis/mcp-redis",
+        "source": "github"
+      },
+      "installCommand": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
+      "configSnippet": "{\n  \"redis\": {\n    \"args\": [\n      \"--from\",\n      \"git+https://github.com/redis/mcp-redis.git\",\n      \"redis-mcp-server\",\n      \"--url\",\n      \"redis://localhost:6379/0\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/redis-mcp-server"
+    },
+    {
+      "name": "sentry-mcp-server",
+      "title": "Sentry MCP Server for Claude",
+      "description": "Monitor errors, debug production issues, and track application health",
+      "websiteUrl": "https://docs.sentry.io/product/sentry-mcp/",
+      "installCommand": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
+      "configSnippet": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/sentry-mcp-server"
+    },
+    {
+      "name": "socket-mcp-server",
+      "title": "Socket MCP Server for Claude",
+      "description": "Security analysis and vulnerability scanning for dependencies",
+      "websiteUrl": "https://github.com/SocketDev/socket-mcp",
+      "repository": {
+        "url": "https://github.com/SocketDev/socket-mcp",
+        "source": "github"
+      },
+      "installCommand": "claude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list",
+      "configSnippet": "{\n  \"socket\": {\n    \"url\": \"https://mcp.socket.dev/\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/socket-mcp-server"
+    },
+    {
+      "name": "square-mcp-server",
+      "title": "Square MCP Server for Claude",
+      "description": "Build on Square APIs for payments, inventory, and order management",
+      "websiteUrl": "https://developer.squareup.com/docs/mcp",
+      "installCommand": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
+      "configSnippet": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/square-mcp-server"
+    },
+    {
+      "name": "stripe-mcp-server",
+      "title": "Stripe MCP Server for Claude",
+      "description": "Payment processing, subscription management, and financial transaction handling",
+      "websiteUrl": "https://docs.stripe.com/mcp",
+      "installCommand": "claude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list",
+      "configSnippet": "{\n  \"stripe\": {\n    \"url\": \"https://mcp.stripe.com\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/stripe-mcp-server"
+    },
+    {
+      "name": "stytch-mcp-server",
+      "title": "Stytch MCP Server for Claude",
+      "description": "Configure and manage Stytch authentication services and workspace settings",
+      "websiteUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+      "installCommand": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list",
+      "configSnippet": "{\n  \"stytch\": {\n    \"url\": \"http://mcp.stytch.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/stytch-mcp-server"
+    },
+    {
+      "name": "vercel-mcp-server",
+      "title": "Vercel MCP Server for Claude",
+      "description": "Manage deployments, analyze logs, and control Vercel projects",
+      "websiteUrl": "https://vercel.com/docs/mcp/vercel-mcp",
+      "installCommand": "claude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list",
+      "configSnippet": "{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/vercel-mcp-server"
+    },
+    {
+      "name": "workato-mcp-server",
+      "title": "Workato MCP Server for Claude",
+      "description": "Access any application, workflows, or data via Workato's integration platform",
+      "websiteUrl": "https://docs.workato.com/mcp.html",
+      "installCommand": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
+      "configSnippet": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/workato-mcp-server"
+    },
+    {
+      "name": "zapier-mcp-server",
+      "title": "Zapier MCP Server for Claude",
+      "description": "Connect to nearly 8,000 apps through Zapier's automation platform",
+      "websiteUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
+      "installCommand": "claude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list",
+      "configSnippet": "{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}",
+      "heyclaudeUrl": "https://heyclau.de/mcp/zapier-mcp-server"
+    }
+  ]
+}

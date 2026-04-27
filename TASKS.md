@@ -82,6 +82,20 @@ Gate: `pnpm test:commercial-intake`, `pnpm test`, and local lead route smoke wit
 - [x] [commercial] Add sponsored placement expiry reporting and renewal reminders. Evidence: `pnpm test:commercial-intake`.
 - [x] [commercial] Add public sponsored/affiliate disclosure examples to the commercial docs surface. Evidence: `pnpm type-check`.
 
+## Growth + Registry Moat
+
+Gate: `pnpm validate:content:strict`, `pnpm test`, `pnpm test:e2e`, `pnpm type-check`, and `pnpm build`.
+
+- [x] [ugc] Auto-detect unlabeled submission-shaped issues and apply submission labels before validation comments. Evidence: `pnpm test:submission-intake`.
+- [x] [ugc] Publish a scheduled submission queue artifact with valid, invalid, skipped, and import-ready issue state. Evidence: `pnpm test:submission-intake`.
+- [x] [content] Differentiate duplicate-body content groups without deleting existing entries. Evidence: `pnpm test:registry-artifacts`.
+- [x] [content] Seed the tools/apps/services directory with curated organic editorial listings and explicit disclosure fields. Evidence: `pnpm validate:content:strict`.
+- [x] [commercial] Reject contributor affiliate/referral URLs while allowing only explicit internal affiliate disclosure contracts. Evidence: `pnpm test:submission-intake`.
+- [x] [registry] Publish hashed read-only ecosystem, MCP-compatible, plugin export, and Raycast v2 feed contracts from registry builders. Evidence: `pnpm test:registry-artifacts`.
+- [x] [signals] Add progressive used-this, works-for-me, and reported-broken community signals without public star ratings or review JSON-LD. Evidence: `pnpm test:e2e`.
+- [x] [seo] Add human-approved editorial cluster pages for Claude hooks, MCP servers, skills, security review, starter kits, and Claude-native tools. Evidence: `pnpm test:e2e`.
+- [x] [api] Document community signals and ecosystem feed usage in public API docs and OpenAPI. Evidence: `pnpm test`.
+
 ## Testing/CI/Trunk
 
 Gate: `pnpm test`, `pnpm test:e2e`, and `trunk check --show-existing --all --no-progress`.

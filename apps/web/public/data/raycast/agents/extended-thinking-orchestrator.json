@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:extended-thinking-orchestrator",
   "category": "agents",
   "slug": "extended-thinking-orchestrator",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "agents:subagent-factory-agent",
   "category": "agents",
   "slug": "subagent-factory-agent",

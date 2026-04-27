@@ -1,0 +1,19 @@
+# Zed
+URL: https://heyclau.de/tools/zed
+Category: tools
+Author: Zed Industries
+Date added: 2026-04-27
+Documentation: https://zed.dev/docs
+Repository: https://github.com/zed-industries/zed
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zed.mdx
+## Summary
+Collaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.
+## Tags
+- code-editor
+- collaboration
+## Content
+## Editorial notes
+Zed belongs in the directory because AI coding workflows increasingly depend on low-latency editor collaboration and shared context.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

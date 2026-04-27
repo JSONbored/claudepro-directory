@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:markdown-link-checker",
   "category": "hooks",
   "slug": "markdown-link-checker",

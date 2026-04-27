@@ -1,0 +1,19 @@
+# Cline
+URL: https://heyclau.de/tools/cline
+Category: tools
+Author: Cline
+Date added: 2026-04-27
+Documentation: https://docs.cline.bot
+Repository: https://github.com/cline/cline
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cline.mdx
+## Summary
+Open-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.
+## Tags
+- vs-code
+- coding-agent
+## Content
+## Editorial notes
+Cline is useful for users who want a visible agent loop inside VS Code with command execution and file-editing control.
+
+## Disclosure
+Editorial listing. No paid placement or affiliate link is used.

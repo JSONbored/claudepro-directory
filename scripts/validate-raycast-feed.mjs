@@ -38,8 +38,11 @@ if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
   process.exit();
 }
 
-if (payload.schemaVersion !== 1) {
-  fail(`Raycast feed schemaVersion must be 1, got ${payload.schemaVersion}`);
+if (payload.schemaVersion !== 2) {
+  fail(`Raycast feed schemaVersion must be 2, got ${payload.schemaVersion}`);
+}
+if (payload.kind !== "raycast-index") {
+  fail(`Raycast feed kind must be raycast-index, got ${payload.kind}`);
 }
 if (
   !/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(String(payload.generatedAt ?? ""))
@@ -51,6 +54,9 @@ if (
 if (!Array.isArray(payload.entries) || payload.entries.length === 0) {
   fail("Raycast feed entries must be a non-empty array");
   process.exit();
+}
+if (payload.count !== payload.entries.length) {
+  fail("Raycast feed count must match entries length");
 }
 
 const seen = new Set();
@@ -92,8 +98,8 @@ for (const entry of payload.entries) {
   }
 
   const detail = JSON.parse(fs.readFileSync(detailPath, "utf8"));
-  if (detail.schemaVersion !== 1)
-    fail(`${key}: detail schemaVersion must be 1`);
+  if (detail.schemaVersion !== 2)
+    fail(`${key}: detail schemaVersion must be 2`);
   if (typeof detail.copyText !== "string" || detail.copyText.trim() === "") {
     fail(`${key}: detail copyText must be non-empty`);
   }

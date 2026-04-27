@@ -11,7 +11,7 @@
 
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
-- `SITE_DB` (D1) for durable upvotes, private jobs listings, listing leads, commercial placements, and future dynamic site state.
+- `SITE_DB` (D1) for durable upvotes, private jobs listings, listing leads, commercial placements, community signals, and future dynamic site state.
 - Shared between `prod` and `dev` environments in the current setup.
 
 ## D1 setup
@@ -42,6 +42,7 @@ Current migrations include:
 - `0002_jobs.sql` for private jobs listing records
 - `0003_commercial_leads.sql` for job/tool listing leads and commercial placement windows
 - `0004_intent_events.sql` for privacy-light copy/open/install/download/vote intent counters
+- `0005_community_signals.sql` for used-this, works-for-me, and reported-broken listing signals
 
 ## OpenNext build/deploy commands
 

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "hooks:documentation-auto-generator-on-stop",
   "category": "hooks",
   "slug": "documentation-auto-generator-on-stop",

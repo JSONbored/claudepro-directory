@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "mcp:docker-mcp-server",
   "category": "mcp",
   "slug": "docker-mcp-server",

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "key": "commands:tdd-workflow",
   "category": "commands",
   "slug": "tdd-workflow",

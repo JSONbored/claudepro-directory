@@ -1,0 +1,85 @@
+name: Submission Queue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 10 * * 1"
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  build-submission-queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Fetch open issues
+        uses: actions/github-script@373c709c69115d41ff229c7e5df9f8788daa9553
+        with:
+          script: |
+            const fs = require("node:fs");
+            fs.mkdirSync(".github/tmp", { recursive: true });
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
+              ...context.repo,
+              state: "open",
+              per_page: 100
+            });
+            const userIssues = issues.filter((issue) => !issue.pull_request);
+            fs.writeFileSync(
+              ".github/tmp/open-issues.json",
+              JSON.stringify(userIssues, null, 2),
+              "utf8"
+            );
+
+      - name: Build queue
+        run: |
+          pnpm run submission:queue -- \
+            --issues-json .github/tmp/open-issues.json \
+            --output .github/tmp/submission-queue.json
+
+      - name: Upload queue artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: submission-queue
+          path: .github/tmp/submission-queue.json
+          if-no-files-found: error
+
+      - name: Write queue summary
+        run: |
+          node - <<'NODE'
+          const fs = require("node:fs");
+          const queue = JSON.parse(fs.readFileSync(".github/tmp/submission-queue.json", "utf8"));
+          const lines = [
+            "# Submission Queue",
+            "",
+            `- Import ready: ${queue.summary.importReady}`,
+            `- Needs changes: ${queue.summary.needsChanges}`,
+            `- Skipped: ${queue.summary.skipped}`,
+            "",
+            "| Issue | Status | Category | Slug | Notes |",
+            "| --- | --- | --- | --- | --- |",
+          ];
+          for (const entry of queue.entries) {
+            const issue = entry.url ? `[#${entry.number}](${entry.url})` : `#${entry.number}`;
+            const notes = entry.errors.length ? entry.errors.join("<br>") : entry.importPath;
+            lines.push(`| ${issue} | ${entry.status} | ${entry.category || "-"} | ${entry.slug || "-"} | ${notes || "-"} |`);
+          }
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+          NODE
