@@ -10,6 +10,7 @@ import {
   categoryDescriptions,
   categoryLabels,
   categoryQuickstarts,
+  categorySeoDescriptions,
   categoryUsageHints,
   siteConfig,
 } from "@/lib/site";
@@ -31,6 +32,7 @@ export async function generateMetadata({
   const { category } = await params;
   const label = categoryLabels[category];
   const description = categoryDescriptions[category];
+  const seoDescription = categorySeoDescriptions[category];
 
   if (!label || !description) {
     return buildPageMetadata({
@@ -43,7 +45,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `${label} directory`,
-    description,
+    description: seoDescription,
     path: `/${category}`,
     keywords: [label.toLowerCase(), "claude", "directory", "heyclaude"],
   });
@@ -66,7 +68,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       siteUrl: siteConfig.url,
       path: `/${category}`,
       name: `${categoryLabels[category] ?? category} directory`,
-      description: categoryDescriptions[category],
+      description:
+        categorySeoDescriptions[category] ?? categoryDescriptions[category],
       breadcrumbId: `${categoryUrl}#breadcrumb`,
     }),
     buildItemListJsonLd(
@@ -76,7 +79,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       })),
       {
         name: `${categoryLabels[category] ?? category} directory`,
-        description: categoryDescriptions[category],
+        description:
+          categorySeoDescriptions[category] ?? categoryDescriptions[category],
       },
     ),
   ];

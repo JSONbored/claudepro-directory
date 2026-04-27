@@ -17,7 +17,6 @@ on:
       - "package.json"
       - "pnpm-lock.yaml"
       - "playwright.config.ts"
-      - "TASKS.md"
       - "vitest.config.ts"
   workflow_dispatch:
   schedule:
@@ -124,9 +123,7 @@ jobs:
         run: pnpm audit:content
 
       - name: Verify README is up to date
-        run: |
-          pnpm generate:readme
-          git diff --exit-code README.md
+        run: pnpm validate:readme
 
       - name: Type-check web app
         run: pnpm type-check

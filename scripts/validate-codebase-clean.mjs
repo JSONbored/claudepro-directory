@@ -194,9 +194,13 @@ if (!fs.existsSync(trunkConfig)) {
 }
 
 const tasksPath = path.join(repoRoot, "TASKS.md");
-if (!fs.existsSync(tasksPath)) {
-  failures.push("TASKS.md is missing");
-} else {
+const gitignore = fs.existsSync(path.join(repoRoot, ".gitignore"))
+  ? fs.readFileSync(path.join(repoRoot, ".gitignore"), "utf8")
+  : "";
+if (!gitignore.split("\n").includes("TASKS.md")) {
+  failures.push("TASKS.md must stay ignored as a local-only tracker");
+}
+if (fs.existsSync(tasksPath)) {
   const tasks = fs.readFileSync(tasksPath, "utf8");
   for (const section of requiredTaskSections) {
     if (!tasks.includes(`## ${section}`)) {
@@ -241,6 +245,27 @@ if (!fs.existsSync(tasksPath)) {
     if (!tasks.includes(`pnpm ${scriptName}`)) {
       failures.push(`TASKS.md is missing gate command: pnpm ${scriptName}`);
     }
+  }
+}
+
+const scriptNames = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
+).scripts;
+for (const scriptName of [
+  "validate:clean",
+  "validate:content:strict",
+  "validate:issue-templates",
+  "validate:category-spec",
+  "validate:packages",
+  "validate:raycast-feed",
+  "test",
+  "test:e2e",
+  "type-check",
+  "build",
+  "validate:tasks",
+]) {
+  if (!scriptNames?.[scriptName]) {
+    failures.push(`package.json is missing validation gate script: ${scriptName}`);
   }
 }
 

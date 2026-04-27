@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "kind": "distribution-feed-index",
+  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "categories": [
+    {
+      "category": "agents",
+      "label": "Agents",
+      "count": 39,
+      "feedUrl": "/data/feeds/categories/agents.json",
+      "canonicalUrl": "https://heyclau.de/agents"
+    },
+    {
+      "category": "mcp",
+      "label": "MCP Servers",
+      "count": 44,
+      "feedUrl": "/data/feeds/categories/mcp.json",
+      "canonicalUrl": "https://heyclau.de/mcp"
+    },
+    {
+      "category": "tools",
+      "label": "Tools",
+      "count": 52,
+      "feedUrl": "/data/feeds/categories/tools.json",
+      "canonicalUrl": "https://heyclau.de/tools"
+    },
+    {
+      "category": "skills",
+      "label": "Skills",
+      "count": 67,
+      "feedUrl": "/data/feeds/categories/skills.json",
+      "canonicalUrl": "https://heyclau.de/skills"
+    },
+    {
+      "category": "rules",
+      "label": "Rules",
+      "count": 29,
+      "feedUrl": "/data/feeds/categories/rules.json",
+      "canonicalUrl": "https://heyclau.de/rules"
+    },
+    {
+      "category": "commands",
+      "label": "Commands",
+      "count": 27,
+      "feedUrl": "/data/feeds/categories/commands.json",
+      "canonicalUrl": "https://heyclau.de/commands"
+    },
+    {
+      "category": "hooks",
+      "label": "Hooks",
+      "count": 66,
+      "feedUrl": "/data/feeds/categories/hooks.json",
+      "canonicalUrl": "https://heyclau.de/hooks"
+    },
+    {
+      "category": "guides",
+      "label": "Guides",
+      "count": 19,
+      "feedUrl": "/data/feeds/categories/guides.json",
+      "canonicalUrl": "https://heyclau.de/guides"
+    },
+    {
+      "category": "collections",
+      "label": "Collections",
+      "count": 10,
+      "feedUrl": "/data/feeds/categories/collections.json",
+      "canonicalUrl": "https://heyclau.de/collections"
+    },
+    {
+      "category": "statuslines",
+      "label": "Statuslines",
+      "count": 26,
+      "feedUrl": "/data/feeds/categories/statuslines.json",
+      "canonicalUrl": "https://heyclau.de/statuslines"
+    }
+  ],
+  "platforms": [
+    {
+      "platform": "Claude",
+      "platformSlug": "claude",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/claude.json"
+    },
+    {
+      "platform": "Codex",
+      "platformSlug": "codex",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/codex.json"
+    },
+    {
+      "platform": "Windsurf",
+      "platformSlug": "windsurf",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/windsurf.json"
+    },
+    {
+      "platform": "Gemini",
+      "platformSlug": "gemini",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/gemini.json"
+    },
+    {
+      "platform": "Cursor",
+      "platformSlug": "cursor",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/cursor.json"
+    },
+    {
+      "platform": "Generic AGENTS",
+      "platformSlug": "generic-agents",
+      "count": 67,
+      "feedUrl": "/data/feeds/platforms/generic-agents.json"
+    }
+  ]
+}

@@ -29,6 +29,13 @@ for (const category of categorySpec.categoryOrder) {
     fail(`${category}: quickstart must include at least two steps`);
   }
 
+  const seoDescription = String(spec.seoDescription ?? "").trim();
+  if (seoDescription.length < 120 || seoDescription.length > 170) {
+    fail(
+      `${category}: seoDescription must be 120-170 characters for search snippets`,
+    );
+  }
+
   if (!submissionCategories.has(category)) {
     continue;
   }

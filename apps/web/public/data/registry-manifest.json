@@ -2357,13 +2357,16 @@
     "entryDetails": "/data/entries",
     "entryLlms": "/data/llms",
     "raycastDetails": "/data/raycast",
-    "skillAdapters": "/data/skill-adapters"
+    "skillAdapters": "/data/skill-adapters",
+    "distributionFeeds": "/data/feeds",
+    "categoryFeeds": "/data/feeds/categories",
+    "platformFeeds": "/data/feeds/platforms"
   },
   "artifactContracts": {
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "d74e5377959db57b7d04083d0f6270039c2f7acf4fc75811a1d16b386a7cb3de"
+      "sha256": "7a6839d72993e7aaaa682d1bfb726a9d1f42f2c9decb1981f74e7fba93ab5bc3"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
@@ -2393,7 +2396,12 @@
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "7a0d40ae010decba40a4a2c836b2a013b0495f4e923b1d952ae86a191db32c0b"
+      "sha256": "d17f34a047360d0034ada2d18de4f8dfb35af410765520fddd8de0992776b30e"
+    },
+    "feeds/index.json": {
+      "path": "/data/feeds%2Findex.json",
+      "type": "json",
+      "sha256": "ebf8ad2cf68ab60a7871fb4903972863e935228decd7ec921a803743e0de5673"
     },
     "content-quality-report.json": {
       "path": "/data/content-quality-report.json",
@@ -2408,7 +2416,7 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "4bc49178a4bb99838d7f734d8623e353e0930e41b174557c03db861ef9398afb"
+      "sha256": "bbe371c25e326db442e4901a2d23938fc76c597195e1656d26d47159fd09215c"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
@@ -2628,7 +2636,7 @@
     "entries/skills/agent-evals-regression-gate.json": {
       "path": "/data/entries%2Fskills%2Fagent-evals-regression-gate.json",
       "type": "json",
-      "sha256": "da6d717a06206db1100ed36a62a75a3fb5afdf7fc243208885579abd7ec4af68"
+      "sha256": "cc7b197095137fd9081906400a76f42b20b414a3e828c40c3a3b65c5efa04dc7"
     },
     "llms/skills/agent-evals-regression-gate.txt": {
       "path": "/data/llms%2Fskills%2Fagent-evals-regression-gate.txt",
@@ -2693,7 +2701,7 @@
     "entries/skills/ai-agent-observability-incident-response.json": {
       "path": "/data/entries%2Fskills%2Fai-agent-observability-incident-response.json",
       "type": "json",
-      "sha256": "149801c3b182c7a98880f7ef526adfce07d66cc63490fe67b25a754bd618ce21"
+      "sha256": "df25c1d057a67e9fb1fa1f4153ca5aa25f0d539ab70380cba911d0d4a18c7e2d"
     },
     "llms/skills/ai-agent-observability-incident-response.txt": {
       "path": "/data/llms%2Fskills%2Fai-agent-observability-incident-response.txt",
@@ -2713,7 +2721,7 @@
     "entries/skills/ai-business-idea-validation-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fai-business-idea-validation-capability-pack.json",
       "type": "json",
-      "sha256": "40980257b8ded7c8d4e07cd5bb06f9856188d051fda9ecb934c32cc5235085ec"
+      "sha256": "aeb952418fdd890826cad996da73748d67e2adf1878feb6ce379471e0c849417"
     },
     "llms/skills/ai-business-idea-validation-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fai-business-idea-validation-capability-pack.txt",
@@ -2793,7 +2801,7 @@
     "entries/skills/ai-search-ranking-content-cluster-strategy.json": {
       "path": "/data/entries%2Fskills%2Fai-search-ranking-content-cluster-strategy.json",
       "type": "json",
-      "sha256": "0b6ad9b0a38ea1d2459328552f139465149c9f9d98213eda56b975561743c5cd"
+      "sha256": "f0f5b8fc408a9bed62be2ca842fde243fe693acd20eae84cf2208ea56e17ec49"
     },
     "llms/skills/ai-search-ranking-content-cluster-strategy.txt": {
       "path": "/data/llms%2Fskills%2Fai-search-ranking-content-cluster-strategy.txt",
@@ -2813,7 +2821,7 @@
     "entries/tools/aider.json": {
       "path": "/data/entries%2Ftools%2Faider.json",
       "type": "json",
-      "sha256": "2f127120ed7c9fe0c455a698583c5fa7b9bbaf7fe48b2f71841f5917f2237b95"
+      "sha256": "234d3770d45a90c4e6ca84ba4e9c7ef6d3a24ba28e247299db34968a17d495a1"
     },
     "llms/tools/aider.txt": {
       "path": "/data/llms%2Ftools%2Faider.txt",
@@ -2828,7 +2836,7 @@
     "entries/mcp/airtable-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fairtable-mcp-server.json",
       "type": "json",
-      "sha256": "6d63b5aefdcda8b2d54632ce3a5a1b6d448bf660aeee69a7de548a204d7a175f"
+      "sha256": "e4d69f2171f68aea11ed3a4a561a250903ac0d108f0aaca011c5731f24b0d29c"
     },
     "llms/mcp/airtable-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fairtable-mcp-server.txt",
@@ -2933,7 +2941,7 @@
     "entries/tools/apify.json": {
       "path": "/data/entries%2Ftools%2Fapify.json",
       "type": "json",
-      "sha256": "79107d6c69243e57b116484e9afb61c37ae6ab4e2230d22f94823393790db83b"
+      "sha256": "a418ca2688b760d61eb1e436a8906eee86e1b8e0cf7e91c33c0aeadaf6590ad0"
     },
     "llms/tools/apify.txt": {
       "path": "/data/llms%2Ftools%2Fapify.txt",
@@ -2948,7 +2956,7 @@
     "entries/tools/arcade-ai.json": {
       "path": "/data/entries%2Ftools%2Farcade-ai.json",
       "type": "json",
-      "sha256": "243777bc02b5a5cd742dee65c3698cfec95589f5b8d22a66f033dc1e40905f00"
+      "sha256": "c05f079bc73b1f31601ff01ae572afb385078db01ad77f4958b9e14b97d8eb1c"
     },
     "llms/tools/arcade-ai.txt": {
       "path": "/data/llms%2Ftools%2Farcade-ai.txt",
@@ -2978,7 +2986,7 @@
     "entries/mcp/asana-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fasana-mcp-server.json",
       "type": "json",
-      "sha256": "a490e1eb28ad44411db7b4e2f2e34cd0831690277cae29092a640202570bbd99"
+      "sha256": "ada9b1cfb4a26db3b64f7eba483d2424388f8956500b92bd04b6bfcafacab250"
     },
     "llms/mcp/asana-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fasana-mcp-server.txt",
@@ -2993,7 +3001,7 @@
     "entries/skills/audio-transcription-summarization.json": {
       "path": "/data/entries%2Fskills%2Faudio-transcription-summarization.json",
       "type": "json",
-      "sha256": "f5f15fe5c69e52912d74485cfc856dd8d884f2b7043cc19609dafb66dd7e1f33"
+      "sha256": "172cade466246b1c5dc8a3b1bf607ac50e9ac3960091c0125bbefd1773f52db5"
     },
     "llms/skills/audio-transcription-summarization.txt": {
       "path": "/data/llms%2Fskills%2Faudio-transcription-summarization.txt",
@@ -3163,7 +3171,7 @@
     "entries/skills/base-l2-smart-contract-launchpad.json": {
       "path": "/data/entries%2Fskills%2Fbase-l2-smart-contract-launchpad.json",
       "type": "json",
-      "sha256": "cbe6c4e7e80e79db69e1a9bb60fe779cc3ea080c148a197b485eb9667806e433"
+      "sha256": "9ec6eb7e8f0ae7c7fac7cff29ca69f2740c8a0c769c541c7bf46298b3d476809"
     },
     "llms/skills/base-l2-smart-contract-launchpad.txt": {
       "path": "/data/llms%2Fskills%2Fbase-l2-smart-contract-launchpad.txt",
@@ -3213,7 +3221,7 @@
     "entries/tools/bolt-new.json": {
       "path": "/data/entries%2Ftools%2Fbolt-new.json",
       "type": "json",
-      "sha256": "889fc3fc5462ff54ef0fad77c16fbcae36739f7c9026e4ac549f66c17c188e6e"
+      "sha256": "92ed80307ae9b0d747edca741039258538afad90c8a129205c6d4685d75c13c1"
     },
     "llms/tools/bolt-new.txt": {
       "path": "/data/llms%2Ftools%2Fbolt-new.txt",
@@ -3228,7 +3236,7 @@
     "entries/mcp/box-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fbox-mcp-server.json",
       "type": "json",
-      "sha256": "19d3476db75c66c4477a9e4040e2ab5ece32a322e2c7cb1453b62c059915c9ec"
+      "sha256": "83ee5607283248c5bf396df2f91d2910e1d876cb09e2fe3c5ac6ffa8c47a042c"
     },
     "llms/mcp/box-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fbox-mcp-server.txt",
@@ -3243,7 +3251,7 @@
     "entries/tools/braintrust.json": {
       "path": "/data/entries%2Ftools%2Fbraintrust.json",
       "type": "json",
-      "sha256": "fe919e5dd646154057f18afadc6e46d74d7804c72361c322ba9e71439c03949b"
+      "sha256": "624e574f030136ad6b5d886640f4b8b1e36a941cffc68ffb7c0777669a2276a5"
     },
     "llms/tools/braintrust.txt": {
       "path": "/data/llms%2Ftools%2Fbraintrust.txt",
@@ -3258,7 +3266,7 @@
     "entries/skills/browser-agent-workflow-automation.json": {
       "path": "/data/entries%2Fskills%2Fbrowser-agent-workflow-automation.json",
       "type": "json",
-      "sha256": "7af3c00d329dbd8f468187b2e97b9e972fb9acb27297f0b4c6e6f244f54f0e92"
+      "sha256": "43813a6b0cc303d68f2f62a0a4c734374263ea3b63403078d72b04e269c3d092"
     },
     "llms/skills/browser-agent-workflow-automation.txt": {
       "path": "/data/llms%2Fskills%2Fbrowser-agent-workflow-automation.txt",
@@ -3278,7 +3286,7 @@
     "entries/tools/browser-use.json": {
       "path": "/data/entries%2Ftools%2Fbrowser-use.json",
       "type": "json",
-      "sha256": "5ad9b274fdbef4be3954576015366f03b6abd1abc43fe6b3d51abda0bdd7e011"
+      "sha256": "0f2330192b272817f57dc7192647a534e790ad01d77e1378d191b7ae8e7b3217"
     },
     "llms/tools/browser-use.txt": {
       "path": "/data/llms%2Ftools%2Fbrowser-use.txt",
@@ -3293,7 +3301,7 @@
     "entries/tools/browserbase.json": {
       "path": "/data/entries%2Ftools%2Fbrowserbase.json",
       "type": "json",
-      "sha256": "52840e0760da9a13befc7c9f996870c3e6d2200d2c365df446dd191af8e88d35"
+      "sha256": "829dd98a56126be9fc56bbce7450b6d2fd930d4537416892b3385c050fca5d66"
     },
     "llms/tools/browserbase.txt": {
       "path": "/data/llms%2Ftools%2Fbrowserbase.txt",
@@ -3323,7 +3331,7 @@
     "entries/skills/bun-runtime-modern-javascript.json": {
       "path": "/data/entries%2Fskills%2Fbun-runtime-modern-javascript.json",
       "type": "json",
-      "sha256": "dbaf98dcf2170b5b6b80d850e4fb15f1bd59ccf80536359524ef8817bf91c2d9"
+      "sha256": "30efb0df4abf3f5416dea7177581a04dba496532b6dfc89552a9a118b4c9506f"
     },
     "llms/skills/bun-runtime-modern-javascript.txt": {
       "path": "/data/llms%2Fskills%2Fbun-runtime-modern-javascript.txt",
@@ -3373,7 +3381,7 @@
     "entries/mcp/canva-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcanva-mcp-server.json",
       "type": "json",
-      "sha256": "3a712bf01d13fb2b5227fc61bd738c1dbc52e7a08bbb9e28bc88fd11389cfcbd"
+      "sha256": "00885c102bb240158daf7ff12931fed3c9443ff7de4daab8d7bc15f2375a3261"
     },
     "llms/mcp/canva-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcanva-mcp-server.txt",
@@ -3478,7 +3486,7 @@
     "entries/tools/claude-code.json": {
       "path": "/data/entries%2Ftools%2Fclaude-code.json",
       "type": "json",
-      "sha256": "4833bb3a5b894d137d22e31f0435e227235a5054fd04ffd4c655d9958f7beec5"
+      "sha256": "5313aabe1d1dad5766821d500ed988511cfb2683ac54b4d2c7218ce8ad8a0988"
     },
     "llms/tools/claude-code.txt": {
       "path": "/data/llms%2Ftools%2Fclaude-code.txt",
@@ -3718,7 +3726,7 @@
     "entries/skills/cli-data-viz-quickstart.json": {
       "path": "/data/entries%2Fskills%2Fcli-data-viz-quickstart.json",
       "type": "json",
-      "sha256": "7fb64ea7b2a14053d3519f2155d4be4f80b189d42d8b8a59dac64c07d92355e6"
+      "sha256": "c61569c2e76590129628d13e29e2557078d86c3e9e33a7b9e725c6cf226a45a3"
     },
     "llms/skills/cli-data-viz-quickstart.txt": {
       "path": "/data/llms%2Fskills%2Fcli-data-viz-quickstart.txt",
@@ -3738,7 +3746,7 @@
     "entries/mcp/clickup-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fclickup-mcp-server.json",
       "type": "json",
-      "sha256": "9c180a085d7b9971abf0b33574cb7351f9907133bd4a1ffdf89fd9798575a7d0"
+      "sha256": "b216e143ff586be1dce61d0ebe3bc16ff56d4391766bce2f82dc0498b405b224"
     },
     "llms/mcp/clickup-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fclickup-mcp-server.txt",
@@ -3753,7 +3761,7 @@
     "entries/tools/cline.json": {
       "path": "/data/entries%2Ftools%2Fcline.json",
       "type": "json",
-      "sha256": "396e6d4933968c3b7288c3e05a5819ce16ebc740928fbadba0ba142d0b6cf1d5"
+      "sha256": "0cfa51c5ac2536bebcec62d1da3d8ca3ddea12efa8a5f88c9868ed9775c9beda"
     },
     "llms/tools/cline.txt": {
       "path": "/data/llms%2Ftools%2Fcline.txt",
@@ -3798,7 +3806,7 @@
     "entries/tools/cloudflare-agents-sdk.json": {
       "path": "/data/entries%2Ftools%2Fcloudflare-agents-sdk.json",
       "type": "json",
-      "sha256": "b3c646ac4b562cfa0c178f6015ce709d3f2c5376f4ff77566db4ef2b077b14da"
+      "sha256": "957bd5370dbbebfe5a6a698b688a1f4d923e5e441b2a7c84886eaa07de4008ee"
     },
     "llms/tools/cloudflare-agents-sdk.txt": {
       "path": "/data/llms%2Ftools%2Fcloudflare-agents-sdk.txt",
@@ -3813,7 +3821,7 @@
     "entries/mcp/cloudflare-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcloudflare-mcp-server.json",
       "type": "json",
-      "sha256": "601506f4d8f496926bfe20870e229f28543e7eb4941afe916a205a49ae4e5db1"
+      "sha256": "011b21355bafc1fa882bfdff30fbe322a1244b52775aa27251c6f53bfc3e5395"
     },
     "llms/mcp/cloudflare-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcloudflare-mcp-server.txt",
@@ -3828,7 +3836,7 @@
     "entries/skills/cloudflare-workers-ai-edge.json": {
       "path": "/data/entries%2Fskills%2Fcloudflare-workers-ai-edge.json",
       "type": "json",
-      "sha256": "32ad18ec624f5dd63b75559f1c74f301ab0f06ffde9e37feaca030f6537e8432"
+      "sha256": "880977c01a0a81b18a87bacaef7670e97422db0f41c05fa7d7328f71249e0df5"
     },
     "llms/skills/cloudflare-workers-ai-edge.txt": {
       "path": "/data/llms%2Fskills%2Fcloudflare-workers-ai-edge.txt",
@@ -3848,7 +3856,7 @@
     "entries/skills/cloudflare-workers-d1-kv-r2-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fcloudflare-workers-d1-kv-r2-capability-pack.json",
       "type": "json",
-      "sha256": "186e474f92ec1efe98e9dd820bd374c204c0e9625da574091baee69fceb887bf"
+      "sha256": "d14f477d27f1e6bd007691918c4409d1ccec9d9d8665526b802bd16ae0256372"
     },
     "llms/skills/cloudflare-workers-d1-kv-r2-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fcloudflare-workers-d1-kv-r2-capability-pack.txt",
@@ -3868,7 +3876,7 @@
     "entries/mcp/cloudinary-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcloudinary-mcp-server.json",
       "type": "json",
-      "sha256": "a6bd801036e43e2efb70da4e76e592d5106ed987b0715e66083a5e164272b711"
+      "sha256": "a1f4e433dc04f892231cde104111b51b1ff6af96e40d9ae940687a6c6a18f998"
     },
     "llms/mcp/cloudinary-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcloudinary-mcp-server.txt",
@@ -3913,7 +3921,7 @@
     "entries/skills/coderabbit-lite-pr-review-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fcoderabbit-lite-pr-review-capability-pack.json",
       "type": "json",
-      "sha256": "2e46cf17557fca5a8e37e0b3d15e068abfc2711d7d2f2bdf174fe63714dfb762"
+      "sha256": "65a9837f0abe2a784fdaf715297de4c3212bfd08013e85a77b7635c48b8bc27b"
     },
     "llms/skills/coderabbit-lite-pr-review-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fcoderabbit-lite-pr-review-capability-pack.txt",
@@ -3933,7 +3941,7 @@
     "entries/rules/code-review-expert.json": {
       "path": "/data/entries%2Frules%2Fcode-review-expert.json",
       "type": "json",
-      "sha256": "89666027c5269933aee65a34fce951ed9621ea4b157facf90114e8cdb1a9f588"
+      "sha256": "9a8da8d08c7bd709aa6c09ebe3068a5e06b7857ba0c9a68dfbd08d3a4abdb7a9"
     },
     "llms/rules/code-review-expert.txt": {
       "path": "/data/llms%2Frules%2Fcode-review-expert.txt",
@@ -3993,7 +4001,7 @@
     "entries/tools/coderabbit.json": {
       "path": "/data/entries%2Ftools%2Fcoderabbit.json",
       "type": "json",
-      "sha256": "43f3788840daf6198de827180c13c037fed6488e8e24d0f01e38bd4c7dbc5ecb"
+      "sha256": "0926d5462632fcabb78ef5ab25d3f75a45870627719b8e2de78da449d39fc9a3"
     },
     "llms/tools/coderabbit.txt": {
       "path": "/data/llms%2Ftools%2Fcoderabbit.txt",
@@ -4008,7 +4016,7 @@
     "entries/skills/codex-automations-orchestrator-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fcodex-automations-orchestrator-capability-pack.json",
       "type": "json",
-      "sha256": "948bdd12d9844470c7576fb733c3575aef9384fd7ea5c3ba36048745cc3865ca"
+      "sha256": "42917b3544f8b1040442e0105e62c93d3645c22398ca38a9d9636b887c75733a"
     },
     "llms/skills/codex-automations-orchestrator-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fcodex-automations-orchestrator-capability-pack.txt",
@@ -4028,7 +4036,7 @@
     "entries/skills/codex-plugin-creator-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fcodex-plugin-creator-capability-pack.json",
       "type": "json",
-      "sha256": "74f397c83ac31cabdfae4788521a14d826f4a08704ec9ced4e13cf9e042b48e2"
+      "sha256": "308e256a577f44d73aeeea831c3f7f8a9282f3e8ccc3ce0c56c2526b03204a8d"
     },
     "llms/skills/codex-plugin-creator-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fcodex-plugin-creator-capability-pack.txt",
@@ -4063,7 +4071,7 @@
     "entries/tools/composio.json": {
       "path": "/data/entries%2Ftools%2Fcomposio.json",
       "type": "json",
-      "sha256": "73519c68f6b6f8ba278f6afe52fe5f6472b9e34cf8e6ff4ebce2b91f03a5e6fa"
+      "sha256": "addb633c2b1ce3beb3129c853cc3e448f952404b62f7f11108634204ea445e91"
     },
     "llms/tools/composio.txt": {
       "path": "/data/llms%2Ftools%2Fcomposio.txt",
@@ -4123,7 +4131,7 @@
     "entries/tools/continue.json": {
       "path": "/data/entries%2Ftools%2Fcontinue.json",
       "type": "json",
-      "sha256": "862114f05bdb4891162cefa4f1d026f849c17de5905acf7c1004f6c894173819"
+      "sha256": "572e216bc262335b9c8e71941252f0d424c78bae09e60fed9392773b5eaf0ebc"
     },
     "llms/tools/continue.txt": {
       "path": "/data/llms%2Ftools%2Fcontinue.txt",
@@ -4153,7 +4161,7 @@
     "entries/tools/crewai.json": {
       "path": "/data/entries%2Ftools%2Fcrewai.json",
       "type": "json",
-      "sha256": "d513d1a2f2014e4570bc80a538d430f265e16c4682704736ec82ff5f8d50ed32"
+      "sha256": "f915da97f2b21d3e1df09bb43bdcae10ab8f56786e379b4956f6cb4333a43fa8"
     },
     "llms/tools/crewai.txt": {
       "path": "/data/llms%2Ftools%2Fcrewai.txt",
@@ -4183,7 +4191,7 @@
     "entries/skills/csv-excel-data-wrangler.json": {
       "path": "/data/entries%2Fskills%2Fcsv-excel-data-wrangler.json",
       "type": "json",
-      "sha256": "57e42a3d6c585a38f61d2177ea79348f40d83d5821fb756848c3c78e0fe60a3e"
+      "sha256": "fcf1014901dbd742d9d91c6fd7eace11f0c14466d85781f0f1dec12d6cd8d426"
     },
     "llms/skills/csv-excel-data-wrangler.txt": {
       "path": "/data/llms%2Fskills%2Fcsv-excel-data-wrangler.txt",
@@ -4203,7 +4211,7 @@
     "entries/tools/cursor.json": {
       "path": "/data/entries%2Ftools%2Fcursor.json",
       "type": "json",
-      "sha256": "64bcdad423faa532bcf70c5d3af3e3c579c9c2a4732f013c3f963e1c2410265d"
+      "sha256": "97c0ccae2f15229dba8cb74362df3f0b8aa72dd5cbd91a71913baf327f70f76d"
     },
     "llms/tools/cursor.txt": {
       "path": "/data/llms%2Ftools%2Fcursor.txt",
@@ -4218,7 +4226,7 @@
     "entries/skills/cursor-windsurf-ai-ide-setup.json": {
       "path": "/data/entries%2Fskills%2Fcursor-windsurf-ai-ide-setup.json",
       "type": "json",
-      "sha256": "b8aea0b5f30bd22a51096fc639e159f1fa5a78a42110ed590fa7d4c958a7524c"
+      "sha256": "523230c47a72468548878e50a0b99c40f938edea913b6ccd7b62996cb77d8595"
     },
     "llms/skills/cursor-windsurf-ai-ide-setup.txt": {
       "path": "/data/llms%2Fskills%2Fcursor-windsurf-ai-ide-setup.txt",
@@ -4463,7 +4471,7 @@
     "entries/tools/devin.json": {
       "path": "/data/entries%2Ftools%2Fdevin.json",
       "type": "json",
-      "sha256": "35c8a712c6b8a9a4e66406dc4c6c77edcc61bd80cb6d9237d7cbf80cf9e39551"
+      "sha256": "eac1c2aa53d9f5f57b069c9aa13738f6505cee4e80f79022585cb916d2ee89da"
     },
     "llms/tools/devin.txt": {
       "path": "/data/llms%2Ftools%2Fdevin.txt",
@@ -4508,7 +4516,7 @@
     "entries/mcp/discord-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fdiscord-mcp-server.json",
       "type": "json",
-      "sha256": "b86e8be8ceae7c83b1619ffe3d39fb4a75d5e2358a46c5d676fe638c4060b658"
+      "sha256": "bea155f7798f687f805bb72ff8d210c56ea4cb4d07f460ceeba7c72806093785"
     },
     "llms/mcp/discord-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fdiscord-mcp-server.txt",
@@ -4538,7 +4546,7 @@
     "entries/skills/docker-compose-production-blueprints.json": {
       "path": "/data/entries%2Fskills%2Fdocker-compose-production-blueprints.json",
       "type": "json",
-      "sha256": "51b9181f3c456e210b991e1a103f2000158597cfbd8c2db853b0059aa4764772"
+      "sha256": "906c98da7ad717726627f72950b5e2cf33e663e384a82bf4e994046d09cfdf72"
     },
     "llms/skills/docker-compose-production-blueprints.txt": {
       "path": "/data/llms%2Fskills%2Fdocker-compose-production-blueprints.txt",
@@ -4633,7 +4641,7 @@
     "entries/skills/docx-report-generator.json": {
       "path": "/data/entries%2Fskills%2Fdocx-report-generator.json",
       "type": "json",
-      "sha256": "e87e03f7e62b395add9269b59dce8f5b4a9f36ce8c9ac4f3c682549cf8a82637"
+      "sha256": "f3f38410c145178289eac68f8317ac7ad2faed23efc4331d5479329f2f2430eb"
     },
     "llms/skills/docx-report-generator.txt": {
       "path": "/data/llms%2Fskills%2Fdocx-report-generator.txt",
@@ -4713,7 +4721,7 @@
     "entries/skills/ethereum-base-smart-contract-security-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fethereum-base-smart-contract-security-capability-pack.json",
       "type": "json",
-      "sha256": "5ceb4b328c466a4ba9f046ec54ebbf07a896987ce0f701b897293d02de4e2b90"
+      "sha256": "2ad5ce2efbe4b2fc1c29876be01b19bbacd1e2cccafbac449e58bcd3c7958c9e"
     },
     "llms/skills/ethereum-base-smart-contract-security-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fethereum-base-smart-contract-security-capability-pack.txt",
@@ -4733,7 +4741,7 @@
     "entries/skills/ethereum-solidity-security-foundry.json": {
       "path": "/data/entries%2Fskills%2Fethereum-solidity-security-foundry.json",
       "type": "json",
-      "sha256": "a80579410b1bd509127c781e8f150dc39737dd08dfc19a7a83cb60f9f9066f77"
+      "sha256": "575273994348e082a256821672b145b3b3a4d1438e1d150df28ca20fd2e15511"
     },
     "llms/skills/ethereum-solidity-security-foundry.txt": {
       "path": "/data/llms%2Fskills%2Fethereum-solidity-security-foundry.txt",
@@ -4753,7 +4761,7 @@
     "entries/tools/exa.json": {
       "path": "/data/entries%2Ftools%2Fexa.json",
       "type": "json",
-      "sha256": "f00ae755598aa58fa5596d7de917685473ba38c422f34e597402e0be33b42ea8"
+      "sha256": "7f6b230c1d78634ae45287640b9cc7798cd6c0b0cd491340af541ef01493f6d9"
     },
     "llms/tools/exa.txt": {
       "path": "/data/llms%2Ftools%2Fexa.txt",
@@ -4783,7 +4791,7 @@
     "entries/skills/fastapi-python-backend.json": {
       "path": "/data/entries%2Fskills%2Ffastapi-python-backend.json",
       "type": "json",
-      "sha256": "0f41785934d254494c55b9d8c4f44ddb078f3df91c9c9954596353d1c9f90065"
+      "sha256": "18ea2c2aefe61cc1d1d9427d075013ec8f88b648cff92ff1375ffa7f52d8e574"
     },
     "llms/skills/fastapi-python-backend.txt": {
       "path": "/data/llms%2Fskills%2Ffastapi-python-backend.txt",
@@ -4803,7 +4811,7 @@
     "entries/mcp/figma-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Ffigma-mcp-server.json",
       "type": "json",
-      "sha256": "cec9edbba2f566658ffc3914054974e5e97787070224d67000ddbc848d6ab2da"
+      "sha256": "639bc6e6e18bec7895401695c4efa8166c96a4cf98ef1e8a7c45f4c5f50d81f0"
     },
     "llms/mcp/figma-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Ffigma-mcp-server.txt",
@@ -4863,7 +4871,7 @@
     "entries/tools/firecrawl.json": {
       "path": "/data/entries%2Ftools%2Ffirecrawl.json",
       "type": "json",
-      "sha256": "27cea0842c7f0b8bdeaee28706849eddb62031dc981abf4ed80154e680bfdd42"
+      "sha256": "3c76705d3985141b39c866a89c511511c3c64dbf78fdb1d4e1ad00a7de895631"
     },
     "llms/tools/firecrawl.txt": {
       "path": "/data/llms%2Ftools%2Ffirecrawl.txt",
@@ -4878,7 +4886,7 @@
     "entries/mcp/fireflies-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Ffireflies-mcp-server.json",
       "type": "json",
-      "sha256": "4b933ac09cca1b3fe82261936034ad704b897e598bb2c3661bf1965da1d7f2c9"
+      "sha256": "751fd214a0d0d9412cd705717d6c43be6a9dead0b4313f2e444638b2c68eca98"
     },
     "llms/mcp/fireflies-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Ffireflies-mcp-server.txt",
@@ -4998,7 +5006,7 @@
     "entries/tools/garak.json": {
       "path": "/data/entries%2Ftools%2Fgarak.json",
       "type": "json",
-      "sha256": "110cca59b205d325ed54587704025b81a6f16131a5d91b6ddd9b6f34807fb0db"
+      "sha256": "aaf8dd8908f7b26b54e0fac89b6284ba950d0925bc6542abc733786c954f9f66"
     },
     "llms/tools/garak.txt": {
       "path": "/data/llms%2Ftools%2Fgarak.txt",
@@ -5028,7 +5036,7 @@
     "entries/tools/giskard.json": {
       "path": "/data/entries%2Ftools%2Fgiskard.json",
       "type": "json",
-      "sha256": "71ec330c06a371d275bfa000cf029f8b19430b4ab240a7f58318f0125e86c103"
+      "sha256": "0980d5376de0f3a074f1c2b791ced12e77a5642e7485a885b3168cdec7747015"
     },
     "llms/tools/giskard.txt": {
       "path": "/data/llms%2Ftools%2Fgiskard.txt",
@@ -5133,7 +5141,7 @@
     "entries/skills/git-cliff-release-changelog-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fgit-cliff-release-changelog-capability-pack.json",
       "type": "json",
-      "sha256": "fe9c01ed5a28d69f039b93867548c99f0f326b39253dee3f7f67a9e5692d072f"
+      "sha256": "500219ed17641fb3d673e690bc3aea6a572ebf75db929b4892c1c529fa7891da"
     },
     "llms/skills/git-cliff-release-changelog-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fgit-cliff-release-changelog-capability-pack.txt",
@@ -5153,7 +5161,7 @@
     "entries/skills/github-actions-ai-cicd.json": {
       "path": "/data/entries%2Fskills%2Fgithub-actions-ai-cicd.json",
       "type": "json",
-      "sha256": "c1276a2bc80e28a64ec1bf65dbdd4eac7db8979eca8624dab21744850808a279"
+      "sha256": "53499efa1ca4bff88f4929565d7a7d63bb252d2634bcae3d68473bd1a9ae0e1c"
     },
     "llms/skills/github-actions-ai-cicd.txt": {
       "path": "/data/llms%2Fskills%2Fgithub-actions-ai-cicd.txt",
@@ -5173,7 +5181,7 @@
     "entries/skills/github-actions-secure-cicd-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fgithub-actions-secure-cicd-capability-pack.json",
       "type": "json",
-      "sha256": "a120d57fe475645bbc2982fea891a1500a6a07fee895bd2971437f4aca44b6cd"
+      "sha256": "ccd429afba634ac00ed0432a7986688a8686444914797d8d497e6e366a010f90"
     },
     "llms/skills/github-actions-secure-cicd-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fgithub-actions-secure-cicd-capability-pack.txt",
@@ -5208,7 +5216,7 @@
     "entries/tools/github-copilot.json": {
       "path": "/data/entries%2Ftools%2Fgithub-copilot.json",
       "type": "json",
-      "sha256": "a1b2cfb6551e0675f7fc2223aeef5bd7ca83f31a1ded52bdc4751a7b805db925"
+      "sha256": "dca54d57ca2364f591c95a51949a710373162230e6e075e5f25962ae0c946e14"
     },
     "llms/tools/github-copilot.txt": {
       "path": "/data/llms%2Ftools%2Fgithub-copilot.txt",
@@ -5298,7 +5306,7 @@
     "entries/skills/google-workspace-gemini-automation.json": {
       "path": "/data/entries%2Fskills%2Fgoogle-workspace-gemini-automation.json",
       "type": "json",
-      "sha256": "a5dcab5539f6a2511f833c8ee100a588ba7be7b466f2f63704340913f44d0399"
+      "sha256": "bf367897801a7874307c81506e787b26e6378c4c642c84535ea572f4f085ed94"
     },
     "llms/skills/google-workspace-gemini-automation.txt": {
       "path": "/data/llms%2Fskills%2Fgoogle-workspace-gemini-automation.txt",
@@ -5318,7 +5326,7 @@
     "entries/tools/graphite-diamond.json": {
       "path": "/data/entries%2Ftools%2Fgraphite-diamond.json",
       "type": "json",
-      "sha256": "eec2130342b62a57438f4ec0f9c93ad11ded259322f293fb7c4b9c4d100486a5"
+      "sha256": "6105d61ce52a83861465f8afe7f7a49a8d7b039dd166f234bcaefc96bf563774"
     },
     "llms/tools/graphite-diamond.txt": {
       "path": "/data/llms%2Ftools%2Fgraphite-diamond.txt",
@@ -5363,7 +5371,7 @@
     "entries/tools/helicone.json": {
       "path": "/data/entries%2Ftools%2Fhelicone.json",
       "type": "json",
-      "sha256": "199fcb683bf129ce8f99902811bb0fa847c217f1023c20917b231310d5a3bb4a"
+      "sha256": "0a38b01696592ed3c37fc5fb194f6ecc739eea70f5b62307f87e563c797cc839"
     },
     "llms/tools/helicone.txt": {
       "path": "/data/llms%2Ftools%2Fhelicone.txt",
@@ -5393,7 +5401,7 @@
     "entries/skills/heyclaude-skill-submission-factory.json": {
       "path": "/data/entries%2Fskills%2Fheyclaude-skill-submission-factory.json",
       "type": "json",
-      "sha256": "0fc15b4ad6fe5e45fc4435e6916293b31e24c6018c36479c994a43c03e29b31d"
+      "sha256": "e59f9684c7cf91a47308a26d274e0c0256594400361acdb1dc765cdafeef70bf"
     },
     "llms/skills/heyclaude-skill-submission-factory.txt": {
       "path": "/data/llms%2Fskills%2Fheyclaude-skill-submission-factory.txt",
@@ -5428,7 +5436,7 @@
     "entries/mcp/hubspot-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fhubspot-mcp-server.json",
       "type": "json",
-      "sha256": "7ff8f3a01e6fcdac868cf4673014d06c605dd5e05f5014b3835b024ba86f1e8e"
+      "sha256": "9d1da042298d2f6d432e3a36d2c69c3c8d5802ce30c6a58bc8b8c2c6c5e63ff9"
     },
     "llms/mcp/hubspot-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fhubspot-mcp-server.txt",
@@ -5443,7 +5451,7 @@
     "entries/mcp/hugging-face-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fhugging-face-mcp-server.json",
       "type": "json",
-      "sha256": "337ad5a4170881ceb762c120bd6515b7295f3c76aead20255371bb82a5ad46e9"
+      "sha256": "74e82c1987ec57afcb4eb97c833d83fb5c3d759f115a8dc96802fc05cd60027e"
     },
     "llms/mcp/hugging-face-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fhugging-face-mcp-server.txt",
@@ -5458,7 +5466,7 @@
     "entries/skills/husky-commit-governance-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fhusky-commit-governance-capability-pack.json",
       "type": "json",
-      "sha256": "67836d8392d54e96df90341e07d0674dc5e36380ed84487ab8fb1fe58bf92082"
+      "sha256": "e36c870b1ee9eaca4368cb086d1c692b8d675a48db6b1552831743b7bb1030fc"
     },
     "llms/skills/husky-commit-governance-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fhusky-commit-governance-capability-pack.txt",
@@ -5508,7 +5516,7 @@
     "entries/skills/image-ocr-table-extraction.json": {
       "path": "/data/entries%2Fskills%2Fimage-ocr-table-extraction.json",
       "type": "json",
-      "sha256": "71b35b85cab797b23454733d99ceb277af72fb9c19d43e9342b5f204f8ea3373"
+      "sha256": "609bf01a17a7ee61d9151ed8d45dff0839731978da0e2658ef62feea4c2af0ad"
     },
     "llms/skills/image-ocr-table-extraction.txt": {
       "path": "/data/llms%2Fskills%2Fimage-ocr-table-extraction.txt",
@@ -5528,7 +5536,7 @@
     "entries/skills/indexnow-search-indexing-accelerator.json": {
       "path": "/data/entries%2Fskills%2Findexnow-search-indexing-accelerator.json",
       "type": "json",
-      "sha256": "980c4c22864fef4d1ccd474a6ddd2060c7da31d9163ee9186969e4e6bcb6dc73"
+      "sha256": "a21b8d5e7a93101866ecbc1ebb4ef66f3b4b7bcda5cffe1ec7686d189851103f"
     },
     "llms/skills/indexnow-search-indexing-accelerator.txt": {
       "path": "/data/llms%2Fskills%2Findexnow-search-indexing-accelerator.txt",
@@ -5548,7 +5556,7 @@
     "entries/mcp/intercom-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fintercom-mcp-server.json",
       "type": "json",
-      "sha256": "ecc2a3fb9a98a78ab4886050580ab98aeb0137a5e3f4ebfa90d38b5877b4925b"
+      "sha256": "06bab781543120d58f8fa2d1ba443cff39088f9585fe4820f076f81ef6c7aecd"
     },
     "llms/mcp/intercom-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fintercom-mcp-server.txt",
@@ -5563,7 +5571,7 @@
     "entries/mcp/invideo-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Finvideo-mcp-server.json",
       "type": "json",
-      "sha256": "01d6ed319d87485d69937a448cfba7da67e43fed49e7133fabfeda4d9251dff2"
+      "sha256": "6f51875356e3b725a7e72eb17a0e1c2db47033f0586f5ba96a8aaaf23376f0aa"
     },
     "llms/mcp/invideo-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Finvideo-mcp-server.txt",
@@ -5608,7 +5616,7 @@
     "entries/mcp/jira-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fjira-mcp-server.json",
       "type": "json",
-      "sha256": "bae2f5d63a3a8d7339d69ee08ed253728cec94c8c2a7abbde5b4b68147ebc95f"
+      "sha256": "316930e6368d9d0a0f009829601f0932a89cc4a7b516d89bfb692fbf8d2ee50c"
     },
     "llms/mcp/jira-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fjira-mcp-server.txt",
@@ -5623,7 +5631,7 @@
     "entries/skills/json-schema-validation-transformation.json": {
       "path": "/data/entries%2Fskills%2Fjson-schema-validation-transformation.json",
       "type": "json",
-      "sha256": "47e2054277c7940c0ea613a86d86e27a5dc9042f8e2be98bf640d80b3ee27bed"
+      "sha256": "f43b65975d79c148876a88196a19c88eeeea3262730e79d51a951424bf02ffad"
     },
     "llms/skills/json-schema-validation-transformation.txt": {
       "path": "/data/llms%2Fskills%2Fjson-schema-validation-transformation.txt",
@@ -5688,7 +5696,7 @@
     "entries/mcp/kubernetes-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fkubernetes-mcp-server.json",
       "type": "json",
-      "sha256": "1a9c8e59a7623b621f5e061a2e5f844b72954cd729f05ebfdd3303be98c3c5c3"
+      "sha256": "071b6ddffa836a1221e4142310f31c0eac65324acc1d31cac22765cca4d210bd"
     },
     "llms/mcp/kubernetes-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fkubernetes-mcp-server.txt",
@@ -5703,7 +5711,7 @@
     "entries/tools/lakera-guard.json": {
       "path": "/data/entries%2Ftools%2Flakera-guard.json",
       "type": "json",
-      "sha256": "0cbf769a27e46e26f40095a0f494d8bbfb1fd3defffd0437a5d88348c2a2067a"
+      "sha256": "94224f98818975a5d58c40d20a9efcc5bbe149bd1a94f73ccfbb8a345f41a457"
     },
     "llms/tools/lakera-guard.txt": {
       "path": "/data/llms%2Ftools%2Flakera-guard.txt",
@@ -5718,7 +5726,7 @@
     "entries/tools/langfuse.json": {
       "path": "/data/entries%2Ftools%2Flangfuse.json",
       "type": "json",
-      "sha256": "3cd4ec2a8e6241e20c71e7d40cea09c4c5506b6ef7ed8d7890f92de33d873ecd"
+      "sha256": "4ca613e057c1bd31461e08265abd691bb5b59bc146f1ca49d81a733ec32a447d"
     },
     "llms/tools/langfuse.txt": {
       "path": "/data/llms%2Ftools%2Flangfuse.txt",
@@ -5733,7 +5741,7 @@
     "entries/tools/langgraph.json": {
       "path": "/data/entries%2Ftools%2Flanggraph.json",
       "type": "json",
-      "sha256": "9aa2c9aac5313a69c0662f0fb11e312e3ab705404010c47b861826dcb3ba0ce1"
+      "sha256": "8a9d6bf54aaa7f975f7c47c46b1ac13e3ee3e76675e68c8079add9edcb23a0ed"
     },
     "llms/tools/langgraph.txt": {
       "path": "/data/llms%2Ftools%2Flanggraph.txt",
@@ -5748,7 +5756,7 @@
     "entries/tools/langsmith.json": {
       "path": "/data/entries%2Ftools%2Flangsmith.json",
       "type": "json",
-      "sha256": "890adc0f830761a14ec9a54e47815027d50f746b8e29d66825da59831cb62c89"
+      "sha256": "29e0d2126ab07c451ebdce7d1deb6f21031c3a45a69968541d04f507b70c71c1"
     },
     "llms/tools/langsmith.txt": {
       "path": "/data/llms%2Ftools%2Flangsmith.txt",
@@ -5778,7 +5786,7 @@
     "entries/mcp/linear-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Flinear-mcp-server.json",
       "type": "json",
-      "sha256": "7288a4d4038db97bb62920ff461ca9a51cfe9d4a44c10bf6fa27f4b60cf436b0"
+      "sha256": "92c7a5ee84e1808fa078fb279cc78ffb84e521f1b60b10dae1a125a6999d0d22"
     },
     "llms/mcp/linear-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Flinear-mcp-server.txt",
@@ -5808,7 +5816,7 @@
     "entries/skills/log-parsing-incident-timeline.json": {
       "path": "/data/entries%2Fskills%2Flog-parsing-incident-timeline.json",
       "type": "json",
-      "sha256": "6bce0ce310b557920c4c4c8980cf9a39e94cfdb16fdfd865c31c454274233f7e"
+      "sha256": "f7463531b7cdb94e7f3bead267248ca7f59ffac5678989b0febe5dc6efb2573c"
     },
     "llms/skills/log-parsing-incident-timeline.txt": {
       "path": "/data/llms%2Fskills%2Flog-parsing-incident-timeline.txt",
@@ -5828,7 +5836,7 @@
     "entries/tools/lovable.json": {
       "path": "/data/entries%2Ftools%2Flovable.json",
       "type": "json",
-      "sha256": "981463d1efb98776ccf7e2af5a376d8ced3c127b8148414c0abaae87cf8d99d9"
+      "sha256": "541422bb204d4f63c9d77718d559ef44e02ec940e98556a222c76896b258226a"
     },
     "llms/tools/lovable.txt": {
       "path": "/data/llms%2Ftools%2Flovable.txt",
@@ -5843,7 +5851,7 @@
     "entries/tools/make.json": {
       "path": "/data/entries%2Ftools%2Fmake.json",
       "type": "json",
-      "sha256": "5e134c3f27ebf5ce944b1e23afaa93385872fffd381c32d20d74b7d245ce91d1"
+      "sha256": "75d9ebb6c8c9c5e62f3154244e9465efa92638c9804c1be11e412d6e37c42aa5"
     },
     "llms/tools/make.txt": {
       "path": "/data/llms%2Ftools%2Fmake.txt",
@@ -5858,7 +5866,7 @@
     "entries/skills/markdown-knowledge-base-composer.json": {
       "path": "/data/entries%2Fskills%2Fmarkdown-knowledge-base-composer.json",
       "type": "json",
-      "sha256": "c2bafb86f71a25073e5f8f000abc32d200116e9ae9e589ccf0b881fac4d788d9"
+      "sha256": "b85f89a4ebec936ae9519e54d87dbb6e1b5360aa12ddad15cd6ae7566e2c374c"
     },
     "llms/skills/markdown-knowledge-base-composer.txt": {
       "path": "/data/llms%2Fskills%2Fmarkdown-knowledge-base-composer.txt",
@@ -5893,7 +5901,7 @@
     "entries/tools/mastra.json": {
       "path": "/data/entries%2Ftools%2Fmastra.json",
       "type": "json",
-      "sha256": "e79b43a8bc0797316b64951d9b1ea37473b27399dd6d0695b20961d0f3f0946b"
+      "sha256": "62879a958687571dcd58b060fe7c0afc485c9e65fceec740a57057d6cf2beb65"
     },
     "llms/tools/mastra.txt": {
       "path": "/data/llms%2Ftools%2Fmastra.txt",
@@ -5908,7 +5916,7 @@
     "entries/skills/mcp-server-authoring-security-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fmcp-server-authoring-security-capability-pack.json",
       "type": "json",
-      "sha256": "29968a76fc6dd5caee08a36d3c8264937a3c534875d2ef0c163bfd16b97287de"
+      "sha256": "5cb983cb518386184f3191055bb008db9c1467bd27cbd87acd3783fb12178def"
     },
     "llms/skills/mcp-server-authoring-security-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fmcp-server-authoring-security-capability-pack.txt",
@@ -5928,7 +5936,7 @@
     "entries/skills/mcp-server-security-hardening.json": {
       "path": "/data/entries%2Fskills%2Fmcp-server-security-hardening.json",
       "type": "json",
-      "sha256": "31dd36e70beb9f316af38f95a69ec78f23340297dfd7acafd5ec2110d1c525d0"
+      "sha256": "e397d0dac7d323b6a26540b4f768bf2c9a9e5a3aa311037cd7c9c2fb1a5c3345"
     },
     "llms/skills/mcp-server-security-hardening.txt": {
       "path": "/data/llms%2Fskills%2Fmcp-server-security-hardening.txt",
@@ -5978,7 +5986,7 @@
     "entries/skills/mcp-tool-contract-testing.json": {
       "path": "/data/entries%2Fskills%2Fmcp-tool-contract-testing.json",
       "type": "json",
-      "sha256": "62947077fabd41b6e04b4155fdf7aef6ed9cf4a4a05251bbb4d97ef6497a7ee9"
+      "sha256": "25d6498dcc17b61cefd8cdb1259d4bacd4e16a9c30ceeeda17922bf8c3b5694e"
     },
     "llms/skills/mcp-tool-contract-testing.txt": {
       "path": "/data/llms%2Fskills%2Fmcp-tool-contract-testing.txt",
@@ -6013,7 +6021,7 @@
     "entries/tools/microsoft-autogen.json": {
       "path": "/data/entries%2Ftools%2Fmicrosoft-autogen.json",
       "type": "json",
-      "sha256": "33fad154c51f807ba4110b90e49750b6774a18e03ab2507cf33caa2715a8afce"
+      "sha256": "4e5afe5fe0eec10f75a28118e5131282bcf01da636bd9691622f4e8ae6ba28d0"
     },
     "llms/tools/microsoft-autogen.txt": {
       "path": "/data/llms%2Ftools%2Fmicrosoft-autogen.txt",
@@ -6043,7 +6051,7 @@
     "entries/skills/mintlify-documentation-automation.json": {
       "path": "/data/entries%2Fskills%2Fmintlify-documentation-automation.json",
       "type": "json",
-      "sha256": "82ed5959574b5089443c2eb267b63ad663eef17c5a50282bef2bbd9f56e7c935"
+      "sha256": "bff87b63eb7650e8a552cb89e15561764046a7c71b39908e945b81a019781275"
     },
     "llms/skills/mintlify-documentation-automation.txt": {
       "path": "/data/llms%2Fskills%2Fmintlify-documentation-automation.txt",
@@ -6108,7 +6116,7 @@
     "entries/skills/model-routing-cost-latency-optimizer.json": {
       "path": "/data/entries%2Fskills%2Fmodel-routing-cost-latency-optimizer.json",
       "type": "json",
-      "sha256": "c7167edb155664156b043748170a918925b8b40e10be3d085214bd895ca4aeab"
+      "sha256": "9b77722ab86675396f6c8bd6bd21ff7b6c6bbaf2b8d3af05b818ab83752316b0"
     },
     "llms/skills/model-routing-cost-latency-optimizer.txt": {
       "path": "/data/llms%2Fskills%2Fmodel-routing-cost-latency-optimizer.txt",
@@ -6143,7 +6151,7 @@
     "entries/mcp/monday-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fmonday-mcp-server.json",
       "type": "json",
-      "sha256": "23a64f4e44e468a0be90a3e492ae6eb7f772cd98495defd5b5f85b006545cd13"
+      "sha256": "01ded6641e29b5f682fda8dead26477ddb903b8f86880937353b5b031194b6c1"
     },
     "llms/mcp/monday-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fmonday-mcp-server.txt",
@@ -6233,7 +6241,7 @@
     "entries/tools/n8n.json": {
       "path": "/data/entries%2Ftools%2Fn8n.json",
       "type": "json",
-      "sha256": "7f3b4e7054581761365cb50103e1d19477a727e17cd3a09c71281795aa55ff5b"
+      "sha256": "5fc12379d38f2ec8a21556b215e5018852fdf560e67f05196a1d249872d03d48"
     },
     "llms/tools/n8n.txt": {
       "path": "/data/llms%2Ftools%2Fn8n.txt",
@@ -6248,7 +6256,7 @@
     "entries/skills/n8n-ai-agent-workflow-architect.json": {
       "path": "/data/entries%2Fskills%2Fn8n-ai-agent-workflow-architect.json",
       "type": "json",
-      "sha256": "eae2a47d31965766667c0f199fa0435f3447d36d9c7a335c7e7166d2d40d8371"
+      "sha256": "4f49fe3d9d9b64d42073d7f70fbe9eb629b611bf6ba9723d7b564f4e8e1538bf"
     },
     "llms/skills/n8n-ai-agent-workflow-architect.txt": {
       "path": "/data/llms%2Fskills%2Fn8n-ai-agent-workflow-architect.txt",
@@ -6268,7 +6276,7 @@
     "entries/skills/n8n-operations-resilience-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fn8n-operations-resilience-capability-pack.json",
       "type": "json",
-      "sha256": "54d8015472b5f6990d9175358415949916e261240292b7c9c6728b7977182aa4"
+      "sha256": "c0d13d84358dae0e28c50548942a910b605f80636c0c95195928a6abfa2ca9db"
     },
     "llms/skills/n8n-operations-resilience-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fn8n-operations-resilience-capability-pack.txt",
@@ -6288,7 +6296,7 @@
     "entries/skills/n8n-production-security-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fn8n-production-security-capability-pack.json",
       "type": "json",
-      "sha256": "116563ae612208966214a4601866c749f2a72648ab2aa23230588f1acbbfdedc"
+      "sha256": "eafcecd8f671ce04f0926f6e0a02671c75ccf0266379f38b5a08891c76d97ee6"
     },
     "llms/skills/n8n-production-security-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fn8n-production-security-capability-pack.txt",
@@ -6308,7 +6316,7 @@
     "entries/mcp/netlify-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fnetlify-mcp-server.json",
       "type": "json",
-      "sha256": "799189163e3437198b16ba6fbdd03ee3ee43982135afd211e648a8863da6b9ed"
+      "sha256": "5ac32bfc3ab15a2205da8b4fb984e07e374f0984a4bb3b76b86ff94d3c631d62"
     },
     "llms/mcp/netlify-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fnetlify-mcp-server.txt",
@@ -6353,7 +6361,7 @@
     "entries/mcp/notion-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fnotion-mcp-server.json",
       "type": "json",
-      "sha256": "873d0ff7b466f100fdc1396cedf64a480d9dde9c9ee92c1e03a86e163fcfca91"
+      "sha256": "b4db15d7853d5493a8bb12b0ea3ba9b747fd892560e6fff1c93670f39fdffac7"
     },
     "llms/mcp/notion-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fnotion-mcp-server.txt",
@@ -6383,7 +6391,7 @@
     "entries/skills/openclaw-agent-ops-hardening.json": {
       "path": "/data/entries%2Fskills%2Fopenclaw-agent-ops-hardening.json",
       "type": "json",
-      "sha256": "ac68cedaf1659ac14434a2a22768fb709050a6a228fc1827341ea207b3f6a05c"
+      "sha256": "51a40f34d0e93c6017352e0546865871c0c294ffe714cb64e80f6f253e4557c9"
     },
     "llms/skills/openclaw-agent-ops-hardening.txt": {
       "path": "/data/llms%2Fskills%2Fopenclaw-agent-ops-hardening.txt",
@@ -6403,7 +6411,7 @@
     "entries/skills/openclaw-operator-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fopenclaw-operator-capability-pack.json",
       "type": "json",
-      "sha256": "7c53f82b23d85881da0b304b1f88c8314ea303f9610a32c82b3d515def03fc60"
+      "sha256": "1271860081a401913513057b32c76ce8b9ed983799dae72d79281b7f23263e28"
     },
     "llms/skills/openclaw-operator-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fopenclaw-operator-capability-pack.txt",
@@ -6423,7 +6431,7 @@
     "entries/skills/openclaw-skill-authoring-factory-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fopenclaw-skill-authoring-factory-capability-pack.json",
       "type": "json",
-      "sha256": "36917e4fb72a4a5f6b07468e2cb83980c42f0aee26a53ba8cca46b4f7b650b74"
+      "sha256": "1c0303c6cb51b8a515186621f7837cbeb0b1b6fe3070054b7ad9f775d0c4276f"
     },
     "llms/skills/openclaw-skill-authoring-factory-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fopenclaw-skill-authoring-factory-capability-pack.txt",
@@ -6443,7 +6451,7 @@
     "entries/tools/opencode.json": {
       "path": "/data/entries%2Ftools%2Fopencode.json",
       "type": "json",
-      "sha256": "79d3f3488b119f35e1185cca8987c8c9d24caf544a31c7ec5b0968ad2c7f1f3c"
+      "sha256": "c5a4f24766d58034d885f5a82c9ffa8bc482f18bad6b5e4ab334a31c5d50284c"
     },
     "llms/tools/opencode.txt": {
       "path": "/data/llms%2Ftools%2Fopencode.txt",
@@ -6458,7 +6466,7 @@
     "entries/skills/opennext-cloudflare-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fopennext-cloudflare-capability-pack.json",
       "type": "json",
-      "sha256": "b96be7a294e005a7e1a34d5dbeae073aabfeb687278b21b146713210564c193a"
+      "sha256": "4225a2ce5bdfb6da7af927e5854ca358b22d97a390b11e88fa875a54aa57c61f"
     },
     "llms/skills/opennext-cloudflare-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fopennext-cloudflare-capability-pack.txt",
@@ -6493,7 +6501,7 @@
     "entries/skills/pagespeed-insights-optimizer.json": {
       "path": "/data/entries%2Fskills%2Fpagespeed-insights-optimizer.json",
       "type": "json",
-      "sha256": "d197c78533991a53ee12aa8452ad20f7476bf833a7b4e160bd3f8549b80af69e"
+      "sha256": "cb4a95f437ef7e114efccb9be8e868d084d085a0fb0ea75c1741bee45a10a5d9"
     },
     "llms/skills/pagespeed-insights-optimizer.txt": {
       "path": "/data/llms%2Fskills%2Fpagespeed-insights-optimizer.txt",
@@ -6603,7 +6611,7 @@
     "entries/tools/pipedream.json": {
       "path": "/data/entries%2Ftools%2Fpipedream.json",
       "type": "json",
-      "sha256": "7e5f44ec02a09f92d46cb4f6dbb3c5862fc98ee3fc728412afc00a0e8593c0a9"
+      "sha256": "c7987294f5408bc0bd870d5421ff4e9605c74bf99daad018af2369ebfd5ef44f"
     },
     "llms/tools/pipedream.txt": {
       "path": "/data/llms%2Ftools%2Fpipedream.txt",
@@ -6648,7 +6656,7 @@
     "entries/skills/playwright-e2e-testing.json": {
       "path": "/data/entries%2Fskills%2Fplaywright-e2e-testing.json",
       "type": "json",
-      "sha256": "fb4b49bd16df301de559bd3ec6ec8007b26ac637ded5282aaeaebc00b1be80a1"
+      "sha256": "636fe66c0ae101ef6641eb3f468d1c1ca99fffd15e3321286b6198a4bf43e56e"
     },
     "llms/skills/playwright-e2e-testing.txt": {
       "path": "/data/llms%2Fskills%2Fplaywright-e2e-testing.txt",
@@ -6668,7 +6676,7 @@
     "entries/skills/playwright-mcp-browser-automation-engineer.json": {
       "path": "/data/entries%2Fskills%2Fplaywright-mcp-browser-automation-engineer.json",
       "type": "json",
-      "sha256": "1b5d4156ae1b468c3b28d29e3c7063fcaac54f02908eb57604b39ea68ae0581f"
+      "sha256": "82da714e2b07d292cccf064754fb4b8c58ea7c85a73122091919551db15e8135"
     },
     "llms/skills/playwright-mcp-browser-automation-engineer.txt": {
       "path": "/data/llms%2Fskills%2Fplaywright-mcp-browser-automation-engineer.txt",
@@ -6733,7 +6741,7 @@
     "entries/skills/postgresql-query-optimization.json": {
       "path": "/data/entries%2Fskills%2Fpostgresql-query-optimization.json",
       "type": "json",
-      "sha256": "7083b0b2df869eb351d6b5e56599c88e107a4c9dead1de005c304462102dd709"
+      "sha256": "d8c499525a56963cc3934d83cb0602272aac61302c2da8bb8a356227adf43e95"
     },
     "llms/skills/postgresql-query-optimization.txt": {
       "path": "/data/llms%2Fskills%2Fpostgresql-query-optimization.txt",
@@ -6843,7 +6851,7 @@
     "entries/skills/prompt-injection-defense-guardrails.json": {
       "path": "/data/entries%2Fskills%2Fprompt-injection-defense-guardrails.json",
       "type": "json",
-      "sha256": "f283e9df3a8500211afdcc156ada391208c123580661555d9f8304da4695cb74"
+      "sha256": "e650d78ee6e99f55ef81b0b88b03edf0d7a7a657f1a0cf22cf8dcdc3bad13fcb"
     },
     "llms/skills/prompt-injection-defense-guardrails.txt": {
       "path": "/data/llms%2Fskills%2Fprompt-injection-defense-guardrails.txt",
@@ -6893,7 +6901,7 @@
     "entries/tools/promptfoo.json": {
       "path": "/data/entries%2Ftools%2Fpromptfoo.json",
       "type": "json",
-      "sha256": "3cb1dc7bb933ad406f97202c52ba1065627d76eaa51c53481c73a38853dbc083"
+      "sha256": "f18e313bdbd6b60102535def5d0ab56c517c939f62ebf1ad8e7788fd126a83db"
     },
     "llms/tools/promptfoo.txt": {
       "path": "/data/llms%2Ftools%2Fpromptfoo.txt",
@@ -6908,7 +6916,7 @@
     "entries/tools/protect-ai.json": {
       "path": "/data/entries%2Ftools%2Fprotect-ai.json",
       "type": "json",
-      "sha256": "1b08180f477bcd555b383f2e3974384a6b9ea00f64ce01f8db457ad58297ac71"
+      "sha256": "a66bde61839d1a39c27585b927908d9e28f16a5f34e7e94b361b4d89219f8a86"
     },
     "llms/tools/protect-ai.txt": {
       "path": "/data/llms%2Ftools%2Fprotect-ai.txt",
@@ -6923,7 +6931,7 @@
     "entries/skills/proxmox-ve-api-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fproxmox-ve-api-capability-pack.json",
       "type": "json",
-      "sha256": "652e36003a05cff49958c5f0a0426ce36f787c5b1613e04a6726f05d3bda37e1"
+      "sha256": "da8a418ed65af65b4588981882e32d252afff600a6b02f90b23ea6dac065455e"
     },
     "llms/skills/proxmox-ve-api-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fproxmox-ve-api-capability-pack.txt",
@@ -6943,7 +6951,7 @@
     "entries/skills/proxmox-ve-api-orchestrator.json": {
       "path": "/data/entries%2Fskills%2Fproxmox-ve-api-orchestrator.json",
       "type": "json",
-      "sha256": "94269b6b3c7379394804e69005f1e543b5d58601b95a6a071f4423d823207fe6"
+      "sha256": "01b42eb7aad75a0df8d31158bf1abb738ea423bc8f6491f6258e2ac1659cdc5a"
     },
     "llms/skills/proxmox-ve-api-orchestrator.txt": {
       "path": "/data/llms%2Fskills%2Fproxmox-ve-api-orchestrator.txt",
@@ -7038,7 +7046,7 @@
     "entries/tools/raycast.json": {
       "path": "/data/entries%2Ftools%2Fraycast.json",
       "type": "json",
-      "sha256": "6fd459ede1504e2a0c3a5832caf84d1fb08c177688cc70012121be971da274da"
+      "sha256": "cd69ba8a2211273105880f219072bceefa1c67d54b1733da7ef46c1bbafacea3"
     },
     "llms/tools/raycast.txt": {
       "path": "/data/llms%2Ftools%2Fraycast.txt",
@@ -7053,7 +7061,7 @@
     "entries/skills/raycast-extension-dev-publish-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fraycast-extension-dev-publish-capability-pack.json",
       "type": "json",
-      "sha256": "d47d35b981d430e349846de3024fef36557f500008c06c0f6faa71facbaecbe9"
+      "sha256": "90368de2bf48722be03de9c623665d947f57674b0fb90e2d028be1cdf227e17c"
     },
     "llms/skills/raycast-extension-dev-publish-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fraycast-extension-dev-publish-capability-pack.txt",
@@ -7238,7 +7246,7 @@
     "entries/skills/rest-api-client-harness.json": {
       "path": "/data/entries%2Fskills%2Frest-api-client-harness.json",
       "type": "json",
-      "sha256": "e92be89580f94fd8522bf3ec1e68dc8c40664a978dc4567705a7ea17cc9b7212"
+      "sha256": "cad0695c4af07a46d848d202da200b211c3df73fe3ac26c05143f3d44e78cd4d"
     },
     "llms/skills/rest-api-client-harness.txt": {
       "path": "/data/llms%2Fskills%2Frest-api-client-harness.txt",
@@ -7258,7 +7266,7 @@
     "entries/tools/roo-code.json": {
       "path": "/data/entries%2Ftools%2Froo-code.json",
       "type": "json",
-      "sha256": "a7b83c507ffdede73d6b0d4c8f652bfcf74bd81bb72f08351459560e418e3b01"
+      "sha256": "836d21606c2f94eea92120b44b187504009cb314d5d8fe2ddc0042e76edf7bfd"
     },
     "llms/tools/roo-code.txt": {
       "path": "/data/llms%2Ftools%2Froo-code.txt",
@@ -7288,7 +7296,7 @@
     "entries/skills/saas-pricing-experimentation-engine.json": {
       "path": "/data/entries%2Fskills%2Fsaas-pricing-experimentation-engine.json",
       "type": "json",
-      "sha256": "af7dfdfc645ff3368f830012b40b4e6b89c179e565ba71264195f8da09d8a52a"
+      "sha256": "716804c007451232603b67d7aeffab2430539b9d3112969fe32f174867086266"
     },
     "llms/skills/saas-pricing-experimentation-engine.txt": {
       "path": "/data/llms%2Fskills%2Fsaas-pricing-experimentation-engine.txt",
@@ -7413,7 +7421,7 @@
     "entries/mcp/sentry-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fsentry-mcp-server.json",
       "type": "json",
-      "sha256": "bf2a4ae01a8f3333f5060ef52e0dfd34076fd1ddfde1e3e3cef29ea7a2cdb0fc"
+      "sha256": "7bcc03781a06e49ea0ada09232b0fe164722956a823a8d254d4d2c9208367cce"
     },
     "llms/mcp/sentry-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fsentry-mcp-server.txt",
@@ -7533,7 +7541,7 @@
     "entries/tools/smithery.json": {
       "path": "/data/entries%2Ftools%2Fsmithery.json",
       "type": "json",
-      "sha256": "19e14a545a0554a583b3002f41e172153b15a01ef3cf16734b86814e4fd05548"
+      "sha256": "ae254936f0f4679bece1fd27c538a88668494b518bf716419b76d6ed5e049f41"
     },
     "llms/tools/smithery.txt": {
       "path": "/data/llms%2Ftools%2Fsmithery.txt",
@@ -7548,7 +7556,7 @@
     "entries/mcp/socket-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fsocket-mcp-server.json",
       "type": "json",
-      "sha256": "0efa33b58bdcd509044a99907f1937965d559ba984929bbd318ceddeade8941d"
+      "sha256": "765befb6575dc65f733d28b1009f24160bc2a42fe173ec2d3318cbe3655b223d"
     },
     "llms/mcp/socket-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fsocket-mcp-server.txt",
@@ -7563,7 +7571,7 @@
     "entries/tools/sourcegraph-cody.json": {
       "path": "/data/entries%2Ftools%2Fsourcegraph-cody.json",
       "type": "json",
-      "sha256": "9a119cdbc69c2f9a1de6c15c4bb81a70b1dfe9b1a66aad097998d77ebac3b856"
+      "sha256": "0b0291f221900c177f0f8e9b31988baf07c40a61975768c4b732ed0e1a539043"
     },
     "llms/tools/sourcegraph-cody.txt": {
       "path": "/data/llms%2Ftools%2Fsourcegraph-cody.txt",
@@ -7578,7 +7586,7 @@
     "entries/mcp/square-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fsquare-mcp-server.json",
       "type": "json",
-      "sha256": "060e6ec65cedd5f16fee81a783a4da1299510d0a34e12cb96ae838d6d28a2047"
+      "sha256": "ea6b0959a5ac5b68876feada773c7a489bdb64f953496b454ed02fdf38df8e4e"
     },
     "llms/mcp/square-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fsquare-mcp-server.txt",
@@ -7593,7 +7601,7 @@
     "entries/tools/stagehand.json": {
       "path": "/data/entries%2Ftools%2Fstagehand.json",
       "type": "json",
-      "sha256": "db8680968aca2d1d8900ad745a62ae061240b8bc331cd97401fcc4245c3bfcf1"
+      "sha256": "fa233b4d019fb3559d508c7e025b80eec7607d27ea7e1b78522d87e3c0b827fb"
     },
     "llms/tools/stagehand.txt": {
       "path": "/data/llms%2Ftools%2Fstagehand.txt",
@@ -7623,7 +7631,7 @@
     "entries/mcp/stripe-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fstripe-mcp-server.json",
       "type": "json",
-      "sha256": "7f8811f1f9ea1a4da44c4509e191500c5f2b25f693ce509054bdb5497adf129a"
+      "sha256": "2a0aa6cef55e363a4acbd851156657ff6ff2bbf86a41c0d963bed7e0acdc5550"
     },
     "llms/mcp/stripe-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fstripe-mcp-server.txt",
@@ -7638,7 +7646,7 @@
     "entries/mcp/stytch-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fstytch-mcp-server.json",
       "type": "json",
-      "sha256": "c1d280239ad05c46baf25a5ebed182721e252c49610e146c113ae5fa35f44418"
+      "sha256": "9c7b688fb34071ccb2a0b0e5780f8383d1a7cfca17705e57d7071cb244e598b1"
     },
     "llms/mcp/stytch-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fstytch-mcp-server.txt",
@@ -7683,7 +7691,7 @@
     "entries/skills/supabase-realtime-database.json": {
       "path": "/data/entries%2Fskills%2Fsupabase-realtime-database.json",
       "type": "json",
-      "sha256": "71bea8f52dd8db0280f823c9e1b90c60a5b349fb4bf34a9dda43b1a0ee61f200"
+      "sha256": "9e20fed27938d9e550f5d3a399c100b18aafa7b06a49f94f9353bf40644c7fce"
     },
     "llms/skills/supabase-realtime-database.txt": {
       "path": "/data/llms%2Fskills%2Fsupabase-realtime-database.txt",
@@ -7718,7 +7726,7 @@
     "entries/skills/svelte-sveltekit-fullstack.json": {
       "path": "/data/entries%2Fskills%2Fsvelte-sveltekit-fullstack.json",
       "type": "json",
-      "sha256": "d7e6cb5e2f81fd2709018eb090dbbd6a1ddf6f1f9d2ed18f7568c56372e50e4a"
+      "sha256": "4a1344bb02676b44aa030b2b75b92dd9192f43ee877f09b2fecef4d2fe38ff34"
     },
     "llms/skills/svelte-sveltekit-fullstack.txt": {
       "path": "/data/llms%2Fskills%2Fsvelte-sveltekit-fullstack.txt",
@@ -7888,7 +7896,7 @@
     "entries/tools/trigger-dev.json": {
       "path": "/data/entries%2Ftools%2Ftrigger-dev.json",
       "type": "json",
-      "sha256": "70f8c48d148d73e1ae0d0b73ca83b64273e5b535f2fa66a52f7c6bb5c966c683"
+      "sha256": "4ad524320b8d0c1718923667132d77eea23640399b21c351cc27c73e30bf63fc"
     },
     "llms/tools/trigger-dev.txt": {
       "path": "/data/llms%2Ftools%2Ftrigger-dev.txt",
@@ -7903,7 +7911,7 @@
     "entries/skills/trpc-type-safe-api.json": {
       "path": "/data/entries%2Fskills%2Ftrpc-type-safe-api.json",
       "type": "json",
-      "sha256": "2884f4bedd0aa5fd0d255f5067238c62a1834159d23e7c0fef1d5f6fff56e6dd"
+      "sha256": "746dd9cb1b1c4870cd02b8163149f8685abae0cc64751987b6caf015b80bc088"
     },
     "llms/skills/trpc-type-safe-api.txt": {
       "path": "/data/llms%2Fskills%2Ftrpc-type-safe-api.txt",
@@ -7968,7 +7976,7 @@
     "entries/skills/unraid-api-automation-operator.json": {
       "path": "/data/entries%2Fskills%2Funraid-api-automation-operator.json",
       "type": "json",
-      "sha256": "dd0816d4714d9e744e73fad12b202120cbf520ca0197ed3a43ab44a453c53ae9"
+      "sha256": "f188062f97fd71552e2770b75b0d312994ec7331bd9ae98c73641c9a12a15e69"
     },
     "llms/skills/unraid-api-automation-operator.txt": {
       "path": "/data/llms%2Fskills%2Funraid-api-automation-operator.txt",
@@ -7988,7 +7996,7 @@
     "entries/skills/unraid-api-v2-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Funraid-api-v2-capability-pack.json",
       "type": "json",
-      "sha256": "3c0f493ccbfbc503092d0df36f85557b35972dccf72d6aeff909a796615d92cd"
+      "sha256": "9efeb089e965d164c70adc938acb2f626d1bc4b24171349b246d0001436461ce"
     },
     "llms/skills/unraid-api-v2-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Funraid-api-v2-capability-pack.txt",
@@ -8008,7 +8016,7 @@
     "entries/skills/unraid-ca-template-authoring-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Funraid-ca-template-authoring-capability-pack.json",
       "type": "json",
-      "sha256": "a646cac908a65da10d9eddde3e6f1d5b324a567ee7671e9b968dade17286ba5e"
+      "sha256": "a1abb86201fe590661d4d30dc870d0e820891a67aa52d4c2a094342ce8a293b5"
     },
     "llms/skills/unraid-ca-template-authoring-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Funraid-ca-template-authoring-capability-pack.txt",
@@ -8028,7 +8036,7 @@
     "entries/tools/vercel-v0.json": {
       "path": "/data/entries%2Ftools%2Fvercel-v0.json",
       "type": "json",
-      "sha256": "aa02e7545e9535c8058e2a6c14e90d323e74739556bf3b32a10d7bd9c3d1e1f0"
+      "sha256": "834b73c0e9106631685ffffb516390887a22d822027d99fea26a28d612769bc1"
     },
     "llms/tools/vercel-v0.txt": {
       "path": "/data/llms%2Ftools%2Fvercel-v0.txt",
@@ -8058,7 +8066,7 @@
     "entries/skills/v0-rapid-prototyping.json": {
       "path": "/data/entries%2Fskills%2Fv0-rapid-prototyping.json",
       "type": "json",
-      "sha256": "a9db51955b6d1760ece43d61be49a407cb60ec81314686ba4dc0a4a61ffca972"
+      "sha256": "cccb3ad9bdc508d24f2b94ce7b6273f31829d47a6f590bbe1b6be82ee6881552"
     },
     "llms/skills/v0-rapid-prototyping.txt": {
       "path": "/data/llms%2Fskills%2Fv0-rapid-prototyping.txt",
@@ -8078,7 +8086,7 @@
     "entries/tools/vercel-ai-sdk.json": {
       "path": "/data/entries%2Ftools%2Fvercel-ai-sdk.json",
       "type": "json",
-      "sha256": "86724cbc1cc93c50568831b9b94ba4ba9edb56c0aefc85326a7367309b190a9d"
+      "sha256": "b5bbdf876263de57537d0cd80dc0466719f0369b61a1e7dec75accbc1856fbc4"
     },
     "llms/tools/vercel-ai-sdk.txt": {
       "path": "/data/llms%2Ftools%2Fvercel-ai-sdk.txt",
@@ -8093,7 +8101,7 @@
     "entries/mcp/vercel-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fvercel-mcp-server.json",
       "type": "json",
-      "sha256": "148d073e1644ce23f36a7c2a1b6e95e185106c752556194957dbce76d727c659"
+      "sha256": "79fd275351de0030bd1eec0074d42da497874cb3f4249efec5c6556de7f39b36"
     },
     "llms/mcp/vercel-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fvercel-mcp-server.txt",
@@ -8108,7 +8116,7 @@
     "entries/skills/vite-build-optimization.json": {
       "path": "/data/entries%2Fskills%2Fvite-build-optimization.json",
       "type": "json",
-      "sha256": "c5005c30d2e5137e421c8069fd36bbb445432dc709bf6cd9db5426554b5723be"
+      "sha256": "68f5836548703989709d30c6c18ea0b2179cce19527a97668aa534b4dd20cea8"
     },
     "llms/skills/vite-build-optimization.txt": {
       "path": "/data/llms%2Fskills%2Fvite-build-optimization.txt",
@@ -8158,7 +8166,7 @@
     "entries/tools/weave.json": {
       "path": "/data/entries%2Ftools%2Fweave.json",
       "type": "json",
-      "sha256": "26b22bc7d97e65e700e092823c8085989ddbe416ef7d1fb3bc5c3da6ccf022df"
+      "sha256": "49bd7b6183de245586d4b24331d58c4298a645124f74f4753a598d5ac92ea75c"
     },
     "llms/tools/weave.txt": {
       "path": "/data/llms%2Ftools%2Fweave.txt",
@@ -8188,7 +8196,7 @@
     "entries/skills/webassembly-module-development.json": {
       "path": "/data/entries%2Fskills%2Fwebassembly-module-development.json",
       "type": "json",
-      "sha256": "6ccb06a8984676a97505d27e1b0dfb97f490c4dd291770080074a71b5035060b"
+      "sha256": "4be1fa1e7eb1befc0f7a7ea00b88fac12ee8f8779998950499cfdc172c4f94c5"
     },
     "llms/skills/webassembly-module-development.txt": {
       "path": "/data/llms%2Fskills%2Fwebassembly-module-development.txt",
@@ -8223,7 +8231,7 @@
     "entries/skills/website-crawler-summarizer.json": {
       "path": "/data/entries%2Fskills%2Fwebsite-crawler-summarizer.json",
       "type": "json",
-      "sha256": "5d6eb8b400fe13bdbb120e2c15d354e3ba87403383a09be58d09170f6bf739be"
+      "sha256": "d0a00d800dd6dbae24128af7e916bcbf03783d91ae58512c6322ffa5da586fa1"
     },
     "llms/skills/website-crawler-summarizer.txt": {
       "path": "/data/llms%2Fskills%2Fwebsite-crawler-summarizer.txt",
@@ -8243,7 +8251,7 @@
     "entries/tools/windsurf.json": {
       "path": "/data/entries%2Ftools%2Fwindsurf.json",
       "type": "json",
-      "sha256": "74125b205e01fb26b7ba725f683453882fde91b07527310ba9a52ca730cacb49"
+      "sha256": "b2f5696731165580734006d2461f41faca95bf2ca1288adadb9e835b265f684d"
     },
     "llms/tools/windsurf.txt": {
       "path": "/data/llms%2Ftools%2Fwindsurf.txt",
@@ -8258,7 +8266,7 @@
     "entries/skills/windsurf-collaborative-development.json": {
       "path": "/data/entries%2Fskills%2Fwindsurf-collaborative-development.json",
       "type": "json",
-      "sha256": "54164c0e5fb186b1460a75a13a186ebf24a310fa35f6c876c3df9e17e597fce0"
+      "sha256": "e50de7c98221165a4da5646b9547c9fc4c6ce5a46176b6dc9918a90e2f0ebf19"
     },
     "llms/skills/windsurf-collaborative-development.txt": {
       "path": "/data/llms%2Fskills%2Fwindsurf-collaborative-development.txt",
@@ -8293,7 +8301,7 @@
     "entries/tools/workato.json": {
       "path": "/data/entries%2Ftools%2Fworkato.json",
       "type": "json",
-      "sha256": "4924f8e9cec9e443277e78b88779a945ee119da1d2321e06558706b0f91cf967"
+      "sha256": "ef61f2dc9d49fbb49712fd330aefb03c3e0336d5da4f22a17ba5b43f2661d5d7"
     },
     "llms/tools/workato.txt": {
       "path": "/data/llms%2Ftools%2Fworkato.txt",
@@ -8308,7 +8316,7 @@
     "entries/mcp/workato-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fworkato-mcp-server.json",
       "type": "json",
-      "sha256": "eba5244e73350add431644169978351bd0157be49b58c575938b102fdcd32cc2"
+      "sha256": "10e33771ba822e94e429d4cb9d7f60e5f2247006b2c1eaefe25e3ebe81a32221"
     },
     "llms/mcp/workato-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fworkato-mcp-server.txt",
@@ -8353,7 +8361,7 @@
     "entries/tools/zapier-ai.json": {
       "path": "/data/entries%2Ftools%2Fzapier-ai.json",
       "type": "json",
-      "sha256": "9b8e731919a4fe67c6a4ce9ed218566b95389cd6e6af4fb1d84e876fc8fda011"
+      "sha256": "abea2912caa3c85a6bb64c4be4f06a3bd0982cfb989ad19acb57a6a331df96f2"
     },
     "llms/tools/zapier-ai.txt": {
       "path": "/data/llms%2Ftools%2Fzapier-ai.txt",
@@ -8368,7 +8376,7 @@
     "entries/mcp/zapier-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fzapier-mcp-server.json",
       "type": "json",
-      "sha256": "f05603ce78ec3dae044a613834abe49f4c5e6abcd4aeb3523fada75dfa0daeb8"
+      "sha256": "4a485a9fb3690219fffde161b66709a4a6d027991a7d51a822483fdcc8d4998e"
     },
     "llms/mcp/zapier-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fzapier-mcp-server.txt",
@@ -8383,7 +8391,7 @@
     "entries/tools/zed.json": {
       "path": "/data/entries%2Ftools%2Fzed.json",
       "type": "json",
-      "sha256": "cc614c0297637147bd8deb3f71d657cf0d91772c17a653a14fb625d2f2fa3a9e"
+      "sha256": "d242ec1bd5d8649c3c50efd5dc63c36ee5380155c30d2f2310bc3f20827aac07"
     },
     "llms/tools/zed.txt": {
       "path": "/data/llms%2Ftools%2Fzed.txt",
@@ -8398,7 +8406,7 @@
     "entries/skills/zero-budget-saas-launch-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fzero-budget-saas-launch-capability-pack.json",
       "type": "json",
-      "sha256": "ac07813de6b039779178bfeec22ba0cbd5f0af3bd4978ebf7d8a66a4467e2d52"
+      "sha256": "90dd915508cb1d849197aecd5e67bdcaeede36fe7d73fa8e8febb3dfef8af5d6"
     },
     "llms/skills/zero-budget-saas-launch-capability-pack.txt": {
       "path": "/data/llms%2Fskills%2Fzero-budget-saas-launch-capability-pack.txt",
@@ -8418,7 +8426,7 @@
     "entries/skills/zod-schema-validator.json": {
       "path": "/data/entries%2Fskills%2Fzod-schema-validator.json",
       "type": "json",
-      "sha256": "9fcbfec67b6ccf9e2b92a79056221a08ea274df1f433b4d0754e58f49f1e121b"
+      "sha256": "54fcae1849b3a1f15706c18d8505d68a44c6e98404a4a25bb15b286a61f8347f"
     },
     "llms/skills/zod-schema-validator.txt": {
       "path": "/data/llms%2Fskills%2Fzod-schema-validator.txt",
@@ -8434,6 +8442,86 @@
       "path": "/data/skill-adapters%2Fcursor%2Fzod-schema-validator.mdc",
       "type": "text",
       "sha256": "ce1056b04773a492515226adf01f961b7b0ffaf9ef5619f05ab2c8a2064aaba3"
+    },
+    "feeds/categories/agents.json": {
+      "path": "/data/feeds%2Fcategories%2Fagents.json",
+      "type": "json",
+      "sha256": "e1d8d439f4c37335905a8fbf8184d3b2d1797e3234c030d25f0cea6ce073b73f"
+    },
+    "feeds/categories/mcp.json": {
+      "path": "/data/feeds%2Fcategories%2Fmcp.json",
+      "type": "json",
+      "sha256": "3ca24c2338dbb2508d63733ce7c92f19a55a0f4e191c9284e82131a1d8f57b3a"
+    },
+    "feeds/categories/tools.json": {
+      "path": "/data/feeds%2Fcategories%2Ftools.json",
+      "type": "json",
+      "sha256": "bc7cc5fc5e8d8ec7d4dbe9afac10072e26ae0ea00414b1b98999de482022bd42"
+    },
+    "feeds/categories/skills.json": {
+      "path": "/data/feeds%2Fcategories%2Fskills.json",
+      "type": "json",
+      "sha256": "b941e179da47b8ba68562918c975bf17a28442ab78cea69e66405056bf3e8777"
+    },
+    "feeds/categories/rules.json": {
+      "path": "/data/feeds%2Fcategories%2Frules.json",
+      "type": "json",
+      "sha256": "9c78a66b30b58a5df1fd9552e81ca0000b740d24fcdbc35dfe8ee9f5ba4c1072"
+    },
+    "feeds/categories/commands.json": {
+      "path": "/data/feeds%2Fcategories%2Fcommands.json",
+      "type": "json",
+      "sha256": "c25a47bf962ff9d9e0633db061a7d623a19843e06c1986f6ade8d0d68bed1396"
+    },
+    "feeds/categories/hooks.json": {
+      "path": "/data/feeds%2Fcategories%2Fhooks.json",
+      "type": "json",
+      "sha256": "b4d35775f63eee95aae0279f87d125fba99fa62f413e1d44e4b7e76ab5cebc48"
+    },
+    "feeds/categories/guides.json": {
+      "path": "/data/feeds%2Fcategories%2Fguides.json",
+      "type": "json",
+      "sha256": "eb445dc469572eb8a7279156c419ac0948561cd599d2da12d7e460ced0d98f7d"
+    },
+    "feeds/categories/collections.json": {
+      "path": "/data/feeds%2Fcategories%2Fcollections.json",
+      "type": "json",
+      "sha256": "9e11a99fd2844af25b6eebb4659b53f6093a6ef8170f0c7560b73379ab8a0712"
+    },
+    "feeds/categories/statuslines.json": {
+      "path": "/data/feeds%2Fcategories%2Fstatuslines.json",
+      "type": "json",
+      "sha256": "0a7cd5ab752257cfaf56ea8938b78410520821a518576efe22506a0c33cfbd22"
+    },
+    "feeds/platforms/claude.json": {
+      "path": "/data/feeds%2Fplatforms%2Fclaude.json",
+      "type": "json",
+      "sha256": "7218c5b95d16bbdae6fd0c6113ab363cacdf31f222e14f401bcd0431c9418a8a"
+    },
+    "feeds/platforms/codex.json": {
+      "path": "/data/feeds%2Fplatforms%2Fcodex.json",
+      "type": "json",
+      "sha256": "27ba26a1b633f98bdd59ff462dc3556f427e7b5d1755ab35e0d48e569b673f44"
+    },
+    "feeds/platforms/windsurf.json": {
+      "path": "/data/feeds%2Fplatforms%2Fwindsurf.json",
+      "type": "json",
+      "sha256": "e1b03c7e184dba38c1b3b0e1488e5843307e1da3582c3a98ecfd2e0e2e6c9d6c"
+    },
+    "feeds/platforms/gemini.json": {
+      "path": "/data/feeds%2Fplatforms%2Fgemini.json",
+      "type": "json",
+      "sha256": "85116be30e2d3f0d9178bdd7eec622cabefb74797a94836cc01d4061a175f696"
+    },
+    "feeds/platforms/cursor.json": {
+      "path": "/data/feeds%2Fplatforms%2Fcursor.json",
+      "type": "json",
+      "sha256": "f0ba232db1b280934aa4162b00e5e99293da3d56d050d2f850e9cea16210a8e7"
+    },
+    "feeds/platforms/generic-agents.json": {
+      "path": "/data/feeds%2Fplatforms%2Fgeneric-agents.json",
+      "type": "json",
+      "sha256": "9df3a3cea9e1c57a351a897ab300601d307497c4a10231af1435d6356425e714"
     }
   }
 }

@@ -3,6 +3,7 @@ import { categorySpec } from "@heyclaude/registry";
 type CategorySpecEntry = {
   label: string;
   description: string;
+  seoDescription?: string;
   usageHint: string;
   quickstart?: string[];
 };
@@ -45,6 +46,14 @@ export const categoryDescriptions: Record<string, string> = Object.fromEntries(
     spec.description,
   ]),
 );
+
+export const categorySeoDescriptions: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(categories).map(([category, spec]) => [
+      category,
+      spec.seoDescription ?? spec.description,
+    ]),
+  );
 
 export const categoryUsageHints: Record<string, string> = Object.fromEntries(
   Object.entries(categories).map(([category, spec]) => [

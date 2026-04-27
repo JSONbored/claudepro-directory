@@ -7,7 +7,7 @@
     "title": "LangGraph",
     "description": "Agent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.",
     "seoTitle": "LangGraph agent orchestration framework",
-    "seoDescription": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
+    "seoDescription": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration. HeyClaude adds source links, install steps,...",
     "author": "LangChain",
     "dateAdded": "2026-04-27",
     "contentUpdatedAt": "2026-04-26T23:21:14-06:00",

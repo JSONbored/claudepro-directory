@@ -406,6 +406,7 @@ paths:
   /api/registry/feed:
     get:
       summary: Fetch the read-only registry feed descriptor
+      description: Links registry APIs, artifact contracts, RSS, changelog, category feeds, platform feeds, and quality surfaces for downstream consumers.
       responses:
         "200":
           description: Registry feed descriptor with API endpoint templates and artifact links
@@ -413,6 +414,53 @@ paths:
           description: Forbidden origin
         "429":
           description: Rate limited
+  /data/feeds/index.json:
+    get:
+      summary: Fetch sharded distribution feed links
+      responses:
+        "200":
+          description: Static feed index for category and platform shards
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /data/feeds/categories/{category}.json:
+    get:
+      summary: Fetch a category-sharded registry feed
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          description: Static category feed envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /data/feeds/platforms/{platform}.json:
+    get:
+      summary: Fetch a platform-sharded skill feed
+      parameters:
+        - in: path
+          name: platform
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          description: Static platform compatibility feed envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
   /api/registry/diff:
     get:
       summary: Fetch registry changes since a known signature or date

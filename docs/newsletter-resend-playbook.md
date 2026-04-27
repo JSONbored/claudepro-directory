@@ -13,6 +13,10 @@ are stable on the release branch.
 
 ## Template Set
 
+Source templates live in `emails/templates/` and should be copied into Resend
+Broadcast drafts for test sends and scheduling. Keep app code limited to
+subscription capture and webhook handling.
+
 ### Curated Drop Digest
 
 Subject: `New HeyClaude picks: {{TOPIC}}`
@@ -48,7 +52,14 @@ Use sparingly for community maintenance. Include:
 
 ## Build Notes
 
-React Email templates are acceptable later, but the first implementation should
-stay simple: Resend-hosted templates or Broadcast drafts with explicit test
-sends before scheduling. Never send from app code without previewing the final
-HTML and plain-text fallback.
+React Email templates are acceptable later, but the current implementation stays
+simple: static HTML/plain-text templates copied into Resend Broadcast drafts
+with explicit test sends before scheduling. Never send from app code without
+previewing the final HTML and plain-text fallback.
+
+## Indexing And Attribution
+
+- Use UTM links when a campaign points to HeyClaude pages:
+  `utm_source=newsletter&utm_medium=email&utm_campaign=<slug>`.
+- Prefer canonical entry URLs and feed/API docs links over short links.
+- Include Resend unsubscribe or preference placeholders in every draft.

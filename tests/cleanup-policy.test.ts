@@ -165,44 +165,31 @@ describe("cleanup policy", () => {
     }
   });
 
-  it("keeps TASKS.md as a verified active tracker", () => {
-    const tasksPath = path.join(repoRoot, "TASKS.md");
-    expect(fs.existsSync(tasksPath)).toBe(true);
-
-    const tasks = fs.readFileSync(tasksPath, "utf8");
-    for (const section of requiredTaskSections) {
-      expect(tasks).toContain(`## ${section}`);
-    }
-    for (const forbiddenName of forbiddenBenchmarkNames) {
-      expect(tasks.toLowerCase()).not.toContain(forbiddenName.toLowerCase());
-    }
-
-    const completedLines = tasks
-      .split("\n")
-      .filter((line) => line.trim().startsWith("- [x]"));
-    expect(completedLines.length).toBeGreaterThan(0);
-    for (const line of completedLines) {
-      expect(line).toContain("Evidence:");
-      expect(line).toContain("`");
-    }
+  it("keeps TASKS.md as an optional local-only tracker", () => {
+    const gitignore = fs.readFileSync(path.join(repoRoot, ".gitignore"), "utf8");
+    expect(gitignore.split("\n")).toContain("TASKS.md");
 
     const rootPackage = JSON.parse(
       fs.readFileSync(path.join(repoRoot, "package.json"), "utf8"),
     ) as { scripts: Record<string, string> };
-    for (const scriptName of [
-      "validate:clean",
-      "validate:content:strict",
-      "validate:category-spec",
-      "validate:packages",
-      "validate:raycast-feed",
-      "test",
-      "test:e2e",
-      "validate:tasks",
-      "type-check",
-      "build",
-    ]) {
-      expect(rootPackage.scripts[scriptName]).toBeTruthy();
-      expect(tasks).toContain(`pnpm ${scriptName}`);
+    expect(rootPackage.scripts["validate:tasks"]).toBeTruthy();
+
+    const validator = fs.readFileSync(
+      path.join(repoRoot, "scripts/validate-tasks.mjs"),
+      "utf8",
+    );
+    expect(validator).toContain("REQUIRE_TASKS");
+    expect(validator).toContain("skipping optional local task tracker");
+
+    const tasksPath = path.join(repoRoot, "TASKS.md");
+    if (fs.existsSync(tasksPath)) {
+      const tasks = fs.readFileSync(tasksPath, "utf8");
+      for (const section of requiredTaskSections) {
+        expect(tasks).toContain(`## ${section}`);
+      }
+      for (const forbiddenName of forbiddenBenchmarkNames) {
+        expect(tasks.toLowerCase()).not.toContain(forbiddenName.toLowerCase());
+      }
     }
   });
 });

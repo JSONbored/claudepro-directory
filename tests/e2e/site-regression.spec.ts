@@ -39,6 +39,7 @@ const htmlRoutes = [
   { path: "/jobs", heading: /Hiring roles/i },
   { path: "/jobs/post", heading: /Post/i },
   { path: "/tools", heading: /Tools/i },
+  { path: "/tools/skill-validator", heading: /Agent Skill package validator/i },
   { path: "/tools/submit", heading: /Submit|Promote/i },
   { path: "/api-docs", heading: /Registry API/i },
   { path: "/claim", heading: /Claim|update/i },
@@ -86,6 +87,7 @@ test.describe("site regression", () => {
       `/api/registry/entries/${entry.category}/${entry.slug}`,
       `/api/registry/entries/${entry.category}/${entry.slug}/llms`,
       "/api/registry/feed",
+      "/48486ebc7ddc47af875118345161ae70.txt",
     ]) {
       const response = await page.goto(route);
       expect(response?.ok(), route).toBe(true);
@@ -133,6 +135,54 @@ test.describe("site regression", () => {
     );
   });
 
+  test("keeps indexable meta descriptions useful for search snippets", async ({
+    page,
+  }) => {
+    for (const route of [
+      "/jobs",
+      "/agents",
+      "/mcp",
+      "/rules",
+      "/hooks",
+      "/statuslines",
+      "/skills",
+      "/commands",
+      "/about",
+      "/guides",
+      "/mcp/hugging-face-mcp-server",
+      "/mcp/monday-mcp-server",
+    ]) {
+      await page.goto(route);
+      const description = await page
+        .locator('meta[name="description"]')
+        .getAttribute("content");
+      expect(description?.length, route).toBeGreaterThanOrEqual(120);
+      expect(description?.length, route).toBeLessThanOrEqual(170);
+    }
+  });
+
+  test("exposes GitHub-based edit and suggestion actions on detail pages", async ({
+    page,
+  }) => {
+    await page.goto(`/${entry.category}/${entry.slug}`);
+    const suggestChange = page.getByRole("link", {
+      name: /Suggest change/i,
+    });
+    await expect(suggestChange).toBeVisible();
+    await expect(suggestChange).toHaveAttribute(
+      "href",
+      /github\.com\/JSONbored\/claudepro-directory\/issues\/new/,
+    );
+
+    const editOnGitHub = page.getByRole("link", { name: /Edit on GitHub/i });
+    if ((await editOnGitHub.count()) > 0) {
+      await expect(editOnGitHub.first()).toHaveAttribute(
+        "href",
+        /github\.com\/JSONbored\/claudepro-directory\/(edit|blob)\//,
+      );
+    }
+  });
+
   test("keeps sitemap coverage for canonical public routes", async ({
     request,
   }) => {
@@ -146,6 +196,7 @@ test.describe("site regression", () => {
       "https://heyclau.de/claim",
       "https://heyclau.de/contributors",
       "https://heyclau.de/quality",
+      "https://heyclau.de/tools/skill-validator",
       "https://heyclau.de/trending",
       "https://heyclau.de/feed.xml",
       "https://heyclau.de/best/claude-native-tools",

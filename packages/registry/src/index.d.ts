@@ -132,6 +132,7 @@ export type CategorySummary = {
 export type RegistryCategorySpecEntry = {
   label: string;
   description: string;
+  seoDescription?: string;
   usageHint: string;
   quickstart?: string[];
   template: string;
@@ -206,6 +207,22 @@ export type DerivedSeoFields = {
   seoDescription: string;
   keywords: string[];
 };
+
+export function platformFeedSlug(platform: string): string;
+export function buildCategoryDistributionFeed(
+  entries: ContentEntry[],
+  category: string,
+  params?: { siteUrl?: string },
+): unknown;
+export function buildPlatformDistributionFeed(
+  entries: ContentEntry[],
+  platform: string,
+  params?: { siteUrl?: string },
+): unknown;
+export function buildDistributionFeedIndex(
+  entries: ContentEntry[],
+  params?: { siteUrl?: string },
+): unknown;
 
 export function deriveSeoFields(
   data?: Record<string, unknown>,

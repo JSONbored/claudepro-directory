@@ -73,6 +73,17 @@ For local Worker-runtime preview:
 pnpm --filter web preview
 ```
 
+After production is deployed and the new sitemap is live, IndexNow can be
+submitted with:
+
+```bash
+INDEXNOW_SUBMIT=1 pnpm indexnow:submit
+```
+
+The public key file is committed under `apps/web/public/` and served from the
+site root. See [`docs/indexnow.md`](../../docs/indexnow.md) for dry-run and CI
+guard details.
+
 ## Newsletter (Resend)
 
 Set secrets/vars in Cloudflare:

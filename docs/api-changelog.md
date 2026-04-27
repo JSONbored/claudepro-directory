@@ -2,6 +2,9 @@
 
 ## 2026-04-27
 
+- Added sharded distribution feeds under `/data/feeds/` for category and platform consumers.
+- Added IndexNow release submission tooling guarded to production URLs.
+- Added the browser-side Agent Skill package validator at `/tools/skill-validator`.
 - Added generated skill platform compatibility metadata for native Agent Skills platforms and adapter targets.
 - Added generated Cursor `.mdc` skill adapters under `/data/skill-adapters/cursor/`.
 - Added deployment artifact validation for preview release candidates.

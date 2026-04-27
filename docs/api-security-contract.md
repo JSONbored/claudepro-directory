@@ -13,6 +13,9 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - `/api/registry/entries/{category}/{slug}`
 - `/api/registry/entries/{category}/{slug}/llms`
 - `/data/*.json` registry artifacts
+- `/data/feeds/index.json`
+- `/data/feeds/categories/{category}.json`
+- `/data/feeds/platforms/{platform}.json`
 - `/data/skill-adapters/...` generated adapters
 
 ## Limited Dynamic Surfaces

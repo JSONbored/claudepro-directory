@@ -7,7 +7,7 @@
 **Discover and share the best Claude configurations**
 379+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
-[🌐 Website](https://heyclau.de) • [💼 Repository](https://github.com/JSONbored/claudepro-directory) • [💬 Discussions](https://github.com/JSONbored/claudepro-directory/discussions) • [💬 Discord](https://discord.gg/Ax3Py4YDrq) • [🐦 Twitter](https://x.com/jsonbored)
+[Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
 </div>
 
@@ -22,6 +22,30 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - Community submissions can flow through GitHub
 - Jobs are reviewed and published by maintainers
 - The site doubles as an awesome-list and a browsable directory
+
+## At a Glance
+
+| Section | Entries | Scope |
+| --- | ---: | --- |
+| [Agents](#ai-agents) | 39 | Specialized Claude agents and expert roles. |
+| [MCP Servers](#mcp-servers) | 44 | Model Context Protocol servers and integrations. |
+| [Tools](#tools) | 52 | Apps, developer tools, services, and products for Claude-native builders. |
+| [Skills](#skills) | 67 | Installable skill packs and reusable capabilities. |
+| [Rules](#rules) | 29 | Prompt guardrails, project rules, and operating constraints. |
+| [Commands](#commands) | 27 | Slash commands and reusable command prompts. |
+| [Hooks](#hooks) | 66 | Claude Code hook configs and automation helpers. |
+| [Guides](#guides) | 19 | Long-form guides and practical walkthroughs. |
+| [Collections](#collections) | 10 | Curated bundles of related assets. |
+| [Statuslines](#statuslines) | 26 | Statusline scripts and workflow telemetry. |
+
+## Distribution Surfaces
+
+- Website: [heyclau.de](https://heyclau.de)
+- Search and browse API: [API docs](https://heyclau.de/api-docs)
+- Machine-readable registry feed: [`/api/registry/feed`](https://heyclau.de/api/registry/feed)
+- Full LLM export: [`/llms-full.txt`](https://heyclau.de/llms-full.txt)
+- RSS updates: [`/feed.xml`](https://heyclau.de/feed.xml)
+- Package validator: [Agent Skill package validator](https://heyclau.de/tools/skill-validator)
 
 ## Quick Start
 
@@ -38,6 +62,12 @@ validate, and approve accepted submissions before automation opens an import PR.
 Tool/app/service
 promotion, listing claims, and jobs use the website lead forms instead of GitHub
 content issues.
+
+### Claim or update an entry
+
+- Use [Claim/update listing](https://heyclau.de/claim) for ownership or commercial listing updates.
+- Use detail-page "Edit on GitHub" links for direct source edits.
+- Use detail-page "Suggest change" links for issue-first corrections.
 
 1. Add or update a file under `content/<category>/`
 2. Run `pnpm --filter web run prebuild`
@@ -59,6 +89,8 @@ content issues.
 
 - Security policy: [SECURITY.md](SECURITY.md)
 - Deployment guide: [apps/web/DEPLOYMENT.md](apps/web/DEPLOYMENT.md)
+- IndexNow: [docs/indexnow.md](docs/indexnow.md)
+- API security contract: [docs/api-security-contract.md](docs/api-security-contract.md)
 - License: [LICENSE](LICENSE)
 
 ---

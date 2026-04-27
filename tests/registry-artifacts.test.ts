@@ -5,8 +5,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildContentQualityArtifact,
   buildContentPromptArtifact,
+  buildCategoryDistributionFeed,
   buildDirectoryEntries,
+  buildDistributionFeedIndex,
   buildMcpRegistryFeed,
+  buildPlatformDistributionFeed,
   buildPluginExportFeed,
   buildCursorSkillAdapter,
   buildJsonLdSnapshots,
@@ -180,6 +183,62 @@ describe("registry artifacts", () => {
     for (const contract of Object.values(manifest.artifactContracts)) {
       expect(contract.sha256).toMatch(/^[a-f0-9]{64}$/);
     }
+  });
+
+  it("publishes category and platform sharded distribution feeds", () => {
+    const feedIndex = readDataJson<{
+      schemaVersion: number;
+      kind: string;
+      categories: Array<{ category: string; feedUrl: string; count: number }>;
+      platforms: Array<{ platform: string; feedUrl: string; count: number }>;
+    }>("feeds/index.json");
+    const skillsCategory = readDataJson<{ kind: string; count: number }>(
+      "feeds/categories/skills.json",
+    );
+    const claudePlatform = readDataJson<{ kind: string; count: number }>(
+      "feeds/platforms/claude.json",
+    );
+
+    expect(feedIndex).toEqual(
+      buildDistributionFeedIndex(contentEntries, {
+        siteUrl: "https://heyclau.de",
+      }),
+    );
+    expect(skillsCategory).toEqual(
+      buildCategoryDistributionFeed(contentEntries, "skills", {
+        siteUrl: "https://heyclau.de",
+      }),
+    );
+    expect(claudePlatform).toEqual(
+      buildPlatformDistributionFeed(contentEntries, "Claude", {
+        siteUrl: "https://heyclau.de",
+      }),
+    );
+    expect(feedIndex).toMatchObject({
+      schemaVersion: 2,
+      kind: "distribution-feed-index",
+    });
+    expect(feedIndex.categories).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          category: "skills",
+          feedUrl: "/data/feeds/categories/skills.json",
+        }),
+      ]),
+    );
+    expect(feedIndex.platforms).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          platform: "Claude",
+          feedUrl: "/data/feeds/platforms/claude.json",
+        }),
+      ]),
+    );
+    expect(manifest.artifacts.distributionFeeds).toBe("/data/feeds");
+    expect(manifest.artifactContracts["feeds/index.json"]).toMatchObject({
+      path: "/data/feeds%2Findex.json",
+      type: "json",
+    });
   });
 
   it("keeps full body fields out of compact indexes", () => {

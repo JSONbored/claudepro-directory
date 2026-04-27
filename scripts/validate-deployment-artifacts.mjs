@@ -2,7 +2,9 @@ const requiredPaths = [
   "/data/directory-index.json",
   "/data/search-index.json",
   "/data/raycast-index.json",
+  "/data/feeds/index.json",
 ];
+const indexNowKeyPath = "/48486ebc7ddc47af875118345161ae70.txt";
 
 function parseArgs(argv) {
   const args = new Map();
@@ -37,6 +39,14 @@ async function fetchJson(baseUrl, pathname) {
   return response.json();
 }
 
+async function fetchText(baseUrl, pathname) {
+  const response = await fetch(`${baseUrl}${pathname}`);
+  if (!response.ok) {
+    throw new Error(`${pathname} returned ${response.status}`);
+  }
+  return response.text();
+}
+
 function readEntries(payload) {
   if (payload && Array.isArray(payload.entries)) return payload.entries;
   return null;
@@ -62,12 +72,21 @@ for (const pathname of requiredPaths) {
       continue;
     }
     const entries = readEntries(payload);
-    if (!Array.isArray(entries)) {
+    if (pathname !== "/data/feeds/index.json" && !Array.isArray(entries)) {
       fail(`${pathname} must return an envelope with entries`);
     }
   } catch (error) {
     fail(error instanceof Error ? error.message : String(error));
   }
+}
+
+try {
+  const key = (await fetchText(baseUrl, indexNowKeyPath)).trim();
+  if (key !== "48486ebc7ddc47af875118345161ae70") {
+    fail(`${indexNowKeyPath} did not return the expected IndexNow key`);
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
 }
 
 try {
@@ -80,6 +99,25 @@ try {
     if (detail?.key !== `${first.category}:${first.slug}`) {
       fail(`${first.detailUrl} did not match the first Raycast entry`);
     }
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
+  const feeds = await fetchJson(baseUrl, "/data/feeds/index.json");
+  const skillsFeed = feeds?.categories?.find(
+    (item) => item?.category === "skills",
+  )?.feedUrl;
+  const claudeFeed = feeds?.platforms?.find(
+    (item) => item?.platform === "Claude",
+  )?.feedUrl;
+
+  if (!skillsFeed || !claudeFeed) {
+    fail("/data/feeds/index.json must expose skills and Claude feed links");
+  } else {
+    await fetchJson(baseUrl, skillsFeed);
+    await fetchJson(baseUrl, claudeFeed);
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

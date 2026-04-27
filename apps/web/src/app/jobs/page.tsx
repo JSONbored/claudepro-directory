@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = buildPageMetadata({
   title: "Claude jobs board",
   description:
-    "Browse roles for teams building with Claude, MCP infrastructure, and AI-native workflows.",
+    "Browse reviewed jobs for teams building with Claude, MCP infrastructure, agents, AI-native developer tools, and production workflow automation.",
   path: "/jobs",
   keywords: ["claude jobs", "ai jobs", "mcp jobs", "llm engineer jobs"],
 });

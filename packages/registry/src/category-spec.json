@@ -74,6 +74,7 @@
     "agents": {
       "label": "Agents",
       "description": "Specialized Claude agents and expert roles.",
+      "seoDescription": "Browse specialized Claude agents, expert role prompts, and reusable AI operator profiles with source links, usage notes, and review-ready metadata.",
       "usageHint": "Copy the full prompt into a Claude agent definition and adapt it to your workflow.",
       "template": "submit-agent.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -92,6 +93,7 @@
     "mcp": {
       "label": "MCP Servers",
       "description": "Model Context Protocol servers and integrations.",
+      "seoDescription": "Discover Model Context Protocol servers for Claude and AI coding tools, including install commands, config snippets, source links, and trust signals.",
       "usageHint": "Install the server, copy the Claude config, then verify the connection in Claude Code.",
       "template": "submit-mcp.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -115,6 +117,7 @@
     "tools": {
       "label": "Tools",
       "description": "Apps, developer tools, services, and products for Claude-native builders.",
+      "seoDescription": "Explore Claude-native apps, developer tools, services, and products with reviewed listings, pricing context, source links, and disclosure signals.",
       "usageHint": "Use this surface for vetted apps and services. Sponsored and affiliate relationships must be disclosed.",
       "template": "",
       "contentRequired": [
@@ -146,6 +149,7 @@
     "skills": {
       "label": "Skills",
       "description": "Installable skill packs and reusable capabilities.",
+      "seoDescription": "Find installable Agent Skill packages for Claude, Codex, Windsurf, Gemini, Cursor adapters, and reusable AI workflows with validation metadata.",
       "usageHint": "Install or download the skill pack, then reuse the included files, prompts, or scripts directly.",
       "template": "submit-skill.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -180,6 +184,7 @@
     "rules": {
       "label": "Rules",
       "description": "Prompt guardrails, project rules, and operating constraints.",
+      "seoDescription": "Browse reusable Claude rules, project guardrails, operating constraints, and prompt policies for teams standardizing AI-assisted development.",
       "usageHint": "Copy the full rule asset into CLAUDE.md or your project rule system instead of only taking the summary.",
       "template": "submit-rule.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -198,6 +203,7 @@
     "commands": {
       "label": "Commands",
       "description": "Slash commands and reusable command prompts.",
+      "seoDescription": "Discover Claude slash commands and reusable command prompts with copy-ready syntax, source assets, usage snippets, and repository-backed metadata.",
       "usageHint": "Use the exact slash command syntax shown for the best starting point, then inspect the full source if needed.",
       "template": "submit-command.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -220,6 +226,7 @@
     "hooks": {
       "label": "Hooks",
       "description": "Claude Code hook configs and automation helpers.",
+      "seoDescription": "Browse Claude Code hooks, automation helpers, trigger configs, and scripts for workflow safety, validation, telemetry, and local developer tooling.",
       "usageHint": "Install the hook script, copy the Claude config, and test the trigger locally before wider use.",
       "template": "submit-hook.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -248,6 +255,7 @@
     "guides": {
       "label": "Guides",
       "description": "Long-form guides and practical walkthroughs.",
+      "seoDescription": "Read practical Claude guides and AI workflow walkthroughs covering setup, implementation steps, troubleshooting, and source-backed recommendations.",
       "usageHint": "Use guides as reference docs and implementation walkthroughs, not as standalone assets.",
       "template": "submit-guide.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -266,6 +274,7 @@
     "collections": {
       "label": "Collections",
       "description": "Curated bundles of related assets.",
+      "seoDescription": "Explore curated HeyClaude collections that bundle related agents, MCP servers, skills, commands, hooks, and guides into practical workflow sets.",
       "usageHint": "Start with the recommended order and then open the included entries one by one.",
       "template": "submit-collection.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
@@ -284,6 +293,7 @@
     "statuslines": {
       "label": "Statuslines",
       "description": "Statusline scripts and workflow telemetry.",
+      "seoDescription": "Find Claude Code statusline scripts and workflow telemetry assets for surfacing context, health, branch state, and operational signals in your terminal.",
       "usageHint": "Copy the Claude statusline config first, then install or adapt the script asset behind it.",
       "template": "submit-statusline.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],

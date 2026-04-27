@@ -68,6 +68,20 @@ function truncateForSeo(value, maxLength) {
   return `${normalized.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
+function deriveSeoDescription(value) {
+  const normalized = compactText(value);
+  if (normalized.length >= 120) return truncateForSeo(normalized, 160);
+
+  const suffix =
+    "HeyClaude adds source links, install steps, compatibility, and metadata.";
+  const combined = normalized ? `${normalized} ${suffix}` : suffix;
+  if (combined.length <= 160) return combined;
+  const sliced = combined.slice(0, 157);
+  const boundary = sliced.lastIndexOf(" ");
+  const safeSlice = boundary >= 120 ? sliced.slice(0, boundary) : sliced;
+  return `${safeSlice.trimEnd()}...`;
+}
+
 function keywordFromValue(value) {
   return compactText(value)
     .toLowerCase()
@@ -121,7 +135,7 @@ export function deriveSeoFields(data = {}, category = "") {
 
   return {
     seoTitle: truncateForSeo(data.seoTitle || titleSuffix, 70),
-    seoDescription: truncateForSeo(descriptionSource, 160),
+    seoDescription: deriveSeoDescription(descriptionSource),
     keywords,
   };
 }

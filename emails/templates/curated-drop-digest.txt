@@ -1,0 +1,14 @@
+HeyClaude curated drop: {{TOPIC}}
+
+{{INTRO}}
+
+Featured: {{FEATURED_TITLE}}
+{{FEATURED_DESCRIPTION}}
+{{FEATURED_URL}}
+
+{{COMPACT_LINKS}}
+
+{{MAINTAINER_NOTE}}
+
+You are receiving this because you subscribed to HeyClaude.
+{{RESEND_UNSUBSCRIBE}}

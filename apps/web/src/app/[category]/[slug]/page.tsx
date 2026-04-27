@@ -9,6 +9,8 @@ import {
   Download,
   ExternalLink,
   FolderTree,
+  MessageSquare,
+  PencilLine,
   ShieldCheck,
   Sparkles,
   Tag,
@@ -49,6 +51,37 @@ type DetailPageProps = {
 };
 
 export const dynamic = "force-dynamic";
+
+function getGitHubEditUrl(githubUrl?: string) {
+  if (!githubUrl) return "";
+  try {
+    const parsed = new URL(githubUrl);
+    if (parsed.hostname !== "github.com") return githubUrl;
+    parsed.pathname = parsed.pathname.replace("/blob/", "/edit/");
+    return parsed.toString();
+  } catch {
+    return githubUrl;
+  }
+}
+
+function getSuggestChangeUrl(entry: { category: string; slug: string; title: string }) {
+  const url = new URL(`${siteConfig.githubUrl}/issues/new`);
+  url.searchParams.set("title", `Suggest change: ${entry.title}`);
+  url.searchParams.set(
+    "body",
+    [
+      "### Entry",
+      `${siteConfig.url}/${entry.category}/${entry.slug}`,
+      "",
+      "### Suggested change",
+      "",
+      "### Source or context",
+      "",
+    ].join("\n"),
+  );
+  url.searchParams.set("labels", "needs-review,content-update");
+  return url.toString();
+}
 
 export async function generateMetadata({
   params,
@@ -138,6 +171,8 @@ export default async function DetailPage({ params }: DetailPageProps) {
   );
   const referenceHref =
     entry.documentationUrl ?? entry.repoUrl ?? entry.githubUrl ?? "";
+  const editHref = getGitHubEditUrl(entry.githubUrl);
+  const suggestChangeHref = getSuggestChangeUrl(entry);
   const referenceLabel = entry.documentationUrl
     ? "Open docs"
     : entry.repoUrl
@@ -241,6 +276,28 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 {badge}
               </span>
             ))}
+          </div>
+          <div className="flex flex-wrap gap-2 lg:hidden">
+            {editHref ? (
+              <a
+                href={editHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground transition hover:border-primary/40"
+              >
+                <PencilLine className="size-4" />
+                Edit on GitHub
+              </a>
+            ) : null}
+            <a
+              href={suggestChangeHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-foreground transition hover:border-primary/40"
+            >
+              <MessageSquare className="size-4" />
+              Suggest change
+            </a>
           </div>
           {topFacts.length ? (
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -457,6 +514,26 @@ export default async function DetailPage({ params }: DetailPageProps) {
                   Open source
                 </a>
               ) : null}
+              {editHref ? (
+                <a
+                  href={editHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+                >
+                  <PencilLine className="size-4" />
+                  Edit on GitHub
+                </a>
+              ) : null}
+              <a
+                href={suggestChangeHref}
+                target="_blank"
+                rel="noreferrer"
+                className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+              >
+                <MessageSquare className="size-4" />
+                Suggest change
+              </a>
               <Link
                 href="/claim"
                 className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-border bg-background text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
@@ -621,6 +698,26 @@ export default async function DetailPage({ params }: DetailPageProps) {
                     </span>
                     <span className="truncate text-foreground">
                       {entry.verificationStatus}
+                    </span>
+                  </div>
+                ) : null}
+                {entry.verifiedAt ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Verified
+                    </span>
+                    <span className="truncate text-foreground">
+                      {entry.verifiedAt}
+                    </span>
+                  </div>
+                ) : null}
+                {entry.contentUpdatedAt ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Updated
+                    </span>
+                    <span className="truncate text-foreground">
+                      {entry.contentUpdatedAt.slice(0, 10)}
                     </span>
                   </div>
                 ) : null}

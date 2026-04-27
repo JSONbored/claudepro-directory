@@ -1124,7 +1124,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/agent-evals-regression-gate#webpage",
           "name": "Agent Evals Regression Gate Skill",
-          "description": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring.",
+          "description": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/agent-evals-regression-gate",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -1139,10 +1139,10 @@
           "@id": "https://heyclau.de/skills/agent-evals-regression-gate#entry",
           "name": "Agent Evals Regression Gate Skill",
           "headline": "Agent Evals Regression Gate Skill",
-          "description": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring.",
+          "description": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/agent-evals-regression-gate",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, agent-evals, regression-testing, quality-gates, ci, reliability, evals, regression, ai-agents, qa, quality-gate, skills, evals, regression, ai-agents, qa, quality-gate",
           "genre": "Skills",
           "author": {
@@ -1435,7 +1435,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/ai-agent-observability-incident-response#webpage",
           "name": "AI Agent Observability and Incident Response Skill",
-          "description": "Reusable skill for AI agent observability, SLOs, alerting, and incident response workflows across production systems.",
+          "description": "Reusable skill for AI agent observability, SLOs, alerting, and incident response workflows across production systems. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/ai-agent-observability-incident-response",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -1450,10 +1450,10 @@
           "@id": "https://heyclau.de/skills/ai-agent-observability-incident-response#entry",
           "name": "AI Agent Observability and Incident Response Skill",
           "headline": "AI Agent Observability and Incident Response Skill",
-          "description": "Reusable skill for AI agent observability, SLOs, alerting, and incident response workflows across production systems.",
+          "description": "Reusable skill for AI agent observability, SLOs, alerting, and incident response workflows across production systems. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/ai-agent-observability-incident-response",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, agent-observability, slos, alerts, traces, incident-management, observability, incident-response, reliability, telemetry, ai-agents, skills, observability, incident-response, reliability, telemetry, ai-agents",
           "genre": "Skills",
           "author": {
@@ -1540,7 +1540,7 @@
           "description": "Advanced AI skill for market validation, pricing experiments, and zero-to-one launch decision frameworks for AI products.",
           "url": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai startup validation, product market demand, pricing hypothesis, go to market testing, business, validation, product-strategy, growth, capability-pack, skills, claude, heyclaude, business, validation, product-strategy, growth, capability-pack",
           "genre": "Skills",
           "author": {
@@ -1924,7 +1924,7 @@
           "description": "Reusable AI skill for planning and executing SEO content clusters that improve rankings, authority, and qualified traffic.",
           "url": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai seo skill, content cluster strategy, search ranking workflow, topical authority, seo, content-strategy, growth, ranking, publishing, skills, claude, heyclaude, seo, content-strategy, growth, ranking, publishing",
           "genre": "Skills",
           "author": {
@@ -1993,7 +1993,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/aider#webpage",
           "name": "Aider",
-          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows.",
+          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/aider",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -2008,7 +2008,7 @@
           "@id": "https://heyclau.de/tools/aider#entry",
           "name": "Aider",
           "headline": "Aider",
-          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows.",
+          "description": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/aider",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -2070,7 +2070,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/airtable-mcp-server#webpage",
           "name": "Airtable MCP Server for Claude",
-          "description": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development.",
+          "description": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/airtable-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -2085,7 +2085,7 @@
           "@id": "https://heyclau.de/mcp/airtable-mcp-server#entry",
           "name": "Airtable MCP Server for Claude",
           "headline": "Airtable MCP Server for Claude",
-          "description": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development.",
+          "description": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/airtable-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -2605,7 +2605,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/apify#webpage",
           "name": "Apify",
-          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows.",
+          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/apify",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -2620,7 +2620,7 @@
           "@id": "https://heyclau.de/tools/apify#entry",
           "name": "Apify",
           "headline": "Apify",
-          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows.",
+          "description": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/apify",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -2680,7 +2680,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/arcade-ai#webpage",
           "name": "Arcade",
-          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents.",
+          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/arcade-ai",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -2695,7 +2695,7 @@
           "@id": "https://heyclau.de/tools/arcade-ai#entry",
           "name": "Arcade",
           "headline": "Arcade",
-          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents.",
+          "description": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/arcade-ai",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -2832,7 +2832,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/asana-mcp-server#webpage",
           "name": "Asana MCP Server for Claude",
-          "description": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development.",
+          "description": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/asana-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -2847,7 +2847,7 @@
           "@id": "https://heyclau.de/mcp/asana-mcp-server#entry",
           "name": "Asana MCP Server for Claude",
           "headline": "Asana MCP Server for Claude",
-          "description": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development.",
+          "description": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/asana-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -2933,7 +2933,7 @@
           "description": "Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization a...",
           "url": "https://heyclau.de/skills/audio-transcription-summarization",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "and, audio, claude, development, ffmpeg, skills, summarization, tools, transcription, whisper, heyclaude, audio transcription summarization skill, audio, transcription, whisper, ffmpeg",
           "genre": "Skills",
           "author": {
@@ -3761,7 +3761,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/base-l2-smart-contract-launchpad#webpage",
           "name": "Base L2 Smart Contract Launchpad Skill",
-          "description": "AI skill for deploying and hardening Base L2 smart contracts with secure rollout, verification, and operational checks.",
+          "description": "AI skill for deploying and hardening Base L2 smart contracts with secure rollout, verification, and operational checks. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/base-l2-smart-contract-launchpad",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -3776,10 +3776,10 @@
           "@id": "https://heyclau.de/skills/base-l2-smart-contract-launchpad#entry",
           "name": "Base L2 Smart Contract Launchpad Skill",
           "headline": "Base L2 Smart Contract Launchpad Skill",
-          "description": "AI skill for deploying and hardening Base L2 smart contracts with secure rollout, verification, and operational checks.",
+          "description": "AI skill for deploying and hardening Base L2 smart contracts with secure rollout, verification, and operational checks. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/base-l2-smart-contract-launchpad",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "base l2 contract deployment, base smart contracts, ethereum layer2 skill, contract verification, base, layer2, smart-contracts, deployment, web3, skills, claude, heyclaude, base, layer2, smart-contracts, deployment, web3",
           "genre": "Skills",
           "author": {
@@ -4001,7 +4001,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/bolt-new#webpage",
           "name": "Bolt",
-          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
+          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/bolt-new",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4016,7 +4016,7 @@
           "@id": "https://heyclau.de/tools/bolt-new#entry",
           "name": "Bolt",
           "headline": "Bolt",
-          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
+          "description": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/bolt-new",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -4076,7 +4076,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/box-mcp-server#webpage",
           "name": "Box MCP Server for Claude",
-          "description": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development.",
+          "description": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/box-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4091,7 +4091,7 @@
           "@id": "https://heyclau.de/mcp/box-mcp-server#entry",
           "name": "Box MCP Server for Claude",
           "headline": "Box MCP Server for Claude",
-          "description": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development.",
+          "description": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/box-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -4159,7 +4159,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/braintrust#webpage",
           "name": "Braintrust",
-          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications.",
+          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/braintrust",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4174,7 +4174,7 @@
           "@id": "https://heyclau.de/tools/braintrust#entry",
           "name": "Braintrust",
           "headline": "Braintrust",
-          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications.",
+          "description": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/braintrust",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -4252,7 +4252,7 @@
           "description": "Reusable skill for AI browser automation with robust selectors, retries, validation checkpoints, and operational safety.",
           "url": "https://heyclau.de/skills/browser-agent-workflow-automation",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, browser-agent, selector-strategy, retries, automation-runbooks, browser-automation, ai-agents, playwright, workflows, reliability, skills, claude, browser-automation, ai-agents, playwright, workflows, reliability",
           "genre": "Skills",
           "author": {
@@ -4321,7 +4321,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/browser-use#webpage",
           "name": "Browser Use",
-          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites.",
+          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/browser-use",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4336,7 +4336,7 @@
           "@id": "https://heyclau.de/tools/browser-use#entry",
           "name": "Browser Use",
           "headline": "Browser Use",
-          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites.",
+          "description": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/browser-use",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -4398,7 +4398,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/browserbase#webpage",
           "name": "Browserbase",
-          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction.",
+          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/browserbase",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4413,7 +4413,7 @@
           "@id": "https://heyclau.de/tools/browserbase#entry",
           "name": "Browserbase",
           "headline": "Browserbase",
-          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction.",
+          "description": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/browserbase",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -4563,7 +4563,7 @@
           "description": "Build high-performance JavaScript and TypeScript applications with Bun, the all-in-one runtime that's 3x faster than Node.js. Includes native TypeScript exec...",
           "url": "https://heyclau.de/skills/bun-runtime-modern-javascript",
           "datePublished": "2025-10-23",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "bun, claude, development, javascript, modern, performance, runtime, skills, tools, typescript, heyclaude, bun javascript runtime development skill, bun, runtime, javascript, typescript, performance",
           "genre": "Skills",
           "author": {
@@ -4788,7 +4788,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/canva-mcp-server#webpage",
           "name": "Canva MCP Server for Claude",
-          "description": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development.",
+          "description": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/canva-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -4803,7 +4803,7 @@
           "@id": "https://heyclau.de/mcp/canva-mcp-server#entry",
           "name": "Canva MCP Server for Claude",
           "headline": "Canva MCP Server for Claude",
-          "description": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development.",
+          "description": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/canva-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -5316,7 +5316,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/claude-code#webpage",
           "name": "Claude Code",
-          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows.",
+          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/claude-code",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -5331,7 +5331,7 @@
           "@id": "https://heyclau.de/tools/claude-code#entry",
           "name": "Claude Code",
           "headline": "Claude Code",
-          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows.",
+          "description": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/claude-code",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -6519,7 +6519,7 @@
           "description": "Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar...",
           "url": "https://heyclau.de/skills/cli-data-viz-quickstart",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "charts, claude, cli, data, development, python, quickstart, skills, tools, vega, visualization, viz, visualization, charts, python, vega",
           "genre": "Skills",
           "author": {
@@ -6588,7 +6588,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/clickup-mcp-server#webpage",
           "name": "Clickup MCP Server for Claude",
-          "description": "Task management and project tracking with ClickUp integration Discover tools for AI development.",
+          "description": "Task management and project tracking with ClickUp integration Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/clickup-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -6603,7 +6603,7 @@
           "@id": "https://heyclau.de/mcp/clickup-mcp-server#entry",
           "name": "Clickup MCP Server for Claude",
           "headline": "Clickup MCP Server for Claude",
-          "description": "Task management and project tracking with ClickUp integration Discover tools for AI development.",
+          "description": "Task management and project tracking with ClickUp integration Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/clickup-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -6673,7 +6673,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/cline#webpage",
           "name": "Cline",
-          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools.",
+          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/cline",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -6688,7 +6688,7 @@
           "@id": "https://heyclau.de/tools/cline#entry",
           "name": "Cline",
           "headline": "Cline",
-          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools.",
+          "description": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/cline",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -6897,7 +6897,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#webpage",
           "name": "Cloudflare Agents SDK",
-          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives.",
+          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/cloudflare-agents-sdk",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -6912,7 +6912,7 @@
           "@id": "https://heyclau.de/tools/cloudflare-agents-sdk#entry",
           "name": "Cloudflare Agents SDK",
           "headline": "Cloudflare Agents SDK",
-          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives.",
+          "description": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/cloudflare-agents-sdk",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -6974,7 +6974,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/cloudflare-mcp-server#webpage",
           "name": "Cloudflare MCP Server - MCP Servers",
-          "description": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development.",
+          "description": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/cloudflare-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -6989,7 +6989,7 @@
           "@id": "https://heyclau.de/mcp/cloudflare-mcp-server#entry",
           "name": "Cloudflare MCP Server - MCP Servers",
           "headline": "Cloudflare MCP Server - MCP Servers",
-          "description": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development.",
+          "description": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/cloudflare-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -7075,7 +7075,7 @@
           "description": "Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-s...",
           "url": "https://heyclau.de/skills/cloudflare-workers-ai-edge",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, cloudflare, development, edge, edge-computing, functions, serverless, skills, tools, workers, ai, heyclaude, cloudflare, edge-computing, ai, serverless, workers",
           "genre": "Skills",
           "author": {
@@ -7162,7 +7162,7 @@
           "description": "Advanced AI skill for Cloudflare Workers architecture with D1, KV, and R2, focused on consistency, performance, and secure operation.",
           "url": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "cloudflare d1 kv r2, edge data architecture, workers storage patterns, serverless data strategy, cloudflare, workers, d1, kv, r2, skills, claude, heyclaude, cloudflare, workers, d1, kv, r2",
           "genre": "Skills",
           "author": {
@@ -7231,7 +7231,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/cloudinary-mcp-server#webpage",
           "name": "Cloudinary MCP Server - MCP Servers",
-          "description": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development.",
+          "description": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/cloudinary-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -7246,7 +7246,7 @@
           "@id": "https://heyclau.de/mcp/cloudinary-mcp-server#entry",
           "name": "Cloudinary MCP Server - MCP Servers",
           "headline": "Cloudinary MCP Server - MCP Servers",
-          "description": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development.",
+          "description": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/cloudinary-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -7461,7 +7461,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack#webpage",
           "name": "Code Review Automation Capability Pack Skill",
-          "description": "Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows.",
+          "description": "Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -7476,10 +7476,10 @@
           "@id": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack#entry",
           "name": "Code Review Automation Capability Pack Skill",
           "headline": "Code Review Automation Capability Pack Skill",
-          "description": "Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows.",
+          "description": "Advanced AI skill for local PR review automation with risk scoring, exploit checks, and remediation workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "pull request audit, local code review automation, severity scoring, exploitability analysis, code-review, pull-requests, security, capability-pack, automation, skills, claude, heyclaude, code-review, pull-requests, security, capability-pack, automation",
           "genre": "Skills",
           "author": {
@@ -7548,7 +7548,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/rules/code-review-expert#webpage",
           "name": "Code Review Expert for Claude",
-          "description": "Comprehensive code review rules for thorough analysis and constructive feedback Discover tools for AI development.",
+          "description": "Comprehensive code review rules for thorough analysis and constructive feedback Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/rules/code-review-expert",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -7563,7 +7563,7 @@
           "@id": "https://heyclau.de/rules/code-review-expert#entry",
           "name": "Code Review Expert for Claude",
           "headline": "Code Review Expert for Claude",
-          "description": "Comprehensive code review rules for thorough analysis and constructive feedback Discover tools for AI development.",
+          "description": "Comprehensive code review rules for thorough analysis and constructive feedback Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/rules/code-review-expert",
           "datePublished": "2025-09-16",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -7851,7 +7851,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/coderabbit#webpage",
           "name": "CodeRabbit",
-          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops.",
+          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/coderabbit",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -7866,7 +7866,7 @@
           "@id": "https://heyclau.de/tools/coderabbit#entry",
           "name": "CodeRabbit",
           "headline": "CodeRabbit",
-          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops.",
+          "description": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/coderabbit",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -7926,7 +7926,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack#webpage",
           "name": "Codex Automations Orchestrator Capability Pack Skill",
-          "description": "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows.",
+          "description": "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -7941,10 +7941,10 @@
           "@id": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack#entry",
           "name": "Codex Automations Orchestrator Capability Pack Skill",
           "headline": "Codex Automations Orchestrator Capability Pack Skill",
-          "description": "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows.",
+          "description": "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "codex automations, recurring agent workflows, rrule scheduling, automation governance, codex, automation, orchestration, scheduling, capability-pack, skills, claude, heyclaude, codex, automation, orchestration, scheduling, capability-pack",
           "genre": "Skills",
           "author": {
@@ -8015,7 +8015,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/codex-plugin-creator-capability-pack#webpage",
           "name": "Codex Plugin Creator Capability Pack Skill",
-          "description": "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations.",
+          "description": "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/codex-plugin-creator-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8030,10 +8030,10 @@
           "@id": "https://heyclau.de/skills/codex-plugin-creator-capability-pack#entry",
           "name": "Codex Plugin Creator Capability Pack Skill",
           "headline": "Codex Plugin Creator Capability Pack Skill",
-          "description": "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations.",
+          "description": "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/codex-plugin-creator-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "codex plugin development, mcp plugin architecture, plugin permission boundaries, ai tooling extensions, codex, plugins, mcp, developer-tooling, capability-pack, skills, claude, heyclaude, codex, plugins, mcp, developer-tooling, capability-pack",
           "genre": "Skills",
           "author": {
@@ -8176,7 +8176,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/composio#webpage",
           "name": "Composio",
-          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations.",
+          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/composio",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8191,7 +8191,7 @@
           "@id": "https://heyclau.de/tools/composio#entry",
           "name": "Composio",
           "headline": "Composio",
-          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations.",
+          "description": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/composio",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -8477,7 +8477,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/continue#webpage",
           "name": "Continue",
-          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows.",
+          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/continue",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8492,7 +8492,7 @@
           "@id": "https://heyclau.de/tools/continue#entry",
           "name": "Continue",
           "headline": "Continue",
-          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows.",
+          "description": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/continue",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -8632,7 +8632,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/crewai#webpage",
           "name": "CrewAI",
-          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems.",
+          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/crewai",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8647,7 +8647,7 @@
           "@id": "https://heyclau.de/tools/crewai#entry",
           "name": "CrewAI",
           "headline": "CrewAI",
-          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems.",
+          "description": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/crewai",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -8802,7 +8802,7 @@
           "description": "Clean, filter, join, pivot, and export CSV/XLSX data reliably with reproducible steps. Transform messy spreadsheets into production-ready datasets with panda...",
           "url": "https://heyclau.de/skills/csv-excel-data-wrangler",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, csv, data, data-cleaning, development, excel, pandas, python, skills, tools, wrangler, xlsx, csv, xlsx, data-cleaning, pandas, python",
           "genre": "Skills",
           "author": {
@@ -8871,7 +8871,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/cursor#webpage",
           "name": "Cursor",
-          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows.",
+          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/tools/cursor",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -8886,7 +8886,7 @@
           "@id": "https://heyclau.de/tools/cursor#entry",
           "name": "Cursor",
           "headline": "Cursor",
-          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows.",
+          "description": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/tools/cursor",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -8964,7 +8964,7 @@
           "description": "Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refact...",
           "url": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup",
           "datePublished": "2025-10-23",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-coding, claude, cursor, cursor windsurf, development, editor, ide, optimization, setup, skills, tools, windsurf, cursor, windsurf, ide, ai-coding, editor",
           "genre": "Skills",
           "author": {
@@ -10174,7 +10174,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/devin#webpage",
           "name": "Devin",
-          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks.",
+          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/devin",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -10189,7 +10189,7 @@
           "@id": "https://heyclau.de/tools/devin#entry",
           "name": "Devin",
           "headline": "Devin",
-          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks.",
+          "description": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/devin",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -10402,7 +10402,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/discord-mcp-server#webpage",
           "name": "Discord MCP Server for Claude",
-          "description": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development.",
+          "description": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/discord-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -10417,7 +10417,7 @@
           "@id": "https://heyclau.de/mcp/discord-mcp-server#entry",
           "name": "Discord MCP Server for Claude",
           "headline": "Discord MCP Server for Claude",
-          "description": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development.",
+          "description": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/discord-mcp-server",
           "datePublished": "2025-09-20",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -10580,7 +10580,7 @@
           "description": "Reusable AI skill for designing secure, resilient Docker Compose deployments with healthchecks, profiles, and operational guardrails.",
           "url": "https://heyclau.de/skills/docker-compose-production-blueprints",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "docker compose production, compose hardening, container operations, compose blueprints, docker, docker-compose, devops, deployment, reliability, skills, claude, heyclaude, docker, docker-compose, devops, deployment, reliability",
           "genre": "Skills",
           "author": {
@@ -11063,7 +11063,7 @@
           "description": "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o...",
           "url": "https://heyclau.de/skills/docx-report-generator",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, development, docx, generator, python, report, reports, skills, templating, tools, heyclaude, docx report generator skill, docx, reports, templating, python",
           "genre": "Skills",
           "author": {
@@ -11450,7 +11450,7 @@
           "description": "Advanced AI skill for Ethereum and Base smart contract security with Foundry testing, threat modeling, and safer deployment workflows.",
           "url": "https://heyclau.de/skills/ethereum-base-smart-contract-security-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "solidity security skill, base smart contract security, foundry invariant testing, evm protocol hardening, ethereum, base, solidity, security, capability-pack, skills, claude, heyclaude, ethereum, base, solidity, security, capability-pack",
           "genre": "Skills",
           "author": {
@@ -11537,7 +11537,7 @@
           "description": "Reusable AI skill for secure Ethereum smart contract development using Solidity, Foundry tests, fuzzing, and OpenZeppelin standards.",
           "url": "https://heyclau.de/skills/ethereum-solidity-security-foundry",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ethereum smart contract skill, solidity security, foundry testing, openzeppelin patterns, ethereum, solidity, foundry, smart-contracts, security, skills, claude, heyclaude, ethereum, solidity, foundry, smart-contracts, security",
           "genre": "Skills",
           "author": {
@@ -11606,7 +11606,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/exa#webpage",
           "name": "Exa",
-          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery.",
+          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/exa",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -11621,7 +11621,7 @@
           "@id": "https://heyclau.de/tools/exa#entry",
           "name": "Exa",
           "headline": "Exa",
-          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery.",
+          "description": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/exa",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -11771,7 +11771,7 @@
           "description": "Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation wi...",
           "url": "https://heyclau.de/skills/fastapi-python-backend",
           "datePublished": "2025-10-23",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "api, async, backend, claude, development, expert, fastapi, pydantic, python, skills, tools, heyclaude, fastapi, python, api, async, pydantic",
           "genre": "Skills",
           "author": {
@@ -11840,7 +11840,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/figma-mcp-server#webpage",
           "name": "Figma MCP Server for Claude",
-          "description": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development.",
+          "description": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/figma-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -11855,7 +11855,7 @@
           "@id": "https://heyclau.de/mcp/figma-mcp-server#entry",
           "name": "Figma MCP Server for Claude",
           "headline": "Figma MCP Server for Claude",
-          "description": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development.",
+          "description": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/figma-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -12156,7 +12156,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/firecrawl#webpage",
           "name": "Firecrawl",
-          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications.",
+          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/firecrawl",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -12171,7 +12171,7 @@
           "@id": "https://heyclau.de/tools/firecrawl#entry",
           "name": "Firecrawl",
           "headline": "Firecrawl",
-          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications.",
+          "description": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/firecrawl",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -12233,7 +12233,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/fireflies-mcp-server#webpage",
           "name": "Fireflies MCP Server for Claude",
-          "description": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development.",
+          "description": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/fireflies-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -12248,7 +12248,7 @@
           "@id": "https://heyclau.de/mcp/fireflies-mcp-server#entry",
           "name": "Fireflies MCP Server for Claude",
           "headline": "Fireflies MCP Server for Claude",
-          "description": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development.",
+          "description": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/fireflies-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -12829,7 +12829,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/garak#webpage",
           "name": "Garak",
-          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
+          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/garak",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -12844,7 +12844,7 @@
           "@id": "https://heyclau.de/tools/garak#entry",
           "name": "Garak",
           "headline": "Garak",
-          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
+          "description": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/garak",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -12983,7 +12983,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/giskard#webpage",
           "name": "Giskard",
-          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality.",
+          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/giskard",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -12998,7 +12998,7 @@
           "@id": "https://heyclau.de/tools/giskard#entry",
           "name": "Giskard",
           "headline": "Giskard",
-          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality.",
+          "description": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/giskard",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -13526,7 +13526,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack#webpage",
           "name": "Git-Cliff Release Changelog Capability Pack Skill",
-          "description": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows.",
+          "description": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -13541,10 +13541,10 @@
           "@id": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack#entry",
           "name": "Git-Cliff Release Changelog Capability Pack Skill",
           "headline": "Git-Cliff Release Changelog Capability Pack Skill",
-          "description": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows.",
+          "description": "Advanced AI skill for git-cliff changelog automation, release note generation, and reliable merge-to-release workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "git cliff changelog, automated release notes, conventional commits release, semantic version workflow, git-cliff, changelog, releases, conventional-commits, capability-pack, skills, claude, heyclaude, git-cliff, changelog, releases, conventional-commits, capability-pack",
           "genre": "Skills",
           "author": {
@@ -13631,7 +13631,7 @@
           "description": "Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration. Includes OIDC authen...",
           "url": "https://heyclau.de/skills/github-actions-ai-cicd",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "actions, automation, ci-cd, claude, development, devops, github, github-actions, powered, skills, tools, ai, github-actions, ci-cd, automation, devops, ai",
           "genre": "Skills",
           "author": {
@@ -13718,7 +13718,7 @@
           "description": "Advanced AI skill for secure GitHub Actions CI/CD including permission scoping, dependency hardening, and workflow resilience.",
           "url": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "github actions security, secure cicd pipelines, workflow hardening, supply chain security, github-actions, cicd, security, devops, capability-pack, skills, claude, heyclaude, github-actions, cicd, security, devops, capability-pack",
           "genre": "Skills",
           "author": {
@@ -13865,7 +13865,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/github-copilot#webpage",
           "name": "GitHub Copilot",
-          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors.",
+          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/github-copilot",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -13880,7 +13880,7 @@
           "@id": "https://heyclau.de/tools/github-copilot#entry",
           "name": "GitHub Copilot",
           "headline": "GitHub Copilot",
-          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors.",
+          "description": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/github-copilot",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -14320,7 +14320,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/google-workspace-gemini-automation#webpage",
           "name": "Google Workspace Gemini Automation Skill",
-          "description": "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows.",
+          "description": "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/google-workspace-gemini-automation",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14335,10 +14335,10 @@
           "@id": "https://heyclau.de/skills/google-workspace-gemini-automation#entry",
           "name": "Google Workspace Gemini Automation Skill",
           "headline": "Google Workspace Gemini Automation Skill",
-          "description": "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows.",
+          "description": "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/google-workspace-gemini-automation",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "gemini workspace automation, google docs ai workflow, sheets automation ai, enterprise ai productivity, google-workspace, gemini, automation, productivity, ai-agents, skills, claude, heyclaude, google-workspace, gemini, automation, productivity, ai-agents",
           "genre": "Skills",
           "author": {
@@ -14407,7 +14407,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/graphite-diamond#webpage",
           "name": "Graphite Diamond",
-          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows.",
+          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/graphite-diamond",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14422,7 +14422,7 @@
           "@id": "https://heyclau.de/tools/graphite-diamond#entry",
           "name": "Graphite Diamond",
           "headline": "Graphite Diamond",
-          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows.",
+          "description": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/graphite-diamond",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -14632,7 +14632,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/helicone#webpage",
           "name": "Helicone",
-          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications.",
+          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/helicone",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14647,7 +14647,7 @@
           "@id": "https://heyclau.de/tools/helicone#entry",
           "name": "Helicone",
           "headline": "Helicone",
-          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications.",
+          "description": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/helicone",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -14811,7 +14811,7 @@
           "description": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
           "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
           "datePublished": "2026-04-27",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "create agent skill, submit skill to heyclaude, cursor rule adapter, skill md package validation, heyclaude, skill-authoring, agent-skills, registry, submissions, skills, claude, heyclaude skill submission factory, heyclaude, skill-authoring, agent-skills, registry, submissions",
           "genre": "Skills",
           "author": {
@@ -14957,7 +14957,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/hubspot-mcp-server#webpage",
           "name": "Hubspot MCP Server for Claude",
-          "description": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development.",
+          "description": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/hubspot-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14972,7 +14972,7 @@
           "@id": "https://heyclau.de/mcp/hubspot-mcp-server#entry",
           "name": "Hubspot MCP Server for Claude",
           "headline": "Hubspot MCP Server for Claude",
-          "description": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development.",
+          "description": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/hubspot-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -15040,7 +15040,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/hugging-face-mcp-server#webpage",
           "name": "Hugging Face MCP Server - MCP Servers",
-          "description": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development.",
+          "description": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/hugging-face-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -15055,7 +15055,7 @@
           "@id": "https://heyclau.de/mcp/hugging-face-mcp-server#entry",
           "name": "Hugging Face MCP Server - MCP Servers",
           "headline": "Hugging Face MCP Server - MCP Servers",
-          "description": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development.",
+          "description": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/hugging-face-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -15123,7 +15123,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/husky-commit-governance-capability-pack#webpage",
           "name": "Husky Commit Governance Capability Pack Skill",
-          "description": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails.",
+          "description": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/husky-commit-governance-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -15138,10 +15138,10 @@
           "@id": "https://heyclau.de/skills/husky-commit-governance-capability-pack#entry",
           "name": "Husky Commit Governance Capability Pack Skill",
           "headline": "Husky Commit Governance Capability Pack Skill",
-          "description": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails.",
+          "description": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/husky-commit-governance-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "husky hooks setup, commit governance, local quality gates, precommit optimization, husky, git-hooks, commitlint, developer-experience, capability-pack, skills, claude, heyclaude, husky, git-hooks, commitlint, developer-experience, capability-pack",
           "genre": "Skills",
           "author": {
@@ -15378,7 +15378,7 @@
           "description": "Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100...",
           "url": "https://heyclau.de/skills/image-ocr-table-extraction",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "and, claude, development, extraction, image, ocr, opencv, pytesseract, skills, table, tables, tools, ocr, image, pytesseract, opencv, tables",
           "genre": "Skills",
           "author": {
@@ -15465,7 +15465,7 @@
           "description": "Reusable AI skill for improving indexing velocity with IndexNow, sitemap operations, and search-engine-friendly update workflows.",
           "url": "https://heyclau.de/skills/indexnow-search-indexing-accelerator",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "indexnow automation, faster indexing, sitemap workflow, technical seo operations, indexnow, seo, indexing, sitemap, search, skills, claude, heyclaude, indexnow, seo, indexing, sitemap, search",
           "genre": "Skills",
           "author": {
@@ -15534,7 +15534,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/intercom-mcp-server#webpage",
           "name": "Intercom MCP Server for Claude",
-          "description": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development.",
+          "description": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/intercom-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -15549,7 +15549,7 @@
           "@id": "https://heyclau.de/mcp/intercom-mcp-server#entry",
           "name": "Intercom MCP Server for Claude",
           "headline": "Intercom MCP Server for Claude",
-          "description": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development.",
+          "description": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/intercom-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -15617,7 +15617,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/invideo-mcp-server#webpage",
           "name": "Invideo MCP Server for Claude",
-          "description": "Build video creation capabilities into your applications Discover tools for AI development.",
+          "description": "Build video creation capabilities into your applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
           "url": "https://heyclau.de/mcp/invideo-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -15632,7 +15632,7 @@
           "@id": "https://heyclau.de/mcp/invideo-mcp-server#entry",
           "name": "Invideo MCP Server for Claude",
           "headline": "Invideo MCP Server for Claude",
-          "description": "Build video creation capabilities into your applications Discover tools for AI development.",
+          "description": "Build video creation capabilities into your applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
           "url": "https://heyclau.de/mcp/invideo-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -15858,7 +15858,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/jira-mcp-server#webpage",
           "name": "Jira MCP Server for Claude",
-          "description": "Manage Jira tickets and Confluence documentation Discover tools for AI development.",
+          "description": "Manage Jira tickets and Confluence documentation Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/jira-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -15873,7 +15873,7 @@
           "@id": "https://heyclau.de/mcp/jira-mcp-server#entry",
           "name": "Jira MCP Server for Claude",
           "headline": "Jira MCP Server for Claude",
-          "description": "Manage Jira tickets and Confluence documentation Discover tools for AI development.",
+          "description": "Manage Jira tickets and Confluence documentation Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/jira-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -15959,7 +15959,7 @@
           "description": "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv...",
           "url": "https://heyclau.de/skills/json-schema-validation-transformation",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ajv, and, claude, development, json, schema, skills, tools, transformation, validation, zod, heyclaude, json, schema, validation, ajv, zod",
           "genre": "Skills",
           "author": {
@@ -16253,7 +16253,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/kubernetes-mcp-server#webpage",
           "name": "Kubernetes MCP Server - MCP Servers",
-          "description": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development.",
+          "description": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/kubernetes-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16268,7 +16268,7 @@
           "@id": "https://heyclau.de/mcp/kubernetes-mcp-server#entry",
           "name": "Kubernetes MCP Server - MCP Servers",
           "headline": "Kubernetes MCP Server - MCP Servers",
-          "description": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development.",
+          "description": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/kubernetes-mcp-server",
           "datePublished": "2025-09-20",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -16338,7 +16338,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/lakera-guard#webpage",
           "name": "Lakera Guard",
-          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications.",
+          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/lakera-guard",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16353,7 +16353,7 @@
           "@id": "https://heyclau.de/tools/lakera-guard#entry",
           "name": "Lakera Guard",
           "headline": "Lakera Guard",
-          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications.",
+          "description": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/lakera-guard",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -16413,7 +16413,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/langfuse#webpage",
           "name": "Langfuse",
-          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation.",
+          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langfuse",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16428,7 +16428,7 @@
           "@id": "https://heyclau.de/tools/langfuse#entry",
           "name": "Langfuse",
           "headline": "Langfuse",
-          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation.",
+          "description": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langfuse",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -16490,7 +16490,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/langgraph#webpage",
           "name": "LangGraph",
-          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
+          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langgraph",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16505,7 +16505,7 @@
           "@id": "https://heyclau.de/tools/langgraph#entry",
           "name": "LangGraph",
           "headline": "LangGraph",
-          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
+          "description": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langgraph",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -16567,7 +16567,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/langsmith#webpage",
           "name": "LangSmith",
-          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents.",
+          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langsmith",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16582,7 +16582,7 @@
           "@id": "https://heyclau.de/tools/langsmith#entry",
           "name": "LangSmith",
           "headline": "LangSmith",
-          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents.",
+          "description": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/langsmith",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -16714,7 +16714,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/linear-mcp-server#webpage",
           "name": "Linear MCP Server for Claude",
-          "description": "Integrate with Linear's issue tracking and project management system Discover tools for AI development.",
+          "description": "Integrate with Linear's issue tracking and project management system Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/linear-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16729,7 +16729,7 @@
           "@id": "https://heyclau.de/mcp/linear-mcp-server#entry",
           "name": "Linear MCP Server for Claude",
           "headline": "Linear MCP Server for Claude",
-          "description": "Integrate with Linear's issue tracking and project management system Discover tools for AI development.",
+          "description": "Integrate with Linear's issue tracking and project management system Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/linear-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -16893,7 +16893,7 @@
           "description": "Parse web, application, and system logs into structured incidents and timelines with anomaly detection. Supports multiple log formats (Apache/Nginx access lo...",
           "url": "https://heyclau.de/skills/log-parsing-incident-timeline",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "and, bash, claude, development, incident, log, logs, observability, parsing, ripgrep, skills, timeline, logs, observability, ripgrep, bash",
           "genre": "Skills",
           "author": {
@@ -16964,7 +16964,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/lovable#webpage",
           "name": "Lovable",
-          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests.",
+          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/lovable",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -16979,7 +16979,7 @@
           "@id": "https://heyclau.de/tools/lovable#entry",
           "name": "Lovable",
           "headline": "Lovable",
-          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests.",
+          "description": "Lovable helps teams generate and iterate on web applications from natural language product and design requests. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/lovable",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -17039,7 +17039,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/make#webpage",
           "name": "Make",
-          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes.",
+          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/make",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -17054,7 +17054,7 @@
           "@id": "https://heyclau.de/tools/make#entry",
           "name": "Make",
           "headline": "Make",
-          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes.",
+          "description": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/make",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -17132,7 +17132,7 @@
           "description": "Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalizat...",
           "url": "https://heyclau.de/skills/markdown-knowledge-base-composer",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "base, claude, composer, development, docs, knowledge, markdown, node, remark, skills, tools, heyclaude, markdown, docs, remark, node",
           "genre": "Skills",
           "author": {
@@ -17278,7 +17278,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/mastra#webpage",
           "name": "Mastra",
-          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
+          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/mastra",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -17293,7 +17293,7 @@
           "@id": "https://heyclau.de/tools/mastra#entry",
           "name": "Mastra",
           "headline": "Mastra",
-          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
+          "description": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/mastra",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -17373,7 +17373,7 @@
           "description": "Advanced AI skill for secure MCP server authoring with robust tool contracts, auth controls, and prompt-injection defenses.",
           "url": "https://heyclau.de/skills/mcp-server-authoring-security-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "mcp security, mcp server design, tool schema validation, agent security controls, mcp, security, server-authoring, tools, capability-pack, skills, claude, heyclaude, mcp, security, server-authoring, tools, capability-pack",
           "genre": "Skills",
           "author": {
@@ -17460,7 +17460,7 @@
           "description": "Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response.",
           "url": "https://heyclau.de/skills/mcp-server-security-hardening",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, mcp-security, tool-safety, prompt-injection, server-hardening, security-checklist, mcp, security, hardening, auth, ai-infrastructure, skills, mcp, security, hardening, auth, ai-infrastructure",
           "genre": "Skills",
           "author": {
@@ -17681,7 +17681,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/mcp-tool-contract-testing#webpage",
           "name": "MCP Tool Contract Testing Skill",
-          "description": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates.",
+          "description": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/mcp-tool-contract-testing",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -17696,10 +17696,10 @@
           "@id": "https://heyclau.de/skills/mcp-tool-contract-testing#entry",
           "name": "MCP Tool Contract Testing Skill",
           "headline": "MCP Tool Contract Testing Skill",
-          "description": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates.",
+          "description": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/skills/mcp-tool-contract-testing",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "mcp testing, tool contract validation, mcp schema checks, ai tool reliability, mcp, testing, contracts, reliability, api, skills, claude, heyclaude, mcp, testing, contracts, reliability, api",
           "genre": "Skills",
           "author": {
@@ -17843,7 +17843,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/microsoft-autogen#webpage",
           "name": "Microsoft AutoGen",
-          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems.",
+          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/microsoft-autogen",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -17858,7 +17858,7 @@
           "@id": "https://heyclau.de/tools/microsoft-autogen#entry",
           "name": "Microsoft AutoGen",
           "headline": "Microsoft AutoGen",
-          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems.",
+          "description": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/microsoft-autogen",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -18018,7 +18018,7 @@
           "description": "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform. Generate comprehensive API reference docum...",
           "url": "https://heyclau.de/skills/mintlify-documentation-automation",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "api-docs, automation, claude, development, documentation, mdx, mintlify, skills, tools, heyclaude, mintlify ai documentation automation skill, mintlify, documentation, mdx, api-docs, automation",
           "genre": "Skills",
           "author": {
@@ -18315,7 +18315,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/model-routing-cost-latency-optimizer#webpage",
           "name": "Model Routing Cost and Latency Optimizer Skill",
-          "description": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows.",
+          "description": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/model-routing-cost-latency-optimizer",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -18330,10 +18330,10 @@
           "@id": "https://heyclau.de/skills/model-routing-cost-latency-optimizer#entry",
           "name": "Model Routing Cost and Latency Optimizer Skill",
           "headline": "Model Routing Cost and Latency Optimizer Skill",
-          "description": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows.",
+          "description": "Reusable AI skill for multi-model routing, quality thresholds, and token budget optimization in production workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/model-routing-cost-latency-optimizer",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, model-router, token-cost, latency-optimization, fallback-strategy, model-routing, cost-optimization, latency, token-budget, ai-operations, skills, claude, model-routing, cost-optimization, latency, token-budget, ai-operations",
           "genre": "Skills",
           "author": {
@@ -18480,7 +18480,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/monday-mcp-server#webpage",
           "name": "Monday MCP Server for Claude",
-          "description": "Manage monday.com boards, items, and CRM activities Discover tools for AI development.",
+          "description": "Manage monday.com boards, items, and CRM activities Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/monday-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -18495,7 +18495,7 @@
           "@id": "https://heyclau.de/mcp/monday-mcp-server#entry",
           "name": "Monday MCP Server for Claude",
           "headline": "Monday MCP Server for Claude",
-          "description": "Manage monday.com boards, items, and CRM activities Discover tools for AI development.",
+          "description": "Manage monday.com boards, items, and CRM activities Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
           "url": "https://heyclau.de/mcp/monday-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -18941,7 +18941,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/n8n#webpage",
           "name": "n8n",
-          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines.",
+          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/n8n",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -18956,7 +18956,7 @@
           "@id": "https://heyclau.de/tools/n8n#entry",
           "name": "n8n",
           "headline": "n8n",
-          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines.",
+          "description": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/n8n",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -19036,7 +19036,7 @@
           "description": "Reusable AI skill for creating n8n AI automations with resilient execution, human-in-the-loop review, and operational safety.",
           "url": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "n8n ai workflows, ai automation skill, workflow orchestration, n8n agent, production automation, n8n, ai-automation, workflows, no-code, operations, skills, claude, n8n, ai-automation, workflows, no-code, operations",
           "genre": "Skills",
           "author": {
@@ -19123,7 +19123,7 @@
           "description": "Advanced AI skill for production n8n operations including reliability patterns, security controls, and workflow incident response.",
           "url": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "n8n production operations, workflow resilience, n8n incident response, n8n credential security, n8n, operations, workflow-automation, reliability, capability-pack, skills, claude, heyclaude, n8n, operations, workflow-automation, reliability, capability-pack",
           "genre": "Skills",
           "author": {
@@ -19210,7 +19210,7 @@
           "description": "Advanced AI skill for securing n8n in production with workflow guardrails, credential controls, and operational hardening practices.",
           "url": "https://heyclau.de/skills/n8n-production-security-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "n8n security, n8n hardening, workflow security, credential governance, n8n, security, automation, ai-workflows, capability-pack, skills, claude, heyclaude, n8n, security, automation, ai-workflows, capability-pack",
           "genre": "Skills",
           "author": {
@@ -19279,7 +19279,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/netlify-mcp-server#webpage",
           "name": "Netlify MCP Server for Claude",
-          "description": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development.",
+          "description": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
           "url": "https://heyclau.de/mcp/netlify-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -19294,7 +19294,7 @@
           "@id": "https://heyclau.de/mcp/netlify-mcp-server#entry",
           "name": "Netlify MCP Server for Claude",
           "headline": "Netlify MCP Server for Claude",
-          "description": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development.",
+          "description": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
           "url": "https://heyclau.de/mcp/netlify-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -19512,7 +19512,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/notion-mcp-server#webpage",
           "name": "Notion MCP Server for Claude",
-          "description": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development.",
+          "description": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/notion-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -19527,7 +19527,7 @@
           "@id": "https://heyclau.de/mcp/notion-mcp-server#entry",
           "name": "Notion MCP Server for Claude",
           "headline": "Notion MCP Server for Claude",
-          "description": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development.",
+          "description": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/notion-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -19691,7 +19691,7 @@
           "description": "AI operations skill for OpenClaw environments focused on policy enforcement, secure runtime design, and operational resilience.",
           "url": "https://heyclau.de/skills/openclaw-agent-ops-hardening",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "openclaw security, agent hardening, ai ops, least privilege, agent runtime security, openclaw, ai-agents, security, hardening, operations, skills, claude, openclaw, ai-agents, security, hardening, operations",
           "genre": "Skills",
           "author": {
@@ -19780,7 +19780,7 @@
           "description": "Advanced AI skill for OpenClaw operations, including deployment hardening, policy controls, observability, and incident response.",
           "url": "https://heyclau.de/skills/openclaw-operator-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "openclaw operations, agent governance, openclaw hardening, multi-agent reliability, openclaw, ai-agents, operations, security, capability-pack, skills, claude, heyclaude, openclaw, ai-agents, operations, security, capability-pack",
           "genre": "Skills",
           "author": {
@@ -19851,7 +19851,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack#webpage",
           "name": "OpenClaw Skill Authoring Factory Capability Pack Skill",
-          "description": "Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation.",
+          "description": "Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -19866,10 +19866,10 @@
           "@id": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack#entry",
           "name": "OpenClaw Skill Authoring Factory Capability Pack Skill",
           "headline": "OpenClaw Skill Authoring Factory Capability Pack Skill",
-          "description": "Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation.",
+          "description": "Advanced AI skill for creating and maintaining production-grade OpenClaw skills with reliable packaging and validation. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "openclaw skills, skill packaging workflow, capability pack authoring, ai workflow distribution, openclaw, skill-authoring, packaging, ai-agents, capability-pack, skills, claude, heyclaude, openclaw, skill-authoring, packaging, ai-agents, capability-pack",
           "genre": "Skills",
           "author": {
@@ -19940,7 +19940,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/opencode#webpage",
           "name": "OpenCode",
-          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation.",
+          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/opencode",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -19955,7 +19955,7 @@
           "@id": "https://heyclau.de/tools/opencode#entry",
           "name": "OpenCode",
           "headline": "OpenCode",
-          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation.",
+          "description": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/opencode",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -20035,7 +20035,7 @@
           "description": "Advanced AI skill for OpenNext Cloudflare deployments, including Workers runtime patterns, cache behavior, and operational hardening.",
           "url": "https://heyclau.de/skills/opennext-cloudflare-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "opennext cloudflare, nextjs workers deployment, edge runtime patterns, cloudflare workers nextjs, opennext, cloudflare, nextjs, workers, capability-pack, skills, claude, heyclaude, opennext, cloudflare, nextjs, workers, capability-pack",
           "genre": "Skills",
           "author": {
@@ -20197,7 +20197,7 @@
           "description": "Reusable AI skill for PageSpeed Insights optimization focused on Core Web Vitals, practical remediation, and regression-safe performance improvements.",
           "url": "https://heyclau.de/skills/pagespeed-insights-optimizer",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, pagespeed, lighthouse, lcp, cls, tbt, performance, optimization, core-web-vitals, skills, web-performance, claude, pagespeed, lighthouse, core-web-vitals, web-performance, optimization",
           "genre": "Skills",
           "author": {
@@ -20727,7 +20727,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/pipedream#webpage",
           "name": "Pipedream",
-          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations.",
+          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/pipedream",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -20742,7 +20742,7 @@
           "@id": "https://heyclau.de/tools/pipedream#entry",
           "name": "Pipedream",
           "headline": "Pipedream",
-          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations.",
+          "description": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/pipedream",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -20980,7 +20980,7 @@
           "description": "Automate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a single API. Generate...",
           "url": "https://heyclau.de/skills/playwright-e2e-testing",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "automation, claude, development, e2e, playwright, skills, testing, tools, ai, heyclaude, playwright e2e testing automation skill, testing, playwright, e2e, automation, ai",
           "genre": "Skills",
           "author": {
@@ -21067,7 +21067,7 @@
           "description": "Reusable AI skill for robust browser automation with Playwright MCP, including selector strategy, retries, and anti-flake workflows.",
           "url": "https://heyclau.de/skills/playwright-mcp-browser-automation-engineer",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "playwright mcp, browser automation skill, resilient web automation, ui workflow automation, playwright, mcp, browser-automation, testing, ai-agents, skills, claude, heyclaude, playwright, mcp, browser-automation, testing, ai-agents",
           "genre": "Skills",
           "author": {
@@ -21387,7 +21387,7 @@
           "description": "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. In...",
           "url": "https://heyclau.de/skills/postgresql-query-optimization",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, database, development, optimization, performance, postgresql, query, skills, sql, tools, heyclaude, postgresql query optimization skill, postgresql, database, optimization, performance, sql",
           "genre": "Skills",
           "author": {
@@ -21897,7 +21897,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/prompt-injection-defense-guardrails#webpage",
           "name": "Prompt Injection Defense Guardrails Skill",
-          "description": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests.",
+          "description": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/prompt-injection-defense-guardrails",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -21912,10 +21912,10 @@
           "@id": "https://heyclau.de/skills/prompt-injection-defense-guardrails#entry",
           "name": "Prompt Injection Defense Guardrails Skill",
           "headline": "Prompt Injection Defense Guardrails Skill",
-          "description": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests.",
+          "description": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/prompt-injection-defense-guardrails",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-skill, prompt-injection-defense, llm-security, tool-safety, adversarial-testing, prompt-injection, guardrails, security, ai-safety, red-teaming, skills, claude, prompt-injection, guardrails, security, ai-safety, red-teaming",
           "genre": "Skills",
           "author": {
@@ -22134,7 +22134,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/promptfoo#webpage",
           "name": "Promptfoo",
-          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks.",
+          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/promptfoo",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -22149,7 +22149,7 @@
           "@id": "https://heyclau.de/tools/promptfoo#entry",
           "name": "Promptfoo",
           "headline": "Promptfoo",
-          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks.",
+          "description": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/promptfoo",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -22211,7 +22211,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/protect-ai#webpage",
           "name": "Protect AI",
-          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure.",
+          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/tools/protect-ai",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -22226,7 +22226,7 @@
           "@id": "https://heyclau.de/tools/protect-ai#entry",
           "name": "Protect AI",
           "headline": "Protect AI",
-          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure.",
+          "description": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/tools/protect-ai",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -22304,7 +22304,7 @@
           "description": "Advanced AI capability skill for Proxmox VE API operations, including lifecycle orchestration, auth, and failure-safe runbooks.",
           "url": "https://heyclau.de/skills/proxmox-ve-api-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "proxmox api, vm orchestration, lxc automation, homelab virtualization, proxmox, virtualization, api, infrastructure, capability-pack, skills, claude, heyclaude, proxmox, virtualization, api, infrastructure, capability-pack",
           "genre": "Skills",
           "author": {
@@ -22391,7 +22391,7 @@
           "description": "Reusable AI skill for Proxmox API operations with secure token auth, orchestration sequencing, and operational safeguards.",
           "url": "https://heyclau.de/skills/proxmox-ve-api-orchestrator",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "proxmox automation, vm orchestration, lxc automation, proxmox api, proxmox, virtualization, infrastructure, api, homelab, skills, claude, heyclaude, proxmox, virtualization, infrastructure, api, homelab",
           "genre": "Skills",
           "author": {
@@ -22838,7 +22838,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/raycast#webpage",
           "name": "Raycast",
-          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations.",
+          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/raycast",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -22853,7 +22853,7 @@
           "@id": "https://heyclau.de/tools/raycast#entry",
           "name": "Raycast",
           "headline": "Raycast",
-          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations.",
+          "description": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/raycast",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -22931,7 +22931,7 @@
           "description": "Advanced AI skill for Raycast extension development and publishing, including architecture, quality checks, and store submission readiness.",
           "url": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "raycast extension development, raycast store publishing, command palette apps, macos productivity tooling, raycast, extensions, developer-tools, publishing, capability-pack, skills, claude, heyclaude, raycast, extensions, developer-tools, publishing, capability-pack",
           "genre": "Skills",
           "author": {
@@ -23865,7 +23865,7 @@
           "description": "Explore and script against REST APIs with comprehensive authentication support (API keys, OAuth 2.0, JWT Bearer tokens, Basic Auth), pagination utilities (cu...",
           "url": "https://heyclau.de/skills/rest-api-client-harness",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "api, claude, client, curl, development, harness, http, node, rest, skills, tools, heyclaude, rest, http, api, curl, node",
           "genre": "Skills",
           "author": {
@@ -23934,7 +23934,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/roo-code#webpage",
           "name": "Roo Code",
-          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation.",
+          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/roo-code",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -23949,7 +23949,7 @@
           "@id": "https://heyclau.de/tools/roo-code#entry",
           "name": "Roo Code",
           "headline": "Roo Code",
-          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation.",
+          "description": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/roo-code",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -24104,7 +24104,7 @@
           "description": "Reusable AI skill for SaaS pricing experiments, including hypothesis design, guardrail metrics, and rollout decision frameworks.",
           "url": "https://heyclau.de/skills/saas-pricing-experimentation-engine",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "saas pricing tests, pricing optimization, conversion experiments, revenue operations skill, saas, pricing, experimentation, revenue, product, skills, claude, heyclaude, saas, pricing, experimentation, revenue, product",
           "genre": "Skills",
           "author": {
@@ -24698,7 +24698,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/sentry-mcp-server#webpage",
           "name": "Sentry MCP Server for Claude",
-          "description": "Monitor errors, debug production issues, and track application health Discover tools for AI development.",
+          "description": "Monitor errors, debug production issues, and track application health Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/sentry-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -24713,7 +24713,7 @@
           "@id": "https://heyclau.de/mcp/sentry-mcp-server#entry",
           "name": "Sentry MCP Server for Claude",
           "headline": "Sentry MCP Server for Claude",
-          "description": "Monitor errors, debug production issues, and track application health Discover tools for AI development.",
+          "description": "Monitor errors, debug production issues, and track application health Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/sentry-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -25312,7 +25312,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/smithery#webpage",
           "name": "Smithery",
-          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows.",
+          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/smithery",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25327,7 +25327,7 @@
           "@id": "https://heyclau.de/tools/smithery#entry",
           "name": "Smithery",
           "headline": "Smithery",
-          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows.",
+          "description": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/smithery",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -25387,7 +25387,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/socket-mcp-server#webpage",
           "name": "Socket MCP Server for Claude",
-          "description": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development.",
+          "description": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/socket-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25402,7 +25402,7 @@
           "@id": "https://heyclau.de/mcp/socket-mcp-server#entry",
           "name": "Socket MCP Server for Claude",
           "headline": "Socket MCP Server for Claude",
-          "description": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development.",
+          "description": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/socket-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -25472,7 +25472,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/sourcegraph-cody#webpage",
           "name": "Sourcegraph Cody",
-          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search.",
+          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/sourcegraph-cody",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25487,7 +25487,7 @@
           "@id": "https://heyclau.de/tools/sourcegraph-cody#entry",
           "name": "Sourcegraph Cody",
           "headline": "Sourcegraph Cody",
-          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search.",
+          "description": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/sourcegraph-cody",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -25547,7 +25547,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/square-mcp-server#webpage",
           "name": "Square MCP Server for Claude",
-          "description": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development.",
+          "description": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/square-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25562,7 +25562,7 @@
           "@id": "https://heyclau.de/mcp/square-mcp-server#entry",
           "name": "Square MCP Server for Claude",
           "headline": "Square MCP Server for Claude",
-          "description": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development.",
+          "description": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/square-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -25630,7 +25630,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/stagehand#webpage",
           "name": "Stagehand",
-          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions.",
+          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/stagehand",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25645,7 +25645,7 @@
           "@id": "https://heyclau.de/tools/stagehand#entry",
           "name": "Stagehand",
           "headline": "Stagehand",
-          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions.",
+          "description": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/stagehand",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -25782,7 +25782,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/stripe-mcp-server#webpage",
           "name": "Stripe MCP Server for Claude",
-          "description": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development.",
+          "description": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/stripe-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25797,7 +25797,7 @@
           "@id": "https://heyclau.de/mcp/stripe-mcp-server#entry",
           "name": "Stripe MCP Server for Claude",
           "headline": "Stripe MCP Server for Claude",
-          "description": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development.",
+          "description": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/mcp/stripe-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -25865,7 +25865,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/stytch-mcp-server#webpage",
           "name": "Stytch MCP Server for Claude",
-          "description": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development.",
+          "description": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/stytch-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -25880,7 +25880,7 @@
           "@id": "https://heyclau.de/mcp/stytch-mcp-server#entry",
           "name": "Stytch MCP Server for Claude",
           "headline": "Stytch MCP Server for Claude",
-          "description": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development.",
+          "description": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/stytch-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -26118,7 +26118,7 @@
           "description": "Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers. Create complet...",
           "url": "https://heyclau.de/skills/supabase-realtime-database",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "backend, builder, claude, database, development, postgres, realtime, skills, supabase, tools, heyclaude, supabase realtime database builder skill, supabase, postgres, realtime, backend, database",
           "genre": "Skills",
           "author": {
@@ -26280,7 +26280,7 @@
           "description": "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend fram...",
           "url": "https://heyclau.de/skills/svelte-sveltekit-fullstack",
           "datePublished": "2025-10-23",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, developer, development, frontend, full, full-stack, reactive, skills, stack, svelte, svelte sveltekit, sveltekit, svelte, sveltekit, frontend, full-stack, reactive",
           "genre": "Skills",
           "author": {
@@ -27098,7 +27098,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/trigger-dev#webpage",
           "name": "Trigger.dev",
-          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
+          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/trigger-dev",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -27113,7 +27113,7 @@
           "@id": "https://heyclau.de/tools/trigger-dev#entry",
           "name": "Trigger.dev",
           "headline": "Trigger.dev",
-          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
+          "description": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/trigger-dev",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -27193,7 +27193,7 @@
           "description": "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end...",
           "url": "https://heyclau.de/skills/trpc-type-safe-api",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "api, builder, claude, development, safe, skills, t3-stack, tools, trpc, type, type-safety, typescript, trpc, typescript, api, type-safety, t3-stack",
           "genre": "Skills",
           "author": {
@@ -27502,7 +27502,7 @@
           "description": "AI skill for automating Unraid operations using the Unraid API with secure auth, idempotent actions, and operational safeguards.",
           "url": "https://heyclau.de/skills/unraid-api-automation-operator",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "unraid api automation, homelab ai skill, server operations, unraid maintenance automation, unraid, homelab, automation, api, operations, skills, claude, heyclaude, unraid, homelab, automation, api, operations",
           "genre": "Skills",
           "author": {
@@ -27589,7 +27589,7 @@
           "description": "Expert AI skill for the latest Unraid API usage, including auth, endpoint contracts, safe operations, and reliability workflows.",
           "url": "https://heyclau.de/skills/unraid-api-v2-capability-pack",
           "datePublished": "2026-04-10",
-          "dateModified": "2026-04-27T01:30:00-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "unraid api v2, unraid automation, homelab api skill, server operations, unraid, api, homelab, automation, capability-pack, skills, claude, heyclaude, unraid, api, homelab, automation, capability-pack",
           "genre": "Skills",
           "author": {
@@ -27676,7 +27676,7 @@
           "description": "Advanced AI skill for creating and validating Unraid Community Apps templates with polished metadata and submission standards.",
           "url": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "unraid ca template, community apps xml, unraid docker metadata, ca submission checklist, unraid, community-apps, docker, templates, capability-pack, skills, claude, heyclaude, unraid, community-apps, docker, templates, capability-pack",
           "genre": "Skills",
           "author": {
@@ -27745,7 +27745,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/vercel-v0#webpage",
           "name": "v0",
-          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
+          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/vercel-v0",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -27760,7 +27760,7 @@
           "@id": "https://heyclau.de/tools/vercel-v0#entry",
           "name": "v0",
           "headline": "v0",
-          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
+          "description": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/vercel-v0",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -27916,7 +27916,7 @@
           "description": "Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Verce...",
           "url": "https://heyclau.de/skills/v0-rapid-prototyping",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, development, prototyping, rapid, react, shadcn, skills, tools, workflow, v0, ui, heyclaude, v0, prototyping, ui, shadcn, react",
           "genre": "Skills",
           "author": {
@@ -27985,7 +27985,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/vercel-ai-sdk#webpage",
           "name": "Vercel AI SDK",
-          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
+          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/vercel-ai-sdk",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -28000,7 +28000,7 @@
           "@id": "https://heyclau.de/tools/vercel-ai-sdk#entry",
           "name": "Vercel AI SDK",
           "headline": "Vercel AI SDK",
-          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
+          "description": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/vercel-ai-sdk",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -28062,7 +28062,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/vercel-mcp-server#webpage",
           "name": "Vercel MCP Server for Claude",
-          "description": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development.",
+          "description": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/vercel-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -28077,7 +28077,7 @@
           "@id": "https://heyclau.de/mcp/vercel-mcp-server#entry",
           "name": "Vercel MCP Server for Claude",
           "headline": "Vercel MCP Server for Claude",
-          "description": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development.",
+          "description": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
           "url": "https://heyclau.de/mcp/vercel-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -28163,7 +28163,7 @@
           "description": "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the d...",
           "url": "https://heyclau.de/skills/vite-build-optimization",
           "datePublished": "2025-10-23",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "build, build-tools, claude, development, frontend, optimization, performance, skills, specialist, tools, vite, webpack, vite, build-tools, webpack, performance, frontend",
           "genre": "Skills",
           "author": {
@@ -28382,7 +28382,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/weave#webpage",
           "name": "Weave",
-          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling.",
+          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/weave",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -28397,7 +28397,7 @@
           "@id": "https://heyclau.de/tools/weave#entry",
           "name": "Weave",
           "headline": "Weave",
-          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling.",
+          "description": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/weave",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -28550,7 +28550,7 @@
           "description": "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. Web...",
           "url": "https://heyclau.de/skills/webassembly-module-development",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, development, module, performance, rust, skills, tools, wasi, wasm, webassembly, heyclaude, webassembly wasm module development skill, webassembly, wasm, rust, performance, wasi",
           "genre": "Skills",
           "author": {
@@ -28712,7 +28712,7 @@
           "description": "Crawl domains respectfully, extract readable content, dedupe, and generate structured summaries. Perfect for research, competitive analysis, and content aggr...",
           "url": "https://heyclau.de/skills/website-crawler-summarizer",
           "datePublished": "2025-10-15",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "and, claude, content, crawler, development, readability, scraping, skills, summarization, summarizer, tools, website, crawler, scraping, summarization, readability",
           "genre": "Skills",
           "author": {
@@ -28783,7 +28783,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/windsurf#webpage",
           "name": "Windsurf",
-          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows.",
+          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/windsurf",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -28798,7 +28798,7 @@
           "@id": "https://heyclau.de/tools/windsurf#entry",
           "name": "Windsurf",
           "headline": "Windsurf",
-          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows.",
+          "description": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/windsurf",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -28876,7 +28876,7 @@
           "description": "Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows. Windsurf is ...",
           "url": "https://heyclau.de/skills/windsurf-collaborative-development",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "ai-ide, cascade, claude, collaboration, collaborative, development, native, skills, tools, windsurf, workflow, heyclaude, windsurf, collaboration, cascade, ai-ide, workflow",
           "genre": "Skills",
           "author": {
@@ -29020,7 +29020,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/workato#webpage",
           "name": "Workato",
-          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
+          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/workato",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29035,7 +29035,7 @@
           "@id": "https://heyclau.de/tools/workato#entry",
           "name": "Workato",
           "headline": "Workato",
-          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
+          "description": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/workato",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -29095,7 +29095,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/workato-mcp-server#webpage",
           "name": "Workato MCP Server for Claude",
-          "description": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development.",
+          "description": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/workato-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29110,7 +29110,7 @@
           "@id": "https://heyclau.de/mcp/workato-mcp-server#entry",
           "name": "Workato MCP Server for Claude",
           "headline": "Workato MCP Server for Claude",
-          "description": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development.",
+          "description": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/workato-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -29331,7 +29331,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/zapier-ai#webpage",
           "name": "Zapier AI",
-          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation.",
+          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/zapier-ai",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29346,7 +29346,7 @@
           "@id": "https://heyclau.de/tools/zapier-ai#entry",
           "name": "Zapier AI",
           "headline": "Zapier AI",
-          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation.",
+          "description": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/tools/zapier-ai",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -29406,7 +29406,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/zapier-mcp-server#webpage",
           "name": "Zapier MCP Server for Claude",
-          "description": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development.",
+          "description": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/zapier-mcp-server",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29421,7 +29421,7 @@
           "@id": "https://heyclau.de/mcp/zapier-mcp-server#entry",
           "name": "Zapier MCP Server for Claude",
           "headline": "Zapier MCP Server for Claude",
-          "description": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development.",
+          "description": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
           "url": "https://heyclau.de/mcp/zapier-mcp-server",
           "datePublished": "2025-09-18",
           "dateModified": "2026-04-26T18:18:28-06:00",
@@ -29489,7 +29489,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/tools/zed#webpage",
           "name": "Zed",
-          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows.",
+          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/zed",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29504,7 +29504,7 @@
           "@id": "https://heyclau.de/tools/zed#entry",
           "name": "Zed",
           "headline": "Zed",
-          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows.",
+          "description": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/tools/zed",
           "datePublished": "2026-04-27",
           "dateModified": "2026-04-26T23:21:14-06:00",
@@ -29566,7 +29566,7 @@
           "@type": "WebPage",
           "@id": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack#webpage",
           "name": "Zero-Budget SaaS Launch Capability Pack Skill",
-          "description": "Advanced AI skill for launching SaaS with minimal budget, free-tier infrastructure, and durable growth experiments.",
+          "description": "Advanced AI skill for launching SaaS with minimal budget, free-tier infrastructure, and durable growth experiments. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -29581,10 +29581,10 @@
           "@id": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack#entry",
           "name": "Zero-Budget SaaS Launch Capability Pack Skill",
           "headline": "Zero-Budget SaaS Launch Capability Pack Skill",
-          "description": "Advanced AI skill for launching SaaS with minimal budget, free-tier infrastructure, and durable growth experiments.",
+          "description": "Advanced AI skill for launching SaaS with minimal budget, free-tier infrastructure, and durable growth experiments. HeyClaude adds source links, install...",
           "url": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack",
           "datePublished": "2026-04-11",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "zero budget saas, free tier launch, bootstrap product execution, lean mvp roadmap, saas, bootstrap, growth, cost-optimization, capability-pack, skills, claude, heyclaude, saas, bootstrap, growth, cost-optimization, capability-pack",
           "genre": "Skills",
           "author": {
@@ -29671,7 +29671,7 @@
           "description": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeS...",
           "url": "https://heyclau.de/skills/zod-schema-validator",
           "datePublished": "2025-10-16",
-          "dateModified": "2026-04-26T18:18:28-06:00",
+          "dateModified": "2026-04-27T02:57:15-06:00",
           "keywords": "claude, development, schema, skills, tools, type-safety, typescript, validation, validator, zod, heyclaude, zod schema validation skill, zod, validation, typescript, type-safety, schema",
           "genre": "Skills",
           "author": {

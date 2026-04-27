@@ -7,11 +7,11 @@
     "title": "Agent Evals Regression Gate Skill",
     "description": "Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.",
     "seoTitle": "Agent Evals Regression Gate Skill for AI Workflows",
-    "seoDescription": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring.",
+    "seoDescription": "Reusable AI skill for building agent eval harnesses with regression thresholds, CI checks, and stable scoring. HeyClaude adds source links, install steps,...",
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-10",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-27T02:57:15-06:00",
     "tags": [
       "evals",
       "regression",

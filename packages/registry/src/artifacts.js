@@ -441,6 +441,96 @@ export function buildRegistryChangelogFeed(entries) {
   };
 }
 
+export function platformFeedSlug(platform) {
+  return String(platform || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function buildCategoryDistributionFeed(entries, category, params = {}) {
+  const siteUrl = params.siteUrl ?? SITE_URL;
+  const categoryEntries = entries.filter((entry) => entry.category === category);
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "category-feed",
+    category,
+    generatedAt: generatedAtForEntries(categoryEntries),
+    count: categoryEntries.length,
+    entries: buildDirectoryEntries(categoryEntries).map((entry) => ({
+      ...entry,
+      canonicalUrl: `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`,
+    })),
+  };
+}
+
+export function buildPlatformDistributionFeed(entries, platform, params = {}) {
+  const siteUrl = params.siteUrl ?? SITE_URL;
+  const platformEntries = entries.filter((entry) =>
+    buildSkillPlatformCompatibility(entry).some(
+      (item) => item.platform === platform,
+    ),
+  );
+
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "platform-feed",
+    platform,
+    platformSlug: platformFeedSlug(platform),
+    generatedAt: generatedAtForEntries(platformEntries),
+    count: platformEntries.length,
+    entries: buildDirectoryEntries(platformEntries).map((entry) => ({
+      ...entry,
+      canonicalUrl: `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`,
+    })),
+  };
+}
+
+export function buildDistributionFeedIndex(entries, params = {}) {
+  const siteUrl = params.siteUrl ?? SITE_URL;
+  const categories = categorySpec.categoryOrder.map((category) => {
+    const spec = categorySpec.categories[category];
+    const count = entries.filter((entry) => entry.category === category).length;
+    return {
+      category,
+      label: spec?.label ?? category,
+      count,
+      feedUrl: dataUrl("feeds", "categories", `${category}.json`),
+      canonicalUrl: `${siteUrl.replace(/\/$/, "")}/${category}`,
+    };
+  });
+  const platforms = [
+    ...new Set(
+      entries.flatMap((entry) =>
+        buildSkillPlatformCompatibility(entry).map((item) => item.platform),
+      ),
+    ),
+  ].map((platform) => ({
+    platform,
+    platformSlug: platformFeedSlug(platform),
+    count: entries.filter((entry) =>
+      buildSkillPlatformCompatibility(entry).some(
+        (item) => item.platform === platform,
+      ),
+    ).length,
+    feedUrl: dataUrl(
+      "feeds",
+      "platforms",
+      `${platformFeedSlug(platform)}.json`,
+    ),
+  }));
+
+  return {
+    schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
+    kind: "distribution-feed-index",
+    generatedAt: generatedAtForEntries(entries),
+    categories,
+    platforms,
+  };
+}
+
 export function buildRegistryManifest(entries, extra = {}) {
   const categories = {};
   for (const category of categorySpec.categoryOrder) {
@@ -484,6 +574,9 @@ export function buildRegistryManifest(entries, extra = {}) {
       entryLlms: dataUrl("llms"),
       raycastDetails: dataUrl("raycast"),
       skillAdapters: dataUrl("skill-adapters"),
+      distributionFeeds: dataUrl("feeds"),
+      categoryFeeds: dataUrl("feeds", "categories"),
+      platformFeeds: dataUrl("feeds", "platforms"),
     },
     artifactContracts: extra.artifactContracts ?? {},
   };
@@ -565,6 +658,11 @@ export function buildRegistryArtifactSet(entries, params = {}) {
       value: buildRegistryChangelogFeed(entries),
     },
     {
+      path: "feeds/index.json",
+      type: "json",
+      value: buildDistributionFeedIndex(entries, { siteUrl }),
+    },
+    {
       path: "content-quality-report.json",
       type: "json",
       value: buildContentQualityArtifact(entries),
@@ -616,6 +714,29 @@ export function buildRegistryArtifactSet(entries, params = {}) {
         value: buildCursorSkillAdapter(entry),
       });
     }
+  }
+
+  for (const category of categorySpec.categoryOrder) {
+    files.push({
+      path: `feeds/categories/${category}.json`,
+      type: "json",
+      value: buildCategoryDistributionFeed(entries, category, { siteUrl }),
+    });
+  }
+
+  const platforms = [
+    ...new Set(
+      entries.flatMap((entry) =>
+        buildSkillPlatformCompatibility(entry).map((item) => item.platform),
+      ),
+    ),
+  ];
+  for (const platform of platforms) {
+    files.push({
+      path: `feeds/platforms/${platformFeedSlug(platform)}.json`,
+      type: "json",
+      value: buildPlatformDistributionFeed(entries, platform, { siteUrl }),
+    });
   }
 
   const artifactContracts = Object.fromEntries(

@@ -7,7 +7,7 @@
     "title": "Garak",
     "description": "Open-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.",
     "seoTitle": "Garak LLM vulnerability scanner",
-    "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
+    "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
     "author": "NVIDIA",
     "dateAdded": "2026-04-27",
     "contentUpdatedAt": "2026-04-26T23:21:14-06:00",

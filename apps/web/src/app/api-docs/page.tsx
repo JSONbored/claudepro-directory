@@ -60,6 +60,21 @@ const examples = [
     code: "curl https://heyclau.de/data/registry-changelog.json",
   },
   {
+    title: "Distribution Feed Index",
+    href: "/data/feeds/index.json",
+    code: "curl https://heyclau.de/data/feeds/index.json",
+  },
+  {
+    title: "Category Feed",
+    href: "/data/feeds/categories/skills.json",
+    code: "curl https://heyclau.de/data/feeds/categories/{category}.json",
+  },
+  {
+    title: "Platform Feed",
+    href: "/data/feeds/platforms/claude.json",
+    code: "curl https://heyclau.de/data/feeds/platforms/{platform}.json",
+  },
+  {
     title: "RSS Updates",
     href: "/feed.xml",
     code: "curl https://heyclau.de/feed.xml",

@@ -26,6 +26,7 @@
     "@heyclaude/registry": "workspace:*",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "fflate": "0.8.2",
     "geist": "1.7.0",
     "lucide-react": "1.8.0",
     "marked": "18.0.0",

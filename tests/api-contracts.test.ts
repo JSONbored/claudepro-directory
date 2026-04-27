@@ -24,6 +24,9 @@ const apiRoutes = [
   "/api/intent-events",
   "/api/community-signals",
   "/api/github-stats",
+  "/data/feeds/index.json",
+  "/data/feeds/categories/{category}.json",
+  "/data/feeds/platforms/{platform}.json",
 ];
 
 describe("OpenAPI route coverage", () => {
@@ -54,5 +57,6 @@ describe("OpenAPI route coverage", () => {
     expect(schema).toContain("name: platform");
     expect(schema).toContain("/api/og:");
     expect(schema).toContain("image/png");
+    expect(schema).toContain("category and platform shards");
   });
 });
