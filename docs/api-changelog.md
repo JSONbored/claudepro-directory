@@ -5,6 +5,9 @@
 - Added sharded distribution feeds under `/data/feeds/` for category and platform consumers.
 - Added IndexNow release submission tooling guarded to production URLs.
 - Added the browser-side Agent Skill package validator at `/tools/skill-validator`.
+- Added platform compatibility pages under `/platforms/` for Agent Skills and generated adapters.
+- Added the read-only `@heyclaude/mcp` package for registry search, detail, compatibility, install guidance, adapter lookup, and feed discovery.
+- Added React Email source templates with rendered Resend Broadcast HTML/text artifacts.
 - Added generated skill platform compatibility metadata for native Agent Skills platforms and adapter targets.
 - Added generated Cursor `.mdc` skill adapters under `/data/skill-adapters/cursor/`.
 - Added deployment artifact validation for preview release candidates.

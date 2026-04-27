@@ -232,6 +232,8 @@ if (fs.existsSync(tasksPath)) {
     "validate:category-spec",
     "validate:packages",
     "validate:raycast-feed",
+    "validate:emails",
+    "test:mcp",
     "test",
     "test:e2e",
     "type-check",
@@ -258,6 +260,8 @@ for (const scriptName of [
   "validate:category-spec",
   "validate:packages",
   "validate:raycast-feed",
+  "validate:emails",
+  "test:mcp",
   "test",
   "test:e2e",
   "type-check",
@@ -265,7 +269,9 @@ for (const scriptName of [
   "validate:tasks",
 ]) {
   if (!scriptNames?.[scriptName]) {
-    failures.push(`package.json is missing validation gate script: ${scriptName}`);
+    failures.push(
+      `package.json is missing validation gate script: ${scriptName}`,
+    );
   }
 }
 

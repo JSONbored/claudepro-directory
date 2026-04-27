@@ -64,7 +64,11 @@ function getGitHubEditUrl(githubUrl?: string) {
   }
 }
 
-function getSuggestChangeUrl(entry: { category: string; slug: string; title: string }) {
+function getSuggestChangeUrl(entry: {
+  category: string;
+  slug: string;
+  title: string;
+}) {
   const url = new URL(`${siteConfig.githubUrl}/issues/new`);
   url.searchParams.set("title", `Suggest change: ${entry.title}`);
   url.searchParams.set(

@@ -17,7 +17,10 @@ import {
   normalizeSubmittedUrls,
 } from "./lib/indexnow.mjs";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 
 function parseArgs(argv) {
   const args = {
@@ -123,7 +126,9 @@ async function main() {
     !isProductionIndexNowHost(host) &&
     process.env.INDEXNOW_ALLOW_NON_PRODUCTION !== "1"
   ) {
-    console.log(`Skipping IndexNow submission for non-production host: ${host}`);
+    console.log(
+      `Skipping IndexNow submission for non-production host: ${host}`,
+    );
     return;
   }
 

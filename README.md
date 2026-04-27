@@ -25,24 +25,26 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 
 ## At a Glance
 
-| Section | Entries | Scope |
-| --- | ---: | --- |
-| [Agents](#ai-agents) | 39 | Specialized Claude agents and expert roles. |
-| [MCP Servers](#mcp-servers) | 44 | Model Context Protocol servers and integrations. |
-| [Tools](#tools) | 52 | Apps, developer tools, services, and products for Claude-native builders. |
-| [Skills](#skills) | 67 | Installable skill packs and reusable capabilities. |
-| [Rules](#rules) | 29 | Prompt guardrails, project rules, and operating constraints. |
-| [Commands](#commands) | 27 | Slash commands and reusable command prompts. |
-| [Hooks](#hooks) | 66 | Claude Code hook configs and automation helpers. |
-| [Guides](#guides) | 19 | Long-form guides and practical walkthroughs. |
-| [Collections](#collections) | 10 | Curated bundles of related assets. |
-| [Statuslines](#statuslines) | 26 | Statusline scripts and workflow telemetry. |
+| Section                     | Entries | Scope                                                                     |
+| --------------------------- | ------: | ------------------------------------------------------------------------- |
+| [Agents](#ai-agents)        |      39 | Specialized Claude agents and expert roles.                               |
+| [MCP Servers](#mcp-servers) |      44 | Model Context Protocol servers and integrations.                          |
+| [Tools](#tools)             |      52 | Apps, developer tools, services, and products for Claude-native builders. |
+| [Skills](#skills)           |      67 | Installable skill packs and reusable capabilities.                        |
+| [Rules](#rules)             |      29 | Prompt guardrails, project rules, and operating constraints.              |
+| [Commands](#commands)       |      27 | Slash commands and reusable command prompts.                              |
+| [Hooks](#hooks)             |      66 | Claude Code hook configs and automation helpers.                          |
+| [Guides](#guides)           |      19 | Long-form guides and practical walkthroughs.                              |
+| [Collections](#collections) |      10 | Curated bundles of related assets.                                        |
+| [Statuslines](#statuslines) |      26 | Statusline scripts and workflow telemetry.                                |
 
 ## Distribution Surfaces
 
 - Website: [heyclau.de](https://heyclau.de)
 - Search and browse API: [API docs](https://heyclau.de/api-docs)
 - Machine-readable registry feed: [`/api/registry/feed`](https://heyclau.de/api/registry/feed)
+- Platform compatibility pages: [`/platforms`](https://heyclau.de/platforms)
+- Read-only MCP server: [`packages/mcp`](packages/mcp)
 - Full LLM export: [`/llms-full.txt`](https://heyclau.de/llms-full.txt)
 - RSS updates: [`/feed.xml`](https://heyclau.de/feed.xml)
 - Package validator: [Agent Skill package validator](https://heyclau.de/tools/skill-validator)
@@ -71,7 +73,7 @@ content issues.
 
 1. Add or update a file under `content/<category>/`
 2. Run `pnpm --filter web run prebuild`
-3. Run `pnpm validate:content:strict`, `pnpm validate:issue-templates`, `pnpm validate:clean`, `pnpm audit:content`, `pnpm test:registry-artifacts`, `pnpm test:seo-jsonld`, and `pnpm test:commercial-intake`
+3. Run `pnpm validate:content:strict`, `pnpm validate:issue-templates`, `pnpm validate:clean`, `pnpm audit:content`, `pnpm validate:emails`, `pnpm test:mcp`, `pnpm test:registry-artifacts`, `pnpm test:seo-jsonld`, and `pnpm test:commercial-intake`
 4. Run `pnpm generate:issue-templates` and `pnpm generate:readme` if registry categories or content counts changed
 5. Commit the README and generated registry artifacts alongside your content changes
 
@@ -80,6 +82,7 @@ content issues.
 - Examples: [examples/content/README.md](examples/content/README.md)
 - Registry schema: [content/SCHEMA.md](content/SCHEMA.md)
 - Registry package: [packages/registry](packages/registry)
+- Read-only MCP server: [packages/mcp](packages/mcp)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 
@@ -90,6 +93,7 @@ content issues.
 - Security policy: [SECURITY.md](SECURITY.md)
 - Deployment guide: [apps/web/DEPLOYMENT.md](apps/web/DEPLOYMENT.md)
 - IndexNow: [docs/indexnow.md](docs/indexnow.md)
+- Registry MCP: [docs/registry-mcp-plan.md](docs/registry-mcp-plan.md)
 - API security contract: [docs/api-security-contract.md](docs/api-security-contract.md)
 - License: [LICENSE](LICENSE)
 

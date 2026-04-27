@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
+import prettier from "prettier";
 import categorySpec from "@heyclaude/registry/category-spec";
 
 const repoRoot = process.cwd();
@@ -53,7 +54,17 @@ const categoryRows = categoryOrder
   .map((category) => {
     const entries = entriesByCategory[category] ?? [];
     const spec = categorySpec.categories[category];
-    return `| [${escapeTableCell(spec?.label ?? category)}](#${(categoryHeadings[category] ?? category).replace(/^#+\s*/, "").replace(/[^\w\s-]/g, "").trim().toLowerCase().replace(/\s+/g, "-")}) | ${entries.length} | ${escapeTableCell(spec?.description ?? "")} |`;
+    return `| [${escapeTableCell(spec?.label ?? category)}](#${(
+      categoryHeadings[category] ?? category
+    )
+      .replace(/^#+\s*/, "")
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .toLowerCase()
+      .replace(
+        /\s+/g,
+        "-",
+      )}) | ${entries.length} | ${escapeTableCell(spec?.description ?? "")} |`;
   })
   .join("\n");
 
@@ -117,6 +128,8 @@ ${categoryRows}
 - Website: [heyclau.de](https://heyclau.de)
 - Search and browse API: [API docs](https://heyclau.de/api-docs)
 - Machine-readable registry feed: [\`/api/registry/feed\`](https://heyclau.de/api/registry/feed)
+- Platform compatibility pages: [\`/platforms\`](https://heyclau.de/platforms)
+- Read-only MCP server: [\`packages/mcp\`](packages/mcp)
 - Full LLM export: [\`/llms-full.txt\`](https://heyclau.de/llms-full.txt)
 - RSS updates: [\`/feed.xml\`](https://heyclau.de/feed.xml)
 - Package validator: [Agent Skill package validator](https://heyclau.de/tools/skill-validator)
@@ -145,7 +158,7 @@ content issues.
 
 1. Add or update a file under \`content/<category>/\`
 2. Run \`pnpm --filter web run prebuild\`
-3. Run \`pnpm validate:content:strict\`, \`pnpm validate:issue-templates\`, \`pnpm validate:clean\`, \`pnpm audit:content\`, \`pnpm test:registry-artifacts\`, \`pnpm test:seo-jsonld\`, and \`pnpm test:commercial-intake\`
+3. Run \`pnpm validate:content:strict\`, \`pnpm validate:issue-templates\`, \`pnpm validate:clean\`, \`pnpm audit:content\`, \`pnpm validate:emails\`, \`pnpm test:mcp\`, \`pnpm test:registry-artifacts\`, \`pnpm test:seo-jsonld\`, and \`pnpm test:commercial-intake\`
 4. Run \`pnpm generate:issue-templates\` and \`pnpm generate:readme\` if registry categories or content counts changed
 5. Commit the README and generated registry artifacts alongside your content changes
 
@@ -154,6 +167,7 @@ content issues.
 - Examples: [examples/content/README.md](examples/content/README.md)
 - Registry schema: [content/SCHEMA.md](content/SCHEMA.md)
 - Registry package: [packages/registry](packages/registry)
+- Read-only MCP server: [packages/mcp](packages/mcp)
 - Issue forms: [.github/ISSUE_TEMPLATE](.github/ISSUE_TEMPLATE)
 - Package trust model: [docs/package-security-policy.md](docs/package-security-policy.md)
 
@@ -164,6 +178,7 @@ content issues.
 - Security policy: [SECURITY.md](SECURITY.md)
 - Deployment guide: [apps/web/DEPLOYMENT.md](apps/web/DEPLOYMENT.md)
 - IndexNow: [docs/indexnow.md](docs/indexnow.md)
+- Registry MCP: [docs/registry-mcp-plan.md](docs/registry-mcp-plan.md)
 - API security contract: [docs/api-security-contract.md](docs/api-security-contract.md)
 - License: [LICENSE](LICENSE)
 
@@ -200,16 +215,18 @@ Thanks to everyone who has contributed to making HeyClaude better.
 </div>
 `;
 
+const formattedReadme = await prettier.format(readme, { parser: "markdown" });
+
 if (checkMode) {
   const current = fs.existsSync(readmePath)
     ? fs.readFileSync(readmePath, "utf8")
     : "";
-  if (current !== readme) {
+  if (current !== formattedReadme) {
     console.error("README.md is out of date. Run pnpm generate:readme.");
     process.exit(1);
   }
   console.log("README.md is up to date.");
 } else {
-  fs.writeFileSync(readmePath, readme);
+  fs.writeFileSync(readmePath, formattedReadme);
   console.log(`Updated ${path.relative(repoRoot, readmePath)}`);
 }

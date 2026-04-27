@@ -36,9 +36,7 @@ function toHex(buffer: ArrayBuffer) {
 }
 
 function isLikelyText(path: string) {
-  return /\.(md|mdc|txt|json|ya?ml|toml|js|ts|tsx|py|sh|rb|go|rs)$/i.test(
-    path,
-  );
+  return /\.(md|mdc|txt|json|ya?ml|toml|js|ts|tsx|py|sh|rb|go|rs)$/i.test(path);
 }
 
 export function SkillValidatorClient() {
@@ -223,8 +221,8 @@ export function SkillValidatorClient() {
           Review-ready packages
         </h2>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">
-          Valid packages can open a prefilled skill submission issue. Maintainers
-          still review before anything is published.
+          Valid packages can open a prefilled skill submission issue.
+          Maintainers still review before anything is published.
         </p>
         {state.status === "ready" ? (
           <div className="mt-4 space-y-3">

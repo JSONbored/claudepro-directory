@@ -84,6 +84,12 @@ The public key file is committed under `apps/web/public/` and served from the
 site root. See [`docs/indexnow.md`](../../docs/indexnow.md) for dry-run and CI
 guard details.
 
+Preview deployments must pass artifact validation before merge:
+
+```bash
+pnpm validate:deployment-artifacts -- --base-url https://<preview-host>
+```
+
 ## Newsletter (Resend)
 
 Set secrets/vars in Cloudflare:
@@ -104,6 +110,14 @@ Public vars (non-secret), set in Cloudflare dashboard for each worker environmen
 - `NEXT_PUBLIC_POLAR_JOB_BOARD_URL`
 
 For local development, copy `.dev.vars.example` to `.dev.vars` and fill values.
+
+React Email source templates live in `emails/src/`. Render static Resend
+Broadcast artifacts with:
+
+```bash
+pnpm email:render
+pnpm validate:emails
+```
 
 ## OpenNext Cloudflare notes used in this project
 

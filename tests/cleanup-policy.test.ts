@@ -166,7 +166,10 @@ describe("cleanup policy", () => {
   });
 
   it("keeps TASKS.md as an optional local-only tracker", () => {
-    const gitignore = fs.readFileSync(path.join(repoRoot, ".gitignore"), "utf8");
+    const gitignore = fs.readFileSync(
+      path.join(repoRoot, ".gitignore"),
+      "utf8",
+    );
     expect(gitignore.split("\n")).toContain("TASKS.md");
 
     const rootPackage = JSON.parse(

@@ -48,6 +48,9 @@ const htmlRoutes = [
   { path: "/trending", heading: /Popular|trending/i },
   { path: "/ecosystem", heading: /Ecosystem/i },
   { path: "/best/claude-native-tools", heading: /Tools for Claude-native/i },
+  { path: "/platforms", heading: /Agent Skills by platform/i },
+  { path: "/platforms/claude", heading: /Claude Agent Skills/i },
+  { path: "/platforms/cursor-rules", heading: /Cursor rule adapters/i },
 ];
 
 test.describe("site regression", () => {
@@ -200,6 +203,9 @@ test.describe("site regression", () => {
       "https://heyclau.de/trending",
       "https://heyclau.de/feed.xml",
       "https://heyclau.de/best/claude-native-tools",
+      "https://heyclau.de/platforms",
+      "https://heyclau.de/platforms/claude",
+      "https://heyclau.de/platforms/cursor-rules",
       `https://heyclau.de/${entry.category}/${entry.slug}`,
     ]) {
       expect(sitemap).toContain(route);

@@ -25,8 +25,12 @@ describe("SEO metadata snippets", () => {
       expect(description.length, category).toBeLessThanOrEqual(170);
     }
 
-    for (const path of bingReportedPaths.filter((item) => item !== "jobs" && item !== "about")) {
-      expect(categorySpec.categories[path]?.seoDescription.length).toBeGreaterThanOrEqual(120);
+    for (const path of bingReportedPaths.filter(
+      (item) => item !== "jobs" && item !== "about",
+    )) {
+      expect(
+        categorySpec.categories[path]?.seoDescription.length,
+      ).toBeGreaterThanOrEqual(120);
     }
   });
 

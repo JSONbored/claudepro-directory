@@ -452,7 +452,9 @@ export function platformFeedSlug(platform) {
 
 export function buildCategoryDistributionFeed(entries, category, params = {}) {
   const siteUrl = params.siteUrl ?? SITE_URL;
-  const categoryEntries = entries.filter((entry) => entry.category === category);
+  const categoryEntries = entries.filter(
+    (entry) => entry.category === category,
+  );
   return {
     schemaVersion: REGISTRY_ARTIFACT_SCHEMA_VERSION,
     kind: "category-feed",

@@ -315,7 +315,9 @@ export function getSourceSignals(entry: ContentEntry) {
     entry.verificationStatus
       ? { label: "Verification", value: entry.verificationStatus }
       : null,
-    entry.verifiedAt ? { label: "Last verified", value: entry.verifiedAt } : null,
+    entry.verifiedAt
+      ? { label: "Last verified", value: entry.verifiedAt }
+      : null,
     entry.contentUpdatedAt
       ? { label: "Content updated", value: entry.contentUpdatedAt.slice(0, 10) }
       : null,

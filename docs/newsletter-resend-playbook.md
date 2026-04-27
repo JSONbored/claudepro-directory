@@ -13,9 +13,10 @@ are stable on the release branch.
 
 ## Template Set
 
-Source templates live in `emails/templates/` and should be copied into Resend
-Broadcast drafts for test sends and scheduling. Keep app code limited to
-subscription capture and webhook handling.
+React Email source templates live in `emails/src/`. Rendered HTML and plain-text
+artifacts live in `emails/templates/` and should be copied into Resend Broadcast
+drafts for test sends and scheduling. Keep app code limited to subscription
+capture and webhook handling.
 
 ### Curated Drop Digest
 
@@ -52,10 +53,13 @@ Use sparingly for community maintenance. Include:
 
 ## Build Notes
 
-React Email templates are acceptable later, but the current implementation stays
-simple: static HTML/plain-text templates copied into Resend Broadcast drafts
-with explicit test sends before scheduling. Never send from app code without
-previewing the final HTML and plain-text fallback.
+- Run `pnpm email:render` after editing React Email source templates.
+- Run `pnpm validate:emails` before release to ensure rendered artifacts are
+  current.
+- Resend Broadcast drafts should use the rendered HTML/plain-text output from
+  `emails/templates/`.
+- Never send from app code without previewing the final HTML and plain-text
+  fallback.
 
 ## Indexing And Attribution
 

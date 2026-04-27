@@ -22,6 +22,10 @@
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
     "validate:tasks": "node scripts/validate-tasks.mjs",
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
+    "email:render": "tsx scripts/render-email-templates.ts",
+    "validate:emails": "tsx scripts/render-email-templates.ts --check",
+    "mcp:start": "pnpm --filter @heyclaude/mcp start",
+    "test:mcp": "vitest run tests/mcp-server.test.ts",
     "submission:queue": "node scripts/build-submission-queue.mjs",
     "test": "vitest run",
     "test:e2e": "env -u NO_COLOR playwright test",
@@ -48,6 +52,11 @@
     "@commitlint/config-conventional": "20.5.0",
     "@playwright/test": "^1.59.1",
     "husky": "9.1.7",
+    "prettier": "3.8.3",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "react-email": "6.0.1",
+    "tsx": "4.21.0",
     "vitest": "^4.1.5"
   },
   "pnpm": {

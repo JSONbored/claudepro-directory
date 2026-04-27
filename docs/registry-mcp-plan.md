@@ -1,15 +1,25 @@
-# Read-Only Registry MCP Plan
+# Read-Only Registry MCP
 
-The MCP surface should ship only after the registry API, artifact contracts, and
-Raycast read-only feed have remained stable.
+The MCP surface is implemented as `@heyclaude/mcp` under `packages/mcp`. It
+reads generated registry artifacts and exposes read-only tools over stdio.
 
-## V1 Scope
+Run locally:
 
-- Search registry entries.
-- Fetch entry details.
-- Fetch install guidance and copyable asset text.
-- Fetch skill package metadata and platform compatibility.
-- Fetch generated adapter links such as Cursor `.mdc` files.
+```bash
+pnpm --filter @heyclaude/mcp start
+```
+
+Set `HEYCLAUDE_DATA_DIR=/absolute/path/to/data` to read from another generated
+artifact directory.
+
+## V1 Tools
+
+- `search_registry`
+- `get_entry_detail`
+- `get_compatibility`
+- `get_install_guidance`
+- `get_platform_adapter`
+- `list_distribution_feeds`
 
 ## Exclusions
 

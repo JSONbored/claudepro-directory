@@ -47,10 +47,7 @@ function parseFrontmatter(markdown: string) {
       .split(/\r?\n/)
       .map((line) => line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/))
       .filter((item): item is RegExpMatchArray => Boolean(item))
-      .map((item) => [
-        item[1],
-        item[2].trim().replace(/^["']|["']$/g, ""),
-      ]),
+      .map((item) => [item[1], item[2].trim().replace(/^["']|["']$/g, "")]),
   ) as Record<string, string>;
 }
 
@@ -98,7 +95,9 @@ export function validateSkillPackageFiles(params: {
 
   const entrypoint = findSkillEntrypoint(normalizedFiles) || "";
   if (!entrypoint) {
-    errors.push("Package must include SKILL.md at the root or one folder deep.");
+    errors.push(
+      "Package must include SKILL.md at the root or one folder deep.",
+    );
   }
 
   const skillFile = normalizedFiles.find((file) => file.path === entrypoint);
@@ -133,14 +132,16 @@ export function validateSkillPackageFiles(params: {
     }
   }
 
-  const hasScripts = normalizedFiles.some((file) =>
-    file.path.includes("/scripts/") || file.path.startsWith("scripts/"),
+  const hasScripts = normalizedFiles.some(
+    (file) =>
+      file.path.includes("/scripts/") || file.path.startsWith("scripts/"),
   );
-  const hasReferences = normalizedFiles.some((file) =>
-    file.path.includes("/references/") || file.path.startsWith("references/"),
+  const hasReferences = normalizedFiles.some(
+    (file) =>
+      file.path.includes("/references/") || file.path.startsWith("references/"),
   );
-  const hasAssets = normalizedFiles.some((file) =>
-    file.path.includes("/assets/") || file.path.startsWith("assets/"),
+  const hasAssets = normalizedFiles.some(
+    (file) => file.path.includes("/assets/") || file.path.startsWith("assets/"),
   );
   const slug = slugify(skillName || entrypoint.replace(/\/?SKILL\.md$/, ""));
   const issueUrl = new URL(`${params.githubUrl}/issues/new`);

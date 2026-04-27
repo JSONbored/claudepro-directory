@@ -1,0 +1,18 @@
+{
+  "name": "@heyclaude/mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only MCP server for the HeyClaude registry.",
+  "bin": {
+    "heyclaude-mcp": "./src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "test": "vitest run ../../tests/mcp-server.test.ts"
+  },
+  "dependencies": {
+    "@heyclaude/registry": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.29.0"
+  }
+}

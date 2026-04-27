@@ -5,6 +5,7 @@ on:
     paths:
       - "apps/web/**"
       - "packages/**"
+      - "emails/**"
       - "content/**"
       - "scripts/**"
       - "examples/content/**"
@@ -105,6 +106,9 @@ jobs:
 
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
+
+      - name: Validate email templates
+        run: pnpm validate:emails
 
       - name: Require preview artifact base URL
         if: ${{ github.event_name == 'pull_request' && env.DEPLOYMENT_ARTIFACT_BASE_URL == '' }}

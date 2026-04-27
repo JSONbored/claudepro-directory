@@ -4,8 +4,12 @@ import path from "node:path";
 const repoRoot = path.resolve(new URL("..", import.meta.url).pathname);
 const tasksPath = path.join(repoRoot, "TASKS.md");
 const requireTasks =
-  String(process.env.REQUIRE_TASKS ?? "").trim().toLowerCase() === "1" ||
-  String(process.env.REQUIRE_TASKS ?? "").trim().toLowerCase() === "true";
+  String(process.env.REQUIRE_TASKS ?? "")
+    .trim()
+    .toLowerCase() === "1" ||
+  String(process.env.REQUIRE_TASKS ?? "")
+    .trim()
+    .toLowerCase() === "true";
 
 const requiredSections = [
   "Current Gate",
@@ -68,7 +72,9 @@ if (!fs.existsSync(tasksPath)) {
     fail("TASKS.md is missing and REQUIRE_TASKS is enabled.");
     process.exit();
   }
-  console.log("TASKS.md is not present; skipping optional local task tracker validation.");
+  console.log(
+    "TASKS.md is not present; skipping optional local task tracker validation.",
+  );
   process.exit();
 }
 
