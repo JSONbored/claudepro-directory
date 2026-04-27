@@ -345,5 +345,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "7a075dd66f661d1f928dff7924159040bd6ab2c898f782cbb2862ae79658178e",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://pandas.pydata.org/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/csv-excel-data-wrangler.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-15",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

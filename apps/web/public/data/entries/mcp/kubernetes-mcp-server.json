@@ -306,5 +306,22 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "5a0d7f95e5cc33b35b4d5e3a2f6d4d02c2e6d8bbe50ea6601ac7cb1f95ea1b94",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://github.com/feiskyer/mcp-kubernetes-server",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
   }
 }

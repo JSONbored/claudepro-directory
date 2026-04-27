@@ -249,5 +249,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "88cfe7f7cbd688806926439fcef04929c691deaaa01909a87d5658bbeb8c28bb",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-authoring-security-capability-pack.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-10",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

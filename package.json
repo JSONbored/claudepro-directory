@@ -24,6 +24,7 @@
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
     "email:render": "tsx scripts/render-email-templates.ts",
     "validate:emails": "tsx scripts/render-email-templates.ts --check",
+    "resend:sync-templates": "tsx scripts/sync-resend-templates.ts",
     "mcp:start": "pnpm --filter @heyclaude/mcp start",
     "test:mcp": "vitest run tests/mcp-server.test.ts",
     "submission:queue": "node scripts/build-submission-queue.mjs",

@@ -11,6 +11,7 @@ import {
   buildWebPageJsonLd,
   buildWebsiteJsonLd,
 } from "@heyclaude/registry/seo";
+import { buildEntryCitationFacts } from "@heyclaude/registry/llms";
 
 import { loadContentEntries } from "./helpers/registry-fixtures";
 
@@ -101,6 +102,28 @@ describe("SEO JSON-LD policy", () => {
     });
     expect(webpage["@type"]).toBe("WebPage");
     expect(webpage.url).toBe("https://heyclau.de/browse");
+  });
+
+  it("emits AI citation facts from truthful registry metadata", () => {
+    const skillWithPackage = entries.find(
+      (entry) => entry.category === "skills" && entry.downloadSha256,
+    );
+    expect(skillWithPackage).toBeTruthy();
+
+    const facts = buildEntryCitationFacts(skillWithPackage!, {
+      siteUrl: "https://heyclau.de",
+    });
+
+    expect(facts).toContain(
+      `Canonical URL: https://heyclau.de/${skillWithPackage!.category}/${skillWithPackage!.slug}`,
+    );
+    expect(facts).toContain(
+      `Package SHA256: ${skillWithPackage!.downloadSha256}`,
+    );
+    expect(facts).toContain("Platform compatibility:");
+    expect(facts).toContain("Last verified:");
+    expect(facts).not.toContain("aggregateRating");
+    expect(facts).not.toContain("review:");
   });
 
   it("does not emit SoftwareApplication until visible required fields exist", () => {

@@ -324,5 +324,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "446158b7bf996f8a2538d024e254e925b83c93d8c1ae180f1a7576ed3a654a57",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://kit.svelte.dev/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/svelte-sveltekit-fullstack.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-23",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

@@ -117,6 +117,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/agent-operator-growth-master-pack"
     },
     {
@@ -202,6 +218,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/api-development-starter-kit.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/api-development-starter-kit"
     },
     {
@@ -293,6 +325,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/aws-cloud-infrastructure-bundle.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/aws-cloud-infrastructure-bundle"
     },
     {
@@ -379,6 +427,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/backend-development-suite.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/backend-development-suite"
     },
     {
@@ -458,6 +522,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/code-quality-toolkit.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/code-quality-toolkit"
     },
     {
@@ -548,6 +628,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/content-creation-workflow"
     },
     {
@@ -643,6 +739,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/data-engineering-suite.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/data-engineering-suite"
     },
     {
@@ -722,6 +834,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/debugging-troubleshooting-system.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/debugging-troubleshooting-system"
     },
     {
@@ -818,6 +946,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/production-readiness-toolkit.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/production-readiness-toolkit"
     },
     {
@@ -912,6 +1056,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/collections/developer-productivity-booster"
     }
   ]

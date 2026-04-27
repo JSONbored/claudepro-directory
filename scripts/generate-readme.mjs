@@ -46,6 +46,23 @@ function escapeTableCell(value) {
   return String(value || "").replace(/\|/g, "\\|");
 }
 
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function headingAnchor(category) {
+  return (categoryHeadings[category] ?? category)
+    .replace(/^#+\s*/, "")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-");
+}
+
+function readmeEntryLine(category, entry) {
+  return `- **[${entry.title}](https://heyclau.de/${category}/${entry.slug})** - ${entry.description}`;
+}
+
 const entriesByCategory = Object.fromEntries(
   categoryOrder.map((category) => [category, readEntries(category)]),
 );
@@ -54,17 +71,7 @@ const categoryRows = categoryOrder
   .map((category) => {
     const entries = entriesByCategory[category] ?? [];
     const spec = categorySpec.categories[category];
-    return `| [${escapeTableCell(spec?.label ?? category)}](#${(
-      categoryHeadings[category] ?? category
-    )
-      .replace(/^#+\s*/, "")
-      .replace(/[^\w\s-]/g, "")
-      .trim()
-      .toLowerCase()
-      .replace(
-        /\s+/g,
-        "-",
-      )}) | ${entries.length} | ${escapeTableCell(spec?.description ?? "")} |`;
+    return `| [${escapeTableCell(spec?.label ?? category)}](#${headingAnchor(category)}) | ${entries.length} | ${escapeTableCell(spec?.description ?? "")} |`;
   })
   .join("\n");
 
@@ -76,10 +83,7 @@ const sections = categoryOrder
     const lines = [
       `${categoryHeadings[category] ?? `## ${category}`} (${entries.length})`,
       "",
-      ...entries.map(
-        (entry) =>
-          `- **[${entry.title}](https://heyclau.de/${category}/${entry.slug})** - ${entry.description}`,
-      ),
+      ...entries.map((entry) => readmeEntryLine(category, entry)),
     ];
 
     return lines.join("\n");
@@ -102,6 +106,8 @@ const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
 ${total}+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
+
+[Feeds](https://heyclau.de/api/registry/feed) • [RSS](https://heyclau.de/feed.xml) • [Atom](https://heyclau.de/atom.xml) • [LLM export](https://heyclau.de/llms-full.txt) • [Raycast](integrations/raycast) • [MCP](packages/mcp) • [Claim/update](https://heyclau.de/claim)
 
 </div>
 
@@ -132,6 +138,7 @@ ${categoryRows}
 - Read-only MCP server: [\`packages/mcp\`](packages/mcp)
 - Full LLM export: [\`/llms-full.txt\`](https://heyclau.de/llms-full.txt)
 - RSS updates: [\`/feed.xml\`](https://heyclau.de/feed.xml)
+- Atom updates: [\`/atom.xml\`](https://heyclau.de/atom.xml)
 - Package validator: [Agent Skill package validator](https://heyclau.de/tools/skill-validator)
 
 ## Quick Start
@@ -217,6 +224,58 @@ Thanks to everyone who has contributed to making HeyClaude better.
 
 const formattedReadme = await prettier.format(readme, { parser: "markdown" });
 
+function validateReadmeCatalog(readmeContent) {
+  const errors = [];
+
+  if (!readmeContent.includes(`${total}+ file-backed entries`)) {
+    errors.push(`README total count does not match ${total}.`);
+  }
+
+  for (const category of categoryOrder) {
+    const entries = entriesByCategory[category] ?? [];
+    const spec = categorySpec.categories[category];
+    const label = spec?.label ?? category;
+    const countRowPattern = new RegExp(
+      `\\| \\[${escapeRegExp(label)}\\]\\(#${escapeRegExp(
+        headingAnchor(category),
+      )}\\)\\s*\\|\\s*${entries.length}\\s*\\|`,
+    );
+
+    if (!countRowPattern.test(readmeContent)) {
+      errors.push(
+        `README At a Glance row for ${category} does not show ${entries.length}.`,
+      );
+    }
+
+    const heading = `${categoryHeadings[category] ?? `## ${category}`} (${
+      entries.length
+    })`;
+    if (!readmeContent.includes(heading)) {
+      errors.push(
+        `README section heading is missing or stale for ${category}.`,
+      );
+    }
+
+    for (const entry of entries) {
+      const url = `https://heyclau.de/${category}/${entry.slug}`;
+      if (!readmeContent.includes(url)) {
+        errors.push(`README catalog is missing ${category}/${entry.slug}.`);
+      }
+      if (entry.description && !readmeContent.includes(entry.description)) {
+        errors.push(
+          `README catalog is missing the frontmatter description for ${category}/${entry.slug}.`,
+        );
+      }
+    }
+  }
+
+  if (errors.length) {
+    throw new Error(`README catalog validation failed:\n${errors.join("\n")}`);
+  }
+}
+
+validateReadmeCatalog(formattedReadme);
+
 if (checkMode) {
   const current = fs.existsSync(readmePath)
     ? fs.readFileSync(readmePath, "utf8")
@@ -225,6 +284,7 @@ if (checkMode) {
     console.error("README.md is out of date. Run pnpm generate:readme.");
     process.exit(1);
   }
+  validateReadmeCatalog(current);
   console.log("README.md is up to date.");
 } else {
   fs.writeFileSync(readmePath, formattedReadme);

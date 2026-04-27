@@ -71,5 +71,24 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": true,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 4,
+    "sourceUrls": [
+      "https://www.promptfoo.dev/docs",
+      "https://github.com/promptfoo/promptfoo",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/promptfoo.mdx",
+      "https://www.promptfoo.dev"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
   }
 }

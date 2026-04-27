@@ -12,6 +12,7 @@ Required checks before merging:
 - `pnpm validate:packages`
 - `pnpm validate:raycast-feed`
 - `pnpm validate:emails`
+- `pnpm resend:sync-templates -- --dry-run`
 - `pnpm test:mcp`
 - `pnpm test`
 - `pnpm test:e2e`

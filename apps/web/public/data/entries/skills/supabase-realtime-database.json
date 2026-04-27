@@ -341,5 +341,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "e4070e1dd49d8c0871cf79e4cf9db65964522b9f8b42579f124530c5c7d858c1",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://supabase.com/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-16",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

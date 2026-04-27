@@ -324,5 +324,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "3bc2f1a78615abff0539bd4f50e36337af9c433c6b145a16b2720fa8f00c26b1",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://vitejs.dev/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/vite-build-optimization.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-23",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

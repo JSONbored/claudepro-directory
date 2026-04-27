@@ -69,6 +69,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.w3.org/WAI/WCAG21/quickref/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/accessibility-first-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/accessibility-first-statusline"
     },
     {
@@ -136,6 +153,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://epoch.ai/data-insights/context-windows",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/ai-model-performance-dashboard.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/ai-model-performance-dashboard"
     },
     {
@@ -201,6 +235,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/api-latency-breakdown.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/api-latency-breakdown"
     },
     {
@@ -267,6 +318,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/block-timer-tracker"
     },
     {
@@ -332,6 +400,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/burn-rate-monitor"
     },
     {
@@ -397,6 +482,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/cache-efficiency-monitor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/cache-efficiency-monitor"
     },
     {
@@ -463,6 +565,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/catppuccin/catppuccin",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/catppuccin-mocha-theme"
     },
     {
@@ -531,6 +650,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.docker.com/reference/cli/docker/container/stats/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/docker-health-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/docker-health-statusline"
     },
     {
@@ -596,6 +732,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/daily-usage-percentage-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/daily-usage-percentage-tracker"
     },
     {
@@ -661,6 +814,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/five-hour-window-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/five-hour-window-tracker"
     },
     {
@@ -727,6 +897,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://git-scm.com/docs/git-status",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/git-status-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/git-status-statusline"
     },
     {
@@ -792,6 +979,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/lines-per-minute-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/lines-per-minute-tracker"
     },
     {
@@ -856,6 +1060,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/mcp-server-status-monitor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/mcp-server-status-monitor"
     },
     {
@@ -920,6 +1140,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/powerline/powerline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/minimal-powerline"
     },
     {
@@ -985,6 +1222,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/model-switch-history-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/model-switch-history-tracker"
     },
     {
@@ -1050,6 +1304,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-line-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/multi-line-statusline"
     },
     {
@@ -1115,6 +1385,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.anthropic.com/claude/docs/models-overview",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-provider-token-counter.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/multi-provider-token-counter"
     },
     {
@@ -1180,6 +1467,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-session-overlap-indicator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/multi-session-overlap-indicator"
     },
     {
@@ -1246,6 +1550,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/oh-my-zsh-robbyrussell"
     },
     {
@@ -1312,6 +1633,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://rich.readthedocs.io/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/python-rich-statusline"
     },
     {
@@ -1376,6 +1714,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/real-time-cost-tracker.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/real-time-cost-tracker"
     },
     {
@@ -1441,6 +1795,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-health-score.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/session-health-score"
     },
     {
@@ -1506,6 +1877,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-timer-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/session-timer-statusline"
     },
     {
@@ -1571,6 +1958,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/simple-text-statusline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/simple-text-statusline"
     },
     {
@@ -1634,6 +2037,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/starship-powerline-theme.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/starship-powerline-theme"
     },
     {
@@ -1699,6 +2118,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.com/en/docs/claude-code/statusline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/workspace-project-depth-indicator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/statuslines/workspace-project-depth-indicator"
     }
   ]

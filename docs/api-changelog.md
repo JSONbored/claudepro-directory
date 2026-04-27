@@ -2,6 +2,10 @@
 
 ## 2026-04-27
 
+- Added `/atom.xml` as a registry update feed alongside `/feed.xml`.
+- Added factual `trustSignals` metadata to registry search, feeds, and entry detail artifacts.
+- Added a dry-run-first Resend Templates sync command for dashboard review without app-side sending.
+- Strengthened generated README validation so category counts and every file-backed entry stay aligned.
 - Added sharded distribution feeds under `/data/feeds/` for category and platform consumers.
 - Added IndexNow release submission tooling guarded to production URLs.
 - Added the browser-side Agent Skill package validator at `/tools/skill-validator`.

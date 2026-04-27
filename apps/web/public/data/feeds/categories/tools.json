@@ -48,6 +48,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://aider.chat/docs",
+          "https://github.com/Aider-AI/aider",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx",
+          "https://aider.chat"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/aider"
     },
     {
@@ -93,6 +112,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.apify.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/apify.mdx",
+          "https://apify.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/apify"
     },
     {
@@ -138,6 +175,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.arcade.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arcade-ai.mdx",
+          "https://www.arcade.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/arcade-ai"
     },
     {
@@ -183,6 +238,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://arize.com/docs/phoenix",
+          "https://github.com/Arize-ai/phoenix",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx",
+          "https://phoenix.arize.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/arize-phoenix"
     },
     {
@@ -228,6 +302,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://support.bolt.new",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx",
+          "https://bolt.new"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/bolt-new"
     },
     {
@@ -273,6 +365,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://www.braintrust.dev/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/braintrust.mdx",
+          "https://www.braintrust.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/braintrust"
     },
     {
@@ -318,6 +428,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.browser-use.com",
+          "https://github.com/browser-use/browser-use",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/browser-use.mdx",
+          "https://browser-use.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/browser-use"
     },
     {
@@ -363,6 +492,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.browserbase.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/browserbase.mdx",
+          "https://www.browserbase.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/browserbase"
     },
     {
@@ -405,6 +552,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.anthropic.com/en/docs/claude-code/overview",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/claude-code.mdx",
+          "https://www.anthropic.com/claude-code"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/claude-code"
     },
     {
@@ -450,6 +615,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.cline.bot",
+          "https://github.com/cline/cline",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cline.mdx",
+          "https://cline.bot"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/cline"
     },
     {
@@ -495,6 +679,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/agents/",
+          "https://github.com/cloudflare/agents",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/cloudflare-agents-sdk"
     },
     {
@@ -540,6 +742,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.coderabbit.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/coderabbit.mdx",
+          "https://www.coderabbit.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/coderabbit"
     },
     {
@@ -584,6 +804,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.composio.dev",
+          "https://github.com/ComposioHQ/composio",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/composio.mdx",
+          "https://composio.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/composio"
     },
     {
@@ -629,6 +868,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.continue.dev",
+          "https://github.com/continuedev/continue",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/continue.mdx",
+          "https://continue.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/continue"
     },
     {
@@ -674,6 +932,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.crewai.com",
+          "https://github.com/crewAIInc/crewAI",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/crewai.mdx",
+          "https://www.crewai.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/crewai"
     },
     {
@@ -719,6 +996,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.cursor.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cursor.mdx",
+          "https://cursor.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/cursor"
     },
     {
@@ -764,6 +1059,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.devin.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/devin.mdx",
+          "https://devin.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/devin"
     },
     {
@@ -809,6 +1122,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.exa.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/exa.mdx",
+          "https://exa.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/exa"
     },
     {
@@ -854,6 +1185,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.firecrawl.dev",
+          "https://github.com/mendableai/firecrawl",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/firecrawl.mdx",
+          "https://www.firecrawl.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/firecrawl"
     },
     {
@@ -899,6 +1249,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/NVIDIA/garak",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/garak"
     },
     {
@@ -944,6 +1311,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.giskard.ai",
+          "https://github.com/Giskard-AI/giskard",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/giskard.mdx",
+          "https://www.giskard.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/giskard"
     },
     {
@@ -988,6 +1374,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.github.com/en/copilot",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/github-copilot.mdx",
+          "https://github.com/features/copilot"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/github-copilot"
     },
     {
@@ -1032,6 +1436,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://graphite.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/graphite-diamond.mdx",
+          "https://graphite.dev/diamond"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/graphite-diamond"
     },
     {
@@ -1077,6 +1499,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.helicone.ai",
+          "https://github.com/Helicone/helicone",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx",
+          "https://www.helicone.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/helicone"
     },
     {
@@ -1122,6 +1563,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.hyperbrowser.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/hyperbrowser.mdx",
+          "https://www.hyperbrowser.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/hyperbrowser"
     },
     {
@@ -1167,6 +1626,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.lakera.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lakera-guard.mdx",
+          "https://www.lakera.ai/guard"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/lakera-guard"
     },
     {
@@ -1212,6 +1689,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://langfuse.com/docs",
+          "https://github.com/langfuse/langfuse",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langfuse.mdx",
+          "https://langfuse.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/langfuse"
     },
     {
@@ -1257,6 +1753,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://langchain-ai.github.io/langgraph/",
+          "https://github.com/langchain-ai/langgraph",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langgraph.mdx",
+          "https://www.langchain.com/langgraph"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/langgraph"
     },
     {
@@ -1302,6 +1817,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.smith.langchain.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx",
+          "https://www.langchain.com/langsmith"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/langsmith"
     },
     {
@@ -1347,6 +1880,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.lovable.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lovable.mdx",
+          "https://lovable.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/lovable"
     },
     {
@@ -1392,6 +1943,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://www.make.com/en/help",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/make.mdx",
+          "https://www.make.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/make"
     },
     {
@@ -1437,6 +2006,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://mastra.ai/docs",
+          "https://github.com/mastra-ai/mastra",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/mastra.mdx",
+          "https://mastra.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/mastra"
     },
     {
@@ -1482,6 +2070,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://microsoft.github.io/autogen/",
+          "https://github.com/microsoft/autogen",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen"
     },
     {
@@ -1527,6 +2133,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.n8n.io",
+          "https://github.com/n8n-io/n8n",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/n8n.mdx",
+          "https://n8n.io"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/n8n"
     },
     {
@@ -1572,6 +2197,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://opencode.ai",
+          "https://github.com/sst/opencode",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/opencode"
     },
     {
@@ -1617,6 +2260,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://pipedream.com/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx",
+          "https://pipedream.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/pipedream"
     },
     {
@@ -1661,6 +2322,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://www.promptfoo.dev/docs",
+          "https://github.com/promptfoo/promptfoo",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/promptfoo.mdx",
+          "https://www.promptfoo.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/promptfoo"
     },
     {
@@ -1706,6 +2386,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.protectai.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/protect-ai.mdx",
+          "https://protectai.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/protect-ai"
     },
     {
@@ -1751,6 +2449,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://developers.raycast.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/raycast.mdx",
+          "https://www.raycast.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/raycast"
     },
     {
@@ -1796,6 +2512,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.replit.com/replitai/agent",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/replit-agent.mdx",
+          "https://replit.com/ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/replit-agent"
     },
     {
@@ -1841,6 +2575,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.roocode.com",
+          "https://github.com/RooCodeInc/Roo-Code",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/roo-code.mdx",
+          "https://roocode.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/roo-code"
     },
     {
@@ -1886,6 +2639,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://smithery.ai/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/smithery.mdx",
+          "https://smithery.ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/smithery"
     },
     {
@@ -1930,6 +2701,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://sourcegraph.com/docs/cody",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx",
+          "https://sourcegraph.com/cody"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/sourcegraph-cody"
     },
     {
@@ -1975,6 +2764,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://docs.stagehand.dev",
+          "https://github.com/browserbase/stagehand",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/stagehand.mdx",
+          "https://www.stagehand.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/stagehand"
     },
     {
@@ -2020,6 +2828,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://trigger.dev/docs",
+          "https://github.com/triggerdotdev/trigger.dev",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/trigger-dev.mdx",
+          "https://trigger.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/trigger-dev"
     },
     {
@@ -2065,6 +2892,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://v0.dev/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx",
+          "https://v0.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/vercel-v0"
     },
     {
@@ -2109,6 +2954,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://ai-sdk.dev/docs",
+          "https://github.com/vercel/ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx",
+          "https://ai-sdk.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/vercel-ai-sdk"
     },
     {
@@ -2154,6 +3018,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://weave-docs.wandb.ai",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/weave.mdx",
+          "https://wandb.ai/site/weave"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/weave"
     },
     {
@@ -2198,6 +3080,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.windsurf.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/windsurf.mdx",
+          "https://windsurf.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/windsurf"
     },
     {
@@ -2243,6 +3143,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://docs.workato.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/workato.mdx",
+          "https://www.workato.com"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/workato"
     },
     {
@@ -2288,6 +3206,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://help.zapier.com",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx",
+          "https://zapier.com/ai"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/zapier-ai"
     },
     {
@@ -2333,6 +3269,25 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 4,
+        "sourceUrls": [
+          "https://zed.dev/docs",
+          "https://github.com/zed-industries/zed",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zed.mdx",
+          "https://zed.dev"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/tools/zed"
     }
   ]

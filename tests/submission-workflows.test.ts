@@ -55,5 +55,7 @@ describe("submission automation workflows", () => {
     expect(source).toContain("github.event_name == 'pull_request'");
     expect(source).toContain("DEPLOYMENT_ARTIFACT_BASE_URL must point");
     expect(source).toContain("pnpm validate:deployment-artifacts");
+    expect(source).toContain("Dry-run Resend template sync");
+    expect(source).toContain("pnpm resend:sync-templates -- --dry-run");
   });
 });

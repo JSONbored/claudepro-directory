@@ -238,5 +238,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "7e3ee39f61507d249f0b0b5ec49c35c6fc076b5ca2d6f85174eec8664de00867",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://github.com/openai/codex",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-automations-orchestrator-capability-pack.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-11",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

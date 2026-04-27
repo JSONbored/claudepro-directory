@@ -110,6 +110,9 @@ jobs:
       - name: Validate email templates
         run: pnpm validate:emails
 
+      - name: Dry-run Resend template sync
+        run: pnpm resend:sync-templates -- --dry-run
+
       - name: Require preview artifact base URL
         if: ${{ github.event_name == 'pull_request' && env.DEPLOYMENT_ARTIFACT_BASE_URL == '' }}
         run: |

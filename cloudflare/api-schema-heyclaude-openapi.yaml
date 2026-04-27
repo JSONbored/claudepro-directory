@@ -16,6 +16,59 @@ components:
       type: http
       scheme: bearer
       description: Token required for listing lead review and status transitions.
+  schemas:
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+    RegistryTrustSignals:
+      type: object
+      additionalProperties: false
+      properties:
+        firstPartyEditorial:
+          type: boolean
+        packageVerified:
+          type: boolean
+        packageTrust:
+          type: string
+          nullable: true
+        packageChecksum:
+          type: string
+        checksumPresent:
+          type: boolean
+        sourceUrlCount:
+          type: integer
+        sourceUrls:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            format: uri
+        sourceStatus:
+          type: string
+          enum:
+            - available
+            - missing
+        lastVerifiedAt:
+          type: string
+        adapterGenerated:
+          type: boolean
+        platforms:
+          type: array
+          maxItems: 12
+          items:
+            type: string
+        supportLevels:
+          type: array
+          maxItems: 12
+          items:
+            type: string
 security:
   - OriginCheck: []
 paths:
@@ -392,6 +445,9 @@ paths:
                     items:
                       type: object
                       additionalProperties: true
+                      properties:
+                        trustSignals:
+                          $ref: "#/components/schemas/RegistryTrustSignals"
                 required:
                   - schemaVersion
                   - query
@@ -406,7 +462,7 @@ paths:
   /api/registry/feed:
     get:
       summary: Fetch the read-only registry feed descriptor
-      description: Links registry APIs, artifact contracts, RSS, changelog, category feeds, platform feeds, and quality surfaces for downstream consumers.
+      description: Links registry APIs, artifact contracts, RSS, changelog, category feeds, platform feeds, trustSignals, and quality surfaces for downstream consumers.
       responses:
         "200":
           description: Registry feed descriptor with API endpoint templates and artifact links
@@ -414,6 +470,26 @@ paths:
           description: Forbidden origin
         "429":
           description: Rate limited
+  /feed.xml:
+    get:
+      summary: Fetch RSS registry update feed
+      responses:
+        "200":
+          description: Cacheable RSS feed backed by the registry changelog
+          content:
+            application/rss+xml:
+              schema:
+                type: string
+  /atom.xml:
+    get:
+      summary: Fetch Atom registry update feed
+      responses:
+        "200":
+          description: Cacheable Atom feed backed by the registry changelog
+          content:
+            application/atom+xml:
+              schema:
+                type: string
   /data/feeds/index.json:
     get:
       summary: Fetch sharded distribution feed links
@@ -554,10 +630,13 @@ paths:
                   entry:
                     type: object
                     additionalProperties: true
+                  trustSignals:
+                    $ref: "#/components/schemas/RegistryTrustSignals"
                 required:
                   - schemaVersion
                   - key
                   - entry
+                  - trustSignals
         "403":
           description: Forbidden origin
         "404":

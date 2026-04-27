@@ -324,5 +324,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "a62b1a1e1fcee8faa7b1fb5cd68fa3c5112a74337fea3729a6bc5738c24f36d9",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://fastapi.tiangolo.com/",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-23",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

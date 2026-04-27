@@ -119,6 +119,21 @@ pnpm email:render
 pnpm validate:emails
 ```
 
+To sync rendered templates into the Resend Templates dashboard for visual review
+and manual Broadcast use:
+
+```bash
+pnpm resend:sync-templates -- --dry-run
+RESEND_API_KEY=... pnpm resend:sync-templates -- --apply
+```
+
+If a template already exists, set the matching ignored local env var before
+running `--apply`: `RESEND_TEMPLATE_CURATED_DROP_ID`,
+`RESEND_TEMPLATE_RELEASE_NOTES_ID`, or `RESEND_TEMPLATE_MAINTAINER_CALL_ID`.
+The sync command creates or updates draft templates only. It does not publish
+templates, create Broadcasts, schedule campaigns, or send email. Keep those
+steps manual inside Resend.
+
 ## OpenNext Cloudflare notes used in this project
 
 - `next.config.mjs` initializes Cloudflare local development via `initOpenNextCloudflareForDev()`.

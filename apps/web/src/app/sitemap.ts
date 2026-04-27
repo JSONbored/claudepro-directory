@@ -42,6 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/llms.txt",
     "/llms-full.txt",
     "/feed.xml",
+    "/atom.xml",
     ...getPlatformPageDefinitions().map(
       (platform) => `/platforms/${platform.slug}`,
     ),

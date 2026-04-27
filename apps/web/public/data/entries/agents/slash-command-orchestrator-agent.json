@@ -522,5 +522,22 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": false,
+    "packageTrust": null,
+    "packageChecksum": "",
+    "checksumPresent": false,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://docs.claude.com/en/docs/claude-code/slash-commands",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/slash-command-orchestrator-agent.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2026-04-27T01:30:00-06:00",
+    "adapterGenerated": false,
+    "platforms": [],
+    "supportLevels": []
   }
 }

@@ -17,6 +17,7 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - `/data/feeds/categories/{category}.json`
 - `/data/feeds/platforms/{platform}.json`
 - `/data/skill-adapters/...` generated adapters
+- `/feed.xml` and static registry changelog artifacts
 
 ## Limited Dynamic Surfaces
 
@@ -37,6 +38,9 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - JSON writes require content-type validation and payload size limits.
 - Admin review endpoints require bearer or admin-token headers.
 - Webhooks require provider signatures when configured.
+- Newsletter template syncing is a local operator script that talks to Resend
+  Templates only; the public site does not expose campaign-send, scheduling, or
+  template-management endpoints.
 - Website submissions require origin checks, payload limits, schema validation,
   honeypot discard logging, existing-content duplicate checks, pending
   GitHub-issue duplicate checks, and GitHub issue creation only.
@@ -47,3 +51,17 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
   requests reach the Worker; in-process limits remain a local fallback.
 - No endpoint may import content into the registry, create pull requests, or
   publish submissions without maintainer review.
+
+## Registry Trust Fields
+
+Registry feeds and entry detail payloads may include `trustSignals` derived from
+existing file-backed facts:
+
+- package verification flags, first-party/external trust, and package SHA256
+- source URLs already present on the entry
+- content/repository/verification timestamps already present on the entry
+- generated adapter status and platform compatibility
+
+These fields are factual metadata, not paid ranking or live health claims. Live
+link health checks can be added later as a separate generated artifact once they
+are backed by a real checker.

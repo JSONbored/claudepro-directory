@@ -311,5 +311,36 @@
     "githubStars": null,
     "githubForks": null,
     "repoUpdatedAt": null
+  },
+  "trustSignals": {
+    "firstPartyEditorial": false,
+    "packageVerified": true,
+    "packageTrust": "first-party",
+    "packageChecksum": "d9c1c744531414228b49e8915b9cf9d652c874f79cb3845e8b2bc2d9d4dac381",
+    "checksumPresent": true,
+    "sourceUrlCount": 2,
+    "sourceUrls": [
+      "https://bun.sh/docs",
+      "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/bun-runtime-modern-javascript.mdx"
+    ],
+    "sourceStatus": "available",
+    "lastVerifiedAt": "2025-10-23",
+    "adapterGenerated": true,
+    "platforms": [
+      "Claude",
+      "Codex",
+      "Windsurf",
+      "Gemini",
+      "Cursor",
+      "Generic AGENTS"
+    ],
+    "supportLevels": [
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "native-skill",
+      "adapter",
+      "manual-context"
+    ]
   }
 }

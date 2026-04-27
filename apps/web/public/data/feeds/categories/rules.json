@@ -58,6 +58,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.anthropic.com/claude/docs/prompt-engineering",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/ai-prompt-engineering-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/ai-prompt-engineering-expert"
     },
     {
@@ -114,6 +131,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://swagger.io/specification/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-design-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/api-design-expert"
     },
     {
@@ -172,6 +206,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://swagger.io/specification/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-first-development-architect.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/api-first-development-architect"
     },
     {
@@ -227,6 +278,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.aws.amazon.com/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/aws-cloud-architect"
     },
     {
@@ -284,6 +352,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://biomejs.dev/linter/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/biome-strict-linting-rules"
     },
     {
@@ -338,6 +423,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.claude.ai/rules/code-review",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/code-review-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/code-review-expert"
     },
     {
@@ -393,6 +495,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://go.dev/doc/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/go-golang-expert"
     },
     {
@@ -450,6 +569,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://go.dev/doc/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/golang-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/golang-expert"
     },
     {
@@ -505,6 +641,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.apollographql.com/docs/federation/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/graphql-federation-specialist"
     },
     {
@@ -560,6 +713,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://kubernetes.io/docs/concepts/security/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/kubernetes-devsecops-engineer"
     },
     {
@@ -617,6 +787,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developer.apple.com/documentation/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/mobile-app-developer"
     },
     {
@@ -674,6 +861,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developer.apple.com/documentation/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/mobile-app-development-expert"
     },
     {
@@ -730,6 +934,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://turbo.build/repo/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/monorepo-workspace-manager.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/monorepo-workspace-manager"
     },
     {
@@ -786,6 +1007,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://nextjs.org/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/nextjs-15-performance-architect.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/nextjs-15-performance-architect"
     },
     {
@@ -845,6 +1083,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://platform.claude.com/docs/en/agent-sdk/modifying-system-prompts#method-1-claude-md-files-project-level-instructions",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/production-codebase-auditor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/production-codebase-auditor"
     },
     {
@@ -901,6 +1156,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://pandas.pydata.org/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/python-data-science"
     },
     {
@@ -957,6 +1229,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://pandas.pydata.org/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/python-data-science-expert"
     },
     {
@@ -1013,6 +1302,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://react.dev/reference/react",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-19-concurrent-features-specialist.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/react-19-concurrent-features-specialist"
     },
     {
@@ -1068,6 +1374,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://nextjs.org/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/react-expert"
     },
     {
@@ -1123,6 +1446,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://nextjs.org/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/react-next-js-expert"
     },
     {
@@ -1179,6 +1519,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://react.dev/reference/rsc/server-components",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-server-components-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/react-server-components-expert"
     },
     {
@@ -1234,6 +1591,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://owasp.org/www-project-top-ten/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/security-auditor"
     },
     {
@@ -1289,6 +1663,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://owasp.org/www-project-top-ten/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor-penetration-tester.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/security-auditor-penetration-tester"
     },
     {
@@ -1345,6 +1736,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://owasp.org/www-project-top-ten/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-first-react-components.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/security-first-react-components"
     },
     {
@@ -1400,6 +1808,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.terraform.io/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/terraform-infrastructure-architect.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/terraform-infrastructure-architect"
     },
     {
@@ -1457,6 +1882,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://vitest.dev/guide/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/test-driven-development-enforcer"
     },
     {
@@ -1512,6 +1954,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/typescript-5x-strict-mode-expert.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/typescript-5x-strict-mode-expert"
     },
     {
@@ -1567,6 +2026,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.w3.org/WAI/WCAG22/quickref/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/wcag-accessibility-auditor"
     },
     {
@@ -1623,6 +2099,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.codeium.com/windsurf",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/windsurf-ai-native-ide-patterns.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/rules/windsurf-ai-native-ide-patterns"
     }
   ]

@@ -74,6 +74,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "de3543063d919647fdf25c518ccd6679e32c5e9ae49d94150344fee4dabc3856",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/domdomegg/airtable-mcp-server",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/airtable-mcp-server"
     },
     {
@@ -145,6 +162,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "686fda20bfa3699a449ee489e34d4d57de5279ee41755d346bf90c8289e7a7a1",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server"
     },
     {
@@ -216,6 +250,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "36c5b42a87926bb71ca8bf7a878e163cc8b6f8f28fe4fd6c55394f32659ae580",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/awslabs/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/aws-services-mcp-server"
     },
     {
@@ -287,6 +338,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "973bd359536505c1000cffb3e754727c536496bc0b05fd56503a91184b6d5d6d",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://box.dev/guides/box-mcp/remote/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/box-mcp-server"
     },
     {
@@ -358,6 +426,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "461bfddb65f343a48e35a1dfcfbec79028101aebeebb217c5c0ed6dd55e48afe",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/canva-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/canva-mcp-server"
     },
     {
@@ -428,6 +513,22 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "57690091c83e5827fb0e82a2a6193d2da2171c6637fae598edb894029828d1b5",
+        "checksumPresent": true,
+        "sourceUrlCount": 1,
+        "sourceUrls": [
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/desktop-mcp-setup"
     },
     {
@@ -499,6 +600,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "f790c531d131631b690c489a7219a986c27295cdddc53fa73f732584bfe5611f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/hauptsacheNet/clickup-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/clickup-mcp-server"
     },
     {
@@ -570,6 +688,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "06a4d88be66de572abcbfe34634a8ce927597249e591ec5717ef6b9c6a520212",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/cloudflare-mcp-server"
     },
     {
@@ -641,6 +776,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "40ee1633161361f65ee12c6766e87277e3e062ea6e30ff65ad609334cdb0ae8d",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudinary-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/cloudinary-mcp-server"
     },
     {
@@ -694,6 +846,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://api.contrastcyber.com",
+          "https://github.com/UPinar/contrastapi",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server"
     },
     {
@@ -765,6 +935,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "3862b42d9655eff41883b09966e5f1007b51271479fb8d423b3c2c8f44876d98",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.daloopa.com/docs/daloopa-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/daloopa-mcp-server"
     },
     {
@@ -836,6 +1023,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "c533512b60c880469d414d1eb89751df1f7d9db580d53b73f22b5cbb0b696275",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/saseq/discord-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/discord-mcp-server"
     },
     {
@@ -908,6 +1112,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "b426e4d04a6da772ba591f1326d26e4da80e4903e9095ef1d822178889e82b5e",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.docker.com/engine/api/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/docker-mcp-server"
     },
     {
@@ -979,6 +1200,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0ff339ff6bb2328f6058233db30fe13eac93fd2805270f6817df9cf5ff1c2eee",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://help.figma.com/hc/en-us/articles/32132100833559",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/figma-mcp-server"
     },
     {
@@ -1050,6 +1288,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "da141637f603f2298808a0aa503696894f46ec0b651afd4a4042c9464e44eb97",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/examples",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/filesystem-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/filesystem-mcp-server"
     },
     {
@@ -1121,6 +1376,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "21b16bcef6c23c95d81241c4937bf0c89f4582fb57748f12da8da13a01ba7038",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/fireflies-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/fireflies-mcp-server"
     },
     {
@@ -1192,6 +1464,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "f7f4ab253a6a32a2cb2d8b024239dd024523ebd49047d08b8693df98cf83d0eb",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/examples",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/git-mcp-server"
     },
     {
@@ -1263,6 +1552,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0cbf34c03e258fe4bae54d619073caa8277f026af7103ee92323be2a97e7a923",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/github-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/github-mcp-server"
     },
     {
@@ -1339,6 +1645,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://heyclau.de/mcp/heyclaude-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp"
     },
     {
@@ -1410,6 +1733,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a3d5e18765768e67f645b91f89c67d7163ebb763932652f693d85d1a260949c8",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.hubspot.com/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/hubspot-mcp-server"
     },
     {
@@ -1481,6 +1821,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "15b13953a5ce71275805521b92e911501486da07034cdaaf9b5466926890e0b5",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://huggingface.co/settings/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hugging-face-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/hugging-face-mcp-server"
     },
     {
@@ -1552,6 +1909,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "90c46cda2f6c8aab07b4c1deae865e9820fc86227772eb369b5365021ca11e5d",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.intercom.com/docs/guides/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/intercom-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/intercom-mcp-server"
     },
     {
@@ -1623,6 +1997,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "ab826be403e238e55b55783ad32320578f6fa1f1010d07493d9a2469588b355e",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://invideo.io/ai/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/invideo-mcp-server"
     },
     {
@@ -1694,6 +2085,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "18adeb9b457cec2ce115e3518419308f0abe2f847480af657148f0a14ae13ab5",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://jam.dev/docs/debug-a-jam/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jam-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/jam-mcp-server"
     },
     {
@@ -1765,6 +2173,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a12b0119f2e3f98912c5f5121fd64ae779b3da1488d2a6862bd0069e2f8fa3ed",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.atlassian.com/platform/remote-mcp-server",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jira-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/jira-mcp-server"
     },
     {
@@ -1836,6 +2261,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "5a0d7f95e5cc33b35b4d5e3a2f6d4d02c2e6d8bbe50ea6601ac7cb1f95ea1b94",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/feiskyer/mcp-kubernetes-server",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/kubernetes-mcp-server"
     },
     {
@@ -1907,6 +2349,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a9f6c46cfbe25cd19a67129ccf249c2f16e590b68f75597008c5192fbf9cfe20",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://linear.app/docs/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/linear-mcp-server"
     },
     {
@@ -1978,6 +2437,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "188b737c7620ced286f4fcc8ba38e46bb49f98a62729dfe8af6ce3cfe9b13ec4",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/monday-mcp-server"
     },
     {
@@ -2049,6 +2525,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "33ce412d63829a6e891ae2a245fc84bb83eab8af8c1f4f01e80b1489fd9da641",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/netlify-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/netlify-mcp-server"
     },
     {
@@ -2120,6 +2613,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "5be293afa3eadf51565061c1b49445b1f1f14610e7d3a275ded73155086d3d79",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.notion.com/docs/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/notion-mcp-server"
     },
     {
@@ -2191,6 +2701,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "4418a41748dff3d809983b7f75e0ba83d90bf6d54df0f8360f97b198087763f2",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.paypal.ai/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/paypal-mcp-server"
     },
     {
@@ -2262,6 +2789,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "40696c214bbf5776242e5d6fe366cda848a7dea1612d838562604655e269f4ef",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/plaid-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/plaid-mcp-server"
     },
     {
@@ -2333,6 +2877,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "2935644e5353e573faf8b78d11f376a7f99e6662b4687ae8f40d2ad39d1fde83",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/examples",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/postgresql-mcp-server"
     },
     {
@@ -2386,6 +2947,24 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 3,
+        "sourceUrls": [
+          "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
+          "https://github.com/MohamedAbdallah-14/prompt-to-asset",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset"
     },
     {
@@ -2458,6 +3037,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "4789d95508464215c52e523a39bd41dd04909b297e06af2e37e4ce8ea6320a30",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/karanb192/reddit-mcp-buddy",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/reddit-mcp-buddy"
     },
     {
@@ -2530,6 +3126,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "53ca24ed61d13c6d40277f385286fcc089c13b173c7829913b02ddb4d669c68a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/redis/mcp-redis",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/redis-mcp-server"
     },
     {
@@ -2602,6 +3215,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "fcacfb50943f8657a34ddad5696e4bfa8298d55d9a7b33bb469903188fdea3a5",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.sentry.io/product/sentry-mcp/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/sentry-mcp-server"
     },
     {
@@ -2673,6 +3303,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "d2e6263bc6e0ec724a61ac9a348aa5f0fd9c28f7ec07fcd66ca36f4a1185151a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/SocketDev/socket-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/socket-mcp-server"
     },
     {
@@ -2744,6 +3391,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "d641dab1566fd2d5550a21872559701a301470bcfdedd9565a77d8090b301316",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developer.squareup.com/docs/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/square-mcp-server"
     },
     {
@@ -2815,6 +3479,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "c9da8acb0af76bc240e21f66deab75e26380909a1d2dfb27e7d9965c679b8d9c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.stripe.com/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/stripe-mcp-server"
     },
     {
@@ -2886,6 +3567,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "2669e215154068770a95ecb53f4b64a50fe86a076d8d0a6244e2f762153f949c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://stytch.com/docs/workspace-management/stytch-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/stytch-mcp-server"
     },
     {
@@ -2957,6 +3655,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8e7de38d9166a354c4cae17e0384a395f88a8851cb8ff1e92dfc5a6c4fcb0bcf",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://vercel.com/docs/mcp/vercel-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/vercel-mcp-server"
     },
     {
@@ -3028,6 +3743,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "c69f27e627ef47cea43d72c64d4c1425ad1e7e07481aa656188d08ab0af611dc",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.workato.com/mcp.html",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/workato-mcp-server"
     },
     {
@@ -3099,6 +3831,23 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "e43a859d567995a464e662a9b3726830434085c31bea4240635bf4ec61d66abd",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://help.zapier.com/hc/en-us/articles/36265392843917",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      },
       "canonicalUrl": "https://heyclau.de/mcp/zapier-mcp-server"
     }
   ]

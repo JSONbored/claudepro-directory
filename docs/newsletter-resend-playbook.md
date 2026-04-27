@@ -56,10 +56,42 @@ Use sparingly for community maintenance. Include:
 - Run `pnpm email:render` after editing React Email source templates.
 - Run `pnpm validate:emails` before release to ensure rendered artifacts are
   current.
-- Resend Broadcast drafts should use the rendered HTML/plain-text output from
-  `emails/templates/`.
+- Run `pnpm resend:sync-templates -- --dry-run` to preview the Resend Template
+  create/update operations without requiring an API key.
+- Run `RESEND_API_KEY=... pnpm resend:sync-templates -- --apply` only when you
+  want to upload the current rendered templates into the Resend Templates
+  dashboard.
+- Store existing Resend template IDs in ignored local env when updating
+  templates:
+  - `RESEND_TEMPLATE_CURATED_DROP_ID`
+  - `RESEND_TEMPLATE_RELEASE_NOTES_ID`
+  - `RESEND_TEMPLATE_MAINTAINER_CALL_ID`
+- Optional alias overrides can also live in ignored local env:
+  - `RESEND_TEMPLATE_CURATED_DROP_ALIAS`
+  - `RESEND_TEMPLATE_RELEASE_NOTES_ALIAS`
+  - `RESEND_TEMPLATE_MAINTAINER_CALL_ALIAS`
+- Resend Broadcast drafts should use the synced dashboard templates or the
+  rendered HTML/plain-text output from `emails/templates/`.
+- Review and publish templates in the Resend dashboard before using them in a
+  Broadcast.
 - Never send from app code without previewing the final HTML and plain-text
   fallback.
+
+The sync command only calls Resend Templates endpoints. It does not call Resend
+Emails, Broadcasts, or scheduling endpoints, and it does not publish templates.
+Broadcast creation, test sends, scheduling, and final sends stay manual inside
+Resend.
+
+## Cloudflare Position
+
+- Do not add Cloudflare cron campaign sends or serverless newsletter send
+  workers to the site app.
+- Cloudflare Workers Cron can be considered later for non-send jobs such as
+  registry digest draft generation, stale-link checks, IndexNow retry checks,
+  or partner-feed refreshes.
+- Cloudflare Email Workers can be considered later for inbound workflows such
+  as claim/update routing, but Resend remains the subscriber, template, sending,
+  unsubscribe, and deliverability system of record.
 
 ## Indexing And Attribution
 

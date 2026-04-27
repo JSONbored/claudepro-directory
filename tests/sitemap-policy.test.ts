@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   isSitemapIndexableEntry,
   sitemapEntryLastModified,
 } from "@/lib/sitemap-policy";
+import { repoRoot } from "./helpers/registry-fixtures";
 
 describe("sitemap policy", () => {
   it("excludes noindex registry entries from indexable sitemap URLs", () => {
@@ -34,5 +37,16 @@ describe("sitemap policy", () => {
     } as any);
 
     expect(lastModified?.toISOString()).toBe("2026-04-26T12:34:56.000Z");
+  });
+
+  it("includes machine-readable distribution surfaces in the sitemap source", () => {
+    const source = fs.readFileSync(
+      path.join(repoRoot, "apps/web/src/app/sitemap.ts"),
+      "utf8",
+    );
+    expect(source).toContain('"/llms.txt"');
+    expect(source).toContain('"/llms-full.txt"');
+    expect(source).toContain('"/feed.xml"');
+    expect(source).toContain('"/atom.xml"');
   });
 });

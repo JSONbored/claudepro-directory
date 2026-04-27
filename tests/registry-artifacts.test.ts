@@ -8,6 +8,7 @@ import {
   buildCategoryDistributionFeed,
   buildDirectoryEntries,
   buildDistributionFeedIndex,
+  buildEntryTrustSignals,
   buildMcpRegistryFeed,
   buildPlatformDistributionFeed,
   buildPluginExportFeed,
@@ -98,6 +99,47 @@ describe("registry artifacts", () => {
     });
     expect(directoryEntries.length).toBe(contentEntries.length);
     expect(searchEntries.length).toBe(contentEntries.length);
+  });
+
+  it("publishes factual trust signals across compact and detail artifacts", () => {
+    const contentByKey = new Map(
+      contentEntries.map((entry) => [`${entry.category}:${entry.slug}`, entry]),
+    );
+
+    for (const entry of directoryEntries) {
+      const key = `${entry.category}:${entry.slug}`;
+      const contentEntry = contentByKey.get(key);
+      expect(contentEntry).toBeTruthy();
+      expect(entry.trustSignals).toEqual(buildEntryTrustSignals(contentEntry!));
+      expect(entry.trustSignals).toMatchObject({
+        sourceStatus: expect.stringMatching(/^(available|missing)$/),
+        checksumPresent: Boolean(
+          entry.downloadSha256 || entry.skillPackage?.sha256,
+        ),
+      });
+      expect(entry.trustSignals.sourceUrlCount).toBe(
+        entry.trustSignals.sourceUrls.length,
+      );
+
+      const detailPayload = readDataJson<{
+        trustSignals: Record<string, unknown>;
+      }>(`entries/${entry.category}/${entry.slug}.json`);
+      expect(detailPayload.trustSignals).toEqual(entry.trustSignals);
+    }
+
+    expect(
+      directoryEntries.some((entry) => entry.trustSignals.checksumPresent),
+    ).toBe(true);
+    expect(
+      directoryEntries.some((entry) => entry.trustSignals.adapterGenerated),
+    ).toBe(true);
+    for (const entry of searchEntries) {
+      expect(entry.trustSignals).toMatchObject({
+        lastVerifiedAt: expect.any(String),
+        platforms: expect.any(Array),
+        supportLevels: expect.any(Array),
+      });
+    }
   });
 
   it("derives all generated aggregate artifacts from registry builders", () => {

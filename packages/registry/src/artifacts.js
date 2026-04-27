@@ -100,7 +100,10 @@ export function buildDirectoryEntries(entries) {
       scriptBody: _scriptBody,
       ...directoryEntry
     } = entry;
-    return directoryEntry;
+    return {
+      ...directoryEntry,
+      trustSignals: buildEntryTrustSignals(entry),
+    };
   });
 }
 
@@ -128,6 +131,7 @@ export function buildSearchEntries(entries) {
     documentationUrl: entry.documentationUrl || "",
     repoUrl: entry.repoUrl || "",
     url: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    trustSignals: buildEntryTrustSignals(entry),
   }));
 }
 
@@ -186,6 +190,53 @@ export function buildSkillPlatformCompatibility(entry) {
       verifiedAt,
     },
   ];
+}
+
+function sourceUrlsForEntry(entry) {
+  return [
+    entry.documentationUrl,
+    entry.repoUrl,
+    entry.githubUrl,
+    entry.websiteUrl,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .filter((value, index, list) => list.indexOf(value) === index);
+}
+
+function lastVerifiedForEntry(entry) {
+  return (
+    entry.verifiedAt ||
+    entry.contentUpdatedAt ||
+    entry.repoUpdatedAt ||
+    entry.dateAdded ||
+    ""
+  );
+}
+
+export function buildEntryTrustSignals(entry) {
+  const platformCompatibility = buildSkillPlatformCompatibility(entry);
+  const adapterGenerated = platformCompatibility.some(
+    (item) => item.supportLevel === "adapter" && item.adapterPath,
+  );
+  const packageChecksum =
+    entry.downloadSha256 || entry.skillPackage?.sha256 || "";
+  const sourceUrls = sourceUrlsForEntry(entry);
+
+  return {
+    firstPartyEditorial: entry.disclosure === "heyclaude_pick",
+    packageVerified: entry.packageVerified === true,
+    packageTrust: entry.downloadTrust || null,
+    packageChecksum,
+    checksumPresent: Boolean(packageChecksum),
+    sourceUrlCount: sourceUrls.length,
+    sourceUrls,
+    sourceStatus: sourceUrls.length ? "available" : "missing",
+    lastVerifiedAt: lastVerifiedForEntry(entry),
+    adapterGenerated,
+    platforms: platformCompatibility.map((item) => item.platform),
+    supportLevels: platformCompatibility.map((item) => item.supportLevel),
+  };
 }
 
 export function buildCursorSkillAdapter(entry) {
@@ -256,6 +307,7 @@ export function buildEntryDetail(entry) {
     schemaVersion: ENTRY_SCHEMA_VERSION,
     key: `${entry.category}:${entry.slug}`,
     entry,
+    trustSignals: buildEntryTrustSignals(entry),
   };
 }
 
@@ -328,6 +380,7 @@ export function buildReadOnlyEcosystemFeed(entries, params = {}) {
         tags: entry.tags || [],
         qualityScore: quality.scores.total,
         provenance: quality.provenance,
+        trustSignals: buildEntryTrustSignals(entry),
       };
     }),
   };

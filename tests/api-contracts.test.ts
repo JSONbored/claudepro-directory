@@ -24,6 +24,8 @@ const apiRoutes = [
   "/api/intent-events",
   "/api/community-signals",
   "/api/github-stats",
+  "/feed.xml",
+  "/atom.xml",
   "/data/feeds/index.json",
   "/data/feeds/categories/{category}.json",
   "/data/feeds/platforms/{platform}.json",
@@ -58,5 +60,15 @@ describe("OpenAPI route coverage", () => {
     expect(schema).toContain("/api/og:");
     expect(schema).toContain("image/png");
     expect(schema).toContain("category and platform shards");
+  });
+
+  it("documents error envelopes, cacheable feeds, and registry trust signals", () => {
+    expect(schema).toContain("ErrorEnvelope:");
+    expect(schema).toContain("RegistryTrustSignals:");
+    expect(schema).toContain("trustSignals");
+    expect(schema).toContain("packageChecksum");
+    expect(schema).toContain("lastVerifiedAt");
+    expect(schema).toContain("adapterGenerated");
+    expect(schema).toContain("RSS, changelog, category feeds, platform feeds");
   });
 });

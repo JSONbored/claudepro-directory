@@ -51,11 +51,18 @@ export async function GET(request: Request) {
       pluginExportFeed: "/data/plugin-export-feed.json",
       changelogFeed: "/data/registry-changelog.json",
       rssFeed: "/feed.xml",
+      atomFeed: "/atom.xml",
       distributionFeedIndex: "/data/feeds/index.json",
       categoryFeed: "/data/feeds/categories/{category}.json",
       platformFeed: "/data/feeds/platforms/{platform}.json",
       contentQuality: "/data/content-quality-report.json",
       raycastFeed: "/data/raycast-index.json",
+    },
+    contracts: {
+      registryEntries:
+        "Search results, sharded feeds, and entry details expose factual trustSignals when source/checksum/compatibility data exists.",
+      writes:
+        "Registry publishing is not exposed through the public API; submissions create reviewable GitHub issues only.",
     },
     artifacts: manifest.artifacts,
     artifactContracts: manifest.artifactContracts,

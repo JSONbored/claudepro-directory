@@ -126,6 +126,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "c11d9b5eecae8fa09374644ee91dd77197ecbc11f5f60519b9b161f4754214d3",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://openai.com/index/new-tools-and-features-in-the-responses-api/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/agent-evals-regression-gate"
     },
     {
@@ -248,6 +279,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "be991706421c0df692082e6109da5ef9b3479fa7fdcdf95809c8eeaff3b892b4",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://opentelemetry.io/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-agent-observability-incident-response.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/ai-agent-observability-incident-response"
     },
     {
@@ -372,6 +434,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "9955465ac6dea7ab8837ab2ad18bf6a53f6635c72c85c7cff24025a9efbd8cfe",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.ycombinator.com/library",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-business-idea-validation-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack"
     },
     {
@@ -494,6 +587,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "cc04f016dc2ee3f988e6fd411ff7406fc999b0c5f2377e7fc6e71d5f795dc2e8",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.google.com/search/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-search-ranking-content-cluster-strategy.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy"
     },
     {
@@ -618,6 +742,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "227f513fd69287b909f5b20d191418d4bc515aa4593508058a42e6d3bdf1ba4c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openai/whisper",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/audio-transcription-summarization"
     },
     {
@@ -740,6 +895,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "147aaf1222f6161a918b24193e7a74c19f07f4a8df6d4a76c668fe3695376796",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.base.org/get-started/deploy-smart-contracts",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/base-l2-smart-contract-launchpad.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/base-l2-smart-contract-launchpad"
     },
     {
@@ -862,6 +1048,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "6aa6e8c44b99d7cf368236a7567453abefb91476ba74d431c992b409c5cfc8f3",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://playwright.dev/docs/best-practices",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/browser-agent-workflow-automation"
     },
     {
@@ -987,6 +1204,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "d9c1c744531414228b49e8915b9cf9d652c874f79cb3845e8b2bc2d9d4dac381",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://bun.sh/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/bun-runtime-modern-javascript.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-23",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/bun-runtime-modern-javascript"
     },
     {
@@ -1111,6 +1359,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "442cc6c1e4836a11a8dcee585d55624556f6b79bbb2351d75630a6b4746d8ead",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://matplotlib.org/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cli-data-viz-quickstart.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/cli-data-viz-quickstart"
     },
     {
@@ -1236,6 +1515,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8cf522b452d3699ef4bc63ebfb8e326609b053e7c7234a44aef1b2b2adeee6d8",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/workers-ai/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-ai-edge.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-ai-edge"
     },
     {
@@ -1361,6 +1671,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "2b0c31db74f9b42751e2c14d8dab16fa3ded453bd4397a1347ac782ce5bc792a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/workers/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack"
     },
     {
@@ -1485,6 +1826,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "5e2a8567d4a88913443a4a9e76823180775eb767e51770c0a3c8ca5e39ffe59b",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/coderabbit-lite-pr-review-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack"
     },
     {
@@ -1609,6 +1981,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7e3ee39f61507d249f0b0b5ec49c35c6fc076b5ca2d6f85174eec8664de00867",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openai/codex",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-automations-orchestrator-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack"
     },
     {
@@ -1733,6 +2136,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7ea59a73540f97320dc9819720d4dc25f6d117f44096d7aa6011a4857cced8f0",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openai/codex",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-plugin-creator-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/codex-plugin-creator-capability-pack"
     },
     {
@@ -1858,6 +2292,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7a075dd66f661d1f928dff7924159040bd6ab2c898f782cbb2862ae79658178e",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://pandas.pydata.org/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/csv-excel-data-wrangler.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/csv-excel-data-wrangler"
     },
     {
@@ -1983,6 +2448,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "4f8ce19de6069c834ec7a452e8c3dbf1de4ff304ce049d5665a8ad56a0e800fe",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://cursor.sh/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cursor-windsurf-ai-ide-setup.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-23",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup"
     },
     {
@@ -2105,6 +2601,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "f755fc12857dee8d1ee1264decb4e2ff342d9ba8ed36f32a7fa723ca0335d59b",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.docker.com/compose/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docker-compose-production-blueprints.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/docker-compose-production-blueprints"
     },
     {
@@ -2229,6 +2756,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "97c1f763257656b21679a7b0158c6a5f70e4f9feae1722c8674242498e39d462",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docxtpl.readthedocs.io/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docx-report-generator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/docx-report-generator"
     },
     {
@@ -2354,6 +2912,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "3f10c007835d0f339dc11a96b12cc7951032f9d14ce505951d2c0bf0f43d4312",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.base.org/get-started/deploy-smart-contracts",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-base-smart-contract-security-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/ethereum-base-smart-contract-security-capability-pack"
     },
     {
@@ -2476,6 +3065,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "658d185c8a7a5c7981f9d4c0d5bb046f425a567016a35bbd8c8aaaf83284db5e",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://ethereum.org/developers/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/ethereum-solidity-security-foundry"
     },
     {
@@ -2601,6 +3221,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a62b1a1e1fcee8faa7b1fb5cd68fa3c5112a74337fea3729a6bc5738c24f36d9",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://fastapi.tiangolo.com/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-23",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/fastapi-python-backend"
     },
     {
@@ -2725,6 +3376,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "88297534195c8e594486b5e5c230f5c99b1053118e534e7dbf598514e79a4741",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://git-cliff.org/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/git-cliff-release-changelog-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack"
     },
     {
@@ -2850,6 +3532,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.github.com/en/actions",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/github-actions-ai-cicd"
     },
     {
@@ -2974,6 +3687,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "171cde88dd94e324d349dfa76d0910dfd8bd3da54f1f22898331b04f5132e4b0",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.github.com/actions",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-secure-cicd-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack"
     },
     {
@@ -3096,6 +3840,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "2795143f0a54328d4335b4119fa51310480f6785dc02234b54d7738e85540db2",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://ai.google.dev/gemini-api/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/google-workspace-gemini-automation.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/google-workspace-gemini-automation"
     },
     {
@@ -3223,6 +3998,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://heyclau.de/submit",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-27",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/heyclaude-skill-submission-factory"
     },
     {
@@ -3347,6 +4153,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "aef3f6a1d69042ef5f12ff5dc7958397dd7c5de9bbbcf55d4b7211f0e0eef66b",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://typicode.github.io/husky/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/husky-commit-governance-capability-pack"
     },
     {
@@ -3472,6 +4309,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "9b48b3202b664e1fbe69e162d3193cb5ad7f64a38a929268b4175c3433873764",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://tesseract-ocr.github.io/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/image-ocr-table-extraction"
     },
     {
@@ -3594,6 +4462,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "50f1cfd7cb8c10daafd7e7d88904e1afcf852a63e55cefd52aa673a83c2969b2",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.indexnow.org/documentation",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/indexnow-search-indexing-accelerator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/indexnow-search-indexing-accelerator"
     },
     {
@@ -3719,6 +4618,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "851adc6e2004750ad392111dbccb5a131aec55693c028a0e460cd09f0acb9b8f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://ajv.js.org/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/json-schema-validation-transformation.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/json-schema-validation-transformation"
     },
     {
@@ -3843,6 +4773,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "ca52e864c9ea2178c5c2a5bdc80c951cdfc99a2ee86d75242ba3ec2ba5f3eed7",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/BurntSushi/ripgrep",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/log-parsing-incident-timeline.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/log-parsing-incident-timeline"
     },
     {
@@ -3967,6 +4928,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "1a7c976ec10973f41970cd3328f73888927501684a89edc34ffe23e53d58567a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/remarkjs/remark",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/markdown-knowledge-base-composer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/markdown-knowledge-base-composer"
     },
     {
@@ -4091,6 +5083,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "88cfe7f7cbd688806926439fcef04929c691deaaa01909a87d5658bbeb8c28bb",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-authoring-security-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/mcp-server-authoring-security-capability-pack"
     },
     {
@@ -4213,6 +5236,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "d55bf62f2aa6f52fa38a0e362cd9e5da2cc52c9d6012037f4a98919fbd342a88",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/specification/2025-06-18",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-security-hardening.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/mcp-server-security-hardening"
     },
     {
@@ -4335,6 +5389,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7e8f76baf26241e849bdb0108bf57628864ffb91a056e3878de27247f1d7d352",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://modelcontextprotocol.io/specification/2025-06-18/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-tool-contract-testing.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/mcp-tool-contract-testing"
     },
     {
@@ -4459,6 +5544,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "23f581d57c2ddb576db5b593baf9f02b5de5314dda4042592ee3ed366bdc27c9",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://mintlify.com/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mintlify-documentation-automation.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/mintlify-documentation-automation"
     },
     {
@@ -4581,6 +5697,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8d45355903bb0faf1b2104e91a605180579611f7647fd252e981b0d4873d574f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://platform.openai.com/docs/guides/latency-optimization",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/model-routing-cost-latency-optimizer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/model-routing-cost-latency-optimizer"
     },
     {
@@ -4703,6 +5850,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7b9351535e62d89cea292da665d32ba45eb6e32d4a178b478e054cf8f69b493b",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.n8n.io/advanced-ai/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-ai-agent-workflow-architect.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect"
     },
     {
@@ -4827,6 +6005,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "39e4ad81bf6055fbe1832b8e0344f3e41dd23ae88b6b8e677102b6a0d97aedcc",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.n8n.io/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack"
     },
     {
@@ -4951,6 +6160,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a4563ec065238789a4e01fa371b8681b120f9141ab6bd415563d8e1bb966e74a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.n8n.io/hosting/securing/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-production-security-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/n8n-production-security-capability-pack"
     },
     {
@@ -5073,6 +6313,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a2287d07c870f3070dc22382f0e2a409b098c5115c844429796bfa4424baf21d",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openclaw/openclaw",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-agent-ops-hardening.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/openclaw-agent-ops-hardening"
     },
     {
@@ -5197,6 +6468,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "d67f69f050a67f21b64fd103dc9a901b46624621d7aaae84606ba3f657c12749",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openclaw/openclaw",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-operator-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/openclaw-operator-capability-pack"
     },
     {
@@ -5321,6 +6623,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "cf3ec648f0dd4808a709afca8306947b6be5c9bc18e2b481cdf0436e846fe9e3",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/openclaw/openclaw",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-skill-authoring-factory-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack"
     },
     {
@@ -5445,6 +6778,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0254c5d9edfe925907cfca3f06a24c866ecd42e1e7ef51ad64b2a5518199360c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://opennext.js.org/cloudflare/get-started",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/opennext-cloudflare-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/opennext-cloudflare-capability-pack"
     },
     {
@@ -5568,6 +6932,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "bcb96e6ace1641db8801d2c105e7491c4ecb18fc181ae9a73378e0578d932fc4",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://web.dev/articles/vitals",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/pagespeed-insights-optimizer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/pagespeed-insights-optimizer"
     },
     {
@@ -5692,6 +7087,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "61fb431b4e7253846d6c180b34c22226e431cd3234bd5f6917fdf18702df5dbe",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://playwright.dev/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-e2e-testing.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/playwright-e2e-testing"
     },
     {
@@ -5814,6 +7240,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "debb75ce2997bba8fcd5fbe24eb7b8cae6cfec0f34f8619611134906f2993b1e",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://playwright.dev/docs/getting-started-mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-mcp-browser-automation-engineer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/playwright-mcp-browser-automation-engineer"
     },
     {
@@ -5939,6 +7396,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "a180b68a318eb007218f5d5de00e12deaf980f75f5e4519eeecc550cba7715df",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://www.postgresql.org/docs/current/performance-tips.html",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/postgresql-query-optimization.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/postgresql-query-optimization"
     },
     {
@@ -6061,6 +7549,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8bf9869deb15e9db78456574e555a755fbefe6e70c4362761d1fcbd416496c03",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/prompt-injection-defense-guardrails.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/prompt-injection-defense-guardrails"
     },
     {
@@ -6185,6 +7704,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0dd1737529e1488f32e951bd9543fd8cd433619c6dc3547f266e56e8b9bb9be8",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/proxmox-ve-api-capability-pack"
     },
     {
@@ -6307,6 +7857,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8c49dff8580bad344aeda18707159b9ad25bc7eef25946d6c429ac65cb7565b0",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-orchestrator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/proxmox-ve-api-orchestrator"
     },
     {
@@ -6431,6 +8012,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "27bea14be236882b4fbb89528b3f0229e0f27a18441c188269d833effef5bfb8",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.raycast.com/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/raycast-extension-dev-publish-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack"
     },
     {
@@ -6556,6 +8168,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "7ca26f7e32710870302ff983bbd1f2b443b756a67af553ece30441be5e3b329c",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/rest-api-client-harness.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/rest-api-client-harness"
     },
     {
@@ -6678,6 +8321,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0eebf445e5f54017b313993dbe934576dd54daf29da27ed35db45ff4f84dc005",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://stripe.com/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/saas-pricing-experimentation-engine.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/saas-pricing-experimentation-engine"
     },
     {
@@ -6803,6 +8477,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "e4070e1dd49d8c0871cf79e4cf9db65964522b9f8b42579f124530c5c7d858c1",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://supabase.com/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/supabase-realtime-database"
     },
     {
@@ -6928,6 +8633,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "446158b7bf996f8a2538d024e254e925b83c93d8c1ae180f1a7576ed3a654a57",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://kit.svelte.dev/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/svelte-sveltekit-fullstack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-23",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/svelte-sveltekit-fullstack"
     },
     {
@@ -7053,6 +8789,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "33c0ad29db6fc2f841bd0bf3521a4ebb8111a34d702a317745ea11735d7422c0",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://trpc.io/docs/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/trpc-type-safe-api"
     },
     {
@@ -7175,6 +8942,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "64de5cc69848cd40c32125cbc81f12b07c4f64c9db8975b1a95dc99517ffe87a",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.unraid.net/API/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-automation-operator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/unraid-api-automation-operator"
     },
     {
@@ -7299,6 +9097,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "f1b76482519832597daed36f244bfe502df781fd2491b895ec246d4e0859ecea",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.unraid.net/API/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-v2-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-10",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/unraid-api-v2-capability-pack"
     },
     {
@@ -7423,6 +9252,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://forums.unraid.net/forum/64-docker-engine/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack"
     },
     {
@@ -7548,6 +9408,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "4d04ee6b712ac687c14c4a7d539bd4eb8182cac36364c413426c92a465602174",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://v0.dev/docs",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/v0-rapid-prototyping.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/v0-rapid-prototyping"
     },
     {
@@ -7673,6 +9564,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "3bc2f1a78615abff0539bd4f50e36337af9c433c6b145a16b2720fa8f00c26b1",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://vitejs.dev/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/vite-build-optimization.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-23",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/vite-build-optimization"
     },
     {
@@ -7798,6 +9720,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "ef8e4038c38a8508ad1afdd7e0152ba4b64babc941ad5deabffb70122e10e75f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://webassembly.org/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/webassembly-module-development.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/webassembly-module-development"
     },
     {
@@ -7922,6 +9875,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "b9a4470d1a5231d0b35ddf03c620b7450b06dd6c394ca5b2aaee0dc956053792",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://github.com/mozilla/readability",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/website-crawler-summarizer.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-15",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/website-crawler-summarizer"
     },
     {
@@ -8047,6 +10031,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "0dfd4b876ad1f9c90261eb51c6443c2988f0b7857b9e6b26f177e360fc401cd4",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.codeium.com/windsurf",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/windsurf-collaborative-development.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/windsurf-collaborative-development"
     },
     {
@@ -8171,6 +10186,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "77fa0891ce8a4bc6ffcc8a8ab9a2110d7a8ea5e073630f3912fefae2f4cc1e6f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://developers.cloudflare.com/workers/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-11",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack"
     },
     {
@@ -8296,6 +10342,37 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "56133067087d163b8ff5a35aa325a55b75ce8916a75bfc7523075b5e3e76974f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://zod.dev/",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2025-10-16",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
+      },
       "canonicalUrl": "https://heyclau.de/skills/zod-schema-validator"
     }
   ]

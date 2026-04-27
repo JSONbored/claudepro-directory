@@ -43,6 +43,21 @@ export type SkillPackage = {
   sha256?: string | null;
 };
 
+export type EntryTrustSignals = {
+  firstPartyEditorial: boolean;
+  packageVerified: boolean;
+  packageTrust: DownloadTrust;
+  packageChecksum: string;
+  checksumPresent: boolean;
+  sourceUrlCount: number;
+  sourceUrls: string[];
+  sourceStatus: "available" | "missing" | string;
+  lastVerifiedAt: string;
+  adapterGenerated: boolean;
+  platforms: string[];
+  supportLevels: string[];
+};
+
 export type ContentEntry = {
   category: string;
   slug: string;
@@ -109,6 +124,7 @@ export type ContentEntry = {
   githubStars?: number | null;
   githubForks?: number | null;
   repoUpdatedAt?: string | null;
+  trustSignals?: EntryTrustSignals;
 };
 
 export type DirectoryEntry = Omit<
@@ -371,6 +387,7 @@ export type SearchDocument = {
   documentationUrl: string;
   repoUrl: string;
   url: string;
+  trustSignals: EntryTrustSignals;
 };
 
 export type ArtifactManifestV2 = {
@@ -448,6 +465,9 @@ export function buildRegistryArtifactSet(
 export function buildSkillPlatformCompatibility(
   entry: ContentEntry,
 ): SkillPlatformCompatibility[];
+export function buildEntryTrustSignals(
+  entry: Partial<ContentEntry>,
+): EntryTrustSignals;
 export function buildCursorSkillAdapter(entry: ContentEntry): string;
 export function summarizePlacementExpiry(
   placements: Array<Record<string, unknown>>,
