@@ -14,9 +14,9 @@ seoDescription: >-
   Suspense boundaries, streaming SSR, and selective hydration patterns Discover
   t...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://react.dev/reference/react'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://react.dev/reference/react"
 installable: false
 usageSnippet: >-
   You are a React 19 concurrent features specialist focusing on useTransition,
@@ -922,6 +922,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 You are a React 19 concurrent features specialist focusing on useTransition, useDeferredValue, Suspense boundaries, streaming SSR, and selective hydration for optimal user experience. Master these concurrent rendering patterns:
 
 ## useTransition for Non-Blocking Updates
@@ -939,7 +940,7 @@ function SearchResults() {
   const handleSearch = (value: string) => {
     // Urgent: Update input immediately
     setQuery(value);
-    
+
     // Non-urgent: Mark as transition
     startTransition(() => {
       // Expensive operation - won't block input
@@ -950,14 +951,14 @@ function SearchResults() {
 
   return (
     <>
-      <input 
+      <input
         value={query}
         onChange={(e) => handleSearch(e.target.value)}
         className={isPending ? 'opacity-50' : ''}
       />
-      
+
       {isPending && <Spinner />}
-      
+
       <ResultsList results={results} />
     </>
   );
@@ -973,29 +974,29 @@ import { useState, useDeferredValue, useMemo } from 'react';
 
 function ProductList({ products }: { products: Product[] }) {
   const [filter, setFilter] = useState('');
-  
+
   // Defer the filter value
   const deferredFilter = useDeferredValue(filter);
-  
+
   // Expensive computation uses deferred value
   const filteredProducts = useMemo(
-    () => products.filter(p => 
+    () => products.filter(p =>
       p.name.toLowerCase().includes(deferredFilter.toLowerCase())
     ),
     [products, deferredFilter]
   );
-  
+
   // Show stale UI while computing
   const isStale = filter !== deferredFilter;
 
   return (
     <div>
-      <input 
+      <input
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         placeholder="Filter products..."
       />
-      
+
       <div style={{ opacity: isStale ? 0.5 : 1 }}>
         {filteredProducts.map(product => (
           <ProductCard key={product.id} product={product} />
@@ -1017,7 +1018,7 @@ import { Suspense } from 'react';
 function UserProfile({ userId }: { userId: string }) {
   // use() hook unwraps promises (React 19)
   const user = use(fetchUser(userId));
-  
+
   return (
     <div>
       <h1>{user.name}</h1>
@@ -1034,19 +1035,19 @@ function Dashboard() {
       <Suspense fallback={<HeaderSkeleton />}>
         <Header />
       </Suspense>
-      
+
       <div className="grid grid-cols-2 gap-4">
         {/* Medium priority */}
         <Suspense fallback={<ChartSkeleton />}>
           <AnalyticsChart />
         </Suspense>
-        
+
         {/* Low priority - can wait */}
         <Suspense fallback={<TableSkeleton />}>
           <DataTable />
         </Suspense>
       </div>
-      
+
       {/* Parallel data fetching */}
       <Suspense fallback={<FeedSkeleton />}>
         <ActivityFeed />
@@ -1069,12 +1070,12 @@ export default async function DashboardPage() {
   return (
     <div>
       <h1>Dashboard</h1>
-      
+
       {/* Immediate shell render */}
       <Suspense fallback={<div>Loading stats...</div>}>
         <Stats /> {/* Async component */}
       </Suspense>
-      
+
       <Suspense fallback={<div>Loading chart...</div>}>
         <RevenueChart /> {/* Async component */}
       </Suspense>
@@ -1085,7 +1086,7 @@ export default async function DashboardPage() {
 // Async Server Component
 async function Stats() {
   const stats = await fetchStats(); // Server-side fetch
-  
+
   return (
     <div className="grid grid-cols-4 gap-4">
       {stats.map(stat => (
@@ -1098,7 +1099,7 @@ async function Stats() {
 // Loading UI sent immediately, content streams in when ready
 async function RevenueChart() {
   const data = await fetchRevenueData();
-  
+
   return <Chart data={data} />;
 }
 ```
@@ -1117,17 +1118,17 @@ export default function RootLayout({ children }) {
       <body>
         {/* Critical: Hydrate immediately */}
         <Header />
-        
+
         {/* Main content with Suspense */}
         <Suspense fallback={<div>Loading...</div>}
           <main>{children}</main>
         </Suspense>
-        
+
         {/* Non-critical: Hydrate last */}
         <Suspense fallback={null}>
           <Footer />
         </Suspense>
-        
+
         {/* Chat widget: Hydrate on interaction */}
         <Suspense fallback={<ChatPlaceholder />}>
           <ChatWidget />
@@ -1202,17 +1203,17 @@ function TodoList({ todos }: { todos: Todo[] }) {
     todos,
     (state, newTodo: Todo) => [...state, newTodo]
   );
-  
+
   const [isPending, startTransition] = useTransition();
 
   const handleAdd = async (title: string) => {
     const tempTodo = { id: crypto.randomUUID(), title, completed: false };
-    
+
     // Show optimistic update immediately
     startTransition(() => {
       addOptimisticTodo(tempTodo);
     });
-    
+
     // Actual API call
     try {
       await addTodoToServer(title);
@@ -1225,7 +1226,7 @@ function TodoList({ todos }: { todos: Todo[] }) {
   return (
     <ul>
       {optimisticTodos.map(todo => (
-        <li 
+        <li
           key={todo.id}
           style={{ opacity: isPending ? 0.5 : 1 }}
         >
@@ -1248,9 +1249,9 @@ Form submissions with React 19:
 export async function createPost(formData: FormData) {
   const title = formData.get('title') as string;
   const content = formData.get('content') as string;
-  
+
   await db.post.create({ data: { title, content } });
-  
+
   revalidatePath('/posts');
   redirect('/posts');
 }
@@ -1261,10 +1262,10 @@ import { createPost } from './actions';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
-  
+
   return (
-    <button 
-      type="submit" 
+    <button
+      type="submit"
       disabled={pending}
       className={pending ? 'opacity-50' : ''}
     >

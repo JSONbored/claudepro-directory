@@ -10,7 +10,7 @@ const ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/dev\.heyclau\.de$/i,
   /^https:\/\/[a-z0-9-]+\.zeronode\.workers\.dev$/i,
   /^http:\/\/localhost:\d+$/i,
-  /^http:\/\/127\.0\.0\.1:\d+$/i
+  /^http:\/\/127\.0\.0\.1:\d+$/i,
 ];
 
 export function getClientIp(request: Request) {

@@ -9,7 +9,7 @@ seoDescription: >-
   Extract valuable insights from meeting transcripts and summaries Discover
   tools for AI development.
 author: Fireflies
-dateAdded: '2025-09-18'
+dateAdded: "2025-09-18"
 documentationUrl: >-
   https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol
 downloadUrl: /downloads/mcp/fireflies-mcp-server.mcpb
@@ -34,10 +34,10 @@ configSnippet: |-
 estimatedSetupTime: 2 minutes
 difficulty: beginner
 prerequisites:
-  - 'Fireflies.ai account (sign up at https://fireflies.ai if needed)'
+  - "Fireflies.ai account (sign up at https://fireflies.ai if needed)"
   - Fireflies API key (obtain from Fireflies settings/API section)
   - OAuth authentication support (for workspace access)
-  - 'HTTP transport support (remote MCP server at https://api.fireflies.ai/mcp)'
+  - "HTTP transport support (remote MCP server at https://api.fireflies.ai/mcp)"
   - Claude Desktop 0.7.0+ or Claude Code with MCP support
   - Internet connection (remote API access required)
   - >-
@@ -74,6 +74,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Unlock the power of your meeting data by connecting Claude to Fireflies.ai's meeting intelligence platform. Automatically extract action items, search conversation history, analyze speaker participation, and generate comprehensive meeting summaries through natural language commands, transforming how you capture and act on meeting insights.
@@ -139,34 +140,49 @@ Unlock the power of your meeting data by connecting Claude to Fireflies.ai's mee
 ```
 
 ## Examples
+
 ### Get action items from today's standup
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Get action items from today's standup"
 ```
+
 ### Search for discussions about Q4 planning
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Search for discussions about Q4 planning"
 ```
+
 ### Generate summary of customer call
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate summary of customer call"
 ```
+
 ### Find all mentions of budget in recent meetings
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find all mentions of budget in recent meetings"
 ```
+
 ### Get Meeting Transcript
+
 Retrieve a meeting transcript with speaker identification
+
 ```typescript
 // Get Fireflies meeting transcript
 const transcript = await fireflies.transcripts.get({
   meeting_id: "meeting-id",
   format: "text",
-  include_speakers: true
+  include_speakers: true,
 });
 ```
 
@@ -183,27 +199,35 @@ const transcript = await fireflies.transcripts.get({
 - Fireflies webhook configurations and payloads may contain sensitive meeting transcripts and participant information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### Too many requests error with code 429
 
 Free/Pro plans: 50 requests/day limit. Business/Enterprise: 60 requests/minute. Check retryAfter timestamp in error response. Wait specified time before retry or upgrade plan for higher limits.
+
 ### Invalid API key or authentication failed error
 
 Add Authorization header with Bearer YOUR_API_KEY format. Verify API key hasn't expired in Fireflies settings. Check for typos and regenerate key if authentication continues to fail.
+
 ### Cannot access meeting transcripts or recordings
 
 Verify workspace permissions grant access to meetings. Check meeting privacy settings allow API access. Ensure your account has viewer or higher role for target meetings in Fireflies workspace.
+
 ### Transcripts incomplete or missing sections
 
 Check audio quality of original recording. Verify storage limits haven't been exceeded for your plan tier. Review transcript settings for language and accuracy preferences in Fireflies workspace.
+
 ### Fireflies MCP server authentication errors with API keys
 
 Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Fireflies rate limit errors when processing multiple meetings
 
 Implement exponential backoff retry logic with jitter. Use Fireflies API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed meeting data. Fireflies allows 100 requests per minute per API key.
+
 ### Fireflies meeting or transcript access denied errors
 
 Verify API key has access to the meeting. Check meeting permissions and account membership. Ensure API key has required permissions (read transcripts, read meetings) for target operations.
+
 ### Fireflies MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Fireflies API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

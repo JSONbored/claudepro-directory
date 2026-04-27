@@ -2,15 +2,15 @@
 title: Cloudinary MCP Server - MCP Servers
 slug: cloudinary-mcp-server
 category: mcp
-description: 'Upload, manage, transform, and analyze media assets in the cloud'
-cardDescription: 'Upload, manage, transform, and analyze media assets in the cloud'
+description: "Upload, manage, transform, and analyze media assets in the cloud"
+cardDescription: "Upload, manage, transform, and analyze media assets in the cloud"
 seoTitle: Cloudinary MCP Server - MCP Servers
 seoDescription: >-
   Upload, manage, transform, and analyze media assets in the cloud Discover
   tools for AI development.
 author: Cloudinary
-dateAdded: '2025-09-18'
-documentationUrl: 'https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers'
+dateAdded: "2025-09-18"
+documentationUrl: "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers"
 downloadUrl: /downloads/mcp/cloudinary-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -47,7 +47,7 @@ configSnippet: |-
 estimatedSetupTime: 2 minutes
 difficulty: beginner
 prerequisites:
-  - 'Cloudinary account (free or paid) from https://console.cloudinary.com/'
+  - "Cloudinary account (free or paid) from https://console.cloudinary.com/"
   - Cloudinary Cloud Name (found in Cloudinary Console dashboard)
   - Cloudinary API Key (found in Cloudinary Console dashboard)
   - Cloudinary API Secret (found in Cloudinary Console dashboard)
@@ -64,7 +64,7 @@ prerequisites:
   - >-
     File size awareness: Account tier limits (typically 10-100MB per file, use
     chunked uploads for larger files)
-  - 'HTTP transport support (remote MCP server, not local stdio)'
+  - "HTTP transport support (remote MCP server, not local stdio)"
 tags:
   - media
   - cloudinary
@@ -91,6 +91,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Manage and transform media assets through Cloudinary's comprehensive cloud-based media platform.
@@ -161,37 +162,52 @@ Manage and transform media assets through Cloudinary's comprehensive cloud-based
 ```
 
 ## Examples
+
 ### Resize all product images to 800x600
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Resize all product images to 800x600"
 ```
+
 ### Apply watermark to videos
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Apply watermark to videos"
 ```
+
 ### Generate responsive image sets
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate responsive image sets"
 ```
+
 ### Optimize images for web delivery
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Optimize images for web delivery"
 ```
+
 ### Upload Image with Transformations
+
 Upload an image to Cloudinary with automatic transformations and tagging
+
 ```typescript
 // Upload image to Cloudinary with transformations
 const result = await cloudinary.uploader.upload("image.jpg", {
   folder: "products",
   transformation: [
     { width: 800, height: 600, crop: "fill" },
-    { quality: "auto", fetch_format: "auto" }
+    { quality: "auto", fetch_format: "auto" },
   ],
-  tags: ["product", "featured"]
+  tags: ["product", "featured"],
 });
 ```
 
@@ -208,27 +224,35 @@ const result = await cloudinary.uploader.upload("image.jpg", {
 - Cloudinary webhook configurations and payloads may contain sensitive asset metadata and upload information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### HTTP 420 rate limited error on Admin API requests
 
 Admin API limits: Free plan 500/hour, Paid 2000/hour. Wait for hourly reset or upgrade plan. Use Retry-After header to time your next request. Upload API has no rate limits.
+
 ### HTTP 401 authentication required error
 
 Verify CLOUDINARY_CLOUD_NAME, API_KEY, and API_SECRET are correctly set. Check signed URLs for add-ons or Strict Transformation mode. Regenerate credentials from Cloudinary Console if authentication fails.
+
 ### Image transformation fails or returns errors
 
 Verify transformation parameters are valid and supported. Check account tier for transformation quota limits. Ensure URL is properly signed for Strict Transformations mode if enabled.
+
 ### Upload fails with file too large error
 
 Check file size against your account tier limits (typically 10-100MB). For larger files, use chunked uploads. Verify network connectivity and increase timeout settings for large files.
+
 ### Cloudinary MCP server authentication errors with API credentials
 
 Verify API key and secret are valid and not expired. Check credentials match the correct cloud name. Ensure credentials are properly configured in environment variables. For signed URLs, verify signature generation is correct.
+
 ### Cloudinary image upload or transformation failures
 
 Check file size limits (100MB for free tier, 10GB for paid). Verify upload preset permissions allow uploads. Ensure network connectivity is stable. For large files, use chunked upload API with resumable upload support.
+
 ### Cloudinary MCP server rate limiting or throttling errors
 
 Implement exponential backoff retry logic with jitter. Use Cloudinary API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed asset URLs. Request rate limit increases from Cloudinary support if needed.
+
 ### Cloudinary MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Cloudinary API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -30,12 +30,14 @@ Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Ca
 
 ## Prerequisites
 **Required:**
-- Claude Pro subscription or Claude Code CLI  
+
+- Claude Pro subscription or Claude Code CLI
 - Node.js 18+ with TypeScript 5.0+
 - Understanding of React or Next.js
 - Basic API development knowledge
 
 **What Claude handles automatically:**
+
 - Setting up tRPC server with Express, Next.js, or standalone
 - Creating type-safe routers and procedures
 - Implementing middleware for authentication
@@ -51,6 +53,7 @@ Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Ca
 **Prompt:** "Set up a tRPC API with Next.js 15 that has procedures for creating, reading, updating, and deleting todos. Include Zod validation and automatic React Query hooks."
 
 Claude will:
+
 1. Initialize tRPC router with type-safe procedures
 2. Add Zod schemas for input validation
 3. Create CRUD operations with proper types
@@ -64,6 +67,7 @@ Claude will:
 **Prompt:** "Add JWT authentication middleware to my tRPC API. Protected procedures should verify the token and attach user data to context."
 
 Claude will:
+
 1. Create authentication middleware
 2. Verify JWT tokens with jose library
 3. Extend tRPC context with user data
@@ -77,6 +81,7 @@ Claude will:
 **Prompt:** "Build a tRPC subscription that sends real-time notifications when new messages are posted. Use WebSocket transport."
 
 Claude will:
+
 1. Configure WebSocket link on client
 2. Create subscription procedure
 3. Implement event emitter pattern
@@ -90,6 +95,7 @@ Claude will:
 **Prompt:** "Create a complete T3 Stack application with tRPC, Prisma, NextAuth, and Tailwind. Include user authentication, database models, and type-safe API routes."
 
 Claude will:
+
 1. Initialize T3 app with create-t3-app
 2. Set up Prisma schema and migrations
 3. Configure NextAuth providers
@@ -113,6 +119,7 @@ Claude will:
 
 ## Common Workflows
 ### E-Commerce API
+
 ```
 "Build a type-safe e-commerce API with tRPC:
 1. Product catalog with filtering and search
@@ -125,6 +132,7 @@ Claude will:
 ```
 
 ### Social Media Backend
+
 ```
 "Create a social media backend using tRPC:
 1. User profiles with follow/unfollow
@@ -137,6 +145,7 @@ Claude will:
 ```
 
 ### SaaS Multi-Tenant API
+
 ```
 "Build a multi-tenant SaaS API with tRPC:
 1. Organization and team management
@@ -149,6 +158,7 @@ Claude will:
 ```
 
 ### AI Chat Application
+
 ```
 "Create a chat app with tRPC and streaming:
 1. OpenAI integration with streaming responses

@@ -14,9 +14,9 @@ seoDescription: >-
   configuration across environments. This PostToolUse hook provides
   comprehensive...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
-documentationUrl: 'https://12factor.net/config'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
+documentationUrl: "https://12factor.net/config"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic validation when .env files are modified with real-time validation feedback when environment configuration files are changed during active development
@@ -129,10 +130,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/environment-variable-validator.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -155,17 +153,17 @@ fi
 # Check if it's an environment-related file
 if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$FILE_PATH" == *config* ]] || [[ "$FILE_PATH" == docker-compose.yml ]] || [[ "$FILE_PATH" == docker-compose.yaml ]]; then
   echo "🔧 Environment file detected: $FILE_PATH" >&2
-  
+
   # Initialize validation counters
   ERRORS=0
   WARNINGS=0
   VALIDATIONS=0
-  
+
   # Function to report validation results
   report_issue() {
     local level="$1"
     local message="$2"
-    
+
     if [ "$level" = "ERROR" ]; then
       echo "❌ $message" >&2
       ERRORS=$((ERRORS + 1))
@@ -177,28 +175,28 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
     fi
     VALIDATIONS=$((VALIDATIONS + 1))
   }
-  
+
   # Validate environment file if it exists
   if [ -f "$FILE_PATH" ]; then
     echo "🔍 Validating environment configuration..." >&2
-    
+
     # Check for common required variables
     COMMON_REQUIRED_VARS=("NODE_ENV" "PORT")
-    
+
     if [[ "$FILE_PATH" == *.env* ]]; then
       echo "📋 Checking for environment variables in $FILE_PATH" >&2
-      
+
       # Extract variables from the file
       ENV_VARS=$(grep -oE '^[A-Z_][A-Z0-9_]*=' "$FILE_PATH" 2>/dev/null | sed 's/=//' || echo "")
-      
+
       if [ -n "$ENV_VARS" ]; then
         ENV_COUNT=$(echo "$ENV_VARS" | wc -l | xargs)
         echo "📊 Found $ENV_COUNT environment variables" >&2
       fi
-      
+
       # Security validation - check for insecure defaults
       echo "🔒 Performing security validation..." >&2
-      
+
       INSECURE_PATTERNS=(
         "password=admin"
         "password=123"
@@ -209,22 +207,22 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
         "secret=secret"
         "key=key"
       )
-      
+
       for pattern in "${INSECURE_PATTERNS[@]}"; do
         if grep -qi "$pattern" "$FILE_PATH" 2>/dev/null; then
           report_issue "ERROR" "Insecure default detected: $pattern"
         fi
       done
-      
+
       # Check for secrets that are too short
       while IFS= read -r line; do
         if [[ "$line" =~ ^([A-Z_]+)=(.+)$ ]]; then
           var_name="${BASH_REMATCH[1]}"
           var_value="${BASH_REMATCH[2]}"
-          
+
           # Remove quotes from value
           var_value=$(echo "$var_value" | sed 's/^["'\'']*//;s/["'\'']*$//')
-          
+
           # Check secret length for security-related variables
           if [[ "$var_name" =~ (SECRET|KEY|TOKEN|PASSWORD) ]]; then
             if [ ${#var_value} -lt 16 ]; then
@@ -233,7 +231,7 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
               report_issue "WARNING" "$var_name should be at least 32 characters for security"
             fi
           fi
-          
+
           # Format validation
           case "$var_name" in
             *PORT*)
@@ -259,16 +257,16 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
           esac
         fi
       done < "$FILE_PATH"
-      
+
       # Environment-specific validation
       if grep -q "NODE_ENV=production" "$FILE_PATH" 2>/dev/null; then
         echo "🏭 Production environment detected - performing production checks" >&2
-        
+
         # Check for development settings in production
         if grep -qi "debug=true" "$FILE_PATH" 2>/dev/null; then
           report_issue "ERROR" "DEBUG should not be enabled in production"
         fi
-        
+
         # Check for required production variables
         PROD_REQUIRED=("JWT_SECRET" "DATABASE_URL")
         for var in "${PROD_REQUIRED[@]}"; do
@@ -276,41 +274,41 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
             report_issue "WARNING" "$var is recommended for production environments"
           fi
         done
-        
+
       elif grep -q "NODE_ENV=development" "$FILE_PATH" 2>/dev/null; then
         echo "🔧 Development environment detected" >&2
-        
+
         # Development-specific checks
         if ! grep -q "DEBUG" "$FILE_PATH" 2>/dev/null; then
           report_issue "INFO" "Consider adding DEBUG variable for development"
         fi
       fi
     fi
-    
+
     # Cross-environment consistency check
     echo "🔄 Checking cross-environment consistency..." >&2
     ENV_FILES=(".env" ".env.local" ".env.development" ".env.staging" ".env.production")
-    
+
     EXISTING_ENV_FILES=()
     for env_file in "${ENV_FILES[@]}"; do
       if [ -f "$env_file" ] && [ "$env_file" != "$FILE_PATH" ]; then
         EXISTING_ENV_FILES+=("$env_file")
       fi
     done
-    
+
     if [ ${#EXISTING_ENV_FILES[@]} -gt 0 ]; then
       echo "📂 Found ${#EXISTING_ENV_FILES[@]} other environment files for comparison" >&2
-      
+
       # Extract variable names from current file
       if [[ "$FILE_PATH" == *.env* ]]; then
         CURRENT_VARS=$(grep -oE '^[A-Z_][A-Z0-9_]*=' "$FILE_PATH" 2>/dev/null | sed 's/=//' | sort || echo "")
-        
+
         for other_file in "${EXISTING_ENV_FILES[@]}"; do
           OTHER_VARS=$(grep -oE '^[A-Z_][A-Z0-9_]*=' "$other_file" 2>/dev/null | sed 's/=//' | sort || echo "")
-          
+
           # Find variables in current file but not in other file
           MISSING_IN_OTHER=$(comm -23 <(echo "$CURRENT_VARS") <(echo "$OTHER_VARS") 2>/dev/null || echo "")
-          
+
           if [ -n "$MISSING_IN_OTHER" ] && [ "$MISSING_IN_OTHER" != "" ]; then
             MISSING_COUNT=$(echo "$MISSING_IN_OTHER" | wc -l | xargs)
             if [ "$MISSING_COUNT" -gt 0 ]; then
@@ -320,28 +318,28 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
         done
       fi
     fi
-    
+
     # Check for .env files in version control
     if [ -f ".gitignore" ]; then
       if ! grep -q "\.env" ".gitignore" 2>/dev/null; then
         report_issue "WARNING" "Consider adding .env files to .gitignore to prevent committing secrets"
       fi
     fi
-    
+
   else
     echo "⚠️ Environment file $FILE_PATH not found for validation" >&2
   fi
-  
+
   # Docker compose specific validation
   if [[ "$FILE_PATH" == docker-compose.y*ml ]]; then
     echo "🐳 Docker Compose file detected - checking environment configuration" >&2
-    
+
     if [ -f "$FILE_PATH" ]; then
       # Check for hardcoded secrets in docker-compose
       if grep -q "password:" "$FILE_PATH" 2>/dev/null; then
         report_issue "WARNING" "Consider using environment variables instead of hardcoded passwords"
       fi
-      
+
       # Check for env_file usage
       if grep -q "env_file:" "$FILE_PATH" 2>/dev/null; then
         echo "✅ Good practice: using env_file for environment variables" >&2
@@ -350,14 +348,14 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
       fi
     fi
   fi
-  
+
   # Summary report
   echo "" >&2
   echo "📋 Validation Summary:" >&2
   echo "  🔍 Validations performed: $VALIDATIONS" >&2
   echo "  ❌ Errors found: $ERRORS" >&2
   echo "  ⚠️ Warnings: $WARNINGS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
     echo "✅ Environment validation passed" >&2
   elif [ "$ERRORS" -eq 0 ]; then
@@ -365,14 +363,14 @@ if [[ "$FILE_PATH" == *.env* ]] || [[ "$FILE_PATH" == *environment* ]] || [[ "$F
   else
     echo "⚠️ Environment validation completed with errors" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Environment Security Tips:" >&2
   echo "   • Use strong, unique secrets (32+ characters)" >&2
   echo "   • Never commit .env files to version control" >&2
   echo "   • Use different configurations for each environment" >&2
   echo "   • Validate environment variables in CI/CD pipelines" >&2
-  
+
 else
   echo "File $FILE_PATH is not an environment configuration file, skipping validation" >&2
 fi
@@ -381,6 +379,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Environment Variable Validator Hook Script
 
 Complete hook script that performs environment variable validation when configuration files are modified
@@ -418,6 +417,7 @@ if [[ "$FILE_PATH" == *.env* ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable environment variable validation
@@ -432,6 +432,7 @@ Complete hook configuration for .claude/settings.json to enable environment vari
   }
 }
 ```
+
 ### Production Environment Validation
 
 Enhanced hook script for production environment validation with security checks
@@ -458,6 +459,7 @@ if [[ "$FILE_PATH" == *.env* ]]; then
 fi
 exit 0
 ```
+
 ### Format Validation for Environment Variables
 
 Enhanced hook script for format validation of URLs, emails, ports, and other environment variable types
@@ -495,6 +497,7 @@ if [[ "$FILE_PATH" == *.env* ]]; then
 fi
 exit 0
 ```
+
 ### Security Best Practices Validation
 
 Enhanced hook script for security best practices validation including .gitignore checks and Docker Compose security
@@ -520,27 +523,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook triggers on every file write, slowing development
 
 Narrow matchers to specific .env files only: matchers: ['write:.env*', 'edit:.env*'] in hookConfig to reduce unnecessary validations and improve performance. Use targeted file patterns to exclude non-environment files. Consider using file size thresholds to skip small files.
+
 ### False positives for weak secrets in development environments
 
 Add NODE_ENV check in script to skip strict secret length validation for development. Use conditional logic: if NODE_ENV != production, bypass warnings. Create separate validation rules for development vs production environments. Use environment-specific validation thresholds.
+
 ### Hook fails to detect environment files in nested directories
 
-Update file path matching regex to include subdirectories: [[ "$FILE_PATH" == */.env* ]] and find .env files recursively for comprehensive validation. Use find command to locate all .env files in project. Consider validating all environment files in project directory tree.
+Update file path matching regex to include subdirectories: [["$FILE_PATH" == */.env*]] and find .env files recursively for comprehensive validation. Use find command to locate all .env files in project. Consider validating all environment files in project directory tree.
+
 ### Cross-environment comparison reports too many false differences
 
 Filter comparison to only critical variables (DB, API keys, secrets). Exclude dev-only vars like DEBUG or LOCAL_DEV_PORT from consistency checks to reduce noise. Use whitelist of important variables for cross-environment comparison. Configure variable exclusion patterns.
+
 ### Script exits with errors preventing file saves entirely
 
 Change validation errors to warnings with exit 0 instead of exit 1. Log issues to stderr for review but allow operations to complete without blocking development. Use non-blocking validation that reports issues without preventing file operations. Consider using validation levels (error, warning, info).
+
 ### Format validation fails for environment variables with special characters
 
 Use proper quoting and escaping for environment variable values. Handle special characters in variable values with proper escaping. Verify regex patterns handle escaped characters correctly. Test validation with complex environment variable values including special characters.
+
 ### Docker Compose validation doesn't detect environment variables in service definitions
 
 Parse Docker Compose YAML structure to extract environment variables from services. Use yq or similar YAML parser for Docker Compose files. Check both 'environment' and 'env_file' sections in Docker Compose. Validate environment variables in all service definitions.
+
 ### Validation doesn't check for required variables based on project type
 
 Detect project type (Node.js, Python, etc.) and validate project-specific required variables. Check for package.json, requirements.txt, or other project files to determine required environment variables. Use project-specific validation rules based on detected project type. Create validation profiles for different project types.

@@ -59,9 +59,7 @@ Scans for potential sensitive data exposure and alerts immediately.
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -71,9 +69,7 @@ Scans for potential sensitive data exposure and alerts immediately.
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/sensitive-data-alert-scanner.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -418,6 +414,7 @@ if [ $SECURITY_ISSUES -gt 0 ]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable sensitive data scanning
@@ -432,6 +429,7 @@ Complete hook configuration for .claude/settings.json to enable sensitive data s
   }
 }
 ```
+
 ### Enhanced Scanner with File Wait and Ignore Support
 
 Enhanced hook script with file wait retry loop and .securityignore file support
@@ -460,6 +458,7 @@ if [ $SECURITY_ISSUES -gt 0 ]; then
 fi
 exit 0
 ```
+
 ### Comment-Aware Sensitive Data Scanning
 
 Enhanced hook script that filters out commented lines before scanning for sensitive data
@@ -479,6 +478,7 @@ if echo "$CONTENT" | grep -iE "api[_-]?key\s*[:=]\s*[\"'][^\"']{8,}[\"']" | grep
 fi
 exit 0
 ```
+
 ### Sensitive Data Scanner Configuration Example
 
 Example sensitive data scanner configuration for customizing scan behavior
@@ -589,24 +589,31 @@ exit 0
 ### False positives on example code and test fixtures with dummy keys
 
 Exclusion patterns filter common placeholders but miss context-specific ones. Add .securityignore file and check: grep -qF "$FILE_PATH" .securityignore && exit 0 to whitelist specific files or patterns. Verify exclusion patterns. Test with various test file configurations.
+
 ### Notification hook timing runs before file write completes causing empty scans
 
 Notification hooks fire during operation, not after. File may not exist yet. Add retry loop: for i in {1..5}; do [ -f "$FILE_PATH" ] && break; sleep 0.1; done before scanning to ensure file availability. Verify file existence. Test with various file write scenarios.
+
 ### Notification hook receives different INPUT schema than PostToolUse
 
 Notification hooks fire mid-operation with partial data. Input may lack file_path or use alternative fields. Extend jq filter: '.file_path // .tool_input.file_path // .path // ""' to handle schema variations across hook types. Verify input schema. Test with various hook types.
+
 ### Grep patterns match commented-out secrets in code documentation
 
-Current regex doesn't exclude comments. Add language-aware filtering: grep -v '^\s*[#/]' for basic comment detection, or use awk to skip comment blocks before pattern matching for comprehensive filtering. Verify comment filtering. Test with various comment styles.
+Current regex doesn't exclude comments. Add language-aware filtering: grep -v '^\s\*[#/]' for basic comment detection, or use awk to skip comment blocks before pattern matching for comprehensive filtering. Verify comment filtering. Test with various comment styles.
+
 ### Security scan exits zero even when critical issues detected
 
 Script always exits 0 regardless of SECURITY_ISSUES count. Change final exit: [ $SECURITY_ISSUES -gt 0 ] && exit 1 || exit 0 to fail hook on findings, forcing Claude to acknowledge security alerts before proceeding. Verify exit codes. Test with various security issue scenarios.
+
 ### Pattern matching is too broad and flags legitimate code
 
 Refine regex patterns to be more specific. Add context-aware filtering: check for surrounding code context, variable names, or function signatures. Use negative lookahead patterns to exclude common false positives. Verify pattern specificity. Test with various code patterns.
+
 ### Binary files cause grep errors or false positives
 
 Add binary file detection: if file "$FILE_PATH" | grep -q binary; then exit 0; fi before scanning. Use file command to detect binary files and skip them. Verify binary detection. Test with various file types.
+
 ### Multiple sensitive data patterns detected but only one alert shown
 
 Script may exit early on first match. Remove early exits and collect all matches before reporting. Use array to store all findings, then report all at once. Verify match collection. Test with multiple pattern matches.

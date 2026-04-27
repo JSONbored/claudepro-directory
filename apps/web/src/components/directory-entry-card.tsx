@@ -21,7 +21,7 @@ import {
   getCopyText,
   getDistributionBadges,
   getPreviewLine,
-} from "@/lib/entry-presentation";
+} from "@heyclaude/registry/presentation";
 import { cn } from "@/lib";
 import { categoryAccentClasses, categoryLabels } from "@/lib/site";
 

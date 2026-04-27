@@ -20,7 +20,7 @@ const categoryHeadings = {
   rules: "## 📏 Rules",
   skills: "## 🧠 Skills",
   statuslines: "## 📟 Statuslines",
-  tools: "## 🧰 Tools"
+  tools: "## 🧰 Tools",
 };
 
 function readEntries(category) {
@@ -35,7 +35,7 @@ function readEntries(category) {
       return {
         title: String(data.title ?? fileName.replace(/\.mdx$/, "")),
         slug: String(data.slug ?? fileName.replace(/\.mdx$/, "")),
-        description: String(data.description ?? "")
+        description: String(data.description ?? ""),
       };
     });
 }
@@ -50,8 +50,8 @@ const sections = categoryOrder
       "",
       ...entries.map(
         (entry) =>
-          `- **[${entry.title}](https://heyclau.de/${category}/${entry.slug})** - ${entry.description}`
-      )
+          `- **[${entry.title}](https://heyclau.de/${category}/${entry.slug})** - ${entry.description}`,
+      ),
     ];
 
     return lines.join("\n");
@@ -61,7 +61,7 @@ const sections = categoryOrder
 
 const total = categoryOrder.reduce(
   (sum, category) => sum + readEntries(category).length,
-  0
+  0,
 );
 
 const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
@@ -144,7 +144,7 @@ ${sections}
 Thanks to everyone who has contributed to making HeyClaude better.
 
 <a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
+  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" alt="HeyClaude contributors" />
 </a>
 
 ---

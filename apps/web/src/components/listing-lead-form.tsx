@@ -22,7 +22,8 @@ const labels = {
     applyLabel: "Apply URL",
     applyPlaceholder: "https://company.com/careers/role",
     messageLabel: "Role details",
-    messagePlaceholder: "Location, employment type, compensation, responsibilities, requirements, preferred launch date.",
+    messagePlaceholder:
+      "Location, employment type, compensation, responsibilities, requirements, preferred launch date.",
     submit: "Send job lead",
     subject: "HeyClaude job listing lead",
   },
@@ -35,7 +36,8 @@ const labels = {
     applyLabel: "Docs or demo URL",
     applyPlaceholder: "https://product.com/docs",
     messageLabel: "Listing details",
-    messagePlaceholder: "What it does, who it is for, pricing model, affiliate/referral details, and preferred placement.",
+    messagePlaceholder:
+      "What it does, who it is for, pricing model, affiliate/referral details, and preferred placement.",
     submit: "Send listing lead",
     subject: "HeyClaude tool/app listing lead",
   },
@@ -43,7 +45,9 @@ const labels = {
 
 export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
   const copy = labels[kind];
-  const [state, setState] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [state, setState] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     contactName: "",
@@ -65,7 +69,9 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
       `Company: ${form.companyName}`,
       `Listing title: ${form.listingTitle}`,
       `Website URL: ${form.websiteUrl}`,
-      kind === "job" ? `Apply URL: ${form.applyUrl}` : `Docs/demo URL: ${form.applyUrl}`,
+      kind === "job"
+        ? `Apply URL: ${form.applyUrl}`
+        : `Docs/demo URL: ${form.applyUrl}`,
       "",
       form.message,
     ].join("\n");
@@ -88,13 +94,22 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ kind, tierInterest: tier, ...form }),
       });
-      const payload = (await response.json().catch(() => ({}))) as { error?: string; errors?: string[] };
+      const payload = (await response.json().catch(() => ({}))) as {
+        error?: string;
+        errors?: string[];
+      };
       if (!response.ok) {
-        throw new Error(payload.errors?.join(", ") || payload.error || "Could not submit lead");
+        throw new Error(
+          payload.errors?.join(", ") ||
+            payload.error ||
+            "Could not submit lead",
+        );
       }
       setState("success");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Could not submit lead");
+      setError(
+        caught instanceof Error ? caught.message : "Could not submit lead",
+      );
       setState("error");
     }
   }
@@ -105,47 +120,95 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
   return (
     <form onSubmit={onSubmit} className="surface-panel space-y-4 p-6">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-[0.18em] text-primary">{copy.eyebrow}</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-primary">
+          {copy.eyebrow}
+        </p>
         <p className="text-sm leading-7 text-muted-foreground">
-          This creates a private maintainer-review lead. Payment or sponsorship details are handled after review.
+          This creates a private maintainer-review lead. Payment or sponsorship
+          details are handled after review.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-medium text-foreground">
           Contact name
-          <input className={fieldClass} value={form.contactName} onChange={(event) => updateField("contactName", event.target.value)} required />
+          <input
+            className={fieldClass}
+            value={form.contactName}
+            onChange={(event) => updateField("contactName", event.target.value)}
+            required
+          />
         </label>
         <label className="text-sm font-medium text-foreground">
           Contact email
-          <input className={fieldClass} type="email" value={form.contactEmail} onChange={(event) => updateField("contactEmail", event.target.value)} required />
+          <input
+            className={fieldClass}
+            type="email"
+            value={form.contactEmail}
+            onChange={(event) =>
+              updateField("contactEmail", event.target.value)
+            }
+            required
+          />
         </label>
         <label className="text-sm font-medium text-foreground">
           Company or maker
-          <input className={fieldClass} value={form.companyName} onChange={(event) => updateField("companyName", event.target.value)} required />
+          <input
+            className={fieldClass}
+            value={form.companyName}
+            onChange={(event) => updateField("companyName", event.target.value)}
+            required
+          />
         </label>
         <label className="text-sm font-medium text-foreground">
           {copy.title}
-          <input className={fieldClass} value={form.listingTitle} onChange={(event) => updateField("listingTitle", event.target.value)} placeholder={copy.titlePlaceholder} required />
+          <input
+            className={fieldClass}
+            value={form.listingTitle}
+            onChange={(event) =>
+              updateField("listingTitle", event.target.value)
+            }
+            placeholder={copy.titlePlaceholder}
+            required
+          />
         </label>
         <label className="text-sm font-medium text-foreground">
           {copy.websiteLabel}
-          <input className={fieldClass} type="url" value={form.websiteUrl} onChange={(event) => updateField("websiteUrl", event.target.value)} placeholder={copy.websitePlaceholder} required={kind === "tool"} />
+          <input
+            className={fieldClass}
+            type="url"
+            value={form.websiteUrl}
+            onChange={(event) => updateField("websiteUrl", event.target.value)}
+            placeholder={copy.websitePlaceholder}
+            required={kind === "tool"}
+          />
         </label>
         <label className="text-sm font-medium text-foreground">
           {copy.applyLabel}
-          <input className={fieldClass} type="url" value={form.applyUrl} onChange={(event) => updateField("applyUrl", event.target.value)} placeholder={copy.applyPlaceholder} />
+          <input
+            className={fieldClass}
+            type="url"
+            value={form.applyUrl}
+            onChange={(event) => updateField("applyUrl", event.target.value)}
+            placeholder={copy.applyPlaceholder}
+          />
         </label>
       </div>
 
       <label className="block text-sm font-medium text-foreground">
         {copy.messageLabel}
-        <textarea className={`${fieldClass} min-h-32 resize-y`} value={form.message} onChange={(event) => updateField("message", event.target.value)} placeholder={copy.messagePlaceholder} />
+        <textarea
+          className={`${fieldClass} min-h-32 resize-y`}
+          value={form.message}
+          onChange={(event) => updateField("message", event.target.value)}
+          placeholder={copy.messagePlaceholder}
+        />
       </label>
 
       {state === "success" ? (
         <p className="rounded-xl border border-primary/35 bg-primary/10 px-4 py-3 text-sm text-foreground">
-          Lead received. We will review it before publishing or sending payment steps.
+          Lead received. We will review it before publishing or sending payment
+          steps.
         </p>
       ) : null}
       {state === "error" ? (

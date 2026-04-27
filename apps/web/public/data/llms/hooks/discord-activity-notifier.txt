@@ -111,7 +111,7 @@ fi
 if [ -n "$FILE_PATH" ]; then
   FILENAME=$(basename "$FILE_PATH" 2>/dev/null || echo "Unknown file")
   FILE_EXT="${FILENAME##*.}"
-  
+
   # Add file type icon based on extension
   case "$FILE_EXT" in
     js|jsx|ts|tsx) FILE_ICON="⚛️" ;;
@@ -127,7 +127,7 @@ if [ -n "$FILE_PATH" ]; then
     md) FILE_ICON="📝" ;;
     *) FILE_ICON="📄" ;;
   esac
-  
+
   FILE_DISPLAY="$FILE_ICON $FILENAME"
 else
   FILE_DISPLAY="📂 General activity"
@@ -184,7 +184,7 @@ EOF
 if command -v curl &> /dev/null; then
   RESPONSE=$(curl -s -w "%{http_code}" -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL" 2>/dev/null)
   HTTP_CODE="${RESPONSE: -3}"
-  
+
   if [ "$HTTP_CODE" = "204" ]; then
     echo "✅ Discord notification sent successfully" >&2
   else
@@ -233,7 +233,7 @@ fi
 if [ -n "$FILE_PATH" ]; then
   FILENAME=$(basename "$FILE_PATH" 2>/dev/null || echo "Unknown file")
   FILE_EXT="${FILENAME##*.}"
-  
+
   # Add file type icon based on extension
   case "$FILE_EXT" in
     js|jsx|ts|tsx) FILE_ICON="⚛️" ;;
@@ -249,7 +249,7 @@ if [ -n "$FILE_PATH" ]; then
     md) FILE_ICON="📝" ;;
     *) FILE_ICON="📄" ;;
   esac
-  
+
   FILE_DISPLAY="$FILE_ICON $FILENAME"
 else
   FILE_DISPLAY="📂 General activity"
@@ -306,7 +306,7 @@ EOF
 if command -v curl &> /dev/null; then
   RESPONSE=$(curl -s -w "%{http_code}" -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$DISCORD_WEBHOOK_URL" 2>/dev/null)
   HTTP_CODE="${RESPONSE: -3}"
-  
+
   if [ "$HTTP_CODE" = "204" ]; then
     echo "✅ Discord notification sent successfully" >&2
   else
@@ -369,6 +369,7 @@ if command -v curl &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Discord Notifier with Rate Limiting
 
 Enhanced hook script with rate limiting to prevent webhook spam (max 1 notification per minute)
@@ -409,6 +410,7 @@ if command -v curl &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Discord Notifier with Enhanced Git Integration
 
 Enhanced hook script with improved Git branch/commit detection and jq-based JSON manipulation
@@ -455,6 +457,7 @@ if command -v curl &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Discord Notifier with File Type Icons
 
 Enhanced hook script with file type icon detection and display
@@ -677,24 +680,31 @@ exit 0
 ### DISCORD_WEBHOOK_URL environment variable not available in hook execution context
 
 Export webhook URL in shell profile (.bashrc/.zshrc) or add to Claude Code config. Test with echo $DISCORD_WEBHOOK_URL in hook script to verify environment variable persists. Use .env file or Claude Code environment configuration for persistent webhook URL storage.
+
 ### Discord webhook returns HTTP 400 with invalid JSON body error message
 
 Validate PAYLOAD JSON structure before sending with echo $PAYLOAD | jq command. Ensure special characters in file names are properly escaped within JSON string values. Use jq for safe JSON construction instead of manual string concatenation. Verify JSON is valid: echo $PAYLOAD | jq .
+
 ### Notifications flood Discord channel during rapid-fire Edit or MultiEdit operations
 
 Add rate limiting by checking notification count per minute using temporary file counter: .claude/.discord-rate-limit. Skip notification if threshold exceeded (max 1 per minute recommended), or batch multiple operations into single embed with field array. Use timestamp-based debouncing to prevent spam.
+
 ### Git branch detection fails when hook runs in detached HEAD state
 
 Add fallback to display commit SHA instead of branch name when git branch --show-current returns empty. Use git describe --tags --always for readable detached HEAD representation. Check git rev-parse --abbrev-ref HEAD for branch name with fallback to commit SHA.
+
 ### Timestamp format incompatible with Discord embed RFC3339 requirement causes validation errors
 
 Ensure date -u +%Y-%m-%dT%H:%M:%S.000Z command generates UTC ISO 8601 format. Use gdate on macOS if BSD date lacks proper UTC formatting support: brew install coreutils. Verify timestamp format: date -u +%Y-%m-%dT%H:%M:%S.000Z. Discord requires RFC3339 format with Z timezone.
+
 ### curl command not found error prevents Discord notifications
 
 Install curl using package manager: brew install curl on macOS, apt-get install curl on Ubuntu/Debian, yum install curl on RHEL/CentOS. Verify installation with curl --version. Check PATH includes curl binary location. Consider using wget as fallback if curl unavailable.
+
 ### Discord webhook returns HTTP 429 rate limit error
 
 Implement rate limiting: max 30 requests per 60 seconds per webhook. Add delay between notifications using sleep command. Use rate limit file to track notification frequency. Batch multiple notifications into single embed with multiple fields. Respect Discord rate limit headers if returned.
+
 ### Special characters in file names break JSON payload formatting
 
 Use jq for safe JSON construction: jq -n --arg tool "$TOOL_NAME" --arg file "$FILE_PATH" '{embeds: [{title: "Activity", description: "Tool: \`" + $tool + "\`", fields: [{name: "File", value: $file}]}]}'. Escape special characters properly. Avoid manual JSON string concatenation for complex data.

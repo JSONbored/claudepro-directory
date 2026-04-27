@@ -30,12 +30,14 @@ Claude can build and deploy JavaScript/TypeScript applications using Bun, the al
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - macOS, Linux, or WSL (Windows support in beta)
 - curl or wget for installation
 - Basic JavaScript/TypeScript knowledge
 
 **What Claude handles automatically:**
+
 - Writing Bun-optimized server code
 - Configuring bun:test for testing
 - Setting up Bun.serve() for HTTP servers
@@ -51,6 +53,7 @@ Claude can build and deploy JavaScript/TypeScript applications using Bun, the al
 **Prompt:** "Create Bun HTTP server with: REST API routes, JSON parsing, CORS middleware, static file serving, WebSocket support, and error handling. Optimize for maximum req/sec."
 
 Claude will:
+
 1. Use Bun.serve() with fetch handler
 2. Implement routing with URL patterns
 3. Add CORS headers
@@ -64,6 +67,7 @@ Claude will:
 **Prompt:** "Build CLI tool with Bun for: file processing, progress bars, colored output, interactive prompts, and parallel operations. Package as standalone binary."
 
 Claude will:
+
 1. Parse args with Bun.argv
 2. Use chalk for colors
 3. Add ora for spinners
@@ -77,6 +81,7 @@ Claude will:
 **Prompt:** "Create Bun app with SQLite using bun:sqlite. Include: connection pooling, prepared statements, migrations, and query builder pattern."
 
 Claude will:
+
 1. Use bun:sqlite module
 2. Set up connection pool
 3. Create prepared statements
@@ -90,6 +95,7 @@ Claude will:
 **Prompt:** "Set up Bun testing for API with: unit tests, integration tests, mocking, coverage reporting, and parallel execution."
 
 Claude will:
+
 1. Write tests with bun:test
 2. Use expect assertions
 3. Mock with spyOn
@@ -111,6 +117,7 @@ Claude will:
 
 ## Common Workflows
 ### REST API Backend
+
 ```
 "Build production REST API with Bun:
 1. HTTP server with Bun.serve() and routing
@@ -124,6 +131,7 @@ Claude will:
 ```
 
 ### Build Tool Development
+
 ```
 "Create build tool with Bun:
 1. File watching with Bun.watch()
@@ -137,6 +145,7 @@ Claude will:
 ```
 
 ### Microservices Infrastructure
+
 ```
 "Build microservices with Bun:
 1. Service discovery with etcd

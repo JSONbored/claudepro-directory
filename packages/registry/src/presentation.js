@@ -57,7 +57,10 @@ export function getPreviewLine(entry) {
         firstUsefulLine(entry.body) ||
         firstUsefulLine(entry.copySnippet) ||
         firstUsefulLine(entry.usageSnippet);
-      return (line || "Copy the full prompt and use it in Claude Code").slice(0, 112);
+      return (line || "Copy the full prompt and use it in Claude Code").slice(
+        0,
+        112,
+      );
     }
     case "hooks": {
       const command = extractConfigCommand(entry.configSnippet);
@@ -67,15 +70,19 @@ export function getPreviewLine(entry) {
       break;
     }
     case "statuslines": {
-      const command = extractConfigCommand(entry.configSnippet || entry.copySnippet);
+      const command = extractConfigCommand(
+        entry.configSnippet || entry.copySnippet,
+      );
       if (command) return command.slice(0, 112);
-      if (entry.usageSnippet?.trim()) return entry.usageSnippet.trim().slice(0, 112);
+      if (entry.usageSnippet?.trim())
+        return entry.usageSnippet.trim().slice(0, 112);
       break;
     }
     case "collections": {
       const sequence = buildCollectionSequence(entry);
       if (sequence) return `Start with ${sequence}`.slice(0, 112);
-      if (entry.usageSnippet?.trim()) return entry.usageSnippet.trim().slice(0, 112);
+      if (entry.usageSnippet?.trim())
+        return entry.usageSnippet.trim().slice(0, 112);
       break;
     }
     case "skills":
@@ -134,17 +141,31 @@ export function getCopyText(entry) {
     appendLabeledBlock(lines, "Trigger", entry.trigger);
     appendLabeledBlock(lines, "Install", entry.installCommand);
     appendLabeledBlock(lines, "Claude config", entry.configSnippet);
-    appendLabeledBlock(lines, "Hook script", entry.scriptBody || entry.copySnippet);
+    appendLabeledBlock(
+      lines,
+      "Hook script",
+      entry.scriptBody || entry.copySnippet,
+    );
     if (body) appendLabeledBlock(lines, "Reference", body);
     return lines.join("\n");
   }
 
   if (entry.category === "mcp") {
     const lines = [];
-    appendLabeledBlock(lines, "Install", entry.installCommand || entry.commandSyntax);
+    appendLabeledBlock(
+      lines,
+      "Install",
+      entry.installCommand || entry.commandSyntax,
+    );
     appendLabeledBlock(lines, "Config", entry.configSnippet);
-    appendLabeledBlock(lines, "Usage", entry.copySnippet || entry.usageSnippet || body);
-    return lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title;
+    appendLabeledBlock(
+      lines,
+      "Usage",
+      entry.copySnippet || entry.usageSnippet || body,
+    );
+    return (
+      lines.join("\n") || entry.documentationUrl || entry.repoUrl || entry.title
+    );
   }
 
   if (entry.category === "skills" || entry.category === "statuslines") {
@@ -152,12 +173,18 @@ export function getCopyText(entry) {
     appendLabeledBlock(lines, "Install", entry.installCommand);
     appendLabeledBlock(lines, "Claude config", entry.configSnippet);
     appendLabeledBlock(lines, "Usage", entry.usageSnippet);
-    appendLabeledBlock(lines, "Asset", entry.scriptBody || entry.copySnippet || body);
+    appendLabeledBlock(
+      lines,
+      "Asset",
+      entry.scriptBody || entry.copySnippet || body,
+    );
     return lines.join("\n");
   }
 
   if (entry.category === "commands") {
-    return entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body;
+    return (
+      entry.commandSyntax || entry.copySnippet || entry.usageSnippet || body
+    );
   }
 
   if (entry.category === "collections") {
@@ -167,7 +194,7 @@ export function getCopyText(entry) {
       appendLabeledBlock(
         lines,
         "Included items",
-        entry.items.map((item) => `${item.category}/${item.slug}`).join("\n")
+        entry.items.map((item) => `${item.category}/${item.slug}`).join("\n"),
       );
     }
     if (body) appendLabeledBlock(lines, "Reference", body);
@@ -193,8 +220,8 @@ export function getDistributionBadges(entry) {
   const badges = [
     {
       label: "Raycast",
-      title: "Available in the HeyClaude Raycast feed"
-    }
+      title: "Available in the HeyClaude Raycast feed",
+    },
   ];
 
   if (entry.downloadUrl) {
@@ -203,28 +230,28 @@ export function getDistributionBadges(entry) {
       title:
         entry.downloadTrust === "first-party"
           ? "First-party downloadable package"
-          : "External downloadable package"
+          : "External downloadable package",
     });
   }
 
   if (!entry.downloadUrl && !entry.installCommand && !entry.configSnippet) {
     badges.push({
       label: "copy-only",
-      title: "Use this entry by copying the asset text"
+      title: "Use this entry by copying the asset text",
     });
   }
 
   if (entry.documentationUrl) {
     badges.push({
       label: "docs",
-      title: "Documentation link available"
+      title: "Documentation link available",
     });
   }
 
   if (entry.repoUrl || entry.githubUrl) {
     badges.push({
       label: "source",
-      title: "Source or repository link available"
+      title: "Source or repository link available",
     });
   }
 

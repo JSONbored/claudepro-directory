@@ -2,15 +2,15 @@
 title: Box MCP Server for Claude
 slug: box-mcp-server
 category: mcp
-description: 'Access enterprise content, analyze unstructured data, and automate workflows'
-cardDescription: 'Access enterprise content, analyze unstructured data, and automate workflows'
+description: "Access enterprise content, analyze unstructured data, and automate workflows"
+cardDescription: "Access enterprise content, analyze unstructured data, and automate workflows"
 seoTitle: Box MCP Server for Claude
 seoDescription: >-
   Access enterprise content, analyze unstructured data, and automate workflows
   Discover tools for AI development.
 author: Box
-dateAdded: '2025-09-18'
-documentationUrl: 'https://box.dev/guides/box-mcp/remote/'
+dateAdded: "2025-09-18"
+documentationUrl: "https://box.dev/guides/box-mcp/remote/"
 downloadUrl: /downloads/mcp/box-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -41,13 +41,13 @@ prerequisites:
     OAuth 2.0 authentication configured (for production apps) or Developer Token
     (for testing/development)
   - HTTP transport support in MCP client (required for Box MCP server)
-  - 'Internet connection for accessing Box API (https://api.box.com endpoints)'
+  - "Internet connection for accessing Box API (https://api.box.com endpoints)"
   - Claude Desktop 0.7.0+ or Claude Code with MCP support
   - >-
     Rate limit awareness: 1,000 API calls per minute per user (16.67
     calls/second), 12 searches per second enterprise-wide, 4 uploads per second
     per user
-  - 'Understanding of Box folder/file structure, permissions, and metadata'
+  - "Understanding of Box folder/file structure, permissions, and metadata"
   - >-
     Appropriate Box folder permissions for target operations (read, write,
     delete as needed)
@@ -78,6 +78,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Connect Claude to Box for enterprise content management and document automation.
@@ -142,28 +143,43 @@ Connect Claude to Box for enterprise content management and document automation.
 ```
 
 ## Examples
+
 ### Find all contracts from 2024
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find all contracts from 2024"
 ```
+
 ### Summarize the quarterly reports in the finance fol...
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Summarize the quarterly reports in the finance folder"
 ```
+
 ### Extract key data from invoice documents
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Extract key data from invoice documents"
 ```
+
 ### Organize project files by client and date
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Organize project files by client and date"
 ```
+
 ### Upload File with Metadata
+
 Upload a file to Box with custom metadata and modification timestamp
+
 ```typescript
 // Upload file to Box with custom metadata
 const file = await box.files.upload({
@@ -171,7 +187,7 @@ const file = await box.files.upload({
   name: "document.pdf",
   file: fileBuffer,
   content_modified_at: new Date().toISOString(),
-  metadata: { "custom-field": "value" }
+  metadata: { "custom-field": "value" },
 });
 ```
 
@@ -188,27 +204,35 @@ const file = await box.files.upload({
 - Box webhook configurations and payloads may contain sensitive file and folder metadata - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### Getting HTTP 429 error with rate limit exceeded message
 
 Reduce request frequency to stay under 1,000 API calls per minute per user (16.67 calls/second). Implement exponential backoff using the retry-after header value returned in the 429 response.
+
 ### Search operations failing across enterprise
 
 Enterprise has 12 searches per second limit total. Distribute search requests across all apps, add delays between searches, or contact Box support to increase quota for your business plan.
+
 ### Upload operations timing out or failing
 
 Verify you're staying under 4 uploads per second per user limit. Queue upload requests with proper throttling, check network connectivity, and ensure files meet size requirements for your account tier.
+
 ### Authentication fails with invalid token errors
 
 Regenerate your Box API access token from Box Developer Console. Verify token hasn't expired and includes correct scopes (read, write, delete) required for your operations.
+
 ### Cannot access specific folders or files
 
 Verify your Box account has appropriate folder permissions set. Check enterprise admin settings for content access restrictions and ensure your API token has necessary permissions for target directories.
+
 ### Box MCP server authentication errors with OAuth tokens
 
 Verify OAuth token is valid and not expired. Check token scopes match required permissions. Ensure token format is correct (Bearer token in Authorization header). Implement automatic token refresh logic for long-running operations.
+
 ### Box file upload or download failures
 
 Check file size limits (250MB for standard accounts, 5GB for enterprise). Verify folder permissions allow upload/download. Ensure network connectivity is stable. For large files, use chunked upload API with resumable upload support.
+
 ### Box MCP server rate limiting or throttling errors
 
 Implement exponential backoff retry logic with jitter. Use Box API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed file metadata. Request rate limit increases from Box support if needed.

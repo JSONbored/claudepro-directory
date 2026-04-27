@@ -30,11 +30,13 @@ Claude can write, execute, and maintain end-to-end tests using Playwright, the m
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Node.js 18+ installed
 - Basic understanding of your application's user flows
 
 **What Claude handles automatically:**
+
 - Installing Playwright and browser binaries
 - Generating test files with proper TypeScript types
 - Setting up test configurations and reporters
@@ -48,6 +50,7 @@ Claude can write, execute, and maintain end-to-end tests using Playwright, the m
 **Prompt:** "Create a Playwright test that logs into my application at localhost:3000, navigates to /dashboard, and verifies the welcome message appears."
 
 Claude will:
+
 1. Install Playwright if not present (`npm init playwright@latest`)
 2. Generate a test file with proper page object patterns
 3. Use accessibility-first selectors (role, label, text)
@@ -59,6 +62,7 @@ Claude will:
 **Prompt:** "I have a checkout flow: user adds product to cart, enters shipping info, selects payment method, and completes order. Write comprehensive Playwright tests covering happy path and error cases."
 
 Claude will:
+
 1. Break down the user story into discrete test scenarios
 2. Generate test files organized by feature
 3. Include data-driven tests with fixtures
@@ -71,6 +75,7 @@ Claude will:
 **Prompt:** "Set up Playwright to test my application across Chrome, Firefox, and Safari with parallel execution. Include mobile viewport testing for iOS and Android."
 
 Claude will:
+
 1. Configure `playwright.config.ts` with multiple projects
 2. Define desktop and mobile browser contexts
 3. Set up parallel worker configuration
@@ -83,6 +88,7 @@ Claude will:
 **Prompt:** "Write Playwright tests that verify my REST API endpoints before running UI tests. Mock the API responses for offline testing."
 
 Claude will:
+
 1. Use Playwright's `request` context for API calls
 2. Create API test fixtures for reusable setup
 3. Implement request/response interception
@@ -105,6 +111,7 @@ Claude will:
 
 ## Common Workflows
 ### Complete E2E Test Suite Setup
+
 ```
 "Set up a production-ready Playwright test suite for my Next.js app with:
 1. Authentication flow tests with session storage
@@ -116,6 +123,7 @@ Claude will:
 ```
 
 ### AI-Assisted Test Maintenance
+
 ```
 "My application's login form changed from using email to username.
 Update all Playwright tests that interact with the login form,
@@ -123,6 +131,7 @@ using accessibility selectors instead of data-testid attributes."
 ```
 
 ### Performance Testing
+
 ```
 "Write Playwright tests that measure:
 1. First Contentful Paint (FCP)
@@ -133,6 +142,7 @@ Fail tests if any metric exceeds Web Vitals thresholds."
 ```
 
 ### Mobile-First Testing
+
 ```
 "Create Playwright tests for mobile web experience:
 1. Test on iPhone 13 and Pixel 5 viewports

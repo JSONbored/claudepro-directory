@@ -62,7 +62,9 @@ Real-time burn rate monitor showing cost per minute, tokens per minute, and proj
 
 ## Examples
 ### Enhanced Burn Rate Monitor with Budget Alerts
+
 Extended version with daily budget threshold warnings
+
 ```bash
 #!/usr/bin/env bash
 
@@ -127,8 +129,11 @@ if (( $(echo "$daily_projection > $DAILY_BUDGET" | bc -l 2>/dev/null || echo "0"
   echo "⚠ BUDGET ALERT: Projected daily spend ($${daily_projection}) exceeds budget ($${DAILY_BUDGET})" >&2
 fi
 ```
+
 ### Burn Rate Monitor with Custom Thresholds
+
 Configurable burn rate thresholds for different budget scenarios
+
 ```bash
 #!/usr/bin/env bash
 
@@ -183,8 +188,11 @@ RESET="\033[0m"
 
 echo -e "${BURN_COLOR}🔥 Burn: $${cost_per_minute}/min${RESET} | 📊 ${tokens_per_minute} tok/min | 📅 Daily: $${daily_projection}"
 ```
+
 ### Burn Rate Monitor Installation Example
+
 Complete setup script with bc installation check
+
 ```bash
 #!/bin/bash
 # Installation script for Burn Rate Monitor
@@ -380,24 +388,31 @@ echo "Note: bc is required for floating point calculations. Script refreshes eve
 ### Burn rate showing 0 or incorrect values despite active session
 
 Verify cost.total_cost_usd and cost.total_duration_ms fields exist in JSON: echo '$input' | jq .cost. Ensure bc is installed: which bc. Check division by zero protection is working for very short sessions. Test calculations: echo 'scale=4; 0.05 / 1.5' | bc (should return 0.0333). Verify duration_minutes calculation: duration_minutes=$((total_duration_ms / 60000)).
+
 ### bc command not found error when running script
 
 Install bc calculator: brew install bc (macOS), apt install bc (Linux), or download from https://www.gnu.org/software/bc/. Alternative: use awk for calculations if bc unavailable: awk -v cost=$total_cost -v dur=$duration_minutes 'BEGIN {print cost/dur}'. Verify bc installation: bc --version. Check PATH includes bc location.
+
 ### Daily projection seems unrealistically high
 
-Daily projection assumes CONTINUOUS usage at current burn rate for 24 hours. This is intentional for worst-case budgeting. Actual daily cost will be lower if you don't use Claude Code 24/7. Adjust multiplier from 1440 to expected active minutes. Formula: daily_projection = cost_per_minute * active_minutes_per_day. For 8-hour workday: cost_per_minute * 480.
+Daily projection assumes CONTINUOUS usage at current burn rate for 24 hours. This is intentional for worst-case budgeting. Actual daily cost will be lower if you don't use Claude Code 24/7. Adjust multiplier from 1440 to expected active minutes. Formula: daily*projection = cost_per_minute * active*minutes_per_day. For 8-hour workday: cost_per_minute * 480.
+
 ### Token per minute calculation inaccurate
 
-Script estimates 10 tokens per line (conservative average). Actual token count varies by language/verbosity. For precise tracking, integrate with Claude API token counting if exposed in future JSON fields. Current estimate is sufficient for burn rate trend monitoring. Adjust multiplier: total_tokens=$(( (lines_added + lines_removed) * 15 )) for more verbose code (15 tokens/line).
+Script estimates 10 tokens per line (conservative average). Actual token count varies by language/verbosity. For precise tracking, integrate with Claude API token counting if exposed in future JSON fields. Current estimate is sufficient for burn rate trend monitoring. Adjust multiplier: total_tokens=$(( (lines_added + lines_removed) \* 15 )) for more verbose code (15 tokens/line).
+
 ### Color coding not displaying or showing escape codes as text
 
 Ensure terminal supports ANSI colors. Test: echo -e '\033[38;5;196mRED\033[0m' (should show red text). Verify statusline script outputs to stdout not stderr. Check Claude Code settings.json has correct command path. Verify echo -e flag is used for escape sequence interpretation. Check terminal emulator color support settings.
+
 ### Floating point calculations showing as integers or zero
 
 This indicates bc is not working or fallback to integer math is active. Check bc installation: bc --version. Verify bc command in script: echo 'scale=4; 0.05 / 1.5' | bc (should return 0.0333). If bc fails, script uses integer division which truncates decimals. Install bc for decimal precision. Check bc syntax: bc -l enables math library for comparisons.
+
 ### Burn rate color always showing green even with high costs
 
 Verify bc comparison is working: echo '0.15 > 0.10' | bc -l (should return 1). Check cost_per_minute calculation is correct: echo 'scale=4; $total_cost / $duration_minutes' | bc. Ensure thresholds are correct: HIGH_THRESHOLD=0.10, MEDIUM_THRESHOLD=0.05. Test color logic: if (( $(echo "$cost_per_minute > 0.10" | bc -l) )); then echo "RED"; fi.
+
 ### Tokens per minute showing 0 or extremely high numbers
 
-Check lines_added and lines_removed are being extracted correctly: echo '$input' | jq '.cost.total_lines_added, .cost.total_lines_removed'. Verify token estimation: total_tokens=$(( (lines_added + lines_removed) * 10 )). Test calculation: lines=100; tokens=$((lines * 10)); echo $tokens (should be 1000). Check duration_minutes > 0 before division. Verify bc division: echo 'scale=0; 1000 / 5' | bc (should return 200).
+Check lines*added and lines_removed are being extracted correctly: echo '$input' | jq '.cost.total_lines_added, .cost.total_lines_removed'. Verify token estimation: total_tokens=$(( (lines_added + lines_removed) * 10 )). Test calculation: lines=100; tokens=$((lines \_ 10)); echo $tokens (should be 1000). Check duration_minutes > 0 before division. Verify bc division: echo 'scale=0; 1000 / 5' | bc (should return 200).

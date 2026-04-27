@@ -32,16 +32,16 @@ public class EnterpriseAIApplication
 {
     private readonly Kernel _kernel;
     private readonly SecretClient _secretClient;
-    
+
     public EnterpriseAIApplication()
     {
         // Initialize Azure Key Vault for secure credential management
         var keyVaultUrl = new Uri("https://your-keyvault.vault.azure.net/");
         _secretClient = new SecretClient(keyVaultUrl, new DefaultAzureCredential());
-        
+
         // Build Semantic Kernel with Azure OpenAI
         var builder = Kernel.CreateBuilder();
-        
+
         // Add Azure OpenAI Chat Completion
         var apiKey = _secretClient.GetSecret("AzureOpenAI-ApiKey").Value.Value;
         builder.AddAzureOpenAIChatCompletion(
@@ -49,54 +49,54 @@ public class EnterpriseAIApplication
             endpoint: "https://your-resource.openai.azure.com/",
             apiKey: apiKey
         );
-        
+
         // Add plugins
         builder.Plugins.AddFromType<EmailPlugin>("EmailPlugin");
         builder.Plugins.AddFromType<DatabasePlugin>("DatabasePlugin");
         builder.Plugins.AddFromType<DocumentPlugin>("DocumentPlugin");
-        
+
         // Add logging and telemetry
         builder.Services.AddLogging(config =>
         {
             config.AddConsole();
             config.AddApplicationInsights();
         });
-        
+
         _kernel = builder.Build();
     }
-    
+
     public async Task<string> ExecuteWorkflowAsync(string userRequest)
     {
         var chatService = _kernel.GetRequiredService<IChatCompletionService>();
         var chatHistory = new ChatHistory();
-        
+
         // System prompt with enterprise context
         chatHistory.AddSystemMessage(@"
             You are an enterprise AI assistant with access to:
             - Email system for notifications
             - Database for data queries
             - Document management for file operations
-            
+
             Follow company policies:
             - Never expose sensitive data
             - Log all actions for audit
             - Require approval for critical operations
         ");
-        
+
         chatHistory.AddUserMessage(userRequest);
-        
+
         // Execute with automatic function calling
         var settings = new OpenAIPromptExecutionSettings
         {
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
         };
-        
+
         var result = await chatService.GetChatMessageContentAsync(
             chatHistory,
             executionSettings: settings,
             kernel: _kernel
         );
-        
+
         return result.Content;
     }
 }
@@ -106,13 +106,13 @@ public class EmailPlugin
 {
     private readonly IEmailService _emailService;
     private readonly IAuditLogger _auditLogger;
-    
+
     public EmailPlugin(IEmailService emailService, IAuditLogger auditLogger)
     {
         _emailService = emailService;
         _auditLogger = auditLogger;
     }
-    
+
     [KernelFunction("send_email")]
     [Description("Send an email to specified recipient")]
     public async Task<string> SendEmailAsync(
@@ -127,22 +127,22 @@ public class EmailPlugin
                 "Attempted to send email to unauthorized domain",
                 new { To = to, Subject = subject }
             );
-            
+
             return "Error: Recipient domain not authorized";
         }
-        
+
         // Log for audit trail
         await _auditLogger.LogActionAsync(
             "EmailSent",
             new { To = to, Subject = subject, Timestamp = DateTime.UtcNow }
         );
-        
+
         // Send email
         await _emailService.SendAsync(to, subject, body);
-        
+
         return $"Email sent successfully to {to}";
     }
-    
+
     private bool IsAllowedDomain(string email)
     {
         var allowedDomains = new[] { "company.com", "partner.com" };
@@ -156,7 +156,7 @@ public class DatabasePlugin
 {
     private readonly IDbConnection _connection;
     private readonly IUserContext _userContext;
-    
+
     [KernelFunction("query_customers")]
     [Description("Query customer data with proper access controls")]
     public async Task<string> QueryCustomersAsync(
@@ -165,12 +165,12 @@ public class DatabasePlugin
         // Apply row-level security based on user context
         var userId = _userContext.GetCurrentUserId();
         var userPermissions = await GetUserPermissions(userId);
-        
+
         if (!userPermissions.CanAccessCustomerData)
         {
             return "Error: Insufficient permissions to access customer data";
         }
-        
+
         // Build secure query with parameterization
         var query = $@"
             SELECT CustomerID, Name, Email, Region
@@ -178,12 +178,12 @@ public class DatabasePlugin
             WHERE TenantID = @TenantId
             AND {whereClause}
         ";
-        
-        var results = await _connection.QueryAsync(query, new 
-        { 
-            TenantId = userPermissions.TenantId 
+
+        var results = await _connection.QueryAsync(query, new
+        {
+            TenantId = userPermissions.TenantId
         });
-        
+
         return JsonSerializer.Serialize(results);
     }
 }
@@ -200,16 +200,16 @@ public class EnterpriseAIApplication
 {
     private readonly Kernel _kernel;
     private readonly SecretClient _secretClient;
-    
+
     public EnterpriseAIApplication()
     {
         // Initialize Azure Key Vault for secure credential management
         var keyVaultUrl = new Uri("https://your-keyvault.vault.azure.net/");
         _secretClient = new SecretClient(keyVaultUrl, new DefaultAzureCredential());
-        
+
         // Build Semantic Kernel with Azure OpenAI
         var builder = Kernel.CreateBuilder();
-        
+
         // Add Azure OpenAI Chat Completion
         var apiKey = _secretClient.GetSecret("AzureOpenAI-ApiKey").Value.Value;
         builder.AddAzureOpenAIChatCompletion(
@@ -217,54 +217,54 @@ public class EnterpriseAIApplication
             endpoint: "https://your-resource.openai.azure.com/",
             apiKey: apiKey
         );
-        
+
         // Add plugins
         builder.Plugins.AddFromType<EmailPlugin>("EmailPlugin");
         builder.Plugins.AddFromType<DatabasePlugin>("DatabasePlugin");
         builder.Plugins.AddFromType<DocumentPlugin>("DocumentPlugin");
-        
+
         // Add logging and telemetry
         builder.Services.AddLogging(config =>
         {
             config.AddConsole();
             config.AddApplicationInsights();
         });
-        
+
         _kernel = builder.Build();
     }
-    
+
     public async Task<string> ExecuteWorkflowAsync(string userRequest)
     {
         var chatService = _kernel.GetRequiredService<IChatCompletionService>();
         var chatHistory = new ChatHistory();
-        
+
         // System prompt with enterprise context
         chatHistory.AddSystemMessage(@"
             You are an enterprise AI assistant with access to:
             - Email system for notifications
             - Database for data queries
             - Document management for file operations
-            
+
             Follow company policies:
             - Never expose sensitive data
             - Log all actions for audit
             - Require approval for critical operations
         ");
-        
+
         chatHistory.AddUserMessage(userRequest);
-        
+
         // Execute with automatic function calling
         var settings = new OpenAIPromptExecutionSettings
         {
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
         };
-        
+
         var result = await chatService.GetChatMessageContentAsync(
             chatHistory,
             executionSettings: settings,
             kernel: _kernel
         );
-        
+
         return result.Content;
     }
 }
@@ -274,13 +274,13 @@ public class EmailPlugin
 {
     private readonly IEmailService _emailService;
     private readonly IAuditLogger _auditLogger;
-    
+
     public EmailPlugin(IEmailService emailService, IAuditLogger auditLogger)
     {
         _emailService = emailService;
         _auditLogger = auditLogger;
     }
-    
+
     [KernelFunction("send_email")]
     [Description("Send an email to specified recipient")]
     public async Task<string> SendEmailAsync(
@@ -295,22 +295,22 @@ public class EmailPlugin
                 "Attempted to send email to unauthorized domain",
                 new { To = to, Subject = subject }
             );
-            
+
             return "Error: Recipient domain not authorized";
         }
-        
+
         // Log for audit trail
         await _auditLogger.LogActionAsync(
             "EmailSent",
             new { To = to, Subject = subject, Timestamp = DateTime.UtcNow }
         );
-        
+
         // Send email
         await _emailService.SendAsync(to, subject, body);
-        
+
         return $"Email sent successfully to {to}";
     }
-    
+
     private bool IsAllowedDomain(string email)
     {
         var allowedDomains = new[] { "company.com", "partner.com" };
@@ -324,7 +324,7 @@ public class DatabasePlugin
 {
     private readonly IDbConnection _connection;
     private readonly IUserContext _userContext;
-    
+
     [KernelFunction("query_customers")]
     [Description("Query customer data with proper access controls")]
     public async Task<string> QueryCustomersAsync(
@@ -333,12 +333,12 @@ public class DatabasePlugin
         // Apply row-level security based on user context
         var userId = _userContext.GetCurrentUserId();
         var userPermissions = await GetUserPermissions(userId);
-        
+
         if (!userPermissions.CanAccessCustomerData)
         {
             return "Error: Insufficient permissions to access customer data";
         }
-        
+
         // Build secure query with parameterization
         var query = $@"
             SELECT CustomerID, Name, Email, Region
@@ -346,12 +346,12 @@ public class DatabasePlugin
             WHERE TenantID = @TenantId
             AND {whereClause}
         ";
-        
-        var results = await _connection.QueryAsync(query, new 
-        { 
-            TenantId = userPermissions.TenantId 
+
+        var results = await _connection.QueryAsync(query, new
+        {
+            TenantId = userPermissions.TenantId
         });
-        
+
         return JsonSerializer.Serialize(results);
     }
 }
@@ -377,16 +377,16 @@ class EnterpriseSemanticKernel:
         self._setup_azure_services()
         self._register_plugins()
         self._configure_logging()
-    
+
     def _setup_azure_services(self):
         """Configure Azure AI services with managed identity"""
         # Retrieve secrets from Azure Key Vault
         credential = DefaultAzureCredential()
         key_vault_url = "https://your-keyvault.vault.azure.net/"
         secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
-        
+
         api_key = secret_client.get_secret("AzureOpenAI-ApiKey").value
-        
+
         # Add Azure OpenAI service
         self.kernel.add_service(
             AzureChatCompletion(
@@ -396,17 +396,17 @@ class EnterpriseSemanticKernel:
                 api_key=api_key
             )
         )
-        
+
         # Add Azure Cognitive Search for memory
         search_endpoint = secret_client.get_secret("CognitiveSearch-Endpoint").value
         search_key = secret_client.get_secret("CognitiveSearch-Key").value
-        
+
         memory_store = AzureCognitiveSearchMemoryStore(
             search_endpoint=search_endpoint,
             admin_key=search_key
         )
         self.kernel.register_memory_store(memory_store)
-    
+
     def _register_plugins(self):
         """Register enterprise plugins with governance"""
         self.kernel.add_plugin(
@@ -417,37 +417,37 @@ class EnterpriseSemanticKernel:
             CompliancePlugin(),
             plugin_name="CompliancePlugin"
         )
-    
+
     def _configure_logging(self):
         """Configure Application Insights logging"""
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
-        
+
         # Add Azure Application Insights handler
         # Implementation here
-    
+
     async def execute_with_planning(self, goal: str) -> str:
         """Execute goal with automatic planning"""
         from semantic_kernel.planners import SequentialPlanner
-        
+
         planner = SequentialPlanner(self.kernel)
-        
+
         # Create plan
         plan = await planner.create_plan(goal)
-        
+
         # Log plan for audit
         logging.info(f"Executing plan: {plan}")
-        
+
         # Execute plan
         result = await plan.invoke(self.kernel)
-        
+
         return str(result)
 
 class EnterpriseDataPlugin:
     """Enterprise data access plugin with security controls"""
-    
+
     @kernel_function(
         name="get_financial_data",
         description="Retrieve financial data with proper authorization"
@@ -457,25 +457,25 @@ class EnterpriseDataPlugin:
         # Check user permissions
         if not await self._has_financial_access(user_id):
             return "Error: User not authorized for financial data"
-        
+
         # Apply data masking for sensitive fields
         results = await self._query_database(query)
         masked_results = self._mask_sensitive_data(results)
-        
+
         # Audit log
         await self._log_access(
             user_id=user_id,
             action="financial_data_access",
             query=query
         )
-        
+
         return masked_results
-    
+
     async def _has_financial_access(self, user_id: str) -> bool:
         """Check if user has financial data access"""
         # Implementation here
         return True
-    
+
     def _mask_sensitive_data(self, data: dict) -> str:
         """Mask sensitive fields like SSN, account numbers"""
         # Implementation here
@@ -483,29 +483,29 @@ class EnterpriseDataPlugin:
 
 class CompliancePlugin:
     """Compliance and governance plugin"""
-    
+
     @kernel_function(
         name="check_compliance",
         description="Verify action complies with company policies"
     )
     async def check_compliance(
-        self, 
-        action: str, 
+        self,
+        action: str,
         resource_type: str
     ) -> str:
         """Check if action complies with policies"""
         policies = await self._load_policies(resource_type)
-        
+
         violations = []
         for policy in policies:
             if not policy.allows(action):
                 violations.append(policy.name)
-        
+
         if violations:
             return f"Compliance violation: {', '.join(violations)}"
-        
+
         return "Action approved"
-    
+
     @kernel_function(
         name="generate_audit_report",
         description="Generate compliance audit report"
@@ -518,14 +518,14 @@ class CompliancePlugin:
         """Generate audit report for date range"""
         # Query audit logs from Azure Monitor
         logs = await self._fetch_audit_logs(start_date, end_date)
-        
+
         report = {
             'period': f'{start_date} to {end_date}',
             'total_actions': len(logs),
             'violations': [log for log in logs if log.get('violation')],
             'high_risk_actions': [log for log in logs if log.get('risk_level') == 'high']
         }
-        
+
         return str(report)
 ```
 ```python
@@ -545,16 +545,16 @@ class EnterpriseSemanticKernel:
         self._setup_azure_services()
         self._register_plugins()
         self._configure_logging()
-    
+
     def _setup_azure_services(self):
         """Configure Azure AI services with managed identity"""
         # Retrieve secrets from Azure Key Vault
         credential = DefaultAzureCredential()
         key_vault_url = "https://your-keyvault.vault.azure.net/"
         secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
-        
+
         api_key = secret_client.get_secret("AzureOpenAI-ApiKey").value
-        
+
         # Add Azure OpenAI service
         self.kernel.add_service(
             AzureChatCompletion(
@@ -564,17 +564,17 @@ class EnterpriseSemanticKernel:
                 api_key=api_key
             )
         )
-        
+
         # Add Azure Cognitive Search for memory
         search_endpoint = secret_client.get_secret("CognitiveSearch-Endpoint").value
         search_key = secret_client.get_secret("CognitiveSearch-Key").value
-        
+
         memory_store = AzureCognitiveSearchMemoryStore(
             search_endpoint=search_endpoint,
             admin_key=search_key
         )
         self.kernel.register_memory_store(memory_store)
-    
+
     def _register_plugins(self):
         """Register enterprise plugins with governance"""
         self.kernel.add_plugin(
@@ -585,37 +585,37 @@ class EnterpriseSemanticKernel:
             CompliancePlugin(),
             plugin_name="CompliancePlugin"
         )
-    
+
     def _configure_logging(self):
         """Configure Application Insights logging"""
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         )
-        
+
         # Add Azure Application Insights handler
         # Implementation here
-    
+
     async def execute_with_planning(self, goal: str) -> str:
         """Execute goal with automatic planning"""
         from semantic_kernel.planners import SequentialPlanner
-        
+
         planner = SequentialPlanner(self.kernel)
-        
+
         # Create plan
         plan = await planner.create_plan(goal)
-        
+
         # Log plan for audit
         logging.info(f"Executing plan: {plan}")
-        
+
         # Execute plan
         result = await plan.invoke(self.kernel)
-        
+
         return str(result)
 
 class EnterpriseDataPlugin:
     """Enterprise data access plugin with security controls"""
-    
+
     @kernel_function(
         name="get_financial_data",
         description="Retrieve financial data with proper authorization"
@@ -625,25 +625,25 @@ class EnterpriseDataPlugin:
         # Check user permissions
         if not await self._has_financial_access(user_id):
             return "Error: User not authorized for financial data"
-        
+
         # Apply data masking for sensitive fields
         results = await self._query_database(query)
         masked_results = self._mask_sensitive_data(results)
-        
+
         # Audit log
         await self._log_access(
             user_id=user_id,
             action="financial_data_access",
             query=query
         )
-        
+
         return masked_results
-    
+
     async def _has_financial_access(self, user_id: str) -> bool:
         """Check if user has financial data access"""
         # Implementation here
         return True
-    
+
     def _mask_sensitive_data(self, data: dict) -> str:
         """Mask sensitive fields like SSN, account numbers"""
         # Implementation here
@@ -651,29 +651,29 @@ class EnterpriseDataPlugin:
 
 class CompliancePlugin:
     """Compliance and governance plugin"""
-    
+
     @kernel_function(
         name="check_compliance",
         description="Verify action complies with company policies"
     )
     async def check_compliance(
-        self, 
-        action: str, 
+        self,
+        action: str,
         resource_type: str
     ) -> str:
         """Check if action complies with policies"""
         policies = await self._load_policies(resource_type)
-        
+
         violations = []
         for policy in policies:
             if not policy.allows(action):
                 violations.append(policy.name)
-        
+
         if violations:
             return f"Compliance violation: {', '.join(violations)}"
-        
+
         return "Action approved"
-    
+
     @kernel_function(
         name="generate_audit_report",
         description="Generate compliance audit report"
@@ -686,14 +686,14 @@ class CompliancePlugin:
         """Generate audit report for date range"""
         # Query audit logs from Azure Monitor
         logs = await self._fetch_audit_logs(start_date, end_date)
-        
+
         report = {
             'period': f'{start_date} to {end_date}',
             'total_actions': len(logs),
             'violations': [log for log in logs if log.get('violation')],
             'high_risk_actions': [log for log in logs if log.get('risk_level') == 'high']
         }
-        
+
         return str(report)
 ```
 
@@ -710,7 +710,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SemanticKernelConfig {
-    
+
     @Bean
     public Kernel kernel(
         AzureKeyVaultService keyVaultService,
@@ -718,23 +718,23 @@ public class SemanticKernelConfig {
     ) {
         // Retrieve API key from Key Vault
         String apiKey = keyVaultService.getSecret("AzureOpenAI-ApiKey");
-        
+
         // Build kernel
         var chatCompletion = OpenAIChatCompletion.builder()
             .withModelId("gpt-4")
             .withApiKey(apiKey)
             .withEndpoint("https://your-resource.openai.azure.com/")
             .build();
-        
+
         var kernel = Kernel.builder()
             .withAIService(OpenAIChatCompletion.class, chatCompletion)
             .build();
-        
+
         // Register plugins
         for (KernelPlugin plugin : plugins) {
             kernel.importPlugin(plugin, plugin.getName());
         }
-        
+
         return kernel;
     }
 }
@@ -746,10 +746,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EnterpriseDataPlugin implements KernelPlugin {
-    
+
     private final DataAccessService dataService;
     private final AuditLogger auditLogger;
-    
+
     @DefineKernelFunction(
         name = "queryCustomerData",
         description = "Query customer data with authorization checks"
@@ -763,17 +763,17 @@ public class EnterpriseDataPlugin implements KernelPlugin {
             auditLogger.logUnauthorizedAccess(userId, "queryCustomerData");
             return "Error: Insufficient permissions";
         }
-        
+
         // Execute query with tenant isolation
         String tenantId = userService.getTenantId(userId);
         List<Customer> results = dataService.queryWithTenantFilter(query, tenantId);
-        
+
         // Audit log
         auditLogger.logDataAccess(userId, "queryCustomerData", query);
-        
+
         return objectMapper.writeValueAsString(results);
     }
-    
+
     @Override
     public String getName() {
         return "EnterpriseDataPlugin";
@@ -790,7 +790,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SemanticKernelConfig {
-    
+
     @Bean
     public Kernel kernel(
         AzureKeyVaultService keyVaultService,
@@ -798,23 +798,23 @@ public class SemanticKernelConfig {
     ) {
         // Retrieve API key from Key Vault
         String apiKey = keyVaultService.getSecret("AzureOpenAI-ApiKey");
-        
+
         // Build kernel
         var chatCompletion = OpenAIChatCompletion.builder()
             .withModelId("gpt-4")
             .withApiKey(apiKey)
             .withEndpoint("https://your-resource.openai.azure.com/")
             .build();
-        
+
         var kernel = Kernel.builder()
             .withAIService(OpenAIChatCompletion.class, chatCompletion)
             .build();
-        
+
         // Register plugins
         for (KernelPlugin plugin : plugins) {
             kernel.importPlugin(plugin, plugin.getName());
         }
-        
+
         return kernel;
     }
 }
@@ -826,10 +826,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class EnterpriseDataPlugin implements KernelPlugin {
-    
+
     private final DataAccessService dataService;
     private final AuditLogger auditLogger;
-    
+
     @DefineKernelFunction(
         name = "queryCustomerData",
         description = "Query customer data with authorization checks"
@@ -843,17 +843,17 @@ public class EnterpriseDataPlugin implements KernelPlugin {
             auditLogger.logUnauthorizedAccess(userId, "queryCustomerData");
             return "Error: Insufficient permissions";
         }
-        
+
         // Execute query with tenant isolation
         String tenantId = userService.getTenantId(userId);
         List<Customer> results = dataService.queryWithTenantFilter(query, tenantId);
-        
+
         // Audit log
         auditLogger.logDataAccess(userId, "queryCustomerData", query);
-        
+
         return objectMapper.writeValueAsString(results);
     }
-    
+
     @Override
     public String getName() {
         return "EnterpriseDataPlugin";
@@ -883,40 +883,40 @@ spec:
     spec:
       serviceAccountName: sk-agent-sa
       containers:
-      - name: agent
-        image: yourregistry.azurecr.io/sk-agent:latest
-        env:
-        - name: AZURE_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: azure-identity
-              key: client-id
-        - name: AZURE_TENANT_ID
-          valueFrom:
-            secretKeyRef:
-              name: azure-identity
-              key: tenant-id
-        - name: KEY_VAULT_URL
-          value: "https://your-keyvault.vault.azure.net/"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: agent
+          image: yourregistry.azurecr.io/sk-agent:latest
+          env:
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: azure-identity
+                  key: client-id
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: azure-identity
+                  key: tenant-id
+            - name: KEY_VAULT_URL
+              value: "https://your-keyvault.vault.azure.net/"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -926,9 +926,9 @@ spec:
   selector:
     app: sk-agent
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
   type: LoadBalancer
 ```
 
@@ -952,40 +952,40 @@ spec:
     spec:
       serviceAccountName: sk-agent-sa
       containers:
-      - name: agent
-        image: yourregistry.azurecr.io/sk-agent:latest
-        env:
-        - name: AZURE_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: azure-identity
-              key: client-id
-        - name: AZURE_TENANT_ID
-          valueFrom:
-            secretKeyRef:
-              name: azure-identity
-              key: tenant-id
-        - name: KEY_VAULT_URL
-          value: "https://your-keyvault.vault.azure.net/"
-        resources:
-          requests:
-            memory: "512Mi"
-            cpu: "500m"
-          limits:
-            memory: "1Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
+        - name: agent
+          image: yourregistry.azurecr.io/sk-agent:latest
+          env:
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: azure-identity
+                  key: client-id
+            - name: AZURE_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: azure-identity
+                  key: tenant-id
+            - name: KEY_VAULT_URL
+              value: "https://your-keyvault.vault.azure.net/"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -995,8 +995,8 @@ spec:
   selector:
     app: sk-agent
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8080
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
   type: LoadBalancer
 ```

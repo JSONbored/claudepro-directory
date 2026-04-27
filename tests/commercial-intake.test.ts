@@ -1,0 +1,96 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  isPlacementActive,
+  linkRelForDisclosure,
+  nextLeadStatus,
+  normalizeCommercialTier,
+  normalizeDisclosure,
+  normalizeLeadKind,
+  validateListingLeadPayload,
+} from "@heyclaude/registry/commercial";
+
+describe("commercial intake contracts", () => {
+  it("normalizes commercial listing fields", () => {
+    expect(normalizeLeadKind("job")).toBe("job");
+    expect(normalizeLeadKind("app")).toBe("tool");
+    expect(normalizeCommercialTier("sponsored")).toBe("sponsored");
+    expect(normalizeCommercialTier("unknown")).toBe("free");
+    expect(normalizeDisclosure("affiliate")).toBe("affiliate");
+    expect(normalizeDisclosure("")).toBe("editorial");
+    expect(linkRelForDisclosure("sponsored")).toBe(
+      "sponsored nofollow noreferrer",
+    );
+    expect(linkRelForDisclosure("editorial")).toBe("noreferrer");
+  });
+
+  it("enforces lead review status transitions", () => {
+    expect(nextLeadStatus("new", "review")).toBe("pending_review");
+    expect(nextLeadStatus("pending_review", "approve")).toBe("approved");
+    expect(nextLeadStatus("active", "expire")).toBe("expired");
+    expect(nextLeadStatus("archived", "approve")).toBe("archived");
+  });
+
+  it("detects active placement windows", () => {
+    expect(
+      isPlacementActive(
+        {
+          status: "active",
+          startsAt: "2026-01-01T00:00:00Z",
+          expiresAt: "2026-12-31T23:59:59Z",
+        },
+        new Date("2026-04-26T00:00:00Z"),
+      ),
+    ).toBe(true);
+    expect(
+      isPlacementActive(
+        {
+          status: "active",
+          expiresAt: "2026-01-01T00:00:00Z",
+        },
+        new Date("2026-04-26T00:00:00Z"),
+      ),
+    ).toBe(false);
+  });
+
+  it("validates tool and job leads separately", () => {
+    const tool = validateListingLeadPayload({
+      kind: "tool",
+      tierInterest: "featured",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "Example Tool",
+      websiteUrl: "https://example.com",
+      message: "Free listing with possible sponsorship.",
+    });
+    expect(tool.ok).toBe(true);
+    expect(tool.data.kind).toBe("tool");
+    expect(tool.data.tierInterest).toBe("featured");
+
+    const insecureTool = validateListingLeadPayload({
+      kind: "tool",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "Example Tool",
+      websiteUrl: "http://example.com",
+    });
+    expect(insecureTool.ok).toBe(false);
+    expect(insecureTool.errors).toContain(
+      "tool leads require an https websiteUrl",
+    );
+
+    const job = validateListingLeadPayload({
+      kind: "job",
+      tierInterest: "sponsored",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "AI Engineer",
+      applyUrl: "https://example.com/jobs/ai-engineer",
+    });
+    expect(job.ok).toBe(true);
+    expect(job.data.kind).toBe("job");
+  });
+});

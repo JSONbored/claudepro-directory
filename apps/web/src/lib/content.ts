@@ -5,10 +5,12 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type {
+  ArtifactManifestV2,
   CategorySummary,
   ContentEntry,
   DirectoryEntry,
   RegistryEnvelope,
+  SearchDocument,
 } from "@heyclaude/registry";
 
 import { categoryDescriptions, categoryLabels, siteConfig } from "@/lib/site";
@@ -19,7 +21,7 @@ const DATA_ORIGIN = "https://heyclau.de";
 let directoryIndexPromise: Promise<DirectoryEntry[]> | null = null;
 const entryDetailPromises = new Map<string, Promise<ContentEntry | null>>();
 
-async function loadJsonDataFile<T>(fileName: string): Promise<T> {
+export async function loadJsonDataFile<T>(fileName: string): Promise<T> {
   try {
     const filePath = path.join(process.cwd(), "public", "data", fileName);
     const raw = await readFile(filePath, "utf8");
@@ -69,6 +71,13 @@ export async function loadTextDataFile(fileName: string): Promise<string> {
   }
 }
 
+export function normalizeRegistryEntries<T>(payload: RegistryEnvelope<T>): T[] {
+  if (!Array.isArray(payload?.entries)) {
+    throw new Error("Invalid registry artifact: expected entries envelope");
+  }
+  return payload.entries;
+}
+
 const loadDirectoryIndex = cache(async (): Promise<DirectoryEntry[]> => {
   directoryIndexPromise ??= loadJsonDataFile<RegistryEnvelope<DirectoryEntry>>(
     "directory-index.json",
@@ -76,14 +85,7 @@ const loadDirectoryIndex = cache(async (): Promise<DirectoryEntry[]> => {
   return directoryIndexPromise;
 });
 
-function normalizeRegistryEntries<T>(payload: RegistryEnvelope<T>): T[] {
-  if (!Array.isArray(payload?.entries)) {
-    throw new Error("Invalid registry artifact: expected entries envelope");
-  }
-  return payload.entries;
-}
-
-function isSafeContentPathPart(value: string) {
+export function isSafeContentPathPart(value: string) {
   return /^[a-z0-9-]+$/.test(value);
 }
 
@@ -123,6 +125,30 @@ export const getDirectoryEntries = cache(
 
 export const getEntry = cache(async (category: string, slug: string) => {
   return loadEntryDetail(category, slug);
+});
+
+export const getEntryLlmsText = cache(
+  async (category: string, slug: string) => {
+    if (!isSafeContentPathPart(category) || !isSafeContentPathPart(slug)) {
+      return null;
+    }
+
+    try {
+      return await loadTextDataFile(`llms/${category}/${slug}.txt`);
+    } catch {
+      return null;
+    }
+  },
+);
+
+export const getRegistryManifest = cache(async () => {
+  return loadJsonDataFile<ArtifactManifestV2>("registry-manifest.json");
+});
+
+export const getSearchIndex = cache(async () => {
+  return loadJsonDataFile<RegistryEnvelope<SearchDocument>>(
+    "search-index.json",
+  ).then(normalizeRegistryEntries);
 });
 
 export const getEntriesByCategory = cache(async (category: string) => {

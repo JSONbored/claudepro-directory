@@ -62,7 +62,9 @@ Ultra-lightweight plain text statusline with no colors or special characters for
 
 ## Examples
 ### Simple Text Statusline with awk (More Robust)
+
 Enhanced version using awk for more robust JSON parsing while maintaining zero external dependencies
+
 ```bash
 #!/usr/bin/env bash
 
@@ -110,8 +112,11 @@ model=$(echo "$model" | sed 's/^claude-//' 2>/dev/null || echo "$model")
 # Build simple plain text status
 echo "[Model: $model] [Dir: $dir] [Tokens: $tokens]"
 ```
+
 ### Simple Text Statusline Minimal Version
+
 Absolute minimal version with only model name for ultra-lightweight usage
+
 ```bash
 #!/usr/bin/env bash
 
@@ -129,8 +134,11 @@ model=$(echo "$model" | sed 's/^claude-//' 2>/dev/null || echo "$model")
 # Output minimal status
 echo "[$model]"
 ```
+
 ### Simple Text Statusline Installation Example
+
 Complete setup script with dependency verification (minimal dependencies required)
+
 ```bash
 #!/bin/bash
 # Installation script for Simple Text Statusline
@@ -469,25 +477,32 @@ echo "Test: echo '{\"model\":\"test\"}' | .claude/statuslines/simple-text-status
 ## Troubleshooting
 ### Values showing as empty or 'unknown'
 
-JSON parsing relies on specific format. Ensure Claude Code is outputting standard JSON. Test with: echo '$input' to see raw JSON. Check JSON structure: echo '$input' | grep -o '"model":"[^"]*"' (should return model field). Verify grep pattern: grep uses regex - ensure JSON format matches expected pattern. Try alternative extraction: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}') for more robust parsing. Check if JSON is minified: Minified JSON may break grep patterns - use awk instead.
+JSON parsing relies on specific format. Ensure Claude Code is outputting standard JSON. Test with: echo '$input' to see raw JSON. Check JSON structure: echo '$input' | grep -o '"model":"[^"]\*"' (should return model field). Verify grep pattern: grep uses regex - ensure JSON format matches expected pattern. Try alternative extraction: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}') for more robust parsing. Check if JSON is minified: Minified JSON may break grep patterns - use awk instead.
+
 ### Home directory not shortened to ~
 
 Check that $HOME environment variable is set correctly: echo $HOME (should return home directory path). If using sudo, HOME may not be preserved: Use sudo -H to set HOME or sudo -E to preserve variables. Test sed replacement: echo '$HOME/projects/test' | sed "s|^$HOME|~|" (should return ~/projects/test). Verify HOME is not empty: if [ -z "$HOME" ]; then echo "HOME not set"; fi. Add HOME to env_keep in /etc/sudoers for persistent fix: echo 'Defaults env_keep += "HOME"' | sudo tee -a /etc/sudoers.d/home-preserve.
+
 ### grep or cut command not found
 
 These are standard POSIX utilities. Install coreutils package: Linux (sudo apt-get install coreutils or sudo yum install coreutils), macOS (pre-installed). Verify installation: command -v grep (should return path like /usr/bin/grep). Test commands: echo 'test' | grep 'test' (should return 'test'), echo 'a:b:c' | cut -d':' -f2 (should return 'b'). If on embedded system, ensure busybox is installed: busybox provides minimal grep/cut/sed implementations. Check PATH: echo $PATH (should include /usr/bin, /bin).
+
 ### JSON parsing breaks when Claude Code changes output format
 
-grep/cut parsing is fragile. Switch to jq-based statusline or use awk: awk 'BEGIN { FS="\""; RS="," }; { if ($2 == "model") {print $4} }' for robust parsing. Use awk for better JSON handling: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}'). Consider using jq if available: model=$(echo '$input' | jq -r '.model.id // .model.display_name // "unknown"') for most robust parsing. Test with sample JSON: echo '{"model":"test"}' | grep -o '"model":"[^"]*"' (should work). Update grep patterns if JSON structure changes.
+grep/cut parsing is fragile. Switch to jq-based statusline or use awk: awk 'BEGIN { FS="\""; RS="," }; { if ($2 == "model") {print $4} }' for robust parsing. Use awk for better JSON handling: model=$(echo '$input' | awk -F'"' '/"model"/{print $4;exit}'). Consider using jq if available: model=$(echo '$input' | jq -r '.model.id // .model.display_name // "unknown"') for most robust parsing. Test with sample JSON: echo '{"model":"test"}' | grep -o '"model":"[^"]\*"' (should work). Update grep patterns if JSON structure changes.
+
 ### HOME not preserved when running script with sudo
 
 Use sudo -H to set HOME or sudo -E to preserve variables. Add HOME to env_keep in /etc/sudoers for persistent fix: echo 'Defaults env_keep += "HOME"' | sudo tee -a /etc/sudoers.d/home-preserve. Test: sudo -H bash script.sh (should preserve HOME). Check current HOME: echo $HOME (should show home directory). Verify sudo preserves: sudo -E env | grep HOME (should show HOME variable). Alternative: Hardcode home directory path in script if HOME is unreliable, but this reduces portability.
+
 ### Model name includes 'claude-' prefix when it shouldn't
 
-Script removes 'claude-' prefix: model=$(echo '$model' | sed 's/^claude-//'). Verify sed works: echo 'claude-opus-4-1' | sed 's/^claude-//' (should return 'opus-4-1'). Check if sed is available: command -v sed (should return path). Test pattern: sed 's/^claude-//' should remove leading 'claude-' from model name. If prefix still appears, check extraction: echo '$input' | grep -o '"model":"[^"]*"' (may extract full model ID). Update sed pattern if needed: sed 's/^claude-//' or sed 's/claude-//'.
+Script removes 'claude-' prefix: model=$(echo '$model' | sed 's/^claude-//'). Verify sed works: echo 'claude-opus-4-1' | sed 's/^claude-//' (should return 'opus-4-1'). Check if sed is available: command -v sed (should return path). Test pattern: sed 's/^claude-//' should remove leading 'claude-' from model name. If prefix still appears, check extraction: echo '$input' | grep -o '"model":"[^"]\*"' (may extract full model ID). Update sed pattern if needed: sed 's/^claude-//' or sed 's/claude-//'.
+
 ### Directory path shows full path instead of shortened ~
 
-Check HOME variable: echo $HOME (should be set). Verify sed replacement: echo '$HOME/projects/test' | sed "s|^$HOME|~|" (should return ~/projects/test). Test with actual path: test_path="$HOME/projects/test"; echo "$test_path" | sed "s|^$HOME|~|". Check if path starts with HOME: if [[ "$dir" == "$HOME"* ]]; then echo "Path starts with HOME"; fi. Verify sed pattern: sed uses | as delimiter to avoid conflicts with / in paths. If still not working, check that dir variable contains full path: echo "$dir" (should show full path).
+Check HOME variable: echo $HOME (should be set). Verify sed replacement: echo '$HOME/projects/test' | sed "s|^$HOME|~|" (should return ~/projects/test). Test with actual path: test_path="$HOME/projects/test"; echo "$test_path" | sed "s|^$HOME|~|". Check if path starts with HOME: if [["$dir" == "$HOME"*]]; then echo "Path starts with HOME"; fi. Verify sed pattern: sed uses | as delimiter to avoid conflicts with / in paths. If still not working, check that dir variable contains full path: echo "$dir" (should show full path).
+
 ### Tokens always showing as 0
 
-Check JSON structure: echo '$input' | grep -o '"total_lines_added":[0-9]*' (should return token field). Try alternative field: echo '$input' | grep -o '"totalTokens":[0-9]*'. Verify extraction: tokens=$(echo '$input' | grep -o '"total_lines_added":[0-9]*' | cut -d':' -f2) (should return number). Check if cost object exists: echo '$input' | grep -q '"cost"' (should return true). Test with sample: echo '{"total_lines_added":1234}' | grep -o '"total_lines_added":[0-9]*' | cut -d':' -f2 (should return 1234). If still 0, JSON structure may have changed - update grep pattern.
+Check JSON structure: echo '$input' | grep -o '"total_lines_added":[0-9]*' (should return token field). Try alternative field: echo '$input' | grep -o '"totalTokens":[0-9]_'. Verify extraction: tokens=$(echo '$input' | grep -o '"total_lines_added":[0-9]_' | cut -d':' -f2) (should return number). Check if cost object exists: echo '$input' | grep -q '"cost"' (should return true). Test with sample: echo '{"total_lines_added":1234}' | grep -o '"total_lines_added":[0-9]\*' | cut -d':' -f2 (should return 1234). If still 0, JSON structure may have changed - update grep pattern.

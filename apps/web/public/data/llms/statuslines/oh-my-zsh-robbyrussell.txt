@@ -63,7 +63,9 @@ Oh-My-Zsh robbyrussell theme replica with iconic arrow prompt, Git status indica
 
 ## Examples
 ### Enhanced Oh My Zsh Robbyrussell with Exit Status
+
 Extended version with exit status indicator matching original robbyrussell theme
+
 ```bash
 #!/usr/bin/env bash
 
@@ -118,8 +120,11 @@ prompt+="${CYAN}[${model}]${RESET}"
 
 echo -e "$prompt"
 ```
+
 ### Oh My Zsh Robbyrussell with Full Path Option
+
 Version with configurable directory display (basename vs full path)
+
 ```bash
 #!/usr/bin/env bash
 
@@ -168,8 +173,11 @@ prompt+="${CYAN}[${model}]${RESET}"
 
 echo -e "$prompt"
 ```
+
 ### Oh My Zsh Robbyrussell Installation Example
+
 Complete setup script with UTF-8 encoding verification and Unicode arrow character testing
+
 ```bash
 #!/bin/bash
 # Installation script for Oh My Zsh Robbyrussell Theme
@@ -503,24 +511,31 @@ echo "Test with: echo -e '➜'"
 ### Arrow character (➜) showing as box or question mark
 
 Ensure terminal uses UTF-8 encoding. Check: locale | grep UTF-8. Set if needed: export LANG=en_US.UTF-8. Verify font supports Unicode arrows (U+279C). Test: echo -e '➜'. Verify encoding: locale charmap (should be UTF-8). If not supported, modify script to use ASCII alternative: arrow='>'.
+
 ### Git status always showing dirty (✗) even with clean repo
 
 Check Git status manually: git status. Verify git diff commands work: git diff --quiet && echo clean (should return 0 for clean). Check staged changes: git diff --cached --quiet && echo clean. Ensure .gitignore not excluding modified files. Clear Git cache if needed: git rm -r --cached . && git add . (use with caution). Verify Git commands: git rev-parse --abbrev-ref HEAD (should return branch name).
+
 ### Directory showing full path instead of basename only
 
 Verify basename command available: which basename. Check sed command working: echo ~/foo/bar | sed 's|'$HOME'|~|' | xargs basename (should show 'bar'). Test jq extraction: echo '$input' | jq .workspace.current_dir. Verify xargs: echo 'test' | xargs basename (should return 'test'). Check if path is already basename: basename '/path/to/dir' (should return 'dir').
+
 ### Colors incorrect or showing different shades than Oh-My-Zsh
 
 Oh-My-Zsh uses 256-color codes. Verify terminal: tput colors (should be 256). Compare: echo -e '\033[38;5;51mCyan\033[0m' with zsh prompt. Adjust color codes if terminal palette differs. Check color codes: CYAN='\033[38;5;51m' (should be cyan), GREEN='\033[38;5;82m' (should be green). Test colors: echo -e '\033[38;5;51mTest\033[0m' (should show cyan text).
+
 ### Git branch not detected despite being in repository
 
 Check Git installed and in PATH: git --version. Verify in repo: git rev-parse --git-dir (should return .git path). Ensure script can execute git: which git. Test branch detection: git rev-parse --abbrev-ref HEAD (should return branch name). Check for detached HEAD: git rev-parse --abbrev-ref HEAD (may return HEAD if detached). Verify Git directory exists: ls -la .git (should show Git directory).
+
 ### Model name showing as 'unknown' or incorrect
 
 Check JSON field names: echo '$input' | jq .model.display_name (should return model name). Verify jq extraction: echo '$input' | jq -r '.model.display_name // .model.id // "unknown"'. Check if field exists: echo '$input' | jq 'has("model")'. Verify model field structure: echo '$input' | jq .model (should show object with id/display_name). Update script to check multiple field names if needed.
+
 ### Checkmark/X character (✗) not displaying correctly
 
-Verify terminal supports Unicode checkmark/X: echo -e '✗'. If not supported, replace with ASCII: git_dirty='*' or git_dirty='X'. Check terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Test Unicode: echo -e '✗ ✓' (should display symbols). Alternative: Use ASCII characters like '*' for dirty status.
+Verify terminal supports Unicode checkmark/X: echo -e '✗'. If not supported, replace with ASCII: git*dirty='*' or git*dirty='X'. Check terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Test Unicode: echo -e '✗ ✓' (should display symbols). Alternative: Use ASCII characters like '*' for dirty status.
+
 ### Prompt format not matching Oh-My-Zsh robbyrussell exactly
 
-Compare with original: Oh-My-Zsh robbyrussell uses '➜  %c git:(branch) ✗'. Verify spacing: prompt should have two spaces after arrow. Check format: '➜  directory git:(branch) ✗ [model]'. Verify color order: arrow (cyan), directory (cyan), git (green/yellow), dirty (red), model (cyan). Test full prompt: echo -e '\033[38;5;51m➜\033[0m  \033[38;5;51mdir\033[0m \033[38;5;82mgit:(main)\033[0m'.
+Compare with original: Oh-My-Zsh robbyrussell uses '➜ %c git:(branch) ✗'. Verify spacing: prompt should have two spaces after arrow. Check format: '➜ directory git:(branch) ✗ [model]'. Verify color order: arrow (cyan), directory (cyan), git (green/yellow), dirty (red), model (cyan). Test full prompt: echo -e '\033[38;5;51m➜\033[0m \033[38;5;51mdir\033[0m \033[38;5;82mgit:(main)\033[0m'.

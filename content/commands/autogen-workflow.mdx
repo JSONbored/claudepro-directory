@@ -13,13 +13,13 @@ seoDescription: >-
   Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based
   task delegation, conversation patterns, and collaborative problem solving
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://microsoft.github.io/autogen/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://microsoft.github.io/autogen/"
 installable: true
-installCommand: '/autogen-workflow [options] <workflow_description>'
-usageSnippet: '/autogen-workflow [options] <workflow_description>'
-copySnippet: '/autogen-workflow [options] <workflow_description>'
+installCommand: "/autogen-workflow [options] <workflow_description>"
+usageSnippet: "/autogen-workflow [options] <workflow_description>"
+copySnippet: "/autogen-workflow [options] <workflow_description>"
 scriptLanguage: text
 scriptBody: >-
   The `/autogen-workflow` command creates sophisticated multi-agent workflows
@@ -693,8 +693,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/autogen-workflow [options] <workflow_description>'
+commandSyntax: "/autogen-workflow [options] <workflow_description>"
 ---
+
 The `/autogen-workflow` command creates sophisticated multi-agent workflows using Microsoft AutoGen v0.4's actor model with role-based delegation and conversation patterns.
 
 ## Usage
@@ -706,6 +707,7 @@ The `/autogen-workflow` command creates sophisticated multi-agent workflows usin
 ## Options
 
 ### Workflow Types
+
 - `--research` - Research and analysis workflow
 - `--coding` - Software development workflow (default)
 - `--review` - Code review and quality assurance
@@ -713,16 +715,19 @@ The `/autogen-workflow` command creates sophisticated multi-agent workflows usin
 - `--planning` - Project planning and architecture
 
 ### Agent Configuration
+
 - `--agents=<list>` - Specify agent roles (e.g., "researcher,analyst,coder")
 - `--conversation-pattern=<type>` - Conversation pattern (sequential, round-robin, hierarchical)
 - `--termination=<condition>` - Workflow termination condition
 
 ### Model Selection
+
 - `--model=<name>` - AI model for agents (gpt-4, claude-sonnet-4, gemini-pro)
 - `--temperature=<float>` - Model temperature (0.0-1.0)
 - `--max-rounds=<int>` - Maximum conversation rounds (default: 10)
 
 ### Tools & Integration
+
 - `--tools=<list>` - Enable specific tools (web-search, file-ops, shell)
 - `--memory` - Enable conversation memory
 - `--human-in-loop` - Require human approval for critical actions
@@ -732,11 +737,13 @@ The `/autogen-workflow` command creates sophisticated multi-agent workflows usin
 ### Software Development Workflow
 
 **Command:**
+
 ```
 /autogen-workflow --coding --agents="architect,coder,reviewer,tester" "Build a user authentication system with OAuth2 support"
 ```
 
 **Generated Workflow:**
+
 ```python
 # Generated AutoGen v0.4 workflow
 from autogen_agentchat.agents import AssistantAgent
@@ -761,7 +768,7 @@ architect_agent = AssistantAgent(
     2. Define data models and API contracts
     3. Identify security requirements
     4. Create technical specifications
-    
+
     Focus on scalability, security, and best practices.
     """,
     description="Designs system architecture and technical specifications",
@@ -777,7 +784,7 @@ coder_agent = AssistantAgent(
     2. Write production-ready, type-safe code
     3. Follow SOLID principles and design patterns
     4. Add comprehensive error handling
-    
+
     Use TypeScript, React, and Node.js.
     """,
     description="Implements the technical specifications",
@@ -793,7 +800,7 @@ reviewer_agent = AssistantAgent(
     2. Ensure code quality and maintainability
     3. Verify adherence to best practices
     4. Identify potential bugs and edge cases
-    
+
     Be thorough and constructive in your feedback.
     """,
     description="Reviews code quality and security",
@@ -809,7 +816,7 @@ tester_agent = AssistantAgent(
     2. Create unit, integration, and E2E tests
     3. Identify test scenarios and edge cases
     4. Ensure high code coverage
-    
+
     Use Jest, Vitest, and Playwright.
     """,
     description="Creates comprehensive test suites",
@@ -829,7 +836,7 @@ async def run_auth_workflow():
     result = await team.run(
         task="""
         Build a user authentication system with OAuth2 support.
-        
+
         Requirements:
         1. Support email/password and OAuth2 (Google, GitHub)
         2. JWT-based session management
@@ -837,12 +844,12 @@ async def run_auth_workflow():
         4. Rate limiting and brute force protection
         5. PKCE flow for OAuth2
         6. Comprehensive test coverage
-        
+
         Architect: Start by designing the system architecture.
         """,
         termination_condition=termination,
     )
-    
+
     print("Workflow completed!")
     print(f"Messages exchanged: {len(result.messages)}")
     print(f"Final result: {result.messages[-1].content}")
@@ -855,11 +862,13 @@ asyncio.run(run_auth_workflow())
 ### Research and Analysis Workflow
 
 **Command:**
+
 ```
 /autogen-workflow --research --agents="researcher,analyst,synthesizer" --tools="web-search" "Analyze the current state of edge computing in 2025"
 ```
 
 **Generated Workflow:**
+
 ```python
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import Swarm
@@ -881,7 +890,7 @@ researcher_agent = AssistantAgent(
     2. Gather data from multiple sources
     3. Identify key trends and developments
     4. Compile raw research findings
-    
+
     Be thorough and cite your sources.
     """,
     handoffs=["Analyst"],
@@ -898,7 +907,7 @@ analyst_agent = AssistantAgent(
     2. Identify patterns and insights
     3. Evaluate market trends
     4. Provide data-driven conclusions
-    
+
     Focus on quantitative and qualitative analysis.
     """,
     handoffs=["Synthesizer"],
@@ -915,7 +924,7 @@ synthesizer_agent = AssistantAgent(
     2. Present findings in clear, structured format
     3. Highlight key takeaways
     4. Provide actionable recommendations
-    
+
     Create executive summaries and detailed reports.
     """,
 )
@@ -929,29 +938,31 @@ async def run_research_workflow():
     result = await team.run(
         task="""
         Analyze the current state of edge computing in 2025.
-        
+
         Focus on:
         1. Market size and growth trends
         2. Major players and technologies
         3. Use cases and adoption rates
         4. Future predictions
-        
+
         Researcher: Begin by gathering data from multiple sources.
         """,
         termination_condition=TextMentionTermination("RESEARCH_COMPLETE"),
     )
-    
+
     return result
 ```
 
 ### Code Review Workflow
 
 **Command:**
+
 ```
 /autogen-workflow --review --agents="security-auditor,performance-reviewer,style-checker" "Review authentication middleware implementation"
 ```
 
 **Generated Workflow:**
+
 ```python
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import SelectorGroupChat
@@ -974,7 +985,7 @@ security_agent = AssistantAgent(
     3. Authentication/authorization flaws
     4. Sensitive data exposure
     5. Security misconfigurations
-    
+
     Provide specific recommendations for fixes.
     """,
 )
@@ -992,7 +1003,7 @@ performance_agent = AssistantAgent(
     3. Database query optimization
     4. Caching opportunities
     5. Resource usage
-    
+
     Suggest performance improvements.
     """,
 )
@@ -1010,7 +1021,7 @@ style_agent = AssistantAgent(
     3. Proper error handling
     4. Documentation completeness
     5. Best practices
-    
+
     Ensure maintainable, clean code.
     """,
 )
@@ -1026,29 +1037,31 @@ async def run_review_workflow(file_path: str):
     result = await team.run(
         task=f"""
         Review the authentication middleware at {file_path}.
-        
+
         Each agent should:
         1. Read the file
         2. Analyze their specific area
         3. Provide detailed findings
         4. Suggest improvements
-        
+
         Provide a comprehensive review report.
         """,
         termination_condition=MaxMessageTermination(max_messages=15),
     )
-    
+
     return result
 ```
 
 ### Debugging Workflow
 
 **Command:**
+
 ```
 /autogen-workflow --debug --agents="debugger,root-cause-analyst,fixer" --human-in-loop "Investigate failing user login tests"
 ```
 
 **Generated Workflow:**
+
 ```python
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import RoundRobinGroupChat
@@ -1071,7 +1084,7 @@ debugger_agent = AssistantAgent(
     2. Analyze error messages and stack traces
     3. Identify symptoms of the issue
     4. Gather relevant logs and data
-    
+
     Use systematic debugging techniques.
     """,
 )
@@ -1088,7 +1101,7 @@ analyst_agent = AssistantAgent(
     2. Identify the root cause of the issue
     3. Consider all contributing factors
     4. Explain the issue clearly
-    
+
     Use the 5 Whys technique.
     """,
 )
@@ -1105,7 +1118,7 @@ fixer_agent = AssistantAgent(
     2. Write or update tests
     3. Verify the fix resolves the issue
     4. Ensure no regressions
-    
+
     Request human approval before making changes.
     """,
 )
@@ -1119,23 +1132,24 @@ async def run_debug_workflow():
     result = await team.run(
         task="""
         Investigate and fix the failing user login tests.
-        
+
         Steps:
         1. Debugger: Run tests and gather error information
         2. RootCauseAnalyst: Identify the root cause
         3. Fixer: Implement fix (wait for human approval)
-        
+
         Ensure all tests pass after the fix.
         """,
         termination_condition=TextMentionTermination("TESTS_PASSING"),
     )
-    
+
     return result
 ```
 
 ## Configuration
 
 ### Model Configuration
+
 ```python
 # Custom model configuration
 from autogen_ext.models import AzureOpenAIChatCompletionClient
@@ -1150,6 +1164,7 @@ model_client = AzureOpenAIChatCompletionClient(
 ```
 
 ### Team Patterns
+
 ```python
 # Sequential pattern
 from autogen_agentchat.teams import RoundRobinGroupChat

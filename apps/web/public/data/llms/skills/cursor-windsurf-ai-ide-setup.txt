@@ -30,6 +30,7 @@ Claude can help you configure and optimize Cursor or Windsurf AI code editors fo
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - macOS, Windows, or Linux
 - Cursor or Windsurf IDE installed
@@ -37,6 +38,7 @@ Claude can help you configure and optimize Cursor or Windsurf AI code editors fo
 - Basic code editor knowledge
 
 **What Claude handles automatically:**
+
 - Configuring API keys and model selection
 - Setting up keybindings for AI features
 - Optimizing editor settings for performance
@@ -52,6 +54,7 @@ Claude can help you configure and optimize Cursor or Windsurf AI code editors fo
 **Prompt:** "Help me set up Cursor with Claude Sonnet model. Configure keybindings for: inline completion (Tab), chat (Cmd+K), composer (Cmd+I), and agent mode. Optimize for React/TypeScript projects."
 
 Claude will:
+
 1. Guide API key configuration
 2. Set model to Claude Sonnet
 3. Configure keyboard shortcuts
@@ -65,6 +68,7 @@ Claude will:
 **Prompt:** "Configure Cursor Agent mode for: automatic file edits, test generation, refactoring tasks, and documentation. Set guardrails to prevent breaking changes."
 
 Claude will:
+
 1. Enable agent mode settings
 2. Configure file permissions
 3. Set up test generation rules
@@ -78,6 +82,7 @@ Claude will:
 **Prompt:** "Create .cursorrules file for Next.js 15 project with: TypeScript strict mode, shadcn/ui components, Tailwind CSS, server actions, and Zod validation. Include coding standards."
 
 Claude will:
+
 1. Create .cursorrules file
 2. Specify tech stack versions
 3. Add coding conventions
@@ -91,6 +96,7 @@ Claude will:
 **Prompt:** "Set up Windsurf Cascade for: renaming components across files, updating import paths, refactoring prop types, and running type checks. Configure to preview changes before applying."
 
 Claude will:
+
 1. Configure Cascade settings
 2. Enable preview mode
 3. Set up diff viewing
@@ -114,6 +120,7 @@ Claude will:
 
 ## Common Workflows
 ### React Component Refactoring
+
 ```
 "Configure Cursor for React refactoring workflow:
 1. Set up .cursorrules with React 19 patterns
@@ -127,6 +134,7 @@ Claude will:
 ```
 
 ### API Route Generation
+
 ```
 "Set up Windsurf for API development:
 1. Create .cursorrules for FastAPI/Next.js API routes
@@ -140,6 +148,7 @@ Claude will:
 ```
 
 ### Legacy Code Migration
+
 ```
 "Configure Cursor for migrating JS to TS:
 1. Set up .cursorrules for TypeScript migration
@@ -153,6 +162,7 @@ Claude will:
 ```
 
 ### Test Coverage Improvement
+
 ```
 "Set up Windsurf for test generation:
 1. Configure agent for unit test creation

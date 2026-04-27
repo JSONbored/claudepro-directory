@@ -2,14 +2,14 @@
 title: Mintlify AI Documentation Automation Skill
 slug: mintlify-documentation-automation
 category: skills
-description: 'Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.'
-cardDescription: 'Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform.'
+description: "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform."
+cardDescription: "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform."
 seoTitle: Mintlify AI Documentation Automation Skill
-seoDescription: 'Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform. Generate comprehensive API reference docum...'
+seoDescription: "Automate beautiful, searchable documentation creation with Mintlify - the modern AI-native documentation platform. Generate comprehensive API reference docum..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://mintlify.com/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://mintlify.com/docs"
 downloadUrl: /downloads/skills/mintlify-documentation-automation.zip
 installable: true
 installCommand: npm install -g mintlify
@@ -59,9 +59,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://mintlify.com/docs'
+  - "https://mintlify.com/docs"
 testedPlatforms:
   - Claude
   - Codex
@@ -71,11 +71,11 @@ testedPlatforms:
   - Gemini
 prerequisites:
   - Node.js 18+
-  - 'Mintlify CLI: npm install -g mintlify'
+  - "Mintlify CLI: npm install -g mintlify"
   - Codebase with JSDoc or TypeScript types
-  - 'OpenAPI specification (optional, for API reference)'
+  - "OpenAPI specification (optional, for API reference)"
   - Mintlify account and API access (free tier available) for documentation site hosting and deployment
-  - 'File system read/write access for Mintlify configuration files (mint.json), documentation source files, and generated documentation outputs'
+  - "File system read/write access for Mintlify configuration files (mint.json), documentation source files, and generated documentation outputs"
 tags:
   - mintlify
   - documentation
@@ -101,6 +101,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can generate comprehensive, production-ready documentation using Mintlify - the modern documentation platform that has become the standard for developer-facing docs in 2025. This skill enables automatic API reference generation from code, interactive MDX components, multi-version documentation, and AI-powered content creation from JSDoc/TypeScript types.
@@ -116,15 +117,16 @@ Claude can generate comprehensive, production-ready documentation using Mintlify
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Node.js 18+
 - Existing codebase with functions/APIs to document
 - Basic understanding of Markdown
 
 **What Claude handles automatically:**
+
 - Generating MDX documentation from TypeScript/JSDoc
 - Creating mint.json configuration with navigation
 - Building API reference pages from OpenAPI specs
@@ -139,6 +141,7 @@ Claude can generate comprehensive, production-ready documentation using Mintlify
 **Prompt:** "Generate Mintlify documentation from my TypeScript API client at src/api/users.ts. Include all JSDoc comments, parameter types, return types, and code examples."
 
 Claude will:
+
 1. Parse TypeScript file and extract exported functions
 2. Read JSDoc comments for descriptions
 3. Generate MDX files for each API endpoint
@@ -152,6 +155,7 @@ Claude will:
 **Prompt:** "Convert my OpenAPI 3.0 spec (openapi.yaml) into Mintlify documentation with interactive API playground and authentication examples."
 
 Claude will create:
+
 1. API reference section in mint.json
 2. MDX file for each endpoint with proper structure
 3. Request/response examples using CodeGroup
@@ -165,6 +169,7 @@ Claude will create:
 **Prompt:** "Set up a complete Mintlify documentation site for my SaaS product with: Introduction, Quickstart, API Reference, Guides, Changelog. Include dark mode, search, and analytics."
 
 Claude will generate:
+
 1. Directory structure with organized MDX files
 2. mint.json with proper navigation tabs
 3. Introduction page with hero and feature cards
@@ -180,6 +185,7 @@ Claude will generate:
 **Prompt:** "Document my React component library with interactive examples, prop tables, and usage guidelines. Components are in src/components/ui."
 
 Claude will create:
+
 1. Component documentation pages with descriptions
 2. PropTable components with TypeScript types
 3. Interactive code playgrounds
@@ -205,6 +211,7 @@ Claude will create:
 ## Common Workflows
 
 ### Complete API Documentation
+
 ```
 "Generate full Mintlify API documentation:
 1. Parse src/api/*.ts files for all exported functions
@@ -218,6 +225,7 @@ Claude will create:
 ```
 
 ### Component Library Docs
+
 ```
 "Build Mintlify docs for React component library:
 1. Document all components in src/components/ui
@@ -231,6 +239,7 @@ Claude will create:
 ```
 
 ### SDK Documentation with Examples
+
 ```
 "Generate SDK documentation from TypeScript client:
 1. Document all SDK methods with parameters and returns
@@ -244,6 +253,7 @@ Claude will create:
 ```
 
 ### Multi-Version Documentation
+
 ```
 "Set up versioned Mintlify docs for API v1 and v2:
 1. Create separate documentation for each version
@@ -264,7 +274,7 @@ Claude will create:
 **Solution:** mint.json navigation must explicitly list all pages. Ask Claude to regenerate navigation section matching your actual MDX file structure.
 
 **Issue:** Code examples aren't syntax highlighted correctly
-**Solution:** Specify language in code fence (```typescript, not ```ts). Ask Claude to use full language names for better highlighting.
+**Solution:** Specify language in code fence (`typescript, not `ts). Ask Claude to use full language names for better highlighting.
 
 **Issue:** API Reference pages look inconsistent
 **Solution:** Use Mintlify's built-in components (ParamField, ResponseField) instead of manual tables. Request Claude to refactor using proper components.

@@ -4,7 +4,11 @@ import path from "node:path";
 const repoRoot = process.cwd();
 
 const forbiddenPaths = [
+  "apps/web/public/data/content-index.json",
+  "apps/web/src/generated/content-category-spec.json",
   "apps/web/src/generated/legacy-vote-seed.json",
+  "apps/web/src/lib/entry-presentation.ts",
+  "apps/web/src/lib/llms-export.ts",
   "content/archive/legacy-data",
   "content/data/legacy-vote-seed.json",
   "scripts/content-schema.mjs",
@@ -18,6 +22,11 @@ const forbiddenPaths = [
   "scripts/restore-skills-from-history.mjs",
   "scripts/restore-statuslines-from-history.mjs",
   "scripts/submission-issue-lib.mjs",
+  "scripts/test-all.mjs",
+  "scripts/test-commercial-intake.mjs",
+  "scripts/test-registry-artifacts.mjs",
+  "scripts/test-seo-jsonld.mjs",
+  "scripts/test-submission-intake.mjs",
 ];
 
 const ignoredDirs = new Set([
@@ -34,6 +43,7 @@ const ignoredFiles = new Set([
   "scripts/audit-content.mjs",
   "scripts/validate-content.mjs",
   "scripts/validate-codebase-clean.mjs",
+  "tests/cleanup-policy.test.ts",
 ]);
 
 const forbiddenPatterns = [
@@ -136,8 +146,30 @@ const openApiSchema = fs.existsSync(
       "utf8",
     )
   : "";
-if (!openApiSchema.includes("/api/listing-leads:")) {
-  failures.push("OpenAPI schema is missing /api/listing-leads");
+for (const route of [
+  "/api/registry/manifest:",
+  "/api/registry/categories:",
+  "/api/registry/search:",
+  "/api/registry/entries/{category}/{slug}:",
+  "/api/registry/entries/{category}/{slug}/llms:",
+  "/api/listing-leads:",
+  "/api/admin/listing-leads:",
+]) {
+  if (!openApiSchema.includes(route)) {
+    failures.push(`OpenAPI schema is missing ${route.replace(/:$/, "")}`);
+  }
+}
+
+const wranglerConfig = fs.existsSync(
+  path.join(repoRoot, "apps/web/wrangler.jsonc"),
+)
+  ? fs.readFileSync(path.join(repoRoot, "apps/web/wrangler.jsonc"), "utf8")
+  : "";
+if (!wranglerConfig.includes('"binding": "SITE_DB"')) {
+  failures.push("Wrangler config is missing SITE_DB binding");
+}
+if (wranglerConfig.includes("VOTES_DB")) {
+  failures.push("Wrangler config still references VOTES_DB");
 }
 
 const deploymentDocs = fs.existsSync(

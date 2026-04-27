@@ -2,18 +2,18 @@
 title: PostgreSQL Query Optimization Skill
 slug: postgresql-query-optimization
 category: skills
-description: 'Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis.'
-cardDescription: 'Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and executi...'
+description: "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis."
+cardDescription: "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and executi..."
 seoTitle: PostgreSQL Query Optimization Skill
-seoDescription: 'Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. In...'
+seoDescription: "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. In..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://www.postgresql.org/docs/current/performance-tips.html'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://www.postgresql.org/docs/current/performance-tips.html"
 downloadUrl: /downloads/skills/postgresql-query-optimization.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/postgresql-query-optimization.zip -o postgresql-query-optimization.zip && unzip -o postgresql-query-optimization.zip -d ./postgresql-query-optimization'
-usageSnippet: 'Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. Interpret EXPLAIN ANALYZE plans, identify bottlenecks (sequential scans, nested loops, hash joins), design optimal indexes (B-tree, GIN, BRIN, composite, partial), rewrite queries for better performance, and tune database configuration parameters. Includes pg_stat_statements integration for slow query identification, parallel query execution optimization, JIT compilation tuning, advanced partitioning strategies, and vacuum/autovacuum configuration for high-write workloads.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/postgresql-query-optimization.zip -o postgresql-query-optimization.zip && unzip -o postgresql-query-optimization.zip -d ./postgresql-query-optimization"
+usageSnippet: "Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. Interpret EXPLAIN ANALYZE plans, identify bottlenecks (sequential scans, nested loops, hash joins), design optimal indexes (B-tree, GIN, BRIN, composite, partial), rewrite queries for better performance, and tune database configuration parameters. Includes pg_stat_statements integration for slow query identification, parallel query execution optimization, JIT compilation tuning, advanced partitioning strategies, and vacuum/autovacuum configuration for high-write workloads."
 copySnippet: |-
   -- Run with EXPLAIN ANALYZE to get actual execution times
   EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
@@ -33,9 +33,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://www.postgresql.org/docs/current/performance-tips.html'
+  - "https://www.postgresql.org/docs/current/performance-tips.html"
 testedPlatforms:
   - Claude
   - Codex
@@ -48,8 +48,8 @@ prerequisites:
   - pg_stat_statements extension
   - EXPLAIN access permissions
   - psql or database client
-  - 'PostgreSQL database access with appropriate permissions (SELECT, EXPLAIN, ANALYZE) for query analysis and optimization'
-  - 'PostgreSQL version 12+ (recommended 14+) for advanced query optimization features, EXPLAIN ANALYZE, and modern index types'
+  - "PostgreSQL database access with appropriate permissions (SELECT, EXPLAIN, ANALYZE) for query analysis and optimization"
+  - "PostgreSQL version 12+ (recommended 14+) for advanced query optimization features, EXPLAIN ANALYZE, and modern index types"
 tags:
   - postgresql
   - database
@@ -76,6 +76,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis. Interpret EXPLAIN ANALYZE plans, identify bottlenecks (sequential scans, nested loops, hash joins), design optimal indexes (B-tree, GIN, BRIN, composite, partial), rewrite queries for better performance, and tune database configuration parameters. Includes pg_stat_statements integration for slow query identification, parallel query execution optimization, JIT compilation tuning, advanced partitioning strategies, and vacuum/autovacuum configuration for high-write workloads.
 
 ## Content
@@ -97,16 +98,17 @@ Claude can analyze PostgreSQL query performance, interpret EXPLAIN plans, design
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - PostgreSQL 14+ installed (16+ recommended)
 - Access to database with slow queries or performance issues
 - Basic SQL knowledge
 
 **What Claude handles automatically:**
+
 - Analyzing EXPLAIN ANALYZE output
 - Identifying missing or inefficient indexes
 - Suggesting query rewrites for better performance
@@ -123,6 +125,7 @@ Claude can analyze PostgreSQL query performance, interpret EXPLAIN plans, design
 **Prompt:** "My PostgreSQL query is taking 5 seconds. Here's the query: [paste query]. Analyze the execution plan and suggest optimizations."
 
 Claude will:
+
 1. Run EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
 2. Identify bottlenecks (seq scans, nested loops)
 3. Suggest missing indexes with CREATE INDEX statements
@@ -135,6 +138,7 @@ Claude will:
 **Prompt:** "Design an optimal indexing strategy for a high-traffic e-commerce database with 10M products. Include queries: product search by name, filter by category and price range, sort by popularity."
 
 Claude will:
+
 1. Analyze query patterns and access patterns
 2. Create B-tree indexes for equality/range queries
 3. Add GIN indexes for full-text search
@@ -148,6 +152,7 @@ Claude will:
 **Prompt:** "Tune PostgreSQL configuration for a 32GB RAM server running high-write OLTP workload with 200 concurrent connections."
 
 Claude will:
+
 1. Set shared_buffers (25% of RAM = 8GB)
 2. Configure work_mem per connection
 3. Adjust max_connections and connection pooling
@@ -161,6 +166,7 @@ Claude will:
 **Prompt:** "Rewrite this slow query to eliminate the N+1 problem: [paste ORM-generated query with multiple subqueries]."
 
 Claude will:
+
 1. Identify N+1 or N+M pattern
 2. Convert subqueries to JOINs
 3. Use CTEs for readability
@@ -186,6 +192,7 @@ Claude will:
 ## Common Workflows
 
 ### Complete Performance Audit
+
 ```
 "Perform a comprehensive PostgreSQL performance audit:
 1. Identify top 10 slowest queries from pg_stat_statements
@@ -198,6 +205,7 @@ Claude will:
 ```
 
 ### Time-Series Optimization
+
 ```
 "Optimize PostgreSQL for time-series data:
 1. 100M rows of sensor data per month
@@ -210,6 +218,7 @@ Claude will:
 ```
 
 ### Full-Text Search Tuning
+
 ```
 "Build high-performance full-text search:
 1. Search across title, description, tags fields
@@ -222,6 +231,7 @@ Claude will:
 ```
 
 ### Replication Lag Analysis
+
 ```
 "Debug PostgreSQL replication lag:
 1. Replica is 30 seconds behind primary

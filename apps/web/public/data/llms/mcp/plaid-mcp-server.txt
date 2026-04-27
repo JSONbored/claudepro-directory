@@ -96,31 +96,45 @@ Streamline your banking data integration and financial services by connecting Cl
 
 ## Examples
 ### Debug why account linking is failing
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Debug why account linking is failing"
 ```
+
 ### Show recent API errors
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Show recent API errors"
 ```
+
 ### Verify webhook configuration
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Verify webhook configuration"
 ```
+
 ### Check transaction categorization accuracy
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Check transaction categorization accuracy"
 ```
+
 ### Get Account Balance
+
 Retrieve account balance from Plaid using access token
+
 ```typescript
 // Get Plaid account balance
 const accounts = await plaid.accounts.get({
-  access_token: "access-token"
+  access_token: "access-token",
 });
 const balance = accounts.accounts[0].balances.current;
 ```
@@ -139,7 +153,7 @@ Ask Claude: "Check transaction categorization accuracy"
 ```typescript
 // Get Plaid account balance
 const accounts = await plaid.accounts.get({
-  access_token: "access-token"
+  access_token: "access-token",
 });
 const balance = accounts.accounts[0].balances.current;
 ```
@@ -160,24 +174,31 @@ const balance = accounts.accounts[0].balances.current;
 ### Rate limit exceeded errors during API requests
 
 Plaid enforces rate limits per endpoint (not published publicly). Check error_code and error_type in response body. Use request_id for support inquiries. Implement exponential backoff for retry logic. Monitor rate limit headers if available. Reduce request frequency and batch operations when possible. Contact Plaid support with request_id if legitimate traffic is blocked.
+
 ### Item authentication failed or expired access token
 
 Listen for PENDING_DISCONNECT webhook (US/CA) or PENDING_EXPIRATION (UK/EU). Send users through Plaid Link update mode before Items expire. Re-authenticate via Plaid Link. Check error_type for specific issue (ITEM_LOGIN_REQUIRED, INVALID_CREDENTIALS, etc.). Items automatically transition to ITEM_LOGIN_REQUIRED after 30 days in Sandbox. Use /sandbox/item/reset_login to test error states.
+
 ### Webhook verification fails or not receiving webhooks
 
 Verify webhook signature using Plaid's JWT verification guide (Plaid-Verification header). Check webhook URL is publicly accessible with valid SSL certificate. Test endpoint returns 200 status. Enable webhook logging in Dashboard. Review firewall/security group rules (Plaid sends from specific IP addresses). Retrieve verification key via /webhook_verification_key/get endpoint. Ensure webhook URL matches configuration in /link/token/create or Dashboard.
+
 ### Development vs production environment mismatch
 
 Use separate API keys (client_id and secret) for sandbox and production. Verify environment in Dashboard matches code. Check client_id and secret match environment (sandbox.plaid.com vs production.plaid.com). Test in sandbox before going live with production credentials. Items cannot be moved between environments. Request Production API access via Dashboard if needed.
+
 ### Plaid MCP server authentication errors with API keys
 
 Verify API keys (Client ID and Secret) are valid and match the correct environment (sandbox vs production). Check API key format is correct. For access tokens, verify token is valid and not expired. Regenerate access tokens if needed.
+
 ### Plaid rate limit errors when processing multiple requests
 
 Implement exponential backoff retry logic with jitter. Use Plaid API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed account data. Plaid allows 500 requests per minute per API key.
+
 ### Plaid account or transaction access denied errors
 
 Verify access token has access to the account. Check item status and account permissions. Ensure access token has required products (transactions, auth, identity) for target operations.
+
 ### Plaid MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Plaid API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

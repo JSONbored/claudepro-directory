@@ -19,7 +19,6 @@ Master MCP server development for Claude Desktop. Build production-ready integra
 
 **Key Points:**
 
-
 > **What you'll achieve:** Create your first MCP server connecting Claude to external systems. Deploy production-ready integrations with proper security, testing, and state management.
 
 ## Prerequisites & Requirements
@@ -43,22 +42,16 @@ JSON-RPC 2.0 forms the protocol's messaging foundation. This enables language-ag
 
 ## Step-by-Step Implementation Guide
 1. **Set Up Development Environment**
-   
 
 2. **Create Server Scaffold Structure**
-   
 
 3. **Implement Tool Handlers**
-   
 
 4. **Configure State Management**
-   
 
 5. **Add Security Layers**
-   
 
 6. **Configure Claude Desktop**
-   
 
 7. **Test with MCP Inspector**
 

@@ -66,11 +66,13 @@ Agent Skills are **model-controlled configurations** that give Claude specialize
 ### Install React 19 Skill
 
 **Command:**
+
 ```bash
 /skills-installer --install react-19-expert
 ```
 
 **Installation:**
+
 ```
 [Installing Skill: React 19 Expert]
 
@@ -94,6 +96,7 @@ Activation Triggers:
 ```
 
 **Auto-Activation:**
+
 ```bash
 User: "Create a form with optimistic updates"
 
@@ -109,7 +112,7 @@ export function TodoForm({ addTodo }: Props) {
     todos,
     (state, newTodo) => [...state, newTodo]
   );
-  
+
   // ...
 }
 ```
@@ -117,11 +120,13 @@ export function TodoForm({ addTodo }: Props) {
 ### Install TypeScript Strict Mode Skill
 
 **Command:**
+
 ```bash
 /skills-installer --install typescript-strict
 ```
 
 **Skill Details:**
+
 ```
 [TypeScript Strict Mode Expert]
 
@@ -143,15 +148,18 @@ Configuration:
 ```
 
 **Effect:**
+
 ```typescript
 // Before skill:
-function getData(id: any) {  // Claude might use 'any'
+function getData(id: any) {
+  // Claude might use 'any'
   return data[id];
 }
 
 // After skill activated:
-function getData(id: string): User | undefined {  // Strict types
-  const user = data[id];  // Could be undefined
+function getData(id: string): User | undefined {
+  // Strict types
+  const user = data[id]; // Could be undefined
   if (!user) {
     throw new Error(`User ${id} not found`);
   }
@@ -162,11 +170,13 @@ function getData(id: string): User | undefined {  // Strict types
 ### Install Multiple Skills
 
 **Command:**
+
 ```bash
 /skills-installer --install next-15-expert prisma-advanced tdd-workflow
 ```
 
 **Batch Installation:**
+
 ```
 [Installing 3 Skills]
 
@@ -197,11 +207,13 @@ function getData(id: string): User | undefined {  // Strict types
 ### List Available Skills
 
 **Command:**
+
 ```bash
 /skills-installer --list --category=development
 ```
 
 **Output:**
+
 ```
 [Available Development Skills]
 
@@ -235,22 +247,24 @@ Installed: 0
 ### View Installed Skills
 
 **Command:**
+
 ```bash
 /skills-installer --installed
 ```
 
 **Output:**
+
 ```
 [Installed Skills]
 
 ✓ react-19-expert (v1.2.0)
   Last used: 2 hours ago
   Activations: 45 times
-  
+
 ✓ typescript-strict (v2.1.0)
   Last used: Active now
   Activations: 120 times
-  
+
 ✓ next-15-expert (v1.0.5)
   Last used: Yesterday
   Activations: 30 times
@@ -262,22 +276,24 @@ Storage: 2.4 MB
 ### Search Skills
 
 **Command:**
+
 ```bash
 /skills-installer --search "database optimization"
 ```
 
 **Results:**
+
 ```
 [Search Results: database optimization]
 
 1. prisma-advanced
    Description: Advanced Prisma patterns with query optimization
    Tags: database, orm, optimization, performance
-   
+
 2. postgres-performance
    Description: PostgreSQL query optimization and indexing
    Tags: database, postgresql, performance, sql
-   
+
 3. mongodb-aggregation
    Description: MongoDB aggregation pipeline mastery
    Tags: database, mongodb, nosql, performance
@@ -323,7 +339,7 @@ export function TodoForm({ addTodo }: Props) {
     todos,
     (state, newTodo) => [...state, newTodo]
   );
-  
+
   // ...
 }
 ```
@@ -351,13 +367,15 @@ Configuration:
 ```
 ```typescript
 // Before skill:
-function getData(id: any) {  // Claude might use 'any'
+function getData(id: any) {
+  // Claude might use 'any'
   return data[id];
 }
 
 // After skill activated:
-function getData(id: string): User | undefined {  // Strict types
-  const user = data[id];  // Could be undefined
+function getData(id: string): User | undefined {
+  // Strict types
+  const user = data[id]; // Could be undefined
   if (!user) {
     throw new Error(`User ${id} not found`);
   }
@@ -434,11 +452,11 @@ Installed: 0
 ✓ react-19-expert (v1.2.0)
   Last used: 2 hours ago
   Activations: 45 times
-  
+
 ✓ typescript-strict (v2.1.0)
   Last used: Active now
   Activations: 120 times
-  
+
 ✓ next-15-expert (v1.0.5)
   Last used: Yesterday
   Activations: 30 times
@@ -455,11 +473,11 @@ Storage: 2.4 MB
 1. prisma-advanced
    Description: Advanced Prisma patterns with query optimization
    Tags: database, orm, optimization, performance
-   
+
 2. postgres-performance
    Description: PostgreSQL query optimization and indexing
    Tags: database, postgresql, performance, sql
-   
+
 3. mongodb-aggregation
    Description: MongoDB aggregation pipeline mastery
    Tags: database, mongodb, nosql, performance
@@ -469,6 +487,7 @@ Found 3 matching skills
 
 ## Skill Categories
 ### Frontend Skills
+
 - `react-19-expert` - React 19 features
 - `next-15-expert` - Next.js 15 patterns
 - `vue-3-composition` - Vue 3 Composition API
@@ -477,6 +496,7 @@ Found 3 matching skills
 - `framer-motion-advanced` - Animation patterns
 
 ### Backend Skills
+
 - `node-20-performance` - Node.js optimization
 - `fastapi-async` - FastAPI async patterns
 - `nestjs-microservices` - NestJS architecture
@@ -484,6 +504,7 @@ Found 3 matching skills
 - `graphql-federation` - GraphQL Federation
 
 ### Database Skills
+
 - `prisma-advanced` - Prisma ORM mastery
 - `postgres-performance` - PostgreSQL optimization
 - `mongodb-aggregation` - MongoDB pipelines
@@ -491,6 +512,7 @@ Found 3 matching skills
 - `drizzle-orm` - Drizzle ORM patterns
 
 ### DevOps Skills
+
 - `docker-optimization` - Docker best practices
 - `kubernetes-deployment` - K8s deployments
 - `github-actions-ci` - GitHub Actions CI/CD
@@ -498,6 +520,7 @@ Found 3 matching skills
 - `vercel-edge` - Vercel Edge Functions
 
 ### Testing Skills
+
 - `vitest-advanced` - Vitest mastery
 - `playwright-e2e` - Playwright E2E
 - `cypress-component` - Cypress testing
@@ -505,6 +528,7 @@ Found 3 matching skills
 - `jest-migration` - Jest to Vitest migration
 
 ### Security Skills
+
 - `owasp-top-10` - OWASP security patterns
 - `auth-best-practices` - Authentication/authorization
 - `input-validation` - Input sanitization
@@ -602,9 +626,7 @@ Claude: *Combines knowledge from all 3 skills*
     "React Compiler",
     "New hooks"
   ],
-  "dependencies": [
-    "typescript-strict"
-  ]
+  "dependencies": ["typescript-strict"]
 }
 ```
 ```bash
@@ -641,26 +663,26 @@ Claude: *Combines knowledge from all 3 skills*
     "React Compiler",
     "New hooks"
   ],
-  "dependencies": [
-    "typescript-strict"
-  ]
+  "dependencies": ["typescript-strict"]
 }
 ```
 
 ## Updating Skills
 **Command:**
+
 ```bash
 /skills-installer --update
 ```
 
 **Update Process:**
+
 ```
 [Checking for Updates]
 
 ✓ react-19-expert: v1.2.0 → v1.3.0 available
   - Added Server Actions patterns
   - Improved useOptimistic examples
-  
+
 ✓ typescript-strict: Up to date (v2.1.0)
 
 ✓ next-15-expert: v1.0.5 → v1.1.0 available
@@ -684,7 +706,7 @@ All skills up to date
 ✓ react-19-expert: v1.2.0 → v1.3.0 available
   - Added Server Actions patterns
   - Improved useOptimistic examples
-  
+
 ✓ typescript-strict: Up to date (v2.1.0)
 
 ✓ next-15-expert: v1.0.5 → v1.1.0 available
@@ -730,8 +752,8 @@ git pull
 {
   "skills": [
     { "name": "typescript-strict", "priority": 10 },
-    { "name": "react-19-expert", "priority": 20 },  // Higher priority
-    { "name": "next-15-expert", "priority": 30 }   // Highest priority
+    { "name": "react-19-expert", "priority": 20 }, // Higher priority
+    { "name": "next-15-expert", "priority": 30 } // Highest priority
   ]
 }
 ```
@@ -756,8 +778,8 @@ git pull
 {
   "skills": [
     { "name": "typescript-strict", "priority": 10 },
-    { "name": "react-19-expert", "priority": 20 },  // Higher priority
-    { "name": "next-15-expert", "priority": 30 }   // Highest priority
+    { "name": "react-19-expert", "priority": 20 }, // Higher priority
+    { "name": "next-15-expert", "priority": 30 } // Highest priority
   ]
 }
 ```

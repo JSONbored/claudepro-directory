@@ -167,9 +167,13 @@
           "https://cursor.com/docs/context/rules",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/cursor-rules.mdx"
         ],
-        "externalSourceUrls": ["https://cursor.com/docs/context/rules"]
+        "externalSourceUrls": [
+          "https://cursor.com/docs/context/rules"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:debug",
@@ -194,9 +198,13 @@
           "https://docs.claude.ai/commands/debug",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/debug.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/debug"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/debug"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:docs",
@@ -221,9 +229,13 @@
           "https://docs.claude.ai/commands/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/docs.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/docs"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/docs"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:explain",
@@ -248,9 +260,13 @@
           "https://docs.claude.ai/commands/explain",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/explain.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/explain"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/explain"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:optimize",
@@ -275,9 +291,13 @@
           "https://docs.claude.ai/commands/optimize",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/optimize.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/optimize"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/optimize"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:refactor",
@@ -302,9 +322,13 @@
           "https://docs.claude.ai/commands/refactor",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/refactor.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/refactor"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/refactor"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:refactor-code",
@@ -329,9 +353,13 @@
           "https://docs.claude.ai/commands/refactor",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/refactor-code.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/refactor"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/refactor"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:review",
@@ -356,9 +384,13 @@
           "https://docs.claude.ai/commands/review",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/review.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/review"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/review"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:security",
@@ -383,9 +415,13 @@
           "https://docs.claude.ai/commands/security",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/security"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/security"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:security-audit",
@@ -410,9 +446,13 @@
           "https://docs.claude.ai/commands/security-audit",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security-audit.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/security-audit"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/security-audit"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:test-advanced",
@@ -437,9 +477,13 @@
           "https://docs.claude.ai/commands/test",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/test-advanced.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/test"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/test"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "commands:zod-audit",
@@ -464,7 +508,9 @@
           "https://owasp.org/www-project-top-ten/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx"
         ],
-        "externalSourceUrls": ["https://owasp.org/www-project-top-ten/"]
+        "externalSourceUrls": [
+          "https://owasp.org/www-project-top-ten/"
+        ]
       },
       "warnings": []
     },
@@ -491,9 +537,13 @@
           "https://www.w3.org/WAI/WCAG21/quickref/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/accessibility-checker.mdx"
         ],
-        "externalSourceUrls": ["https://www.w3.org/WAI/WCAG21/quickref/"]
+        "externalSourceUrls": [
+          "https://www.w3.org/WAI/WCAG21/quickref/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "statuslines:accessibility-first-statusline",
@@ -518,7 +568,9 @@
           "https://www.w3.org/WAI/WCAG21/quickref/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/accessibility-first-statusline.mdx"
         ],
-        "externalSourceUrls": ["https://www.w3.org/WAI/WCAG21/quickref/"]
+        "externalSourceUrls": [
+          "https://www.w3.org/WAI/WCAG21/quickref/"
+        ]
       },
       "warnings": []
     },
@@ -636,7 +688,9 @@
           "https://docs.claude.com/en/docs/claude-code/skills"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "skills:ai-agent-observability-incident-response",
@@ -661,7 +715,9 @@
           "https://opentelemetry.io/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-agent-observability-incident-response.mdx"
         ],
-        "externalSourceUrls": ["https://opentelemetry.io/docs/"]
+        "externalSourceUrls": [
+          "https://opentelemetry.io/docs/"
+        ]
       },
       "warnings": []
     },
@@ -688,7 +744,9 @@
           "https://www.ycombinator.com/library",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-business-idea-validation-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://www.ycombinator.com/library"]
+        "externalSourceUrls": [
+          "https://www.ycombinator.com/library"
+        ]
       },
       "warnings": []
     },
@@ -773,7 +831,9 @@
           "https://epoch.ai/data-insights/context-windows",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/ai-model-performance-dashboard.mdx"
         ],
-        "externalSourceUrls": ["https://epoch.ai/data-insights/context-windows"]
+        "externalSourceUrls": [
+          "https://epoch.ai/data-insights/context-windows"
+        ]
       },
       "warnings": []
     },
@@ -829,7 +889,9 @@
           "https://developers.google.com/search/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-search-ranking-content-cluster-strategy.mdx"
         ],
-        "externalSourceUrls": ["https://developers.google.com/search/docs"]
+        "externalSourceUrls": [
+          "https://developers.google.com/search/docs"
+        ]
       },
       "warnings": []
     },
@@ -916,7 +978,9 @@
           "https://swagger.io/specification/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-design-expert.mdx"
         ],
-        "externalSourceUrls": ["https://swagger.io/specification/"]
+        "externalSourceUrls": [
+          "https://swagger.io/specification/"
+        ]
       },
       "warnings": []
     },
@@ -972,7 +1036,9 @@
           "https://swagger.io/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx"
         ],
-        "externalSourceUrls": ["https://swagger.io/docs/"]
+        "externalSourceUrls": [
+          "https://swagger.io/docs/"
+        ]
       },
       "warnings": []
     },
@@ -999,7 +1065,9 @@
           "https://swagger.io/specification/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-first-development-architect.mdx"
         ],
-        "externalSourceUrls": ["https://swagger.io/specification/"]
+        "externalSourceUrls": [
+          "https://swagger.io/specification/"
+        ]
       },
       "warnings": []
     },
@@ -1090,7 +1158,9 @@
           "https://github.com/openai/whisper"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:auto-code-formatter-hook",
@@ -1115,7 +1185,9 @@
           "https://prettier.io/docs/en/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-code-formatter-hook.mdx"
         ],
-        "externalSourceUrls": ["https://prettier.io/docs/en/"]
+        "externalSourceUrls": [
+          "https://prettier.io/docs/en/"
+        ]
       },
       "warnings": []
     },
@@ -1200,7 +1272,9 @@
           "https://microsoft.github.io/autogen/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/autogen-workflow.mdx"
         ],
-        "externalSourceUrls": ["https://microsoft.github.io/autogen/"]
+        "externalSourceUrls": [
+          "https://microsoft.github.io/autogen/"
+        ]
       },
       "warnings": []
     },
@@ -1227,7 +1301,9 @@
           "https://docs.aws.amazon.com/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx"
         ],
-        "externalSourceUrls": ["https://docs.aws.amazon.com/"]
+        "externalSourceUrls": [
+          "https://docs.aws.amazon.com/"
+        ]
       },
       "warnings": []
     },
@@ -1254,7 +1330,9 @@
           "https://aws.amazon.com/cloudformation/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/aws-cloudformation-validator.mdx"
         ],
-        "externalSourceUrls": ["https://aws.amazon.com/cloudformation/"]
+        "externalSourceUrls": [
+          "https://aws.amazon.com/cloudformation/"
+        ]
       },
       "warnings": []
     },
@@ -1428,7 +1506,9 @@
           "https://biomejs.dev/linter/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx"
         ],
-        "externalSourceUrls": ["https://biomejs.dev/linter/"]
+        "externalSourceUrls": [
+          "https://biomejs.dev/linter/"
+        ]
       },
       "warnings": []
     },
@@ -1484,7 +1564,9 @@
           "https://box.dev/guides/box-mcp/remote/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://box.dev/guides/box-mcp/remote/"]
+        "externalSourceUrls": [
+          "https://box.dev/guides/box-mcp/remote/"
+        ]
       },
       "warnings": []
     },
@@ -1511,7 +1593,9 @@
           "https://playwright.dev/docs/best-practices",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx"
         ],
-        "externalSourceUrls": ["https://playwright.dev/docs/best-practices"]
+        "externalSourceUrls": [
+          "https://playwright.dev/docs/best-practices"
+        ]
       },
       "warnings": []
     },
@@ -1567,9 +1651,13 @@
           "https://bun.sh/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/bun-runtime-modern-javascript.mdx"
         ],
-        "externalSourceUrls": ["https://bun.sh/docs"]
+        "externalSourceUrls": [
+          "https://bun.sh/docs"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "statuslines:burn-rate-monitor",
@@ -1745,7 +1833,9 @@
           "https://docs.claude.com/en/docs/claude-code/checkpointing"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "guides:claude-4-extended-thinking-tutorial",
@@ -2086,7 +2176,9 @@
           "https://modelcontextprotocol.io/introduction",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-mcp-skills-integration-agent.mdx"
         ],
-        "externalSourceUrls": ["https://modelcontextprotocol.io/introduction"]
+        "externalSourceUrls": [
+          "https://modelcontextprotocol.io/introduction"
+        ]
       },
       "warnings": []
     },
@@ -2233,7 +2325,9 @@
           "https://docs.claude.com/en/docs/claude-code/claude-md"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "agents:claude-md-knowledge-manager-agent",
@@ -2287,9 +2381,13 @@
           "https://matplotlib.org/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cli-data-viz-quickstart.mdx"
         ],
-        "externalSourceUrls": ["https://matplotlib.org/"]
+        "externalSourceUrls": [
+          "https://matplotlib.org/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "mcp:clickup-mcp-server",
@@ -2431,9 +2529,13 @@
           "https://developers.cloudflare.com/workers-ai/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-ai-edge.mdx"
         ],
-        "externalSourceUrls": ["https://developers.cloudflare.com/workers-ai/"]
+        "externalSourceUrls": [
+          "https://developers.cloudflare.com/workers-ai/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "skills:cloudflare-workers-d1-kv-r2-capability-pack",
@@ -2458,7 +2560,9 @@
           "https://developers.cloudflare.com/workers/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://developers.cloudflare.com/workers/"]
+        "externalSourceUrls": [
+          "https://developers.cloudflare.com/workers/"
+        ]
       },
       "warnings": []
     },
@@ -2600,7 +2704,9 @@
           "https://docs.claude.ai/rules/code-review",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/code-review-expert.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/rules/code-review"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/rules/code-review"
+        ]
       },
       "warnings": []
     },
@@ -2627,7 +2733,9 @@
           "https://google.github.io/eng-practices/review/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/code-reviewer-agent.mdx"
         ],
-        "externalSourceUrls": ["https://google.github.io/eng-practices/review/"]
+        "externalSourceUrls": [
+          "https://google.github.io/eng-practices/review/"
+        ]
       },
       "warnings": []
     },
@@ -2654,7 +2762,9 @@
           "https://jestjs.io/docs/getting-started",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-test-runner-hook.mdx"
         ],
-        "externalSourceUrls": ["https://jestjs.io/docs/getting-started"]
+        "externalSourceUrls": [
+          "https://jestjs.io/docs/getting-started"
+        ]
       },
       "warnings": []
     },
@@ -2681,7 +2791,9 @@
           "https://refactoring.guru/refactoring/catalog",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/codebase-migration-refactoring-agent.mdx"
         ],
-        "externalSourceUrls": ["https://refactoring.guru/refactoring/catalog"]
+        "externalSourceUrls": [
+          "https://refactoring.guru/refactoring/catalog"
+        ]
       },
       "warnings": []
     },
@@ -2832,7 +2944,9 @@
           "https://docs.claude.com/en/docs/claude-code/analysis"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "agents:context-window-optimizer-agent",
@@ -2857,7 +2971,9 @@
           "https://epoch.ai/data-insights/context-windows",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/context-window-optimizer-agent.mdx"
         ],
-        "externalSourceUrls": ["https://epoch.ai/data-insights/context-windows"]
+        "externalSourceUrls": [
+          "https://epoch.ai/data-insights/context-windows"
+        ]
       },
       "warnings": []
     },
@@ -2890,7 +3006,9 @@
           "https://github.com/UPinar/contrastapi"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:css-unused-selector-detector",
@@ -2944,9 +3062,13 @@
           "https://pandas.pydata.org/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/csv-excel-data-wrangler.mdx"
         ],
-        "externalSourceUrls": ["https://pandas.pydata.org/"]
+        "externalSourceUrls": [
+          "https://pandas.pydata.org/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "skills:cursor-windsurf-ai-ide-setup",
@@ -2971,9 +3093,13 @@
           "https://cursor.sh/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cursor-windsurf-ai-ide-setup.mdx"
         ],
-        "externalSourceUrls": ["https://cursor.sh/docs"]
+        "externalSourceUrls": [
+          "https://cursor.sh/docs"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "statuslines:daily-usage-percentage-tracker",
@@ -3027,7 +3153,9 @@
           "https://docs.daloopa.com/docs/daloopa-mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://docs.daloopa.com/docs/daloopa-mcp"]
+        "externalSourceUrls": [
+          "https://docs.daloopa.com/docs/daloopa-mcp"
+        ]
       },
       "warnings": []
     },
@@ -3140,7 +3268,9 @@
           "https://www.postgresql.org/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/database-expert.mdx"
         ],
-        "externalSourceUrls": ["https://www.postgresql.org/docs/"]
+        "externalSourceUrls": [
+          "https://www.postgresql.org/docs/"
+        ]
       },
       "warnings": []
     },
@@ -3167,7 +3297,9 @@
           "https://knexjs.org/guide/migrations.html",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-migration-runner.mdx"
         ],
-        "externalSourceUrls": ["https://knexjs.org/guide/migrations.html"]
+        "externalSourceUrls": [
+          "https://knexjs.org/guide/migrations.html"
+        ]
       },
       "warnings": []
     },
@@ -3198,7 +3330,9 @@
           "https://www.postgresql.org/docs/current/runtime-config-logging.html"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "agents:database-specialist-agent",
@@ -3223,7 +3357,9 @@
           "https://www.postgresql.org/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/database-specialist-agent.mdx"
         ],
-        "externalSourceUrls": ["https://www.postgresql.org/docs/"]
+        "externalSourceUrls": [
+          "https://www.postgresql.org/docs/"
+        ]
       },
       "warnings": []
     },
@@ -3371,7 +3507,9 @@
           "https://docs.npmjs.com/cli/v8/commands/npm-audit"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:dependency-update-checker",
@@ -3400,7 +3538,9 @@
           "https://docs.npmjs.com/cli/v8/commands/npm-audit"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "agents:devops-sre-expert",
@@ -3425,7 +3565,9 @@
           "https://kubernetes.io/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/devops-sre-expert.mdx"
         ],
-        "externalSourceUrls": ["https://kubernetes.io/docs/"]
+        "externalSourceUrls": [
+          "https://kubernetes.io/docs/"
+        ]
       },
       "warnings": []
     },
@@ -3456,7 +3598,9 @@
           "https://discord.com/developers/docs/resources/webhook"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "mcp:discord-mcp-server",
@@ -3540,7 +3684,9 @@
           "https://docs.docker.com/compose/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docker-compose-production-blueprints.mdx"
         ],
-        "externalSourceUrls": ["https://docs.docker.com/compose/"]
+        "externalSourceUrls": [
+          "https://docs.docker.com/compose/"
+        ]
       },
       "warnings": []
     },
@@ -3567,9 +3713,13 @@
           "https://docs.docker.com/compose/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-container-auto-rebuild.mdx"
         ],
-        "externalSourceUrls": ["https://docs.docker.com/compose/"]
+        "externalSourceUrls": [
+          "https://docs.docker.com/compose/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:docker-image-security-scanner",
@@ -3594,9 +3744,13 @@
           "https://aquasecurity.github.io/trivy/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-image-security-scanner.mdx"
         ],
-        "externalSourceUrls": ["https://aquasecurity.github.io/trivy/"]
+        "externalSourceUrls": [
+          "https://aquasecurity.github.io/trivy/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "mcp:docker-mcp-server",
@@ -3621,7 +3775,9 @@
           "https://docs.docker.com/engine/api/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://docs.docker.com/engine/api/"]
+        "externalSourceUrls": [
+          "https://docs.docker.com/engine/api/"
+        ]
       },
       "warnings": []
     },
@@ -3648,9 +3804,13 @@
           "https://jsdoc.app/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-coverage-checker.mdx"
         ],
-        "externalSourceUrls": ["https://jsdoc.app/"]
+        "externalSourceUrls": [
+          "https://jsdoc.app/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:documentation-generator",
@@ -3675,9 +3835,13 @@
           "https://jsdoc.app/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-generator.mdx"
         ],
-        "externalSourceUrls": ["https://jsdoc.app/"]
+        "externalSourceUrls": [
+          "https://jsdoc.app/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "skills:docx-report-generator",
@@ -3702,9 +3866,13 @@
           "https://docxtpl.readthedocs.io/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docx-report-generator.mdx"
         ],
-        "externalSourceUrls": ["https://docxtpl.readthedocs.io/"]
+        "externalSourceUrls": [
+          "https://docxtpl.readthedocs.io/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "agents:domain-specialist-ai-agents",
@@ -3787,7 +3955,9 @@
           "https://12factor.net/config",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-variable-validator.mdx"
         ],
-        "externalSourceUrls": ["https://12factor.net/config"]
+        "externalSourceUrls": [
+          "https://12factor.net/config"
+        ]
       },
       "warnings": []
     },
@@ -3872,7 +4042,9 @@
           "https://ethereum.org/developers/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx"
         ],
-        "externalSourceUrls": ["https://ethereum.org/developers/docs/"]
+        "externalSourceUrls": [
+          "https://ethereum.org/developers/docs/"
+        ]
       },
       "warnings": []
     },
@@ -3928,9 +4100,13 @@
           "https://fastapi.tiangolo.com/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx"
         ],
-        "externalSourceUrls": ["https://fastapi.tiangolo.com/"]
+        "externalSourceUrls": [
+          "https://fastapi.tiangolo.com/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "mcp:figma-mcp-server",
@@ -4013,7 +4189,9 @@
           "https://modelcontextprotocol.io/examples",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/filesystem-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://modelcontextprotocol.io/examples"]
+        "externalSourceUrls": [
+          "https://modelcontextprotocol.io/examples"
+        ]
       },
       "warnings": []
     },
@@ -4242,7 +4420,9 @@
           "https://react.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/frontend-specialist-agent.mdx"
         ],
-        "externalSourceUrls": ["https://react.dev/"]
+        "externalSourceUrls": [
+          "https://react.dev/"
+        ]
       },
       "warnings": []
     },
@@ -4298,9 +4478,13 @@
           "https://docs.claude.ai/commands/test-gen",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/generate-tests.mdx"
         ],
-        "externalSourceUrls": ["https://docs.claude.ai/commands/test-gen"]
+        "externalSourceUrls": [
+          "https://docs.claude.ai/commands/test-gen"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "hooks:git-auto-commit-on-stop",
@@ -4381,7 +4565,9 @@
           "https://modelcontextprotocol.io/examples",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://modelcontextprotocol.io/examples"]
+        "externalSourceUrls": [
+          "https://modelcontextprotocol.io/examples"
+        ]
       },
       "warnings": []
     },
@@ -4408,7 +4594,9 @@
           "https://pre-commit.com/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-pre-commit-validator.mdx"
         ],
-        "externalSourceUrls": ["https://pre-commit.com/"]
+        "externalSourceUrls": [
+          "https://pre-commit.com/"
+        ]
       },
       "warnings": []
     },
@@ -4435,9 +4623,13 @@
           "https://www.conventionalcommits.org/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/git-smart-commit.mdx"
         ],
-        "externalSourceUrls": ["https://www.conventionalcommits.org/"]
+        "externalSourceUrls": [
+          "https://www.conventionalcommits.org/"
+        ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "statuslines:git-status-statusline",
@@ -4462,7 +4654,9 @@
           "https://git-scm.com/docs/git-status",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/git-status-statusline.mdx"
         ],
-        "externalSourceUrls": ["https://git-scm.com/docs/git-status"]
+        "externalSourceUrls": [
+          "https://git-scm.com/docs/git-status"
+        ]
       },
       "warnings": []
     },
@@ -4489,7 +4683,9 @@
           "https://git-cliff.org/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/git-cliff-release-changelog-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://git-cliff.org/docs/"]
+        "externalSourceUrls": [
+          "https://git-cliff.org/docs/"
+        ]
       },
       "warnings": []
     },
@@ -4516,7 +4712,9 @@
           "https://docs.github.com/en/actions",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx"
         ],
-        "externalSourceUrls": ["https://docs.github.com/en/actions"]
+        "externalSourceUrls": [
+          "https://docs.github.com/en/actions"
+        ]
       },
       "warnings": []
     },
@@ -4543,7 +4741,9 @@
           "https://docs.github.com/actions",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-secure-cicd-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://docs.github.com/actions"]
+        "externalSourceUrls": [
+          "https://docs.github.com/actions"
+        ]
       },
       "warnings": []
     },
@@ -4570,7 +4770,9 @@
           "https://docs.github.com/en/actions",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/github-actions-workflow-validator.mdx"
         ],
-        "externalSourceUrls": ["https://docs.github.com/en/actions"]
+        "externalSourceUrls": [
+          "https://docs.github.com/en/actions"
+        ]
       },
       "warnings": []
     },
@@ -4655,7 +4857,9 @@
           "https://go.dev/doc/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx"
         ],
-        "externalSourceUrls": ["https://go.dev/doc/"]
+        "externalSourceUrls": [
+          "https://go.dev/doc/"
+        ]
       },
       "warnings": []
     },
@@ -4682,7 +4886,9 @@
           "https://go.dev/doc/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/golang-expert.mdx"
         ],
-        "externalSourceUrls": ["https://go.dev/doc/"]
+        "externalSourceUrls": [
+          "https://go.dev/doc/"
+        ]
       },
       "warnings": []
     },
@@ -4737,7 +4943,9 @@
           "https://ai.google.dev/gemini-api/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/google-workspace-gemini-automation.mdx"
         ],
-        "externalSourceUrls": ["https://ai.google.dev/gemini-api/docs"]
+        "externalSourceUrls": [
+          "https://ai.google.dev/gemini-api/docs"
+        ]
       },
       "warnings": []
     },
@@ -4764,7 +4972,9 @@
           "https://www.apollographql.com/docs/federation/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx"
         ],
-        "externalSourceUrls": ["https://www.apollographql.com/docs/federation/"]
+        "externalSourceUrls": [
+          "https://www.apollographql.com/docs/federation/"
+        ]
       },
       "warnings": []
     },
@@ -4819,7 +5029,9 @@
           "https://heyclau.de/mcp/heyclaude-mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
-        "externalSourceUrls": ["https://heyclau.de/mcp/heyclaude-mcp"]
+        "externalSourceUrls": [
+          "https://heyclau.de/mcp/heyclaude-mcp"
+        ]
       },
       "warnings": []
     },
@@ -4850,7 +5062,9 @@
           "https://docs.claude.com/en/docs/claude-code/hooks"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "mcp:hubspot-mcp-server",
@@ -4875,7 +5089,9 @@
           "https://developers.hubspot.com/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://developers.hubspot.com/mcp"]
+        "externalSourceUrls": [
+          "https://developers.hubspot.com/mcp"
+        ]
       },
       "warnings": []
     },
@@ -4902,7 +5118,9 @@
           "https://huggingface.co/settings/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hugging-face-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://huggingface.co/settings/mcp"]
+        "externalSourceUrls": [
+          "https://huggingface.co/settings/mcp"
+        ]
       },
       "warnings": []
     },
@@ -4929,7 +5147,9 @@
           "https://typicode.github.io/husky/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://typicode.github.io/husky/"]
+        "externalSourceUrls": [
+          "https://typicode.github.io/husky/"
+        ]
       },
       "warnings": []
     },
@@ -4984,9 +5204,13 @@
           "https://tesseract-ocr.github.io/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx"
         ],
-        "externalSourceUrls": ["https://tesseract-ocr.github.io/"]
+        "externalSourceUrls": [
+          "https://tesseract-ocr.github.io/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "skills:indexnow-search-indexing-accelerator",
@@ -5011,7 +5235,9 @@
           "https://www.indexnow.org/documentation",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/indexnow-search-indexing-accelerator.mdx"
         ],
-        "externalSourceUrls": ["https://www.indexnow.org/documentation"]
+        "externalSourceUrls": [
+          "https://www.indexnow.org/documentation"
+        ]
       },
       "warnings": []
     },
@@ -5067,7 +5293,9 @@
           "https://invideo.io/ai/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://invideo.io/ai/mcp"]
+        "externalSourceUrls": [
+          "https://invideo.io/ai/mcp"
+        ]
       },
       "warnings": []
     },
@@ -5094,7 +5322,9 @@
           "https://jam.dev/docs/debug-a-jam/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jam-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://jam.dev/docs/debug-a-jam/mcp"]
+        "externalSourceUrls": [
+          "https://jam.dev/docs/debug-a-jam/mcp"
+        ]
       },
       "warnings": []
     },
@@ -5178,9 +5408,13 @@
           "https://ajv.js.org/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/json-schema-validation-transformation.mdx"
         ],
-        "externalSourceUrls": ["https://ajv.js.org/"]
+        "externalSourceUrls": [
+          "https://ajv.js.org/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:json-schema-validator",
@@ -5233,7 +5467,9 @@
           "https://kubernetes.io/docs/concepts/security/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx"
         ],
-        "externalSourceUrls": ["https://kubernetes.io/docs/concepts/security/"]
+        "externalSourceUrls": [
+          "https://kubernetes.io/docs/concepts/security/"
+        ]
       },
       "warnings": []
     },
@@ -5348,7 +5584,9 @@
           "https://linear.app/docs/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://linear.app/docs/mcp"]
+        "externalSourceUrls": [
+          "https://linear.app/docs/mcp"
+        ]
       },
       "warnings": []
     },
@@ -5556,7 +5794,9 @@
           "https://docs.claude.com/en/docs/claude-code/mcp"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "statuslines:mcp-server-status-monitor",
@@ -5697,7 +5937,9 @@
           "https://mintlify.com/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mintlify-documentation-automation.mdx"
         ],
-        "externalSourceUrls": ["https://mintlify.com/docs"]
+        "externalSourceUrls": [
+          "https://mintlify.com/docs"
+        ]
       },
       "warnings": []
     },
@@ -5724,7 +5966,9 @@
           "https://mintlify.com/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mintlify-docs.mdx"
         ],
-        "externalSourceUrls": ["https://mintlify.com/docs"]
+        "externalSourceUrls": [
+          "https://mintlify.com/docs"
+        ]
       },
       "warnings": []
     },
@@ -5751,7 +5995,9 @@
           "https://developer.apple.com/documentation/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx"
         ],
-        "externalSourceUrls": ["https://developer.apple.com/documentation/"]
+        "externalSourceUrls": [
+          "https://developer.apple.com/documentation/"
+        ]
       },
       "warnings": []
     },
@@ -5778,7 +6024,9 @@
           "https://developer.apple.com/documentation/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx"
         ],
-        "externalSourceUrls": ["https://developer.apple.com/documentation/"]
+        "externalSourceUrls": [
+          "https://developer.apple.com/documentation/"
+        ]
       },
       "warnings": []
     },
@@ -5892,7 +6140,9 @@
           "https://turbo.build/repo/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/monorepo-workspace-manager.mdx"
         ],
-        "externalSourceUrls": ["https://turbo.build/repo/docs"]
+        "externalSourceUrls": [
+          "https://turbo.build/repo/docs"
+        ]
       },
       "warnings": []
     },
@@ -6034,7 +6284,9 @@
           "https://docs.n8n.io/advanced-ai/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-ai-agent-workflow-architect.mdx"
         ],
-        "externalSourceUrls": ["https://docs.n8n.io/advanced-ai/"]
+        "externalSourceUrls": [
+          "https://docs.n8n.io/advanced-ai/"
+        ]
       },
       "warnings": []
     },
@@ -6061,7 +6313,9 @@
           "https://docs.n8n.io/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://docs.n8n.io/"]
+        "externalSourceUrls": [
+          "https://docs.n8n.io/"
+        ]
       },
       "warnings": []
     },
@@ -6088,7 +6342,9 @@
           "https://docs.n8n.io/hosting/securing/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-production-security-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://docs.n8n.io/hosting/securing/"]
+        "externalSourceUrls": [
+          "https://docs.n8n.io/hosting/securing/"
+        ]
       },
       "warnings": []
     },
@@ -6144,7 +6400,9 @@
           "https://nextjs.org/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/nextjs-15-performance-architect.mdx"
         ],
-        "externalSourceUrls": ["https://nextjs.org/docs"]
+        "externalSourceUrls": [
+          "https://nextjs.org/docs"
+        ]
       },
       "warnings": []
     },
@@ -6199,7 +6457,9 @@
           "https://developers.notion.com/docs/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://developers.notion.com/docs/mcp"]
+        "externalSourceUrls": [
+          "https://developers.notion.com/docs/mcp"
+        ]
       },
       "warnings": []
     },
@@ -6348,7 +6608,9 @@
           "https://opennext.js.org/cloudflare/get-started",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/opennext-cloudflare-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://opennext.js.org/cloudflare/get-started"]
+        "externalSourceUrls": [
+          "https://opennext.js.org/cloudflare/get-started"
+        ]
       },
       "warnings": []
     },
@@ -6403,7 +6665,9 @@
           "https://web.dev/articles/vitals",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/pagespeed-insights-optimizer.mdx"
         ],
-        "externalSourceUrls": ["https://web.dev/articles/vitals"]
+        "externalSourceUrls": [
+          "https://web.dev/articles/vitals"
+        ]
       },
       "warnings": []
     },
@@ -6459,7 +6723,9 @@
           "https://www.paypal.ai/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://www.paypal.ai/"]
+        "externalSourceUrls": [
+          "https://www.paypal.ai/"
+        ]
       },
       "warnings": []
     },
@@ -6542,7 +6808,9 @@
           "https://web.dev/vitals/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-monitor.mdx"
         ],
-        "externalSourceUrls": ["https://web.dev/vitals/"]
+        "externalSourceUrls": [
+          "https://web.dev/vitals/"
+        ]
       },
       "warnings": []
     },
@@ -6569,7 +6837,9 @@
           "https://web.dev/performance/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/performance-optimizer-agent.mdx"
         ],
-        "externalSourceUrls": ["https://web.dev/performance/"]
+        "externalSourceUrls": [
+          "https://web.dev/performance/"
+        ]
       },
       "warnings": []
     },
@@ -6629,7 +6899,9 @@
           "https://docs.claude.com/en/docs/claude-code/extended-thinking"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "skills:playwright-e2e-testing",
@@ -6654,7 +6926,9 @@
           "https://playwright.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-e2e-testing.mdx"
         ],
-        "externalSourceUrls": ["https://playwright.dev/"]
+        "externalSourceUrls": [
+          "https://playwright.dev/"
+        ]
       },
       "warnings": []
     },
@@ -6710,7 +6984,9 @@
           "https://playwright.dev",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/playwright-test-runner.mdx"
         ],
-        "externalSourceUrls": ["https://playwright.dev"]
+        "externalSourceUrls": [
+          "https://playwright.dev"
+        ]
       },
       "warnings": []
     },
@@ -6766,7 +7042,9 @@
           "https://modelcontextprotocol.io/examples",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://modelcontextprotocol.io/examples"]
+        "externalSourceUrls": [
+          "https://modelcontextprotocol.io/examples"
+        ]
       },
       "warnings": []
     },
@@ -6822,7 +7100,9 @@
           "https://www.prisma.io/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/prisma-schema-sync.mdx"
         ],
-        "externalSourceUrls": ["https://www.prisma.io/docs"]
+        "externalSourceUrls": [
+          "https://www.prisma.io/docs"
+        ]
       },
       "warnings": []
     },
@@ -7060,7 +7340,9 @@
           "https://github.com/MohamedAbdallah-14/prompt-to-asset"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "skills:proxmox-ve-api-capability-pack",
@@ -7143,7 +7425,9 @@
           "https://pandas.pydata.org/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science.mdx"
         ],
-        "externalSourceUrls": ["https://pandas.pydata.org/docs/"]
+        "externalSourceUrls": [
+          "https://pandas.pydata.org/docs/"
+        ]
       },
       "warnings": []
     },
@@ -7170,7 +7454,9 @@
           "https://pandas.pydata.org/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science-expert.mdx"
         ],
-        "externalSourceUrls": ["https://pandas.pydata.org/docs/"]
+        "externalSourceUrls": [
+          "https://pandas.pydata.org/docs/"
+        ]
       },
       "warnings": []
     },
@@ -7253,7 +7539,9 @@
           "https://rich.readthedocs.io/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx"
         ],
-        "externalSourceUrls": ["https://rich.readthedocs.io/"]
+        "externalSourceUrls": [
+          "https://rich.readthedocs.io/"
+        ]
       },
       "warnings": []
     },
@@ -7280,7 +7568,9 @@
           "https://developers.raycast.com/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/raycast-extension-dev-publish-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://developers.raycast.com/"]
+        "externalSourceUrls": [
+          "https://developers.raycast.com/"
+        ]
       },
       "warnings": []
     },
@@ -7307,7 +7597,9 @@
           "https://react.dev/reference/react",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-19-concurrent-features-specialist.mdx"
         ],
-        "externalSourceUrls": ["https://react.dev/reference/react"]
+        "externalSourceUrls": [
+          "https://react.dev/reference/react"
+        ]
       },
       "warnings": []
     },
@@ -7334,7 +7626,9 @@
           "https://nextjs.org/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-expert.mdx"
         ],
-        "externalSourceUrls": ["https://nextjs.org/docs"]
+        "externalSourceUrls": [
+          "https://nextjs.org/docs"
+        ]
       },
       "warnings": []
     },
@@ -7361,7 +7655,9 @@
           "https://nextjs.org/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx"
         ],
-        "externalSourceUrls": ["https://nextjs.org/docs"]
+        "externalSourceUrls": [
+          "https://nextjs.org/docs"
+        ]
       },
       "warnings": []
     },
@@ -7595,7 +7891,9 @@
           "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview"
         ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:rust-cargo-check",
@@ -7648,7 +7946,9 @@
           "https://stripe.com/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/saas-pricing-experimentation-engine.mdx"
         ],
-        "externalSourceUrls": ["https://stripe.com/docs"]
+        "externalSourceUrls": [
+          "https://stripe.com/docs"
+        ]
       },
       "warnings": []
     },
@@ -7703,7 +8003,9 @@
           "https://owasp.org/www-project-top-ten/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor.mdx"
         ],
-        "externalSourceUrls": ["https://owasp.org/www-project-top-ten/"]
+        "externalSourceUrls": [
+          "https://owasp.org/www-project-top-ten/"
+        ]
       },
       "warnings": []
     },
@@ -7730,7 +8032,9 @@
           "https://owasp.org/www-project-top-ten/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor-penetration-tester.mdx"
         ],
-        "externalSourceUrls": ["https://owasp.org/www-project-top-ten/"]
+        "externalSourceUrls": [
+          "https://owasp.org/www-project-top-ten/"
+        ]
       },
       "warnings": []
     },
@@ -7757,7 +8061,9 @@
           "https://owasp.org/www-project-top-ten/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/security-scanner-hook.mdx"
         ],
-        "externalSourceUrls": ["https://owasp.org/www-project-top-ten/"]
+        "externalSourceUrls": [
+          "https://owasp.org/www-project-top-ten/"
+        ]
       },
       "warnings": []
     },
@@ -7784,7 +8090,9 @@
           "https://owasp.org/www-project-top-ten/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-first-react-components.mdx"
         ],
-        "externalSourceUrls": ["https://owasp.org/www-project-top-ten/"]
+        "externalSourceUrls": [
+          "https://owasp.org/www-project-top-ten/"
+        ]
       },
       "warnings": []
     },
@@ -7868,7 +8176,9 @@
           "https://docs.sentry.io/product/sentry-mcp/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://docs.sentry.io/product/sentry-mcp/"]
+        "externalSourceUrls": [
+          "https://docs.sentry.io/product/sentry-mcp/"
+        ]
       },
       "warnings": []
     },
@@ -8125,7 +8435,9 @@
           "https://developer.squareup.com/docs/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://developer.squareup.com/docs/mcp"]
+        "externalSourceUrls": [
+          "https://developer.squareup.com/docs/mcp"
+        ]
       },
       "warnings": []
     },
@@ -8180,7 +8492,9 @@
           "https://docs.stripe.com/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://docs.stripe.com/mcp"]
+        "externalSourceUrls": [
+          "https://docs.stripe.com/mcp"
+        ]
       },
       "warnings": []
     },
@@ -8240,7 +8554,9 @@
           "https://docs.claude.com/en/docs/claude-code/sub-agents"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "agents:subagent-factory-agent",
@@ -8294,7 +8610,9 @@
           "https://supabase.com/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx"
         ],
-        "externalSourceUrls": ["https://supabase.com/docs"]
+        "externalSourceUrls": [
+          "https://supabase.com/docs"
+        ]
       },
       "warnings": []
     },
@@ -8349,9 +8667,13 @@
           "https://kit.svelte.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/svelte-sveltekit-fullstack.mdx"
         ],
-        "externalSourceUrls": ["https://kit.svelte.dev/"]
+        "externalSourceUrls": [
+          "https://kit.svelte.dev/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "commands:tdd-workflow",
@@ -8380,7 +8702,9 @@
           "https://docs.claude.com/en/docs/claude-code/testing"
         ]
       },
-      "warnings": ["No substantial copyable asset text."]
+      "warnings": [
+        "No substantial copyable asset text."
+      ]
     },
     {
       "key": "hooks:team-summary-email-generator",
@@ -8462,7 +8786,9 @@
           "https://www.terraform.io/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/terraform-infrastructure-architect.mdx"
         ],
-        "externalSourceUrls": ["https://www.terraform.io/docs"]
+        "externalSourceUrls": [
+          "https://www.terraform.io/docs"
+        ]
       },
       "warnings": []
     },
@@ -8517,7 +8843,9 @@
           "https://playwright.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/test-automation-engineer-agent.mdx"
         ],
-        "externalSourceUrls": ["https://playwright.dev/"]
+        "externalSourceUrls": [
+          "https://playwright.dev/"
+        ]
       },
       "warnings": []
     },
@@ -8572,7 +8900,9 @@
           "https://jestjs.io/docs/getting-started",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/test-runner-hook.mdx"
         ],
-        "externalSourceUrls": ["https://jestjs.io/docs/getting-started"]
+        "externalSourceUrls": [
+          "https://jestjs.io/docs/getting-started"
+        ]
       },
       "warnings": []
     },
@@ -8599,7 +8929,9 @@
           "https://vitest.dev/guide/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx"
         ],
-        "externalSourceUrls": ["https://vitest.dev/guide/"]
+        "externalSourceUrls": [
+          "https://vitest.dev/guide/"
+        ]
       },
       "warnings": []
     },
@@ -8655,9 +8987,13 @@
           "https://trpc.io/docs/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx"
         ],
-        "externalSourceUrls": ["https://trpc.io/docs/"]
+        "externalSourceUrls": [
+          "https://trpc.io/docs/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "rules:typescript-5x-strict-mode-expert",
@@ -8768,7 +9104,9 @@
           "https://docs.unraid.net/API/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-automation-operator.mdx"
         ],
-        "externalSourceUrls": ["https://docs.unraid.net/API/"]
+        "externalSourceUrls": [
+          "https://docs.unraid.net/API/"
+        ]
       },
       "warnings": []
     },
@@ -8795,7 +9133,9 @@
           "https://docs.unraid.net/API/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-api-v2-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://docs.unraid.net/API/"]
+        "externalSourceUrls": [
+          "https://docs.unraid.net/API/"
+        ]
       },
       "warnings": []
     },
@@ -8851,7 +9191,9 @@
           "https://v0.dev/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx"
         ],
-        "externalSourceUrls": ["https://v0.dev/docs"]
+        "externalSourceUrls": [
+          "https://v0.dev/docs"
+        ]
       },
       "warnings": []
     },
@@ -8878,9 +9220,13 @@
           "https://v0.dev/docs",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/v0-rapid-prototyping.mdx"
         ],
-        "externalSourceUrls": ["https://v0.dev/docs"]
+        "externalSourceUrls": [
+          "https://v0.dev/docs"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "mcp:vercel-mcp-server",
@@ -8905,7 +9251,9 @@
           "https://vercel.com/docs/mcp/vercel-mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://vercel.com/docs/mcp/vercel-mcp"]
+        "externalSourceUrls": [
+          "https://vercel.com/docs/mcp/vercel-mcp"
+        ]
       },
       "warnings": []
     },
@@ -8932,7 +9280,9 @@
           "https://vitejs.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/vite-build-optimization.mdx"
         ],
-        "externalSourceUrls": ["https://vitejs.dev/"]
+        "externalSourceUrls": [
+          "https://vitejs.dev/"
+        ]
       },
       "warnings": []
     },
@@ -8987,7 +9337,9 @@
           "https://www.w3.org/WAI/WCAG22/quickref/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx"
         ],
-        "externalSourceUrls": ["https://www.w3.org/WAI/WCAG22/quickref/"]
+        "externalSourceUrls": [
+          "https://www.w3.org/WAI/WCAG22/quickref/"
+        ]
       },
       "warnings": []
     },
@@ -9043,9 +9395,13 @@
           "https://webassembly.org/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/webassembly-module-development.mdx"
         ],
-        "externalSourceUrls": ["https://webassembly.org/"]
+        "externalSourceUrls": [
+          "https://webassembly.org/"
+        ]
       },
-      "warnings": ["Description is long for browse/search display."]
+      "warnings": [
+        "Description is long for browse/search display."
+      ]
     },
     {
       "key": "hooks:webpack-bundle-analyzer",
@@ -9129,7 +9485,9 @@
           "https://docs.codeium.com/windsurf",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/windsurf-collaborative-development.mdx"
         ],
-        "externalSourceUrls": ["https://docs.codeium.com/windsurf"]
+        "externalSourceUrls": [
+          "https://docs.codeium.com/windsurf"
+        ]
       },
       "warnings": []
     },
@@ -9156,7 +9514,9 @@
           "https://docs.codeium.com/windsurf",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/windsurf-ai-native-ide-patterns.mdx"
         ],
-        "externalSourceUrls": ["https://docs.codeium.com/windsurf"]
+        "externalSourceUrls": [
+          "https://docs.codeium.com/windsurf"
+        ]
       },
       "warnings": []
     },
@@ -9183,7 +9543,9 @@
           "https://docs.workato.com/mcp.html",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx"
         ],
-        "externalSourceUrls": ["https://docs.workato.com/mcp.html"]
+        "externalSourceUrls": [
+          "https://docs.workato.com/mcp.html"
+        ]
       },
       "warnings": []
     },
@@ -9296,7 +9658,9 @@
           "https://developers.cloudflare.com/workers/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx"
         ],
-        "externalSourceUrls": ["https://developers.cloudflare.com/workers/"]
+        "externalSourceUrls": [
+          "https://developers.cloudflare.com/workers/"
+        ]
       },
       "warnings": []
     },
@@ -9323,7 +9687,9 @@
           "https://zod.dev/",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx"
         ],
-        "externalSourceUrls": ["https://zod.dev/"]
+        "externalSourceUrls": [
+          "https://zod.dev/"
+        ]
       },
       "warnings": []
     }

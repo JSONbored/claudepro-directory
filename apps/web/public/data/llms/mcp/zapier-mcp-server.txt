@@ -93,34 +93,48 @@ Access thousands of app integrations through Zapier's no-code automation platfor
 
 ## Examples
 ### Trigger the new customer onboarding Zap
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Trigger the new customer onboarding Zap"
 ```
+
 ### Send Slack notification when deal closes
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Send Slack notification when deal closes"
 ```
+
 ### Add form submission to Google Sheets
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Add form submission to Google Sheets"
 ```
+
 ### Create Trello card from email
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create Trello card from email"
 ```
+
 ### Trigger Zap
+
 Trigger a Zapier Zap with input data
+
 ```typescript
 // Trigger Zapier Zap
 const result = await zapier.zaps.trigger({
   zap_id: "zap-id",
   data: {
-    field: "value"
-  }
+    field: "value",
+  },
 });
 ```
 ```plaintext
@@ -140,8 +154,8 @@ Ask Claude: "Create Trello card from email"
 const result = await zapier.zaps.trigger({
   zap_id: "zap-id",
   data: {
-    field: "value"
-  }
+    field: "value",
+  },
 });
 ```
 
@@ -161,24 +175,31 @@ const result = await zapier.zaps.trigger({
 ### Task limit exceeded or Zap throttled without clear error
 
 Check Dashboard > Usage for daily/monthly task quotas (plan-specific limits). Each action counts as one task. Zaps throttled if exceeding plan limits or burst thresholds. Add Delay after Queue step to manage rate (spread out task execution). Upgrade plan for higher limits (Free: 100 tasks/month, Starter: 750 tasks/month, Professional: 2000 tasks/month, Team: 50000 tasks/month, Company: custom). Monitor task usage in Dashboard > Usage. Use Zap History to identify high-frequency Zaps. Implement delays between steps using Delay action. Consider batching tasks to reduce task count.
+
 ### API rate limit errors from connected apps
 
 Check app-specific API usage limits in Zap History (inspect failed tasks, error codes). Zapier API rate limits: 1000 requests/minute, 10000/hour, 100000/day. Check response headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset. Batch tasks where possible (combine operations). Implement delays between steps using Delay action (spread out API calls). Upgrade app plan if hitting external service limits (third-party app rate limits). Use webhooks instead of polling triggers (reduce API calls). Monitor Zap History for rate limit errors (429 status codes). Wait for rate limit reset before retrying.
+
 ### Zap fails with authentication or connection errors
 
 Use Zap History to inspect failed tasks and error codes (detailed error messages). Reauthenticate accounts if credentials expired (Dashboard > My Apps > Reconnect). Check app connection status in My Apps (verify connections are active). Verify OAuth redirect URLs correct (check app settings, redirect URI configuration). Test connection with sample trigger (use Test trigger button in Zap editor). Check personal authentication token not expired (regenerate at mcp.zapier.com if needed). Verify token has required permissions (Zap-level permission controls). Review error messages in Zap History for specific authentication issues (OAuth errors, token expiration, scope issues).
+
 ### Data formatting or missing field errors in multi-step Zaps
 
 Check payloads in Zap History for missing/malformed data (inspect Data tab for each step). Use Formatter to transform data between steps (format dates, numbers, text). Verify required fields mapped correctly (check field mappings in Zap editor). Test each step individually (use Test step button). Enable detailed logging for debugging (Zap History > Task Details). Use Lookup Tables for data transformation (reference data mapping). Check data types match expected format (string vs number, date format). Review Zap History Data tab step-by-step to identify where data is lost or transformed incorrectly. Use Code by Zapier for complex transformations if Formatter insufficient.
+
 ### Zapier MCP server authentication errors with API keys
 
 Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Zapier rate limit errors when processing multiple Zap requests
 
 Implement exponential backoff retry logic with jitter. Use Zapier API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed Zap data. Zapier allows 1,000 requests per hour per API key.
+
 ### Zapier Zap or task access denied errors
 
 Verify API key has access to the Zap or task. Check Zap permissions and account membership. Ensure API key has required permissions for target operations.
+
 ### Zapier MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Zapier API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

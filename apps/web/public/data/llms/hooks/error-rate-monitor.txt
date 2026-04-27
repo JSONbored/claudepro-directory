@@ -16,7 +16,7 @@ Tracks error patterns and alerts when error rates spike. This Notification hook 
 ## Features
 - Real-time error pattern detection in log files with automatic log file discovery across standard locations (logs/, var/log/, .logs/) and framework-specific locations (Next.js .next/, Node.js npm-debug.log, Python django.log)
 - Configurable error rate thresholds and alerting with environment variable configuration (ERROR_THRESHOLD_PER_FILE, TOTAL_ERROR_THRESHOLD) and customizable alert levels
-- Multi-log file monitoring (*.log, logs/*, custom paths) with recursive directory scanning and support for multiple log file formats (*.log, *.out, *.err)
+- Multi-log file monitoring (_.log, logs/_, custom paths) with recursive directory scanning and support for multiple log file formats (_.log, _.out, \*.err)
 - Error severity classification (fatal, error, warning) with pattern-based severity detection including fatal patterns (fatal, critical, panic, abort, segfault), error patterns (error, exception, failed, failure, timeout), and warning patterns (warning, warn, deprecated, notice)
 - Recent error sample display for quick debugging with truncated error messages (120 character limit) and configurable sample count (MAX_SAMPLE_ERRORS)
 - Time-based error rate calculations with configurable time windows (LOG_LINES_TO_CHECK) and Docker container log monitoring with --since time window support
@@ -101,33 +101,33 @@ count_errors_by_severity() {
   local fatal_count=0
   local error_count=0
   local warning_count=0
-  
+
   if [ ! -f "$log_file" ]; then
     return
   fi
-  
+
   # Check last N lines of the log file
   local recent_logs=$(tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null || echo "")
-  
+
   if [ -z "$recent_logs" ]; then
     return
   fi
-  
+
   # Count fatal errors
   for pattern in "${FATAL_PATTERNS[@]}"; do
     fatal_count=$((fatal_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   # Count errors (excluding fatals already counted)
   for pattern in "${ERROR_PATTERNS[@]}"; do
     error_count=$((error_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   # Count warnings
   for pattern in "${WARNING_PATTERNS[@]}"; do
     warning_count=$((warning_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   echo "$fatal_count $error_count $warning_count"
 }
 
@@ -135,11 +135,11 @@ count_errors_by_severity() {
 extract_error_samples() {
   local log_file="$1"
   local sample_count="$2"
-  
+
   if [ ! -f "$log_file" ]; then
     return
   fi
-  
+
   # Get recent error lines with timestamps if available
   tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null | \
     grep -iE '(fatal|critical|error|exception|failed)' | \
@@ -158,11 +158,11 @@ extract_error_samples() {
 check_log_directory() {
   local dir="$1"
   local pattern="$2"
-  
+
   if [ ! -d "$dir" ]; then
     return
   fi
-  
+
   find "$dir" -name "$pattern" -type f 2>/dev/null | while read -r log_file; do
     echo "$log_file"
   done
@@ -194,7 +194,7 @@ if [ -f "package.json" ]; then
   for pattern in "npm-debug.log" "yarn-error.log" "pnpm-debug.log"; do
     [ -f "$pattern" ] && LOG_FILES+=("$pattern")
   done
-  
+
   # Next.js logs
   [ -d ".next" ] && find .next -name "*.log" -type f 2>/dev/null | while read -r file; do
     LOG_FILES+=("$file")
@@ -218,7 +218,7 @@ if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
       if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "🐳 Container '$container' has $ERROR_COUNT recent errors" >&2
         TOTAL_ERRORS=$((TOTAL_ERRORS + ERROR_COUNT))
-        
+
         # Get error samples from container logs
         CONTAINER_ERRORS=$(docker logs "$container" --since=10m 2>&1 | grep -iE '(fatal|critical|error|exception)' | head -2)
         if [ -n "$CONTAINER_ERRORS" ]; then
@@ -240,27 +240,27 @@ for log_file in "${UNIQUE_LOG_FILES[@]}"; do
   if [ ! -f "$log_file" ]; then
     continue
   fi
-  
+
   # Get error counts by severity
   read -r fatal_count error_count warning_count <<< "$(count_errors_by_severity "$log_file")"
-  
+
   file_total_errors=$((fatal_count + error_count))
   TOTAL_ERRORS=$((TOTAL_ERRORS + file_total_errors))
-  
+
   if [ "$file_total_errors" -gt 0 ]; then
     FILES_WITH_ERRORS=$((FILES_WITH_ERRORS + 1))
-    
+
     log_basename=$(basename "$log_file")
-    
+
     # Report file-level errors
     if [ "$fatal_count" -gt 0 ]; then
       echo "🚨 CRITICAL: $log_basename has $fatal_count fatal errors" >&2
       CRITICAL_FILES+=("$log_file")
     fi
-    
+
     if [ "$file_total_errors" -gt "$ERROR_THRESHOLD_PER_FILE" ]; then
       echo "⚠️ ERROR SPIKE: $log_basename has $file_total_errors errors (fatal: $fatal_count, error: $error_count)" >&2
-      
+
       # Extract error samples
       echo "📝 Recent error samples from $log_basename:" >&2
       extract_error_samples "$log_file" "$MAX_SAMPLE_ERRORS" | while IFS= read -r sample; do
@@ -269,7 +269,7 @@ for log_file in "${UNIQUE_LOG_FILES[@]}"; do
     elif [ "$file_total_errors" -gt 0 ]; then
       echo "ℹ️ $log_basename: $file_total_errors errors detected" >&2
     fi
-    
+
     if [ "$warning_count" -gt 0 ]; then
       echo "⚠️ $log_basename: $warning_count warnings" >&2
     fi
@@ -289,14 +289,14 @@ if [ "$TOTAL_ERRORS" -gt "$TOTAL_ERROR_THRESHOLD" ]; then
   echo "" >&2
   echo "🚨 HIGH ERROR RATE DETECTED!" >&2
   echo "⚠️ Total errors ($TOTAL_ERRORS) exceed threshold ($TOTAL_ERROR_THRESHOLD)" >&2
-  
+
   if [ ${#CRITICAL_FILES[@]} -gt 0 ]; then
     echo "🔥 Critical files requiring immediate attention:" >&2
     for critical_file in "${CRITICAL_FILES[@]}"; do
       echo "  → $(basename "$critical_file")" >&2
     done
   fi
-  
+
 elif [ "$TOTAL_ERRORS" -gt 0 ]; then
   echo "ℹ️ Errors detected but within acceptable threshold" >&2
 else
@@ -349,33 +349,33 @@ count_errors_by_severity() {
   local fatal_count=0
   local error_count=0
   local warning_count=0
-  
+
   if [ ! -f "$log_file" ]; then
     return
   fi
-  
+
   # Check last N lines of the log file
   local recent_logs=$(tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null || echo "")
-  
+
   if [ -z "$recent_logs" ]; then
     return
   fi
-  
+
   # Count fatal errors
   for pattern in "${FATAL_PATTERNS[@]}"; do
     fatal_count=$((fatal_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   # Count errors (excluding fatals already counted)
   for pattern in "${ERROR_PATTERNS[@]}"; do
     error_count=$((error_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   # Count warnings
   for pattern in "${WARNING_PATTERNS[@]}"; do
     warning_count=$((warning_count + $(echo "$recent_logs" | grep -icE "\\b$pattern\\b" || echo "0")))
   done
-  
+
   echo "$fatal_count $error_count $warning_count"
 }
 
@@ -383,11 +383,11 @@ count_errors_by_severity() {
 extract_error_samples() {
   local log_file="$1"
   local sample_count="$2"
-  
+
   if [ ! -f "$log_file" ]; then
     return
   fi
-  
+
   # Get recent error lines with timestamps if available
   tail -"$LOG_LINES_TO_CHECK" "$log_file" 2>/dev/null | \
     grep -iE '(fatal|critical|error|exception|failed)' | \
@@ -406,11 +406,11 @@ extract_error_samples() {
 check_log_directory() {
   local dir="$1"
   local pattern="$2"
-  
+
   if [ ! -d "$dir" ]; then
     return
   fi
-  
+
   find "$dir" -name "$pattern" -type f 2>/dev/null | while read -r log_file; do
     echo "$log_file"
   done
@@ -442,7 +442,7 @@ if [ -f "package.json" ]; then
   for pattern in "npm-debug.log" "yarn-error.log" "pnpm-debug.log"; do
     [ -f "$pattern" ] && LOG_FILES+=("$pattern")
   done
-  
+
   # Next.js logs
   [ -d ".next" ] && find .next -name "*.log" -type f 2>/dev/null | while read -r file; do
     LOG_FILES+=("$file")
@@ -466,7 +466,7 @@ if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
       if [ "$ERROR_COUNT" -gt 0 ]; then
         echo "🐳 Container '$container' has $ERROR_COUNT recent errors" >&2
         TOTAL_ERRORS=$((TOTAL_ERRORS + ERROR_COUNT))
-        
+
         # Get error samples from container logs
         CONTAINER_ERRORS=$(docker logs "$container" --since=10m 2>&1 | grep -iE '(fatal|critical|error|exception)' | head -2)
         if [ -n "$CONTAINER_ERRORS" ]; then
@@ -488,27 +488,27 @@ for log_file in "${UNIQUE_LOG_FILES[@]}"; do
   if [ ! -f "$log_file" ]; then
     continue
   fi
-  
+
   # Get error counts by severity
   read -r fatal_count error_count warning_count <<< "$(count_errors_by_severity "$log_file")"
-  
+
   file_total_errors=$((fatal_count + error_count))
   TOTAL_ERRORS=$((TOTAL_ERRORS + file_total_errors))
-  
+
   if [ "$file_total_errors" -gt 0 ]; then
     FILES_WITH_ERRORS=$((FILES_WITH_ERRORS + 1))
-    
+
     log_basename=$(basename "$log_file")
-    
+
     # Report file-level errors
     if [ "$fatal_count" -gt 0 ]; then
       echo "🚨 CRITICAL: $log_basename has $fatal_count fatal errors" >&2
       CRITICAL_FILES+=("$log_file")
     fi
-    
+
     if [ "$file_total_errors" -gt "$ERROR_THRESHOLD_PER_FILE" ]; then
       echo "⚠️ ERROR SPIKE: $log_basename has $file_total_errors errors (fatal: $fatal_count, error: $error_count)" >&2
-      
+
       # Extract error samples
       echo "📝 Recent error samples from $log_basename:" >&2
       extract_error_samples "$log_file" "$MAX_SAMPLE_ERRORS" | while IFS= read -r sample; do
@@ -517,7 +517,7 @@ for log_file in "${UNIQUE_LOG_FILES[@]}"; do
     elif [ "$file_total_errors" -gt 0 ]; then
       echo "ℹ️ $log_basename: $file_total_errors errors detected" >&2
     fi
-    
+
     if [ "$warning_count" -gt 0 ]; then
       echo "⚠️ $log_basename: $warning_count warnings" >&2
     fi
@@ -537,14 +537,14 @@ if [ "$TOTAL_ERRORS" -gt "$TOTAL_ERROR_THRESHOLD" ]; then
   echo "" >&2
   echo "🚨 HIGH ERROR RATE DETECTED!" >&2
   echo "⚠️ Total errors ($TOTAL_ERRORS) exceed threshold ($TOTAL_ERROR_THRESHOLD)" >&2
-  
+
   if [ ${#CRITICAL_FILES[@]} -gt 0 ]; then
     echo "🔥 Critical files requiring immediate attention:" >&2
     for critical_file in "${CRITICAL_FILES[@]}"; do
       echo "  → $(basename "$critical_file")" >&2
     done
   fi
-  
+
 elif [ "$TOTAL_ERRORS" -gt 0 ]; then
   echo "ℹ️ Errors detected but within acceptable threshold" >&2
 else
@@ -596,6 +596,7 @@ if [ "$TOTAL_ERRORS" -gt "$TOTAL_ERROR_THRESHOLD" ]; then
 fi
 exit 0
 ```
+
 ### Docker Container Error Monitoring
 
 Enhanced hook script for Docker container error monitoring with Docker Engine 24.0+ support
@@ -616,6 +617,7 @@ if command -v docker &> /dev/null && docker info &> /dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### Error Severity Classification
 
 Enhanced hook script for error severity classification with fatal, error, and warning pattern detection
@@ -648,6 +650,7 @@ for log_file in *.log logs/*.log 2>/dev/null; do
 done
 exit 0
 ```
+
 ### Framework-Specific Log Monitoring
 
 Enhanced hook script for framework-specific log monitoring including Next.js, Node.js, and Python logs
@@ -752,24 +755,31 @@ exit 0
 ### Hook runs continuously causing terminal spam
 
 Add sleep interval or debounce logic to notification hook: sleep 60 between checks. Reduce LOG_LINES_TO_CHECK to 50 for faster processing with less output. Use notification hook throttling to limit execution frequency. Consider using file modification time checks to skip unchanged log files.
+
 ### Docker container log checks fail with permission denied
 
 Ensure user is in docker group: sudo usermod -aG docker $USER and restart session. Alternatively, skip Docker checks: remove docker logs section from script. Verify Docker Engine 24.0+ is installed and daemon is running: docker info. Check Docker daemon socket permissions.
+
 ### Log file pattern matching misses framework-specific logs
 
-Add custom log paths to LOG_DIRS array: LOG_DIRS+=('build/logs' '.next/logs'). Extend file patterns: find with -name '*.out' -o -name 'app*.log' for comprehensive coverage. Check framework-specific log locations (Next.js .next/, Django logs/, Flask app.log). Use recursive find with appropriate depth limits.
+Add custom log paths to LOG*DIRS array: LOG_DIRS+=('build/logs' '.next/logs'). Extend file patterns: find with -name '*.out' -o -name 'app\_.log' for comprehensive coverage. Check framework-specific log locations (Next.js .next/, Django logs/, Flask app.log). Use recursive find with appropriate depth limits.
+
 ### Error rate threshold alerts for normal warning messages
 
 Separate ERROR_PATTERNS from WARNING_PATTERNS in severity classification. Only count fatal+error toward threshold, exclude warnings: TOTAL_ERRORS=$((fatal_count + error_count)). Use severity-based thresholds: FATAL_THRESHOLD and ERROR_THRESHOLD separately. Configure warning-only monitoring separately from error monitoring.
+
 ### Hook performance degrades with many large log files
 
 Limit file search depth: find . -maxdepth 2 instead of recursive. Increase LOG_LINES_TO_CHECK interval but reduce file count: head -5 on find results for performance. Use file size checks to skip very large log files. Consider log rotation or archiving old log files. Set timeout limits for log file processing.
+
 ### Error samples show truncated or incomplete error messages
 
 Increase MAX_SAMPLE_ERRORS to show more error samples. Adjust line truncation limit (default 120 characters) for longer error messages. Use tail with larger line count: tail -200 for more context. Consider showing error context lines: grep -A 2 -B 2 for error context.
+
 ### Docker container log monitoring misses errors in stopped containers
 
 Check both running and stopped containers: docker ps -a --format '{{.Names}}'. Use docker logs with container ID for stopped containers. Consider monitoring container exit codes: docker ps -a --format '{{.Names}} {{.Status}}'. Add stopped container log checking with appropriate time windows.
+
 ### Time-based error rate calculations don't account for log rotation
 
-Use log file modification time to detect log rotation: stat -c %Y logfile. Check for multiple log files with rotation patterns: *.log, *.log.1, *.log.2. Use log file timestamps instead of line counts for time-based calculations. Consider using log rotation detection: check for log file size changes or new log files.
+Use log file modification time to detect log rotation: stat -c %Y logfile. Check for multiple log files with rotation patterns: _.log, _.log.1, \*.log.2. Use log file timestamps instead of line counts for time-based calculations. Consider using log rotation detection: check for log file size changes or new log files.

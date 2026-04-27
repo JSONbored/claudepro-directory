@@ -12,7 +12,6 @@
 Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 
 - `SITE_DB` (D1) for durable upvotes, private jobs listings, listing leads, commercial placements, and future dynamic site state.
-- `VOTES_DB` remains configured as a backward-compatible alias for the same database.
 - Shared between `prod` and `dev` environments in the current setup.
 
 ## D1 setup
@@ -23,7 +22,7 @@ Configured in [`wrangler.jsonc`](./wrangler.jsonc):
 pnpm --filter web exec wrangler d1 create heyclaude-votes
 ```
 
-2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for `SITE_DB`. `VOTES_DB` is currently kept as a backward-compatible alias for the same database while app code moves to site-wide dynamic-state naming.
+2. Set `database_id` returned by Cloudflare in [`wrangler.jsonc`](./wrangler.jsonc) for `SITE_DB`.
 
 3. Apply migrations:
 
@@ -53,7 +52,7 @@ pnpm --filter web deploy
 
 That command runs:
 
-1. content index generation
+1. registry artifact generation
 2. `opennextjs-cloudflare build`
 3. `opennextjs-cloudflare deploy`
 
@@ -72,12 +71,6 @@ pnpm --filter web exec wrangler secret put RESEND_API_KEY
 pnpm --filter web exec wrangler secret put RESEND_SEGMENT_ID
 pnpm --filter web exec wrangler secret put RESEND_WEBHOOK_SECRET
 pnpm --filter web exec wrangler secret put DISCORD_WEBHOOK_URL
-```
-
-Optional backward-compatible fallback:
-
-```bash
-pnpm --filter web exec wrangler secret put RESEND_AUDIENCE_ID
 ```
 
 Public vars (non-secret), set in Cloudflare dashboard for each worker environment:

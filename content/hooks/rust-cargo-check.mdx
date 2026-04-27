@@ -10,8 +10,8 @@ seoDescription: >-
   PostToolUse hook provides comprehensive Rust code validation with fast
   compilati...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/rust-cargo-check.sh && chmod +x
@@ -71,6 +71,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Fast compilation checking with cargo check including cargo check integration (cargo check command execution with fast compilation validation, incremental compilation with target directory caching, compilation error detection with detailed error reporting, compilation warning detection with warning messages), compilation optimization (incremental compilation optimization with caching, parallel compilation with job scheduling, compilation performance with build optimization, compilation caching with target directory), compilation validation (compilation syntax validation, compilation type checking, compilation borrow checking, compilation lifetime checking), and compilation reporting (compilation error reporting with detailed errors, compilation warning reporting with warnings, compilation success reporting with success messages, compilation statistics with build statistics)
@@ -124,10 +125,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/rust-cargo-check.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -151,22 +149,22 @@ fi
 if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_PATH" == *Cargo.lock ]]; then
     echo "🦀 Rust Cargo Check - Analyzing Rust code..."
     echo "📄 File: $FILE_PATH"
-    
+
     # Check if cargo is available
     if ! command -v cargo >/dev/null 2>&1; then
         echo "⚠️ Cargo not found - please install Rust toolchain"
         echo "💡 Install from: https://rustup.rs/"
         exit 1
     fi
-    
+
     # Check if we're in a Rust project
     if [ ! -f "Cargo.toml" ]; then
         echo "⚠️ No Cargo.toml found - not a Rust project"
         exit 0
     fi
-    
+
     echo "🔍 Running Rust toolchain checks..."
-    
+
     # Step 1: Run cargo check for fast compilation validation
     echo "⚡ Running cargo check (fast compilation check)..."
     if cargo check --message-format=short; then
@@ -176,7 +174,7 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_
         echo "💡 Fix compilation errors before proceeding"
         exit 1
     fi
-    
+
     # Step 2: Run clippy for linting (if available)
     echo ""
     echo "📋 Running clippy (Rust linter)..."
@@ -189,7 +187,7 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_
     else
         echo "ℹ️ Clippy not available - install with: rustup component add clippy"
     fi
-    
+
     # Step 3: Check formatting (if rustfmt is available)
     echo ""
     echo "🎨 Checking code formatting..."
@@ -203,7 +201,7 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_
     else
         echo "ℹ️ rustfmt not available - install with: rustup component add rustfmt"
     fi
-    
+
     # Step 4: Security audit (if cargo-audit is available)
     echo ""
     echo "🔒 Running security audit..."
@@ -216,29 +214,29 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_
     else
         echo "ℹ️ cargo-audit not available - install with: cargo install cargo-audit"
     fi
-    
+
     # Step 5: Project analysis
     echo ""
     echo "📊 Project Analysis:"
-    
+
     # Count Rust files
     RUST_FILES=$(find . -name "*.rs" -not -path "./target/*" | wc -l)
     echo "  • Rust files: $RUST_FILES"
-    
+
     # Check for tests
     TEST_FILES=$(find . -name "*.rs" -not -path "./target/*" -exec grep -l "#\[test\]\|#\[cfg(test)\]" {} \; | wc -l)
     echo "  • Files with tests: $TEST_FILES"
-    
+
     # Check dependencies
     DEPENDENCIES=$(grep -c '^[a-zA-Z].*=' Cargo.toml 2>/dev/null || echo 0)
     echo "  • Dependencies: $DEPENDENCIES"
-    
+
     # Check for unsafe blocks
     if find . -name "*.rs" -not -path "./target/*" -exec grep -l "unsafe" {} \; | head -1 >/dev/null 2>&1; then
         UNSAFE_COUNT=$(find . -name "*.rs" -not -path "./target/*" -exec grep -c "unsafe" {} \; | awk '{sum+=$1} END {print sum}')
         echo "  • ⚠️ Unsafe blocks found: $UNSAFE_COUNT"
     fi
-    
+
     echo ""
     echo "💡 Rust Development Tips:"
     echo "  • Use 'cargo test' to run all tests"
@@ -246,10 +244,10 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]] || [[ "$FILE_
     echo "  • Use 'cargo doc --open' to generate and view documentation"
     echo "  • Use 'cargo bench' for benchmarking (if available)"
     echo "  • Consider using 'cargo watch' for continuous testing"
-    
+
     echo ""
     echo "🎯 Rust code analysis complete!"
-    
+
 else
     echo "ℹ️ File is not a Rust file: $FILE_PATH"
 fi
@@ -258,6 +256,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Rust Cargo Check Hook Script
 
 Complete hook script that runs cargo check on Rust file changes
@@ -282,6 +281,7 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Rust cargo check
@@ -296,6 +296,7 @@ Complete hook configuration for .claude/settings.json to enable Rust cargo check
   }
 }
 ```
+
 ### Comprehensive Rust Validation
 
 Enhanced hook script with cargo check, clippy, and rustfmt
@@ -320,6 +321,7 @@ if [[ "$FILE_PATH" == *.rs ]] || [[ "$FILE_PATH" == *Cargo.toml ]]; then
 fi
 exit 0
 ```
+
 ### Thread-Safe Cargo Check with File Locking
 
 Enhanced hook script with file locking to prevent concurrent cargo check executions
@@ -335,6 +337,7 @@ if [[ "$FILE_PATH" == *.rs ]]; then
 fi
 exit 0
 ```
+
 ### Clippy Configuration Example
 
 Example clippy.toml configuration for strict linting
@@ -350,27 +353,35 @@ warn-on-all-lints = true
 ```
 
 ## Troubleshooting
+
 ### Cargo check fails with 'No Cargo.toml found' in monorepos
 
 Hook searches from file directory upward but may fail in nested workspaces. Add cd logic to find workspace root: while [ ! -f Cargo.toml ] && [ $(pwd) != / ]; do cd ..; done before running cargo commands. Verify workspace structure. Test with various workspace configurations.
+
 ### Target directory compilation artifacts cause slow check times
 
 Cargo check reuses incremental compilation from target/. Ensure .gitignore excludes target/ but preserve it locally. Use cargo clean selectively or CARGO_TARGET_DIR to separate hook builds from development builds. Verify target directory. Test with various build configurations.
+
 ### Cargo audit fails when offline or network restricted environments
 
 Script treats cargo-audit as optional but doesn't handle network errors. Add CARGO_NET_OFFLINE=true check or wrap in: timeout 5s cargo audit || echo 'Audit skipped (offline)' to prevent hanging on network unavailable. Verify network connectivity. Test with various network configurations.
+
 ### Multiple Rust files changed simultaneously trigger concurrent checks
 
 PostToolUse fires per operation causing parallel cargo check processes. Add flock-based locking: { flock -n 200 || exit 0; cargo check; } 200>/tmp/cargo-check.lock to serialize executions and prevent resource contention. Verify file locking. Test with various concurrent scenarios.
+
 ### Hook executes before file write completes showing stale errors
 
 PostToolUse hooks fire after tool completion but file system may buffer writes. Add small delay: sleep 0.1 before cargo check, or verify file timestamp: [ "$FILE_PATH" -nt /tmp/last-check ] to ensure fresh content is analyzed. Verify file timestamps. Test with various file write scenarios.
+
 ### Clippy shows too many warnings or false positives
 
 Configure clippy with clippy.toml to customize lint levels. Use #[allow(clippy::lint_name)] for specific suppressions. Adjust clippy lint groups (pedantic, nursery) based on project needs. Verify clippy configuration. Test with various clippy configurations.
+
 ### Cargo check is slow on large Rust projects
 
 Use incremental compilation with target directory caching. Consider using cargo check --workspace for workspace projects. Use CARGO_TARGET_DIR for separate build directories. Optimize Cargo.toml dependencies. Verify compilation settings. Test with various project sizes.
+
 ### rustfmt formatting conflicts with project style
 
 Configure rustfmt with rustfmt.toml to match project style. Use #[rustfmt::skip] for specific code sections. Customize formatting rules to match project standards. Verify rustfmt configuration. Test with various formatting configurations.

@@ -25,7 +25,7 @@ This tutorial teaches you to build production-ready Claude autonomous agents ach
 Master Claude agent development with this comprehensive framework proven to deliver 90.2% performance improvements through multi-agent orchestration. By completion, you'll have built a production-ready autonomous agent system using Claude 4's revolutionary capabilities, implemented the 3 Amigo pattern reducing development time to 3 hours, and deployed with enterprise monitoring achieving 99.95% uptime. This guide includes 15 practical examples, production-tested code samples, and real-world implementations from Lindy AI's 10x growth and Anthropic's internal 2-3x productivity gains.
 
 > **Tutorial Requirements**
-> 
+>
 > **Prerequisites:** Basic Python/JavaScript, API experience, Claude account<br />
 > **Time Required:** 30 minutes active work<br />
 > **Tools Needed:** Claude API key, MCP server, Docker (optional)<br />
@@ -36,13 +36,10 @@ Master Claude agent development with this comprehensive framework proven to deli
 
 ## Step-by-Step Claude Agent Development
 1. **Step 1: Setup Claude API & Core Architecture**
-   
 
 2. **Step 2: Implement Orchestrator-Worker Pattern**
-   
 
 3. **Step 3: Implement Subagent Context Isolation**
-   
 
 4. **Step 4: Production Deployment with Monitoring**
 
@@ -56,28 +53,28 @@ Understanding these concepts ensures you can adapt this tutorial to your specifi
 
 ## Troubleshooting Guide
 > **Common Issues and Solutions**
-> 
+>
 > **Issue 1: 429 Rate Limit Errors with Multi-Agent Systems**<br />
 > **Solution:** Implement exponential backoff with jitter (2^attempt seconds + 10% random). Use token bucket algorithm limiting to 50 RPM for Tier 1. This reduces 429 errors by 95%.
-> 
+>
 > **Issue 2: Context Window Overflow in Long Sessions**<br />
 > **Solution:** Compress contexts by 60-80% using priority-based retention. Keep top 50 high-priority messages and summarize older content. Implement ephemeral caching for 90% token savings.
-> 
+>
 > **Issue 3: Subagent Memory Conflicts**<br />
 > **Solution:** Enforce strict context isolation with independent 200K token windows per agent. Use reference pointers instead of copying data between agents. Orchestrator maintains global state separately.
-> 
+>
 > **Issue 4: High Token Costs with 15x Consumption**<br />
 > **Solution:** Route 70% tasks to Haiku ($0.25/$1.25), 25% to Sonnet ($3/$15), reserve 5% for Opus ($15/$75). Implement prompt caching and batch processing. Average cost reduces to $0.045 per complex task.
 
 ## Advanced Techniques
 > **Professional Tips**
-> 
+>
 > **Performance Optimization:** Parallel subagent execution reduces task time by 90% for research. Spawn 3-20 agents dynamically based on complexity. Monitor token usage per agent to identify optimization opportunities.
-> 
+>
 > **Security Best Practice:** Always implement least privilege for agent tools. Use MCP bearer tokens with granular authorization. Audit all agent actions with complete trails. Never expose API keys in agent contexts.
-> 
+>
 > **Scalability Pattern:** Deploy on Kubernetes with horizontal pod autoscaling (3-50 replicas). Use spot instances for 60% cost reduction. Implement circuit breakers opening after 5 consecutive failures.
-> 
+>
 > **Cost Management:** Track token usage in real-time with model-specific pricing. Use Batch API for 50% discount on non-urgent tasks. Cache repeated content with 1-hour TTL for 90% savings.
 
 ## Validation and Testing
@@ -90,15 +87,16 @@ Understanding these concepts ensures you can adapt this tutorial to your specifi
 <!-- Section type: related_content -->
 
 > **Tutorial Complete!**
-> 
+>
 > **Congratulations!** You've mastered Claude autonomous agent development and can now build multi-agent systems achieving 90.2% performance improvements.
-> 
+>
 > **What you achieved:**
+>
 > - ✅ Built orchestrator-worker pattern with parallel processing
 > - ✅ Implemented subagent isolation with 200K token contexts
 > - ✅ Deployed production monitoring achieving 99.95% uptime
 > - ✅ Optimized costs to $0.045 per complex task
-> 
+>
 > **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your agent implementations and learn advanced orchestration patterns.
 
-*Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials).*
+_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._

@@ -62,9 +62,7 @@ Generates a comprehensive report when Claude Code workflow stops, including file
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/workflow-completion-report.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -74,9 +72,7 @@ Generates a comprehensive report when Claude Code workflow stops, including file
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/workflow-completion-report.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -125,14 +121,14 @@ echo "════════════════════════�
 # Git analysis
 if git rev-parse --git-dir >/dev/null 2>&1; then
     echo "📊 Git Repository Status:"
-    
+
     BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     echo "  • Current branch: $BRANCH"
-    
+
     # Count modified files
     MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
     echo "  • Modified files: $MODIFIED_FILES"
-    
+
     # Show file status breakdown
     if [ "$MODIFIED_FILES" -gt 0 ]; then
         echo "  • File status breakdown:"
@@ -146,14 +142,14 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
             esac
         done
     fi
-    
+
     # Diff statistics
     DIFF_STATS=$(git diff --stat 2>/dev/null)
     if [ -n "$DIFF_STATS" ]; then
         echo "  • Changes summary:"
         echo "$DIFF_STATS" | tail -1 | sed 's/^/    /' 2>/dev/null || echo "    No statistics available"
     fi
-    
+
     # List modified files (top 10)
     if [ "$MODIFIED_FILES" -gt 0 ]; then
         echo "  • Modified files (top 10):"
@@ -161,15 +157,15 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
             echo "    - $file ($status)"
         done
     fi
-    
+
     # Recent commits
     echo "  • Recent commits:"
     git log --oneline -3 2>/dev/null | sed 's/^/    /' || echo "    No recent commits"
-    
+
 else
     echo "❓ Not a git repository"
     echo "  • Analyzing file system changes..."
-    
+
     # Alternative: look for recently modified files
     echo "  • Recently modified files (last 2 hours):"
     find . -type f -newermt '2 hours ago' 2>/dev/null | head -10 | while read -r file; do
@@ -187,7 +183,7 @@ TEST_COUNT=0
 
 if [ -f "package.json" ]; then
     echo "📦 Node.js Project Analysis:"
-    
+
     # Detect test framework
     if grep -q '"jest"' package.json 2>/dev/null; then
         TEST_FRAMEWORK="jest"
@@ -201,16 +197,16 @@ if [ -f "package.json" ]; then
     else
         echo "  • Testing framework: Not detected"
     fi
-    
+
     # Count test files
     TEST_COUNT=$(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l | tr -d ' ')
     echo "  • Test files found: $TEST_COUNT"
-    
+
     # Dependencies analysis
     DEPS_COUNT=$(jq -r '.dependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
     DEV_DEPS_COUNT=$(jq -r '.devDependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
     echo "  • Dependencies: $DEPS_COUNT production, $DEV_DEPS_COUNT development"
-    
+
     # Check for outdated packages
     echo "  • Checking for outdated packages..."
     OUTDATED_COUNT=$(npm outdated 2>/dev/null | tail -n +2 | wc -l | tr -d ' ')
@@ -219,10 +215,10 @@ if [ -f "package.json" ]; then
     else
         echo "    - All packages are up to date"
     fi
-    
+
 elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
     echo "🐍 Python Project Analysis:"
-    
+
     if command -v pytest >/dev/null 2>&1; then
         TEST_FRAMEWORK="pytest"
         echo "  • Testing framework: pytest"
@@ -232,13 +228,13 @@ elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; 
         TEST_COUNT=$(find . -name "test*.py" | wc -l | tr -d ' ')
     fi
     echo "  • Test files found: $TEST_COUNT"
-    
+
 elif [ -f "Cargo.toml" ]; then
     echo "🦀 Rust Project Analysis:"
     echo "  • Testing framework: Built-in (cargo test)"
     TEST_COUNT=$(find . -name "*.rs" -exec grep -l "#\[test\]" {} \; | wc -l | tr -d ' ')
     echo "  • Files with tests: $TEST_COUNT"
-    
+
 else
     echo "❓ Project type not recognized"
 fi
@@ -377,14 +373,14 @@ echo "════════════════════════�
 # Git analysis
 if git rev-parse --git-dir >/dev/null 2>&1; then
     echo "📊 Git Repository Status:"
-    
+
     BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     echo "  • Current branch: $BRANCH"
-    
+
     # Count modified files
     MODIFIED_FILES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
     echo "  • Modified files: $MODIFIED_FILES"
-    
+
     # Show file status breakdown
     if [ "$MODIFIED_FILES" -gt 0 ]; then
         echo "  • File status breakdown:"
@@ -398,14 +394,14 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
             esac
         done
     fi
-    
+
     # Diff statistics
     DIFF_STATS=$(git diff --stat 2>/dev/null)
     if [ -n "$DIFF_STATS" ]; then
         echo "  • Changes summary:"
         echo "$DIFF_STATS" | tail -1 | sed 's/^/    /' 2>/dev/null || echo "    No statistics available"
     fi
-    
+
     # List modified files (top 10)
     if [ "$MODIFIED_FILES" -gt 0 ]; then
         echo "  • Modified files (top 10):"
@@ -413,15 +409,15 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
             echo "    - $file ($status)"
         done
     fi
-    
+
     # Recent commits
     echo "  • Recent commits:"
     git log --oneline -3 2>/dev/null | sed 's/^/    /' || echo "    No recent commits"
-    
+
 else
     echo "❓ Not a git repository"
     echo "  • Analyzing file system changes..."
-    
+
     # Alternative: look for recently modified files
     echo "  • Recently modified files (last 2 hours):"
     find . -type f -newermt '2 hours ago' 2>/dev/null | head -10 | while read -r file; do
@@ -439,7 +435,7 @@ TEST_COUNT=0
 
 if [ -f "package.json" ]; then
     echo "📦 Node.js Project Analysis:"
-    
+
     # Detect test framework
     if grep -q '"jest"' package.json 2>/dev/null; then
         TEST_FRAMEWORK="jest"
@@ -453,16 +449,16 @@ if [ -f "package.json" ]; then
     else
         echo "  • Testing framework: Not detected"
     fi
-    
+
     # Count test files
     TEST_COUNT=$(find . -name "*.test.*" -o -name "*.spec.*" | grep -v node_modules | wc -l | tr -d ' ')
     echo "  • Test files found: $TEST_COUNT"
-    
+
     # Dependencies analysis
     DEPS_COUNT=$(jq -r '.dependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
     DEV_DEPS_COUNT=$(jq -r '.devDependencies // {} | keys | length' package.json 2>/dev/null || echo "unknown")
     echo "  • Dependencies: $DEPS_COUNT production, $DEV_DEPS_COUNT development"
-    
+
     # Check for outdated packages
     echo "  • Checking for outdated packages..."
     OUTDATED_COUNT=$(npm outdated 2>/dev/null | tail -n +2 | wc -l | tr -d ' ')
@@ -471,10 +467,10 @@ if [ -f "package.json" ]; then
     else
         echo "    - All packages are up to date"
     fi
-    
+
 elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
     echo "🐍 Python Project Analysis:"
-    
+
     if command -v pytest >/dev/null 2>&1; then
         TEST_FRAMEWORK="pytest"
         echo "  • Testing framework: pytest"
@@ -484,13 +480,13 @@ elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; 
         TEST_COUNT=$(find . -name "test*.py" | wc -l | tr -d ' ')
     fi
     echo "  • Test files found: $TEST_COUNT"
-    
+
 elif [ -f "Cargo.toml" ]; then
     echo "🦀 Rust Project Analysis:"
     echo "  • Testing framework: Built-in (cargo test)"
     TEST_COUNT=$(find . -name "*.rs" -exec grep -l "#\[test\]" {} \; | wc -l | tr -d ' ')
     echo "  • Files with tests: $TEST_COUNT"
-    
+
 else
     echo "❓ Project type not recognized"
 fi
@@ -644,6 +640,7 @@ echo "📄 Session report saved: $REPORT_FILE"
 echo "🎉 Workflow completion report generated successfully!"
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable automatic workflow completion reporting
@@ -658,6 +655,7 @@ Complete hook configuration for .claude/settings.json to enable automatic workfl
   }
 }
 ```
+
 ### Enhanced Workflow Completion Report with Session Tracking
 
 Enhanced hook script with session duration tracking, Git diff statistics, test framework detection, and automatic report cleanup
@@ -729,6 +727,7 @@ echo "📄 Session report saved: $REPORT_FILE"
 echo "🎉 Workflow completion report generated successfully!"
 exit 0
 ```
+
 ### Workflow Completion Report with Multi-Language Project Support
 
 Enhanced hook script with multi-language project detection (Node.js, Python, Rust), dependency analysis, outdated package checking with timeout, and comprehensive metrics
@@ -816,6 +815,7 @@ echo "📄 Session report saved: $REPORT_FILE"
 echo "🎉 Workflow completion report generated successfully!"
 exit 0
 ```
+
 ### Workflow Completion Report Configuration Example
 
 Example workflow completion report configuration for customizing report generation behavior
@@ -832,7 +832,13 @@ Example workflow completion report configuration for customizing report generati
     "dependency_analysis": true,
     "outdated_check_timeout": 10,
     "project_types": ["nodejs", "python", "rust", "go", "java"],
-    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/target/**", "**/dist/**", "**/build/**"]
+    "exclude_patterns": [
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/target/**",
+      "**/dist/**",
+      "**/build/**"
+    ]
   }
 }
 ```
@@ -1059,7 +1065,13 @@ exit 0
     "dependency_analysis": true,
     "outdated_check_timeout": 10,
     "project_types": ["nodejs", "python", "rust", "go", "java"],
-    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/target/**", "**/dist/**", "**/build/**"]
+    "exclude_patterns": [
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/target/**",
+      "**/dist/**",
+      "**/build/**"
+    ]
   }
 }
 ```
@@ -1068,24 +1080,31 @@ exit 0
 ### Report shows 'unknown' for session duration and start time
 
 Hook reads .claude/session-start file but file may not exist. Create marker: 'echo "$(date +%s)" > .claude/session-start' at init, then read: 'START_TIMESTAMP=$(cat .claude/session-start)'. Verify .claude directory exists. Check file permissions.
+
 ### Outdated package check causes long delays (npm outdated hangs)
 
 npm outdated performs network checks timing out on slow connections. Add wrapper: 'timeout 10 npm outdated 2>/dev/null || echo "Check skipped"'. Or comment out for speed. Verify timeout command available. Check network connectivity.
+
 ### Report directory cleanup removes current session's report file
 
 Sort bug: 'find | sort | head -n -30' removes newest alphabetically. Fix with time sort: 'find .claude-reports -type f -printf "%T@ %p\n" | sort -n | head -n -30 | cut -d" " -f2- | xargs rm -f'. Verify find supports -printf. Check file timestamps.
+
 ### Diff statistics show empty output despite uncommitted changes
 
 git diff excludes untracked files. Combine: 'git diff --stat; git diff --cached --stat' for staged. Or use: 'git diff HEAD --stat' showing all uncommitted modifications. Verify Git repository state. Check git diff command.
+
 ### Test file count inaccurate with nested test directories
 
-find without depth limit includes node_modules. Add exclusion: 'find . -name "*.test.*" -not -path "*/node_modules/*" -not -path "*/vendor/*"' for accurate counts. Verify find command. Check exclusion patterns.
+find without depth limit includes node*modules. Add exclusion: 'find . -name "*.test._" -not -path "_/node*modules/*" -not -path "_/vendor/_"' for accurate counts. Verify find command. Check exclusion patterns.
+
 ### Session report file not created in .claude-reports directory
 
 Verify .claude-reports directory exists and has write permissions: 'mkdir -p .claude-reports && chmod 755 .claude-reports'. Check disk space. Verify REPORT_FILE path. Test directory creation manually.
+
 ### Git branch detection fails in detached HEAD state
 
 git branch --show-current returns empty in detached HEAD. Use: 'git rev-parse --abbrev-ref HEAD' or 'git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD'. Verify Git repository state. Check HEAD reference.
+
 ### Lines of code estimation fails or shows incorrect count
 
-wc -l may fail on binary files or very large files. Add file type filtering: 'find . -type f \( -name "*.js" -o -name "*.ts" \) | xargs wc -l 2>/dev/null'. Verify find command. Check file exclusions. Test wc command manually.
+wc -l may fail on binary files or very large files. Add file type filtering: 'find . -type f \( -name "_.js" -o -name "_.ts" \) | xargs wc -l 2>/dev/null'. Verify find command. Check file exclusions. Test wc command manually.

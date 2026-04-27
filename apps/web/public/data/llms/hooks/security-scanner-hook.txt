@@ -62,11 +62,7 @@ Automated security vulnerability scanning that integrates with development workf
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/security-scanner-hook.sh",
-      "matchers": [
-        "write",
-        "edit",
-        "multiedit"
-      ]
+      "matchers": ["write", "edit", "multiedit"]
     }
   }
 }
@@ -76,11 +72,7 @@ Automated security vulnerability scanning that integrates with development workf
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/security-scanner-hook.sh",
-      "matchers": [
-        "write",
-        "edit",
-        "multiedit"
-      ]
+      "matchers": ["write", "edit", "multiedit"]
     }
   }
 }
@@ -235,6 +227,7 @@ if command -v semgrep &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable security scanning
@@ -249,6 +242,7 @@ Complete hook configuration for .claude/settings.json to enable security scannin
   }
 }
 ```
+
 ### Language-Specific Security Scanning
 
 Enhanced hook script with language-specific security scanners (npm audit, Bandit, gosec)
@@ -277,6 +271,7 @@ case "$EXT" in
 esac
 exit 0
 ```
+
 ### Secrets Scanning with Exclusion Patterns
 
 Enhanced hook script with TruffleHog secrets scanning and exclusion patterns for test files
@@ -294,6 +289,7 @@ if command -v truffleHog &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Security Scanner Configuration Example
 
 Example security scanner configuration for customizing scan behavior
@@ -401,25 +397,32 @@ exit 0
 ## Troubleshooting
 ### truffleHog reports false positives on test data and mock credentials
 
-Entropy detection flags dummy data. Create .trufflehogignore: add patterns like 'test/**' or '**/fixtures/*'. Or use --exclude: 'truffleHog --exclude test/ --regex' filtering paths. Verify exclusion patterns. Test with various test file configurations.
+Entropy detection flags dummy data. Create .trufflehogignore: add patterns like 'test/**' or '**/fixtures/\*'. Or use --exclude: 'truffleHog --exclude test/ --regex' filtering paths. Verify exclusion patterns. Test with various test file configurations.
+
 ### Semgrep download/install hangs during first hook execution
 
 Hook waits for semgrep auto-install timing out. Pre-install: 'pip install semgrep' or 'brew install semgrep'. Add timeout: 'timeout 30 semgrep --config=auto' preventing indefinite hangs. Verify Semgrep installation. Test with various installation methods.
+
 ### npm audit returns non-zero exit code failing hook on dev dependencies
 
 Audit treats dev warnings as errors. Filter severity: 'npm audit --audit-level=high --production' ignoring dev deps. Or suppress exit: 'npm audit || echo "Vulnerabilities logged"'. Verify audit level. Test with various dependency configurations.
+
 ### Bandit scans entire project instead of modified FILE_PATH
 
 Command targets single file but imports scan. Add --skip-imports: 'bandit "$FILE_PATH" -ll --skip B404' focusing on direct code. Or scope: 'bandit -r $(dirname "$FILE_PATH")' directory-level. Verify Bandit configuration. Test with various file scopes.
+
 ### Security scans add 30+ seconds to every file save operation
 
 Sequential scans without caching. Run async: append '&' to each scan, wait at end. Or cache: 'if [ "$(stat -c %Y "$FILE_PATH")" -lt 60 ]; then exit; fi' skipping recent scans. Verify scan caching. Test with various caching strategies.
+
 ### gosec reports too many false positives or low-severity issues
 
 Configure gosec with severity filters: 'gosec -severity high -confidence high "$FILE_PATH"'. Use --exclude-dirs for test directories. Adjust severity levels based on project needs. Verify gosec configuration. Test with various severity configurations.
+
 ### TruffleHog misses secrets in binary files or archives
 
 TruffleHog primarily scans text files. Use --include-binary for binary file scanning. For archives, extract first or use specialized tools. Verify file type detection. Test with various file types.
+
 ### Semgrep rules conflict with project coding standards
 
 Configure Semgrep with custom rules or disable specific rules: 'semgrep --config=auto --disable-rule=rule-id "$FILE_PATH"'. Create .semgrep.yml for project-specific rules. Verify rule configuration. Test with various rule sets.

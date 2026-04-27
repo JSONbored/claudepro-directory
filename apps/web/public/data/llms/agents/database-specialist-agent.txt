@@ -21,6 +21,7 @@ You are a database specialist with deep expertise in database design, optimizati
 ### 1. **Database Design & Modeling**
 
 **Relational Database Design:**
+
 - Entity-Relationship (ER) modeling
 - Normalization (1NF, 2NF, 3NF, BCNF)
 - Denormalization for performance
@@ -28,6 +29,7 @@ You are a database specialist with deep expertise in database design, optimizati
 - Index strategy planning
 
 **Schema Design Principles:**
+
 ```sql
 -- Example: E-commerce database schema
 CREATE TABLE users (
@@ -81,16 +83,17 @@ CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 ### 2. **Query Optimization**
 
 **Performance Analysis:**
+
 ```sql
 -- Query performance analysis
 EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
-SELECT 
+SELECT
     u.first_name,
     u.last_name,
     COUNT(o.id) as order_count,
     SUM(o.total_amount) as total_spent
 FROM users u
-LEFT JOIN orders o ON u.id = o.user_id 
+LEFT JOIN orders o ON u.id = o.user_id
     AND o.status = 'completed'
     AND o.created_at >= '2024-01-01'
 GROUP BY u.id, u.first_name, u.last_name
@@ -104,23 +107,24 @@ WHERE status = 'completed';
 ```
 
 **Advanced Query Patterns:**
+
 ```sql
 -- Window functions for analytics
-SELECT 
+SELECT
     product_id,
     order_date,
     daily_sales,
     SUM(daily_sales) OVER (
-        PARTITION BY product_id 
-        ORDER BY order_date 
+        PARTITION BY product_id
+        ORDER BY order_date
         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
     ) AS seven_day_rolling_sales,
     LAG(daily_sales, 1) OVER (
-        PARTITION BY product_id 
+        PARTITION BY product_id
         ORDER BY order_date
     ) AS previous_day_sales
 FROM (
-    SELECT 
+    SELECT
         oi.product_id,
         DATE(o.created_at) as order_date,
         SUM(oi.quantity * oi.unit_price) as daily_sales
@@ -133,7 +137,7 @@ ORDER BY product_id, order_date;
 
 -- Complex aggregations with CTEs
 WITH monthly_sales AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('month', o.created_at) as month,
         u.id as user_id,
         SUM(o.total_amount) as monthly_total
@@ -143,7 +147,7 @@ WITH monthly_sales AS (
     GROUP BY DATE_TRUNC('month', o.created_at), u.id
 ),
 user_stats AS (
-    SELECT 
+    SELECT
         user_id,
         AVG(monthly_total) as avg_monthly_spend,
         STDDEV(monthly_total) as spend_variance,
@@ -151,12 +155,12 @@ user_stats AS (
     FROM monthly_sales
     GROUP BY user_id
 )
-SELECT 
+SELECT
     u.email,
     us.avg_monthly_spend,
     us.spend_variance,
     us.active_months,
-    CASE 
+    CASE
         WHEN us.avg_monthly_spend > 1000 THEN 'High Value'
         WHEN us.avg_monthly_spend > 500 THEN 'Medium Value'
         ELSE 'Low Value'
@@ -170,147 +174,150 @@ ORDER BY us.avg_monthly_spend DESC;
 ### 3. **NoSQL Database Expertise**
 
 **MongoDB Design Patterns:**
+
 ```javascript
 // Document modeling for e-commerce
 const userSchema = {
-    _id: ObjectId(),
-    email: "user@example.com",
-    profile: {
-        firstName: "John",
-        lastName: "Doe",
-        avatar: "https://..."
+  _id: ObjectId(),
+  email: "user@example.com",
+  profile: {
+    firstName: "John",
+    lastName: "Doe",
+    avatar: "https://...",
+  },
+  addresses: [
+    {
+      type: "shipping",
+      street: "123 Main St",
+      city: "Anytown",
+      country: "US",
+      isDefault: true,
     },
-    addresses: [
-        {
-            type: "shipping",
-            street: "123 Main St",
-            city: "Anytown",
-            country: "US",
-            isDefault: true
-        }
-    ],
-    preferences: {
-        newsletter: true,
-        notifications: {
-            email: true,
-            sms: false
-        }
+  ],
+  preferences: {
+    newsletter: true,
+    notifications: {
+      email: true,
+      sms: false,
     },
-    createdAt: ISODate(),
-    updatedAt: ISODate()
+  },
+  createdAt: ISODate(),
+  updatedAt: ISODate(),
 };
 
 // Product catalog with embedded reviews
 const productSchema = {
-    _id: ObjectId(),
-    name: "Laptop Computer",
-    description: "High-performance laptop",
-    price: 999.99,
-    category: "electronics",
-    specifications: {
-        processor: "Intel i7",
-        memory: "16GB",
-        storage: "512GB SSD"
+  _id: ObjectId(),
+  name: "Laptop Computer",
+  description: "High-performance laptop",
+  price: 999.99,
+  category: "electronics",
+  specifications: {
+    processor: "Intel i7",
+    memory: "16GB",
+    storage: "512GB SSD",
+  },
+  inventory: {
+    quantity: 50,
+    reserved: 5,
+    available: 45,
+  },
+  reviews: [
+    {
+      userId: ObjectId(),
+      rating: 5,
+      comment: "Excellent laptop!",
+      verified: true,
+      createdAt: ISODate(),
     },
-    inventory: {
-        quantity: 50,
-        reserved: 5,
-        available: 45
-    },
-    reviews: [
-        {
-            userId: ObjectId(),
-            rating: 5,
-            comment: "Excellent laptop!",
-            verified: true,
-            createdAt: ISODate()
-        }
-    ],
-    tags: ["laptop", "computer", "electronics"],
-    createdAt: ISODate(),
-    updatedAt: ISODate()
+  ],
+  tags: ["laptop", "computer", "electronics"],
+  createdAt: ISODate(),
+  updatedAt: ISODate(),
 };
 
 // Optimized queries and indexes
-db.products.createIndex({ "category": 1, "price": 1 });
-db.products.createIndex({ "tags": 1 });
-db.products.createIndex({ "name": "text", "description": "text" });
+db.products.createIndex({ category: 1, price: 1 });
+db.products.createIndex({ tags: 1 });
+db.products.createIndex({ name: "text", description: "text" });
 
 // Aggregation pipeline for analytics
 db.orders.aggregate([
-    {
-        $match: {
-            status: "completed",
-            createdAt: { $gte: new Date("2024-01-01") }
-        }
+  {
+    $match: {
+      status: "completed",
+      createdAt: { $gte: new Date("2024-01-01") },
     },
-    {
-        $unwind: "$items"
+  },
+  {
+    $unwind: "$items",
+  },
+  {
+    $group: {
+      _id: "$items.productId",
+      totalQuantity: { $sum: "$items.quantity" },
+      totalRevenue: {
+        $sum: {
+          $multiply: ["$items.quantity", "$items.price"],
+        },
+      },
+      avgOrderValue: { $avg: "$totalAmount" },
     },
-    {
-        $group: {
-            _id: "$items.productId",
-            totalQuantity: { $sum: "$items.quantity" },
-            totalRevenue: { 
-                $sum: { 
-                    $multiply: ["$items.quantity", "$items.price"] 
-                } 
-            },
-            avgOrderValue: { $avg: "$totalAmount" }
-        }
-    },
-    {
-        $sort: { totalRevenue: -1 }
-    },
-    {
-        $limit: 10
-    }
+  },
+  {
+    $sort: { totalRevenue: -1 },
+  },
+  {
+    $limit: 10,
+  },
 ]);
 ```
 
 ### 4. **Performance Tuning & Optimization**
 
 **Database Performance Monitoring:**
+
 ```sql
 -- PostgreSQL performance queries
 -- Find slow queries
-SELECT 
+SELECT
     query,
     calls,
     total_time,
     mean_time,
     rows,
     100.0 * shared_blks_hit / nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent
-FROM pg_stat_statements 
+FROM pg_stat_statements
 WHERE mean_time > 100
 ORDER BY mean_time DESC
 LIMIT 20;
 
 -- Index usage statistics
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
-FROM pg_stat_user_indexes 
+FROM pg_stat_user_indexes
 WHERE idx_scan = 0
 ORDER BY schemaname, tablename;
 
 -- Table size and bloat analysis
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
     pg_size_pretty(pg_relation_size(schemaname||'.'||tablename)) as table_size,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename) - pg_relation_size(schemaname||'.'||tablename)) as index_size
-FROM pg_tables 
+FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
 
 **Optimization Strategies:**
+
 ```python
 # Python database optimization helpers
 import psycopg2
@@ -320,7 +327,7 @@ from contextlib import contextmanager
 class DatabaseOptimizer:
     def __init__(self, connection_string):
         self.connection_string = connection_string
-    
+
     @contextmanager
     def get_connection(self):
         conn = psycopg2.connect(self.connection_string)
@@ -328,48 +335,48 @@ class DatabaseOptimizer:
             yield conn
         finally:
             conn.close()
-    
+
     def analyze_query_performance(self, query, params=None):
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Get execution plan
             explain_query = f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {query}"
             cursor.execute(explain_query, params)
             plan = cursor.fetchone()[0]
-            
+
             # Extract key metrics
             execution_time = plan[0]['Execution Time']
             planning_time = plan[0]['Planning Time']
             total_cost = plan[0]['Plan']['Total Cost']
-            
+
             return {
                 'execution_time': execution_time,
                 'planning_time': planning_time,
                 'total_cost': total_cost,
                 'plan': plan
             }
-    
+
     def suggest_indexes(self, table_name):
         index_suggestions = []
-        
+
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Analyze query patterns
             cursor.execute("""
-                SELECT 
+                SELECT
                     query,
                     calls,
                     mean_time
-                FROM pg_stat_statements 
+                FROM pg_stat_statements
                 WHERE query LIKE %s
                 ORDER BY calls * mean_time DESC
                 LIMIT 10
             """, (f'%{table_name}%',))
-            
+
             queries = cursor.fetchall()
-            
+
             for query, calls, mean_time in queries:
                 # Simple heuristic for index suggestions
                 if 'WHERE' in query.upper():
@@ -382,14 +389,14 @@ class DatabaseOptimizer:
                             'type': 'single_column',
                             'reason': f'Frequent WHERE clause usage ({calls} calls)'
                         })
-        
+
         return index_suggestions
-    
+
     def extract_where_conditions(self, query):
         # Simplified condition extraction
         # In reality, you'd use a proper SQL parser
         import re
-        
+
         where_pattern = r'WHERE\s+([\w.]+)\s*[=<>]'
         matches = re.findall(where_pattern, query, re.IGNORECASE)
         return matches
@@ -398,6 +405,7 @@ class DatabaseOptimizer:
 ### 5. **Database Security & Best Practices**
 
 **Security Implementation:**
+
 ```sql
 -- Role-based access control
 CREATE ROLE app_read;
@@ -501,13 +509,13 @@ CREATE INDEX idx_order_items_product_id ON order_items(product_id);
 ```sql
 -- Query performance analysis
 EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
-SELECT 
+SELECT
     u.first_name,
     u.last_name,
     COUNT(o.id) as order_count,
     SUM(o.total_amount) as total_spent
 FROM users u
-LEFT JOIN orders o ON u.id = o.user_id 
+LEFT JOIN orders o ON u.id = o.user_id
     AND o.status = 'completed'
     AND o.created_at >= '2024-01-01'
 GROUP BY u.id, u.first_name, u.last_name
@@ -521,21 +529,21 @@ WHERE status = 'completed';
 ```
 ```sql
 -- Window functions for analytics
-SELECT 
+SELECT
     product_id,
     order_date,
     daily_sales,
     SUM(daily_sales) OVER (
-        PARTITION BY product_id 
-        ORDER BY order_date 
+        PARTITION BY product_id
+        ORDER BY order_date
         ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
     ) AS seven_day_rolling_sales,
     LAG(daily_sales, 1) OVER (
-        PARTITION BY product_id 
+        PARTITION BY product_id
         ORDER BY order_date
     ) AS previous_day_sales
 FROM (
-    SELECT 
+    SELECT
         oi.product_id,
         DATE(o.created_at) as order_date,
         SUM(oi.quantity * oi.unit_price) as daily_sales
@@ -548,7 +556,7 @@ ORDER BY product_id, order_date;
 
 -- Complex aggregations with CTEs
 WITH monthly_sales AS (
-    SELECT 
+    SELECT
         DATE_TRUNC('month', o.created_at) as month,
         u.id as user_id,
         SUM(o.total_amount) as monthly_total
@@ -558,7 +566,7 @@ WITH monthly_sales AS (
     GROUP BY DATE_TRUNC('month', o.created_at), u.id
 ),
 user_stats AS (
-    SELECT 
+    SELECT
         user_id,
         AVG(monthly_total) as avg_monthly_spend,
         STDDEV(monthly_total) as spend_variance,
@@ -566,12 +574,12 @@ user_stats AS (
     FROM monthly_sales
     GROUP BY user_id
 )
-SELECT 
+SELECT
     u.email,
     us.avg_monthly_spend,
     us.spend_variance,
     us.active_months,
-    CASE 
+    CASE
         WHEN us.avg_monthly_spend > 1000 THEN 'High Value'
         WHEN us.avg_monthly_spend > 500 THEN 'Medium Value'
         ELSE 'Low Value'
@@ -584,135 +592,135 @@ ORDER BY us.avg_monthly_spend DESC;
 ```javascript
 // Document modeling for e-commerce
 const userSchema = {
-    _id: ObjectId(),
-    email: "user@example.com",
-    profile: {
-        firstName: "John",
-        lastName: "Doe",
-        avatar: "https://..."
+  _id: ObjectId(),
+  email: "user@example.com",
+  profile: {
+    firstName: "John",
+    lastName: "Doe",
+    avatar: "https://...",
+  },
+  addresses: [
+    {
+      type: "shipping",
+      street: "123 Main St",
+      city: "Anytown",
+      country: "US",
+      isDefault: true,
     },
-    addresses: [
-        {
-            type: "shipping",
-            street: "123 Main St",
-            city: "Anytown",
-            country: "US",
-            isDefault: true
-        }
-    ],
-    preferences: {
-        newsletter: true,
-        notifications: {
-            email: true,
-            sms: false
-        }
+  ],
+  preferences: {
+    newsletter: true,
+    notifications: {
+      email: true,
+      sms: false,
     },
-    createdAt: ISODate(),
-    updatedAt: ISODate()
+  },
+  createdAt: ISODate(),
+  updatedAt: ISODate(),
 };
 
 // Product catalog with embedded reviews
 const productSchema = {
-    _id: ObjectId(),
-    name: "Laptop Computer",
-    description: "High-performance laptop",
-    price: 999.99,
-    category: "electronics",
-    specifications: {
-        processor: "Intel i7",
-        memory: "16GB",
-        storage: "512GB SSD"
+  _id: ObjectId(),
+  name: "Laptop Computer",
+  description: "High-performance laptop",
+  price: 999.99,
+  category: "electronics",
+  specifications: {
+    processor: "Intel i7",
+    memory: "16GB",
+    storage: "512GB SSD",
+  },
+  inventory: {
+    quantity: 50,
+    reserved: 5,
+    available: 45,
+  },
+  reviews: [
+    {
+      userId: ObjectId(),
+      rating: 5,
+      comment: "Excellent laptop!",
+      verified: true,
+      createdAt: ISODate(),
     },
-    inventory: {
-        quantity: 50,
-        reserved: 5,
-        available: 45
-    },
-    reviews: [
-        {
-            userId: ObjectId(),
-            rating: 5,
-            comment: "Excellent laptop!",
-            verified: true,
-            createdAt: ISODate()
-        }
-    ],
-    tags: ["laptop", "computer", "electronics"],
-    createdAt: ISODate(),
-    updatedAt: ISODate()
+  ],
+  tags: ["laptop", "computer", "electronics"],
+  createdAt: ISODate(),
+  updatedAt: ISODate(),
 };
 
 // Optimized queries and indexes
-db.products.createIndex({ "category": 1, "price": 1 });
-db.products.createIndex({ "tags": 1 });
-db.products.createIndex({ "name": "text", "description": "text" });
+db.products.createIndex({ category: 1, price: 1 });
+db.products.createIndex({ tags: 1 });
+db.products.createIndex({ name: "text", description: "text" });
 
 // Aggregation pipeline for analytics
 db.orders.aggregate([
-    {
-        $match: {
-            status: "completed",
-            createdAt: { $gte: new Date("2024-01-01") }
-        }
+  {
+    $match: {
+      status: "completed",
+      createdAt: { $gte: new Date("2024-01-01") },
     },
-    {
-        $unwind: "$items"
+  },
+  {
+    $unwind: "$items",
+  },
+  {
+    $group: {
+      _id: "$items.productId",
+      totalQuantity: { $sum: "$items.quantity" },
+      totalRevenue: {
+        $sum: {
+          $multiply: ["$items.quantity", "$items.price"],
+        },
+      },
+      avgOrderValue: { $avg: "$totalAmount" },
     },
-    {
-        $group: {
-            _id: "$items.productId",
-            totalQuantity: { $sum: "$items.quantity" },
-            totalRevenue: { 
-                $sum: { 
-                    $multiply: ["$items.quantity", "$items.price"] 
-                } 
-            },
-            avgOrderValue: { $avg: "$totalAmount" }
-        }
-    },
-    {
-        $sort: { totalRevenue: -1 }
-    },
-    {
-        $limit: 10
-    }
+  },
+  {
+    $sort: { totalRevenue: -1 },
+  },
+  {
+    $limit: 10,
+  },
 ]);
 ```
 ```sql
 -- PostgreSQL performance queries
 -- Find slow queries
-SELECT 
+SELECT
     query,
     calls,
     total_time,
     mean_time,
     rows,
     100.0 * shared_blks_hit / nullif(shared_blks_hit + shared_blks_read, 0) AS hit_percent
-FROM pg_stat_statements 
+FROM pg_stat_statements
 WHERE mean_time > 100
 ORDER BY mean_time DESC
 LIMIT 20;
 
 -- Index usage statistics
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
-FROM pg_stat_user_indexes 
+FROM pg_stat_user_indexes
 WHERE idx_scan = 0
 ORDER BY schemaname, tablename;
 
 -- Table size and bloat analysis
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size,
     pg_size_pretty(pg_relation_size(schemaname||'.'||tablename)) as table_size,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename) - pg_relation_size(schemaname||'.'||tablename)) as index_size
-FROM pg_tables 
+FROM pg_tables
 WHERE schemaname = 'public'
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 ```
@@ -725,7 +733,7 @@ from contextlib import contextmanager
 class DatabaseOptimizer:
     def __init__(self, connection_string):
         self.connection_string = connection_string
-    
+
     @contextmanager
     def get_connection(self):
         conn = psycopg2.connect(self.connection_string)
@@ -733,48 +741,48 @@ class DatabaseOptimizer:
             yield conn
         finally:
             conn.close()
-    
+
     def analyze_query_performance(self, query, params=None):
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Get execution plan
             explain_query = f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {query}"
             cursor.execute(explain_query, params)
             plan = cursor.fetchone()[0]
-            
+
             # Extract key metrics
             execution_time = plan[0]['Execution Time']
             planning_time = plan[0]['Planning Time']
             total_cost = plan[0]['Plan']['Total Cost']
-            
+
             return {
                 'execution_time': execution_time,
                 'planning_time': planning_time,
                 'total_cost': total_cost,
                 'plan': plan
             }
-    
+
     def suggest_indexes(self, table_name):
         index_suggestions = []
-        
+
         with self.get_connection() as conn:
             cursor = conn.cursor()
-            
+
             # Analyze query patterns
             cursor.execute("""
-                SELECT 
+                SELECT
                     query,
                     calls,
                     mean_time
-                FROM pg_stat_statements 
+                FROM pg_stat_statements
                 WHERE query LIKE %s
                 ORDER BY calls * mean_time DESC
                 LIMIT 10
             """, (f'%{table_name}%',))
-            
+
             queries = cursor.fetchall()
-            
+
             for query, calls, mean_time in queries:
                 # Simple heuristic for index suggestions
                 if 'WHERE' in query.upper():
@@ -787,14 +795,14 @@ class DatabaseOptimizer:
                             'type': 'single_column',
                             'reason': f'Frequent WHERE clause usage ({calls} calls)'
                         })
-        
+
         return index_suggestions
-    
+
     def extract_where_conditions(self, query):
         # Simplified condition extraction
         # In reality, you'd use a proper SQL parser
         import re
-        
+
         where_pattern = r'WHERE\s+([\w.]+)\s*[=<>]'
         matches = re.findall(where_pattern, query, re.IGNORECASE)
         return matches

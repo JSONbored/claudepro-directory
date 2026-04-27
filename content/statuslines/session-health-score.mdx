@@ -15,11 +15,11 @@ seoDescription: >-
   efficiency, latency performance, productivity velocity, and cache utilization
   with ac...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
 installable: true
-usageSnippet: '✓ Health: B (82/100) | GOOD | C:25 L:18 P:22 K:17'
+usageSnippet: "✓ Health: B (82/100) | GOOD | C:25 L:18 P:22 K:17"
 copySnippet: |-
   {
     "statusLine": {
@@ -82,6 +82,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive health score aggregating 4 key metrics into A-F grade (90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, <60 = F)
@@ -124,8 +125,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Session Health Score with Custom Thresholds
+
 Extended version with configurable thresholds via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -331,8 +335,11 @@ else
   echo -e "${GRADE_ICON} Health: ${GRADE_COLOR}${GRADE}${RESET} (${health_score}/100) | ${STATUS} | ${METRICS}"
 fi
 ```
+
 ### Session Health Score with Detailed Breakdown
+
 Version showing full metric names and percentages instead of abbreviations
+
 ```bash
 #!/usr/bin/env bash
 
@@ -393,12 +400,12 @@ if command -v bc > /dev/null 2>&1; then
   elif (( $(echo "$cost_per_minute < 0.10" | bc -l 2>/dev/null) )); then cost_score=18
   elif (( $(echo "$cost_per_minute < 0.20" | bc -l 2>/dev/null) )); then cost_score=12
   else cost_score=5; fi
-  
+
   if (( $(echo "$network_seconds < 1" | bc -l 2>/dev/null) )); then latency_score=25
   elif (( $(echo "$network_seconds < 3" | bc -l 2>/dev/null) )); then latency_score=18
   elif (( $(echo "$network_seconds < 5" | bc -l 2>/dev/null) )); then latency_score=12
   else latency_score=5; fi
-  
+
   if (( $(echo "$lines_per_minute > 30" | bc -l 2>/dev/null) )); then productivity_score=25
   elif (( $(echo "$lines_per_minute > 15" | bc -l 2>/dev/null) )); then productivity_score=18
   elif (( $(echo "$lines_per_minute > 5" | bc -l 2>/dev/null) )); then productivity_score=12
@@ -457,8 +464,11 @@ else
   echo -e "${GRADE_ICON} Health: ${GRADE_COLOR}${GRADE}${RESET} (${health_score}/100) | ${STATUS} | ${METRICS}"
 fi
 ```
+
 ### Session Health Score Installation Example
+
 Complete setup script with bc calculator verification and cache metrics validation
+
 ```bash
 #!/bin/bash
 # Installation script for Session Health Score
@@ -661,27 +671,35 @@ echo "Test health score calculation: Verify all 4 metrics (Cost, Latency, Produc
 ```
 
 ## Troubleshooting
+
 ### Health score always showing F grade despite good session
 
 Verify all JSON fields exist: cost.total_cost_usd, cost.total_duration_ms, cost.total_api_duration_ms, cost.total_lines_added, cost.total_lines_removed, cost.cache_read_input_tokens. Missing fields default to 0, causing low scores. Check: echo '$input' | jq .cost. Ensure Claude Code version exposes all required metrics. Test each metric: Calculate cost_score, latency_score, productivity_score, cache_score independently. Verify bc is working: echo 'scale=2; 45000 / 60000' | bc -l (should return 0.75).
+
 ### Individual metric scores seem incorrect
 
 Check thresholds: Cost (<$0.05/min = 25pt, <$0.10 = 18pt, <$0.20 = 12pt, else = 5pt), Latency (<1s network = 25pt, <3s = 18pt, <5s = 12pt, else = 5pt), Productivity (>30 L/min = 25pt, >15 = 18pt, >5 = 12pt, else = 5pt), Cache (>40% hit = 25pt, >20% = 18pt, >0% = 12pt, else = 5pt). Verify calculations: cost_per_minute = total_cost / duration_minutes. Test each metric independently: echo 'scale=4; 0.05 / 0.75' | bc -l (should return 0.0667 for cost per minute).
+
 ### Recommendation not showing despite low grade
 
 Recommendations only display for grades C (70-79), D (60-69), or F (<60). Grades A (90+) and B (80-89) show STATUS instead. Check health_score value and comparison: if [ $health_score -lt 70 ]. If score is exactly 70, triggers C grade but no recommendation (boundary condition). Verify weakest_metric identification: Script compares cost_score, latency_score, productivity_score, cache_score to find minimum. Test: echo C=$cost_score L=$latency_score P=$productivity_score K=$cache_score.
+
 ### Weakest metric identification incorrect
 
 Script compares cost_score, latency_score, productivity_score, cache_score to find minimum. Check individual scores: echo C=$cost_score L=$latency_score P=$productivity_score K=$cache_score. Verify comparison logic uses -lt (less than). If tied, first metric in order wins (cost > latency > productivity > cache). Test comparison: if [ 5 -lt 12 ]; then echo "5 is less than 12"; fi (should output). Verify all scores are calculated: If bc unavailable, all scores default to 5, making weakest metric detection unreliable.
+
 ### Cache score always showing 5 despite caching enabled
 
 Cache score requires cache_read_input_tokens field. Verify: echo '$input' | jq .cost.cache_read_input_tokens. If missing/null, defaults to 0 giving minimum score (5pt). Check that prompt caching is properly configured and Claude Code version supports cache metrics. Zero cache_read_tokens = no cache benefit detected. Test cache calculation: total_input = cache_read + cache_create + regular_input. If total_input = 0, cache_hit_rate = 0%. Verify: echo '$input' | jq '.cost | {read: .cache_read_input_tokens, create: .cache_creation_input_tokens, regular: .input_tokens}'.
+
 ### Metric breakdown abbreviations confusing
 
 Abbreviations: C = Cost efficiency, L = Latency performance, P = Productivity velocity, K = Cache utilization (K for Kache to avoid confusion with C). Each shows score out of 25 points. Add legend to documentation or customize METRICS string for clarity. Alternative: Use detailed version showing full names: Cost:$${cost_per_minute}/min(${cost_score}/25) Latency:${network_seconds}s(${latency_score}/25) Prod:${lines_per_minute}L/min(${productivity_score}/25) Cache:${cache_hit_rate}%(${cache_score}/25).
+
 ### Health score calculation fails with bc: command not found
 
 Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return path). Test bc: echo 'scale=2; 45000 / 60000' | bc -l (should return 0.75). Script has fallback: If bc unavailable, all metric scores default to 5, resulting in health_score = 20 (F grade). Verify bc is in PATH: which bc. Check script: Ensure bc is called with -l flag for math library: bc -l.
+
 ### Grade colors not displaying correctly or showing wrong colors
 
 Verify terminal supports 256-color mode: echo -e '\033[38;5;46m' (should display green). Check color codes: A = 46 (green), B = 75 (blue), C = 226 (yellow), D = 208 (orange), F = 196 (red). Test color: echo -e '\033[38;5;46mGreen\033[0m' (should display green text). Verify RESET code: echo -e '\033[0m' (should reset colors). If colors not working, terminal may only support 16 colors - modify color codes to use standard ANSI: \033[32m for green, \033[34m for blue, etc.

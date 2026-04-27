@@ -15,9 +15,9 @@ seoDescription: >-
   server. Search prompts, agents, MCP servers, rules, commands, and more
   directly fro...
 author: HeyClaude Team
-authorProfileUrl: 'https://heyclau.de'
-dateAdded: '2025-11-25'
-documentationUrl: 'https://heyclau.de/mcp/heyclaude-mcp'
+authorProfileUrl: "https://heyclau.de"
+dateAdded: "2025-11-25"
+documentationUrl: "https://heyclau.de/mcp/heyclaude-mcp"
 downloadUrl: /downloads/mcp/heyclaude-mcp.mcpb
 packageVerified: true
 installable: true
@@ -62,7 +62,7 @@ difficulty: intermediate
 prerequisites:
   - HeyClaude account (Supabase Auth account required)
   - OAuth 2.1 authentication (authorization code flow with PKCE)
-  - 'Network access to mcp.heyclau.de (HTTPS required, HTTP transport)'
+  - "Network access to mcp.heyclau.de (HTTPS required, HTTP transport)"
   - Understanding of MCP protocol (Model Context Protocol 2025-06-18)
   - Claude Desktop 0.7.0+ or Claude Code with MCP support
   - >-
@@ -73,7 +73,7 @@ prerequisites:
   - >-
     Understanding of tool pagination limits (max 50 items per request, some
     tools max 20)
-  - 'Optional: Supabase account (for OAuth authentication)'
+  - "Optional: Supabase account (for OAuth authentication)"
 tags:
   - mcp
   - directory
@@ -106,6 +106,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client. Real-time access to our community-driven directory with 11 powerful tools for discovery, search, and content exploration. Supports OAuth 2.1 authentication with resource parameter (RFC 8707), JWT token audience validation, Row-Level Security enforcement, and comprehensive directory access across all categories.
@@ -180,9 +181,7 @@ Access the complete HeyClaude directory through HeyClaude's official MCP server.
   "heyclaude-mcp": {
     "url": "https://mcp.heyclau.de/mcp",
     "oauth": {
-      "scopes": [
-        "mcp:tools"
-      ],
+      "scopes": ["mcp:tools"],
       "resource": "https://mcp.heyclau.de/mcp",
       "tokenEndpoint": "https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token",
       "authorizationEndpoint": "https://mcp.heyclau.de/oauth/authorize"
@@ -193,33 +192,48 @@ Access the complete HeyClaude directory through HeyClaude's official MCP server.
 ```
 
 ## Examples
+
 ### Search for MCP servers
+
 Use searchContent tool to find MCP servers matching a query
+
 ```plaintext
 Ask Claude: "Search for MCP servers related to GitHub"
 ```
+
 ### Get trending content
+
 Use getTrending tool to discover popular agents
+
 ```plaintext
 Ask Claude: "Get trending agents from the directory"
 ```
+
 ### Get content details
+
 Use getContentDetail tool to retrieve full metadata for a specific item
+
 ```plaintext
 Ask Claude: "Show me details for the github-mcp-server"
 ```
+
 ### Find related content
+
 Use getRelatedContent tool to discover similar items
+
 ```plaintext
 Ask Claude: "Find content related to the stripe-mcp-server"
 ```
+
 ### Get Content Item
+
 Retrieve a content item from HeyClaude with metadata
+
 ```typescript
 // Get HeyClaude content item
 const content = await heyclaude.content.get({
   content_id: "content-id",
-  include_metadata: true
+  include_metadata: true,
 });
 ```
 
@@ -237,27 +251,35 @@ const content = await heyclaude.content.get({
 - HeyClaude webhook configurations and payloads may contain sensitive content and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### OAuth authentication failed or token audience mismatch
 
 Verify OAuth 2.1 flow completed correctly (authorization code with PKCE). Check token audience claim includes MCP server URL (https://mcp.heyclau.de/mcp). Ensure resource parameter (RFC 8707) was included in authorization request. Verify redirect URI matches registered URI in Supabase Auth. Check token not expired (refresh if needed). Review OAuth metadata endpoints: /.well-known/oauth-protected-resource and /.well-known/oauth-authorization-server. Ensure JWT token includes correct audience in 'aud' claim. Re-authenticate if token was issued without resource parameter.
+
 ### JWT token validation errors or missing audience claim
 
 OAuth 2.1 requires resource parameter (RFC 8707) to include MCP server URL in token audience. Verify token was issued with resource parameter in authorization request. Check token 'aud' claim includes https://mcp.heyclau.de/mcp. Re-authenticate if token was issued without resource parameter. Review authorization endpoint: /oauth/authorize (proxies to Supabase Auth with resource parameter). Ensure client uses OAuth 2.1 flow, not OAuth 2.0. Check token expiration and refresh if needed. Verify client ID and redirect URI are correct in Supabase Auth configuration.
+
 ### Tool execution errors or database query failures
 
 Check Row-Level Security (RLS) policies allow access for authenticated user. Verify Supabase client authenticated correctly (token in Authorization header). Review tool pagination limits (max 50 items per request, some tools max 20). Check database connection and RPC availability. Review error messages in tool responses for specific issues. Verify category and slug parameters are correct (valid categories: agents, rules, commands, skills, collections, mcp). Check content exists in directory for specified category/slug. Review tool input schema requirements (required vs optional parameters).
+
 ### Connection errors or endpoint unreachable
 
 Verify network access to mcp.heyclau.de (HTTPS required). Check endpoint URL correct: https://mcp.heyclau.de/mcp. Test health endpoint: https://mcp.heyclau.de/ (should return server info with version 1.0.0, protocol 2025-06-18). Verify CORS headers allow requests from your client. Check MCP Protocol Version header matches 2025-06-18. Review Mcp-Session-Id header if using session management. Verify HTTP transport (not STDIO) for remote server. Check firewall or network restrictions blocking HTTPS connections.
+
 ### HeyClaude MCP server authentication errors with API keys
 
 Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### HeyClaude rate limit errors when processing multiple requests
 
 Implement exponential backoff retry logic with jitter. Use HeyClaude API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed content data. Check HeyClaude documentation for specific rate limits.
+
 ### HeyClaude content or user access denied errors
 
 Verify API key has access to the content or user. Check content permissions and account membership. Ensure API key has required permissions for target operations.
+
 ### HeyClaude MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify HeyClaude API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

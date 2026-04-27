@@ -104,37 +104,54 @@ Streamline your database exploration and analysis by connecting Claude to Postgr
 
 ## Examples
 ### What tables exist in my database?
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "What tables exist in my database?"
 ```
+
 ### Describe the structure of the users table
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Describe the structure of the users table"
 ```
+
 ### How many records are in each table?
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "How many records are in each table?"
 ```
+
 ### Write a query to find active users from last month
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Write a query to find active users from last month"
 ```
+
 ### Generate documentation for my database schema
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate documentation for my database schema"
 ```
+
 ### Execute Query
+
 Execute a parameterized PostgreSQL query with prepared statement
+
 ```typescript
 // Execute PostgreSQL query
 const result = await postgres.query({
   text: "SELECT * FROM users WHERE email = $1",
-  values: ["user@example.com"]
+  values: ["user@example.com"],
 });
 ```
 ```plaintext
@@ -156,7 +173,7 @@ Ask Claude: "Generate documentation for my database schema"
 // Execute PostgreSQL query
 const result = await postgres.query({
   text: "SELECT * FROM users WHERE email = $1",
-  values: ["user@example.com"]
+  values: ["user@example.com"],
 });
 ```
 
@@ -176,27 +193,35 @@ const result = await postgres.query({
 ### Connection refused or database not accessible
 
 Verify PostgreSQL is running with pg_isready command. Check connection string format: postgresql://user:password@host:port/database. Test with psql command first (psql 'postgresql://user:password@host:port/database'). Verify firewall allows connections on port 5432 (default). Check PostgreSQL is listening on correct interface (localhost vs 0.0.0.0). Verify hostname resolves correctly for remote connections.
+
 ### SSL connection error - wrong version number or verify failed
 
 Add sslmode parameter: postgresql://host/db?sslmode=require. Verify PostgreSQL supports TLS version (check pg_config --configure). Use sslmode=disable for local dev only (not recommended for production). Use sslmode=verify-ca or verify-full for production. Check certificate matches CA in ssl_ca_file. Verify SSL is enabled in postgresql.conf (ssl = on).
+
 ### Authentication failed for user or password rejected
 
 Verify username/password in connection string exact match (case-sensitive). Check pg_hba.conf allows connection method (md5, scram-sha-256, trust for local). Ensure user exists with GRANT SELECT permissions. Test auth with psql -U username -d database. Check password special characters are URL-encoded in connection string. Verify user has CONNECT privilege on database.
+
 ### Certificate authentication failed - CN mismatch
 
 Verify certificate CN matches PostgreSQL username exactly. Configure pg_ident.conf for username mapping if needed. Check ssl_cert_file and ssl_key_file permissions (owned by postgres user, mode 600). Ensure client cert trusted by server CA. Verify sslmode=verify-full for certificate validation. Check certificate hasn't expired.
+
 ### Permission denied on table or schema access error
 
 Grant SELECT permissions: GRANT SELECT ON ALL TABLES IN SCHEMA public TO username. For future tables: ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO username. Verify read-only user has pg_read_all_data role (GRANT pg_read_all_data TO username). Check schema permissions with \dp command in psql. Ensure user connected to correct database. Grant USAGE on schema: GRANT USAGE ON SCHEMA public TO username.
+
 ### PostgreSQL MCP server authentication errors with connection strings
 
 Verify connection string is valid and credentials are correct. Check database host, port, username, and password. Ensure SSL/TLS configuration is correct for secure connections. Verify database user has required permissions.
+
 ### PostgreSQL connection pool exhaustion or timeout errors
 
 Check connection pool size and configuration. Reduce connection timeout values. Implement connection pooling with proper limits. Monitor active connections and close idle connections. Check database max_connections setting.
+
 ### PostgreSQL query execution failures or performance issues
 
 Check query syntax and parameter binding. Verify table and column names are correct. Review query execution plans for optimization. Check database indexes and statistics. Monitor slow query logs for performance bottlenecks.
+
 ### PostgreSQL MCP server connection timeouts or network errors
 
 Check network connectivity to PostgreSQL server. Verify firewall rules allow database connections. Increase connection timeout values. Implement connection retry mechanisms with exponential backoff.

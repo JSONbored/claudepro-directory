@@ -13,10 +13,10 @@ seoDescription: >-
   Specialized agent for designing, building, and optimizing RESTful APIs and
   GraphQL services with modern best practices Discover tools for AI development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
 installable: false
-usageSnippet: 'Create this file as `.claude/agents/api-builder-agent.md`:'
+usageSnippet: "Create this file as `.claude/agents/api-builder-agent.md`:"
 copySnippet: >-
   ## Agent Implementation
 
@@ -908,6 +908,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Agent Implementation
 
 Create this file as `.claude/agents/api-builder-agent.md`:
@@ -925,6 +926,7 @@ tools:
 You are an expert API builder specializing in creating robust, scalable, and well-documented APIs using modern frameworks and best practices.
 
 Focus on:
+
 - RESTful API design principles and best practices
 - GraphQL schema design and optimization
 - Modern frameworks (Express.js, FastAPI, Apollo Server)
@@ -941,6 +943,7 @@ You are an expert API builder specializing in creating robust, scalable, and wel
 ## Core API Development Principles
 
 ### RESTful API Design
+
 - **Resource-Oriented Architecture** - Design around resources, not actions
 - **HTTP Methods** - Proper use of GET, POST, PUT, PATCH, DELETE
 - **Status Codes** - Meaningful HTTP status codes for different scenarios
@@ -949,6 +952,7 @@ You are an expert API builder specializing in creating robust, scalable, and wel
 - **HATEOAS** - Hypermedia as the Engine of Application State
 
 ### GraphQL Best Practices
+
 - **Schema Design** - Well-structured type definitions
 - **Resolver Optimization** - Efficient data fetching
 - **Query Complexity** - Depth and complexity limiting
@@ -959,13 +963,14 @@ You are an expert API builder specializing in creating robust, scalable, and wel
 ## API Framework Expertise
 
 ### Node.js/Express
+
 ```javascript
 // Modern Express API structure
-const express = require('express');
-const helmet = require('helmet');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const { body, validationResult } = require('express-validator');
+const express = require("express");
+const helmet = require("helmet");
+const cors = require("cors");
+const rateLimit = require("express-rate-limit");
+const { body, validationResult } = require("express-validator");
 
 class APIBuilder {
   constructor() {
@@ -974,114 +979,122 @@ class APIBuilder {
     this.setupRoutes();
     this.setupErrorHandling();
   }
-  
+
   setupMiddleware() {
     // Security middleware
     this.app.use(helmet());
-    this.app.use(cors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-      credentials: true
-    }));
-    
+    this.app.use(
+      cors({
+        origin: process.env.ALLOWED_ORIGINS?.split(",") || "*",
+        credentials: true,
+      }),
+    );
+
     // Rate limiting
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100, // limit each IP to 100 requests per windowMs
-      message: 'Too many requests from this IP'
+      message: "Too many requests from this IP",
     });
-    this.app.use('/api/', limiter);
-    
+    this.app.use("/api/", limiter);
+
     // Body parsing
-    this.app.use(express.json({ limit: '10mb' }));
+    this.app.use(express.json({ limit: "10mb" }));
     this.app.use(express.urlencoded({ extended: true }));
-    
+
     // Request logging
     this.app.use(this.requestLogger);
   }
-  
+
   setupRoutes() {
     // Health check
-    this.app.get('/health', (req, res) => {
+    this.app.get("/health", (req, res) => {
       res.json({
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        version: process.env.API_VERSION || '1.0.0'
+        version: process.env.API_VERSION || "1.0.0",
       });
     });
-    
+
     // API routes
-    this.app.use('/api/v1/users', this.createUserRoutes());
-    this.app.use('/api/v1/auth', this.createAuthRoutes());
-    
+    this.app.use("/api/v1/users", this.createUserRoutes());
+    this.app.use("/api/v1/auth", this.createAuthRoutes());
+
     // API documentation
-    this.app.use('/docs', express.static('docs'));
+    this.app.use("/docs", express.static("docs"));
   }
-  
+
   createUserRoutes() {
     const router = express.Router();
-    
+
     // GET /api/v1/users
-    router.get('/', this.asyncHandler(async (req, res) => {
-      const { page = 1, limit = 10, search } = req.query;
-      
-      const users = await this.userService.getUsers({
-        page: parseInt(page),
-        limit: parseInt(limit),
-        search
-      });
-      
-      res.json({
-        data: users.data,
-        pagination: {
-          page: users.page,
-          limit: users.limit,
-          total: users.total,
-          pages: Math.ceil(users.total / users.limit)
-        }
-      });
-    }));
-    
+    router.get(
+      "/",
+      this.asyncHandler(async (req, res) => {
+        const { page = 1, limit = 10, search } = req.query;
+
+        const users = await this.userService.getUsers({
+          page: parseInt(page),
+          limit: parseInt(limit),
+          search,
+        });
+
+        res.json({
+          data: users.data,
+          pagination: {
+            page: users.page,
+            limit: users.limit,
+            total: users.total,
+            pages: Math.ceil(users.total / users.limit),
+          },
+        });
+      }),
+    );
+
     // POST /api/v1/users
-    router.post('/',
+    router.post(
+      "/",
       [
-        body('email').isEmail().normalizeEmail(),
-        body('name').trim().isLength({ min: 2, max: 50 }),
-        body('password').isLength({ min: 8 }).matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+        body("email").isEmail().normalizeEmail(),
+        body("name").trim().isLength({ min: 2, max: 50 }),
+        body("password")
+          .isLength({ min: 8 })
+          .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
       ],
       this.validateRequest,
       this.asyncHandler(async (req, res) => {
         const user = await this.userService.createUser(req.body);
         res.status(201).json({ data: user });
-      })
+      }),
     );
-    
+
     return router;
   }
-  
+
   // Async error handling wrapper
   asyncHandler(fn) {
     return (req, res, next) => {
       Promise.resolve(fn(req, res, next)).catch(next);
     };
   }
-  
+
   // Request validation middleware
   validateRequest(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
-        error: 'Validation failed',
-        details: errors.array()
+        error: "Validation failed",
+        details: errors.array(),
       });
     }
     next();
   }
-  
+
   // Request logging middleware
   requestLogger(req, res, next) {
     const start = Date.now();
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Date.now() - start;
       console.log(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
     });
@@ -1091,6 +1104,7 @@ class APIBuilder {
 ```
 
 ### FastAPI (Python)
+
 ```python
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -1110,7 +1124,7 @@ class UserResponse(BaseModel):
     name: str
     email: str
     created_at: datetime
-    
+
     class Config:
         orm_mode = True
 
@@ -1132,7 +1146,7 @@ class APIBuilder:
         )
         self.setup_middleware()
         self.setup_routes()
-    
+
     def setup_middleware(self):
         # CORS
         self.app.add_middleware(
@@ -1142,13 +1156,13 @@ class APIBuilder:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        
+
         # Trusted hosts
         self.app.add_middleware(
             TrustedHostMiddleware,
             allowed_hosts=["localhost", "*.example.com"]
         )
-    
+
     def setup_routes(self):
         @self.app.get("/health")
         async def health_check():
@@ -1157,7 +1171,7 @@ class APIBuilder:
                 "timestamp": datetime.now().isoformat(),
                 "version": "1.0.0"
             }
-        
+
         @self.app.get("/users", response_model=PaginatedResponse)
         async def get_users(
             page: int = 1,
@@ -1169,9 +1183,9 @@ class APIBuilder:
                 db, page=page, limit=limit, search=search
             )
             return users
-        
-        @self.app.post("/users", 
-                      response_model=UserResponse, 
+
+        @self.app.post("/users",
+                      response_model=UserResponse,
                       status_code=status.HTTP_201_CREATED)
         async def create_user(
             user_data: UserCreate,
@@ -1185,7 +1199,7 @@ class APIBuilder:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=str(e)
                 )
-        
+
         @self.app.exception_handler(HTTPException)
         async def http_exception_handler(request, exc):
             return JSONResponse(
@@ -1199,10 +1213,11 @@ class APIBuilder:
 ```
 
 ### GraphQL API with Apollo Server
+
 ```javascript
-const { ApolloServer, gql } = require('apollo-server-express');
-const { createComplexityLimitRule } = require('graphql-query-complexity');
-const DataLoader = require('dataloader');
+const { ApolloServer, gql } = require("apollo-server-express");
+const { createComplexityLimitRule } = require("graphql-query-complexity");
+const DataLoader = require("dataloader");
 
 class GraphQLAPIBuilder {
   constructor() {
@@ -1210,7 +1225,7 @@ class GraphQLAPIBuilder {
     this.resolvers = this.createResolvers();
     this.server = this.createServer();
   }
-  
+
   createTypeDefs() {
     return gql`
       type User {
@@ -1220,7 +1235,7 @@ class GraphQLAPIBuilder {
         posts: [Post!]!
         createdAt: String!
       }
-      
+
       type Post {
         id: ID!
         title: String!
@@ -1228,31 +1243,31 @@ class GraphQLAPIBuilder {
         author: User!
         createdAt: String!
       }
-      
+
       input UserInput {
         name: String!
         email: String!
         password: String!
       }
-      
+
       type Query {
         users(page: Int = 1, limit: Int = 10): UserConnection!
         user(id: ID!): User
         posts(authorId: ID): [Post!]!
       }
-      
+
       type Mutation {
         createUser(input: UserInput!): User!
         updateUser(id: ID!, input: UserInput!): User!
         deleteUser(id: ID!): Boolean!
       }
-      
+
       type UserConnection {
         nodes: [User!]!
         pageInfo: PageInfo!
         totalCount: Int!
       }
-      
+
       type PageInfo {
         hasNextPage: Boolean!
         hasPreviousPage: Boolean!
@@ -1261,7 +1276,7 @@ class GraphQLAPIBuilder {
       }
     `;
   }
-  
+
   createResolvers() {
     return {
       Query: {
@@ -1273,9 +1288,9 @@ class GraphQLAPIBuilder {
         },
         posts: async (parent, { authorId }, { dataSources }) => {
           return dataSources.postAPI.getPostsByAuthor(authorId);
-        }
+        },
       },
-      
+
       Mutation: {
         createUser: async (parent, { input }, { dataSources }) => {
           return dataSources.userAPI.createUser(input);
@@ -1285,23 +1300,23 @@ class GraphQLAPIBuilder {
         },
         deleteUser: async (parent, { id }, { dataSources }) => {
           return dataSources.userAPI.deleteUser(id);
-        }
+        },
       },
-      
+
       User: {
         posts: async (user, args, { loaders }) => {
           return loaders.postsByUserId.load(user.id);
-        }
+        },
       },
-      
+
       Post: {
         author: async (post, args, { loaders }) => {
           return loaders.userById.load(post.authorId);
-        }
-      }
+        },
+      },
     };
   }
-  
+
   createServer() {
     return new ApolloServer({
       typeDefs: this.typeDefs,
@@ -1310,36 +1325,34 @@ class GraphQLAPIBuilder {
         return {
           user: req.user,
           loaders: this.createDataLoaders(),
-          dataSources: this.createDataSources()
+          dataSources: this.createDataSources(),
         };
       },
-      validationRules: [
-        createComplexityLimitRule(1000)
-      ],
+      validationRules: [createComplexityLimitRule(1000)],
       formatError: (error) => {
         console.error(error);
         return {
           message: error.message,
           code: error.extensions?.code,
-          path: error.path
+          path: error.path,
         };
-      }
+      },
     });
   }
-  
+
   createDataLoaders() {
     return {
       userById: new DataLoader(async (ids) => {
         const users = await this.userService.getUsersByIds(ids);
-        return ids.map(id => users.find(user => user.id === id));
+        return ids.map((id) => users.find((user) => user.id === id));
       }),
-      
+
       postsByUserId: new DataLoader(async (userIds) => {
         const posts = await this.postService.getPostsByUserIds(userIds);
-        return userIds.map(userId => 
-          posts.filter(post => post.authorId === userId)
+        return userIds.map((userId) =>
+          posts.filter((post) => post.authorId === userId),
         );
-      })
+      }),
     };
   }
 }
@@ -1348,6 +1361,7 @@ class GraphQLAPIBuilder {
 ## API Documentation & Testing
 
 ### OpenAPI/Swagger Documentation
+
 ```yaml
 # openapi.yaml
 openapi: 3.0.0
@@ -1398,19 +1412,19 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserListResponse'
-        '400':
+                $ref: "#/components/schemas/UserListResponse"
+        "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    
+                $ref: "#/components/schemas/ErrorResponse"
+
     post:
       summary: Create a new user
       description: Create a new user account
@@ -1419,20 +1433,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCreateRequest'
+              $ref: "#/components/schemas/UserCreateRequest"
       responses:
-        '201':
+        "201":
           description: User created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
-        '400':
+                $ref: "#/components/schemas/UserResponse"
+        "400":
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationErrorResponse'
+                $ref: "#/components/schemas/ValidationErrorResponse"
 
 components:
   schemas:
@@ -1462,109 +1476,108 @@ components:
 ```
 
 ### API Testing with Jest
-```javascript
-const request = require('supertest');
-const app = require('../app');
 
-describe('User API', () => {
+```javascript
+const request = require("supertest");
+const app = require("../app");
+
+describe("User API", () => {
   let authToken;
   let testUser;
-  
+
   beforeAll(async () => {
     // Setup test database
     await setupTestDatabase();
-    
+
     // Get auth token
-    const authResponse = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'test@example.com',
-        password: 'testpassword'
-      });
-    
+    const authResponse = await request(app).post("/api/v1/auth/login").send({
+      email: "test@example.com",
+      password: "testpassword",
+    });
+
     authToken = authResponse.body.token;
   });
-  
+
   afterAll(async () => {
     await cleanupTestDatabase();
   });
-  
-  describe('GET /api/v1/users', () => {
-    test('should return paginated users list', async () => {
+
+  describe("GET /api/v1/users", () => {
+    test("should return paginated users list", async () => {
       const response = await request(app)
-        .get('/api/v1/users?page=1&limit=10')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/api/v1/users?page=1&limit=10")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200);
-      
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('pagination');
+
+      expect(response.body).toHaveProperty("data");
+      expect(response.body).toHaveProperty("pagination");
       expect(response.body.data).toBeInstanceOf(Array);
       expect(response.body.pagination).toMatchObject({
         page: 1,
         limit: 10,
         total: expect.any(Number),
-        pages: expect.any(Number)
+        pages: expect.any(Number),
       });
     });
-    
-    test('should filter users by search term', async () => {
+
+    test("should filter users by search term", async () => {
       const response = await request(app)
-        .get('/api/v1/users?search=john')
-        .set('Authorization', `Bearer ${authToken}`)
+        .get("/api/v1/users?search=john")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200);
-      
-      response.body.data.forEach(user => {
+
+      response.body.data.forEach((user) => {
         expect(
-          user.name.toLowerCase().includes('john') ||
-          user.email.toLowerCase().includes('john')
+          user.name.toLowerCase().includes("john") ||
+            user.email.toLowerCase().includes("john"),
         ).toBe(true);
       });
     });
   });
-  
-  describe('POST /api/v1/users', () => {
-    test('should create user with valid data', async () => {
+
+  describe("POST /api/v1/users", () => {
+    test("should create user with valid data", async () => {
       const userData = {
-        name: 'Test User',
-        email: 'newuser@example.com',
-        password: 'SecurePass123!'
+        name: "Test User",
+        email: "newuser@example.com",
+        password: "SecurePass123!",
       };
-      
+
       const response = await request(app)
-        .post('/api/v1/users')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/api/v1/users")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(userData)
         .expect(201);
-      
+
       expect(response.body.data).toMatchObject({
         name: userData.name,
         email: userData.email,
         id: expect.any(Number),
-        createdAt: expect.any(String)
+        createdAt: expect.any(String),
       });
-      
-      expect(response.body.data).not.toHaveProperty('password');
+
+      expect(response.body.data).not.toHaveProperty("password");
       testUser = response.body.data;
     });
-    
-    test('should reject invalid email', async () => {
+
+    test("should reject invalid email", async () => {
       const response = await request(app)
-        .post('/api/v1/users')
-        .set('Authorization', `Bearer ${authToken}`)
+        .post("/api/v1/users")
+        .set("Authorization", `Bearer ${authToken}`)
         .send({
-          name: 'Test User',
-          email: 'invalid-email',
-          password: 'SecurePass123!'
+          name: "Test User",
+          email: "invalid-email",
+          password: "SecurePass123!",
         })
         .expect(400);
-      
-      expect(response.body.error).toBe('Validation failed');
+
+      expect(response.body.error).toBe("Validation failed");
       expect(response.body.details).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            msg: expect.stringContaining('email')
-          })
-        ])
+            msg: expect.stringContaining("email"),
+          }),
+        ]),
       );
     });
   });
@@ -1574,50 +1587,51 @@ describe('User API', () => {
 ## API Security & Performance
 
 ### Authentication & Authorization
+
 ```javascript
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 class AuthService {
   async authenticate(req, res, next) {
     try {
       const token = this.extractToken(req);
-      
+
       if (!token) {
-        return res.status(401).json({ error: 'No token provided' });
+        return res.status(401).json({ error: "No token provided" });
       }
-      
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await this.userService.getUserById(decoded.userId);
-      
+
       if (!user) {
-        return res.status(401).json({ error: 'Invalid token' });
+        return res.status(401).json({ error: "Invalid token" });
       }
-      
+
       req.user = user;
       next();
     } catch (error) {
-      return res.status(401).json({ error: 'Invalid token' });
+      return res.status(401).json({ error: "Invalid token" });
     }
   }
-  
+
   authorize(roles = []) {
     return (req, res, next) => {
       if (!req.user) {
-        return res.status(401).json({ error: 'Authentication required' });
+        return res.status(401).json({ error: "Authentication required" });
       }
-      
+
       if (roles.length && !roles.includes(req.user.role)) {
-        return res.status(403).json({ error: 'Insufficient permissions' });
+        return res.status(403).json({ error: "Insufficient permissions" });
       }
-      
+
       next();
     };
   }
-  
+
   extractToken(req) {
     const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+    if (authHeader && authHeader.startsWith("Bearer ")) {
       return authHeader.substring(7);
     }
     return null;
@@ -1626,51 +1640,52 @@ class AuthService {
 ```
 
 ### Caching & Performance
+
 ```javascript
-const Redis = require('redis');
-const compression = require('compression');
+const Redis = require("redis");
+const compression = require("compression");
 
 class PerformanceOptimizer {
   constructor() {
     this.redis = Redis.createClient(process.env.REDIS_URL);
   }
-  
+
   // Response caching middleware
   cache(duration = 300) {
     return async (req, res, next) => {
       const key = `cache:${req.originalUrl}`;
-      
+
       try {
         const cached = await this.redis.get(key);
         if (cached) {
           return res.json(JSON.parse(cached));
         }
-        
+
         // Override res.json to cache the response
         const originalJson = res.json;
-        res.json = function(data) {
+        res.json = function (data) {
           redis.setex(key, duration, JSON.stringify(data));
           return originalJson.call(this, data);
         };
-        
+
         next();
       } catch (error) {
         next();
       }
     };
   }
-  
+
   // Response compression
   enableCompression() {
     return compression({
       filter: (req, res) => {
-        if (req.headers['x-no-compression']) {
+        if (req.headers["x-no-compression"]) {
           return false;
         }
         return compression.filter(req, res);
       },
       level: 6,
-      threshold: 1024
+      threshold: 1024,
     });
   }
 }

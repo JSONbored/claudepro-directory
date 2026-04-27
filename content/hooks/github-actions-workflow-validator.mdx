@@ -10,9 +10,9 @@ seoDescription: >-
   This PostToolUse hook provides comprehensive GitHub Actions workflow
   validation...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
-documentationUrl: 'https://docs.github.com/en/actions'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
+documentationUrl: "https://docs.github.com/en/actions"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch
@@ -77,10 +77,11 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive GitHub Actions workflow YAML validation using actionlint (recommended), yamllint, or Python YAML parser with fallback methods ensuring validation works even without actionlint installed and providing multiple validation levels
-- Actionlint integration for advanced workflow checking including GitHub Actions-specific syntax validation, context variable validation (github.*, env.*, secrets.*), action compatibility checking, and workflow structure validation with detailed error messages
+- Actionlint integration for advanced workflow checking including GitHub Actions-specific syntax validation, context variable validation (github._, env._, secrets.\*), action compatibility checking, and workflow structure validation with detailed error messages
 - Deprecated action version detection and warnings for outdated action versions (v1, v2) with upgrade recommendations to latest versions (v3, v4) and specific action version compatibility checking
 - Security best practices validation including permissions checking (explicit permissions recommendations), secrets validation (hardcoded secret detection), pull_request_target security warnings, and GitHub secrets usage recommendations
 - YAML syntax verification with fallback methods (actionlint → yamllint → Python YAML parser) ensuring validation works across different environments and providing graceful degradation when tools are unavailable
@@ -127,10 +128,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/github-actions-workflow-validator.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -153,17 +151,17 @@ fi
 # Check if this is a GitHub Actions workflow file
 if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github/workflows/*.yaml ]]; then
   echo "🔄 Validating GitHub Actions workflow: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize validation counters
   WARNINGS=0
   ERRORS=0
   SUGGESTIONS=0
-  
+
   # Function to report issues
   report_issue() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -182,23 +180,23 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
         ;;
     esac
   }
-  
+
   # Check if file exists and is readable
   if [ ! -f "$FILE_PATH" ]; then
     report_issue "ERROR" "Workflow file not found: $FILE_PATH"
     exit 1
   fi
-  
+
   # 1. YAML Syntax Validation
   echo "📋 Checking YAML syntax..." >&2
-  
+
   # Try actionlint first (most comprehensive)
   if command -v actionlint &> /dev/null; then
     echo "   Using actionlint for comprehensive validation..." >&2
-    
+
     ACTIONLINT_OUTPUT=$(actionlint "$FILE_PATH" 2>&1)
     ACTIONLINT_EXIT_CODE=$?
-    
+
     if [ $ACTIONLINT_EXIT_CODE -eq 0 ]; then
       echo "   ✅ actionlint validation passed" >&2
     else
@@ -226,10 +224,10 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
       report_issue "WARNING" "No YAML validator available (actionlint, yamllint, or python3)"
     fi
   fi
-  
+
   # 2. Action Version Validation
   echo "🔍 Checking action versions..." >&2
-  
+
   # Check for outdated action versions
   OUTDATED_ACTIONS=(
     "actions/checkout@v[12]"
@@ -239,99 +237,99 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
     "actions/upload-artifact@v[12]"
     "actions/download-artifact@v[12]"
   )
-  
+
   for pattern in "${OUTDATED_ACTIONS[@]}"; do
     if grep -q "$pattern" "$FILE_PATH" 2>/dev/null; then
       ACTION_NAME=$(echo "$pattern" | cut -d'@' -f1)
       report_issue "WARNING" "Using outdated $ACTION_NAME version - consider upgrading to latest"
     fi
   done
-  
+
   # Check for unpinned action versions (security risk)
   if grep -E 'uses:.*@(main|master|develop)' "$FILE_PATH" >&2 2>/dev/null; then
     report_issue "WARNING" "Actions using branch references instead of pinned versions detected"
     echo "   💡 Use specific version tags or commit SHAs for security" >&2
   fi
-  
+
   # 3. Security Best Practices
   echo "🔒 Checking security best practices..." >&2
-  
+
   # Check for explicit permissions
   if ! grep -q "permissions:" "$FILE_PATH" 2>/dev/null; then
     report_issue "SUGGESTION" "Consider adding explicit 'permissions:' for better security"
     echo "   Example: permissions: { contents: read, actions: read }" >&2
   fi
-  
+
   # Check for pull_request_target usage (potential security risk)
   if grep -q "pull_request_target:" "$FILE_PATH" 2>/dev/null; then
     report_issue "WARNING" "pull_request_target can be a security risk - ensure proper handling"
   fi
-  
+
   # Check for secrets in plain text (basic check)
   if grep -iE '(password|secret|token|key).*:.*[a-zA-Z0-9]+' "$FILE_PATH" | grep -v '\${{' >&2 2>/dev/null; then
     report_issue "ERROR" "Potential hardcoded secrets detected - use GitHub secrets instead"
   fi
-  
+
   # 4. Performance and Best Practices
   echo "⚡ Checking performance best practices..." >&2
-  
+
   # Check for caching
   if ! grep -q "cache" "$FILE_PATH" 2>/dev/null && (grep -q "npm install" "$FILE_PATH" || grep -q "pip install" "$FILE_PATH" || grep -q "bundle install" "$FILE_PATH") 2>/dev/null; then
     report_issue "SUGGESTION" "Consider adding caching for dependencies to improve workflow speed"
   fi
-  
+
   # Check for matrix strategy usage
   if ! grep -q "strategy:" "$FILE_PATH" 2>/dev/null && grep -q "runs-on:" "$FILE_PATH" 2>/dev/null; then
     report_issue "SUGGESTION" "Consider using matrix strategy for testing multiple versions/platforms"
   fi
-  
+
   # Check for conditional job execution
   if ! grep -q "if:" "$FILE_PATH" 2>/dev/null; then
     report_issue "SUGGESTION" "Consider using conditional execution to optimize workflow runs"
   fi
-  
+
   # 5. Workflow Structure Validation
   echo "📋 Checking workflow structure..." >&2
-  
+
   # Check for required fields
   if ! grep -q "name:" "$FILE_PATH" 2>/dev/null; then
     report_issue "WARNING" "Workflow should have a descriptive 'name' field"
   fi
-  
+
   if ! grep -q "on:" "$FILE_PATH" 2>/dev/null; then
     report_issue "ERROR" "Workflow must have 'on:' trigger definition"
   fi
-  
+
   if ! grep -q "jobs:" "$FILE_PATH" 2>/dev/null; then
     report_issue "ERROR" "Workflow must have 'jobs:' section"
   fi
-  
+
   # Check for environment variables
   if grep -q "env:" "$FILE_PATH" 2>/dev/null; then
     echo "   ✅ Environment variables defined" >&2
   fi
-  
+
   # 6. Action-Specific Checks
   echo "🎯 Checking action-specific patterns..." >&2
-  
+
   # Check for Node.js setup
   if grep -q "actions/setup-node" "$FILE_PATH" 2>/dev/null; then
     if ! grep -q "node-version" "$FILE_PATH" 2>/dev/null; then
       report_issue "WARNING" "setup-node should specify node-version"
     fi
-    
+
     if ! grep -q "cache:" "$FILE_PATH" 2>/dev/null; then
       report_issue "SUGGESTION" "Consider enabling cache for setup-node (e.g., cache: npm)"
     fi
   fi
-  
+
   # Check for Python setup
   if grep -q "actions/setup-python" "$FILE_PATH" 2>/dev/null; then
     if ! grep -q "python-version" "$FILE_PATH" 2>/dev/null; then
       report_issue "WARNING" "setup-python should specify python-version"
     fi
   fi
-  
+
   # Check for checkout action
   if grep -q "actions/checkout" "$FILE_PATH" 2>/dev/null; then
     # Check if fetch-depth is appropriate for the use case
@@ -339,7 +337,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
       report_issue "INFO" "Using full history checkout - ensure this is necessary"
     fi
   fi
-  
+
   # 7. Generate Summary Report
   echo "" >&2
   echo "📊 GitHub Actions Validation Summary:" >&2
@@ -348,7 +346,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
   echo "   ❌ Errors: $ERRORS" >&2
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   💡 Suggestions: $SUGGESTIONS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ] && [ "$WARNINGS" -eq 0 ]; then
     echo "   ✅ Validation Status: PASSED" >&2
   elif [ "$ERRORS" -eq 0 ]; then
@@ -356,7 +354,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
   else
     echo "   ❌ Validation Status: FAILED" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 GitHub Actions Best Practices:" >&2
   echo "   • Pin actions to specific versions or commit SHAs" >&2
@@ -365,13 +363,13 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
   echo "   • Use matrix strategies for cross-platform testing" >&2
   echo "   • Add conditional execution to optimize runs" >&2
   echo "   • Keep secrets out of workflow files" >&2
-  
+
   # Exit with error if there are critical issues
   if [ "$ERRORS" -gt 0 ]; then
     echo "⚠️ Workflow has critical errors that should be fixed" >&2
     exit 1
   fi
-  
+
 else
   # Not a GitHub Actions workflow file
   exit 0
@@ -381,6 +379,7 @@ exit 0
 ```
 
 ## Examples
+
 ### GitHub Actions Workflow Validator Hook Script
 
 Complete hook script that performs GitHub Actions workflow validation
@@ -411,6 +410,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable workflow validation
@@ -425,6 +425,7 @@ Complete hook configuration for .claude/settings.json to enable workflow validat
   }
 }
 ```
+
 ### Security Best Practices Validation
 
 Enhanced hook script for security best practices validation
@@ -449,6 +450,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
 fi
 exit 0
 ```
+
 ### Action Version and Performance Validation
 
 Enhanced hook script for action version detection and performance suggestions
@@ -471,6 +473,7 @@ if [[ "$FILE_PATH" == *.github/workflows/*.yml ]] || [[ "$FILE_PATH" == *.github
 fi
 exit 0
 ```
+
 ### Workflow Structure Validation
 
 Enhanced hook script for workflow structure and required fields validation
@@ -501,27 +504,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### actionlint not found but validation still runs
 
 Hook falls back to yamllint or Python YAML parser automatically. Install actionlint with brew install actionlint on macOS or download from GitHub releases for comprehensive validation. Verify installation: 'command -v actionlint'. Add actionlint to PATH if installed but not found.
+
 ### False positives for deprecated actions warning
 
 Update the OUTDATED_ACTIONS array in the hook script to exclude specific action patterns. Use version pinning with commit SHAs instead of version tags to avoid warnings. Verify action versions are actually deprecated before updating patterns. Check GitHub Actions marketplace for latest versions.
+
 ### Hook fails on pull_request_target workflows
 
 This is a security warning, not failure. Review pull_request_target usage carefully and ensure proper checkout action configuration with explicit ref parameter for untrusted code. Consider using pull_request instead of pull_request_target when possible. Verify workflow security requirements.
+
 ### YAML validation passes but workflow fails in GitHub
 
 Install actionlint for GitHub-specific validation beyond YAML syntax. Check for GitHub Actions context variables, expression syntax, and action version compatibility issues. Verify workflow triggers and job dependencies. Test workflow in GitHub Actions UI for runtime errors.
+
 ### Performance suggestions appear for optimized workflows
 
 Suggestions are recommendations, not errors. Customize the hook script to skip specific checks by commenting out sections or adjust thresholds in the performance validation logic. Add SKIP_PERFORMANCE_CHECKS environment variable. Configure project-specific validation rules.
+
 ### Secret detection triggers false positives for test data
 
 Refine secret detection patterns to exclude test files: 'if echo "$FILE_PATH" | grep -qE "(test|spec|example|sample)"; then continue; fi'. Add whitelist for known safe patterns. Use git-secrets or similar tools for more accurate detection. Consider using SKIP_SECURITY_CHECKS for development.
+
 ### Action version warnings for custom actions
 
 Custom actions may not follow standard versioning. Add custom action patterns to exclusion list. Verify custom action versioning scheme. Use commit SHA pinning for custom actions. Document custom action versioning in project documentation.
+
 ### Validation fails on workflow files with includes or reusable workflows
 
 actionlint supports workflow includes and reusable workflows. Install actionlint for comprehensive validation. For basic validation, check main workflow file structure. Verify included workflow files exist and are valid. Use actionlint --format json for detailed validation output.

@@ -92,35 +92,49 @@ Unlock the power of the Hugging Face ecosystem by connecting Claude to the Huggi
 
 ## Examples
 ### Find the best text generation model
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find the best text generation model"
 ```
+
 ### Access the IMDB dataset
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Access the IMDB dataset"
 ```
+
 ### Run the stable diffusion demo
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Run the stable diffusion demo"
 ```
+
 ### Compare BERT model variants
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Compare BERT model variants"
 ```
+
 ### Run Model Inference
+
 Run inference on a Hugging Face model with custom parameters
+
 ```typescript
 // Run Hugging Face model inference
 const result = await huggingface.inference({
   model: "bert-base-uncased",
   inputs: "Hello, world!",
   parameters: {
-    return_all_scores: true
-  }
+    return_all_scores: true,
+  },
 });
 ```
 ```plaintext
@@ -141,8 +155,8 @@ const result = await huggingface.inference({
   model: "bert-base-uncased",
   inputs: "Hello, world!",
   parameters: {
-    return_all_scores: true
-  }
+    return_all_scores: true,
+  },
 });
 ```
 
@@ -162,24 +176,31 @@ const result = await huggingface.inference({
 ### Rate limit reached: log in or use your apiToken error
 
 Pass HF_TOKEN in requests to authenticate. Get token from Hugging Face Settings > Access Tokens. Add Authorization: Bearer YOUR_TOKEN header to all API requests to avoid free tier limits. Free tier has lower limits than authenticated users.
+
 ### Persistent rate limiting despite no recent usage
 
 Rate limits are per 5-minute windows across all request types. Hugging Face uses three rate limit buckets: read operations, write operations, and inference operations. Check your Billing page for current rate limit status across all three buckets. Wait for 5-minute window reset or upgrade to PRO/Enterprise for higher limits.
+
 ### Inference API returns authentication errors
 
 Serverless Inference API requires authentication for most models. Add your HF_TOKEN to requests. For heavy usage or production workloads, switch to Inference Endpoints which provides dedicated resources, higher limits, and better performance.
+
 ### Cannot access models or datasets - permission error
 
 Verify your account has access to requested model or dataset. For gated models, accept terms on model page first. Check model visibility settings (public vs private). Ensure you're authenticated with correct token and token has appropriate permissions.
+
 ### Hugging Face MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Hugging Face rate limit errors when processing multiple inference requests
 
 Implement exponential backoff retry logic with jitter. Use Hugging Face API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed model metadata. Check Hugging Face documentation for specific rate limits.
+
 ### Hugging Face model or dataset access denied errors
 
 Verify API token has access to the model or dataset. Check model permissions and account membership. Ensure token has required permissions for target operations.
+
 ### Hugging Face MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Hugging Face API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

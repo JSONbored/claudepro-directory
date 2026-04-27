@@ -59,9 +59,7 @@ Generates a comprehensive test coverage report when the coding session ends.
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/test-coverage-final-report.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -71,9 +69,7 @@ Generates a comprehensive test coverage report when the coding session ends.
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/test-coverage-final-report.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -98,7 +94,7 @@ echo "🔍 Detecting project type and testing framework..."
 if [ -f "package.json" ]; then
     PROJECT_TYPE="node"
     echo "📦 Node.js project detected"
-    
+
     # Detect testing framework
     if grep -q '"jest"' package.json 2>/dev/null; then
         TEST_FRAMEWORK="jest"
@@ -113,12 +109,12 @@ if [ -f "package.json" ]; then
         TEST_FRAMEWORK="karma"
         echo "🔄 Karma testing framework detected"
     fi
-    
+
 # Python project detection
 elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
     PROJECT_TYPE="python"
     echo "🐍 Python project detected"
-    
+
     if command -v pytest >/dev/null 2>&1; then
         TEST_FRAMEWORK="pytest"
         echo "🧪 Pytest testing framework available"
@@ -126,24 +122,24 @@ elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; 
         TEST_FRAMEWORK="unittest"
         echo "🔬 Unittest framework available"
     fi
-    
+
 # Rust project detection
 elif [ -f "Cargo.toml" ]; then
     PROJECT_TYPE="rust"
     TEST_FRAMEWORK="cargo"
     echo "🦀 Rust project detected"
-    
+
 # Go project detection
 elif [ -f "go.mod" ]; then
     PROJECT_TYPE="go"
     TEST_FRAMEWORK="go_test"
     echo "🐹 Go project detected"
-    
+
 # Java project detection
 elif [ -f "pom.xml" ] || [ -f "build.gradle" ]; then
     PROJECT_TYPE="java"
     echo "☕ Java project detected"
-    
+
     if [ -f "pom.xml" ]; then
         TEST_FRAMEWORK="maven"
         echo "🏗️ Maven build system detected"
@@ -289,13 +285,13 @@ if [ "$COVERAGE_AVAILABLE" = true ]; then
         "node")
             if [ -d "coverage" ]; then
                 echo "📊 Coverage files found in coverage/ directory"
-                
+
                 # Try to parse coverage summary
                 if [ -f "coverage/coverage-summary.json" ]; then
                     echo "📋 Coverage Summary:"
                     cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | "Lines: " + (.lines.pct|tostring) + "% (" + (.lines.covered|tostring) + "/" + (.lines.total|tostring) + ")", "Branches: " + (.branches.pct|tostring) + "% (" + (.branches.covered|tostring) + "/" + (.branches.total|tostring) + ")", "Functions: " + (.functions.pct|tostring) + "% (" + (.functions.covered|tostring) + "/" + (.functions.total|tostring) + ")", "Statements: " + (.statements.pct|tostring) + "% (" + (.statements.covered|tostring) + "/" + (.statements.total|tostring) + ")"' 2>/dev/null || echo "Coverage summary parsing failed"
                 fi
-                
+
                 echo "🌐 HTML Report: file://$(pwd)/coverage/index.html"
             fi
             ;;
@@ -384,7 +380,7 @@ echo "🔍 Detecting project type and testing framework..."
 if [ -f "package.json" ]; then
     PROJECT_TYPE="node"
     echo "📦 Node.js project detected"
-    
+
     # Detect testing framework
     if grep -q '"jest"' package.json 2>/dev/null; then
         TEST_FRAMEWORK="jest"
@@ -399,12 +395,12 @@ if [ -f "package.json" ]; then
         TEST_FRAMEWORK="karma"
         echo "🔄 Karma testing framework detected"
     fi
-    
+
 # Python project detection
 elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
     PROJECT_TYPE="python"
     echo "🐍 Python project detected"
-    
+
     if command -v pytest >/dev/null 2>&1; then
         TEST_FRAMEWORK="pytest"
         echo "🧪 Pytest testing framework available"
@@ -412,24 +408,24 @@ elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; 
         TEST_FRAMEWORK="unittest"
         echo "🔬 Unittest framework available"
     fi
-    
+
 # Rust project detection
 elif [ -f "Cargo.toml" ]; then
     PROJECT_TYPE="rust"
     TEST_FRAMEWORK="cargo"
     echo "🦀 Rust project detected"
-    
+
 # Go project detection
 elif [ -f "go.mod" ]; then
     PROJECT_TYPE="go"
     TEST_FRAMEWORK="go_test"
     echo "🐹 Go project detected"
-    
+
 # Java project detection
 elif [ -f "pom.xml" ] || [ -f "build.gradle" ]; then
     PROJECT_TYPE="java"
     echo "☕ Java project detected"
-    
+
     if [ -f "pom.xml" ]; then
         TEST_FRAMEWORK="maven"
         echo "🏗️ Maven build system detected"
@@ -575,13 +571,13 @@ if [ "$COVERAGE_AVAILABLE" = true ]; then
         "node")
             if [ -d "coverage" ]; then
                 echo "📊 Coverage files found in coverage/ directory"
-                
+
                 # Try to parse coverage summary
                 if [ -f "coverage/coverage-summary.json" ]; then
                     echo "📋 Coverage Summary:"
                     cat coverage/coverage-summary.json 2>/dev/null | jq -r '.total | "Lines: " + (.lines.pct|tostring) + "% (" + (.lines.covered|tostring) + "/" + (.lines.total|tostring) + ")", "Branches: " + (.branches.pct|tostring) + "% (" + (.branches.covered|tostring) + "/" + (.branches.total|tostring) + ")", "Functions: " + (.functions.pct|tostring) + "% (" + (.functions.covered|tostring) + "/" + (.functions.total|tostring) + ")", "Statements: " + (.statements.pct|tostring) + "% (" + (.statements.covered|tostring) + "/" + (.statements.total|tostring) + ")"' 2>/dev/null || echo "Coverage summary parsing failed"
                 fi
-                
+
                 echo "🌐 HTML Report: file://$(pwd)/coverage/index.html"
             fi
             ;;
@@ -698,6 +694,7 @@ echo "  • Use coverage to identify untested code, not as a quality metric"
 echo "🎯 Test coverage analysis complete!"
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable test coverage reports
@@ -712,6 +709,7 @@ Complete hook configuration for .claude/settings.json to enable test coverage re
   }
 }
 ```
+
 ### Enhanced Multi-Language Coverage Analysis
 
 Enhanced hook script with support for Vitest, Rust, and Go coverage tools
@@ -759,6 +757,7 @@ fi
 echo "🎯 Test coverage analysis complete!"
 exit 0
 ```
+
 ### Coverage Threshold Validation
 
 Enhanced hook script with coverage threshold validation and enforcement
@@ -796,6 +795,7 @@ fi
 echo "🎯 Test coverage analysis complete!"
 exit 0
 ```
+
 ### Test Coverage Final Report Configuration Example
 
 Example test coverage final report configuration for customizing coverage analysis behavior
@@ -822,7 +822,11 @@ Example test coverage final report configuration for customizing coverage analys
         "summary_file": "coverage/coverage-summary.json"
       }
     },
-    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/__pycache__/**"]
+    "exclude_patterns": [
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/__pycache__/**"
+    ]
   }
 }
 ```
@@ -974,7 +978,11 @@ exit 0
         "summary_file": "coverage/coverage-summary.json"
       }
     },
-    "exclude_patterns": ["**/node_modules/**", "**/vendor/**", "**/__pycache__/**"]
+    "exclude_patterns": [
+      "**/node_modules/**",
+      "**/vendor/**",
+      "**/__pycache__/**"
+    ]
   }
 }
 ```
@@ -982,25 +990,32 @@ exit 0
 ## Troubleshooting
 ### Jest coverage reports zero percent despite passing tests
 
-collectCoverage disabled or wrong paths in jest.config.js. Verify: 'collectCoverage: true, collectCoverageFrom: ["src/**/*.{js,ts}"]'. Or force: 'npm test -- --coverage --collectCoverageFrom="src/**"'. Check Jest configuration. Verify test execution.
+collectCoverage disabled or wrong paths in jest.config.js. Verify: 'collectCoverage: true, collectCoverageFrom: ["src/**/*.{js,ts}"]'. Or force: 'npm test -- --coverage --collectCoverageFrom="src/\*\*"'. Check Jest configuration. Verify test execution.
+
 ### Coverage summary JSON parsing fails with jq errors
 
 coverage-summary.json missing or malformed. Check exists: '[ -f coverage/coverage-summary.json ]' before jq. Generate: add 'coverageReporters: ["json-summary", "html"]' to jest.config.js. Verify JSON format. Test jq parsing separately.
+
 ### Python pytest-cov not found despite pytest installation
 
 Separate package required. Install: 'pip install pytest-cov coverage'. Verify: 'pytest --version' shows cov plugin. Or use coverage.py: 'coverage run -m pytest; coverage report'. Check Python environment. Verify package installation.
+
 ### Rust tarpaulin installation fails with compilation errors
 
 Requires nightly Rust and specific deps. Use Docker: 'docker run --rm -v $PWD:/volume xd009642/tarpaulin cargo tarpaulin'. Or alternative: 'cargo install cargo-llvm-cov' for stable Rust. Check Rust toolchain. Verify dependencies.
+
 ### HTML report links show file:// protocol not opening in browser
 
 Terminal doesn't hyperlink file:// URLs. Add open command: 'echo "Open: coverage/index.html"; open coverage/index.html 2>/dev/null || xdg-open coverage/index.html' auto-launching browser. Verify file path. Test browser opening.
+
 ### Vitest coverage not generating HTML reports
 
 Install coverage provider: 'npm install --save-dev @vitest/coverage-c8' or '@vitest/coverage-v8'. Configure in vite.config.js: 'test: { coverage: { provider: "c8" } }'. Verify Vitest configuration. Test coverage generation.
+
 ### Go coverage shows incorrect percentages
 
 Verify coverage profile generation: 'go test -coverprofile=coverage.out ./...'. Check coverage profile format. Use 'go tool cover -func=coverage.out' for detailed breakdown. Verify Go version. Test coverage calculation.
+
 ### Maven/Gradle JaCoCo reports not found
 
 Ensure JaCoCo plugin is configured in pom.xml or build.gradle. Run: 'mvn test jacoco:report' or './gradlew test jacocoTestReport'. Check plugin configuration. Verify report generation path. Test JaCoCo execution.

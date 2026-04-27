@@ -15,7 +15,7 @@ Automatically runs Playwright E2E tests when test files or page components are m
 - browser-testing
 ## Content
 ## Features
-- Automatic test execution on file changes including test file detection (Playwright test file patterns: *.spec.ts, *.spec.js, *e2e*.ts with pattern matching, test file identification with path analysis, test file path analysis with directory structure), component change detection (page component detection: pages/*.tsx, app/*.tsx, components/*.tsx with Next.js and React patterns, component name extraction with basename parsing, related test discovery with grep and testPathPattern), automatic test execution (Playwright test execution with npx playwright test command, test result reporting with pass/fail status and exit codes, exit code handling with error reporting and status indicators), and file change monitoring (real-time file change detection with PostToolUse hook, file type filtering with extension matching, change event handling with tool name detection)
+- Automatic test execution on file changes including test file detection (Playwright test file patterns: _.spec.ts, _.spec.js, _e2e_.ts with pattern matching, test file identification with path analysis, test file path analysis with directory structure), component change detection (page component detection: pages/_.tsx, app/_.tsx, components/\*.tsx with Next.js and React patterns, component name extraction with basename parsing, related test discovery with grep and testPathPattern), automatic test execution (Playwright test execution with npx playwright test command, test result reporting with pass/fail status and exit codes, exit code handling with error reporting and status indicators), and file change monitoring (real-time file change detection with PostToolUse hook, file type filtering with extension matching, change event handling with tool name detection)
 - Smart test detection for pages and components including test file discovery (test file pattern matching with glob patterns, test file location detection with directory scanning, test file organization analysis with test structure), component-to-test mapping (component name to test file mapping with name extraction, test file search with grep patterns and --grep flag, test path pattern matching with --testPathPattern flag), related test execution (related test discovery with component name matching, test execution with --grep for test description matching, test execution with --testPathPattern for file path matching, fallback test execution with smoke tests), and test organization analysis (test structure analysis with test file organization, test naming conventions with descriptive test names, test file organization with directory structure)
 - E2E regression testing including regression test execution (full test suite execution with all tests, targeted test execution with file-specific tests, smoke test execution with critical path tests), regression detection (test failure detection with exit code analysis, regression identification with test comparison, regression reporting with failure details), test result analysis (test pass/fail analysis with status reporting, test duration tracking with execution time, test error reporting with error messages), and regression prevention (automated regression detection with continuous testing, CI/CD integration with automated test execution, pre-commit testing with hook-based execution)
 - Playwright integration including Playwright CLI integration (npx playwright test command execution with proper arguments, Playwright configuration detection with playwright.config.ts, Playwright browser detection with browser installation checking), Playwright browser management (browser installation detection with npx playwright install checking, browser selection with Chromium/Firefox/WebKit support, browser launch configuration with browser options), Playwright test execution (test file execution with specific file paths, test suite execution with full test runs, test filtering with --grep and --testPathPattern flags), and Playwright reporting (test result reporting with --reporter=list flag, test output formatting with human-readable format, test summary generation with pass/fail counts)
@@ -59,10 +59,7 @@ Automatically runs Playwright E2E tests when test files or page components are m
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/playwright-test-runner.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -72,10 +69,7 @@ Automatically runs Playwright E2E tests when test files or page components are m
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/playwright-test-runner.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -100,7 +94,7 @@ echo "🎭 Playwright Test Runner - Analyzing file changes..."
 if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]] || [[ "$FILE_PATH" == *e2e*.ts ]]; then
     echo "📝 Test file detected: $FILE_PATH"
     echo "🎭 Running specific Playwright test..."
-    
+
     if command -v npx >/dev/null 2>&1; then
         npx playwright test "$FILE_PATH" --reporter=list
         if [ $? -eq 0 ]; then
@@ -111,12 +105,12 @@ if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]] || [[ "$FI
     else
         echo "⚠️ Playwright not found. Install with: npm install -D @playwright/test"
     fi
-    
+
 elif [[ "$FILE_PATH" == *pages/*.tsx ]] || [[ "$FILE_PATH" == *app/*.tsx ]] || [[ "$FILE_PATH" == *components/*.tsx ]]; then
     PAGE_NAME=$(basename "${FILE_PATH%.*}")
     echo "🧩 Component/page detected: $PAGE_NAME"
     echo "🎭 Running related E2E tests..."
-    
+
     if command -v npx >/dev/null 2>&1; then
         # Try to find and run tests related to this component
         npx playwright test --grep "$PAGE_NAME" --reporter=list 2>/dev/null
@@ -164,7 +158,7 @@ echo "🎭 Playwright Test Runner - Analyzing file changes..."
 if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]] || [[ "$FILE_PATH" == *e2e*.ts ]]; then
     echo "📝 Test file detected: $FILE_PATH"
     echo "🎭 Running specific Playwright test..."
-    
+
     if command -v npx >/dev/null 2>&1; then
         npx playwright test "$FILE_PATH" --reporter=list
         if [ $? -eq 0 ]; then
@@ -175,12 +169,12 @@ if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]] || [[ "$FI
     else
         echo "⚠️ Playwright not found. Install with: npm install -D @playwright/test"
     fi
-    
+
 elif [[ "$FILE_PATH" == *pages/*.tsx ]] || [[ "$FILE_PATH" == *app/*.tsx ]] || [[ "$FILE_PATH" == *components/*.tsx ]]; then
     PAGE_NAME=$(basename "${FILE_PATH%.*}")
     echo "🧩 Component/page detected: $PAGE_NAME"
     echo "🎭 Running related E2E tests..."
-    
+
     if command -v npx >/dev/null 2>&1; then
         # Try to find and run tests related to this component
         npx playwright test --grep "$PAGE_NAME" --reporter=list 2>/dev/null
@@ -237,6 +231,7 @@ if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Playwright test execution on file changes
@@ -251,6 +246,7 @@ Complete hook configuration for .claude/settings.json to enable Playwright test 
   }
 }
 ```
+
 ### Component-Based Test Execution
 
 Enhanced hook script for component-based test discovery and execution
@@ -272,6 +268,7 @@ if [[ "$FILE_PATH" == *pages/*.tsx ]] || [[ "$FILE_PATH" == *app/*.tsx ]]; then
 fi
 exit 0
 ```
+
 ### Browser Installation Check
 
 Enhanced hook script with browser installation detection and automatic installation
@@ -292,6 +289,7 @@ if [[ "$FILE_PATH" == *.spec.ts ]] || [[ "$FILE_PATH" == *.spec.js ]]; then
 fi
 exit 0
 ```
+
 ### Cross-Browser Testing
 
 Enhanced hook script for cross-browser test execution with Chromium, Firefox, and WebKit
@@ -401,24 +399,31 @@ exit 0
 ### Playwright tests fail with 'browser not found' errors
 
 Browsers not installed after @playwright/test install. Run: 'npx playwright install' downloading Chromium/Firefox/WebKit. Or specific: 'npx playwright install chromium' for single browser. Verify browser installation. Test with various browser configurations.
+
 ### Component name grep returns no tests despite matching test files
 
---grep searches test descriptions not filenames. Use --testPathPattern: 'npx playwright test --testPathPattern="$PAGE_NAME"' or combine: '--grep "$PAGE_NAME" --testPathPattern=".*"'. Verify test naming. Test with various test patterns.
+--grep searches test descriptions not filenames. Use --testPathPattern: 'npx playwright test --testPathPattern="$PAGE_NAME"' or combine: '--grep "$PAGE_NAME" --testPathPattern=".\*"'. Verify test naming. Test with various test patterns.
+
 ### E2E tests fail when run via hook but pass manually
 
 Hook lacks env variables or server not running. Check baseURL: set in playwright.config.ts. Or start server: add 'npm run dev &' before tests with cleanup: 'kill $!' after. Verify environment setup. Test with various server configurations.
+
 ### Hook triggers on every .tsx save running slow E2E tests
 
 No file type filtering. Restrict matchers: 'matchers': ['write:**/*.spec.{ts,js}', 'edit:**/*.spec.{ts,js}'] running only on test file changes. Or add path check excluding components. Verify matcher configuration. Test with various file types.
+
 ### Smoke tests run instead of specific component tests showing wrong results
 
 Fallback triggers on grep failure. Add existence check: 'if ! npx playwright test --list --grep "$PAGE_NAME" | grep -q .; then exit 0; fi' before running. Skip fallback if no matches. Verify test discovery. Test with various test structures.
+
 ### Playwright test execution times out
 
 Increase timeout in playwright.config.ts: test.setTimeout(60000) for 60 seconds. Or use --timeout flag: npx playwright test --timeout=60000. Verify test complexity. Test with various timeout values.
+
 ### Cross-browser tests fail on specific browsers
 
 Verify browser installation: npx playwright install --help. Check browser-specific configuration in playwright.config.ts. Test browsers individually: --project=chromium. Verify browser compatibility. Test with various browser configurations.
+
 ### Test results not showing in hook output
 
 Use --reporter=list for detailed output. Or --reporter=line for concise output. Verify reporter configuration. Check Playwright version compatibility. Test with various reporter options.

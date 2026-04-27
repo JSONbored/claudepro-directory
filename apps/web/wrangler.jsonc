@@ -3,56 +3,47 @@
   "name": "heyclaude-prod",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-04-05",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "observability": {
     "enabled": true,
     "logs": {
       "enabled": true,
       "invocation_logs": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
     },
     "traces": {
       "enabled": true,
-      "head_sampling_rate": 1
-    }
+      "head_sampling_rate": 1,
+    },
   },
   "logpush": true,
   "placement": {
-    "mode": "smart"
+    "mode": "smart",
   },
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "heyclaude-prod"
-    }
+      "service": "heyclaude-prod",
+    },
   ],
   "vars": {
     "NEXT_PUBLIC_DISCORD_URL": "https://discord.com/invite/Ax3Py4YDrq",
     "NEXT_PUBLIC_TWITTER_URL": "https://x.com/jsonbored",
     "NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL": "/jobs/post?tier=sponsored",
     "NEXT_PUBLIC_POLAR_FEATURED_JOB_URL": "/jobs/post?tier=featured",
-    "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard"
+    "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard",
   },
   "d1_databases": [
     {
       "binding": "SITE_DB",
       "database_name": "heyclaude-votes",
       "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
-      "migrations_dir": "migrations"
+      "migrations_dir": "migrations",
     },
-    {
-      "binding": "VOTES_DB",
-      "database_name": "heyclaude-votes",
-      "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
-      "migrations_dir": "migrations"
-    }
   ],
   "env": {
     "dev": {
@@ -62,28 +53,22 @@
         "NEXT_PUBLIC_TWITTER_URL": "https://x.com/jsonbored",
         "NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL": "/jobs/post?tier=sponsored",
         "NEXT_PUBLIC_POLAR_FEATURED_JOB_URL": "/jobs/post?tier=featured",
-        "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard"
+        "NEXT_PUBLIC_POLAR_JOB_BOARD_URL": "/jobs/post?tier=standard",
       },
       "services": [
         {
           "binding": "WORKER_SELF_REFERENCE",
-          "service": "heyclaude-dev"
-        }
+          "service": "heyclaude-dev",
+        },
       ],
       "d1_databases": [
         {
           "binding": "SITE_DB",
           "database_name": "heyclaude-votes",
           "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
-          "migrations_dir": "migrations"
+          "migrations_dir": "migrations",
         },
-        {
-          "binding": "VOTES_DB",
-          "database_name": "heyclaude-votes",
-          "database_id": "2897db33-c0c7-4d15-af73-618cb83a0a33",
-          "migrations_dir": "migrations"
-        }
-      ]
-    }
-  }
+      ],
+    },
+  },
 }

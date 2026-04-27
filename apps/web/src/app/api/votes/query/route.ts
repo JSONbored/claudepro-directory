@@ -4,7 +4,7 @@ import {
   hasBodyWithinLimit,
   hasJsonContentType,
   isAllowedOrigin,
-  isRateLimited
+  isRateLimited,
 } from "@/lib/api-security";
 import { logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
 import {
@@ -13,7 +13,7 @@ import {
   getVotesDb,
   isValidEntryKey,
   queryVoteCounts,
-  queryVotesByClient
+  queryVotesByClient,
 } from "@/lib/votes";
 
 type QueryPayload = {
@@ -34,10 +34,20 @@ export async function POST(request: Request) {
 
   if (!hasJsonContentType(request)) {
     logApiWarn(request, "votes.query.invalid_content_type");
-    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
+    return NextResponse.json(
+      { error: "invalid_content_type" },
+      { status: 415 },
+    );
   }
 
-  if (isRateLimited({ request, scope: "votes-query", limit: 120, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "votes-query",
+      limit: 120,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "votes.query.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -51,7 +61,9 @@ export async function POST(request: Request) {
   }
 
   const rawKeys = Array.isArray(payload.keys) ? payload.keys : [];
-  const keys = [...new Set(rawKeys.map((key) => String(key).trim()))].filter(isValidEntryKey);
+  const keys = [...new Set(rawKeys.map((key) => String(key).trim()))].filter(
+    isValidEntryKey,
+  );
   const clientId = String(payload.clientId ?? "").trim();
 
   if (keys.length === 0) {
@@ -68,30 +80,33 @@ export async function POST(request: Request) {
     return NextResponse.json({
       counts: getFallbackVoteCounts(keys),
       voted: getFallbackClientVotes(keys),
-      available: false
+      available: false,
     });
   }
 
   try {
     const [counts, voted] = await Promise.all([
       queryVoteCounts(db, keys),
-      clientId ? queryVotesByClient(db, keys, clientId) : Promise.resolve({})
+      clientId ? queryVotesByClient(db, keys, clientId) : Promise.resolve({}),
     ]);
 
     if (sample(0.02)) {
-      logApiInfo(request, "votes.query.sample", { keyCount: keys.length, hasClient: Boolean(clientId) });
+      logApiInfo(request, "votes.query.sample", {
+        keyCount: keys.length,
+        hasClient: Boolean(clientId),
+      });
     }
     return NextResponse.json(
       {
         counts,
         voted,
-        available: true
+        available: true,
       },
       {
         headers: {
-          "cache-control": "no-store"
-        }
-      }
+          "cache-control": "no-store",
+        },
+      },
     );
   } catch {
     logApiWarn(request, "votes.query.unavailable", { keyCount: keys.length });
@@ -99,13 +114,13 @@ export async function POST(request: Request) {
       {
         counts: getFallbackVoteCounts(keys),
         voted: getFallbackClientVotes(keys),
-        available: false
+        available: false,
       },
       {
         headers: {
-          "cache-control": "no-store"
-        }
-      }
+          "cache-control": "no-store",
+        },
+      },
     );
   }
 }

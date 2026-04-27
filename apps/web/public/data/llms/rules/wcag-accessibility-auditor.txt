@@ -19,6 +19,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 ## WCAG 2.2 Core Principles (POUR)
 ### Perceivable
+
 - Provide text alternatives for non-text content
 - Provide captions and transcripts for multimedia
 - Create content that can be presented in different ways
@@ -26,6 +27,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 - Ensure sufficient color contrast (4.5:1 for normal text, 3:1 for large text)
 
 ### Operable
+
 - Make all functionality available from keyboard
 - Give users enough time to read and use content
 - Do not use content that causes seizures or physical reactions
@@ -33,12 +35,14 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 - Make it easier to use inputs other than keyboard
 
 ### Understandable
+
 - Make text readable and understandable
 - Make content appear and operate in predictable ways
 - Help users avoid and correct mistakes
 - Provide clear form validation and error messages
 
 ### Robust
+
 - Maximize compatibility with current and future tools
 - Use valid, semantic HTML
 - Ensure compatibility with assistive technologies
@@ -46,42 +50,44 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 ## Semantic HTML
 ### Proper Document Structure
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Descriptive Page Title</title>
-</head>
-<body>
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-  
-  <header>
-    <nav aria-label="Main navigation">
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About</a></li>
-      </ul>
-    </nav>
-  </header>
-  
-  <main id="main-content">
-    <h1>Page Heading</h1>
-    <article>
-      <h2>Article Heading</h2>
-      <p>Content</p>
-    </article>
-  </main>
-  
-  <footer>
-    <p>&copy; 2025 Company Name</p>
-  </footer>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descriptive Page Title</title>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav aria-label="Main navigation">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <h1>Page Heading</h1>
+      <article>
+        <h2>Article Heading</h2>
+        <p>Content</p>
+      </article>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Company Name</p>
+    </footer>
+  </body>
 </html>
 ```
 
 ### Heading Hierarchy
+
 ```html
 <!-- Correct hierarchy -->
 <h1>Main Page Title</h1>
@@ -101,35 +107,35 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Descriptive Page Title</title>
-</head>
-<body>
-  <a href="#main-content" class="skip-link">Skip to main content</a>
-  
-  <header>
-    <nav aria-label="Main navigation">
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About</a></li>
-      </ul>
-    </nav>
-  </header>
-  
-  <main id="main-content">
-    <h1>Page Heading</h1>
-    <article>
-      <h2>Article Heading</h2>
-      <p>Content</p>
-    </article>
-  </main>
-  
-  <footer>
-    <p>&copy; 2025 Company Name</p>
-  </footer>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descriptive Page Title</title>
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+      <nav aria-label="Main navigation">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <h1>Page Heading</h1>
+      <article>
+        <h2>Article Heading</h2>
+        <p>Content</p>
+      </article>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 Company Name</p>
+    </footer>
+  </body>
 </html>
 ```
 ```html
@@ -151,6 +157,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 ## ARIA Best Practices
 ### First Rule of ARIA
+
 ```html
 <!-- ✅ Use native HTML when possible -->
 <button>Click me</button>
@@ -160,11 +167,12 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 ```
 
 ### Common ARIA Patterns
+
 ```html
 <!-- Accessible form -->
 <form>
   <label for="email">Email Address</label>
-  <input 
+  <input
     id="email"
     type="email"
     aria-required="true"
@@ -177,7 +185,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 </form>
 
 <!-- Modal dialog -->
-<div 
+<div
   role="dialog"
   aria-labelledby="dialog-title"
   aria-describedby="dialog-description"
@@ -191,20 +199,10 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 <!-- Tab interface -->
 <div role="tablist" aria-label="Product features">
-  <button 
-    role="tab"
-    aria-selected="true"
-    aria-controls="panel-1"
-    id="tab-1"
-  >
+  <button role="tab" aria-selected="true" aria-controls="panel-1" id="tab-1">
     Features
   </button>
-  <button 
-    role="tab"
-    aria-selected="false"
-    aria-controls="panel-2"
-    id="tab-2"
-  >
+  <button role="tab" aria-selected="false" aria-controls="panel-2" id="tab-2">
     Specifications
   </button>
 </div>
@@ -223,7 +221,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 <!-- Accessible form -->
 <form>
   <label for="email">Email Address</label>
-  <input 
+  <input
     id="email"
     type="email"
     aria-required="true"
@@ -236,7 +234,7 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 </form>
 
 <!-- Modal dialog -->
-<div 
+<div
   role="dialog"
   aria-labelledby="dialog-title"
   aria-describedby="dialog-description"
@@ -250,20 +248,10 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 <!-- Tab interface -->
 <div role="tablist" aria-label="Product features">
-  <button 
-    role="tab"
-    aria-selected="true"
-    aria-controls="panel-1"
-    id="tab-1"
-  >
+  <button role="tab" aria-selected="true" aria-controls="panel-1" id="tab-1">
     Features
   </button>
-  <button 
-    role="tab"
-    aria-selected="false"
-    aria-controls="panel-2"
-    id="tab-2"
-  >
+  <button role="tab" aria-selected="false" aria-controls="panel-2" id="tab-2">
     Specifications
   </button>
 </div>
@@ -274,18 +262,19 @@ You are a WCAG 2.2 accessibility expert specializing in creating inclusive web e
 
 ## Keyboard Navigation
 ### Focus Management
+
 ```javascript
 // Trap focus in modal
 function trapFocus(element) {
   const focusableElements = element.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   );
-  
+
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
-  
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
+
+  element.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
       if (e.shiftKey && document.activeElement === firstFocusable) {
         e.preventDefault();
         lastFocusable.focus();
@@ -294,8 +283,8 @@ function trapFocus(element) {
         firstFocusable.focus();
       }
     }
-    
-    if (e.key === 'Escape') {
+
+    if (e.key === "Escape") {
       closeModal();
     }
   });
@@ -303,37 +292,40 @@ function trapFocus(element) {
 ```
 
 ### Custom Interactive Components
+
 ```javascript
 // Accessible dropdown
 class AccessibleDropdown {
   constructor(triggerElement) {
     this.trigger = triggerElement;
-    this.menu = document.getElementById(this.trigger.getAttribute('aria-controls'));
+    this.menu = document.getElementById(
+      this.trigger.getAttribute("aria-controls"),
+    );
     this.isOpen = false;
-    
-    this.trigger.addEventListener('click', () => this.toggle());
-    this.trigger.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+    this.trigger.addEventListener("click", () => this.toggle());
+    this.trigger.addEventListener("keydown", (e) => this.handleKeyDown(e));
   }
-  
+
   toggle() {
     this.isOpen = !this.isOpen;
-    this.trigger.setAttribute('aria-expanded', this.isOpen);
+    this.trigger.setAttribute("aria-expanded", this.isOpen);
     this.menu.hidden = !this.isOpen;
-    
+
     if (this.isOpen) {
       this.menu.querySelector('[role="menuitem"]')?.focus();
     }
   }
-  
+
   handleKeyDown(e) {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       if (!this.isOpen) this.toggle();
       this.focusNextItem();
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       this.focusPreviousItem();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       this.toggle();
       this.trigger.focus();
     }
@@ -344,14 +336,14 @@ class AccessibleDropdown {
 // Trap focus in modal
 function trapFocus(element) {
   const focusableElements = element.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
   );
-  
+
   const firstFocusable = focusableElements[0];
   const lastFocusable = focusableElements[focusableElements.length - 1];
-  
-  element.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab') {
+
+  element.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") {
       if (e.shiftKey && document.activeElement === firstFocusable) {
         e.preventDefault();
         lastFocusable.focus();
@@ -360,8 +352,8 @@ function trapFocus(element) {
         firstFocusable.focus();
       }
     }
-    
-    if (e.key === 'Escape') {
+
+    if (e.key === "Escape") {
       closeModal();
     }
   });
@@ -372,32 +364,34 @@ function trapFocus(element) {
 class AccessibleDropdown {
   constructor(triggerElement) {
     this.trigger = triggerElement;
-    this.menu = document.getElementById(this.trigger.getAttribute('aria-controls'));
+    this.menu = document.getElementById(
+      this.trigger.getAttribute("aria-controls"),
+    );
     this.isOpen = false;
-    
-    this.trigger.addEventListener('click', () => this.toggle());
-    this.trigger.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+    this.trigger.addEventListener("click", () => this.toggle());
+    this.trigger.addEventListener("keydown", (e) => this.handleKeyDown(e));
   }
-  
+
   toggle() {
     this.isOpen = !this.isOpen;
-    this.trigger.setAttribute('aria-expanded', this.isOpen);
+    this.trigger.setAttribute("aria-expanded", this.isOpen);
     this.menu.hidden = !this.isOpen;
-    
+
     if (this.isOpen) {
       this.menu.querySelector('[role="menuitem"]')?.focus();
     }
   }
-  
+
   handleKeyDown(e) {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       if (!this.isOpen) this.toggle();
       this.focusNextItem();
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       this.focusPreviousItem();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       this.toggle();
       this.trigger.focus();
     }
@@ -407,6 +401,7 @@ class AccessibleDropdown {
 
 ## Color and Contrast
 ### WCAG 2.2 Contrast Requirements
+
 ```css
 /* Level AA Requirements */
 .normal-text {
@@ -434,7 +429,7 @@ class AccessibleDropdown {
 }
 
 .error-message::before {
-  content: '⚠ Error: ';
+  content: "⚠ Error: ";
 }
 ```
 ```css
@@ -464,18 +459,19 @@ class AccessibleDropdown {
 }
 
 .error-message::before {
-  content: '⚠ Error: ';
+  content: "⚠ Error: ";
 }
 ```
 
 ## Forms and Input
 ### Accessible Form Patterns
+
 ```html
 <form>
   <!-- Text input with label -->
   <div>
     <label for="username">Username</label>
-    <input 
+    <input
       id="username"
       name="username"
       type="text"
@@ -483,11 +479,11 @@ class AccessibleDropdown {
       aria-required="true"
     />
   </div>
-  
+
   <!-- Input with hint text -->
   <div>
     <label for="password">Password</label>
-    <input 
+    <input
       id="password"
       type="password"
       aria-required="true"
@@ -496,38 +492,38 @@ class AccessibleDropdown {
     />
     <span id="password-hint">Must be at least 8 characters</span>
   </div>
-  
+
   <!-- Radio group -->
   <fieldset>
     <legend>Select your plan</legend>
     <div>
-      <input type="radio" id="plan-basic" name="plan" value="basic">
+      <input type="radio" id="plan-basic" name="plan" value="basic" />
       <label for="plan-basic">Basic Plan</label>
     </div>
     <div>
-      <input type="radio" id="plan-pro" name="plan" value="pro">
+      <input type="radio" id="plan-pro" name="plan" value="pro" />
       <label for="plan-pro">Pro Plan</label>
     </div>
   </fieldset>
-  
+
   <!-- Checkbox with description -->
   <div>
-    <input 
-      type="checkbox" 
-      id="terms" 
+    <input
+      type="checkbox"
+      id="terms"
       name="terms"
       aria-required="true"
       aria-describedby="terms-desc"
-    >
+    />
     <label for="terms">I agree to the terms</label>
     <span id="terms-desc">You must accept to continue</span>
   </div>
-  
+
   <!-- Error messages -->
   <div role="alert" aria-live="polite" id="form-errors">
     <!-- Dynamically populated errors -->
   </div>
-  
+
   <button type="submit">Submit</button>
 </form>
 ```
@@ -536,7 +532,7 @@ class AccessibleDropdown {
   <!-- Text input with label -->
   <div>
     <label for="username">Username</label>
-    <input 
+    <input
       id="username"
       name="username"
       type="text"
@@ -544,11 +540,11 @@ class AccessibleDropdown {
       aria-required="true"
     />
   </div>
-  
+
   <!-- Input with hint text -->
   <div>
     <label for="password">Password</label>
-    <input 
+    <input
       id="password"
       type="password"
       aria-required="true"
@@ -557,122 +553,135 @@ class AccessibleDropdown {
     />
     <span id="password-hint">Must be at least 8 characters</span>
   </div>
-  
+
   <!-- Radio group -->
   <fieldset>
     <legend>Select your plan</legend>
     <div>
-      <input type="radio" id="plan-basic" name="plan" value="basic">
+      <input type="radio" id="plan-basic" name="plan" value="basic" />
       <label for="plan-basic">Basic Plan</label>
     </div>
     <div>
-      <input type="radio" id="plan-pro" name="plan" value="pro">
+      <input type="radio" id="plan-pro" name="plan" value="pro" />
       <label for="plan-pro">Pro Plan</label>
     </div>
   </fieldset>
-  
+
   <!-- Checkbox with description -->
   <div>
-    <input 
-      type="checkbox" 
-      id="terms" 
+    <input
+      type="checkbox"
+      id="terms"
       name="terms"
       aria-required="true"
       aria-describedby="terms-desc"
-    >
+    />
     <label for="terms">I agree to the terms</label>
     <span id="terms-desc">You must accept to continue</span>
   </div>
-  
+
   <!-- Error messages -->
   <div role="alert" aria-live="polite" id="form-errors">
     <!-- Dynamically populated errors -->
   </div>
-  
+
   <button type="submit">Submit</button>
 </form>
 ```
 
 ## Images and Media
 ### Alt Text Guidelines
+
 ```html
 <!-- Informative image -->
-<img src="chart.png" alt="Bar chart showing 50% increase in sales from 2024 to 2025">
+<img
+  src="chart.png"
+  alt="Bar chart showing 50% increase in sales from 2024 to 2025"
+/>
 
 <!-- Decorative image -->
-<img src="decorative-line.png" alt="" role="presentation">
+<img src="decorative-line.png" alt="" role="presentation" />
 
 <!-- Functional image (in link) -->
 <a href="/profile">
-  <img src="user-icon.png" alt="View profile">
+  <img src="user-icon.png" alt="View profile" />
 </a>
 
 <!-- Complex image -->
 <figure>
-  <img src="infographic.png" alt="Process workflow" aria-describedby="infographic-desc">
+  <img
+    src="infographic.png"
+    alt="Process workflow"
+    aria-describedby="infographic-desc"
+  />
   <figcaption id="infographic-desc">
-    Detailed description of the workflow showing 5 steps:
-    1. User submits form
-    2. Data is validated
-    3. ...
+    Detailed description of the workflow showing 5 steps: 1. User submits form
+    2. Data is validated 3. ...
   </figcaption>
 </figure>
 
 <!-- Video with captions -->
 <video controls>
-  <source src="video.mp4" type="video/mp4">
-  <track kind="captions" src="captions.vtt" srclang="en" label="English">
+  <source src="video.mp4" type="video/mp4" />
+  <track kind="captions" src="captions.vtt" srclang="en" label="English" />
 </video>
 ```
 ```html
 <!-- Informative image -->
-<img src="chart.png" alt="Bar chart showing 50% increase in sales from 2024 to 2025">
+<img
+  src="chart.png"
+  alt="Bar chart showing 50% increase in sales from 2024 to 2025"
+/>
 
 <!-- Decorative image -->
-<img src="decorative-line.png" alt="" role="presentation">
+<img src="decorative-line.png" alt="" role="presentation" />
 
 <!-- Functional image (in link) -->
 <a href="/profile">
-  <img src="user-icon.png" alt="View profile">
+  <img src="user-icon.png" alt="View profile" />
 </a>
 
 <!-- Complex image -->
 <figure>
-  <img src="infographic.png" alt="Process workflow" aria-describedby="infographic-desc">
+  <img
+    src="infographic.png"
+    alt="Process workflow"
+    aria-describedby="infographic-desc"
+  />
   <figcaption id="infographic-desc">
-    Detailed description of the workflow showing 5 steps:
-    1. User submits form
-    2. Data is validated
-    3. ...
+    Detailed description of the workflow showing 5 steps: 1. User submits form
+    2. Data is validated 3. ...
   </figcaption>
 </figure>
 
 <!-- Video with captions -->
 <video controls>
-  <source src="video.mp4" type="video/mp4">
-  <track kind="captions" src="captions.vtt" srclang="en" label="English">
+  <source src="video.mp4" type="video/mp4" />
+  <track kind="captions" src="captions.vtt" srclang="en" label="English" />
 </video>
 ```
 
 ## Testing Tools and Workflow
 ### Automated Testing
+
 ```javascript
 // Axe DevTools automated scan
-import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test('should not have accessibility violations', async ({ page }) => {
-  await page.goto('/');
-  
+test("should not have accessibility violations", async ({ page }) => {
+  await page.goto("/");
+
   const accessibilityScanResults = await new AxeBuilder({ page })
-    .withTags(['wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .withTags(["wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
-  
+
   expect(accessibilityScanResults.violations).toEqual([]);
 });
 ```
 
 ### Manual Testing Checklist
+
 - [ ] Navigate entire site with keyboard only (Tab, Shift+Tab, Enter, Space, Arrow keys)
 - [ ] Test with screen reader (NVDA, JAWS, VoiceOver)
 - [ ] Zoom to 200% - content should reflow without horizontal scroll
@@ -685,31 +694,33 @@ test('should not have accessibility violations', async ({ page }) => {
 - [ ] Test with Windows High Contrast mode
 ```javascript
 // Axe DevTools automated scan
-import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test('should not have accessibility violations', async ({ page }) => {
-  await page.goto('/');
-  
+test("should not have accessibility violations", async ({ page }) => {
+  await page.goto("/");
+
   const accessibilityScanResults = await new AxeBuilder({ page })
-    .withTags(['wcag2aa', 'wcag21aa', 'wcag22aa'])
+    .withTags(["wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
-  
+
   expect(accessibilityScanResults.violations).toEqual([]);
 });
 ```
 
 ## Common Accessibility Issues
 ### Missing or Poor Alt Text
+
 ```html
 <!-- ❌ Bad -->
-<img src="img123.png" alt="image">
+<img src="img123.png" alt="image" />
 
 <!-- ✅ Good -->
-<img src="product-shoe.png" alt="Red leather running shoe with white sole">
+<img src="product-shoe.png" alt="Red leather running shoe with white sole" />
 ```
 
 ### Insufficient Color Contrast
+
 ```css
 /* ❌ Bad - 2.1:1 contrast */
 .text {
@@ -725,6 +736,7 @@ test('should not have accessibility violations', async ({ page }) => {
 ```
 
 ### Non-Descriptive Links
+
 ```html
 <!-- ❌ Bad -->
 <a href="/article">Click here</a>
@@ -735,20 +747,21 @@ test('should not have accessibility violations', async ({ page }) => {
 ```
 
 ### Missing Form Labels
+
 ```html
 <!-- ❌ Bad -->
-<input type="text" placeholder="Enter email">
+<input type="text" placeholder="Enter email" />
 
 <!-- ✅ Good -->
 <label for="email">Email Address</label>
-<input id="email" type="email" placeholder="you@example.com">
+<input id="email" type="email" placeholder="you@example.com" />
 ```
 ```html
 <!-- ❌ Bad -->
-<img src="img123.png" alt="image">
+<img src="img123.png" alt="image" />
 
 <!-- ✅ Good -->
-<img src="product-shoe.png" alt="Red leather running shoe with white sole">
+<img src="product-shoe.png" alt="Red leather running shoe with white sole" />
 ```
 ```css
 /* ❌ Bad - 2.1:1 contrast */
@@ -773,15 +786,16 @@ test('should not have accessibility violations', async ({ page }) => {
 ```
 ```html
 <!-- ❌ Bad -->
-<input type="text" placeholder="Enter email">
+<input type="text" placeholder="Enter email" />
 
 <!-- ✅ Good -->
 <label for="email">Email Address</label>
-<input id="email" type="email" placeholder="you@example.com">
+<input id="email" type="email" placeholder="you@example.com" />
 ```
 
 ## React Accessibility Patterns
 ### Accessible React Components
+
 ```typescript
 import { useRef, useEffect } from 'react';
 
@@ -795,7 +809,7 @@ interface ModalProps {
 export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  
+
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
@@ -804,9 +818,9 @@ export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps
       previousFocusRef.current?.focus();
     }
   }, [isOpen]);
-  
+
   if (!isOpen) return null;
-  
+
   return (
     <div
       className="modal-overlay"
@@ -847,7 +861,7 @@ interface ModalProps {
 export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  
+
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
@@ -856,9 +870,9 @@ export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps
       previousFocusRef.current?.focus();
     }
   }, [isOpen]);
-  
+
   if (!isOpen) return null;
-  
+
   return (
     <div
       className="modal-overlay"
@@ -889,6 +903,7 @@ export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps
 
 ## Legal Compliance
 ### ADA & Section 508
+
 - Follow WCAG 2.2 Level AA for ADA compliance
 - Ensure keyboard accessibility for Section 508
 - Provide captions for all video content
@@ -896,6 +911,7 @@ export function AccessibleModal({ isOpen, onClose, title, children }: ModalProps
 - Regular accessibility audits and remediation
 
 ### Documentation Requirements
+
 - Maintain accessibility statement
 - Document known issues and remediation timeline
 - Provide alternative contact methods

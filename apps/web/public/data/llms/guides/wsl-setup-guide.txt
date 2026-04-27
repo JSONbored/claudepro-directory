@@ -25,7 +25,7 @@ This tutorial teaches you to configure Claude Code on Windows Subsystem for Linu
 Master Claude Code installation on Windows through proper WSL2 configuration. By completion, you'll have a fully functional Claude Code environment with optimized performance. This guide includes 5 practical examples, 12 code samples, and 4 real-world troubleshooting scenarios.
 
 > **Prerequisites Check**
-> 
+>
 > Windows 10 Build 18362.1049+ or Windows 11, 8GB RAM minimum, virtualization enabled in BIOS, administrator access for installation. Verify requirements before starting.
 
 ## What You'll Achieve
@@ -33,40 +33,31 @@ Master Claude Code installation on Windows through proper WSL2 configuration. By
 
 ## Step 1: Install and Configure WSL2
 1. **Enable Virtualization in BIOS**
-   
 
 2. **Install WSL2 with Ubuntu**
-   
 
 3. **Configure WSL2 Settings**
-   
 
 4. **Create Memory Configuration**
-   
 
 > **Common Installation Error**
-> 
+>
 > **Error: WslRegisterDistribution failed with error: 0x80370114**  
 > **Solution:** Enable Virtual Machine Platform feature. Run `dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart` in PowerShell as Administrator.
 
 ## Step 2: Configure Node.js Environment
 1. **Install NVM in Ubuntu**
-   
 
 2. **Install Node.js 20 LTS**
-   
 
 3. **Configure NPM Global Directory**
-   
 
 4. **Install Build Tools**
 
 ## Step 3: Install Claude Code
 1. **Install Claude Code Package**
-   
 
 2. **Run Diagnostic Check**
-   
 
 3. **Configure Authentication**
 
@@ -75,10 +66,8 @@ Master Claude Code installation on Windows through proper WSL2 configuration. By
 
 ## Step 5: Optimize Performance
 1. **Configure Windows Defender Exclusions**
-   
 
 2. **Optimize File System Usage**
-   
 
 3. **Configure Git for Dual Systems**
 
@@ -87,7 +76,7 @@ Master Claude Code installation on Windows through proper WSL2 configuration. By
 
 ## Verification Checklist
 > **Installation Verification Steps**
-> 
+>
 > Run these commands to confirm successful setup. All should complete without errors.
 
 <!-- Section type: code_group -->
@@ -97,11 +86,11 @@ Master Claude Code installation on Windows through proper WSL2 configuration. By
 
 ## Advanced Techniques
 > **Professional Tips**
-> 
+>
 > **Performance Optimization:** Use Linux filesystem exclusively for 20x speed improvement. Projects in ~/dev run faster than /mnt/c/.
-> 
+>
 > **Security Best Practice:** Always configure npm to use user directories. Never use sudo with npm installations.
-> 
+>
 > **Scalability Pattern:** For teams, create shared .wslconfig templates. Standardize configurations across developer machines.
 
 ## Next Steps
@@ -114,14 +103,15 @@ Master Claude Code installation on Windows through proper WSL2 configuration. By
 <!-- Section type: related_content -->
 
 > **Tutorial Complete!**
-> 
+>
 > **Congratulations!** You've mastered Claude Code WSL setup and can now develop efficiently on Windows.
-> 
+>
 > **What you achieved:**
+>
 > - ✅ WSL2 with Ubuntu 22.04 fully configured
 > - ✅ Node.js environment with proper permissions
 > - ✅ Claude Code running at optimal performance
-> 
+>
 > **Ready for more?** Explore our [tutorials collection](/guides/tutorials) or join our [community](/community) to share your setup and get help with advanced configurations.
 
-*Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials).*
+_Last updated: September 2025 | Found this helpful? Share it with your team and explore more [Claude tutorials](/guides/tutorials)._

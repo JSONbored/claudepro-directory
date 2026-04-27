@@ -4,7 +4,7 @@ import {
   hasBodyWithinLimit,
   hasJsonContentType,
   isAllowedOrigin,
-  isRateLimited
+  isRateLimited,
 } from "@/lib/api-security";
 import { logApiError, logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
 import { getVotesDb, isValidEntryKey, toggleVote } from "@/lib/votes";
@@ -28,10 +28,20 @@ export async function POST(request: Request) {
 
   if (!hasJsonContentType(request)) {
     logApiWarn(request, "votes.toggle.invalid_content_type");
-    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
+    return NextResponse.json(
+      { error: "invalid_content_type" },
+      { status: 415 },
+    );
   }
 
-  if (isRateLimited({ request, scope: "votes-toggle", limit: 45, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "votes-toggle",
+      limit: 45,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "votes.toggle.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -54,14 +64,19 @@ export async function POST(request: Request) {
   }
 
   if (clientId.length < 8 || clientId.length > 128) {
-    logApiWarn(request, "votes.toggle.invalid_client_id", { clientIdLength: clientId.length });
+    logApiWarn(request, "votes.toggle.invalid_client_id", {
+      clientIdLength: clientId.length,
+    });
     return NextResponse.json({ error: "invalid_client_id" }, { status: 400 });
   }
 
   const db = getVotesDb();
   if (!db) {
     logApiError(request, "votes.toggle.db_not_configured");
-    return NextResponse.json({ error: "votes_db_not_configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "votes_db_not_configured" },
+      { status: 503 },
+    );
   }
 
   try {
@@ -69,23 +84,28 @@ export async function POST(request: Request) {
       db,
       entryKey: key,
       clientId,
-      vote
+      vote,
     });
 
     if (sample(0.05)) {
-      logApiInfo(request, "votes.toggle.sample", { key, vote, voted: result.voted, count: result.count });
+      logApiInfo(request, "votes.toggle.sample", {
+        key,
+        vote,
+        voted: result.voted,
+        count: result.count,
+      });
     }
     return NextResponse.json(
       {
         key,
         count: result.count,
-        voted: result.voted
+        voted: result.voted,
       },
       {
         headers: {
-          "cache-control": "no-store"
-        }
-      }
+          "cache-control": "no-store",
+        },
+      },
     );
   } catch {
     logApiError(request, "votes.toggle.internal_error", { key });

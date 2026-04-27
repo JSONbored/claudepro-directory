@@ -93,34 +93,48 @@ Connect to hundreds of applications through Workato's enterprise automation and 
 
 ## Examples
 ### Sync Salesforce contacts to HubSpot
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Sync Salesforce contacts to HubSpot"
 ```
+
 ### Execute the invoice processing workflow
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Execute the invoice processing workflow"
 ```
+
 ### Check status of overnight data sync
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Check status of overnight data sync"
 ```
+
 ### Trigger customer onboarding recipe
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Trigger customer onboarding recipe"
 ```
+
 ### Execute Recipe
+
 Execute a Workato recipe with input data
+
 ```typescript
 // Execute Workato recipe
 const execution = await workato.recipes.execute({
   recipe_id: "recipe-id",
   input: {
-    data: "input-data"
-  }
+    data: "input-data",
+  },
 });
 ```
 ```plaintext
@@ -140,8 +154,8 @@ Ask Claude: "Trigger customer onboarding recipe"
 const execution = await workato.recipes.execute({
   recipe_id: "recipe-id",
   input: {
-    data: "input-data"
-  }
+    data: "input-data",
+  },
 });
 ```
 
@@ -161,24 +175,31 @@ const execution = await workato.recipes.execute({
 ### Webhook rate limit exceeded - 429 Too Many Requests
 
 Workato webhook rate limits: 20 events/sec (72K events/hour), burst capacity 9K events. Check response headers: X-Rate-Limit-Remaining (remaining events), X-Rate-Limit-Reset (reset time). Wait for Retry-After duration before retrying. Reduce event frequency by optimizing recipes to minimize webhook calls. Use batch processing where possible. Monitor webhook usage in Workato Dashboard. Consider using polling triggers instead of webhooks for high-frequency events. Implement exponential backoff for retries.
+
 ### Recipe execution failed - job error during processing
 
 Navigate to Jobs tab in Workato Dashboard, select the failed job, inspect Data tab step-by-step to identify the failing step. Check trigger configuration matches event source (verify trigger data structure). Verify all app connections are active (test connections in Connections tab). Review error message for specific issue (authentication, data format, API limits). Re-authenticate connections if credentials expired. Check recipe logic for data transformation errors. Verify input data format matches recipe expectations. Review recipe logs for detailed error context.
+
 ### API rate limit violation from external app (Salesforce, Slack, etc.)
 
 Use Wait/Batch/Conditional steps in recipes to rate-limit API calls programmatically. Reduce number of actions per recipe (combine operations where possible). Optimize recipes to make minimal API calls (use lookup tables, cache data). RecipeOps monitors API rate limit violations every 5 minutes and sends alerts. Review app-specific rate limits in Workato documentation. Implement retry logic with exponential backoff. Use Workato's built-in rate limiting features. Consider using webhooks instead of polling to reduce API calls. Monitor RecipeOps alerts for rate limit violations.
+
 ### Recipe not running or trigger not activating
 
 Verify recipe is active (not paused) in Recipe tab - check recipe status indicator. Check trigger configuration matches event source (verify trigger type, filters, conditions). Test trigger with sample data using 'Test trigger' button. Review connection permissions allow trigger access (check connection scopes in Connections tab). Check app webhook configuration if using webhook trigger (verify webhook URL, authentication, event subscriptions). Verify recipe has required connections configured (all connectors have active connections). Check recipe schedule if using scheduled trigger (verify timezone, frequency). Review recipe logs for trigger activation attempts. Ensure workspace has sufficient capacity for recipe execution.
+
 ### Workato MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Workato rate limit errors when processing multiple workflow requests
 
 Implement exponential backoff retry logic with jitter. Use Workato API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed recipe data. Check Workato documentation for specific rate limits.
+
 ### Workato recipe or connection access denied errors
 
 Verify API token has access to the recipe or connection. Check recipe permissions and workspace membership. Ensure API token has required permissions for target operations.
+
 ### Workato MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Workato API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

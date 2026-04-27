@@ -69,7 +69,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://cursor.com/docs/context/rules"]
+          "sameAs": [
+            "https://cursor.com/docs/context/rules"
+          ]
         }
       ]
     },
@@ -138,7 +140,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/debug"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/debug"
+          ]
         }
       ]
     },
@@ -207,7 +211,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/docs"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/docs"
+          ]
         }
       ]
     },
@@ -276,7 +282,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/explain"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/explain"
+          ]
         }
       ]
     },
@@ -345,7 +353,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/optimize"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/optimize"
+          ]
         }
       ]
     },
@@ -414,7 +424,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/refactor"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/refactor"
+          ]
         }
       ]
     },
@@ -483,7 +495,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/refactor"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/refactor"
+          ]
         }
       ]
     },
@@ -552,7 +566,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/review"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/review"
+          ]
         }
       ]
     },
@@ -621,7 +637,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/security"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/security"
+          ]
         }
       ]
     },
@@ -690,7 +708,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/security-audit"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/security-audit"
+          ]
         }
       ]
     },
@@ -759,7 +779,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/test"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/test"
+          ]
         }
       ]
     },
@@ -828,7 +850,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://owasp.org/www-project-top-ten/"]
+          "sameAs": [
+            "https://owasp.org/www-project-top-ten/"
+          ]
         }
       ]
     },
@@ -897,7 +921,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.w3.org/WAI/WCAG21/quickref/"]
+          "sameAs": [
+            "https://www.w3.org/WAI/WCAG21/quickref/"
+          ]
         }
       ]
     },
@@ -966,7 +992,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.w3.org/WAI/WCAG21/quickref/"]
+          "sameAs": [
+            "https://www.w3.org/WAI/WCAG21/quickref/"
+          ]
         }
       ]
     },
@@ -1246,7 +1274,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/skills"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/skills"
+          ]
         }
       ]
     },
@@ -1315,7 +1345,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://opentelemetry.io/docs/"]
+          "sameAs": [
+            "https://opentelemetry.io/docs/"
+          ]
         }
       ]
     },
@@ -1384,7 +1416,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.ycombinator.com/library"]
+          "sameAs": [
+            "https://www.ycombinator.com/library"
+          ]
         }
       ]
     },
@@ -1591,7 +1625,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://epoch.ai/data-insights/context-windows"]
+          "sameAs": [
+            "https://epoch.ai/data-insights/context-windows"
+          ]
         }
       ]
     },
@@ -1731,7 +1767,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.google.com/search/docs"]
+          "sameAs": [
+            "https://developers.google.com/search/docs"
+          ]
         }
       ]
     },
@@ -1940,7 +1978,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://swagger.io/specification/"]
+          "sameAs": [
+            "https://swagger.io/specification/"
+          ]
         }
       ]
     },
@@ -2078,7 +2118,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://swagger.io/docs/"]
+          "sameAs": [
+            "https://swagger.io/docs/"
+          ]
         }
       ]
     },
@@ -2147,7 +2189,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://swagger.io/specification/"]
+          "sameAs": [
+            "https://swagger.io/specification/"
+          ]
         }
       ]
     },
@@ -2216,7 +2260,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -2427,7 +2473,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://prettier.io/docs/en/"]
+          "sameAs": [
+            "https://prettier.io/docs/en/"
+          ]
         }
       ]
     },
@@ -2634,7 +2682,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://microsoft.github.io/autogen/"]
+          "sameAs": [
+            "https://microsoft.github.io/autogen/"
+          ]
         }
       ]
     },
@@ -2703,7 +2753,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.aws.amazon.com/"]
+          "sameAs": [
+            "https://docs.aws.amazon.com/"
+          ]
         }
       ]
     },
@@ -2772,7 +2824,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://aws.amazon.com/cloudformation/"]
+          "sameAs": [
+            "https://aws.amazon.com/cloudformation/"
+          ]
         }
       ]
     },
@@ -3119,7 +3173,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.base.org/get-started/deploy-smart-contracts"]
+          "sameAs": [
+            "https://docs.base.org/get-started/deploy-smart-contracts"
+          ]
         }
       ]
     },
@@ -3188,7 +3244,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://biomejs.dev/linter/"]
+          "sameAs": [
+            "https://biomejs.dev/linter/"
+          ]
         }
       ]
     },
@@ -3257,7 +3315,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -3325,7 +3385,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://box.dev/guides/box-mcp/remote/"]
+          "sameAs": [
+            "https://box.dev/guides/box-mcp/remote/"
+          ]
         }
       ]
     },
@@ -3394,7 +3456,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://playwright.dev/docs/best-practices"]
+          "sameAs": [
+            "https://playwright.dev/docs/best-practices"
+          ]
         }
       ]
     },
@@ -3532,7 +3596,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://bun.sh/docs"]
+          "sameAs": [
+            "https://bun.sh/docs"
+          ]
         }
       ]
     },
@@ -3601,7 +3667,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -3670,7 +3738,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -4644,7 +4714,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.anthropic.com/en/docs/about-claude/models"]
+          "sameAs": [
+            "https://docs.anthropic.com/en/docs/about-claude/models"
+          ]
         }
       ]
     },
@@ -4782,7 +4854,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://modelcontextprotocol.io/introduction"]
+          "sameAs": [
+            "https://modelcontextprotocol.io/introduction"
+          ]
         }
       ]
     },
@@ -5127,7 +5201,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/claude-md"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/claude-md"
+          ]
         }
       ]
     },
@@ -5267,7 +5343,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://matplotlib.org/"]
+          "sameAs": [
+            "https://matplotlib.org/"
+          ]
         }
       ]
     },
@@ -5615,7 +5693,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.cloudflare.com/workers-ai/"]
+          "sameAs": [
+            "https://developers.cloudflare.com/workers-ai/"
+          ]
         }
       ]
     },
@@ -5684,7 +5764,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.cloudflare.com/workers/"]
+          "sameAs": [
+            "https://developers.cloudflare.com/workers/"
+          ]
         }
       ]
     },
@@ -6032,7 +6114,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/rules/code-review"]
+          "sameAs": [
+            "https://docs.claude.ai/rules/code-review"
+          ]
         }
       ]
     },
@@ -6101,7 +6185,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://google.github.io/eng-practices/review/"]
+          "sameAs": [
+            "https://google.github.io/eng-practices/review/"
+          ]
         }
       ]
     },
@@ -6170,7 +6256,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://jestjs.io/docs/getting-started"]
+          "sameAs": [
+            "https://jestjs.io/docs/getting-started"
+          ]
         }
       ]
     },
@@ -6239,7 +6327,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://refactoring.guru/refactoring/catalog"]
+          "sameAs": [
+            "https://refactoring.guru/refactoring/catalog"
+          ]
         }
       ]
     },
@@ -6590,7 +6680,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/analysis"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/analysis"
+          ]
         }
       ]
     },
@@ -6659,7 +6751,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://epoch.ai/data-insights/context-windows"]
+          "sameAs": [
+            "https://epoch.ai/data-insights/context-windows"
+          ]
         }
       ]
     },
@@ -6868,7 +6962,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://pandas.pydata.org/"]
+          "sameAs": [
+            "https://pandas.pydata.org/"
+          ]
         }
       ]
     },
@@ -6937,7 +7033,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://cursor.sh/docs"]
+          "sameAs": [
+            "https://cursor.sh/docs"
+          ]
         }
       ]
     },
@@ -7006,7 +7104,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -7074,7 +7174,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.daloopa.com/docs/daloopa-mcp"]
+          "sameAs": [
+            "https://docs.daloopa.com/docs/daloopa-mcp"
+          ]
         }
       ]
     },
@@ -7350,7 +7452,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.postgresql.org/docs/"]
+          "sameAs": [
+            "https://www.postgresql.org/docs/"
+          ]
         }
       ]
     },
@@ -7419,7 +7523,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://knexjs.org/guide/migrations.html"]
+          "sameAs": [
+            "https://knexjs.org/guide/migrations.html"
+          ]
         }
       ]
     },
@@ -7559,7 +7665,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.postgresql.org/docs/"]
+          "sameAs": [
+            "https://www.postgresql.org/docs/"
+          ]
         }
       ]
     },
@@ -7907,7 +8015,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.npmjs.com/cli/v8/commands/npm-audit"]
+          "sameAs": [
+            "https://docs.npmjs.com/cli/v8/commands/npm-audit"
+          ]
         }
       ]
     },
@@ -7976,7 +8086,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.npmjs.com/cli/v8/commands/npm-audit"]
+          "sameAs": [
+            "https://docs.npmjs.com/cli/v8/commands/npm-audit"
+          ]
         }
       ]
     },
@@ -8045,7 +8157,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://kubernetes.io/docs/"]
+          "sameAs": [
+            "https://kubernetes.io/docs/"
+          ]
         }
       ]
     },
@@ -8114,7 +8228,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://discord.com/developers/docs/resources/webhook"]
+          "sameAs": [
+            "https://discord.com/developers/docs/resources/webhook"
+          ]
         }
       ]
     },
@@ -8323,7 +8439,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.docker.com/compose/"]
+          "sameAs": [
+            "https://docs.docker.com/compose/"
+          ]
         }
       ]
     },
@@ -8392,7 +8510,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.docker.com/compose/"]
+          "sameAs": [
+            "https://docs.docker.com/compose/"
+          ]
         }
       ]
     },
@@ -8461,7 +8581,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://aquasecurity.github.io/trivy/"]
+          "sameAs": [
+            "https://aquasecurity.github.io/trivy/"
+          ]
         }
       ]
     },
@@ -8530,7 +8652,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.docker.com/engine/api/"]
+          "sameAs": [
+            "https://docs.docker.com/engine/api/"
+          ]
         }
       ]
     },
@@ -8599,7 +8723,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://jsdoc.app/"]
+          "sameAs": [
+            "https://jsdoc.app/"
+          ]
         }
       ]
     },
@@ -8668,7 +8794,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://jsdoc.app/"]
+          "sameAs": [
+            "https://jsdoc.app/"
+          ]
         }
       ]
     },
@@ -8737,7 +8865,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docxtpl.readthedocs.io/"]
+          "sameAs": [
+            "https://docxtpl.readthedocs.io/"
+          ]
         }
       ]
     },
@@ -8944,7 +9074,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://12factor.net/config"]
+          "sameAs": [
+            "https://12factor.net/config"
+          ]
         }
       ]
     },
@@ -9082,7 +9214,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.base.org/get-started/deploy-smart-contracts"]
+          "sameAs": [
+            "https://docs.base.org/get-started/deploy-smart-contracts"
+          ]
         }
       ]
     },
@@ -9151,7 +9285,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://ethereum.org/developers/docs/"]
+          "sameAs": [
+            "https://ethereum.org/developers/docs/"
+          ]
         }
       ]
     },
@@ -9289,7 +9425,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://fastapi.tiangolo.com/"]
+          "sameAs": [
+            "https://fastapi.tiangolo.com/"
+          ]
         }
       ]
     },
@@ -9357,7 +9495,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://help.figma.com/hc/en-us/articles/32132100833559"]
+          "sameAs": [
+            "https://help.figma.com/hc/en-us/articles/32132100833559"
+          ]
         }
       ]
     },
@@ -9494,7 +9634,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://modelcontextprotocol.io/examples"]
+          "sameAs": [
+            "https://modelcontextprotocol.io/examples"
+          ]
         }
       ]
     },
@@ -9702,7 +9844,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -10047,7 +10191,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://react.dev/"]
+          "sameAs": [
+            "https://react.dev/"
+          ]
         }
       ]
     },
@@ -10185,7 +10331,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.ai/commands/test-gen"]
+          "sameAs": [
+            "https://docs.claude.ai/commands/test-gen"
+          ]
         }
       ]
     },
@@ -10391,7 +10539,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://modelcontextprotocol.io/examples"]
+          "sameAs": [
+            "https://modelcontextprotocol.io/examples"
+          ]
         }
       ]
     },
@@ -10460,7 +10610,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://pre-commit.com/"]
+          "sameAs": [
+            "https://pre-commit.com/"
+          ]
         }
       ]
     },
@@ -10529,7 +10681,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.conventionalcommits.org/"]
+          "sameAs": [
+            "https://www.conventionalcommits.org/"
+          ]
         }
       ]
     },
@@ -10598,7 +10752,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://git-scm.com/docs/git-status"]
+          "sameAs": [
+            "https://git-scm.com/docs/git-status"
+          ]
         }
       ]
     },
@@ -10667,7 +10823,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://git-cliff.org/docs/"]
+          "sameAs": [
+            "https://git-cliff.org/docs/"
+          ]
         }
       ]
     },
@@ -10736,7 +10894,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.github.com/en/actions"]
+          "sameAs": [
+            "https://docs.github.com/en/actions"
+          ]
         }
       ]
     },
@@ -10805,7 +10965,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.github.com/actions"]
+          "sameAs": [
+            "https://docs.github.com/actions"
+          ]
         }
       ]
     },
@@ -10874,7 +11036,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.github.com/en/actions"]
+          "sameAs": [
+            "https://docs.github.com/en/actions"
+          ]
         }
       ]
     },
@@ -11082,7 +11246,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://go.dev/doc/"]
+          "sameAs": [
+            "https://go.dev/doc/"
+          ]
         }
       ]
     },
@@ -11151,7 +11317,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://go.dev/doc/"]
+          "sameAs": [
+            "https://go.dev/doc/"
+          ]
         }
       ]
     },
@@ -11289,7 +11457,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://ai.google.dev/gemini-api/docs"]
+          "sameAs": [
+            "https://ai.google.dev/gemini-api/docs"
+          ]
         }
       ]
     },
@@ -11358,7 +11528,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.apollographql.com/docs/federation/"]
+          "sameAs": [
+            "https://www.apollographql.com/docs/federation/"
+          ]
         }
       ]
     },
@@ -11496,7 +11668,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://heyclau.de/mcp/heyclaude-mcp"]
+          "sameAs": [
+            "https://heyclau.de/mcp/heyclaude-mcp"
+          ]
         }
       ]
     },
@@ -11565,7 +11739,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/hooks"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/hooks"
+          ]
         }
       ]
     },
@@ -11633,7 +11809,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.hubspot.com/mcp"]
+          "sameAs": [
+            "https://developers.hubspot.com/mcp"
+          ]
         }
       ]
     },
@@ -11701,7 +11879,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://huggingface.co/settings/mcp"]
+          "sameAs": [
+            "https://huggingface.co/settings/mcp"
+          ]
         }
       ]
     },
@@ -11770,7 +11950,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://typicode.github.io/husky/"]
+          "sameAs": [
+            "https://typicode.github.io/husky/"
+          ]
         }
       ]
     },
@@ -11908,7 +12090,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://tesseract-ocr.github.io/"]
+          "sameAs": [
+            "https://tesseract-ocr.github.io/"
+          ]
         }
       ]
     },
@@ -11977,7 +12161,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.indexnow.org/documentation"]
+          "sameAs": [
+            "https://www.indexnow.org/documentation"
+          ]
         }
       ]
     },
@@ -12045,7 +12231,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.intercom.com/docs/guides/mcp"]
+          "sameAs": [
+            "https://developers.intercom.com/docs/guides/mcp"
+          ]
         }
       ]
     },
@@ -12113,7 +12301,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://invideo.io/ai/mcp"]
+          "sameAs": [
+            "https://invideo.io/ai/mcp"
+          ]
         }
       ]
     },
@@ -12181,7 +12371,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://jam.dev/docs/debug-a-jam/mcp"]
+          "sameAs": [
+            "https://jam.dev/docs/debug-a-jam/mcp"
+          ]
         }
       ]
     },
@@ -12318,7 +12510,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.atlassian.com/platform/remote-mcp-server"]
+          "sameAs": [
+            "https://www.atlassian.com/platform/remote-mcp-server"
+          ]
         }
       ]
     },
@@ -12387,7 +12581,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://ajv.js.org/"]
+          "sameAs": [
+            "https://ajv.js.org/"
+          ]
         }
       ]
     },
@@ -12525,7 +12721,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://kubernetes.io/docs/concepts/security/"]
+          "sameAs": [
+            "https://kubernetes.io/docs/concepts/security/"
+          ]
         }
       ]
     },
@@ -12802,7 +13000,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://linear.app/docs/mcp"]
+          "sameAs": [
+            "https://linear.app/docs/mcp"
+          ]
         }
       ]
     },
@@ -12871,7 +13071,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -13224,7 +13426,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://modelcontextprotocol.io/specification/2025-06-18"]
+          "sameAs": [
+            "https://modelcontextprotocol.io/specification/2025-06-18"
+          ]
         }
       ]
     },
@@ -13293,7 +13497,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/mcp"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/mcp"
+          ]
         }
       ]
     },
@@ -13643,7 +13849,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://mintlify.com/docs"]
+          "sameAs": [
+            "https://mintlify.com/docs"
+          ]
         }
       ]
     },
@@ -13712,7 +13920,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://mintlify.com/docs"]
+          "sameAs": [
+            "https://mintlify.com/docs"
+          ]
         }
       ]
     },
@@ -13781,7 +13991,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developer.apple.com/documentation/"]
+          "sameAs": [
+            "https://developer.apple.com/documentation/"
+          ]
         }
       ]
     },
@@ -13850,7 +14062,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developer.apple.com/documentation/"]
+          "sameAs": [
+            "https://developer.apple.com/documentation/"
+          ]
         }
       ]
     },
@@ -13990,7 +14204,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -14129,7 +14345,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://turbo.build/repo/docs"]
+          "sameAs": [
+            "https://turbo.build/repo/docs"
+          ]
         }
       ]
     },
@@ -14336,7 +14554,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.anthropic.com/claude/docs/models-overview"]
+          "sameAs": [
+            "https://docs.anthropic.com/claude/docs/models-overview"
+          ]
         }
       ]
     },
@@ -14405,7 +14625,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -14474,7 +14696,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.n8n.io/advanced-ai/"]
+          "sameAs": [
+            "https://docs.n8n.io/advanced-ai/"
+          ]
         }
       ]
     },
@@ -14543,7 +14767,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.n8n.io/"]
+          "sameAs": [
+            "https://docs.n8n.io/"
+          ]
         }
       ]
     },
@@ -14612,7 +14838,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.n8n.io/hosting/securing/"]
+          "sameAs": [
+            "https://docs.n8n.io/hosting/securing/"
+          ]
         }
       ]
     },
@@ -14751,7 +14979,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://nextjs.org/docs"]
+          "sameAs": [
+            "https://nextjs.org/docs"
+          ]
         }
       ]
     },
@@ -14888,7 +15118,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.notion.com/docs/mcp"]
+          "sameAs": [
+            "https://developers.notion.com/docs/mcp"
+          ]
         }
       ]
     },
@@ -15244,7 +15476,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://opennext.js.org/cloudflare/get-started"]
+          "sameAs": [
+            "https://opennext.js.org/cloudflare/get-started"
+          ]
         }
       ]
     },
@@ -15382,7 +15616,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://web.dev/articles/vitals"]
+          "sameAs": [
+            "https://web.dev/articles/vitals"
+          ]
         }
       ]
     },
@@ -15451,7 +15687,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/sub-agents"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/sub-agents"
+          ]
         }
       ]
     },
@@ -15519,7 +15757,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.paypal.ai/"]
+          "sameAs": [
+            "https://www.paypal.ai/"
+          ]
         }
       ]
     },
@@ -15726,7 +15966,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://web.dev/vitals/"]
+          "sameAs": [
+            "https://web.dev/vitals/"
+          ]
         }
       ]
     },
@@ -15795,7 +16037,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://web.dev/performance/"]
+          "sameAs": [
+            "https://web.dev/performance/"
+          ]
         }
       ]
     },
@@ -15863,7 +16107,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://plaid.com/blog/plaid-mcp-ai-assistant-claude/"]
+          "sameAs": [
+            "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/"
+          ]
         }
       ]
     },
@@ -16003,7 +16249,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://playwright.dev/"]
+          "sameAs": [
+            "https://playwright.dev/"
+          ]
         }
       ]
     },
@@ -16072,7 +16320,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://playwright.dev/docs/getting-started-mcp"]
+          "sameAs": [
+            "https://playwright.dev/docs/getting-started-mcp"
+          ]
         }
       ]
     },
@@ -16141,7 +16391,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://playwright.dev"]
+          "sameAs": [
+            "https://playwright.dev"
+          ]
         }
       ]
     },
@@ -16278,7 +16530,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://modelcontextprotocol.io/examples"]
+          "sameAs": [
+            "https://modelcontextprotocol.io/examples"
+          ]
         }
       ]
     },
@@ -16418,7 +16672,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.prisma.io/docs"]
+          "sameAs": [
+            "https://www.prisma.io/docs"
+          ]
         }
       ]
     },
@@ -16834,7 +17090,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://genai.owasp.org/llmrisk/llm01-prompt-injection/"]
+          "sameAs": [
+            "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
+          ]
         }
       ]
     },
@@ -17185,7 +17443,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://pandas.pydata.org/docs/"]
+          "sameAs": [
+            "https://pandas.pydata.org/docs/"
+          ]
         }
       ]
     },
@@ -17254,7 +17514,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://pandas.pydata.org/docs/"]
+          "sameAs": [
+            "https://pandas.pydata.org/docs/"
+          ]
         }
       ]
     },
@@ -17461,7 +17723,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://rich.readthedocs.io/"]
+          "sameAs": [
+            "https://rich.readthedocs.io/"
+          ]
         }
       ]
     },
@@ -17530,7 +17794,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.raycast.com/"]
+          "sameAs": [
+            "https://developers.raycast.com/"
+          ]
         }
       ]
     },
@@ -17599,7 +17865,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://react.dev/reference/react"]
+          "sameAs": [
+            "https://react.dev/reference/react"
+          ]
         }
       ]
     },
@@ -17668,7 +17936,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://nextjs.org/docs"]
+          "sameAs": [
+            "https://nextjs.org/docs"
+          ]
         }
       ]
     },
@@ -17737,7 +18007,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://nextjs.org/docs"]
+          "sameAs": [
+            "https://nextjs.org/docs"
+          ]
         }
       ]
     },
@@ -17806,7 +18078,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://react.dev/reference/rsc/server-components"]
+          "sameAs": [
+            "https://react.dev/reference/rsc/server-components"
+          ]
         }
       ]
     },
@@ -18435,7 +18709,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://stripe.com/docs"]
+          "sameAs": [
+            "https://stripe.com/docs"
+          ]
         }
       ]
     },
@@ -18573,7 +18849,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://owasp.org/www-project-top-ten/"]
+          "sameAs": [
+            "https://owasp.org/www-project-top-ten/"
+          ]
         }
       ]
     },
@@ -18642,7 +18920,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://owasp.org/www-project-top-ten/"]
+          "sameAs": [
+            "https://owasp.org/www-project-top-ten/"
+          ]
         }
       ]
     },
@@ -18711,7 +18991,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://owasp.org/www-project-top-ten/"]
+          "sameAs": [
+            "https://owasp.org/www-project-top-ten/"
+          ]
         }
       ]
     },
@@ -18780,7 +19062,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://owasp.org/www-project-top-ten/"]
+          "sameAs": [
+            "https://owasp.org/www-project-top-ten/"
+          ]
         }
       ]
     },
@@ -18987,7 +19271,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.sentry.io/product/sentry-mcp/"]
+          "sameAs": [
+            "https://docs.sentry.io/product/sentry-mcp/"
+          ]
         }
       ]
     },
@@ -19056,7 +19342,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -19613,7 +19901,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developer.squareup.com/docs/mcp"]
+          "sameAs": [
+            "https://developer.squareup.com/docs/mcp"
+          ]
         }
       ]
     },
@@ -19750,7 +20040,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.stripe.com/mcp"]
+          "sameAs": [
+            "https://docs.stripe.com/mcp"
+          ]
         }
       ]
     },
@@ -19818,7 +20110,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://stytch.com/docs/workspace-management/stytch-mcp"]
+          "sameAs": [
+            "https://stytch.com/docs/workspace-management/stytch-mcp"
+          ]
         }
       ]
     },
@@ -19887,7 +20181,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/sub-agents"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/sub-agents"
+          ]
         }
       ]
     },
@@ -19956,7 +20252,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/sub-agents"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/sub-agents"
+          ]
         }
       ]
     },
@@ -20025,7 +20323,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://supabase.com/docs"]
+          "sameAs": [
+            "https://supabase.com/docs"
+          ]
         }
       ]
     },
@@ -20163,7 +20463,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://kit.svelte.dev/"]
+          "sameAs": [
+            "https://kit.svelte.dev/"
+          ]
         }
       ]
     },
@@ -20232,7 +20534,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/testing"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/testing"
+          ]
         }
       ]
     },
@@ -20439,7 +20743,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.terraform.io/docs"]
+          "sameAs": [
+            "https://www.terraform.io/docs"
+          ]
         }
       ]
     },
@@ -20577,7 +20883,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://playwright.dev/"]
+          "sameAs": [
+            "https://playwright.dev/"
+          ]
         }
       ]
     },
@@ -20715,7 +21023,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://jestjs.io/docs/getting-started"]
+          "sameAs": [
+            "https://jestjs.io/docs/getting-started"
+          ]
         }
       ]
     },
@@ -20784,7 +21094,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://vitest.dev/guide/"]
+          "sameAs": [
+            "https://vitest.dev/guide/"
+          ]
         }
       ]
     },
@@ -20922,7 +21234,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://trpc.io/docs/"]
+          "sameAs": [
+            "https://trpc.io/docs/"
+          ]
         }
       ]
     },
@@ -21200,7 +21514,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.unraid.net/API/"]
+          "sameAs": [
+            "https://docs.unraid.net/API/"
+          ]
         }
       ]
     },
@@ -21269,7 +21585,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.unraid.net/API/"]
+          "sameAs": [
+            "https://docs.unraid.net/API/"
+          ]
         }
       ]
     },
@@ -21338,7 +21656,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://forums.unraid.net/forum/64-docker-engine/"]
+          "sameAs": [
+            "https://forums.unraid.net/forum/64-docker-engine/"
+          ]
         }
       ]
     },
@@ -21407,7 +21727,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://v0.dev/docs"]
+          "sameAs": [
+            "https://v0.dev/docs"
+          ]
         }
       ]
     },
@@ -21476,7 +21798,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://v0.dev/docs"]
+          "sameAs": [
+            "https://v0.dev/docs"
+          ]
         }
       ]
     },
@@ -21544,7 +21868,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://vercel.com/docs/mcp/vercel-mcp"]
+          "sameAs": [
+            "https://vercel.com/docs/mcp/vercel-mcp"
+          ]
         }
       ]
     },
@@ -21613,7 +21939,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://vitejs.dev/"]
+          "sameAs": [
+            "https://vitejs.dev/"
+          ]
         }
       ]
     },
@@ -21751,7 +22079,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://www.w3.org/WAI/WCAG22/quickref/"]
+          "sameAs": [
+            "https://www.w3.org/WAI/WCAG22/quickref/"
+          ]
         }
       ]
     },
@@ -21891,7 +22221,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://webassembly.org/"]
+          "sameAs": [
+            "https://webassembly.org/"
+          ]
         }
       ]
     },
@@ -22101,7 +22433,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.codeium.com/windsurf"]
+          "sameAs": [
+            "https://docs.codeium.com/windsurf"
+          ]
         }
       ]
     },
@@ -22170,7 +22504,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.codeium.com/windsurf"]
+          "sameAs": [
+            "https://docs.codeium.com/windsurf"
+          ]
         }
       ]
     },
@@ -22238,7 +22574,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.workato.com/mcp.html"]
+          "sameAs": [
+            "https://docs.workato.com/mcp.html"
+          ]
         }
       ]
     },
@@ -22376,7 +22714,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://docs.claude.com/en/docs/claude-code/statusline"]
+          "sameAs": [
+            "https://docs.claude.com/en/docs/claude-code/statusline"
+          ]
         }
       ]
     },
@@ -22444,7 +22784,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://help.zapier.com/hc/en-us/articles/36265392843917"]
+          "sameAs": [
+            "https://help.zapier.com/hc/en-us/articles/36265392843917"
+          ]
         }
       ]
     },
@@ -22513,7 +22855,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://developers.cloudflare.com/workers/"]
+          "sameAs": [
+            "https://developers.cloudflare.com/workers/"
+          ]
         }
       ]
     },
@@ -22582,7 +22926,9 @@
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
           },
-          "sameAs": ["https://zod.dev/"]
+          "sameAs": [
+            "https://zod.dev/"
+          ]
         }
       ]
     }

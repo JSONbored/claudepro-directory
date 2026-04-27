@@ -61,7 +61,9 @@ Real-time AI cost tracking statusline with per-session spend analytics, model pr
 
 ## Examples
 ### Enhanced Real-Time Cost Tracker with Daily Budget
+
 Extended version tracking daily spending and budget limits
+
 ```bash
 #!/usr/bin/env bash
 
@@ -124,7 +126,7 @@ echo "${TODAY}|${new_total}" >> "$COST_FILE"
 # Budget alert
 if command -v bc > /dev/null 2>&1; then
   budget_percentage=$(awk "BEGIN {printf \"%.1f\", ($new_total / $DAILY_BUDGET) * 100}" 2>/dev/null || echo "0.0")
-  
+
   if (( $(echo "$new_total >= $DAILY_BUDGET" | bc -l 2>/dev/null) )); then
     color="\033[31m"
     icon="🚨"
@@ -159,8 +161,11 @@ RESET="\033[0m"
 
 echo -e "${icon} ${color}${session_formatted}${RESET} │ Daily: ${total_formatted} (${budget_status}) │ ${tokens_formatted} tokens"
 ```
+
 ### Real-Time Cost Tracker with Custom Pricing
+
 Version with configurable pricing via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -240,8 +245,11 @@ RESET="\033[0m"
 
 echo -e "${icon} ${color}$${cost}${RESET} │ ${tokens_formatted} tokens"
 ```
+
 ### Real-Time Cost Tracker Installation Example
+
 Complete setup script with bc calculator verification and locale configuration
+
 ```bash
 #!/bin/bash
 # Installation script for Real-Time Cost Tracker
@@ -472,7 +480,7 @@ echo "${TODAY}|${new_total}" >> "$COST_FILE"
 # Budget alert
 if command -v bc > /dev/null 2>&1; then
   budget_percentage=$(awk "BEGIN {printf \"%.1f\", ($new_total / $DAILY_BUDGET) * 100}" 2>/dev/null || echo "0.0")
-  
+
   if (( $(echo "$new_total >= $DAILY_BUDGET" | bc -l 2>/dev/null) )); then
     color="\033[31m"
     icon="🚨"
@@ -759,24 +767,31 @@ echo "Test cost calculation: echo 'scale=4; 1000000 / 1000000 * 3.00' | bc -l"
 ### Cost calculation shows wrong decimal format with comma separator
 
 Set LC_NUMERIC=C at script start to enforce dot decimal separator. Some locales default to comma, breaking bc. Add: export LC_NUMERIC=C before math operations. Verify locale: locale -k LC_NUMERIC | grep decimal_point (should be '.'). Test: echo 'scale=4; 3.00' | bc -l (should return 3.0000, not 3,0000). Check script: Ensure export LC_NUMERIC=C is at the top of the script.
+
 ### Pricing appears outdated or incorrect for current AI models
 
-Update price_per_m values. Claude Sonnet 4 is $3/M (2025), Claude Opus is $15/M, Claude Haiku is $0.25/M, GPT-4.1 is $5/M, GPT-4o is $2.50/M, Gemini 2.0 is $3.50/M. Verify at provider docs before updating script. Check model detection: echo '$input' | jq .model.id (should match pattern in script). Update pricing: Modify price_per_m values in script for each model pattern. Test: Calculate manually: (tokens / 1000000) * price_per_m.
+Update price_per_m values. Claude Sonnet 4 is $3/M (2025), Claude Opus is $15/M, Claude Haiku is $0.25/M, GPT-4.1 is $5/M, GPT-4o is $2.50/M, Gemini 2.0 is $3.50/M. Verify at provider docs before updating script. Check model detection: echo '$input' | jq .model.id (should match pattern in script). Update pricing: Modify price_per_m values in script for each model pattern. Test: Calculate manually: (tokens / 1000000) \* price_per_m.
+
 ### bc: command not found when running cost calculations
 
 Install bc calculator: macOS (brew install bc), Linux (sudo apt-get install bc or sudo yum install bc). Verify installation: command -v bc (should return path). Test bc: echo 'scale=4; 3.00' | bc -l (should return 3.0000). Script has awk fallback: If bc unavailable, script uses awk for cost calculation. Verify awk: command -v awk (should return path). Check both: Script tries awk first, then bc as fallback.
+
 ### Cost displays as $0.0000 despite high token usage
 
-Check printf precision: use %.4f for micro-dollars. Verify tokens populated: echo '$input' | jq '.cost.total_lines_added' (should return number). If zero, test JSON parsing: echo '$input' | jq '.session.totalTokens'. Check field names: Script checks cost.total_lines_added and session.totalTokens. Verify calculation: echo 'scale=4; (1000000 / 1000000) * 3.00' | bc -l (should return 3.0000). Check model detection: If model not recognized, default price is 1.00 - verify model name matches patterns.
+Check printf precision: use %.4f for micro-dollars. Verify tokens populated: echo '$input' | jq '.cost.total_lines_added' (should return number). If zero, test JSON parsing: echo '$input' | jq '.session.totalTokens'. Check field names: Script checks cost.total_lines_added and session.totalTokens. Verify calculation: echo 'scale=4; (1000000 / 1000000) \* 3.00' | bc -l (should return 3.0000). Check model detection: If model not recognized, default price is 1.00 - verify model name matches patterns.
+
 ### Budget alert colors not changing or always showing same color
 
 Verify bc comparison works: echo '0.60 > 0.50' | bc -l (should return 1 for true). Check cost value: echo $cost (should be decimal like 0.1234). Verify thresholds: Script uses > 0.50 (red), > 0.10 (yellow), else (green). Test comparison: echo 'scale=4; 0.60 > 0.50' | bc -l (should return 1). Check if bc unavailable: Script uses integer fallback if bc not found - may not work correctly for decimal comparisons.
+
 ### Token count not displaying with thousands separator
 
 Verify printf supports thousands separator: printf "%'d" 12345 (should return 12,345). Check locale settings: locale (should include thousands separator). Set locale if needed: export LC_NUMERIC=en_US.UTF-8 (but keep LC_NUMERIC=C for calculations). Test formatting: printf "%'d" 1234567 (should return 1,234,567). If not supported, script falls back to plain numbers. Alternative: Use awk for formatting: awk '{printf "%'"'"'d", $1}' <<< 12345.
+
 ### Model pricing not detected correctly for new model variants
 
-Add patterns to model detection logic. Common patterns: claude-sonnet-4, claude-opus, claude-haiku, gpt-4.1, gpt-4o, gemini-2, gemini-1.5-pro. Update with: [[ "$model" == *"pattern"* ]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [[ "test-claude-sonnet-4" == *"claude-sonnet-4"* ]] && echo "Matched". Add new model variants to appropriate pricing block. Verify pricing: Check provider documentation for current pricing.
+Add patterns to model detection logic. Common patterns: claude-sonnet-4, claude-opus, claude-haiku, gpt-4.1, gpt-4o, gemini-2, gemini-1.5-pro. Update with: [["$model" == *"pattern"*]]. Check model name format: echo '$input' | jq .model.id. Test pattern matching: [["test-claude-sonnet-4" == *"claude-sonnet-4"*]] && echo "Matched". Add new model variants to appropriate pricing block. Verify pricing: Check provider documentation for current pricing.
+
 ### Cost calculation precision too low or rounded incorrectly
 
-Increase precision in awk: awk 'BEGIN {printf "%.4f", ...}' (4 decimals). For bc: echo 'scale=4; ...' (4 decimal places). Verify calculation: echo 'scale=4; (1000000 / 1000000) * 3.00' | bc -l (should return 3.0000). Check printf format: printf "$%.4f" 0.1234 (should return $0.1234). Higher precision: Use %.6f for 6 decimals (micro-dollars). Note: Higher precision may slow execution slightly.
+Increase precision in awk: awk 'BEGIN {printf "%.4f", ...}' (4 decimals). For bc: echo 'scale=4; ...' (4 decimal places). Verify calculation: echo 'scale=4; (1000000 / 1000000) \* 3.00' | bc -l (should return 3.0000). Check printf format: printf "$%.4f" 0.1234 (should return $0.1234). Higher precision: Use %.6f for 6 decimals (micro-dollars). Note: Higher precision may slow execution slightly.

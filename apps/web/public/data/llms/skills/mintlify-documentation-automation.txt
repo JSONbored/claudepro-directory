@@ -30,11 +30,13 @@ Claude can generate comprehensive, production-ready documentation using Mintlify
 
 ## Prerequisites
 **Required:**
+
 - Node.js 18+
 - Existing codebase with functions/APIs to document
 - Basic understanding of Markdown
 
 **What Claude handles automatically:**
+
 - Generating MDX documentation from TypeScript/JSDoc
 - Creating mint.json configuration with navigation
 - Building API reference pages from OpenAPI specs
@@ -48,6 +50,7 @@ Claude can generate comprehensive, production-ready documentation using Mintlify
 **Prompt:** "Generate Mintlify documentation from my TypeScript API client at src/api/users.ts. Include all JSDoc comments, parameter types, return types, and code examples."
 
 Claude will:
+
 1. Parse TypeScript file and extract exported functions
 2. Read JSDoc comments for descriptions
 3. Generate MDX files for each API endpoint
@@ -61,6 +64,7 @@ Claude will:
 **Prompt:** "Convert my OpenAPI 3.0 spec (openapi.yaml) into Mintlify documentation with interactive API playground and authentication examples."
 
 Claude will create:
+
 1. API reference section in mint.json
 2. MDX file for each endpoint with proper structure
 3. Request/response examples using CodeGroup
@@ -74,6 +78,7 @@ Claude will create:
 **Prompt:** "Set up a complete Mintlify documentation site for my SaaS product with: Introduction, Quickstart, API Reference, Guides, Changelog. Include dark mode, search, and analytics."
 
 Claude will generate:
+
 1. Directory structure with organized MDX files
 2. mint.json with proper navigation tabs
 3. Introduction page with hero and feature cards
@@ -89,6 +94,7 @@ Claude will generate:
 **Prompt:** "Document my React component library with interactive examples, prop tables, and usage guidelines. Components are in src/components/ui."
 
 Claude will create:
+
 1. Component documentation pages with descriptions
 2. PropTable components with TypeScript types
 3. Interactive code playgrounds
@@ -112,6 +118,7 @@ Claude will create:
 
 ## Common Workflows
 ### Complete API Documentation
+
 ```
 "Generate full Mintlify API documentation:
 1. Parse src/api/*.ts files for all exported functions
@@ -125,6 +132,7 @@ Claude will create:
 ```
 
 ### Component Library Docs
+
 ```
 "Build Mintlify docs for React component library:
 1. Document all components in src/components/ui
@@ -138,6 +146,7 @@ Claude will create:
 ```
 
 ### SDK Documentation with Examples
+
 ```
 "Generate SDK documentation from TypeScript client:
 1. Document all SDK methods with parameters and returns
@@ -151,6 +160,7 @@ Claude will create:
 ```
 
 ### Multi-Version Documentation
+
 ```
 "Set up versioned Mintlify docs for API v1 and v2:
 1. Create separate documentation for each version
@@ -213,7 +223,7 @@ Claude will create:
 **Solution:** mint.json navigation must explicitly list all pages. Ask Claude to regenerate navigation section matching your actual MDX file structure.
 
 **Issue:** Code examples aren't syntax highlighted correctly
-**Solution:** Specify language in code fence (```typescript, not ```ts). Ask Claude to use full language names for better highlighting.
+**Solution:** Specify language in code fence (`typescript, not `ts). Ask Claude to use full language names for better highlighting.
 
 **Issue:** API Reference pages look inconsistent
 **Solution:** Use Mintlify's built-in components (ParamField, ResponseField) instead of manual tables. Request Claude to refactor using proper components.

@@ -16,6 +16,13 @@ runtimes:
     - python@3.10.8
 # This is the section where you manage your linters. (https://docs.trunk.io/check/configuration)
 lint:
+  ignore:
+    - linters: [checkov, git-diff-check, prettier]
+      paths:
+        - apps/web/public/data/**
+    - linters: [prettier]
+      paths:
+        - integrations/raycast/raycast-env.d.ts
   enabled:
     - actionlint@1.7.12
     - checkov@3.2.525

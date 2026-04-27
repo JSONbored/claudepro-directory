@@ -1,5 +1,9 @@
 type JsonLdProps = {
-  data: Record<string, unknown> | Array<Record<string, unknown> | null | undefined> | null | undefined;
+  data:
+    | Record<string, unknown>
+    | Array<Record<string, unknown> | null | undefined>
+    | null
+    | undefined;
 };
 
 function safeJson(value: unknown) {

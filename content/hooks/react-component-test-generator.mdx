@@ -14,8 +14,8 @@ seoDescription: >-
   modified. This PostToolUse hook provides comprehensive React component test
   generation ...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch
@@ -79,9 +79,10 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
-- Automatic test file generation for React components including test file creation (automatic test file generation for React components with .test.jsx/.test.tsx naming, test file scaffolding with Jest/React Testing Library structure, test file organization with component co-location, test file naming conventions with .test.* or .spec.* patterns), test file updates (automatic test file updates when components change, test file synchronization with component changes, test file maintenance with component evolution), test file structure (Jest test structure with describe/it blocks, React Testing Library test structure with render/screen queries, test file organization with imports and setup, test file templates with customizable templates), and test file validation (test file syntax validation, test file structure validation, test file completeness checking)
+- Automatic test file generation for React components including test file creation (automatic test file generation for React components with .test.jsx/.test.tsx naming, test file scaffolding with Jest/React Testing Library structure, test file organization with component co-location, test file naming conventions with .test._ or .spec._ patterns), test file updates (automatic test file updates when components change, test file synchronization with component changes, test file maintenance with component evolution), test file structure (Jest test structure with describe/it blocks, React Testing Library test structure with render/screen queries, test file organization with imports and setup, test file templates with customizable templates), and test file validation (test file syntax validation, test file structure validation, test file completeness checking)
 - Support for both TypeScript and JavaScript including TypeScript support (TypeScript test file generation with .test.tsx extension, TypeScript type checking in tests, TypeScript interface/type support for props, TypeScript import/export support), JavaScript support (JavaScript test file generation with .test.jsx extension, JavaScript ES6+ features support, JavaScript import/export support, JavaScript prop validation), language detection (automatic language detection from component file extension, TypeScript/JavaScript file extension handling, language-specific test generation, language-specific import/export patterns), and language configuration (TypeScript configuration support with tsconfig.json, JavaScript configuration support with jsconfig.json, language-specific test templates, language-specific test utilities)
 - Jest and React Testing Library integration including Jest integration (Jest test framework integration with describe/it/expect, Jest snapshot testing support, Jest mocking capabilities, Jest async testing support), React Testing Library integration (React Testing Library render utilities, React Testing Library screen queries with getByRole/getByLabelText, React Testing Library userEvent for interactions, React Testing Library accessibility testing), test utilities (test utility functions for common patterns, test helper functions for component testing, test setup/teardown utilities, test configuration utilities), and test configuration (Jest configuration support with jest.config.js, React Testing Library configuration, test environment configuration, test setup files configuration)
 - Basic render test scaffolding including render tests (basic component render tests with render() function, component rendering validation, component structure testing, component output verification), component validation (component existence validation, component props validation, component state validation, component behavior validation), test scaffolding (test structure scaffolding with describe/it blocks, test case scaffolding with basic assertions, test setup scaffolding with imports and setup, test cleanup scaffolding with cleanup functions), and test templates (customizable test templates, test template variables, test template customization, test template best practices)
@@ -132,10 +133,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/react-component-test-generator.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -161,30 +159,30 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]]; then
     if [[ "$FILE_PATH" == *.test.* ]] || [[ "$FILE_PATH" == *.spec.* ]]; then
         exit 0
     fi
-    
+
     echo "⚛️ React Component Test Generator - Processing component..."
     echo "📄 Component: $FILE_PATH"
-    
+
     # Extract component info
     COMPONENT_DIR=$(dirname "$FILE_PATH")
     COMPONENT_BASENAME=$(basename "$FILE_PATH")
     COMPONENT_NAME=$(basename "${FILE_PATH%.*}")
     COMPONENT_EXT="${FILE_PATH##*.}"
-    
+
     # Determine test file path
     if [[ "$COMPONENT_EXT" == "tsx" ]]; then
         TEST_FILE="${COMPONENT_DIR}/${COMPONENT_NAME}.test.tsx"
     else
         TEST_FILE="${COMPONENT_DIR}/${COMPONENT_NAME}.test.jsx"
     fi
-    
+
     # Check if test file already exists
     if [ -f "$TEST_FILE" ]; then
         echo "ℹ️ Test file already exists: $TEST_FILE"
         echo "💡 Consider updating tests to match component changes"
     else
         echo "🧪 Generating test file: $TEST_FILE"
-        
+
         # Create test file content
         cat > "$TEST_FILE" << EOF
 import { render, screen } from '@testing-library/react';
@@ -204,7 +202,7 @@ describe('$COMPONENT_NAME', () => {
 
   // Add more component-specific tests here
   // Example: testing props, user interactions, etc.
-  // 
+  //
   // it('handles user interactions', async () => {
   //   const user = userEvent.setup();
   //   render(<$COMPONENT_NAME />);
@@ -213,7 +211,7 @@ describe('$COMPONENT_NAME', () => {
   // });
 });
 EOF
-        
+
         if [ $? -eq 0 ]; then
             echo "✅ Test file created successfully!"
             echo "📝 Test file: $TEST_FILE"
@@ -221,33 +219,33 @@ EOF
             echo "❌ Failed to create test file"
         fi
     fi
-    
+
     # Additional suggestions based on component analysis
     echo ""
     echo "🔍 Component Analysis:"
-    
+
     if [ -f "$FILE_PATH" ]; then
         # Check for props interface/type
         if grep -q "interface.*Props\|type.*Props" "$FILE_PATH"; then
             echo "  • 💡 Props interface detected - consider testing different prop combinations"
         fi
-        
+
         # Check for hooks usage
         if grep -q "useState\|useEffect\|useContext" "$FILE_PATH"; then
             echo "  • 💡 React hooks detected - consider testing state changes and side effects"
         fi
-        
+
         # Check for event handlers
         if grep -q "onClick\|onChange\|onSubmit" "$FILE_PATH"; then
             echo "  • 💡 Event handlers detected - consider testing user interactions"
         fi
-        
+
         # Check for conditional rendering
         if grep -q "&&\|?.*:" "$FILE_PATH"; then
             echo "  • 💡 Conditional rendering detected - test different rendering scenarios"
         fi
     fi
-    
+
     echo ""
     echo "💡 Testing Best Practices:"
     echo "  • Test component behavior, not implementation details"
@@ -255,10 +253,10 @@ EOF
     echo "  • Test user interactions with userEvent"
     echo "  • Mock external dependencies and API calls"
     echo "  • Test edge cases and error states"
-    
+
     echo ""
     echo "🎯 Test generation complete!"
-    
+
 else
     echo "ℹ️ File is not a React component: $FILE_PATH"
 fi
@@ -267,6 +265,7 @@ exit 0
 ```
 
 ## Examples
+
 ### React Component Test Generator Hook Script
 
 Complete hook script that generates React component test files
@@ -306,6 +305,7 @@ EOF
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable React component test generation
@@ -320,6 +320,7 @@ Complete hook configuration for .claude/settings.json to enable React component 
   }
 }
 ```
+
 ### Component Analysis and Test Recommendations
 
 Enhanced hook script with component analysis and test recommendations
@@ -355,6 +356,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]]; then
 fi
 exit 0
 ```
+
 ### Complete Test Example with User Interactions
 
 Example of a complete React component test with user interactions using React Testing Library
@@ -383,6 +385,7 @@ describe('Button', () => {
   });
 });
 ```
+
 ### Jest Configuration Example
 
 Example Jest configuration for React component testing
@@ -400,27 +403,35 @@ Example Jest configuration for React component testing
 ```
 
 ## Troubleshooting
+
 ### Generated tests import components incorrectly using default export
 
 Hook assumes default exports. For named exports, modify the template to use: import { ComponentName } from './file'. Check component export pattern before generation or add detection logic for export type. Verify component exports. Test with various export patterns.
+
 ### Test file created but component requires props causing render failures
 
 Base template uses empty props <Component />. Extract props interface from component file using grep and generate mock props: const mockProps = { required: 'value' }; before render() call in template. Verify props interface. Test with various prop configurations.
+
 ### Generated imports fail when @testing-library not installed in project
 
 Hook doesn't verify testing dependencies. Add package.json check: grep -q '@testing-library/react' package.json || { echo 'Install testing libraries first'; exit 1; } before generating test files. Verify package.json. Test with various dependency configurations.
+
 ### Test generation races with file write causing empty component reads
 
 PostToolUse triggers immediately after tool but writes may be buffered. Add validation: [ -s "$FILE_PATH" ] to check file has content before reading. Use sleep 0.05 if race conditions persist in analysis section. Verify file content. Test with various file write scenarios.
+
 ### Cat heredoc syntax fails when component name contains special chars
 
-Template uses unquoted $COMPONENT_NAME in heredoc. Escape special characters: SAFE_NAME=${COMPONENT_NAME//[^a-zA-Z0-9_]/} or use single quotes: cat > "$TEST_FILE" <<'EOF' to prevent variable expansion issues. Verify component names. Test with various component name patterns.
+Template uses unquoted $COMPONENT_NAME in heredoc. Escape special characters: SAFE_NAME=${COMPONENT*NAME//[^a-zA-Z0-9*]/} or use single quotes: cat > "$TEST_FILE" <<'EOF' to prevent variable expansion issues. Verify component names. Test with various component name patterns.
+
 ### Generated tests fail with TypeScript type errors
 
 Ensure TypeScript configuration is correct and @types/react is installed. Verify tsconfig.json includes test files. Check type definitions for React Testing Library. Verify TypeScript setup. Test with various TypeScript configurations.
+
 ### Test file generated but Jest cannot find component
 
 Verify import paths are correct relative to test file location. Check component file exists and export is correct. Ensure Jest module resolution is configured properly. Verify file structure. Test with various project structures.
+
 ### Generated tests don't follow project testing standards
 
 Customize test template to match project standards. Add project-specific test utilities and patterns. Configure test generation to use project-specific templates. Verify project standards. Test with various project configurations.

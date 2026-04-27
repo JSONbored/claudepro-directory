@@ -62,7 +62,9 @@ Claude Code multi-session overlap detector showing concurrent active sessions wi
 
 ## Examples
 ### Enhanced Multi-Session Overlap Indicator with Session Details
+
 Extended version showing session IDs and workspace paths for debugging
+
 ```bash
 #!/usr/bin/env bash
 
@@ -131,7 +133,7 @@ if [ $active_sessions -gt 1 ]; then
     session_list="${session_list}●"
   done
   visual="[${session_list}]"
-  
+
   # Show session IDs (first 8 chars)
   session_ids=""
   for session_file in "$SESSION_DIR"/*.active; do
@@ -152,8 +154,11 @@ else
   echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
 fi
 ```
+
 ### Multi-Session Overlap Indicator with Custom Stale Threshold
+
 Version with configurable stale session timeout via environment variable
+
 ```bash
 #!/usr/bin/env bash
 
@@ -235,8 +240,11 @@ else
   echo -e "${SESSION_COLOR}${SESSION_ICON} ${SESSION_STATUS}${RESET}: ${active_sessions} active ${visual}"
 fi
 ```
+
 ### Multi-Session Overlap Indicator Installation Example
+
 Complete setup script with session directory creation and Unicode character testing
+
 ```bash
 #!/bin/bash
 # Installation script for Multi-Session Overlap Indicator
@@ -453,7 +461,7 @@ if [ $active_sessions -gt 1 ]; then
     session_list="${session_list}●"
   done
   visual="[${session_list}]"
-  
+
   # Show session IDs (first 8 chars)
   session_ids=""
   for session_file in "$SESSION_DIR"/*.active; do
@@ -707,25 +715,32 @@ echo "View active sessions: ls -la ~/.claude-code-sessions/*.active"
 ## Troubleshooting
 ### Session count always showing 1 despite multiple Claude Code instances running
 
-Verify session_id field exists in JSON: echo '$input' | jq .session_id. Check ~/.claude-code-sessions directory is writable: ls -la ~/.claude-code-sessions. Ensure each Claude Code instance has unique session_id. If all sessions share same ID (bug), script cannot distinguish them. Verify session files are created: ls -la ~/.claude-code-sessions/*.active (should show multiple files). Check file permissions: chmod 755 ~/.claude-code-sessions.
+Verify session_id field exists in JSON: echo '$input' | jq .session_id. Check ~/.claude-code-sessions directory is writable: ls -la ~/.claude-code-sessions. Ensure each Claude Code instance has unique session_id. If all sessions share same ID (bug), script cannot distinguish them. Verify session files are created: ls -la ~/.claude-code-sessions/\*.active (should show multiple files). Check file permissions: chmod 755 ~/.claude-code-sessions.
+
 ### Workspace collision warning appearing incorrectly
 
 Check workspace.current_dir field: echo '$input' | jq .workspace.current_dir. Script uses exact path matching - symlinks and relative paths may cause false positives. Verify sessions are actually in different directories with pwd. Collision is EXPECTED if multiple sessions genuinely share same workspace. Check path format: Script matches exact paths, so /home/user/project and /home/user/project/ are different. Normalize paths if needed.
+
 ### Stale sessions not being cleaned up automatically
 
-Cleanup runs every statusline update (default 2s refresh). Threshold is 600 seconds (10 minutes) of inactivity. Check session files: ls -la ~/.claude-code-sessions/*.active. Verify date command works: date +%s (should return Unix timestamp). Check file format: cat ~/.claude-code-sessions/*.active (should show timestamp|workspace). Manually cleanup: rm ~/.claude-code-sessions/*.active. Verify timestamp parsing: cut -d'|' -f1 < file.active (should return number).
+Cleanup runs every statusline update (default 2s refresh). Threshold is 600 seconds (10 minutes) of inactivity. Check session files: ls -la ~/.claude-code-sessions/_.active. Verify date command works: date +%s (should return Unix timestamp). Check file format: cat ~/.claude-code-sessions/_.active (should show timestamp|workspace). Manually cleanup: rm ~/.claude-code-sessions/\*.active. Verify timestamp parsing: cut -d'|' -f1 < file.active (should return number).
+
 ### Permission denied when creating session tracking directory
 
 Script creates ~/.claude-code-sessions on first run. Ensure HOME environment variable is set: echo $HOME. Check write permissions: mkdir -p ~/.claude-code-sessions. If permission denied, change location in script: SESSION_DIR="/tmp/claude-sessions-$(whoami)". Verify directory creation: mkdir -p ~/.claude-code-sessions && touch ~/.claude-code-sessions/test && rm ~/.claude-code-sessions/test. Check disk space: df -h ~.
+
 ### Visual session list not displaying dots correctly
 
-Ensure terminal supports Unicode bullet character (●). Test with: echo -e '●●●'. If unsupported, replace with ASCII: SESSION_ICON='*' and visual characters. Check terminal encoding is UTF-8: echo $LANG (should show UTF-8). Set encoding: export LANG=en_US.UTF-8. Verify Unicode support: locale charmap (should be UTF-8). Alternative: Use ASCII characters like [***] instead of [●●●].
+Ensure terminal supports Unicode bullet character (●). Test with: echo -e '●●●'. If unsupported, replace with ASCII: SESSION_ICON='\*' and visual characters. Check terminal encoding is UTF-8: echo $LANG (should show UTF-8). Set encoding: export LANG=en_US.UTF-8. Verify Unicode support: locale charmap (should be UTF-8). Alternative: Use ASCII characters like [***] instead of [●●●].
+
 ### Session count showing incorrect number or negative values
 
-Verify find command works: find ~/.claude-code-sessions -name '*.active' -type f (should list active session files). Check wc command: find ... | wc -l (should return number). Verify tr command: echo ' 5 ' | tr -d ' ' (should return 5). Check for stale files: Script cleans up files older than 10 minutes, but may miss files if date command fails. Verify arithmetic: active_sessions=$((find_count)) (should be positive integer).
+Verify find command works: find ~/.claude-code-sessions -name '\*.active' -type f (should list active session files). Check wc command: find ... | wc -l (should return number). Verify tr command: echo ' 5 ' | tr -d ' ' (should return 5). Check for stale files: Script cleans up files older than 10 minutes, but may miss files if date command fails. Verify arithmetic: active_sessions=$((find_count)) (should be positive integer).
+
 ### Warning emoji (⚠) not displaying correctly
 
 Verify terminal supports Unicode warning emoji: echo -e '⚠'. If not supported, replace with ASCII: COLLISION_WARNING="[!] WORKSPACE COLLISION". Check terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Test emoji: echo -e '⚠ ⚠ ⚠' (should display warning symbols). Alternative: Use text warning: "WARNING: WORKSPACE COLLISION".
+
 ### Session files accumulating and not being deleted
 
-Check cleanup logic: Script removes files older than 600 seconds (10 minutes). Verify date command: date +%s (should return current timestamp). Check timestamp extraction: cut -d'|' -f1 < file.active (should return timestamp). Verify age calculation: age=$((CURRENT_TIME - session_timestamp)) (should be positive). Check file permissions: ls -la ~/.claude-code-sessions/*.active (should be writable). Manually test cleanup: Delete old files manually: find ~/.claude-code-sessions -name '*.active' -mmin +10 -delete.
+Check cleanup logic: Script removes files older than 600 seconds (10 minutes). Verify date command: date +%s (should return current timestamp). Check timestamp extraction: cut -d'|' -f1 < file.active (should return timestamp). Verify age calculation: age=$((CURRENT*TIME - session_timestamp)) (should be positive). Check file permissions: ls -la ~/.claude-code-sessions/*.active (should be writable). Manually test cleanup: Delete old files manually: find ~/.claude-code-sessions -name '\_.active' -mmin +10 -delete.

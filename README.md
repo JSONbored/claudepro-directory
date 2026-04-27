@@ -429,7 +429,7 @@ Option C (advanced): commit content files directly.
 Thanks to everyone who has contributed to making HeyClaude better.
 
 <a href="https://github.com/JSONbored/claudepro-directory/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" />
+  <img src="https://contrib.rocks/image?repo=JSONbored/claudepro-directory" alt="HeyClaude contributors" />
 </a>
 
 ---

@@ -1,13 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests"
-  ],
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
   "timezone": "America/Denver",
-  "labels": [
-    "dependencies"
-  ],
+  "labels": ["dependencies"],
   "rangeStrategy": "pin",
   "dependencyDashboard": true,
   "minimumReleaseAge": "2 days",
@@ -17,43 +12,28 @@
   "separateMultipleMajor": true,
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": [
-      "before 6am on monday"
-    ]
+    "schedule": ["before 6am on monday"]
   },
   "packageRules": [
     {
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "groupName": "non-major dependencies",
       "automerge": false
     },
     {
-      "matchUpdateTypes": [
-        "major"
-      ],
+      "matchUpdateTypes": ["major"],
       "groupName": "major dependencies",
       "automerge": false
     },
     {
-      "matchManagers": [
-        "github-actions"
-      ],
+      "matchManagers": ["github-actions"],
       "groupName": "github actions",
       "automerge": false
     },
     {
       "description": "Track GitHub Actions setup-node runtime on Node 24",
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchDepNames": [
-        "node"
-      ],
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["node"],
       "allowedVersions": "24.x",
       "automerge": false
     }

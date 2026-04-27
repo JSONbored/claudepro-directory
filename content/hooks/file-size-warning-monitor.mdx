@@ -15,8 +15,8 @@ seoDescription: >-
   PostToolUse hook provides comprehensive file size monitoring when files are
   crea...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/file-size-warning-monitor.sh &&
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Real-time file size monitoring during write/edit operations with automatic file size detection across platforms (macOS, Linux, Windows) using cross-platform stat commands and fallback methods
@@ -129,10 +130,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/file-size-warning-monitor.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -162,7 +160,7 @@ echo "📏 Checking file size for: $(basename "$FILE_PATH")" >&2
 # Get file size in bytes (cross-platform)
 get_file_size() {
   local file="$1"
-  
+
   # Try different stat formats for cross-platform compatibility
   if stat -f%z "$file" 2>/dev/null; then
     # macOS/BSD
@@ -181,7 +179,7 @@ get_file_size() {
 # Convert bytes to human-readable format
 format_size() {
   local bytes="$1"
-  
+
   if [ "$bytes" -lt 1024 ]; then
     echo "${bytes}B"
   elif [ "$bytes" -lt 1048576 ]; then
@@ -202,7 +200,7 @@ get_file_extension() {
 # Define file type categories and their thresholds
 get_size_threshold() {
   local extension="$1"
-  
+
   case "$extension" in
     # Source code files - should be relatively small
     js|jsx|ts|tsx|py|rb|go|rs|java|cpp|c|h|hpp|php|cs)
@@ -247,7 +245,7 @@ get_size_threshold() {
 get_optimization_suggestions() {
   local extension="$1"
   local size_mb="$2"
-  
+
   case "$extension" in
     js|jsx|ts|tsx)
       echo "Consider code splitting, tree shaking, or minification"
@@ -303,11 +301,11 @@ echo "📊 File: $FILE_NAME ($SIZE_HUMAN)" >&2
 if [ "$SIZE_BYTES" -gt "$THRESHOLD_BYTES" ]; then
   echo "⚠️ SIZE WARNING: File exceeds recommended threshold for .$FILE_EXTENSION files" >&2
   echo "   Current: $SIZE_HUMAN | Recommended: < $THRESHOLD_HUMAN" >&2
-  
+
   # Provide optimization suggestions
   SUGGESTION=$(get_optimization_suggestions "$FILE_EXTENSION" "$SIZE_MB")
   echo "💡 Suggestion: $SUGGESTION" >&2
-  
+
   # Specific warnings for very large files
   if [ "$SIZE_MB" -gt 50 ]; then
     echo "🚨 VERY LARGE FILE: This file may cause performance issues" >&2
@@ -315,7 +313,7 @@ if [ "$SIZE_BYTES" -gt "$THRESHOLD_BYTES" ]; then
   elif [ "$SIZE_MB" -gt 10 ]; then
     echo "⚠️ LARGE FILE: May impact repository performance" >&2
   fi
-  
+
 else
   echo "✅ File size within acceptable range ($THRESHOLD_HUMAN threshold)" >&2
 fi
@@ -353,7 +351,7 @@ if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
   # Check if file is tracked by git
   if git ls-files --error-unmatch "$FILE_PATH" &> /dev/null; then
     echo "🔄 Git repository impact:" >&2
-    
+
     # Check if file has grown significantly
     if git log --oneline -n 1 -- "$FILE_PATH" &> /dev/null; then
       # File has history, check previous size
@@ -361,19 +359,19 @@ if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
       if [ "$PREV_SIZE" -gt 0 ]; then
         PREV_SIZE_HUMAN=$(format_size "$PREV_SIZE")
         SIZE_DIFF=$((SIZE_BYTES - PREV_SIZE))
-        
+
         if [ "$SIZE_DIFF" -gt 0 ]; then
           DIFF_HUMAN=$(format_size "$SIZE_DIFF")
           PERCENT_INCREASE=$((SIZE_DIFF * 100 / PREV_SIZE))
           echo "   Size change: +$DIFF_HUMAN (+$PERCENT_INCREASE%) from previous version" >&2
-          
+
           if [ "$PERCENT_INCREASE" -gt 100 ]; then
             echo "   📈 Significant size increase detected" >&2
           fi
         fi
       fi
     fi
-    
+
     # Suggest Git LFS for large files
     if [ "$SIZE_MB" -gt 10 ]; then
       echo "   💡 Consider using Git LFS for this large file" >&2
@@ -413,6 +411,7 @@ exit 0
 ```
 
 ## Examples
+
 ### File Size Warning Monitor Hook Script
 
 Complete hook script that performs file size monitoring when files are created or modified
@@ -440,6 +439,7 @@ if [ "$SIZE_KB" -gt "$THRESHOLD_KB" ]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable file size monitoring
@@ -454,6 +454,7 @@ Complete hook configuration for .claude/settings.json to enable file size monito
   }
 }
 ```
+
 ### Git LFS Recommendation for Large Files
 
 Enhanced hook script for Git LFS recommendations for files over 10MB
@@ -481,6 +482,7 @@ if [ -f "$FILE_PATH" ]; then
 fi
 exit 0
 ```
+
 ### File Type-Specific Optimization Suggestions
 
 Enhanced hook script for file type-specific optimization suggestions with ImageMagick support
@@ -518,6 +520,7 @@ if [ -f "$FILE_PATH" ]; then
 fi
 exit 0
 ```
+
 ### Git Size Change Tracking
 
 Enhanced hook script for tracking file size changes using Git history
@@ -543,27 +546,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook triggers warnings for legitimate large binary files
 
-Create size threshold overrides in .claude/hook-config.json: THRESHOLD_OVERRIDES={'*.wasm': 10485760}. Add file extension exclusions for known large asset types. Use environment variables to override thresholds: export THRESHOLD_OVERRIDE_wasm=10485760. Configure file type-specific thresholds based on project requirements.
+Create size threshold overrides in .claude/hook-config.json: THRESHOLD_OVERRIDES={'\*.wasm': 10485760}. Add file extension exclusions for known large asset types. Use environment variables to override thresholds: export THRESHOLD_OVERRIDE_wasm=10485760. Configure file type-specific thresholds based on project requirements.
+
 ### File size calculation fails on Windows with stat errors
 
-Use PowerShell fallback for Windows: (Get-Item $FILE_PATH).Length. Add platform detection: if [[ $OSTYPE == 'msys' ]], use alternative stat format or wc -c. Use cross-platform stat commands: stat -f%z for macOS, stat -c%s for Linux. Test file size detection on target platform before deployment.
+Use PowerShell fallback for Windows: (Get-Item $FILE_PATH).Length. Add platform detection: if [[$OSTYPE == 'msys']], use alternative stat format or wc -c. Use cross-platform stat commands: stat -f%z for macOS, stat -c%s for Linux. Test file size detection on target platform before deployment.
+
 ### Git size comparison shows incorrect previous version size
 
 Check if file is staged vs committed: use git show :"$FILE_PATH" for staged, git show HEAD:"$FILE_PATH" for committed. Handle new files with [ -z $PREV_SIZE ] check. Verify Git repository state before size comparison. Use git diff --cached for staged file size comparison.
+
 ### Hook slows down every file write operation significantly
 
 Add file size pre-check before running full analysis: skip hook if size < 100KB. Use matcher filters: matchers: ['write'] only, exclude 'edit' for incremental changes. Set timeout limits for file size operations. Consider using file modification time checks to skip unchanged files.
+
 ### Image dimension detection with identify command fails
 
 Check if ImageMagick installed: command -v identify || skip dimension check. Use alternative: file command for basic image info without requiring external dependencies. Verify ImageMagick version compatibility. Consider using exiftool or other image metadata tools as fallback.
+
 ### File size thresholds don't account for project-specific requirements
 
 Use environment variables to override thresholds: export THRESHOLD_OVERRIDE_js=1000000. Create project-specific configuration file: .claude/file-size-thresholds.json. Configure file type-specific thresholds based on project needs. Use conditional logic to adjust thresholds based on project type.
+
 ### Git LFS recommendation appears for files already in Git LFS
 
 Check .gitattributes for existing LFS configuration before recommending. Verify file is tracked by Git LFS: git lfs ls-files | grep "$FILE_PATH". Skip Git LFS recommendation if file extension is already configured in .gitattributes. Use git check-attr filter to verify LFS status.
+
 ### Performance impact assessment doesn't account for file type context
 
 Use file type-specific impact assessment: source code files have different impact than media files. Consider file usage context: library files vs application files. Adjust impact levels based on file type and project requirements. Use project-specific impact assessment rules.

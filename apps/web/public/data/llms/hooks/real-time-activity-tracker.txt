@@ -58,9 +58,7 @@ Tracks all Claude Code activities in real-time and logs them for monitoring and 
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/real-time-activity-tracker.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -70,9 +68,7 @@ Tracks all Claude Code activities in real-time and logs them for monitoring and 
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/real-time-activity-tracker.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -128,17 +124,17 @@ fi
 if [ -f "$ACTIVITY_LOG" ]; then
     TOTAL_ACTIVITIES=$(wc -l < "$ACTIVITY_LOG")
     echo "📈 Session Activity Count: $TOTAL_ACTIVITIES"
-    
+
     # Show recent activity summary
     echo "🕒 Recent Activities:"
     tail -n 3 "$ACTIVITY_LOG" | while read -r line; do
         echo "  • $line"
     done
-    
+
     # File operation summary
     WRITE_COUNT=$(grep -c "Write\|Edit" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
     read_COUNT=$(grep -c "Read" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
-    
+
     echo "📊 Today's Summary:"
     echo "  • Write/Edit operations: $WRITE_COUNT"
     echo "  • Read operations: $READ_COUNT"
@@ -148,11 +144,11 @@ fi
 if [ "$(date +%u)" = "7" ]; then
     ARCHIVE_DIR=".claude/archive/$(date +%Y-%m)"
     mkdir -p "$ARCHIVE_DIR"
-    
+
     # Move old logs to archive
     find .claude -name "activity-*.log" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
     find .claude -name "activity-*.json" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
-    
+
     echo "📦 Weekly archive created in $ARCHIVE_DIR"
 fi
 
@@ -209,17 +205,17 @@ fi
 if [ -f "$ACTIVITY_LOG" ]; then
     TOTAL_ACTIVITIES=$(wc -l < "$ACTIVITY_LOG")
     echo "📈 Session Activity Count: $TOTAL_ACTIVITIES"
-    
+
     # Show recent activity summary
     echo "🕒 Recent Activities:"
     tail -n 3 "$ACTIVITY_LOG" | while read -r line; do
         echo "  • $line"
     done
-    
+
     # File operation summary
     WRITE_COUNT=$(grep -c "Write\|Edit" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
     read_COUNT=$(grep -c "Read" "$ACTIVITY_LOG" 2>/dev/null || echo 0)
-    
+
     echo "📊 Today's Summary:"
     echo "  • Write/Edit operations: $WRITE_COUNT"
     echo "  • Read operations: $READ_COUNT"
@@ -229,11 +225,11 @@ fi
 if [ "$(date +%u)" = "7" ]; then
     ARCHIVE_DIR=".claude/archive/$(date +%Y-%m)"
     mkdir -p "$ARCHIVE_DIR"
-    
+
     # Move old logs to archive
     find .claude -name "activity-*.log" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
     find .claude -name "activity-*.json" -mtime +7 -exec mv {} "$ARCHIVE_DIR/" \;
-    
+
     echo "📦 Weekly archive created in $ARCHIVE_DIR"
 fi
 
@@ -266,6 +262,7 @@ cat >> "$ACTIVITY_JSON" << EOF
 EOF
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable real-time activity tracking
@@ -280,6 +277,7 @@ Complete hook configuration for .claude/settings.json to enable real-time activi
   }
 }
 ```
+
 ### Structured JSON Logging with jq
 
 Enhanced hook script with proper JSON array handling using jq
@@ -299,6 +297,7 @@ fi
 jq -s '. + [{"timestamp": "'$TIMESTAMP'", "tool_name": "'$TOOL_NAME'", "file_path": "'$FILE_PATH'"}]' "$ACTIVITY_JSON" > "$ACTIVITY_JSON.tmp" && mv "$ACTIVITY_JSON.tmp" "$ACTIVITY_JSON"
 exit 0
 ```
+
 ### Thread-Safe Logging with flock
 
 Enhanced hook script with file locking for concurrent writes
@@ -313,6 +312,7 @@ mkdir -p .claude
 (flock -x 200; echo "[$TIMESTAMP] Tool: $TOOL_NAME" >> "$ACTIVITY_LOG"; ) 200>.claude/activity.lock
 exit 0
 ```
+
 ### Activity Tracker Configuration
 
 Example configuration for activity tracker settings
@@ -396,24 +396,31 @@ exit 0
 ### Activity logs show incorrect timestamps or 'unknown' dates
 
 ISO-8601 date varies by platform. Replace 'date --iso-8601=seconds' with portable: 'date -u +"%Y-%m-%dT%H:%M:%SZ"'. Works on both Linux and macOS without fallback. Verify date command. Test with various date formats.
+
 ### JSON activity log is malformed with trailing commas
 
 Each append adds trailing comma creating invalid JSON. Wrap in array: initialize with '[', append without trailing comma, close ']' on end. Or rebuild: 'jq -s . file.json'. Verify JSON structure. Test with various JSON formats.
+
 ### Weekly archive triggers fail on macOS (date +%u returns wrong day)
 
 macOS date lacks %u for weekday. Replace with: 'if [ "$(date +%w)" = "0" ]; then' (Sunday=0). Or use portable: '[ $(date +%A) = "Sunday" ]' for name-based check. Verify date command. Test with various date formats.
+
 ### Session IDs duplicate when multiple Claude instances run simultaneously
 
-Current session_id uses timestamp+PID but PID can conflict. Add random suffix: "$(date +%Y%m%d_%H%M%S)_$$_$RANDOM" or use UUID: "$(uuidgen 2>/dev/null || echo $RANDOM$RANDOM)". Verify session ID generation. Test with various session scenarios.
+Current session*id uses timestamp+PID but PID can conflict. Add random suffix: "$(date +%Y%m%d*%H%M%S)_$$_$RANDOM" or use UUID: "$(uuidgen 2>/dev/null || echo $RANDOM$RANDOM)". Verify session ID generation. Test with various session scenarios.
+
 ### Log files locked causing permission denied errors on write
 
 Concurrent writes from parallel Claude sessions. Use flock: '(flock -x 200; echo ".." >> log; ) 200>/var/lock/activity.lock' for atomic append operations. Verify file locking. Test with various concurrent scenarios.
+
 ### Activity logs grow too large consuming disk space
 
 Implement log rotation with size limits and automatic cleanup. Use tail -n 100 to keep only recent entries. Configure log retention policies. Archive old logs. Verify log rotation. Test with various log sizes.
+
 ### Activity tracking slows down Claude Code operations
 
 Optimize logging operations with asynchronous logging or buffering. Use efficient file operations. Minimize JSON parsing overhead. Consider background logging. Verify performance. Test with various activity volumes.
+
 ### Activity logs missing some activities or incomplete data
 
-Verify notification hook matchers include all activities (* matcher). Check file write permissions. Ensure activity data is properly captured. Verify hook execution. Test with various activity types.
+Verify notification hook matchers include all activities (\* matcher). Check file write permissions. Ensure activity data is properly captured. Verify hook execution. Test with various activity types.

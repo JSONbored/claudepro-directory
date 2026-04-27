@@ -395,7 +395,6 @@ export function buildIssueTemplateSpec(
   category: string,
 ): IssueTemplateSpec | null;
 export function buildSubmissionSpecs(): Record<string, unknown>;
-
 export const CATEGORY_SCHEMAS: Record<
   string,
   { required: string[]; recommended: string[] }

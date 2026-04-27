@@ -30,11 +30,13 @@ Claude can design, generate, and optimize GitHub Actions workflows for comprehen
 
 ## Prerequisites
 **Required:**
+
 - GitHub repository with Actions enabled
 - Basic understanding of your deployment target (Vercel, AWS, etc.)
 - Test suite in your project
 
 **What Claude handles automatically:**
+
 - Generating complete workflow YAML files
 - Configuring matrix builds for multiple environments
 - Setting up caching strategies for faster builds
@@ -48,6 +50,7 @@ Claude can design, generate, and optimize GitHub Actions workflows for comprehen
 **Prompt:** "Create a GitHub Actions workflow for my Next.js 15 app that runs on every push. Include TypeScript type checking, ESLint, Vitest unit tests, Playwright E2E tests, and deploy to Vercel on main branch."
 
 Claude will generate:
+
 1. `.github/workflows/ci-cd.yml` with multiple jobs
 2. Type checking job with caching
 3. Lint job with auto-fix capability
@@ -61,6 +64,7 @@ Claude will generate:
 **Prompt:** "Set up GitHub Actions to deploy to staging on pull requests and production on main branch merges. Include manual approval for production and rollback capabilities."
 
 Claude will create:
+
 1. Separate workflows for staging and production
 2. Environment-specific secrets configuration
 3. Manual approval gates using GitHub Environments
@@ -73,6 +77,7 @@ Claude will create:
 **Prompt:** "Add comprehensive security scanning to my CI pipeline: dependency vulnerabilities, CodeQL analysis, Docker image scanning, and secrets detection."
 
 Claude will implement:
+
 1. Dependabot integration for automated dependency updates
 2. CodeQL workflow for code security analysis
 3. Trivy for Docker image vulnerability scanning
@@ -85,6 +90,7 @@ Claude will implement:
 **Prompt:** "Create a workflow that runs Lighthouse CI on every deployment preview and fails if Core Web Vitals thresholds are not met."
 
 Claude will set up:
+
 1. Lighthouse CI workflow triggered on deployment
 2. Performance budgets configuration
 3. Core Web Vitals thresholds (LCP, FID, CLS)
@@ -107,6 +113,7 @@ Claude will set up:
 
 ## Common Workflows
 ### Complete Next.js Production Pipeline
+
 ```
 "Create a production-grade GitHub Actions pipeline for Next.js 15:
 1. Install dependencies with pnpm caching
@@ -120,6 +127,7 @@ Claude will set up:
 ```
 
 ### Monorepo CI/CD with Turborepo
+
 ```
 "Set up GitHub Actions for Turborepo monorepo:
 1. Use Turborepo remote caching with Vercel
@@ -131,6 +139,7 @@ Claude will set up:
 ```
 
 ### Docker Multi-Stage Build & Deploy
+
 ```
 "Create workflow for Docker application:
 1. Build Docker image with multi-stage caching
@@ -143,6 +152,7 @@ Claude will set up:
 ```
 
 ### Infrastructure as Code Pipeline
+
 ```
 "Generate Terraform deployment workflow:
 1. Validate Terraform syntax and formatting

@@ -2,14 +2,14 @@
 title: JSON Schema Validate + Transform Skill
 slug: json-schema-validation-transformation
 category: skills
-description: 'Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation).'
-cardDescription: 'Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and trans...'
+description: "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation)."
+cardDescription: "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and trans..."
 seoTitle: JSON Schema Validate + Transform Skill
-seoDescription: 'Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv...'
+seoDescription: "Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-documentationUrl: 'https://ajv.js.org/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+documentationUrl: "https://ajv.js.org/"
 downloadUrl: /downloads/skills/json-schema-validation-transformation.zip
 installable: true
 installCommand: npm i ajv
@@ -28,9 +28,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://ajv.js.org/'
+  - "https://ajv.js.org/"
 testedPlatforms:
   - Claude
   - Codex
@@ -42,9 +42,9 @@ prerequisites:
   - Node.js 18+
   - ajv or zod
   - TypeScript 4.5+ (for Zod)
-  - 'json-schema-to-typescript (optional, for type generation)'
-  - 'File system read/write access for JSON schema files, data files, and generated TypeScript type definitions'
-  - 'JSON Schema specification knowledge or reference documentation for creating valid schemas (draft-07, 2019-09, or 2020-12)'
+  - "json-schema-to-typescript (optional, for type generation)"
+  - "File system read/write access for JSON schema files, data files, and generated TypeScript type definitions"
+  - "JSON Schema specification knowledge or reference documentation for creating valid schemas (draft-07, 2019-09, or 2020-12)"
 tags:
   - json
   - schema
@@ -72,6 +72,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can validate JSON data against schemas, transform data between formats, migrate between schema versions, and generate TypeScript types from JSON schemas using tools like Ajv, Zod, and json-schema-to-typescript.
@@ -87,15 +88,16 @@ Claude can validate JSON data against schemas, transform data between formats, m
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - JSON data or schema file uploaded
 
 **What Claude handles:**
+
 - Installing validation libraries (Ajv, Zod)
 - Schema compilation and validation
 - Error reporting and debugging
@@ -109,6 +111,7 @@ Claude can validate JSON data against schemas, transform data between formats, m
 **Prompt:** "Validate this JSON data against the provided JSON Schema. Show me all validation errors."
 
 Claude will:
+
 1. Load schema and data
 2. Compile schema
 3. Run validation
@@ -120,6 +123,7 @@ Claude will:
 **Prompt:** "Generate TypeScript interfaces from this JSON Schema."
 
 Claude will:
+
 1. Parse the JSON Schema
 2. Generate TypeScript types
 3. Include JSDoc comments
@@ -130,6 +134,7 @@ Claude will:
 **Prompt:** "Transform this API response from format A to format B according to this mapping schema."
 
 Claude will:
+
 1. Analyze source and target schemas
 2. Create transformation logic
 3. Map fields
@@ -141,6 +146,7 @@ Claude will:
 **Prompt:** "Migrate these 100 JSON documents from schema v1 to schema v2. Show me the migration script and any issues."
 
 Claude will:
+
 1. Compare schema versions
 2. Identify changes
 3. Generate migration script
@@ -150,6 +156,7 @@ Claude will:
 ## Common Workflows
 
 ### API Payload Validation
+
 ```
 "Create a validation script that:
 1. Loads this OpenAPI spec
@@ -160,6 +167,7 @@ Claude will:
 ```
 
 ### Config File Validation
+
 ```
 "Validate all JSON config files in the uploaded directory:
 1. Check against config.schema.json
@@ -170,6 +178,7 @@ Claude will:
 ```
 
 ### Data Normalization
+
 ```
 "Normalize this messy JSON data:
 1. Validate against the schema
@@ -180,6 +189,7 @@ Claude will:
 ```
 
 ### Batch Transformation
+
 ```
 "Transform all JSON files from old format to new:
 1. Load transformation rules
@@ -204,12 +214,14 @@ Claude will:
 ## Advanced Features
 
 ### Schema Generation
+
 - Generate schema from sample JSON
 - Infer types and patterns
 - Add validation rules
 - Export as JSON Schema or TypeScript
 
 ### Complex Validations
+
 - Custom validation functions
 - Conditional schemas (if/then/else)
 - Dependencies between properties
@@ -217,6 +229,7 @@ Claude will:
 - Recursive schemas
 
 ### Data Transformation Patterns
+
 - Field renaming and mapping
 - Nested object flattening/nesting
 - Array transformations

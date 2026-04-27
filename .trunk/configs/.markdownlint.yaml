@@ -1,2 +1,19 @@
-# Prettier friendly markdownlint config (all formatting rules disabled)
+# Prettier-friendly markdownlint config.
+#
+# The content registry stores prompt bodies, command snippets, generated
+# changelog fragments, MDX/HTML examples, and literal URLs. Those shapes are
+# semantically validated by the registry/content gates, so markdownlint stays
+# focused on formatting instead of blocking valid registry payloads.
 extends: markdownlint/style/prettier
+MD024: false
+MD025: false
+MD026: false
+MD001: false
+MD033: false
+MD034: false
+MD036: false
+MD037: false
+MD038: false
+MD040: false
+MD041: false
+MD051: false

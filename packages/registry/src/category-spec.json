@@ -96,7 +96,12 @@
       "usageHint": "Install the server, copy the Claude config, then verify the connection in Claude Code.",
       "template": "submit-mcp.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
-      "contentRecommended": ["installCommand", "usageSnippet", "copySnippet", "configSnippet"],
+      "contentRecommended": [
+        "installCommand",
+        "usageSnippet",
+        "copySnippet",
+        "configSnippet"
+      ],
       "submissionRequired": ["install_command", "usage_snippet"],
       "requiresUsageSnippet": true,
       "requiresAssetContent": false,
@@ -113,8 +118,19 @@
       "description": "Apps, developer tools, services, and products for Claude-native builders.",
       "usageHint": "Use this surface for vetted apps and services. Sponsored and affiliate relationships must be disclosed.",
       "template": "",
-      "contentRequired": ["title", "slug", "description", "cardDescription", "websiteUrl"],
-      "contentRecommended": ["pricingModel", "documentationUrl", "repoUrl", "disclosure"],
+      "contentRequired": [
+        "title",
+        "slug",
+        "description",
+        "cardDescription",
+        "websiteUrl"
+      ],
+      "contentRecommended": [
+        "pricingModel",
+        "documentationUrl",
+        "repoUrl",
+        "disclosure"
+      ],
       "submissionRequired": [],
       "requiresUsageSnippet": false,
       "requiresAssetContent": false,
@@ -145,7 +161,12 @@
         "retrievalSources",
         "testedPlatforms"
       ],
-      "submissionRequired": ["usage_snippet", "skill_type", "skill_level", "verification_status"],
+      "submissionRequired": [
+        "usage_snippet",
+        "skill_type",
+        "skill_level",
+        "verification_status"
+      ],
       "requiresUsageSnippet": true,
       "requiresAssetContent": false,
       "supportsSkillMetadata": true,
@@ -181,7 +202,11 @@
       "template": "submit-command.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
       "contentRecommended": ["commandSyntax", "usageSnippet", "copySnippet"],
-      "submissionRequired": ["command_syntax", "usage_snippet", "full_copyable_content"],
+      "submissionRequired": [
+        "command_syntax",
+        "usage_snippet",
+        "full_copyable_content"
+      ],
       "requiresUsageSnippet": true,
       "requiresAssetContent": true,
       "supportsSkillMetadata": false,
@@ -198,8 +223,18 @@
       "usageHint": "Install the hook script, copy the Claude config, and test the trigger locally before wider use.",
       "template": "submit-hook.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
-      "contentRecommended": ["trigger", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"],
-      "submissionRequired": ["trigger", "usage_snippet", "full_copyable_content"],
+      "contentRecommended": [
+        "trigger",
+        "usageSnippet",
+        "copySnippet",
+        "configSnippet",
+        "scriptBody"
+      ],
+      "submissionRequired": [
+        "trigger",
+        "usage_snippet",
+        "full_copyable_content"
+      ],
       "requiresUsageSnippet": true,
       "requiresAssetContent": true,
       "supportsSkillMetadata": false,
@@ -252,8 +287,18 @@
       "usageHint": "Copy the Claude statusline config first, then install or adapt the script asset behind it.",
       "template": "submit-statusline.yml",
       "contentRequired": ["title", "slug", "description", "cardDescription"],
-      "contentRecommended": ["scriptLanguage", "usageSnippet", "copySnippet", "configSnippet", "scriptBody"],
-      "submissionRequired": ["script_language", "usage_snippet", "full_copyable_content"],
+      "contentRecommended": [
+        "scriptLanguage",
+        "usageSnippet",
+        "copySnippet",
+        "configSnippet",
+        "scriptBody"
+      ],
+      "submissionRequired": [
+        "script_language",
+        "usage_snippet",
+        "full_copyable_content"
+      ],
       "requiresUsageSnippet": true,
       "requiresAssetContent": true,
       "supportsSkillMetadata": false,

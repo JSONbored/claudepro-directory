@@ -94,36 +94,50 @@ Streamline your project management and CRM workflows by connecting Claude to mon
 
 ## Examples
 ### Create a new item in the Projects board
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a new item in the Projects board"
 ```
+
 ### Update status to Done for item 12345
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update status to Done for item 12345"
 ```
+
 ### Assign this task to the design team
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Assign this task to the design team"
 ```
+
 ### Add CRM activity for client meeting
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Add CRM activity for client meeting"
 ```
+
 ### Create Board Item
+
 Create a new Monday.com board item with column values
+
 ```typescript
 // Create Monday.com board item
 const item = await monday.items.create({
   board_id: "board-id",
   item_name: "New Task",
   column_values: {
-    "status": "Working on it",
-    "text": "Task description"
-  }
+    status: "Working on it",
+    text: "Task description",
+  },
 });
 ```
 ```plaintext
@@ -144,9 +158,9 @@ const item = await monday.items.create({
   board_id: "board-id",
   item_name: "New Task",
   column_values: {
-    "status": "Working on it",
-    "text": "Task description"
-  }
+    status: "Working on it",
+    text: "Task description",
+  },
 });
 ```
 
@@ -166,24 +180,31 @@ const item = await monday.items.create({
 ### API rate limit exceeded - 429 error code returned
 
 Complexity limit: 10M points/minute for paid accounts (personal API tokens), 1M for trial/free/NGO accounts. Daily call limits: 200 (free/trial), 1,000 (standard/basic), 10,000 (pro), 25,000 (enterprise). Check Retry-After header in response to see wait time. Monitor complexity using `complexity` query field. Reduce query complexity or split operations into smaller batches. Use `page` and `limit` arguments to paginate large result sets.
+
 ### API token authentication fails or workspace access denied
 
 Verify Personal V2 API token is correctly configured. Generate token from Developer Center (profile > Developers > API token) or Administration tab (for admins). Token permissions mirror your UI permissions. Verify workspace permissions allow API access. Check account has Member role (not Guest). For hosted service, ensure OAuth authentication is properly configured. Contact workspace admin to grant API permissions if needed.
+
 ### GraphQL query complexity calculation too high
 
 Individual query cannot exceed 5M complexity points. Reduce nested fields in queries. Limit items per query to 50-100. Use `complexity { query before after }` field to check costs before execution. Request only data you need. Split complex queries into multiple simpler requests. Utilize `page` and `limit` arguments for pagination. Check monday.com developer docs for complexity calculation guidelines.
+
 ### Board or item permissions insufficient for operation
 
 Verify your account has write permissions to specific board. Check board sharing settings allow modifications. Token permissions mirror your UI permissions (board, column, item, account level). Contact board owner to upgrade access level if read-only. Verify you're using correct workspace and board IDs in queries.
+
 ### Monday.com MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Monday.com rate limit errors when making multiple API calls
 
 Implement exponential backoff retry logic with jitter. Use Monday.com API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed board data. Monday.com allows 25 requests per minute per API token.
+
 ### Monday.com board or item access denied errors
 
 Verify API token has access to the board or item. Check board permissions and workspace membership. Ensure API token has required permissions for target operations.
+
 ### Monday.com MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Monday.com API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -13,8 +13,8 @@ seoDescription: >-
   Official MCP server providing secure file system operations for Claude Desktop
   and Claude Code Discover tools for AI development.
 author: Anthropic
-dateAdded: '2025-09-15'
-documentationUrl: 'https://modelcontextprotocol.io/examples'
+dateAdded: "2025-09-15"
+documentationUrl: "https://modelcontextprotocol.io/examples"
 downloadUrl: /downloads/mcp/filesystem-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -45,8 +45,8 @@ configSnippet: |-
 estimatedSetupTime: 3 minutes
 difficulty: beginner
 prerequisites:
-  - 'Node.js 14 or higher installed (verify with: node --version)'
-  - 'npx available (comes with Node.js, verify with: npx --version)'
+  - "Node.js 14 or higher installed (verify with: node --version)"
+  - "npx available (comes with Node.js, verify with: npx --version)"
   - File system read/write permissions for directories you want to access
   - >-
     Understanding of absolute vs relative paths (must use absolute paths in
@@ -55,7 +55,7 @@ prerequisites:
   - >-
     Understanding of directory access controls (server only accesses explicitly
     allowed directories)
-  - 'Platform: macOS, Windows, or Linux (cross-platform support)'
+  - "Platform: macOS, Windows, or Linux (cross-platform support)"
   - >-
     Ability to create and edit JSON configuration files (.mcp.json or
     claude_desktop_config.json)
@@ -91,6 +91,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Securely enable Claude to read, write, and manage files in your local file system with granular directory access controls. The official Filesystem MCP Server from Anthropic provides safe file operations with built-in protections, allowing you to work with project files, analyze codebases, create new files, and perform refactoring operations through natural language commands.
@@ -162,17 +163,23 @@ Securely enable Claude to read, write, and manage files in your local file syste
 ```
 
 ## Examples
+
 ### Reading Project Configuration Files
+
 Access configuration files to understand project setup, dependencies, and build configurations. Claude can analyze and suggest optimizations.
+
 ```javascript
 // Read package.json and analyze dependencies
-"Show me the contents of package.json and explain the dependencies"
+"Show me the contents of package.json and explain the dependencies";
 
 // Read TypeScript config
-"Read tsconfig.json and suggest improvements for a Next.js project"
+"Read tsconfig.json and suggest improvements for a Next.js project";
 ```
+
 ### Creating New Files and Directories
+
 Generate new files and directory structures. Perfect for scaffolding components, modules, or configuration files.
+
 ```javascript
 // Create a new React component
 "Create src/components/Button.tsx with a reusable Button component using TypeScript"
@@ -182,55 +189,70 @@ Generate new files and directory structures. Perfect for scaffolding components,
 - Create src/features/auth/
 - Add index.ts, types.ts, and hooks.ts files"
 ```
+
 ### Searching and Analyzing Codebase
+
 Search through your codebase for patterns, imports, comments, or specific code structures. Essential for code reviews and refactoring.
+
 ```javascript
 // Find specific patterns
-"Find all TypeScript files in src/ that use useState"
+"Find all TypeScript files in src/ that use useState";
 
 // Search for TODOs and FIXMEs
-"List all files containing TODO or FIXME comments"
+"List all files containing TODO or FIXME comments";
 
 // Analyze imports
-"Show me all files that import from 'react-query'"
+"Show me all files that import from 'react-query'";
 ```
+
 ### Reading and Modifying Multiple Files
+
 Work with multiple files simultaneously. Perfect for refactoring, updating configurations, or analyzing project architecture.
+
 ```javascript
 // Update multiple related files
-"Update all API client files in src/api/ to use the new authentication header"
+"Update all API client files in src/api/ to use the new authentication header";
 
 // Read project structure
-"Show me the directory structure of src/ and list all component files"
+"Show me the directory structure of src/ and list all component files";
 ```
+
 ### Project Setup and Configuration
+
 Set up project configuration files, environment templates, and development tools. Claude can generate properly structured config files.
+
 ```javascript
 // Initialize new configuration
-"Create .env.example file with all required environment variables from the codebase"
+"Create .env.example file with all required environment variables from the codebase";
 
 // Setup linting
-"Create .eslintrc.json with React and TypeScript rules"
+"Create .eslintrc.json with React and TypeScript rules";
 ```
+
 ### Code Migration and Refactoring
+
 Perform large-scale code migrations and refactoring operations. The filesystem server handles file moves and updates safely.
+
 ```javascript
 // Migrate file structure
-"Move all files from src/old-components/ to src/components/ and update all imports"
+"Move all files from src/old-components/ to src/components/ and update all imports";
 
 // Refactor code style
-"Convert all CommonJS requires in src/ to ES6 imports"
+"Convert all CommonJS requires in src/ to ES6 imports";
 ```
+
 ### Read and Write File
+
 Read a file, modify its content, and write it back to the filesystem
+
 ```typescript
 // Read and write file using filesystem MCP
 const content = await filesystem.readFile({
-  path: "/path/to/file.txt"
+  path: "/path/to/file.txt",
 });
 await filesystem.writeFile({
   path: "/path/to/output.txt",
-  content: content + "\nModified by Claude"
+  content: content + "\nModified by Claude",
 });
 ```
 
@@ -248,27 +270,35 @@ await filesystem.writeFile({
 - Filesystem change events and file content may contain sensitive information - ensure file monitoring and content access are properly secured and access-controlled
 
 ## Troubleshooting
+
 ### Permission denied when accessing files or directories
 
 Verify filesystem server has read/write permissions to target directories. Run ls -l (Unix) or icacls (Windows) to check ownership and permissions. Use absolute paths in ALLOWED_DIRS config, not relative paths.
+
 ### Directory not allowed error from MCP server
 
 Add directory to allowed directories in MCP server config args. Use absolute path: npx -y @modelcontextprotocol/server-filesystem /absolute/path/to/directory. Restart Claude Desktop after config change.
+
 ### MCP server fails to start or connect
 
 Verify Node.js is installed: run node --version (requires v14+). Check Claude Desktop config syntax is valid JSON. Ensure no other process is using same MCP server instance.
+
 ### File operations fail or return no results
 
 Confirm target files exist in allowed directories. Check file paths are absolute and accessible. Verify filesystem server process is running via Claude Desktop logs or MCP status.
+
 ### Filesystem MCP server permission denied errors
 
 Verify file and directory permissions allow read/write access. Check user permissions for target paths. Ensure server process has necessary filesystem permissions. For restricted directories, adjust permissions or use sudo (with caution).
+
 ### Filesystem operations failing with path errors
 
 Verify file paths are correct and use absolute paths. Check path format matches operating system requirements (forward slashes on Unix, backslashes on Windows). Ensure directories exist before file operations.
+
 ### Filesystem MCP server connection timeouts or performance issues
 
 Check filesystem performance and disk I/O. Verify network filesystem connectivity if using remote mounts. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
+
 ### Filesystem operations failing with disk space errors
 
 Check available disk space on target filesystem. Verify disk quotas are not exceeded. Clean up temporary files. Monitor disk usage and implement cleanup routines for large file operations.

@@ -2,15 +2,15 @@
 title: Notion MCP Server for Claude
 slug: notion-mcp-server
 category: mcp
-description: 'Read docs, update pages, and manage tasks in Notion workspaces'
-cardDescription: 'Read docs, update pages, and manage tasks in Notion workspaces'
+description: "Read docs, update pages, and manage tasks in Notion workspaces"
+cardDescription: "Read docs, update pages, and manage tasks in Notion workspaces"
 seoTitle: Notion MCP Server for Claude
 seoDescription: >-
   Read docs, update pages, and manage tasks in Notion workspaces Discover tools
   for AI development.
 author: Notion
-dateAdded: '2025-09-18'
-documentationUrl: 'https://developers.notion.com/docs/mcp'
+dateAdded: "2025-09-18"
+documentationUrl: "https://developers.notion.com/docs/mcp"
 downloadUrl: /downloads/mcp/notion-mcp-server.mcpb
 packageVerified: true
 installable: true
@@ -39,7 +39,7 @@ prerequisites:
   - >-
     OAuth 2.0 integration (create public integration in Notion with client ID
     and client secret)
-  - 'HTTP transport support (remote MCP server at https://mcp.notion.com/mcp)'
+  - "HTTP transport support (remote MCP server at https://mcp.notion.com/mcp)"
   - Internet connection (remote Notion API access required)
   - >-
     Understanding of Notion API rate limits (3 requests/second average per
@@ -83,6 +83,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Streamline your documentation and knowledge management by connecting Claude to Notion. Read and update pages, create databases, query with advanced filters, manage tasks and workflows, search across workspaces, handle relations and rollups, and automate content creation—all through natural language commands. Leverage Notion's powerful API with rate limit monitoring and comprehensive workspace integration.
@@ -161,38 +162,57 @@ Streamline your documentation and knowledge management by connecting Claude to N
 ```
 
 ## Examples
+
 ### Create a new page for today's meeting notes
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a new page for today's meeting notes"
 ```
+
 ### Update the project status in Notion
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update the project status in Notion"
 ```
+
 ### Find all tasks due this week
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find all tasks due this week"
 ```
+
 ### Add this conversation summary to Notion
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Add this conversation summary to Notion"
 ```
+
 ### Create Page with Blocks
+
 Create a new Notion page in a database with custom blocks
+
 ```typescript
 // Create Notion page with blocks
 const page = await notion.pages.create({
   parent: { database_id: "database-id" },
   properties: {
-    Title: { title: [{ text: { content: "New Page" } }] }
+    Title: { title: [{ text: { content: "New Page" } }] },
   },
   children: [
-    { object: "block", type: "paragraph", paragraph: { rich_text: [{ text: { content: "Page content" } }] } }
-  ]
+    {
+      object: "block",
+      type: "paragraph",
+      paragraph: { rich_text: [{ text: { content: "Page content" } }] },
+    },
+  ],
 });
 ```
 
@@ -210,27 +230,35 @@ const page = await notion.pages.create({
 - Notion webhook configurations and payloads may contain sensitive page content and database information - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### Rate limit reached - 429 error with rate_limited code
 
 Rate limit: 3 requests/second average per integration. Bursts beyond this average are allowed. Implement 350ms delay between requests for sustained operations. Use burst capacity sparingly. Back off exponentially on 429 errors. Check Retry-After header in response to determine wait time. Implement request queuing for pending requests to manage rate limits effectively.
+
 ### Page or database not accessible - integration permissions
 
 Share page/database with integration explicitly in Notion. Click Share > Add connection > select your integration. Verify integration has appropriate capabilities (Read content, Update content, Insert content). Check parent page sharing settings if accessing nested pages. For database relations and rollups, related databases must also be shared with integration. Guest workspaces don't support integrations.
+
 ### OAuth authentication fails or bad gateway error
 
 Re-authenticate at https://mcp.notion.com/mcp. Verify workspace allows integrations (not Guest workspace). Check OAuth client ID and client secret are correct. Ensure redirect URI matches integration settings. Check internet connectivity. Verify Notion-Version header is included in requests (e.g., 2022-06-28). Restart MCP client if persistent 502 errors occur.
+
 ### API returns empty results or stale data from queries
 
 Verify query filters match exact database property names (case-sensitive). Check integration has access to specific database. Refresh integration permissions. Use property IDs instead of names for reliability. For search, pages/databases directly shared with integration are guaranteed to be returned immediately. For nested content, ensure parent pages are also shared. Check integration capabilities match required operations.
+
 ### Notion MCP server authentication errors with integration tokens
 
 Verify integration token is valid and not expired. Check integration permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Notion rate limit errors when processing multiple requests
 
 Implement exponential backoff retry logic with jitter. Use Notion API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed page data. Notion allows 3 requests per second per integration.
+
 ### Notion page or database access denied errors
 
 Verify integration has access to the page or database. Check page permissions and workspace sharing settings. Ensure integration has required capabilities (read, update, insert) for target operations.
+
 ### Notion MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Notion API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

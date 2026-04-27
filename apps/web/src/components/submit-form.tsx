@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import categorySpec from "@/generated/content-category-spec.json";
+import categorySpec from "@heyclaude/registry/category-spec.json";
 import { categoryLabels, siteConfig } from "@/lib/site";
 import { buildSubmissionFieldModel } from "@heyclaude/registry/submission-spec";
 

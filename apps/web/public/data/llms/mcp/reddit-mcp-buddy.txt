@@ -76,9 +76,7 @@ Streamline your Reddit research and analysis by connecting Claude to Reddit. Bro
 ```json
 {
   "reddit": {
-    "args": [
-      "reddit-mcp-buddy"
-    ],
+    "args": ["reddit-mcp-buddy"],
     "command": "npx"
   }
 }
@@ -86,9 +84,7 @@ Streamline your Reddit research and analysis by connecting Claude to Reddit. Bro
 ```json
 {
   "reddit": {
-    "args": [
-      "reddit-mcp-buddy"
-    ],
+    "args": ["reddit-mcp-buddy"],
     "command": "npx"
   }
 }
@@ -96,48 +92,71 @@ Streamline your Reddit research and analysis by connecting Claude to Reddit. Bro
 
 ## Examples
 ### What's trending in r/technology today?
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "What's trending in r/technology today?"
 ```
+
 ### Search for discussions about ChatGPT in r/programm...
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Search for discussions about ChatGPT in r/programming"
 ```
+
 ### Get the top posts from r/MachineLearning this week
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Get the top posts from r/MachineLearning this week"
 ```
+
 ### Find the most discussed topics in r/stocks
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find the most discussed topics in r/stocks"
 ```
+
 ### What is trending on reddit?
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "What is trending on reddit?"
 ```
+
 ### Search for discussions about AI
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Search for discussions about AI"
 ```
+
 ### Show me the comments on this Reddit URL
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Show me the comments on this Reddit URL"
 ```
+
 ### Create Post
+
 Create a new Reddit post in a subreddit
+
 ```typescript
 // Create Reddit post
 const post = await reddit.subreddit("subreddit").submit({
   title: "Post Title",
   text: "Post content",
-  kind: "self"
+  kind: "self",
 });
 ```
 ```plaintext
@@ -166,7 +185,7 @@ Ask Claude: "Show me the comments on this Reddit URL"
 const post = await reddit.subreddit("subreddit").submit({
   title: "Post Title",
   text: "Post content",
-  kind: "self"
+  kind: "self",
 });
 ```
 
@@ -186,24 +205,31 @@ const post = await reddit.subreddit("subreddit").submit({
 ### Rate limit errors: Add Reddit credentials for higher limits
 
 Reddit API enforces dynamic rate limits based on HTTP response headers. Unauthenticated requests have lower limits. Add Reddit OAuth credentials (client_id, client_secret, username, password) to environment variables in your MCP configuration for enhanced rate limits. Monitor rate limit headers in responses. Implement exponential backoff on 429 errors. Each OAuth authorization has its own rate limit window.
+
 ### Subreddit not found: Check spelling (case-insensitive)
 
 Verify subreddit name spelling (case-insensitive). Check if subreddit exists by visiting r/subredditname in browser. Ensure subreddit is public (private subreddits require authentication). Some subreddits may be banned or quarantined. Use Reddit search to confirm subreddit name before querying.
+
 ### Private subreddits require authentication
 
 Private subreddits require Reddit OAuth authentication. Add Reddit credentials (client_id, client_secret, username, password) to your MCP configuration environment variables. Ensure your Reddit account has access to the private subreddit. Create a Reddit OAuth app at https://www.reddit.com/prefs/apps if you don't have one. Use script-type OAuth app for read-only access.
+
 ### Restart Claude Desktop after config changes
 
 Claude Desktop requires a restart to load new MCP server configurations. After adding or modifying the reddit-mcp-buddy configuration in claude_desktop_config.json, fully quit and restart Claude Desktop. Verify the server is loaded with claude mcp list command (Claude Code) or by asking Claude to list available tools. Configuration changes take effect only after restart.
+
 ### Reddit MCP server authentication errors with OAuth tokens
 
 Verify OAuth token is valid and not expired. Check token scopes match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Reddit rate limit errors when making multiple API calls
 
 Implement exponential backoff retry logic with jitter. Use Reddit API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed content data. Reddit allows 60 requests per minute per OAuth application.
+
 ### Reddit post or subreddit access denied errors
 
 Verify OAuth token has access to the post or subreddit. Check subreddit permissions and user role. Ensure OAuth token has required scopes (read, submit, modposts) for target operations.
+
 ### Reddit MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Reddit API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

@@ -14,12 +14,12 @@ Prevents direct edits to protected branches like main or master, enforcing PR-ba
 ## Content
 ## Features
 - Protection of critical branches (main, master, production, release, staging, develop) with default protected branch list and environment variable customization via PROTECTED_BRANCHES_LIST for project-specific protection
-- Configurable protected branch patterns including wildcard patterns (release/*, hotfix/*, support/*) with pattern matching support and environment variable customization via PROTECTED_PATTERNS_LIST for flexible branch protection rules
+- Configurable protected branch patterns including wildcard patterns (release/_, hotfix/_, support/\*) with pattern matching support and environment variable customization via PROTECTED_PATTERNS_LIST for flexible branch protection rules
 - Clear error messages with actionable guidance including suggested branch names based on file names, feature branch creation commands (git checkout -b), pull request workflow instructions, and repository status information
 - Feature branch creation suggestions based on file names being edited with sanitized branch name generation removing special characters and providing quick command suggestions for branch creation
 - Integration with CI/CD workflow enforcement preventing direct commits that bypass CI/CD pipelines and ensuring all changes go through proper review and testing processes
 - Override capability for emergency changes with FORCE_ALLOW_PROTECTED_EDIT environment variable and safety warnings including reminders to remove override after emergency changes are complete
-- Branch naming convention validation with pattern matching for feature/*, bugfix/*, hotfix/* branches with informational messages and pull request reminders for proper workflow adherence
+- Branch naming convention validation with pattern matching for feature/_, bugfix/_, hotfix/\* branches with informational messages and pull request reminders for proper workflow adherence
 - Repository safety and collaboration enforcement with detailed protection violation messages, workflow guidance, branch status information (ahead/behind remote), and uncommitted changes detection with stash suggestions
 
 ## Use Cases
@@ -57,11 +57,7 @@ Prevents direct edits to protected branches like main or master, enforcing PR-ba
   "hooks": {
     "preToolUse": {
       "script": "./.claude/hooks/git-branch-protection.sh",
-      "matchers": [
-        "edit",
-        "write",
-        "multiEdit"
-      ]
+      "matchers": ["edit", "write", "multiEdit"]
     }
   }
 }
@@ -71,11 +67,7 @@ Prevents direct edits to protected branches like main or master, enforcing PR-ba
   "hooks": {
     "preToolUse": {
       "script": "./.claude/hooks/git-branch-protection.sh",
-      "matchers": [
-        "edit",
-        "write",
-        "multiEdit"
-      ]
+      "matchers": ["edit", "write", "multiEdit"]
     }
   }
 }
@@ -170,7 +162,7 @@ if [ "$IS_PROTECTED" = true ]; then
   echo "   3. Push and create a Pull Request:" >&2
   echo "      git push -u origin feature/your-feature-name" >&2
   echo "" >&2
-  
+
   # Suggest specific branch names based on the file being edited
   if [ -n "$FILE_PATH" ]; then
     BASE_NAME=$(basename "$FILE_PATH" | cut -d. -f1)
@@ -179,23 +171,23 @@ if [ "$IS_PROTECTED" = true ]; then
     echo "   Quick command: git checkout -b $SUGGESTED_BRANCH" >&2
     echo "" >&2
   fi
-  
+
   # Show current branch status
   echo "📊 Current repository status:" >&2
   echo "   Current branch: $CURRENT_BRANCH" >&2
-  
+
   # Show available branches
   AVAILABLE_BRANCHES=$(git branch | grep -v "\*" | head -5 | xargs)
   if [ -n "$AVAILABLE_BRANCHES" ]; then
     echo "   Available branches: $AVAILABLE_BRANCHES" >&2
   fi
-  
+
   # Check if there are uncommitted changes
   if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
     echo "   ⚠️ You have uncommitted changes" >&2
     echo "   💡 Consider: git stash (to save changes temporarily)" >&2
   fi
-  
+
   echo "" >&2
   echo "🆘 Emergency override (use with caution):" >&2
   echo "   FORCE_ALLOW_PROTECTED_EDIT=true [your command]" >&2
@@ -206,7 +198,7 @@ if [ "$IS_PROTECTED" = true ]; then
   echo "   • Proper CI/CD pipeline execution" >&2
   echo "   • Team collaboration standards" >&2
   echo "" >&2
-  
+
   # Exit with error to prevent the tool from running
   exit 1
 fi
@@ -223,11 +215,11 @@ fi
 if git rev-parse --verify "origin/$CURRENT_BRANCH" > /dev/null 2>&1; then
   AHEAD=$(git rev-list --count "origin/$CURRENT_BRANCH"..HEAD 2>/dev/null || echo "0")
   BEHIND=$(git rev-list --count HEAD.."origin/$CURRENT_BRANCH" 2>/dev/null || echo "0")
-  
+
   if [ "$AHEAD" -gt 0 ]; then
     echo "📤 Branch is $AHEAD commits ahead of origin" >&2
   fi
-  
+
   if [ "$BEHIND" -gt 0 ]; then
     echo "📥 Branch is $BEHIND commits behind origin - consider pulling" >&2
   fi
@@ -324,7 +316,7 @@ if [ "$IS_PROTECTED" = true ]; then
   echo "   3. Push and create a Pull Request:" >&2
   echo "      git push -u origin feature/your-feature-name" >&2
   echo "" >&2
-  
+
   # Suggest specific branch names based on the file being edited
   if [ -n "$FILE_PATH" ]; then
     BASE_NAME=$(basename "$FILE_PATH" | cut -d. -f1)
@@ -333,23 +325,23 @@ if [ "$IS_PROTECTED" = true ]; then
     echo "   Quick command: git checkout -b $SUGGESTED_BRANCH" >&2
     echo "" >&2
   fi
-  
+
   # Show current branch status
   echo "📊 Current repository status:" >&2
   echo "   Current branch: $CURRENT_BRANCH" >&2
-  
+
   # Show available branches
   AVAILABLE_BRANCHES=$(git branch | grep -v "\*" | head -5 | xargs)
   if [ -n "$AVAILABLE_BRANCHES" ]; then
     echo "   Available branches: $AVAILABLE_BRANCHES" >&2
   fi
-  
+
   # Check if there are uncommitted changes
   if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
     echo "   ⚠️ You have uncommitted changes" >&2
     echo "   💡 Consider: git stash (to save changes temporarily)" >&2
   fi
-  
+
   echo "" >&2
   echo "🆘 Emergency override (use with caution):" >&2
   echo "   FORCE_ALLOW_PROTECTED_EDIT=true [your command]" >&2
@@ -360,7 +352,7 @@ if [ "$IS_PROTECTED" = true ]; then
   echo "   • Proper CI/CD pipeline execution" >&2
   echo "   • Team collaboration standards" >&2
   echo "" >&2
-  
+
   # Exit with error to prevent the tool from running
   exit 1
 fi
@@ -377,11 +369,11 @@ fi
 if git rev-parse --verify "origin/$CURRENT_BRANCH" > /dev/null 2>&1; then
   AHEAD=$(git rev-list --count "origin/$CURRENT_BRANCH"..HEAD 2>/dev/null || echo "0")
   BEHIND=$(git rev-list --count HEAD.."origin/$CURRENT_BRANCH" 2>/dev/null || echo "0")
-  
+
   if [ "$AHEAD" -gt 0 ]; then
     echo "📤 Branch is $AHEAD commits ahead of origin" >&2
   fi
-  
+
   if [ "$BEHIND" -gt 0 ]; then
     echo "📥 Branch is $BEHIND commits behind origin - consider pulling" >&2
   fi
@@ -431,6 +423,7 @@ if [ "$IS_PROTECTED" = true ]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable branch protection
@@ -445,6 +438,7 @@ Complete hook configuration for .claude/settings.json to enable branch protectio
   }
 }
 ```
+
 ### Configurable Protected Branches and Patterns
 
 Enhanced hook script for configurable protected branches and pattern matching
@@ -485,6 +479,7 @@ if [ "$IS_PROTECTED" = true ] && [ "$FORCE_ALLOW_PROTECTED_EDIT" != "true" ]; th
 fi
 exit 0
 ```
+
 ### Feature Branch Name Suggestions
 
 Enhanced hook script for feature branch name suggestions based on file names
@@ -513,6 +508,7 @@ if [ "$IS_PROTECTED" = true ] && [ "$FORCE_ALLOW_PROTECTED_EDIT" != "true" ]; th
 fi
 exit 0
 ```
+
 ### Branch Status and Detached HEAD Handling
 
 Enhanced hook script for branch status information and detached HEAD state handling
@@ -693,24 +689,31 @@ exit 0
 ### Hook blocks edits even when FORCE_ALLOW_PROTECTED_EDIT set to true
 
 Environment variable not exported to hook subprocess. Use: 'export FORCE_ALLOW_PROTECTED_EDIT=true' before command. Or add to .bashrc/.zshrc for session-wide availability. Verify: 'env | grep FORCE_ALLOW_PROTECTED_EDIT'. Check environment variable is set in correct shell context.
-### Protected branch pattern matching fails for release/* branches
+
+### Protected branch pattern matching fails for release/\* branches
 
 Bash pattern requires proper glob: use 'case "$CURRENT_BRANCH" in release/*) IS_PROTECTED=true;;' instead of [[ match. Or use regex: '[[ "$CURRENT_BRANCH" =~ ^release/ ]]'. Verify pattern syntax matches bash glob patterns. Test pattern matching with sample branch names.
+
 ### Custom protected branches from PROTECTED_BRANCHES_LIST ignored
 
 CSV parsing expects exact format. Ensure no spaces: 'main,staging,prod' not 'main, staging, prod'. Or handle: 'IFS=',' read -ra CUSTOM | tr -d ' '' stripping whitespace. Verify environment variable is exported. Check CSV format matches expected pattern.
+
 ### Branch detection fails in detached HEAD state showing empty branch
 
 git rev-parse --abbrev-ref returns 'HEAD' when detached. Add check: 'if [ "$CURRENT_BRANCH" = "HEAD" ]; then echo "Detached HEAD allowed"; exit 0; fi' before protection logic. Verify detached HEAD state handling. Consider allowing operations in detached HEAD state or requiring branch checkout.
+
 ### Suggested branch names contain special characters breaking git commands
 
 Filename with spaces/slashes creates invalid branch names. Sanitize: 'SUGGESTED=$(echo "$BASE_NAME" | tr ' /' '-' | tr -cd 'a-zA-Z0-9-')' removing unsafe characters before suggestion. Verify branch name sanitization. Test with various file names containing special characters.
+
 ### Hook doesn't protect branches in subdirectories or nested repositories
 
 Hook checks current directory Git repository. Verify you're in the correct repository root. Check for nested Git repositories: 'find . -name .git -type d'. Use git rev-parse --show-toplevel to get repository root. Consider adding repository root detection.
+
 ### Pattern matching doesn't work for complex branch naming conventions
 
 Bash glob patterns have limitations. Use case statements for complex patterns: 'case "$CURRENT_BRANCH" in release/v*) IS_PROTECTED=true;; esac'. Or use regex matching: '[[ "$CURRENT_BRANCH" =~ ^release/v[0-9]+ ]]'. Test pattern matching with actual branch names. Consider using extended glob patterns: 'shopt -s extglob'.
+
 ### Emergency override doesn't work in CI/CD environments
 
 CI/CD environments may not have environment variables available. Use Git config for override: 'git config hooks.allow-protected-edit true'. Or use file-based override: 'touch .claude/allow-protected-edit'. Verify CI/CD environment variable availability. Check hook execution context in CI/CD pipelines.

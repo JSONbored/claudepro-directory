@@ -59,10 +59,7 @@ Automated accessibility testing and compliance checking for web applications fol
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/accessibility-checker.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -72,10 +69,7 @@ Automated accessibility testing and compliance checking for web applications fol
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/accessibility-checker.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -109,17 +103,17 @@ if command -v axe &> /dev/null; then
 else
   # Basic checks without axe
   echo "Running basic accessibility checks..."
-  
+
   # Check for missing alt attributes
   if grep -q '<img[^>]*>' "$FILE_PATH" && ! grep -q 'alt=' "$FILE_PATH"; then
     echo "⚠️ Images without alt attributes found" >&2
   fi
-  
+
   # Check for missing labels
   if grep -q '<input[^>]*>' "$FILE_PATH" && ! grep -q 'aria-label\|<label' "$FILE_PATH"; then
     echo "⚠️ Form inputs without labels found" >&2
   fi
-  
+
   echo "✅ Basic accessibility checks completed" >&2
 fi
 
@@ -152,17 +146,17 @@ if command -v axe &> /dev/null; then
 else
   # Basic checks without axe
   echo "Running basic accessibility checks..."
-  
+
   # Check for missing alt attributes
   if grep -q '<img[^>]*>' "$FILE_PATH" && ! grep -q 'alt=' "$FILE_PATH"; then
     echo "⚠️ Images without alt attributes found" >&2
   fi
-  
+
   # Check for missing labels
   if grep -q '<input[^>]*>' "$FILE_PATH" && ! grep -q 'aria-label\|<label' "$FILE_PATH"; then
     echo "⚠️ Form inputs without labels found" >&2
   fi
-  
+
   echo "✅ Basic accessibility checks completed" >&2
 fi
 
@@ -190,6 +184,7 @@ else
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable accessibility checking on file writes and edits
@@ -211,6 +206,7 @@ Complete hook configuration for .claude/settings.json to enable accessibility ch
   }
 }
 ```
+
 ### Enhanced Accessibility Checker with Violation Blocking
 
 Advanced hook script that blocks critical accessibility violations and provides detailed violation reporting
@@ -231,6 +227,7 @@ if command -v axe &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Color Contrast Validation Hook
 
 Specialized hook for validating color contrast ratios against WCAG standards for design system compliance
@@ -246,6 +243,7 @@ if command -v axe &> /dev/null; then
 fi
 exit 0
 ```
+
 ### ARIA Validation Hook
 
 Specialized hook for validating ARIA attributes and ensuring proper screen reader compatibility
@@ -343,24 +341,31 @@ exit 0
 ### Hook executes on non-HTML files wasting resources
 
 Verify file extension check works: grep 'html' hook-file. Ensure matcher filters to .html files only. Add extension validation before processing. Check FILE_PATH extraction: echo "$FILE_PATH" | grep -E '\.html$'.
+
 ### Axe-core not found but script expects it installed
 
 Install globally: npm i -g @axe-core/cli. Or add fallback checks in script. Verify command availability: which axe. Add installation to project setup docs. Check npm global path: npm config get prefix.
+
 ### PostToolUse hook runs after Write but no output shown
 
 Check stderr redirection in hook script. Verify echo statements use >&2 for user feedback. Test with: bash hook-file <<< '{"tool_name":"write","tool_input":{"file_path":"test.html"}}'. Ensure hook script has execute permissions: chmod +x hook-file.
+
 ### Hook captures stdin but file_path extraction fails
 
 Debug jq parsing: echo "$INPUT" | jq -r '.tool_input.file_path'. Verify JSON structure matches expected format. Add fallback paths for nested inputs: .tool_input.file_path // .tool_input.path // "". Test jq installation: jq --version.
+
 ### Accessibility violations detected but build continues
 
 Change exit 0 to exit 1 on violations if blocking desired. Add violation count threshold. Use jq to filter critical issues: jq 'select(.impact=="critical")'. Configure exit codes: 0=success, 2=block. Check hook decision return format for PreToolUse hooks.
+
 ### Axe-core scan takes too long on large HTML files
 
 Add timeout wrapper: timeout 30s axe file.html. Implement file size check before scanning: [ $(stat -f%z file.html) -lt 1000000 ]. Use axe rules filtering to run only specific rules: --rules color-contrast,label. Consider running scans asynchronously in CI/CD.
+
 ### Color contrast violations not detected by axe-core
 
 Color contrast requires visual rendering - axe-core CLI may not detect all contrast issues. Use browser-based testing for accurate results. Verify axe-core version supports color-contrast rule: axe --version. Consider using @axe-core/cli with headless browser mode for better detection.
+
 ### Hook works locally but fails in CI/CD environment
 
 Verify axe-core installation in CI environment: which axe. Check PATH includes npm global bin directory. Install dependencies in CI: npm ci && npm i -g @axe-core/cli. Ensure jq is available: jq --version. Check file permissions and working directory in CI context.

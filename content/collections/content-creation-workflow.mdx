@@ -13,8 +13,8 @@ seoDescription: >-
   across multiple platforms, design graphics, and automate content distribution
   with i...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-02'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-02"
 installable: false
 usageSnippet: Start with `asana-mcp-server` → `clickup-mcp-server` → `canva-mcp-server`
 items:
@@ -39,7 +39,7 @@ difficulty: beginner
 prerequisites:
   - Asana or ClickUp account
   - Canva account (free or Pro)
-  - 'Cloudinary account (optional, for advanced media management)'
+  - "Cloudinary account (optional, for advanced media management)"
 tags:
   - content
   - marketing
@@ -67,6 +67,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Streamlined workflow for content creators and marketers. Manage projects across multiple platforms, design graphics, and automate content distribution with integrated tools.
 
 ## Features
@@ -131,18 +132,23 @@ Choose the content type you need to create, then use the templates and prompts t
 5. `docs`
 
 ## Troubleshooting
+
 ### Asana and ClickUp MCP servers conflict when both enabled
 
 Choose one project management tool. Edit claude_desktop_config.json to comment out the unused server. Restart Claude Desktop to apply changes.
+
 ### Canva MCP server fails with 'API key not found' error
 
 Generate Canva API token at canva.com/developers. Add to config: CANVA_API_KEY=token. Verify token has design.read and design.write scopes.
+
 ### Cloudinary media uploads fail after Canva integration
 
 Set unique output directories for each service. Configure Canva uploads to /canva and Cloudinary to /cloudinary in respective MCP server settings.
+
 ### Missing Node.js dependencies for all MCP servers in bundle
 
-Install Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-* for each MCP server. Verify with node --version.
+Install Node.js 18+ from nodejs.org. Run npm install -g @modelcontextprotocol/server-\* for each MCP server. Verify with node --version.
+
 ### Collection items installed but not appearing in Claude
 
 Verify installation order: project management first, then media tools. Check claude_desktop_config.json syntax. Restart Claude Desktop completely.

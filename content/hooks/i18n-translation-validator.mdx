@@ -14,8 +14,8 @@ seoDescription: >-
   different language files. This PostToolUse hook provides comprehensive i18n
   trans...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/i18n-translation-validator.sh &&
@@ -75,6 +75,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive translation key validation across multiple locales with automatic locale detection by parsing file names and directory structure, base file comparison (en.json, en-US.json, base.json), and cross-locale consistency checking with key count comparison
@@ -125,10 +126,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/i18n-translation-validator.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -151,19 +149,19 @@ fi
 # Check if this is a translation/localization file
 if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] || [[ "$FILE_PATH" == *lang/*.json ]] || [[ "$FILE_PATH" == *translations/*.json ]] || [[ "$FILE_PATH" == *.po ]] || [[ "$FILE_PATH" == *messages/*.properties ]]; then
   echo "🌍 i18n Translation Validation for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize validation counters
   ERRORS=0
   WARNINGS=0
   MISSING_KEYS=0
   ORPHANED_KEYS=0
   TOTAL_KEYS=0
-  
+
   # Function to report validation results
   report_validation() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -189,29 +187,29 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
         ;;
     esac
   }
-  
+
   # Check if file exists and is readable
   if [ ! -f "$FILE_PATH" ]; then
     report_validation "ERROR" "Translation file not found: $FILE_PATH"
     exit 1
   fi
-  
+
   if [ ! -r "$FILE_PATH" ]; then
     report_validation "ERROR" "Translation file is not readable: $FILE_PATH"
     exit 1
   fi
-  
+
   # Determine file format
   FILE_EXT="${FILE_PATH##*.}"
   LOCALE_DIR="$(dirname "$FILE_PATH")"
   FILE_NAME="$(basename "$FILE_PATH")"
   LOCALE_CODE="${FILE_NAME%.*}"
-  
+
   echo "📊 Translation file: $FILE_NAME (format: $FILE_EXT, locale: $LOCALE_CODE)" >&2
-  
+
   # 1. File Format Validation
   echo "📋 Validating file format..." >&2
-  
+
   case "$FILE_EXT" in
     "json")
       if jq empty "$FILE_PATH" 2>/dev/null; then
@@ -245,13 +243,13 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       report_validation "WARNING" "Unknown translation file format: $FILE_EXT"
       ;;
   esac
-  
+
   # 2. Find Base Translation File (for comparison)
   echo "🔍 Locating base translation file..." >&2
-  
+
   BASE_FILE=""
   BASE_CANDIDATES=("en.json" "en-US.json" "en_US.json" "base.json" "default.json")
-  
+
   for candidate in "${BASE_CANDIDATES[@]}"; do
     if [ -f "$LOCALE_DIR/$candidate" ] && [ "$LOCALE_DIR/$candidate" != "$FILE_PATH" ]; then
       BASE_FILE="$LOCALE_DIR/$candidate"
@@ -259,7 +257,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       break
     fi
   done
-  
+
   if [ -z "$BASE_FILE" ]; then
     # Look for any .json file in the directory as base
     FIRST_JSON=$(find "$LOCALE_DIR" -name '*.json' -not -path "$FILE_PATH" | head -1)
@@ -270,11 +268,11 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       echo "   ⚠️ No base translation file found - running standalone validation" >&2
     fi
   fi
-  
+
   # 3. Key Structure Validation (JSON files)
   if [ "$FILE_EXT" = "json" ]; then
     echo "🔑 Analyzing translation keys..." >&2
-    
+
     # Check for nested vs flat structure
     NESTED_COUNT=$(jq '[.. | objects | keys] | flatten | length' "$FILE_PATH" 2>/dev/null || echo "0")
     if [ "$NESTED_COUNT" -gt "$TOTAL_KEYS" ]; then
@@ -282,13 +280,13 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
     else
       echo "   📊 Flat key structure ($TOTAL_KEYS keys)" >&2
     fi
-    
+
     # Check for empty values
     EMPTY_VALUES=$(jq '[.. | select(type == "string" and length == 0)] | length' "$FILE_PATH" 2>/dev/null || echo "0")
     if [ "$EMPTY_VALUES" -gt 0 ]; then
       report_validation "WARNING" "$EMPTY_VALUES empty translation values found"
     fi
-    
+
     # Check for untranslated strings (same as key)
     UNTRANSLATED=0
     if command -v jq &> /dev/null; then
@@ -298,25 +296,25 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       fi
     fi
   fi
-  
+
   # 4. Compare with Base File (if available)
   if [ -n "$BASE_FILE" ] && [ -f "$BASE_FILE" ]; then
     echo "🔄 Comparing with base translation file..." >&2
-    
+
     if [ "$FILE_EXT" = "json" ]; then
       # Extract all keys from both files
       BASE_KEYS_FILE="/tmp/base_keys_$$"
       CURRENT_KEYS_FILE="/tmp/current_keys_$$"
-      
+
       # Get all nested keys (dot notation)
       jq -r 'paths(scalars) as $p | $p | join(".")' "$BASE_FILE" 2>/dev/null | sort > "$BASE_KEYS_FILE"
       jq -r 'paths(scalars) as $p | $p | join(".")' "$FILE_PATH" 2>/dev/null | sort > "$CURRENT_KEYS_FILE"
-      
+
       # Find missing keys (in base but not in current)
       MISSING_KEYS_LIST="/tmp/missing_keys_$$"
       comm -23 "$BASE_KEYS_FILE" "$CURRENT_KEYS_FILE" > "$MISSING_KEYS_LIST"
       MISSING_COUNT=$(wc -l < "$MISSING_KEYS_LIST" | xargs)
-      
+
       if [ "$MISSING_COUNT" -gt 0 ]; then
         report_validation "MISSING" "$MISSING_COUNT translation keys missing from base"
         echo "   Missing keys:" >&2
@@ -327,12 +325,12 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       else
         report_validation "PASS" "All base translation keys are present"
       fi
-      
+
       # Find orphaned keys (in current but not in base)
       ORPHANED_KEYS_LIST="/tmp/orphaned_keys_$$"
       comm -13 "$BASE_KEYS_FILE" "$CURRENT_KEYS_FILE" > "$ORPHANED_KEYS_LIST"
       ORPHANED_COUNT=$(wc -l < "$ORPHANED_KEYS_LIST" | xargs)
-      
+
       if [ "$ORPHANED_COUNT" -gt 0 ]; then
         report_validation "ORPHANED" "$ORPHANED_COUNT keys not found in base (potential orphans)"
         echo "   Orphaned keys:" >&2
@@ -343,14 +341,14 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       else
         report_validation "PASS" "No orphaned keys detected"
       fi
-      
+
       # Calculate completeness percentage
       BASE_KEY_COUNT=$(wc -l < "$BASE_KEYS_FILE" | xargs)
       if [ "$BASE_KEY_COUNT" -gt 0 ]; then
         TRANSLATED_COUNT=$((BASE_KEY_COUNT - MISSING_COUNT))
         COMPLETENESS=$((TRANSLATED_COUNT * 100 / BASE_KEY_COUNT))
         echo "   📊 Translation completeness: $COMPLETENESS% ($TRANSLATED_COUNT/$BASE_KEY_COUNT)" >&2
-        
+
         if [ "$COMPLETENESS" -eq 100 ]; then
           report_validation "PASS" "Translation is 100% complete"
         elif [ "$COMPLETENESS" -ge 90 ]; then
@@ -361,15 +359,15 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
           report_validation "ERROR" "Translation is only $COMPLETENESS% complete (significant gaps)"
         fi
       fi
-      
+
       # Cleanup temp files
       rm -f "$BASE_KEYS_FILE" "$CURRENT_KEYS_FILE" "$MISSING_KEYS_LIST" "$ORPHANED_KEYS_LIST"
     fi
   fi
-  
+
   # 5. Variable Placeholder Validation
   echo "🔤 Checking variable placeholders..." >&2
-  
+
   if [ "$FILE_EXT" = "json" ]; then
     # Check for common placeholder patterns
     PLACEHOLDER_PATTERNS=(
@@ -379,16 +377,16 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       '\$\{[^}]+\}'   # Dollar: ${variable}
       '%[sd]'         # Printf style: %s, %d
     )
-    
+
     PLACEHOLDER_COUNT=0
     for pattern in "${PLACEHOLDER_PATTERNS[@]}"; do
       COUNT=$(grep -oE "$pattern" "$FILE_PATH" 2>/dev/null | wc -l | xargs || echo "0")
       PLACEHOLDER_COUNT=$((PLACEHOLDER_COUNT + COUNT))
     done
-    
+
     if [ "$PLACEHOLDER_COUNT" -gt 0 ]; then
       echo "   📝 $PLACEHOLDER_COUNT variable placeholders found" >&2
-      
+
       # Check for unmatched placeholders if base file exists
       if [ -n "$BASE_FILE" ]; then
         # This is a simplified check - in practice, you'd want more sophisticated matching
@@ -398,10 +396,10 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       echo "   ℹ️ No variable placeholders detected" >&2
     fi
   fi
-  
+
   # 6. Locale-Specific Validation
   echo "🌐 Locale-specific validation..." >&2
-  
+
   case "$LOCALE_CODE" in
     "ar"*|"he"*|"fa"*)
       echo "   🔄 RTL language detected - ensure proper text direction handling" >&2
@@ -416,7 +414,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       echo "   🌍 Locale: $LOCALE_CODE" >&2
       ;;
   esac
-  
+
   # Check for potential encoding issues (non-ASCII characters)
   if [ "$FILE_EXT" = "json" ]; then
     NON_ASCII_COUNT=$(grep -P '[^\x00-\x7F]' "$FILE_PATH" 2>/dev/null | wc -l | xargs || echo "0")
@@ -424,19 +422,19 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
       echo "   🔤 $NON_ASCII_COUNT lines contain non-ASCII characters (normal for international content)" >&2
     fi
   fi
-  
+
   # 7. Multi-file Consistency Check
   echo "📁 Checking consistency across locale files..." >&2
-  
+
   LOCALE_FILES=()
   while IFS= read -r -d '' file; do
     LOCALE_FILES+=("$file")
   done < <(find "$LOCALE_DIR" -name "*.$FILE_EXT" -print0 2>/dev/null)
-  
+
   LOCALE_COUNT=${#LOCALE_FILES[@]}
   if [ "$LOCALE_COUNT" -gt 1 ]; then
     echo "   📊 Found $LOCALE_COUNT locale files in directory" >&2
-    
+
     # Check if all files have similar key counts (within 20% difference)
     if [ "$FILE_EXT" = "json" ] && [ "$TOTAL_KEYS" -gt 0 ]; then
       INCONSISTENT_FILES=0
@@ -444,13 +442,13 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
         if [ "$locale_file" != "$FILE_PATH" ]; then
           OTHER_KEY_COUNT=$(jq -r 'keys | length' "$locale_file" 2>/dev/null || echo "0")
           DIFF_PERCENT=$((abs(TOTAL_KEYS - OTHER_KEY_COUNT) * 100 / TOTAL_KEYS))
-          
+
           if [ "$DIFF_PERCENT" -gt 20 ]; then
             INCONSISTENT_FILES=$((INCONSISTENT_FILES + 1))
           fi
         fi
       done
-      
+
       if [ "$INCONSISTENT_FILES" -gt 0 ]; then
         report_validation "WARNING" "$INCONSISTENT_FILES locale files have significantly different key counts"
       else
@@ -460,7 +458,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
   else
     echo "   ℹ️ Single locale file found" >&2
   fi
-  
+
   # 8. Generate Validation Summary
   echo "" >&2
   echo "📋 i18n Translation Validation Summary:" >&2
@@ -473,7 +471,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   🔍 Missing Keys: $MISSING_KEYS" >&2
   echo "   🏷️ Orphaned Keys: $ORPHANED_KEYS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ] && [ "$MISSING_KEYS" -eq 0 ]; then
     if [ "$WARNINGS" -eq 0 ] && [ "$ORPHANED_KEYS" -eq 0 ]; then
       echo "   🎉 Status: EXCELLENT - Translation file is complete and consistent" >&2
@@ -485,7 +483,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
   else
     echo "   ❌ Status: ERRORS - Critical issues must be fixed" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 i18n Translation Best Practices:" >&2
   echo "   • Keep translation keys consistent across all locales" >&2
@@ -494,13 +492,13 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]] |
   echo "   • Consider cultural context in translations" >&2
   echo "   • Test with longer/shorter text in different languages" >&2
   echo "   • Use proper character encoding (UTF-8)" >&2
-  
+
   # Exit with error if there are critical issues
   if [ "$ERRORS" -gt 0 ]; then
     echo "⚠️ Translation validation completed with errors" >&2
     exit 1
   fi
-  
+
 else
   # Not a translation file, exit silently
   exit 0
@@ -510,6 +508,7 @@ exit 0
 ```
 
 ## Examples
+
 ### I18n Translation Validator Hook Script
 
 Complete hook script that performs i18n translation validation
@@ -534,6 +533,7 @@ if [[ "$FILE_PATH" == *locales/*.json ]] || [[ "$FILE_PATH" == *i18n/*.json ]]; 
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable translation validation
@@ -548,6 +548,7 @@ Complete hook configuration for .claude/settings.json to enable translation vali
   }
 }
 ```
+
 ### Missing Key Detection
 
 Enhanced hook script for missing translation key detection with base file comparison
@@ -570,6 +571,7 @@ if [[ "$FILE_PATH" == *.json ]] && [ -f "$BASE_FILE" ]; then
 fi
 exit 0
 ```
+
 ### Variable Placeholder and Empty Value Validation
 
 Enhanced hook script for variable placeholder validation and empty value detection
@@ -595,6 +597,7 @@ if [[ "$FILE_PATH" == *.json ]]; then
 fi
 exit 0
 ```
+
 ### Locale-Specific Validation
 
 Enhanced hook script for locale-specific validation including RTL and CJK language detection
@@ -624,27 +627,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook validates non-i18n JSON files in directories with similar names
 
-Strengthen path detection: [[ "$FILE_PATH" =~ /(locales|i18n|lang|translations)/ ]] || exit 0. Check for translation-specific keys like locale/language markers before running full validation. Verify file path patterns match translation file locations. Test with various directory structures.
+Strengthen path detection: [["$FILE_PATH" =~ /(locales|i18n|lang|translations)/]] || exit 0. Check for translation-specific keys like locale/language markers before running full validation. Verify file path patterns match translation file locations. Test with various directory structures.
+
 ### Missing keys detection fails when base file uses nested structure
 
 Use jq to flatten nested keys: jq -r 'paths(scalars) as $p | $p | join(".")' to get dot notation paths. Compare flattened key lists instead of top-level keys only for accurate missing key detection. Verify both files use same nesting structure. Test with deeply nested JSON structures.
+
 ### Validation shows false positives for orphaned keys in locale-specific translations
 
 Some translations legitimately have locale-specific keys (e.g., currency formats, date patterns). Add whitelist patterns or check key prefixes like 'locale.' to skip cultural adaptation keys from orphan detection. Configure locale-specific key patterns. Document expected locale-specific keys.
+
 ### Completeness percentage incorrectly calculated for multi-level nested JSON
 
 Script uses top-level key count but should count leaf nodes: jq '[paths(scalars)] | length'. Ensure both base and current files are counted at same nesting level for accurate percentage. Use consistent key counting method. Verify completeness calculation logic.
+
 ### Hook crashes with 'command not found: abs' on DIFF_PERCENT calculation
 
 Bash doesn't have abs() function. Replace with: DIFF_PERCENT=$(( (TOTAL_KEYS - OTHER_KEY_COUNT) < 0 ? (OTHER_KEY_COUNT - TOTAL_KEYS) : (TOTAL_KEYS - OTHER_KEY_COUNT) )) or use bc: echo "scale=0; sqrt(($A-$B)^2)" | bc. Verify absolute value calculation. Test with various key count differences.
+
 ### Variable placeholder validation misses placeholders in nested JSON values
 
 grep only searches file content, not parsed JSON values. Use jq to extract string values: jq -r '.. | strings' | grep -oE pattern. This ensures placeholders in nested values are detected. Verify placeholder detection works with nested structures. Test with various placeholder formats.
+
 ### PO file validation fails when msgfmt is not installed
 
 Hook falls back to basic validation when msgfmt unavailable. Install gettext package: brew install gettext (macOS), apt-get install gettext (Linux). Verify msgfmt installation: command -v msgfmt. Add msgfmt availability check before PO validation.
+
 ### Translation completeness shows 0% when base file is not found
 
 Hook should handle missing base file gracefully. Add check: if [ -z "$BASE_FILE" ]; then echo "⚠️ No base file found - completeness check skipped"; fi. Verify base file detection logic. Provide fallback base file suggestions. Document base file requirements.

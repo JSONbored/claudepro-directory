@@ -13,7 +13,7 @@ seoDescription: >-
   Build applications, analyze traffic, and manage security settings through
   Cloudflare Discover tools for AI development.
 author: Cloudflare
-dateAdded: '2025-09-18'
+dateAdded: "2025-09-18"
 documentationUrl: >-
   https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/
 downloadUrl: /downloads/mcp/cloudflare-mcp-server.mcpb
@@ -57,7 +57,7 @@ estimatedSetupTime: 2 minutes
 difficulty: beginner
 prerequisites:
   - Cloudflare account with active zones
-  - 'Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens'
+  - "Cloudflare API Token from https://dash.cloudflare.com/profile/api-tokens"
   - Cloudflare Account ID (found in Cloudflare dashboard)
   - >-
     Node.js and npm/npx available for running the
@@ -104,6 +104,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Content
 
 Manage Cloudflare services and configurations through Claude for comprehensive infrastructure control.
@@ -166,38 +167,50 @@ Manage Cloudflare services and configurations through Claude for comprehensive i
       "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}",
       "CLOUDFLARE_ACCOUNT_ID": "${CLOUDFLARE_ACCOUNT_ID}"
     },
-    "args": [
-      "-y",
-      "@cloudflare/mcp-server-cloudflare"
-    ],
+    "args": ["-y", "@cloudflare/mcp-server-cloudflare"],
     "command": "npx"
   }
 }
 ```
 
 ## Examples
+
 ### Add DNS record for subdomain
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Add DNS record for subdomain"
 ```
+
 ### Deploy Worker script
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Deploy Worker script"
 ```
+
 ### Show traffic analytics
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Show traffic analytics"
 ```
+
 ### Configure firewall rule
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Configure firewall rule"
 ```
+
 ### Create DNS Record
+
 Create a new Cloudflare DNS A record with TTL configuration
+
 ```typescript
 // Create Cloudflare DNS record
 const record = await cloudflare.dns.records.create({
@@ -205,7 +218,7 @@ const record = await cloudflare.dns.records.create({
   type: "A",
   name: "example.com",
   content: "192.0.2.1",
-  ttl: 3600
+  ttl: 3600,
 });
 ```
 
@@ -222,30 +235,39 @@ const record = await cloudflare.dns.records.create({
 - Cloudflare webhook configurations and payloads may contain sensitive DNS and security configuration data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
 
 ## Troubleshooting
+
 ### HTTP 429 error: API rate limit exceeded for 5 minutes
 
 Cloudflare global rate limit is 1,200 requests per 5 minutes. Wait for 5-minute window to reset. Distribute API calls across time and implement request throttling to stay under 4 requests per second.
+
 ### Rate limit API error: decoding not yet implemented
 
 Add Content-Type: application/json header to your API request. Verify request body is properly formatted JSON and includes all required parameters for the endpoint.
+
 ### Error: ratelimit.api.not_entitled for Enterprise features
 
 Contact your Cloudflare Account Team to enable Enterprise rate limiting features. Verify your account tier supports advanced rate limiting or migrate to Ruleset Engine API.
+
 ### Authentication error: token permission insufficient
 
 Verify API token has Firewall Services Write permission for rate limiting. Check token hasn't expired and regenerate from Cloudflare dashboard if needed. Use Bearer authentication, not email/key pair.
+
 ### Cannot configure rate limits or firewall rules
 
 Ensure API token has correct zone and account-level permissions. Verify you're using Ruleset Engine API (not deprecated Rate Limiting API) and check account tier supports feature.
+
 ### Cloudflare MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For Global API keys, verify email and key combination is correct.
+
 ### Cloudflare rate limit errors when managing large zones
 
 Implement exponential backoff retry logic with jitter. Use batch operations to reduce API calls. Cache frequently accessed zone data. Monitor rate limit headers and adjust request frequency accordingly. Cloudflare allows 1,200 requests per 5 minutes per API token.
+
 ### Cloudflare zone or DNS record access denied errors
 
 Verify API token has access to the zone and account. Check zone permissions and account membership. Ensure API token scopes include required zone and DNS permissions.
+
 ### Cloudflare MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Cloudflare API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

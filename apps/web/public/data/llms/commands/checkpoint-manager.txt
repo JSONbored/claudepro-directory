@@ -58,6 +58,7 @@ The `/checkpoint-manager` command helps you manage Claude Code's automatic check
 
 ## Quick Access
 ### ESC+ESC Method (Fastest)
+
 ```bash
 # During any Claude Code session:
 # Press ESC twice quickly
@@ -83,6 +84,7 @@ The `/checkpoint-manager` command helps you manage Claude Code's automatic check
 ```
 
 ### /rewind Command Method
+
 ```bash
 /rewind
 
@@ -239,10 +241,10 @@ Files to be reverted:
   src/services/cache.service.ts
     - 45 lines added will be removed
     - 12 lines modified will be restored
-  
+
   src/config/redis.config.ts
     - File will be deleted (was created in this session)
-  
+
   tests/cache.service.test.ts
     - File will be deleted (was created in this session)
 
@@ -269,13 +271,13 @@ Proceed with rewind? (y/n): y
 ⚡ Auto Checkpoints:
 2. Implemented user authentication (14:25:12)
    Files: auth.service.ts, user.model.ts, routes/auth.ts
-   
+
 3. Fixed login validation (14:20:45)
    Files: auth.service.ts
-   
+
 4. Created auth endpoint (14:15:33)
    Files: routes/auth.ts
-   
+
 5. Added password hashing (14:10:22)
    Files: auth.service.ts, user.model.ts
 
@@ -377,10 +379,10 @@ Files to be reverted:
   src/services/cache.service.ts
     - 45 lines added will be removed
     - 12 lines modified will be restored
-  
+
   src/config/redis.config.ts
     - File will be deleted (was created in this session)
-  
+
   tests/cache.service.test.ts
     - File will be deleted (was created in this session)
 
@@ -404,13 +406,13 @@ Proceed with rewind? (y/n): y
 ⚡ Auto Checkpoints:
 2. Implemented user authentication (14:25:12)
    Files: auth.service.ts, user.model.ts, routes/auth.ts
-   
+
 3. Fixed login validation (14:20:45)
    Files: auth.service.ts
-   
+
 4. Created auth endpoint (14:15:33)
    Files: routes/auth.ts
-   
+
 5. Added password hashing (14:10:22)
    Files: auth.service.ts, user.model.ts
 
@@ -420,12 +422,14 @@ Session duration: 25 minutes
 
 ## Checkpoint Limitations
 ### What Checkpoints DO Track
+
 ✅ File edits made by Claude Code tools (edit_file, write_file)
 ✅ File content at time of snapshot
 ✅ Conversation history and context
 ✅ File metadata (permissions, timestamps)
 
 ### What Checkpoints DON'T Track
+
 ❌ Bash command side effects (files created by shell commands)
 ❌ Manual edits made outside Claude Code
 ❌ git operations (commits, pushes, merges)
@@ -433,6 +437,7 @@ Session duration: 25 minutes
 ❌ External API calls
 
 ### Example: Bash Limitations
+
 ```bash
 User: "Create a backup directory"
 
@@ -470,18 +475,21 @@ $ mkdir backup && cp -r src backup/
 ### Checkpoints vs Git Commits
 
 **Checkpoints:**
+
 - Session-level (temporary)
 - Automatic, no manual intervention
 - Fast rewind (instant)
 - Lost after session ends
 
 **Git Commits:**
+
 - Permanent version control
 - Manual commit process
 - Can share with team
 - Persistent across sessions
 
 ### Recommended Workflow
+
 ```bash
 1. Checkpoints for exploration:
    - Try risky changes
@@ -495,6 +503,7 @@ $ mkdir backup && cp -r src backup/
 ```
 
 ### Example: Checkpoint + Git Workflow
+
 ```bash
 User: "Try refactoring the auth system"
 
@@ -539,6 +548,7 @@ User: "Works great! Commit this"
 
 ## Advanced Patterns
 ### Exploratory Coding Pattern
+
 ```bash
 1. Manual checkpoint before exploration
    /checkpoint-manager --create "Before experiment"
@@ -558,6 +568,7 @@ User: "Works great! Commit this"
 ```
 
 ### Refactoring Safety Net
+
 ```bash
 # Before large refactor:
 /checkpoint-manager --create "Before refactor: Working state"
@@ -575,6 +586,7 @@ git commit -m "Refactored modules A-E"
 ```
 
 ### Debugging with Checkpoints
+
 ```bash
 User: "The app broke, not sure when"
 
@@ -582,16 +594,16 @@ User: "The app broke, not sure when"
 
 [Checkpoints]
 1. [5 min ago] Added caching
-2. [10 min ago] Optimized queries  
+2. [10 min ago] Optimized queries
 3. [15 min ago] Updated dependencies
 4. [20 min ago] Fixed validation
 
 # Binary search for breaking change:
 Restore to checkpoint 2
   → Still broken
-Restore to checkpoint 3  
+Restore to checkpoint 3
   → Works!
-  
+
 Conclusion: "Optimized queries" (checkpoint 2) broke the app
 
 # Fix the query optimization:
@@ -636,16 +648,16 @@ User: "The app broke, not sure when"
 
 [Checkpoints]
 1. [5 min ago] Added caching
-2. [10 min ago] Optimized queries  
+2. [10 min ago] Optimized queries
 3. [15 min ago] Updated dependencies
 4. [20 min ago] Fixed validation
 
 # Binary search for breaking change:
 Restore to checkpoint 2
   → Still broken
-Restore to checkpoint 3  
+Restore to checkpoint 3
   → Works!
-  
+
 Conclusion: "Optimized queries" (checkpoint 2) broke the app
 
 # Fix the query optimization:
@@ -654,17 +666,18 @@ User: "The query optimization broke it. Let's fix that specific change"
 
 ## Configuration
 ### Auto-Checkpoint Settings
+
 ```json
 // .claude/checkpoint.config.json
 {
   "autoCheckpoint": {
     "enabled": true,
-    "interval": 1,  // Every N file edits
-    "maxCheckpoints": 50,  // Keep last 50 checkpoints
-    "includeTests": false  // Don't checkpoint test file changes
+    "interval": 1, // Every N file edits
+    "maxCheckpoints": 50, // Keep last 50 checkpoints
+    "includeTests": false // Don't checkpoint test file changes
   },
   "rewindDefaults": {
-    "restoreMode": "both",  // code-only, conversation-only, both
+    "restoreMode": "both", // code-only, conversation-only, both
     "confirmBeforeRestore": true,
     "showPreview": true
   }
@@ -672,6 +685,7 @@ User: "The query optimization broke it. Let's fix that specific change"
 ```
 
 ### Disable Auto-Checkpoints
+
 ```bash
 /checkpoint-manager --disable-auto
 
@@ -681,6 +695,7 @@ User: "The query optimization broke it. Let's fix that specific change"
 ```
 
 ### Custom Checkpoint Intervals
+
 ```bash
 /checkpoint-manager --interval=5
 
@@ -691,12 +706,12 @@ User: "The query optimization broke it. Let's fix that specific change"
 {
   "autoCheckpoint": {
     "enabled": true,
-    "interval": 1,  // Every N file edits
-    "maxCheckpoints": 50,  // Keep last 50 checkpoints
-    "includeTests": false  // Don't checkpoint test file changes
+    "interval": 1, // Every N file edits
+    "maxCheckpoints": 50, // Keep last 50 checkpoints
+    "includeTests": false // Don't checkpoint test file changes
   },
   "rewindDefaults": {
-    "restoreMode": "both",  // code-only, conversation-only, both
+    "restoreMode": "both", // code-only, conversation-only, both
     "confirmBeforeRestore": true,
     "showPreview": true
   }
@@ -747,12 +762,14 @@ User: "The query optimization broke it. Let's fix that specific change"
 
 ## Troubleshooting
 ### "No checkpoints available"
+
 ```
 Cause: Session just started, no changes made yet
 Solution: Make some changes first, checkpoints auto-create
 ```
 
 ### "Cannot rewind bash command changes"
+
 ```
 Cause: Bash commands create files outside checkpoint tracking
 Solution: Manually clean up with reverse commands
@@ -761,6 +778,7 @@ Solution: Manually clean up with reverse commands
 ```
 
 ### "Checkpoint restored but issue persists"
+
 ```
 Cause: Issue may be in database, environment, or external state
 Solution: Check non-code factors:
@@ -770,6 +788,7 @@ Solution: Check non-code factors:
 ```
 
 ### "Lost conversation context after rewind"
+
 ```
 Cause: Restored "both" which includes conversation
 Solution: Use "code-only" restore to preserve discussion

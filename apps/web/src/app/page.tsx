@@ -19,17 +19,20 @@ export const metadata: Metadata = buildPageMetadata({
     "mcp servers",
     "ai skills",
     "claude agents",
-    "ai workflows"
-  ]
+    "ai workflows",
+  ],
 });
 
 export default async function HomePage() {
   const [directoryEntries, categories] = await Promise.all([
     getDirectoryEntries(),
-    getCategorySummaries()
+    getCategorySummaries(),
   ]);
   const initialEntries = directoryEntries.slice(0, 15);
-  const totalEntries = categories.reduce((sum, category) => sum + category.count, 0);
+  const totalEntries = categories.reduce(
+    (sum, category) => sum + category.count,
+    0,
+  );
   const jsonLd = buildItemListJsonLd(
     initialEntries.map((entry) => ({
       name: entry.title,
@@ -37,7 +40,8 @@ export default async function HomePage() {
     })),
     {
       name: "Featured HeyClaude entries",
-      description: "A starting set of Claude resources from the HeyClaude directory.",
+      description:
+        "A starting set of Claude resources from the HeyClaude directory.",
     },
   );
 
@@ -49,15 +53,19 @@ export default async function HomePage() {
           <div className="mx-auto max-w-4xl space-y-5">
             <span className="eyebrow">Community directory for Claude</span>
             <h1 className="display-title text-balance">
-              Discover the best Claude tools, skills, MCP servers, and workflows.
+              Discover the best Claude tools, skills, MCP servers, and
+              workflows.
             </h1>
             <p className="mx-auto max-w-2xl text-lg leading-8 text-muted-foreground">
-              A GitHub-native directory for Claude Code setups, MCP integrations,
-              prompts, hooks, reusable skills, and practical guides.
+              A GitHub-native directory for Claude Code setups, MCP
+              integrations, prompts, hooks, reusable skills, and practical
+              guides.
             </p>
             <div className="hero-stats-grid">
               <div className="hero-stat-block">
-                <div className="hero-stat-number"><GitHubStarsLive withPlus fallback={0} /></div>
+                <div className="hero-stat-number">
+                  <GitHubStarsLive withPlus fallback={0} />
+                </div>
                 <div className="hero-stat-label">GitHub Stars</div>
               </div>
               <div className="hero-stat-block">
@@ -65,13 +73,19 @@ export default async function HomePage() {
                 <div className="hero-stat-label">Categories</div>
               </div>
               <div className="hero-stat-block">
-                <div className="hero-stat-number">{totalEntries.toLocaleString()}+</div>
+                <div className="hero-stat-number">
+                  {totalEntries.toLocaleString()}+
+                </div>
                 <div className="hero-stat-label">Configs</div>
               </div>
             </div>
           </div>
           <div className="mx-auto mt-14 max-w-[52rem] text-left">
-            <BrowseDirectory entries={initialEntries} limit={15} entriesUrl="/data/directory-index.json" />
+            <BrowseDirectory
+              entries={initialEntries}
+              limit={15}
+              entriesUrl="/data/directory-index.json"
+            />
           </div>
         </div>
       </section>

@@ -14,11 +14,11 @@ seoDescription: >-
   and stash count alongside Claude session info Discover tools for AI
   development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-01'
-documentationUrl: 'https://git-scm.com/docs/git-status'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-01"
+documentationUrl: "https://git-scm.com/docs/git-status"
 installable: true
-usageSnippet: 'sonnet-4.5 │ 1,234  main↑2 ✗ ⚑1'
+usageSnippet: "sonnet-4.5 │ 1,234  main↑2 ✗ ⚑1"
 copySnippet: |-
   {
     "statusLine": {
@@ -137,6 +137,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Git branch name with 🌿 icon
@@ -179,8 +180,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Git Status Statusline with Conflict Detection
+
 Extended version detecting merge conflicts and showing conflict count
+
 ```bash
 #!/usr/bin/env bash
 
@@ -196,10 +200,10 @@ cd "$workdir" 2>/dev/null || cd .
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
-  
+
   # Check for merge conflicts
   conflict_count=$(git diff --name-only --diff-filter=U 2>/dev/null | wc -l | tr -d ' ')
-  
+
   # Check working directory status
   if [ "$conflict_count" -gt 0 ]; then
     status_icon="⚠"
@@ -211,7 +215,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     status_icon="✗"
     status_color="\033[33m"  # Yellow
   fi
-  
+
   ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
   tracking=""
   if [ -n "$ahead_behind" ]; then
@@ -224,18 +228,18 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
       tracking="${tracking}↓$behind"
     fi
   fi
-  
+
   stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
   stash_info=""
   if [ "$stash_count" -gt 0 ]; then
     stash_info=" ⚑$stash_count"
   fi
-  
+
   conflict_info=""
   if [ "$conflict_count" -gt 0 ]; then
     conflict_info=" ⚠$conflict_count"
   fi
-  
+
   git_info=" ${status_color}${branch}${tracking}${stash_info}${conflict_info} ${status_icon}\033[0m"
 else
   git_info=""
@@ -249,8 +253,11 @@ fi
 
 echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
 ```
+
 ### Git Status Statusline with Remote Status
+
 Version showing remote repository name and URL
+
 ```bash
 #!/usr/bin/env bash
 
@@ -266,11 +273,11 @@ cd "$workdir" 2>/dev/null || cd .
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
-  
+
   # Get remote name
   remote=$(git config --get branch.${branch}.remote 2>/dev/null || echo "origin")
   remote_url=$(git config --get remote.${remote}.url 2>/dev/null | sed 's/.*\/\([^/]*\)\.git$/\1/')
-  
+
   if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     status_icon="✓"
     status_color="\033[32m"
@@ -278,7 +285,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     status_icon="✗"
     status_color="\033[33m"
   fi
-  
+
   ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
   tracking=""
   if [ -n "$ahead_behind" ]; then
@@ -291,18 +298,18 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
       tracking="${tracking}↓$behind"
     fi
   fi
-  
+
   stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
   stash_info=""
   if [ "$stash_count" -gt 0 ]; then
     stash_info=" ⚑$stash_count"
   fi
-  
+
   remote_info=""
   if [ -n "$remote_url" ]; then
     remote_info=" @${remote_url}"
   fi
-  
+
   git_info=" ${status_color}${branch}${tracking}${stash_info}${remote_info} ${status_icon}\033[0m"
 else
   git_info=""
@@ -316,8 +323,11 @@ fi
 
 echo -e "\033[36m${model}\033[0m │ \033[35m${tokens_formatted}\033[0m${git_info}"
 ```
+
 ### Git Status Statusline Installation Example
+
 Complete setup script with Git verification and Unicode character testing
+
 ```bash
 #!/bin/bash
 # Installation script for Git Status Statusline
@@ -367,7 +377,7 @@ cd "$workdir" 2>/dev/null || cd .
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
   branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "(detached)")
-  
+
   if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
     status_icon="✓"
     status_color="\033[32m"
@@ -375,7 +385,7 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
     status_icon="✗"
     status_color="\033[33m"
   fi
-  
+
   ahead_behind=$(git rev-list --left-right --count HEAD...@{upstream} 2>/dev/null)
   tracking=""
   if [ -n "$ahead_behind" ]; then
@@ -388,13 +398,13 @@ if git rev-parse --git-dir > /dev/null 2>&1; then
       tracking="${tracking}↓$behind"
     fi
   fi
-  
+
   stash_count=$(git stash list 2>/dev/null | wc -l | tr -d ' ')
   stash_info=""
   if [ "$stash_count" -gt 0 ]; then
     stash_info=" ⚑$stash_count"
   fi
-  
+
   git_info=" ${status_color}${branch}${tracking}${stash_info} ${status_icon}\033[0m"
 else
   git_info=""
@@ -425,27 +435,35 @@ echo "Set upstream branch for ahead/behind tracking: git branch --set-upstream-t
 ```
 
 ## Troubleshooting
+
 ### Git branch not showing or shows '(detached)'
 
 Ensure you're on a proper branch: git checkout main. Detached HEAD state is normal when checking out specific commits. Verify branch exists: git branch. Check symbolic-ref command: git symbolic-ref --short HEAD. If in detached state, create new branch: git checkout -b new-branch-name.
+
 ### Ahead/behind indicators (↑↓) not appearing
 
 This requires an upstream branch to be set. Run: git branch --set-upstream-to=origin/main main (adjust branch name as needed). Verify upstream is set: git branch -vv. Check remote exists: git remote -v. Ensure remote branch exists: git ls-remote origin main. If remote doesn't exist, push branch first: git push -u origin main.
+
 ### Status always shows dirty (✗) even after commit
 
 Check git status for untracked files or changes. The statusline reflects actual git state. Run git status -s to see what's detected. Check for untracked files: git status --porcelain. Verify all changes are committed: git diff HEAD. Check for ignored files that might be tracked: git ls-files.
+
 ### Unicode icons showing as boxes
 
-Install a Nerd Font or ensure terminal has Unicode support. Test with: echo '✓ ✗ ↑ ↓ ⚑'. Check terminal encoding: locale charmap (should be UTF-8). Set terminal to UTF-8: export LANG=en_US.UTF-8. Install Nerd Font: https://www.nerdfonts.com/. If Unicode not supported, modify script to use ASCII alternatives: + for clean, * for dirty, ^ for ahead, v for behind.
+Install a Nerd Font or ensure terminal has Unicode support. Test with: echo '✓ ✗ ↑ ↓ ⚑'. Check terminal encoding: locale charmap (should be UTF-8). Set terminal to UTF-8: export LANG=en_US.UTF-8. Install Nerd Font: https://www.nerdfonts.com/. If Unicode not supported, modify script to use ASCII alternatives: + for clean, \* for dirty, ^ for ahead, v for behind.
+
 ### Stash count not showing or incorrect
 
 Verify stashes exist: git stash list. Check stash count calculation: git stash list | wc -l. Ensure git stash command works: git stash list 2>/dev/null. If stashes exist but not showing, check script logic for stash_count variable. Verify wc and tr commands are available: which wc tr.
+
 ### Token count not displaying or showing 0
 
 Check JSON input structure: echo '$input' | jq .. Verify cost.total_tokens exists: echo '$input' | jq .cost.total_tokens. Check alternative field: echo '$input' | jq .session.totalTokens. Verify jq is installed: which jq. Test with sample JSON: echo '{"cost":{"total_tokens":1234}}' | jq -r '.cost.total_tokens // 0' (should return 1234).
+
 ### Model name not displaying correctly
 
 Check JSON input: echo '$input' | jq .model. Verify model.display_name exists: echo '$input' | jq .model.display_name. Check alternative: echo '$input' | jq .model.id. Verify sed command works: echo 'claude-sonnet-4.5' | sed 's/claude-//' (should return sonnet-4.5). Check model field structure in Claude Code JSON output.
+
 ### Git statusline not appearing when not in git repository
 
 This is expected behavior - script gracefully handles non-git directories. Verify git repository check: git rev-parse --git-dir (should return .git path or error). If you want git info in non-git directories, modify script to show 'no-git' indicator. Check workspace path: echo '$input' | jq .workspace.current_dir.

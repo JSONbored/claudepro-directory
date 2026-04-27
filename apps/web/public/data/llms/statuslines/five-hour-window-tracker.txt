@@ -62,7 +62,9 @@ Claude Code 5-hour rolling session window tracker with visual progress bar, time
 
 ## Examples
 ### Enhanced Five Hour Window Tracker with Session History
+
 Extended version tracking multiple sessions within the 5-hour window
+
 ```bash
 #!/usr/bin/env bash
 
@@ -143,8 +145,11 @@ RESET="\033[0m"
 
 echo -e "${STATUS_ICON} 5H Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
 ```
+
 ### Five Hour Window Tracker with Custom Window Limit
+
 Configurable window limit for different usage scenarios
+
 ```bash
 #!/usr/bin/env bash
 
@@ -206,8 +211,11 @@ RESET="\033[0m"
 
 echo -e "${STATUS_ICON} ${WINDOW_LIMIT}min Window: ${STATUS_COLOR}${bar}${RESET} ${percentage_used}% | ${STATUS_COLOR}${time_display}${RESET} left"
 ```
+
 ### Five Hour Window Tracker Installation Example
+
 Complete setup script with Unicode character verification
+
 ```bash
 #!/bin/bash
 # Installation script for Five Hour Window Tracker
@@ -554,24 +562,31 @@ echo "Note: This tracks Claude Code's unique 5-hour rolling session window (300 
 ### Progress bar not updating or showing as empty boxes
 
 Ensure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. If unsupported, replace with ASCII: bar_filled uses '#' and bar_empty uses '-' instead of Unicode blocks. Verify printf command works: printf '█%.0s' $(seq 1 5). Check terminal encoding: locale charmap (should be UTF-8).
+
 ### Time remaining showing negative or EXPIRED incorrectly
 
 Check cost.total_duration_ms field in JSON: echo '$input' | jq .cost.total_duration_ms. Verify calculation: duration_minutes should be total_duration_ms / 60000. If sessions overlap, this tracks CURRENT session only, not aggregate time. Check WINDOW_LIMIT is 300: echo $WINDOW_LIMIT. Verify time_remaining calculation: time_remaining=$((WINDOW_LIMIT - duration_minutes)).
+
 ### Percentage exceeds 100% showing incorrect progress
 
-Script caps percentage at 100% with overflow protection. Claude sessions can continue beyond 5 hours in practice. If you see 100% + EXPIRED, session has exceeded window. This is expected behavior, not a bug. Start new session to reset window. Verify percentage calculation: percentage_used=$(( (duration_minutes * 100) / WINDOW_LIMIT )). Check overflow protection: if [ $percentage_used -gt 100 ]; then percentage_used=100; fi.
+Script caps percentage at 100% with overflow protection. Claude sessions can continue beyond 5 hours in practice. If you see 100% + EXPIRED, session has exceeded window. This is expected behavior, not a bug. Start new session to reset window. Verify percentage calculation: percentage_used=$(( (duration_minutes \* 100) / WINDOW_LIMIT )). Check overflow protection: if [ $percentage_used -gt 100 ]; then percentage_used=100; fi.
+
 ### Warning colors not displaying at correct thresholds
 
-Verify color thresholds: <50% green, 50-80% yellow, >80% red. Check percentage_used calculation: (duration_minutes * 100) / 300. Test with known durations: 150 min should be 50% yellow, 250 min should be 83% red. Verify ANSI color codes work: echo -e '\033[38;5;46mGREEN\033[0m'. Check terminal supports 256-color mode: echo $TERM (should be xterm-256color or similar).
+Verify color thresholds: <50% green, 50-80% yellow, >80% red. Check percentage_used calculation: (duration_minutes \* 100) / 300. Test with known durations: 150 min should be 50% yellow, 250 min should be 83% red. Verify ANSI color codes work: echo -e '\033[38;5;46mGREEN\033[0m'. Check terminal supports 256-color mode: echo $TERM (should be xterm-256color or similar).
+
 ### Multiple overlapping sessions not reflected in tracker
 
 Statusline tracks CURRENT session only (based on session_id in JSON). Claude supports multiple overlapping 5-hour windows simultaneously. To track multiple sessions, run separate statusline instances or modify script to read from multiple session files. Verify session_id exists: echo '$input' | jq .session_id. Check if session history tracking is enabled in enhanced version.
+
 ### Time display showing incorrect hours/minutes format
 
 Verify time_remaining calculation: time_remaining=$((WINDOW_LIMIT - duration_minutes)). Check hours calculation: remaining_hours=$((time_remaining / 60)). Check minutes calculation: remaining_mins=$((time_remaining % 60)). Test: time_remaining=150 should show '2h 30m'. Verify format logic: if [ $time_remaining -gt 60 ]; then show hours and minutes; elif [ $time_remaining -gt 0 ]; then show minutes only; else show EXPIRED.
+
 ### Progress bar calculation showing wrong number of filled blocks
 
 Verify bar_filled calculation: bar_filled=$((percentage_used / 5)) (each char = 5%). Test: percentage=50%; bar_filled=$((50 / 5)); echo $bar_filled (should be 10). Check bar_empty calculation: bar_empty=$((20 - bar_filled)). Verify printf command: printf '█%.0s' $(seq 1 5) should output 5 block characters. Ensure seq command is available: which seq.
+
 ### Statusline not updating or stuck at 0%
 
 Check JSON input is being read: echo '$input' | jq .. Verify cost.total_duration_ms exists: echo '$input' | jq .cost.total_duration_ms. Check jq is installed: which jq. Verify duration_minutes calculation: duration_minutes=$((total_duration_ms / 60000)). Test with sample JSON: echo '{"cost":{"total_duration_ms":180000}}' | jq -r '.cost.total_duration_ms // 0' (should return 180000). Check refreshInterval in settings.json is set to 1000ms or lower.

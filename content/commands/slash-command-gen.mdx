@@ -15,13 +15,13 @@ seoDescription: >-
   frontmatter metadata, and team-shared workflows stored in .claude/commands
   directory
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/slash-commands'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/slash-commands"
 installable: true
-installCommand: '/slash-command-gen [command-name] [options]'
-usageSnippet: '/slash-command-gen [command-name] [options]'
-copySnippet: '/slash-command-gen [command-name] [options]'
+installCommand: "/slash-command-gen [command-name] [options]"
+usageSnippet: "/slash-command-gen [command-name] [options]"
+copySnippet: "/slash-command-gen [command-name] [options]"
 tags:
   - slash-commands
   - custom-commands
@@ -50,8 +50,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/slash-command-gen [command-name] [options]'
+commandSyntax: "/slash-command-gen [command-name] [options]"
 ---
+
 The `/slash-command-gen` command creates custom slash commands stored as Markdown templates in `.claude/commands/` for reusable, team-shared workflows.
 
 ## Features
@@ -97,11 +98,13 @@ The `/slash-command-gen` command creates custom slash commands stored as Markdow
 ### Basic Custom Command
 
 **Command:**
+
 ```bash
 /slash-command-gen fix-issue --github-workflow --project
 ```
 
 **Generated File:** `.claude/commands/fix-issue.md`
+
 ```markdown
 ---
 description: Fix GitHub issue with TDD workflow
@@ -120,12 +123,14 @@ Fix GitHub issue #$1 using test-driven development:
 8. Request review
 
 Follow TDD best practices:
+
 - Write tests FIRST
 - Commit tests before implementation
 - Ensure 80%+ coverage
 ```
 
 **Usage:**
+
 ```bash
 /fix-issue 123
 
@@ -136,11 +141,13 @@ Follow TDD best practices:
 ### Code Review Command
 
 **Command:**
+
 ```bash
 /slash-command-gen review-pr --code-review --with-args
 ```
 
 **Generated:** `.claude/commands/review-pr.md`
+
 ```markdown
 ---
 description: Comprehensive PR review with security focus
@@ -150,6 +157,7 @@ tags: [review, security, quality]
 Perform comprehensive code review of PR #$1:
 
 ## Security Review
+
 1. Check for SQL injection vulnerabilities
 2. Verify input validation on all endpoints
 3. Check authentication/authorization
@@ -157,6 +165,7 @@ Perform comprehensive code review of PR #$1:
 5. Check for sensitive data exposure
 
 ## Code Quality
+
 1. Verify TypeScript types (no `any`)
 2. Check for code duplication
 3. Review error handling
@@ -164,23 +173,27 @@ Perform comprehensive code review of PR #$1:
 5. Check adherence to CLAUDE.md standards
 
 ## Performance
+
 1. Identify N+1 query issues
 2. Check for unnecessary re-renders
 3. Review database query efficiency
 4. Check for memory leaks
 
 ## Documentation
+
 1. Verify JSDoc comments on public APIs
 2. Check README updates if needed
 3. Ensure CHANGELOG updated
 
 Provide:
+
 - ✅ Approved items
-- ⚠️  Suggestions for improvement  
+- ⚠️ Suggestions for improvement
 - ❌ Required changes before merge
 ```
 
 **Usage:**
+
 ```bash
 /review-pr 456
 
@@ -190,11 +203,13 @@ Provide:
 ### Multi-Argument Command
 
 **Command:**
+
 ```bash
 /slash-command-gen create-feature --custom --with-args
 ```
 
 **Generated:** `.claude/commands/create-feature.md`
+
 ```markdown
 ---
 description: Create new feature with full stack implementation
@@ -204,11 +219,13 @@ tags: [feature, fullstack, tdd]
 Create feature "$1" in module "$2" with priority $3:
 
 ## Planning Phase
+
 1. Review existing $2 module architecture
 2. Design feature integration approach
 3. Identify affected files and dependencies
 
 ## Implementation (TDD)
+
 1. Write comprehensive test suite for $1
 2. Implement backend:
    - Database schema changes
@@ -220,16 +237,19 @@ Create feature "$1" in module "$2" with priority $3:
    - State management
 
 ## Testing
+
 1. Unit tests (80%+ coverage)
 2. Integration tests (API + DB)
 3. E2E tests (critical paths)
 
 ## Documentation
+
 1. Update API documentation
 2. Add usage examples
 3. Update CHANGELOG with feature: $1
 
 ## Deployment
+
 1. Create feature flag for gradual rollout
 2. Generate migration scripts
 3. Create deployment checklist
@@ -239,23 +259,26 @@ Deadline: Based on priority
 ```
 
 **Usage:**
+
 ```bash
 /create-feature "user notifications" "messaging" "high"
 
 # $1 = user notifications
-# $2 = messaging  
+# $2 = messaging
 # $3 = high
 ```
 
 ### Simple Workflow Command
 
 **Command:**
+
 ```bash
 /slash-command-gen optimize-bundle --custom
 ```
 
 **Generated:** `.claude/commands/optimize-bundle.md`
-```markdown
+
+````markdown
 ---
 description: Analyze and optimize bundle size
 tags: [performance, optimization]
@@ -267,6 +290,7 @@ Optimize application bundle size:
    ```bash
    pnpm run build:analyze
    ```
+````
 
 2. Identify large dependencies:
    - Check for duplicate packages
@@ -290,23 +314,26 @@ Optimize application bundle size:
    - Check Core Web Vitals
 
 Target: Reduce bundle size by 30%
-```
+
+````
 
 **Usage:**
 ```bash
 /optimize-bundle
 
 # Claude analyzes bundle, suggests optimizations, implements changes
-```
+````
 
 ### Documentation Command
 
 **Command:**
+
 ```bash
 /slash-command-gen doc-api --documentation --with-args
 ```
 
 **Generated:** `.claude/commands/doc-api.md`
+
 ```markdown
 ---
 description: Generate comprehensive API documentation
@@ -316,6 +343,7 @@ tags: [documentation, api]
 Generate comprehensive documentation for API endpoint $1:
 
 ## Endpoint Analysis
+
 1. Read implementation: $1
 2. Extract:
    - HTTP method and path
@@ -326,6 +354,7 @@ Generate comprehensive documentation for API endpoint $1:
    - Authentication requirements
 
 ## Documentation Generation
+
 Create markdown documentation with:
 
 ### Endpoint: $1
@@ -335,27 +364,31 @@ Create markdown documentation with:
 **Authentication:** [Required/Optional]
 
 #### Request
+
 \`\`\`typescript
 interface RequestBody {
-  // Schema
+// Schema
 }
 \`\`\`
 
 #### Response
+
 \`\`\`typescript
 interface ResponseBody {
-  // Schema
+// Schema
 }
 \`\`\`
 
 #### Example
+
 \`\`\`bash
 curl -X POST https://api.example.com$1 \
-  -H "Authorization: Bearer TOKEN" \
-  -d '{"example": "data"}'
+ -H "Authorization: Bearer TOKEN" \
+ -d '{"example": "data"}'
 \`\`\`
 
 #### Error Codes
+
 - 400: Bad Request - [Details]
 - 401: Unauthorized - [Details]
 - 500: Server Error - [Details]
@@ -364,6 +397,7 @@ Save to: docs/api/$1.md
 ```
 
 **Usage:**
+
 ```bash
 /doc-api /api/users/create
 
@@ -373,11 +407,13 @@ Save to: docs/api/$1.md
 ### $ARGUMENTS vs Positional
 
 **Using $ARGUMENTS (all arguments as string):**
+
 ```markdown
 # .claude/commands/commit.md
+
 ---
-description: Create conventional commit
----
+
+## description: Create conventional commit
 
 Create a conventional commit with message: "$ARGUMENTS"
 
@@ -386,23 +422,28 @@ Run: git add . && git commit -m "$ARGUMENTS"
 ```
 
 **Usage:**
+
 ```bash
 /commit feat(auth): add OAuth2 support
 # $ARGUMENTS = "feat(auth): add OAuth2 support"
 ```
 
 **Using Positional ($1, $2, $3):**
+
 ```markdown
 # .claude/commands/commit-structured.md
+
 Create conventional commit:
+
 - Type: $1
-- Scope: $2  
+- Scope: $2
 - Message: $3
 
 Run: git commit -m "$1($2): $3"
 ```
 
 **Usage:**
+
 ```bash
 /commit-structured feat auth "add OAuth2 support"
 # $1 = feat
@@ -413,6 +454,7 @@ Run: git commit -m "$1($2): $3"
 ## Advanced Patterns
 
 ### Conditional Logic
+
 ```markdown
 ---
 description: Deploy to environment
@@ -421,6 +463,7 @@ description: Deploy to environment
 Deploy to $1 environment:
 
 If $1 is "production":
+
 1. Run full test suite
 2. Require approval
 3. Create backup
@@ -428,16 +471,19 @@ If $1 is "production":
 5. Monitor for 30 minutes
 
 If $1 is "staging":
+
 1. Run smoke tests
 2. Deploy immediately
 3. Notify team in Slack
 
 If $1 is "dev":
+
 1. Skip tests
 2. Fast deployment
 ```
 
 ### Chained Commands
+
 ```markdown
 ---
 description: Full feature workflow
@@ -459,7 +505,8 @@ Complete feature workflow for "$1":
 ```
 
 ### Template with Frontmatter
-```markdown
+
+````markdown
 ---
 description: Security audit workflow
 tags: [security, audit, compliance]
@@ -474,8 +521,10 @@ Run comprehensive security audit:
    ```bash
    npx sonarqube-scanner
    ```
+````
 
 2. Dependency audit:
+
    ```bash
    npm audit --audit-level=moderate
    ```
@@ -489,7 +538,8 @@ Run comprehensive security audit:
    - Findings summary
    - Severity ratings
    - Remediation steps
-```
+
+````
 
 ## Team Collaboration
 
@@ -505,15 +555,17 @@ Run comprehensive security audit:
     review-pr.md
     deploy.md
     create-feature.md
-```
+````
 
 **Benefits:**
+
 - Consistent workflows across team
 - Onboard new developers faster
 - Standardize complex processes
 - Share tribal knowledge
 
 ### User Commands (Personal)
+
 ```bash
 # Location: ~/.claude/commands/
 # Personal workflows
@@ -526,6 +578,7 @@ Run comprehensive security audit:
 ```
 
 **Use Cases:**
+
 - Personal shortcuts
 - Individual preferences
 - Experimental workflows
@@ -533,6 +586,7 @@ Run comprehensive security audit:
 ## Command Discovery
 
 ### List All Commands
+
 ```bash
 /help
 
@@ -548,11 +602,12 @@ User Commands:
 ```
 
 ### Tab Completion
+
 ```bash
 # Type / and press TAB
 /fix-<TAB>
   → /fix-issue
-  
+
 /rev<TAB>
   → /review-pr
 ```
@@ -560,6 +615,7 @@ User Commands:
 ## Best Practices
 
 ### Clear Descriptions
+
 ```markdown
 ---
 # ✅ Good
@@ -571,35 +627,42 @@ description: Fix stuff
 ```
 
 ### Specific Instructions
+
 ```markdown
 # ✅ Good
+
 Implement feature using:
+
 1. Write tests in tests/unit/
 2. Use Vitest framework
 3. 80%+ coverage required
 4. Follow AAA pattern
 
 # ❌ Bad
+
 Write some tests
 ```
 
 ### Use Tags
+
 ```markdown
 ---
 tags: [github, tdd, testing, workflow]
 ---
+
 # Makes commands searchable and organized
 ```
 
 ### Document Arguments
+
 ```markdown
 ---
 description: Deploy to environment
 ---
 
 Arguments:
-  $1 - Environment (dev, staging, production)
-  $2 - Version tag (optional)
+$1 - Environment (dev, staging, production)
+$2 - Version tag (optional)
 
 Example: /deploy production v1.2.3
 ```
@@ -609,30 +672,35 @@ Example: /deploy production v1.2.3
 ### Available Templates
 
 **GitHub Workflows:**
+
 - fix-issue
 - create-pr
 - review-pr
 - close-stale-issues
 
 **Code Quality:**
+
 - code-review
 - refactor-module
 - optimize-performance
 - fix-security-issue
 
 **Testing:**
+
 - generate-tests
 - run-e2e-tests
 - update-snapshots
 - coverage-report
 
 **Documentation:**
+
 - doc-api
 - update-readme
 - generate-changelog
 - write-tutorial
 
 **Deployment:**
+
 - deploy-env
 - rollback
 - health-check
@@ -641,6 +709,7 @@ Example: /deploy production v1.2.3
 ## Command Maintenance
 
 ### Update Command
+
 ```bash
 /slash-command-gen fix-issue --update
 
@@ -650,6 +719,7 @@ Example: /deploy production v1.2.3
 ```
 
 ### Delete Command
+
 ```bash
 /slash-command-gen fix-issue --delete
 
@@ -658,6 +728,7 @@ Example: /deploy production v1.2.3
 ```
 
 ### Validate Commands
+
 ```bash
 /slash-command-gen --validate-all
 

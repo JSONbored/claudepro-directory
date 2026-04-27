@@ -2,18 +2,18 @@
 title: WebAssembly WASM Module Development Skill
 slug: webassembly-module-development
 category: skills
-description: 'Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments.'
-cardDescription: 'Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, a...'
+description: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments."
+cardDescription: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, a..."
 seoTitle: WebAssembly WASM Module Development Skill
-seoDescription: 'Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. Web...'
+seoDescription: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. Web..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://webassembly.org/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://webassembly.org/"
 downloadUrl: /downloads/skills/webassembly-module-development.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/webassembly-module-development.zip -o webassembly-module-development.zip && unzip -o webassembly-module-development.zip -d ./webassembly-module-development'
-usageSnippet: 'Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps. Features include Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI for system calls, Component Model for interoperability, binary size optimization, SIMD support for performance, and multi-runtime compatibility (browser, Node.js, serverless).'
+installCommand: "curl -L https://heyclau.de/downloads/skills/webassembly-module-development.zip -o webassembly-module-development.zip && unzip -o webassembly-module-development.zip -d ./webassembly-module-development"
+usageSnippet: "Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps. Features include Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI for system calls, Component Model for interoperability, binary size optimization, SIMD support for performance, and multi-runtime compatibility (browser, Node.js, serverless)."
 copySnippet: |-
   use wasm_bindgen::prelude::*;
 
@@ -59,9 +59,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://webassembly.org/'
+  - "https://webassembly.org/"
 testedPlatforms:
   - Claude
   - Codex
@@ -75,7 +75,7 @@ prerequisites:
   - WASI SDK 20+ (for WASI modules)
   - Node.js 18+ for JavaScript integration
   - Emscripten SDK or Rust toolchain (wasm-pack) or AssemblyScript compiler for compiling source code to WebAssembly
-  - 'Modern browser with WebAssembly support (Chrome 57+, Firefox 52+, Safari 11+, Edge 16+) or Node.js 8+ with WASI support for running WebAssembly modules'
+  - "Modern browser with WebAssembly support (Chrome 57+, Firefox 52+, Safari 11+, Edge 16+) or Node.js 8+ with WASI support for running WebAssembly modules"
 tags:
   - webassembly
   - wasm
@@ -102,6 +102,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments. With WASI 0.3 bringing native async support and WebAssembly 2.0 complete as of March 2025, WASM has transitioned from experimental to production-ready for AI workloads, cloud-native applications, and high-performance web apps. Features include Rust/C++/Go compilation to WASM, wasm-bindgen for JavaScript integration, WASI for system calls, Component Model for interoperability, binary size optimization, SIMD support for performance, and multi-runtime compatibility (browser, Node.js, serverless).
 
 ## Content
@@ -123,16 +124,17 @@ Claude can build production-ready WebAssembly modules that run at near-native sp
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Rust (recommended) or C++/Go compiler
 - Node.js 18+ for JavaScript integration
 - Basic understanding of systems programming
 
 **What Claude handles automatically:**
+
 - Writing Rust/C++ code optimized for WASM
 - Compiling to WebAssembly with proper optimizations
 - Generating JavaScript bindings with wasm-bindgen
@@ -148,6 +150,7 @@ Claude can build production-ready WebAssembly modules that run at near-native sp
 **Prompt:** "Build a WebAssembly module in Rust that calculates Fibonacci numbers. Include JavaScript bindings and deploy to npm."
 
 Claude will:
+
 1. Set up Rust project with wasm-pack
 2. Write optimized Fibonacci implementation
 3. Add wasm-bindgen annotations
@@ -161,6 +164,7 @@ Claude will:
 **Prompt:** "Create a WebAssembly module that applies image filters (grayscale, blur, sharpen) to ImageData from canvas. Optimize for processing 4K images in real-time."
 
 Claude will:
+
 1. Write Rust image processing algorithms
 2. Use rayon for parallel processing
 3. Interface with JavaScript canvas API
@@ -174,6 +178,7 @@ Claude will:
 **Prompt:** "Build a WebAssembly module that runs ONNX neural network models in the browser. Support image classification with MobileNetV3."
 
 Claude will:
+
 1. Integrate wasm-bindgen with onnxruntime-web
 2. Load and cache ONNX models
 3. Implement preprocessing pipeline
@@ -187,6 +192,7 @@ Claude will:
 **Prompt:** "Create a WebAssembly module with WASI 0.3 that processes CSV files, performs data transformations, and writes results to stdout. Deploy to Fermyon Spin."
 
 Claude will:
+
 1. Write Rust code using WASI SDK
 2. Implement async file I/O with WASI 0.3
 3. Add CSV parsing and transformation logic
@@ -212,6 +218,7 @@ Claude will:
 ## Common Workflows
 
 ### High-Performance Web App Component
+
 ```
 "Create a WebAssembly module for my React app that:
 1. Parses and validates 10MB JSON files instantly
@@ -224,6 +231,7 @@ Claude will:
 ```
 
 ### Cryptocurrency Mining (Educational)
+
 ```
 "Build a WebAssembly SHA-256 hasher in Rust:
 1. Implements Bitcoin mining algorithm
@@ -235,6 +243,7 @@ Claude will:
 ```
 
 ### Video Codec in Browser
+
 ```
 "Create a WebAssembly H.264 decoder:
 1. Decode video streams in real-time (30fps)
@@ -246,6 +255,7 @@ Claude will:
 ```
 
 ### Database Query Engine
+
 ```
 "Build a WebAssembly SQLite query engine:
 1. Compile SQLite to WASM with WASI

@@ -35,7 +35,7 @@ import {
   renderMarkdown,
   stripCodeBlocks,
 } from "@/lib/detail-assembly";
-import { getDistributionBadges } from "@/lib/entry-presentation";
+import { getDistributionBadges } from "@heyclaude/registry/presentation";
 import { buildPageMetadata } from "@/lib/seo";
 import { categoryLabels, siteConfig } from "@/lib/site";
 import {

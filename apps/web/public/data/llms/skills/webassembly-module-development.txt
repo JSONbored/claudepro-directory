@@ -36,12 +36,14 @@ Claude can build production-ready WebAssembly modules that run at near-native sp
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Rust (recommended) or C++/Go compiler
 - Node.js 18+ for JavaScript integration
 - Basic understanding of systems programming
 
 **What Claude handles automatically:**
+
 - Writing Rust/C++ code optimized for WASM
 - Compiling to WebAssembly with proper optimizations
 - Generating JavaScript bindings with wasm-bindgen
@@ -56,6 +58,7 @@ Claude can build production-ready WebAssembly modules that run at near-native sp
 **Prompt:** "Build a WebAssembly module in Rust that calculates Fibonacci numbers. Include JavaScript bindings and deploy to npm."
 
 Claude will:
+
 1. Set up Rust project with wasm-pack
 2. Write optimized Fibonacci implementation
 3. Add wasm-bindgen annotations
@@ -69,6 +72,7 @@ Claude will:
 **Prompt:** "Create a WebAssembly module that applies image filters (grayscale, blur, sharpen) to ImageData from canvas. Optimize for processing 4K images in real-time."
 
 Claude will:
+
 1. Write Rust image processing algorithms
 2. Use rayon for parallel processing
 3. Interface with JavaScript canvas API
@@ -82,6 +86,7 @@ Claude will:
 **Prompt:** "Build a WebAssembly module that runs ONNX neural network models in the browser. Support image classification with MobileNetV3."
 
 Claude will:
+
 1. Integrate wasm-bindgen with onnxruntime-web
 2. Load and cache ONNX models
 3. Implement preprocessing pipeline
@@ -95,6 +100,7 @@ Claude will:
 **Prompt:** "Create a WebAssembly module with WASI 0.3 that processes CSV files, performs data transformations, and writes results to stdout. Deploy to Fermyon Spin."
 
 Claude will:
+
 1. Write Rust code using WASI SDK
 2. Implement async file I/O with WASI 0.3
 3. Add CSV parsing and transformation logic
@@ -118,6 +124,7 @@ Claude will:
 
 ## Common Workflows
 ### High-Performance Web App Component
+
 ```
 "Create a WebAssembly module for my React app that:
 1. Parses and validates 10MB JSON files instantly
@@ -130,6 +137,7 @@ Claude will:
 ```
 
 ### Cryptocurrency Mining (Educational)
+
 ```
 "Build a WebAssembly SHA-256 hasher in Rust:
 1. Implements Bitcoin mining algorithm
@@ -141,6 +149,7 @@ Claude will:
 ```
 
 ### Video Codec in Browser
+
 ```
 "Create a WebAssembly H.264 decoder:
 1. Decode video streams in real-time (30fps)
@@ -152,6 +161,7 @@ Claude will:
 ```
 
 ### Database Query Engine
+
 ```
 "Build a WebAssembly SQLite query engine:
 1. Compile SQLite to WASM with WASI

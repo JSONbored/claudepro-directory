@@ -72,15 +72,19 @@ Select the backend components you need from the collection below. Each resource 
 ### Multiple agents provide conflicting architectural recommendations
 
 Install backend-architect-agent first to establish system design. Database and API agents will follow architectural decisions. Enable only one agent at a time when designing new components.
+
 ### AWS MCP server version incompatible with agent-generated code
 
 Verify aws-services-mcp-server supports AWS SDK v3. Check package.json for @aws-sdk version compatibility with generated code. Update MCP server to latest version matching SDK requirements.
+
 ### Database agent schema conflicts with API Builder endpoints
 
 Follow installationOrder: install database-specialist-agent before api-builder-agent. Database agent sets schema first, API agent generates compatible endpoints matching established design.
+
 ### Missing AWS credentials prevent MCP server initialization
 
 Configure AWS credentials first: run aws configure or set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY. Verify with aws sts get-caller-identity then install aws-services-mcp-server.
+
 ### Collection items require different Node.js versions
 
 All items require Node 18+. Verify with node --version before installation. Use nvm to switch versions: nvm use 18. Reinstall entire collection after activating correct Node version.

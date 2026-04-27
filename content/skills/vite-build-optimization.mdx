@@ -2,14 +2,14 @@
 title: Vite Frontend Build Performance Optimization Skill
 slug: vite-build-optimization
 category: skills
-description: 'Optimize frontend build performance with Vite''s lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite.'
-cardDescription: 'Optimize frontend build performance with Vite''s lightning-fast HMR, code splitting, and tree-shaking.'
+description: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite."
+cardDescription: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking."
 seoTitle: Vite Frontend Build Performance Optimization Skill
-seoDescription: 'Optimize frontend build performance with Vite''s lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the d...'
+seoDescription: "Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the d..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-23'
-documentationUrl: 'https://vitejs.dev/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-23"
+documentationUrl: "https://vitejs.dev/"
 downloadUrl: /downloads/skills/vite-build-optimization.zip
 installable: true
 installCommand: npm create vite@latest my-app
@@ -58,9 +58,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-23'
+verifiedAt: "2025-10-23"
 retrievalSources:
-  - 'https://vitejs.dev/'
+  - "https://vitejs.dev/"
 testedPlatforms:
   - Claude
   - Codex
@@ -103,6 +103,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can optimize your Vite build configuration for production-ready performance with instant Hot Module Replacement (HMR), intelligent code splitting, and tree-shaking. Vite leverages native ES modules during development and Rollup for optimized production builds, delivering the fastest developer experience while generating highly optimized bundles. From configuring build options to debugging bundle size, Claude handles the complexity of modern frontend tooling.
@@ -118,16 +119,17 @@ Claude can optimize your Vite build configuration for production-ready performan
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Node.js 18+ (20+ recommended)
 - npm, pnpm, or yarn package manager
 - Basic understanding of JavaScript modules
 
 **What Claude handles automatically:**
+
 - Configuring vite.config.ts for optimal builds
 - Setting up code splitting strategies
 - Implementing lazy loading for routes/components
@@ -144,6 +146,7 @@ Claude can optimize your Vite build configuration for production-ready performan
 **Prompt:** "Optimize my Vite config for production with: code splitting by route, lazy loading for heavy components, CSS extraction, source maps, and tree-shaking. Target modern browsers (ES2020)."
 
 Claude will:
+
 1. Configure build.rollupOptions for chunking
 2. Set up manual chunks for vendors
 3. Enable CSS code splitting
@@ -157,6 +160,7 @@ Claude will:
 **Prompt:** "My Vite bundle is 2MB. Help me analyze what's taking space and optimize. Use rollup-plugin-visualizer and suggest splitting strategies."
 
 Claude will:
+
 1. Install and configure bundle analyzer
 2. Generate visual bundle report
 3. Identify large dependencies
@@ -170,6 +174,7 @@ Claude will:
 **Prompt:** "Configure Vite for multi-page app with 3 entry points: landing page, dashboard, admin panel. Each should have separate bundles but share common dependencies."
 
 Claude will:
+
 1. Set up build.rollupOptions.input
 2. Create separate HTML entry points
 3. Configure shared chunk extraction
@@ -183,6 +188,7 @@ Claude will:
 **Prompt:** "Set up Vite with React, TypeScript, PWA support, image optimization, and SVG imports. Optimize for fastest dev server startup and HMR."
 
 Claude will:
+
 1. Install and configure @vitejs/plugin-react
 2. Add vite-plugin-pwa with precaching
 3. Set up vite-imagetools for optimization
@@ -208,6 +214,7 @@ Claude will:
 ## Common Workflows
 
 ### Large React App Optimization
+
 ```
 "Optimize Vite build for React app with 50+ routes:
 1. Implement route-based code splitting with React.lazy()
@@ -221,6 +228,7 @@ Claude will:
 ```
 
 ### Monorepo Build Configuration
+
 ```
 "Configure Vite in Turborepo monorepo:
 1. Shared vite.config.base.ts for common config
@@ -234,6 +242,7 @@ Claude will:
 ```
 
 ### Progressive Web App Build
+
 ```
 "Set up Vite PWA with offline support:
 1. Install vite-plugin-pwa with Workbox
@@ -247,6 +256,7 @@ Claude will:
 ```
 
 ### Library Build Configuration
+
 ```
 "Configure Vite for component library build:
 1. Set build.lib mode with entry point

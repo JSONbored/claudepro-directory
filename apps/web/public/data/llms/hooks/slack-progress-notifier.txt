@@ -59,9 +59,7 @@ Sends progress updates to Slack channel for team visibility on Claude activities
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/slack-progress-notifier.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -71,9 +69,7 @@ Sends progress updates to Slack channel for team visibility on Claude activities
   "hooks": {
     "notification": {
       "script": "./.claude/hooks/slack-progress-notifier.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -415,6 +411,7 @@ fi
 jq -n --arg text "$MESSAGE" '{text: $text}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Slack notifications
@@ -429,6 +426,7 @@ Complete hook configuration for .claude/settings.json to enable Slack notificati
   }
 }
 ```
+
 ### Debounced Slack Notifications
 
 Enhanced hook script with debouncing to prevent notification spam
@@ -450,6 +448,7 @@ MESSAGE="⚡ Claude Code: $TOOL_NAME"
 jq -n --arg text "$MESSAGE" '{text: $text}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
 exit 0
 ```
+
 ### Rich Slack Message with Block Kit
 
 Enhanced hook script with Slack Block Kit formatting and Git context
@@ -465,6 +464,7 @@ TIMESTAMP=$(date '+%H:%M:%S')
 jq -n --arg text "Claude Code Activity" --arg tool "$TOOL_NAME" --arg file "$(basename "$FILE_PATH" 2>/dev/null || echo 'N/A')" --arg branch "$BRANCH" --arg repo "$REPO_NAME" --arg time "$TIMESTAMP" '{"blocks": [{"type": "section", "text": {"type": "mrkdwn", "text": ("*Claude Code Activity*\n*Action:* " + $tool + "\n*File:* " + $file + "\n*Branch:* " + $branch + "\n*Repo:* " + $repo + "\n*Time:* " + $time)}}]}' | curl -X POST -H 'Content-type: application/json' --data @- --max-time 3 --silent "$SLACK_WEBHOOK_URL" >/dev/null 2>&1 &
 exit 0
 ```
+
 ### Slack Notifier Configuration Example
 
 Example Slack notifier configuration for customizing notification behavior
@@ -565,24 +565,31 @@ exit 0
 ### Notifications fail with 'invalid_payload' error from Slack
 
 Escape special characters in JSON payload. Use jq to construct payload: jq -n --arg msg "$MESSAGE" '{text: $msg}' | curl -d @- $SLACK_WEBHOOK_URL. Avoid shell variable expansion inside JSON strings. Verify JSON format. Test with various message content.
+
 ### Hook causes timeout on every tool execution slowing workflow
 
 Run curl in background with & to avoid blocking: (curl --max-time 3 "$SLACK_WEBHOOK_URL" &) >/dev/null 2>&1. Add exit 0 immediately after background execution. Reduce timeout from 5s to 3s. Verify async execution. Test with various timeout values.
+
 ### Slack webhook returns HTTP 410 'url_verification_failed'
 
 Webhook URL expired or was revoked. Generate new webhook at https://api.slack.com/messaging/webhooks. Update SLACK_WEBHOOK_URL environment variable. Check workspace permissions for incoming webhooks. Verify webhook URL. Test with new webhook URL.
+
 ### Git branch detection fails showing 'unknown' for detached HEAD
 
 Add fallback to commit SHA: BRANCH=$(git branch --show-current || git rev-parse --short HEAD || echo 'unknown'). Handle detached HEAD state gracefully with descriptive label like 'detached@SHA'. Verify Git state. Test with various Git states.
+
 ### Notification spam floods channel during rapid file operations
 
 Implement debouncing with timestamp check: LAST_NOTIFY=$(cat /tmp/slack_last 2>/dev/null || echo 0); NOW=$(date +%s); [ $((NOW - LAST_NOTIFY)) -lt 10 ] && exit 0. Skip notifications within 10s window. Verify debouncing logic. Test with various activity frequencies.
+
 ### Slack notifications are not delivered or delayed
 
 Check network connectivity and Slack service status. Verify webhook URL is correct and accessible. Check curl exit codes for specific errors. Add retry logic for transient failures. Verify webhook configuration. Test with manual curl requests.
+
 ### Emoji selection is incorrect or missing for activity types
 
 Review emoji mapping case statements. Add more activity type patterns. Use default emoji fallback. Verify activity type detection. Test with various activity types.
+
 ### Slack message formatting is broken or unreadable
 
 Use jq for safe JSON generation instead of heredoc. Validate JSON payload before sending. Use Slack Block Kit for rich formatting. Verify message format. Test with various message content.

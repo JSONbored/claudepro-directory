@@ -23,14 +23,16 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
       [job.title, job.company, job.location, job.description]
         .join(" ")
         .toLowerCase()
-        .includes(normalizedQuery)
+        .includes(normalizedQuery),
     );
   }, [jobs, normalizedQuery]);
 
   const sortedJobs = useMemo(() => {
     return [...filteredJobs].sort((left, right) => {
-      const leftScore = Number(Boolean(left.sponsored)) * 2 + Number(Boolean(left.featured));
-      const rightScore = Number(Boolean(right.sponsored)) * 2 + Number(Boolean(right.featured));
+      const leftScore =
+        Number(Boolean(left.sponsored)) * 2 + Number(Boolean(left.featured));
+      const rightScore =
+        Number(Boolean(right.sponsored)) * 2 + Number(Boolean(right.featured));
       return rightScore - leftScore;
     });
   }, [filteredJobs]);
@@ -39,7 +41,10 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
     if (!value) return null;
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) return value;
-    return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return parsed.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
@@ -53,7 +58,8 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
       </div>
 
       <div className="text-sm text-muted-foreground">
-        {sortedJobs.length} hiring {sortedJobs.length === 1 ? "listing" : "listings"} found
+        {sortedJobs.length} hiring{" "}
+        {sortedJobs.length === 1 ? "listing" : "listings"} found
       </div>
 
       <div className="space-y-4">
@@ -74,8 +80,8 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                       job.isPlaceholder
                         ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
                         : job.sponsored
-                        ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
-                        : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
+                          ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                          : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
                     }
                   >
                     {job.isPlaceholder
@@ -95,7 +101,9 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   {job.type ? <span>· {job.type}</span> : null}
                   <span>· {job.location}</span>
                   {job.compensation ? <span>· {job.compensation}</span> : null}
-                  {job.postedAt ? <span>· {formatPosted(job.postedAt)}</span> : null}
+                  {job.postedAt ? (
+                    <span>· {formatPosted(job.postedAt)}</span>
+                  ) : null}
                 </div>
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground">
                   {job.title}
@@ -106,15 +114,22 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
               </div>
               <div className="flex items-center gap-2">
                 {job.isPlaceholder ? null : (
-                  <Link href={`/jobs/${job.slug}`} className="directory-link-chip">
+                  <Link
+                    href={`/jobs/${job.slug}`}
+                    className="directory-link-chip"
+                  >
                     Details
                   </Link>
                 )}
                 <a
                   href={job.applyUrl}
                   className="directory-link-chip"
-                  target={job.applyUrl.startsWith("http") ? "_blank" : undefined}
-                  rel={job.applyUrl.startsWith("http") ? "noreferrer" : undefined}
+                  target={
+                    job.applyUrl.startsWith("http") ? "_blank" : undefined
+                  }
+                  rel={
+                    job.applyUrl.startsWith("http") ? "noreferrer" : undefined
+                  }
                 >
                   <ArrowUpRight className="size-3.5" />
                   {job.isPlaceholder ? "Post role" : "Apply"}

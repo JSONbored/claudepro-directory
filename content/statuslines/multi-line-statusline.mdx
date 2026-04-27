@@ -14,8 +14,8 @@ seoDescription: >-
   across two lines with organized sections and visual separators Discover tools
   for...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-01'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-01"
 installable: true
 usageSnippet: |-
   ┌ claude-sonnet-4.5 │ ~/projects/app  main ✓
@@ -148,7 +148,7 @@ prerequisites:
   - >-
     Terminal with ANSI color code support (256-color mode recommended for
     color-coded sections)
-  - 'Git command (optional, for git branch and status display)'
+  - "Git command (optional, for git branch and status display)"
 tags:
   - multi-line
   - comprehensive
@@ -178,6 +178,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Two-line display for comprehensive information
@@ -220,8 +221,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Multi-Line Statusline with Session Duration
+
 Extended version with session duration tracking and enhanced formatting
+
 ```bash
 #!/usr/bin/env bash
 
@@ -292,8 +296,11 @@ bottom_line="${BOT_LEFT}${RESET} ${TOKEN_C}${tokens_formatted} tokens${RESET} ${
 echo -e "$top_line"
 echo -e "$bottom_line"
 ```
+
 ### Multi-Line Statusline with Custom Layout
+
 Version with customizable line order and optional sections
+
 ```bash
 #!/usr/bin/env bash
 
@@ -358,8 +365,11 @@ fi
 echo -e "$top_line"
 echo -e "$bottom_line"
 ```
+
 ### Multi-Line Statusline Installation Example
+
 Complete setup script with UTF-8 encoding verification and box drawing character testing
+
 ```bash
 #!/bin/bash
 # Installation script for Multi-Line Statusline
@@ -476,27 +486,35 @@ echo "Test with: echo -e '┌│└'"
 ```
 
 ## Troubleshooting
+
 ### Box drawing characters showing as garbage or question marks
 
 Ensure terminal has UTF-8 encoding enabled. Set: export LANG=en_US.UTF-8. Test with: echo -e '┌│└'. Verify encoding: locale charmap (should be UTF-8). If not supported, modify script to use ASCII alternatives: TOP_LEFT='+', VSEP='|', BOT_LEFT='+'.
+
 ### Second line overwriting first line or display corruption
 
 Terminal may not support multi-line statuslines properly. Check Claude Code configuration for multi-line support or use single-line statusline instead. Verify terminal supports ANSI escape sequences: echo -e '\033[0m'. Test multi-line output: echo -e 'Line 1\nLine 2'. If issues persist, consider single-line statusline format.
+
 ### Memory usage always showing 0.0 MB
 
 Memory monitoring may not be available in your Claude Code version. This field is optional - statusline works without it. Check if system.memoryUsage field exists: echo '$input' | jq .system.memoryUsage. If null, memory display is automatically hidden. Verify memory calculation: awk '{printf "%.1f", $0/1024/1024}' (converts bytes to MB).
+
 ### Lines not aligned or wrapped incorrectly
 
 Terminal window may be too narrow. Resize to at least 80 characters wide or simplify displayed information. Check terminal width: tput cols (should be >= 80). Consider reducing information displayed or using shorter directory paths. Test with: echo -e '┌ Model │ Directory\n└ Tokens │ Cost'.
+
 ### Git status not displaying or showing incorrect branch
 
 Verify git command is available: command -v git. Check if in git repository: git rev-parse --git-dir (should return .git path). Verify branch detection: git symbolic-ref --short HEAD. Check git status: git status --porcelain (empty = clean, non-empty = dirty). Ensure workdir is correct: echo '$input' | jq .workspace.current_dir.
+
 ### Token count or cost showing as 0 or incorrect values
 
 Check JSON field names: echo '$input' | jq .cost.total_lines_added (tokens), echo '$input' | jq .cost.total_cost_usd (cost). Verify jq extraction: echo '$input' | jq -r '.cost.total_cost_usd // 0'. Check awk formatting: echo '0.01234' | awk '{printf "%.3f", $0}' (should return 0.012). Verify thousands separator: printf "%'d" 12345 (should return 12,345).
+
 ### Colors not displaying or showing as escape codes
 
 Verify terminal supports ANSI colors: echo -e '\033[38;5;111mTest\033[0m' (should show colored text). Check 256-color mode: tput colors (should be >= 256). Test color codes: echo -e '\033[38;5;111mBlue\033[0m' (should show blue text). If not supported, remove color codes or use basic 8-color ANSI codes.
+
 ### Directory path too long or not displaying correctly
 
 Check directory extraction: echo '$input' | jq .workspace.current_dir. Verify HOME replacement: sed "s|$HOME|~|" (replaces /home/user with ~). Test path shortening: dirname=$(basename "$dir") (shows only directory name). Consider truncating long paths: echo "${dir:0:30}..." (limits to 30 characters).

@@ -12,9 +12,15 @@ const requiredEntryFields = [
   "copyText",
   "detailMarkdown",
   "detailUrl",
-  "webUrl"
+  "webUrl",
 ];
-const forbiddenEntryFields = ["body", "sections", "headings", "codeBlocks", "scriptBody"];
+const forbiddenEntryFields = [
+  "body",
+  "sections",
+  "headings",
+  "codeBlocks",
+  "scriptBody",
+];
 
 function fail(message) {
   console.error(message);
@@ -35,8 +41,12 @@ if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
 if (payload.schemaVersion !== 1) {
   fail(`Raycast feed schemaVersion must be 1, got ${payload.schemaVersion}`);
 }
-if (!/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(String(payload.generatedAt ?? ""))) {
-  fail("Raycast feed generatedAt must be deterministic YYYY-MM-DDT00:00:00.000Z");
+if (
+  !/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/.test(String(payload.generatedAt ?? ""))
+) {
+  fail(
+    "Raycast feed generatedAt must be deterministic YYYY-MM-DDT00:00:00.000Z",
+  );
 }
 if (!Array.isArray(payload.entries) || payload.entries.length === 0) {
   fail("Raycast feed entries must be a non-empty array");
@@ -50,12 +60,17 @@ for (const entry of payload.entries) {
   seen.add(key);
 
   for (const field of requiredEntryFields) {
-    if (entry[field] === undefined || entry[field] === null || entry[field] === "") {
+    if (
+      entry[field] === undefined ||
+      entry[field] === null ||
+      entry[field] === ""
+    ) {
       fail(`${key}: missing Raycast field ${field}`);
     }
   }
   for (const field of forbiddenEntryFields) {
-    if (entry[field] !== undefined) fail(`${key}: forbidden Raycast field ${field}`);
+    if (entry[field] !== undefined)
+      fail(`${key}: forbidden Raycast field ${field}`);
   }
   if (!Array.isArray(entry.tags)) fail(`${key}: tags must be an array`);
   if (String(entry.copyText ?? "").length > 20003) {
@@ -70,16 +85,22 @@ for (const entry of payload.entries) {
 
   const detailPath = path.join(repoRoot, "apps/web/public", detailUrl);
   if (!fs.existsSync(detailPath)) {
-    fail(`${key}: missing detail payload ${path.relative(repoRoot, detailPath)}`);
+    fail(
+      `${key}: missing detail payload ${path.relative(repoRoot, detailPath)}`,
+    );
     continue;
   }
 
   const detail = JSON.parse(fs.readFileSync(detailPath, "utf8"));
-  if (detail.schemaVersion !== 1) fail(`${key}: detail schemaVersion must be 1`);
+  if (detail.schemaVersion !== 1)
+    fail(`${key}: detail schemaVersion must be 1`);
   if (typeof detail.copyText !== "string" || detail.copyText.trim() === "") {
     fail(`${key}: detail copyText must be non-empty`);
   }
-  if (entry.copyTextTruncated && detail.copyText.length <= String(entry.copyText ?? "").length) {
+  if (
+    entry.copyTextTruncated &&
+    detail.copyText.length <= String(entry.copyText ?? "").length
+  ) {
     fail(`${key}: truncated feed entry must have longer detail copyText`);
   }
 }

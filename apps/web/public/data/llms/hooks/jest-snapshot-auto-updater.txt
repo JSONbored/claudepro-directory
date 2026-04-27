@@ -14,7 +14,7 @@ Automatically updates Jest snapshots when component files are modified significa
 - automation
 ## Content
 ## Features
-- Intelligent Jest snapshot detection and updating for modified components with automatic snapshot file discovery in __snapshots__ directories (__snapshots__, snapshots, __tests__/__snapshots__, tests/__snapshots__), test file detection using pattern matching (.test.*, .spec.*), component-to-test mapping with component name extraction, and snapshot file association with component files
+- Intelligent Jest snapshot detection and updating for modified components with automatic snapshot file discovery in **snapshots** directories (**snapshots**, snapshots, **tests**/**snapshots**, tests/**snapshots**), test file detection using pattern matching (.test._, .spec._), component-to-test mapping with component name extraction, and snapshot file association with component files
 - Multi-framework support (React, Vue, Angular, vanilla JS) with framework-specific test file detection including React component detection (.jsx, .tsx), Vue component detection (.vue), Angular component detection (.component.ts), and vanilla JS test file detection (.test.js, .spec.js) with framework-agnostic snapshot management
 - Snapshot change analysis and impact assessment with git diff analysis to detect significant changes using git diff with line count analysis, configurable change threshold (default 10 lines, customizable for major changes), change scope detection (minor vs significant changes), and snapshot update decision logic based on change analysis
 - Test suite validation before snapshot updates with test execution using npm/yarn/pnpm test commands, test failure detection and analysis, snapshot mismatch detection from test output, test result parsing (PASS/FAIL counts), and snapshot update decision based on test results
@@ -58,10 +58,7 @@ Automatically updates Jest snapshots when component files are modified significa
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/jest-snapshot-auto-updater.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -71,10 +68,7 @@ Automatically updates Jest snapshots when component files are modified significa
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/jest-snapshot-auto-updater.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -96,19 +90,19 @@ fi
 # Check if this is a component file that might have Jest snapshots
 if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.vue ]] || [[ "$FILE_PATH" == *.component.ts ]]; then
   echo "📸 Jest Snapshot Management for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize counters
   SNAPSHOTS_UPDATED=0
   TESTS_RUN=0
   TESTS_PASSED=0
   TESTS_FAILED=0
   SNAPSHOT_FILES_FOUND=0
-  
+
   # Function to report snapshot operations
   report_snapshot() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "SUCCESS")
         echo "✅ SUCCESS: $message" >&2
@@ -128,25 +122,25 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         ;;
     esac
   }
-  
+
   # Extract component information
   FILE_NAME="$(basename "$FILE_PATH")"
   COMPONENT_NAME="${FILE_NAME%.*}"
   FILE_DIR="$(dirname "$FILE_PATH")"
-  
+
   # Check if this is likely a component or test file
   if [[ "$FILE_NAME" == *.test.* ]] || [[ "$FILE_NAME" == *.spec.* ]]; then
     echo "   🧪 Test file detected - checking for snapshot updates" >&2
   else
     echo "   🔧 Component file detected - looking for related tests" >&2
   fi
-  
+
   # Check if Jest is available
   if ! command -v npx &> /dev/null; then
     report_snapshot "ERROR" "npx not available - cannot run Jest"
     exit 1
   fi
-  
+
   # Check if Jest is configured in the project
   JEST_CONFIG_FOUND=false
   if [ -f "package.json" ]; then
@@ -155,23 +149,23 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       echo "   📋 Jest configuration found in package.json" >&2
     fi
   fi
-  
+
   if [ -f "jest.config.js" ] || [ -f "jest.config.ts" ] || [ -f "jest.config.json" ]; then
     JEST_CONFIG_FOUND=true
     echo "   📋 Jest configuration file found" >&2
   fi
-  
+
   if [ "$JEST_CONFIG_FOUND" = false ]; then
     report_snapshot "WARNING" "No Jest configuration found - snapshots may not be available"
     exit 0
   fi
-  
+
   # 1. Find existing snapshot files
   echo "🔍 Searching for existing snapshot files..." >&2
-  
+
   SNAPSHOT_DIRS=("__snapshots__" "snapshots" "__tests__/__snapshots__" "tests/__snapshots__")
   SNAPSHOT_FILES=()
-  
+
   for dir in "${SNAPSHOT_DIRS[@]}"; do
     if [ -d "$FILE_DIR/$dir" ]; then
       while IFS= read -r -d '' file; do
@@ -179,14 +173,14 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       done < <(find "$FILE_DIR/$dir" -name "*.snap" -print0 2>/dev/null)
     fi
   done
-  
+
   # Also check for snapshots in test directories
   while IFS= read -r -d '' file; do
     SNAPSHOT_FILES+=("$file")
   done < <(find . -name "*.snap" -path "*$COMPONENT_NAME*" -print0 2>/dev/null)
-  
+
   SNAPSHOT_FILES_FOUND=${#SNAPSHOT_FILES[@]}
-  
+
   if [ "$SNAPSHOT_FILES_FOUND" -gt 0 ]; then
     echo "   📁 Found $SNAPSHOT_FILES_FOUND snapshot files related to this component" >&2
     for snapshot in "${SNAPSHOT_FILES[@]}"; do
@@ -195,26 +189,26 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   else
     echo "   ℹ️ No existing snapshot files found for this component" >&2
   fi
-  
+
   # 2. Find test files for this component
   echo "🧪 Locating test files..." >&2
-  
+
   TEST_PATTERNS=(
     "${COMPONENT_NAME}.test.*"
     "${COMPONENT_NAME}.spec.*"
     "*${COMPONENT_NAME}*.test.*"
     "*${COMPONENT_NAME}*.spec.*"
   )
-  
+
   TEST_FILES=()
   for pattern in "${TEST_PATTERNS[@]}"; do
     while IFS= read -r -d '' file; do
       TEST_FILES+=("$file")
     done < <(find . -name "$pattern" -print0 2>/dev/null)
   done
-  
+
   TEST_FILES_COUNT=${#TEST_FILES[@]}
-  
+
   if [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "   🎯 Found $TEST_FILES_COUNT test files" >&2
     for test_file in "${TEST_FILES[@]}"; do
@@ -224,15 +218,15 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     echo "   ⚠️ No test files found for component: $COMPONENT_NAME" >&2
     report_snapshot "INFO" "Consider creating tests for better component coverage"
   fi
-  
+
   # 3. Check if component file has been significantly modified
   echo "📊 Analyzing component changes..." >&2
-  
+
   # Check git status to see if file was modified
   if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
     if git status --porcelain "$FILE_PATH" | grep -q '^.M'; then
       echo "   🔄 Component has been modified since last commit" >&2
-      
+
       # Get the diff to understand the scope of changes
       LINES_CHANGED=$(git diff "$FILE_PATH" 2>/dev/null | grep -c '^[+-]' || echo "0")
       if [ "$LINES_CHANGED" -gt 10 ]; then
@@ -250,11 +244,11 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     echo "   ℹ️ Not in a git repository - assuming snapshots should be checked" >&2
     SHOULD_UPDATE_SNAPSHOTS=true
   fi
-  
+
   # 4. Run tests and update snapshots if needed
   if [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "🧪 Running tests for component..." >&2
-    
+
     # Determine the test command
     TEST_COMMAND="npm test"
     if [ -f "yarn.lock" ]; then
@@ -262,28 +256,28 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     elif [ -f "pnpm-lock.yaml" ]; then
       TEST_COMMAND="pnpm test"
     fi
-    
+
     # Create test patterns for Jest
     TEST_PATTERN="$COMPONENT_NAME"
-    
+
     echo "   🚀 Running: $TEST_COMMAND -- --testNamePattern='$TEST_PATTERN' --coverage=false --watchAll=false" >&2
-    
+
     # Run tests without updating snapshots first
     TEST_OUTPUT_FILE="/tmp/jest_output_$$"
     if $TEST_COMMAND -- --testNamePattern="$TEST_PATTERN" --coverage=false --watchAll=false --verbose=false > "$TEST_OUTPUT_FILE" 2>&1; then
       TESTS_PASSED=$(grep -c 'PASS' "$TEST_OUTPUT_FILE" 2>/dev/null || echo "0")
       report_snapshot "SUCCESS" "Tests passed ($TESTS_PASSED test suites)"
-      
+
       # Check if snapshots are outdated
       if grep -q 'snapshot.*failed' "$TEST_OUTPUT_FILE" 2>/dev/null || grep -q 'snapshot.*obsolete' "$TEST_OUTPUT_FILE" 2>/dev/null; then
         echo "   📸 Outdated snapshots detected" >&2
         SHOULD_UPDATE_SNAPSHOTS=true
       fi
-      
+
     else
       TESTS_FAILED=$(grep -c 'FAIL' "$TEST_OUTPUT_FILE" 2>/dev/null || echo "1")
       echo "   ❌ Tests failed ($TESTS_FAILED test suites) - checking for snapshot issues" >&2
-      
+
       # Check if failures are due to snapshot mismatches
       if grep -q 'Snapshot.*differ' "$TEST_OUTPUT_FILE" 2>/dev/null; then
         echo "   📸 Snapshot mismatches detected - snapshots may need updating" >&2
@@ -296,25 +290,25 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         done
       fi
     fi
-    
+
     rm -f "$TEST_OUTPUT_FILE"
   fi
-  
+
   # 5. Update snapshots if needed
   if [ "$SHOULD_UPDATE_SNAPSHOTS" = true ] && [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "📸 Updating Jest snapshots..." >&2
-    
+
     # Run with snapshot update flag
     UPDATE_OUTPUT_FILE="/tmp/jest_update_$$"
     if $TEST_COMMAND -- --testNamePattern="$TEST_PATTERN" --updateSnapshot --coverage=false --watchAll=false > "$UPDATE_OUTPUT_FILE" 2>&1; then
-      
+
       # Count updated snapshots
       SNAPSHOTS_WRITTEN=$(grep -c 'snapshot.*written' "$UPDATE_OUTPUT_FILE" 2>/dev/null || echo "0")
       SNAPSHOTS_UPDATED_COUNT=$(grep -c 'snapshot.*updated' "$UPDATE_OUTPUT_FILE" 2>/dev/null || echo "0")
-      
+
       if [ "$SNAPSHOTS_WRITTEN" -gt 0 ] || [ "$SNAPSHOTS_UPDATED_COUNT" -gt 0 ]; then
         report_snapshot "SNAPSHOT" "Updated $((SNAPSHOTS_WRITTEN + SNAPSHOTS_UPDATED_COUNT)) snapshots"
-        
+
         # Show which snapshots were affected
         grep 'snapshot.*written\|snapshot.*updated' "$UPDATE_OUTPUT_FILE" 2>/dev/null | head -5 | while read line; do
           echo "     $line" >&2
@@ -322,7 +316,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       else
         report_snapshot "INFO" "Snapshot update completed - no changes needed"
       fi
-      
+
     else
       report_snapshot "ERROR" "Failed to update snapshots"
       echo "   📝 Update error details:" >&2
@@ -330,28 +324,28 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         echo "     $line" >&2
       done
     fi
-    
+
     rm -f "$UPDATE_OUTPUT_FILE"
   else
     echo "   ℹ️ Snapshot updates not needed at this time" >&2
   fi
-  
+
   # 6. Clean up orphaned snapshots
   echo "🧹 Checking for orphaned snapshots..." >&2
-  
+
   if [ "$SNAPSHOT_FILES_FOUND" -gt 0 ]; then
     # This is a simplified check - in practice, you'd want more sophisticated orphan detection
     POTENTIALLY_ORPHANED=0
-    
+
     for snapshot_file in "${SNAPSHOT_FILES[@]}"; do
       SNAPSHOT_BASE=$(basename "$snapshot_file" .snap)
-      
+
       # Check if there's a corresponding test or component file
       if ! find . -name "*${SNAPSHOT_BASE%.*}*" -type f \( -name "*.test.*" -o -name "*.spec.*" \) 2>/dev/null | head -1 | grep -q .; then
         POTENTIALLY_ORPHANED=$((POTENTIALLY_ORPHANED + 1))
       fi
     done
-    
+
     if [ "$POTENTIALLY_ORPHANED" -gt 0 ]; then
       report_snapshot "WARNING" "$POTENTIALLY_ORPHANED potentially orphaned snapshot files detected"
       echo "   💡 Run 'npm test -- --updateSnapshot' to clean up unused snapshots" >&2
@@ -359,7 +353,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       echo "   ✅ No orphaned snapshots detected" >&2
     fi
   fi
-  
+
   # 7. Generate summary report
   echo "" >&2
   echo "📋 Jest Snapshot Management Summary:" >&2
@@ -370,7 +364,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   echo "   ✅ Tests passed: $TESTS_PASSED" >&2
   echo "   ❌ Tests failed: $TESTS_FAILED" >&2
   echo "   📸 Snapshots updated: $SNAPSHOTS_UPDATED" >&2
-  
+
   if [ "$SNAPSHOTS_UPDATED" -gt 0 ]; then
     echo "   🎉 Status: SNAPSHOTS UPDATED - Review changes before committing" >&2
   elif [ "$TESTS_FAILED" -gt 0 ]; then
@@ -380,7 +374,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   else
     echo "   ✅ Status: ALL GOOD - Snapshots are up to date" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Jest Snapshot Best Practices:" >&2
   echo "   • Review snapshot changes carefully before committing" >&2
@@ -389,13 +383,13 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   echo "   • Use descriptive test names for better snapshot organization" >&2
   echo "   • Consider using 'toMatchInlineSnapshot' for small snapshots" >&2
   echo "   • Run 'npm test -- --updateSnapshot' to update all snapshots" >&2
-  
+
   # Exit with error if tests are failing for non-snapshot reasons
   if [ "$TESTS_FAILED" -gt 0 ] && [ "$SNAPSHOTS_UPDATED" -eq 0 ]; then
     echo "⚠️ Jest tests are failing - please review and fix issues" >&2
     exit 1
   fi
-  
+
 else
   # Not a component file, exit silently
   exit 0
@@ -418,19 +412,19 @@ fi
 # Check if this is a component file that might have Jest snapshots
 if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.vue ]] || [[ "$FILE_PATH" == *.component.ts ]]; then
   echo "📸 Jest Snapshot Management for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize counters
   SNAPSHOTS_UPDATED=0
   TESTS_RUN=0
   TESTS_PASSED=0
   TESTS_FAILED=0
   SNAPSHOT_FILES_FOUND=0
-  
+
   # Function to report snapshot operations
   report_snapshot() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "SUCCESS")
         echo "✅ SUCCESS: $message" >&2
@@ -450,25 +444,25 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         ;;
     esac
   }
-  
+
   # Extract component information
   FILE_NAME="$(basename "$FILE_PATH")"
   COMPONENT_NAME="${FILE_NAME%.*}"
   FILE_DIR="$(dirname "$FILE_PATH")"
-  
+
   # Check if this is likely a component or test file
   if [[ "$FILE_NAME" == *.test.* ]] || [[ "$FILE_NAME" == *.spec.* ]]; then
     echo "   🧪 Test file detected - checking for snapshot updates" >&2
   else
     echo "   🔧 Component file detected - looking for related tests" >&2
   fi
-  
+
   # Check if Jest is available
   if ! command -v npx &> /dev/null; then
     report_snapshot "ERROR" "npx not available - cannot run Jest"
     exit 1
   fi
-  
+
   # Check if Jest is configured in the project
   JEST_CONFIG_FOUND=false
   if [ -f "package.json" ]; then
@@ -477,23 +471,23 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       echo "   📋 Jest configuration found in package.json" >&2
     fi
   fi
-  
+
   if [ -f "jest.config.js" ] || [ -f "jest.config.ts" ] || [ -f "jest.config.json" ]; then
     JEST_CONFIG_FOUND=true
     echo "   📋 Jest configuration file found" >&2
   fi
-  
+
   if [ "$JEST_CONFIG_FOUND" = false ]; then
     report_snapshot "WARNING" "No Jest configuration found - snapshots may not be available"
     exit 0
   fi
-  
+
   # 1. Find existing snapshot files
   echo "🔍 Searching for existing snapshot files..." >&2
-  
+
   SNAPSHOT_DIRS=("__snapshots__" "snapshots" "__tests__/__snapshots__" "tests/__snapshots__")
   SNAPSHOT_FILES=()
-  
+
   for dir in "${SNAPSHOT_DIRS[@]}"; do
     if [ -d "$FILE_DIR/$dir" ]; then
       while IFS= read -r -d '' file; do
@@ -501,14 +495,14 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       done < <(find "$FILE_DIR/$dir" -name "*.snap" -print0 2>/dev/null)
     fi
   done
-  
+
   # Also check for snapshots in test directories
   while IFS= read -r -d '' file; do
     SNAPSHOT_FILES+=("$file")
   done < <(find . -name "*.snap" -path "*$COMPONENT_NAME*" -print0 2>/dev/null)
-  
+
   SNAPSHOT_FILES_FOUND=${#SNAPSHOT_FILES[@]}
-  
+
   if [ "$SNAPSHOT_FILES_FOUND" -gt 0 ]; then
     echo "   📁 Found $SNAPSHOT_FILES_FOUND snapshot files related to this component" >&2
     for snapshot in "${SNAPSHOT_FILES[@]}"; do
@@ -517,26 +511,26 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   else
     echo "   ℹ️ No existing snapshot files found for this component" >&2
   fi
-  
+
   # 2. Find test files for this component
   echo "🧪 Locating test files..." >&2
-  
+
   TEST_PATTERNS=(
     "${COMPONENT_NAME}.test.*"
     "${COMPONENT_NAME}.spec.*"
     "*${COMPONENT_NAME}*.test.*"
     "*${COMPONENT_NAME}*.spec.*"
   )
-  
+
   TEST_FILES=()
   for pattern in "${TEST_PATTERNS[@]}"; do
     while IFS= read -r -d '' file; do
       TEST_FILES+=("$file")
     done < <(find . -name "$pattern" -print0 2>/dev/null)
   done
-  
+
   TEST_FILES_COUNT=${#TEST_FILES[@]}
-  
+
   if [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "   🎯 Found $TEST_FILES_COUNT test files" >&2
     for test_file in "${TEST_FILES[@]}"; do
@@ -546,15 +540,15 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     echo "   ⚠️ No test files found for component: $COMPONENT_NAME" >&2
     report_snapshot "INFO" "Consider creating tests for better component coverage"
   fi
-  
+
   # 3. Check if component file has been significantly modified
   echo "📊 Analyzing component changes..." >&2
-  
+
   # Check git status to see if file was modified
   if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
     if git status --porcelain "$FILE_PATH" | grep -q '^.M'; then
       echo "   🔄 Component has been modified since last commit" >&2
-      
+
       # Get the diff to understand the scope of changes
       LINES_CHANGED=$(git diff "$FILE_PATH" 2>/dev/null | grep -c '^[+-]' || echo "0")
       if [ "$LINES_CHANGED" -gt 10 ]; then
@@ -572,11 +566,11 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     echo "   ℹ️ Not in a git repository - assuming snapshots should be checked" >&2
     SHOULD_UPDATE_SNAPSHOTS=true
   fi
-  
+
   # 4. Run tests and update snapshots if needed
   if [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "🧪 Running tests for component..." >&2
-    
+
     # Determine the test command
     TEST_COMMAND="npm test"
     if [ -f "yarn.lock" ]; then
@@ -584,28 +578,28 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
     elif [ -f "pnpm-lock.yaml" ]; then
       TEST_COMMAND="pnpm test"
     fi
-    
+
     # Create test patterns for Jest
     TEST_PATTERN="$COMPONENT_NAME"
-    
+
     echo "   🚀 Running: $TEST_COMMAND -- --testNamePattern='$TEST_PATTERN' --coverage=false --watchAll=false" >&2
-    
+
     # Run tests without updating snapshots first
     TEST_OUTPUT_FILE="/tmp/jest_output_$$"
     if $TEST_COMMAND -- --testNamePattern="$TEST_PATTERN" --coverage=false --watchAll=false --verbose=false > "$TEST_OUTPUT_FILE" 2>&1; then
       TESTS_PASSED=$(grep -c 'PASS' "$TEST_OUTPUT_FILE" 2>/dev/null || echo "0")
       report_snapshot "SUCCESS" "Tests passed ($TESTS_PASSED test suites)"
-      
+
       # Check if snapshots are outdated
       if grep -q 'snapshot.*failed' "$TEST_OUTPUT_FILE" 2>/dev/null || grep -q 'snapshot.*obsolete' "$TEST_OUTPUT_FILE" 2>/dev/null; then
         echo "   📸 Outdated snapshots detected" >&2
         SHOULD_UPDATE_SNAPSHOTS=true
       fi
-      
+
     else
       TESTS_FAILED=$(grep -c 'FAIL' "$TEST_OUTPUT_FILE" 2>/dev/null || echo "1")
       echo "   ❌ Tests failed ($TESTS_FAILED test suites) - checking for snapshot issues" >&2
-      
+
       # Check if failures are due to snapshot mismatches
       if grep -q 'Snapshot.*differ' "$TEST_OUTPUT_FILE" 2>/dev/null; then
         echo "   📸 Snapshot mismatches detected - snapshots may need updating" >&2
@@ -618,25 +612,25 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         done
       fi
     fi
-    
+
     rm -f "$TEST_OUTPUT_FILE"
   fi
-  
+
   # 5. Update snapshots if needed
   if [ "$SHOULD_UPDATE_SNAPSHOTS" = true ] && [ "$TEST_FILES_COUNT" -gt 0 ]; then
     echo "📸 Updating Jest snapshots..." >&2
-    
+
     # Run with snapshot update flag
     UPDATE_OUTPUT_FILE="/tmp/jest_update_$$"
     if $TEST_COMMAND -- --testNamePattern="$TEST_PATTERN" --updateSnapshot --coverage=false --watchAll=false > "$UPDATE_OUTPUT_FILE" 2>&1; then
-      
+
       # Count updated snapshots
       SNAPSHOTS_WRITTEN=$(grep -c 'snapshot.*written' "$UPDATE_OUTPUT_FILE" 2>/dev/null || echo "0")
       SNAPSHOTS_UPDATED_COUNT=$(grep -c 'snapshot.*updated' "$UPDATE_OUTPUT_FILE" 2>/dev/null || echo "0")
-      
+
       if [ "$SNAPSHOTS_WRITTEN" -gt 0 ] || [ "$SNAPSHOTS_UPDATED_COUNT" -gt 0 ]; then
         report_snapshot "SNAPSHOT" "Updated $((SNAPSHOTS_WRITTEN + SNAPSHOTS_UPDATED_COUNT)) snapshots"
-        
+
         # Show which snapshots were affected
         grep 'snapshot.*written\|snapshot.*updated' "$UPDATE_OUTPUT_FILE" 2>/dev/null | head -5 | while read line; do
           echo "     $line" >&2
@@ -644,7 +638,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       else
         report_snapshot "INFO" "Snapshot update completed - no changes needed"
       fi
-      
+
     else
       report_snapshot "ERROR" "Failed to update snapshots"
       echo "   📝 Update error details:" >&2
@@ -652,28 +646,28 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
         echo "     $line" >&2
       done
     fi
-    
+
     rm -f "$UPDATE_OUTPUT_FILE"
   else
     echo "   ℹ️ Snapshot updates not needed at this time" >&2
   fi
-  
+
   # 6. Clean up orphaned snapshots
   echo "🧹 Checking for orphaned snapshots..." >&2
-  
+
   if [ "$SNAPSHOT_FILES_FOUND" -gt 0 ]; then
     # This is a simplified check - in practice, you'd want more sophisticated orphan detection
     POTENTIALLY_ORPHANED=0
-    
+
     for snapshot_file in "${SNAPSHOT_FILES[@]}"; do
       SNAPSHOT_BASE=$(basename "$snapshot_file" .snap)
-      
+
       # Check if there's a corresponding test or component file
       if ! find . -name "*${SNAPSHOT_BASE%.*}*" -type f \( -name "*.test.*" -o -name "*.spec.*" \) 2>/dev/null | head -1 | grep -q .; then
         POTENTIALLY_ORPHANED=$((POTENTIALLY_ORPHANED + 1))
       fi
     done
-    
+
     if [ "$POTENTIALLY_ORPHANED" -gt 0 ]; then
       report_snapshot "WARNING" "$POTENTIALLY_ORPHANED potentially orphaned snapshot files detected"
       echo "   💡 Run 'npm test -- --updateSnapshot' to clean up unused snapshots" >&2
@@ -681,7 +675,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
       echo "   ✅ No orphaned snapshots detected" >&2
     fi
   fi
-  
+
   # 7. Generate summary report
   echo "" >&2
   echo "📋 Jest Snapshot Management Summary:" >&2
@@ -692,7 +686,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   echo "   ✅ Tests passed: $TESTS_PASSED" >&2
   echo "   ❌ Tests failed: $TESTS_FAILED" >&2
   echo "   📸 Snapshots updated: $SNAPSHOTS_UPDATED" >&2
-  
+
   if [ "$SNAPSHOTS_UPDATED" -gt 0 ]; then
     echo "   🎉 Status: SNAPSHOTS UPDATED - Review changes before committing" >&2
   elif [ "$TESTS_FAILED" -gt 0 ]; then
@@ -702,7 +696,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   else
     echo "   ✅ Status: ALL GOOD - Snapshots are up to date" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Jest Snapshot Best Practices:" >&2
   echo "   • Review snapshot changes carefully before committing" >&2
@@ -711,13 +705,13 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH"
   echo "   • Use descriptive test names for better snapshot organization" >&2
   echo "   • Consider using 'toMatchInlineSnapshot' for small snapshots" >&2
   echo "   • Run 'npm test -- --updateSnapshot' to update all snapshots" >&2
-  
+
   # Exit with error if tests are failing for non-snapshot reasons
   if [ "$TESTS_FAILED" -gt 0 ] && [ "$SNAPSHOTS_UPDATED" -eq 0 ]; then
     echo "⚠️ Jest tests are failing - please review and fix issues" >&2
     exit 1
   fi
-  
+
 else
   # Not a component file, exit silently
   exit 0
@@ -756,6 +750,7 @@ if [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.tsx ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Jest snapshot auto-updating
@@ -770,6 +765,7 @@ Complete hook configuration for .claude/settings.json to enable Jest snapshot au
   }
 }
 ```
+
 ### Change Analysis with Git Diff
 
 Enhanced hook script for analyzing component changes using git diff with configurable threshold
@@ -792,6 +788,7 @@ if command -v git &> /dev/null && git rev-parse --git-dir > /dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### Test Execution and Snapshot Update
 
 Enhanced hook script for running tests and updating snapshots with parallel execution optimization
@@ -819,6 +816,7 @@ fi
 rm -f "$TEST_OUTPUT_FILE"
 exit 0
 ```
+
 ### Orphaned Snapshot Detection
 
 Enhanced hook script for detecting orphaned snapshot files with test file association validation
@@ -954,24 +952,31 @@ exit 0
 ### Hook runs tests for every file change even non-test files
 
 Detection too broad (matches all .js/.ts). Add matchers: 'matchers': ['write:**/*.{test,spec}.{js,ts,jsx,tsx}', 'edit:**/*.{test,spec}.{js,ts,jsx,tsx}'] to trigger only on test files. Verify file path patterns match test files. Test with various file types.
+
 ### Jest runs entire test suite instead of component-specific tests
 
 testNamePattern with component name unreliable. Use --testPathPattern: '$TEST_COMMAND -- --testPathPattern="$COMPONENT_NAME" --watchAll=false'. Targets files not test descriptions. Verify component name extraction. Test with various component names.
+
 ### Parallel test execution with --maxWorkers causes race conditions
 
 No worker limit causes resource exhaustion. Add '--maxWorkers=2': '$TEST_COMMAND -- --testPathPattern="$TEST_PATTERN" --maxWorkers=2 --watchAll=false' for stable CI execution. Verify worker count. Test with various test suite sizes.
+
 ### Snapshot update creates duplicate snapshot files after renaming
 
-Old snapshots persist when components renamed. Run cleanup: 'npm test -- --updateSnapshot --clearCache' deleting unused snapshots. Or manually remove from __snapshots__ directory. Verify snapshot cleanup. Test with component renaming.
+Old snapshots persist when components renamed. Run cleanup: 'npm test -- --updateSnapshot --clearCache' deleting unused snapshots. Or manually remove from **snapshots** directory. Verify snapshot cleanup. Test with component renaming.
+
 ### git diff threshold (10 lines) triggers updates for minor changes
 
 Conservative threshold causes excessive updates. Increase: 'if [ "$LINES_CHANGED" -gt 50 ]; then' for major changes only. Or check specific files: test if modified file is component. Verify threshold configuration. Test with various change sizes.
+
 ### Snapshot update fails with 'Cannot find module' errors
 
 Jest cache may be stale. Clear cache: 'npm test -- --clearCache'. Verify Jest configuration. Check module resolution paths. Ensure all dependencies installed. Verify test environment setup.
+
 ### Tests pass but snapshots are not updated automatically
 
 Hook may not detect snapshot mismatches. Check test output for snapshot-related messages. Verify --updateSnapshot flag is passed. Check Jest configuration for snapshot settings. Verify snapshot file permissions. Test with explicit snapshot updates.
+
 ### Orphaned snapshot detection shows false positives
 
 Pattern matching may be too strict. Adjust snapshot base name extraction. Verify test file naming conventions. Check for test files in different directories. Verify snapshot file associations. Test with various project structures.

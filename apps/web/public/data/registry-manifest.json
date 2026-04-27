@@ -57,7 +57,6 @@
     }
   },
   "artifacts": {
-    "content": "/data/content-index.json",
     "directory": "/data/directory-index.json",
     "search": "/data/search-index.json",
     "raycast": "/data/raycast-index.json",

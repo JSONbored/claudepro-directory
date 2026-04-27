@@ -65,7 +65,9 @@ Docker statusline configuration for Claude Code CLI. Features real-time health m
 
 ## Examples
 ### Enhanced Docker Health Statusline with Container Names
+
 Extended version displaying unhealthy container names for quick identification
+
 ```bash
 #!/bin/bash
 
@@ -97,8 +99,11 @@ else
     echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
 fi
 ```
+
 ### Docker Health Statusline with Restart Count
+
 Version showing container restart counts for monitoring stability
+
 ```bash
 #!/bin/bash
 
@@ -133,8 +138,11 @@ else
     echo -e "${BLUE}🐳${NC} ${status} ${running}/${total}"
 fi
 ```
+
 ### Docker Health Statusline Installation Example
+
 Complete setup script with Docker daemon verification and permissions check
+
 ```bash
 #!/bin/bash
 # Installation script for Docker Health Statusline
@@ -339,24 +347,31 @@ echo "Test with: docker ps"
 ### Statusline shows 0/0 containers even when containers are running
 
 Verify Docker daemon is running with 'docker ps'. Check user has permissions to access Docker socket. On Linux, add user to docker group with 'sudo usermod -aG docker $USER' and restart terminal. On macOS/Windows, ensure Docker Desktop is running. Verify DOCKER_HOST environment variable if using remote Docker daemon.
+
 ### Colors not displaying correctly in statusline output
 
 Ensure terminal supports ANSI color codes. Set TERM=xterm-256color in shell profile (~/.bashrc or ~/.zshrc). Verify colorScheme setting in statusline.json matches terminal capabilities. Test with: echo -e '\033[0;32mGREEN\033[0m'. If colors still don't work, terminal may not support ANSI codes.
+
 ### Statusline causing performance lag or high CPU usage
 
 Increase refreshInterval to 3000-5000ms in configuration. Reduce docker ps query frequency. Consider caching container count between refresh cycles for better performance. Use docker ps -q (quiet mode) to reduce output parsing overhead. Monitor Docker daemon performance with 'docker stats'.
+
 ### Health check status not updating or always showing healthy
 
 Confirm containers have HEALTHCHECK defined in Dockerfile or docker-compose.yml. Verify docker version supports health checks (17.05+). Run 'docker inspect CONTAINER' to check health configuration. Check health check interval and timeout settings. Verify health check command is working: docker exec CONTAINER health-check-command.
+
 ### Permission denied errors when running docker commands
 
 On Linux: Add user to docker group: sudo usermod -aG docker $USER, then log out and log back in. Verify group membership: groups $USER. Check Docker socket permissions: ls -l /var/run/docker.sock. On macOS/Windows: Ensure Docker Desktop is running and user has proper permissions. Check Docker Desktop settings for user access.
+
 ### Unhealthy containers not being detected by statusline
 
 Verify health check filter syntax: docker ps --filter health=unhealthy. Check if containers actually have health checks configured: docker inspect CONTAINER | jq '.[0].State.Health'. Ensure Docker version supports health checks (17.05+). Verify health check command is failing as expected. Check health check logs: docker inspect CONTAINER | jq '.[0].State.Health.Log'.
+
 ### Docker daemon connection errors or socket not found
 
 Verify Docker daemon is running: systemctl status docker (Linux) or check Docker Desktop status (macOS/Windows). Check DOCKER_HOST environment variable: echo $DOCKER_HOST. Default socket location: /var/run/docker.sock (Linux) or ~/.docker/run/docker.sock (macOS). Verify socket exists: ls -l /var/run/docker.sock. Restart Docker daemon if needed.
+
 ### Statusline showing incorrect container counts
 
 Verify docker ps commands are working: docker ps -q | wc -l. Check for stopped containers: docker ps -a -q | wc -l. Ensure script is using correct flags: -q for quiet mode, -a for all containers. Verify wc and tr commands are available: which wc tr. Check for hidden characters in output: docker ps -q | od -c.

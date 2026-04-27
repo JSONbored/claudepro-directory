@@ -15,10 +15,10 @@ seoDescription: >-
   safe deletion verification and rollback support using Knip 5.x, ts-prune,
   depch...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-19'
-repoUrl: 'https://github.com/nadeesha/ts-prune'
-documentationUrl: 'https://github.com/nadeesha/ts-prune'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-19"
+repoUrl: "https://github.com/nadeesha/ts-prune"
+documentationUrl: "https://github.com/nadeesha/ts-prune"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/dead-code-eliminator.sh && chmod
@@ -72,6 +72,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Unused import detection and removal across multiple languages (JavaScript/TypeScript with ESLint 9.37.0, Python with autoflake) with automatic cleanup
@@ -149,7 +150,7 @@ echo "===========================================" >> "$REPORT_FILE"
 # Function to find unused imports (JavaScript/TypeScript)
 find_unused_imports_js() {
   echo "🔍 Checking for unused imports in JS/TS files..." >&2
-  
+
   if command -v npx &> /dev/null; then
     # Check if eslint-plugin-unused-imports is available
     if [ -f "package.json" ] && grep -q "eslint" package.json; then
@@ -157,7 +158,7 @@ find_unused_imports_js() {
       npx eslint --ext .js,.jsx,.ts,.tsx --quiet --format compact . 2>/dev/null | \
         grep "unused" | head -20 >> "$REPORT_FILE" || true
     fi
-    
+
     # Use ts-prune for TypeScript projects
     if [ -f "tsconfig.json" ] && command -v npx &> /dev/null; then
       echo "📦 Running ts-prune for unused exports..." >&2
@@ -170,7 +171,7 @@ find_unused_imports_js() {
 # Function to find unused Python imports
 find_unused_imports_python() {
   echo "🔍 Checking for unused imports in Python files..." >&2
-  
+
   if command -v autoflake &> /dev/null; then
     echo "📦 Running autoflake for unused imports..." >&2
     autoflake --check --recursive --remove-all-unused-imports . 2>/dev/null | \
@@ -188,13 +189,13 @@ find_unused_imports_python() {
 # Function to find unreferenced files
 find_unreferenced_files() {
   echo "🔍 Finding potentially unreferenced files..." >&2
-  
+
   # Find files that might be orphaned (not imported anywhere)
   if command -v rg &> /dev/null; then
     echo "" >> "$REPORT_FILE"
     echo "Potentially Unreferenced Files:" >> "$REPORT_FILE"
     echo "--------------------------------" >> "$REPORT_FILE"
-    
+
     # Find .js/.ts files in src
     find src -type f \( -name "*.js" -o -name "*.ts" -o -name "*.tsx" -o -name "*.jsx" \) 2>/dev/null | \
       head -50 | while read -r file; do
@@ -211,13 +212,13 @@ find_unreferenced_files() {
 # Function to find unused dependencies
 find_unused_dependencies() {
   echo "🔍 Checking for unused npm dependencies..." >&2
-  
+
   if [ -f "package.json" ]; then
     if command -v npx &> /dev/null; then
       echo "" >> "$REPORT_FILE"
       echo "Unused Dependencies Check:" >> "$REPORT_FILE"
       echo "-------------------------" >> "$REPORT_FILE"
-      
+
       # Use depcheck if available
       if npx depcheck --version &> /dev/null; then
         npx depcheck --json 2>/dev/null | \
@@ -232,12 +233,12 @@ find_unused_dependencies() {
 # Function to analyze dead code with coverage data
 analyze_with_coverage() {
   echo "📊 Analyzing test coverage for dead code hints..." >&2
-  
+
   if [ -f "coverage/coverage-summary.json" ]; then
     echo "" >> "$REPORT_FILE"
     echo "Zero-Coverage Files (Potential Dead Code):" >> "$REPORT_FILE"
     echo "------------------------------------------" >> "$REPORT_FILE"
-    
+
     jq -r 'to_entries[] | select(.value.lines.pct == 0) | .key' \
       coverage/coverage-summary.json 2>/dev/null | \
       head -10 >> "$REPORT_FILE" || true
@@ -262,7 +263,7 @@ if [ -s "$REPORT_FILE" ]; then
   cat "$REPORT_FILE" >&2
   echo "" >&2
   echo "💾 Full report saved to: $REPORT_FILE" >&2
-  
+
   if [ "$DRY_RUN" = "true" ]; then
     echo "" >&2
     echo "🔒 DRY RUN mode enabled - no files deleted" >&2
@@ -286,6 +287,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Dead Code Eliminator Hook Script
 
 Complete hook script that detects and reports dead code when session ends
@@ -314,6 +316,7 @@ else
 fi
 exit 0
 ```
+
 ### TypeScript Unused Exports Detection
 
 Enhanced hook script for TypeScript unused exports detection using ts-prune
@@ -330,6 +333,7 @@ if [ -f "tsconfig.json" ] && command -v npx &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Python Dead Code Detection
 
 Enhanced hook script for Python dead code detection using autoflake and Vulture
@@ -347,6 +351,7 @@ else
 fi
 exit 0
 ```
+
 ### Unused Dependencies Detection
 
 Enhanced hook script for detecting unused npm dependencies using depcheck
@@ -363,27 +368,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### SessionEnd hook runs but no dead code report generated
 
 Check .claude/reports directory permissions and disk space. Verify jq command available for JSON parsing. Run manually to see stderr output: bash .claude/hooks/dead-code-eliminator.sh. Check if dead code detection tools are installed (Knip, ts-prune, depcheck, autoflake, Vulture).
+
 ### False positives for dynamic imports and runtime dependencies
 
-Hook uses static analysis only. Exclude dynamic require() patterns from reports. Add ignore patterns to .dead-code-ignore file. Use /* dead-code-safe */ comments for runtime-loaded modules. Configure Knip with ignore patterns for dynamic imports.
+Hook uses static analysis only. Exclude dynamic require() patterns from reports. Add ignore patterns to .dead-code-ignore file. Use /_ dead-code-safe _/ comments for runtime-loaded modules. Configure Knip with ignore patterns for dynamic imports.
+
 ### ts-prune reports too many false positives on exports
 
 Configure ts-prune with .ts-prunerc ignore patterns. Export unused items intentionally for public API. Use ts-prune --ignore to exclude specific paths or patterns from analysis. Consider using Knip 5.x for more accurate TypeScript analysis.
+
 ### DRY_RUN=false mode deletes files without confirmation
 
 Backup created in .claude/backups before deletion. Review report first in dry run mode. Implement confirmation prompt in script. Use git to recover deleted files if needed. Always test in dry-run mode first before enabling automatic deletion.
+
 ### Coverage-based detection misses files outside test scope
 
 Zero coverage indicates potential dead code but not definitive. Cross-reference with import analysis. Check if files are runtime-loaded or dynamically required. Verify files are not entry points or config files. Use Knip for more comprehensive analysis.
+
 ### Knip reports unused dependencies that are actually used
 
 Knip may miss dynamic imports or runtime-loaded dependencies. Add Knip configuration to ignore specific dependencies. Check if dependencies are used in configuration files or build scripts. Verify Knip 5.x version for improved accuracy.
+
 ### autoflake removes imports that are used at runtime
 
 autoflake uses static analysis and may miss runtime imports. Review autoflake output carefully before applying changes. Use --check flag first to preview changes. Add imports to whitelist if they are intentionally used at runtime.
+
 ### Vulture reports false positives for framework entry points
 
 Vulture may flag framework entry points as unused. Add entry point files to Vulture whitelist. Use --min-confidence flag to filter low-confidence results. Configure Vulture to ignore specific patterns or file paths.

@@ -64,7 +64,9 @@ Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline sepa
 
 ## Examples
 ### Enhanced Catppuccin Mocha with Cost Display
+
 Extended version with cost information and additional segments
+
 ```bash
 #!/usr/bin/env bash
 
@@ -124,8 +126,11 @@ fi
 
 echo -e "$statusline"
 ```
+
 ### Catppuccin Mocha with Custom Segment Order
+
 Configurable segment order via environment variables
+
 ```bash
 #!/usr/bin/env bash
 
@@ -184,8 +189,11 @@ done
 
 echo -e "$statusline"
 ```
+
 ### Catppuccin Mocha Theme Installation Example
+
 Complete setup script with Nerd Font verification
+
 ```bash
 #!/bin/bash
 # Installation script for Catppuccin Mocha Theme
@@ -392,24 +400,31 @@ echo "Note: For best results, use a terminal with 256-color support and Nerd Fon
 ### Colors look washed out or incorrect compared to official palette
 
 Verify terminal supports 256 colors with 'tput colors' (should return 256). Enable true color if available: export COLORTERM=truecolor. Check terminal theme doesn't override ANSI colors. Verify color codes match Catppuccin Mocha palette: LAVENDER=183, BLUE=117, TEAL=152, PEACH=216. Test colors: echo -e '\033[48;5;183m LAVENDER \033[0m'.
+
 ### Nerd Font icons showing as boxes or missing glyphs
 
 Install Catppuccin-compatible Nerd Font from nerdfonts.com. Recommended: JetBrains Mono Nerd Font, FiraCode Nerd Font. Configure terminal to use installed font in preferences. Verify font includes Powerline glyphs (U+E0B0-U+E0B3). Test separator: echo -e '\ue0b0' (should show Powerline separator, not box).
+
 ### Git branch not displaying even when in repository
 
 Check Git installed: git --version. Verify you're in Git repo: git status. Ensure script has permission to execute git commands. Test manually: git rev-parse --abbrev-ref HEAD. Check error handling: git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo ""). Verify Git command output is not empty.
+
 ### Powerline separators misaligned or overlapping text
 
 Verify Nerd Font properly installed with Powerline glyphs (U+E0B0-U+E0B3). Test separator: echo -e '\ue0b0'. Disable font ligatures if enabled. Increase terminal line spacing if needed. Check terminal font rendering settings. Verify separator character encoding: SEP="\ue0b0" (Unicode escape).
+
 ### Statusline disappears or flickers on refresh
 
 Increase refreshInterval to 1000ms in configuration: {"refreshInterval": 1000}. Check script permissions: chmod +x statusline.sh. Verify jq installed: jq --version. Test script manually with sample JSON input. Check for syntax errors: bash -n catppuccin-mocha-theme.sh.
+
 ### Model or directory showing as 'unknown' or empty
 
 Verify JSON structure: echo '$input' | jq '.model, .workspace'. Check field names: model.id, model.display_name, workspace.current_dir, workspace.project_dir. Test extraction: echo '$input' | jq -r '.model.id // .model.display_name // "unknown"'. Verify Claude Code is passing correct JSON structure.
+
 ### Token count always showing 0
 
 Check token field exists: echo '$input' | jq '.session.totalTokens, .cost.total_tokens'. Verify field name matches: session.totalTokens or cost.total_tokens. Test extraction: echo '$input' | jq -r '.session.totalTokens // .cost.total_tokens // 0'. Check Claude Code version supports token tracking.
+
 ### Statusline output showing raw ANSI codes instead of colors
 
 Verify echo -e flag is used for escape sequence interpretation. Check terminal supports ANSI colors: echo -e '\033[38;5;183mLAVENDER\033[0m'. Some terminals require explicit color support enabled. Check TERM environment variable: echo $TERM (should include 'xterm' or '256color'). Verify terminal emulator settings for color support.

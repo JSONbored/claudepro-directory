@@ -7,7 +7,12 @@ import {
   isAllowedOrigin,
   isRateLimited,
 } from "@/lib/api-security";
-import { logApiError, logApiInfo, logApiWarn, redactEmail } from "@/lib/api-logs";
+import {
+  logApiError,
+  logApiInfo,
+  logApiWarn,
+  redactEmail,
+} from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 
 export async function POST(request: Request) {
@@ -23,10 +28,20 @@ export async function POST(request: Request) {
 
   if (!hasJsonContentType(request)) {
     logApiWarn(request, "listing_leads.invalid_content_type");
-    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
+    return NextResponse.json(
+      { error: "invalid_content_type" },
+      { status: 415 },
+    );
   }
 
-  if (isRateLimited({ request, scope: "listing-leads", limit: 12, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "listing-leads",
+      limit: 12,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "listing_leads.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -41,14 +56,22 @@ export async function POST(request: Request) {
 
   const report = validateListingLeadPayload(payload);
   if (!report.ok) {
-    logApiWarn(request, "listing_leads.invalid_payload", { errors: report.errors });
-    return NextResponse.json({ error: "invalid_payload", errors: report.errors }, { status: 400 });
+    logApiWarn(request, "listing_leads.invalid_payload", {
+      errors: report.errors,
+    });
+    return NextResponse.json(
+      { error: "invalid_payload", errors: report.errors },
+      { status: 400 },
+    );
   }
 
   const db = getSiteDb();
   if (!db) {
     logApiError(request, "listing_leads.db_not_configured");
-    return NextResponse.json({ error: "site_db_not_configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "site_db_not_configured" },
+      { status: 503 },
+    );
   }
 
   const data = report.data;
@@ -75,7 +98,7 @@ export async function POST(request: Request) {
           payload_json,
           created_at,
           updated_at
-        ) VALUES (?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`
+        ) VALUES (?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       )
       .bind(
         data.kind,
@@ -96,7 +119,10 @@ export async function POST(request: Request) {
       tier: data.tierInterest,
       email: redactEmail(data.contactEmail),
     });
-    return NextResponse.json({ ok: true }, { headers: { "cache-control": "no-store" } });
+    return NextResponse.json(
+      { ok: true },
+      { headers: { "cache-control": "no-store" } },
+    );
   } catch {
     logApiError(request, "listing_leads.insert_failed", {
       kind: data.kind,

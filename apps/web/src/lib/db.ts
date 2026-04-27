@@ -24,9 +24,8 @@ export function getSiteDb(): D1DatabaseLike | null {
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as {
       SITE_DB?: D1DatabaseLike;
-      VOTES_DB?: D1DatabaseLike;
     };
-    return envRecord.SITE_DB ?? envRecord.VOTES_DB ?? null;
+    return envRecord.SITE_DB ?? null;
   } catch {
     return null;
   }

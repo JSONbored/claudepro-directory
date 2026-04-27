@@ -50,6 +50,13 @@
       "types": "./src/index.d.ts",
       "default": "./src/commercial.js"
     },
+    "./content-builder": {
+      "types": "./src/content-builder.d.ts",
+      "default": "./src/content-builder.js"
+    },
     "./category-spec.json": "./src/category-spec.json"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3"
   }
 }

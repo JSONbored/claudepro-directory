@@ -25,11 +25,11 @@ export function EntryChecklistCard({
   eyebrow = "Checklist",
   description,
   items,
-  variant = "prerequisites"
+  variant = "prerequisites",
 }: EntryChecklistCardProps) {
   const storageKey = useMemo(
     () => `heyclaude-checklist:${entryKey}:${slugify(title)}`,
-    [entryKey, title]
+    [entryKey, title],
   );
   const [open, setOpen] = useState(true);
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
@@ -50,7 +50,9 @@ export function EntryChecklistCard({
   }, [completed, storageKey]);
 
   const completeCount = items.filter((item) => completed[item]).length;
-  const progress = items.length ? Math.round((completeCount / items.length) * 100) : 0;
+  const progress = items.length
+    ? Math.round((completeCount / items.length) * 100)
+    : 0;
 
   return (
     <section
@@ -71,10 +73,16 @@ export function EntryChecklistCard({
             )}
           </span>
           <div className="min-w-0 text-left">
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{eyebrow}</p>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">{title}</h2>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              {eyebrow}
+            </p>
+            <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+              {title}
+            </h2>
             {description ? (
-              <p className="mt-2 text-sm leading-7 text-muted-foreground">{description}</p>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">
+                {description}
+              </p>
             ) : null}
           </div>
         </div>
@@ -87,7 +95,11 @@ export function EntryChecklistCard({
               Complete
             </p>
           </div>
-          {open ? <ChevronUp className="size-4 text-muted-foreground" /> : <ChevronDown className="size-4 text-muted-foreground" />}
+          {open ? (
+            <ChevronUp className="size-4 text-muted-foreground" />
+          ) : (
+            <ChevronDown className="size-4 text-muted-foreground" />
+          )}
         </div>
       </button>
 
@@ -95,7 +107,10 @@ export function EntryChecklistCard({
         <div className="space-y-4 border-t border-border/70 px-5 py-5">
           <div className="space-y-2">
             <div className="h-2 overflow-hidden rounded-full bg-background">
-              <div className="checklist-card-progress" style={{ width: `${progress}%` }} />
+              <div
+                className="checklist-card-progress"
+                style={{ width: `${progress}%` }}
+              />
             </div>
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
               {progress}% complete
@@ -112,15 +127,19 @@ export function EntryChecklistCard({
                     onClick={() =>
                       setCompleted((current) => ({
                         ...current,
-                        [item]: !current[item]
+                        [item]: !current[item],
                       }))
                     }
                     className={`checklist-item ${isDone ? "checklist-item-complete" : ""}`}
                   >
-                    <span className={`checklist-item-box ${isDone ? "checklist-item-box-complete" : ""}`}>
+                    <span
+                      className={`checklist-item-box ${isDone ? "checklist-item-box-complete" : ""}`}
+                    >
                       {isDone ? <Check className="size-3.5" /> : null}
                     </span>
-                    <span className="min-w-0 text-left text-sm leading-7">{item}</span>
+                    <span className="min-w-0 text-left text-sm leading-7">
+                      {item}
+                    </span>
                   </button>
                 </li>
               );

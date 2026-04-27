@@ -103,9 +103,9 @@ report_benchmark() {
   local name="$2"
   local duration="$3"
   local details="$4"
-  
+
   BENCHMARKS_RUN=$((BENCHMARKS_RUN + 1))
-  
+
   case "$status" in
     "PASS")
       echo "✅ PASS: $name (${duration}s)" >&2
@@ -122,7 +122,7 @@ report_benchmark() {
       echo "ℹ️ INFO: $name" >&2
       ;;
   esac
-  
+
   if [ -n "$duration" ] && [ "$duration" != "0" ]; then
     TOTAL_DURATION=$((TOTAL_DURATION + duration))
   fi
@@ -133,17 +133,17 @@ run_timed_benchmark() {
   local name="$1"
   local command="$2"
   local timeout_seconds="${3:-60}"
-  
+
   echo "   🏃 Running: $name..." >&2
-  
+
   local start_time=$(date +%s)
   local output_file="/tmp/benchmark_${name//[^a-zA-Z0-9]/_}_$$"
-  
+
   if timeout "${timeout_seconds}s" bash -c "$command" > "$output_file" 2>&1; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     report_benchmark "PASS" "$name" "$duration"
-    
+
     # Show brief output
     if [ -s "$output_file" ]; then
       echo "     📊 Results:" >&2
@@ -155,7 +155,7 @@ run_timed_benchmark() {
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     report_benchmark "FAIL" "$name" "$duration"
-    
+
     # Show error output
     if [ -s "$output_file" ]; then
       echo "     ❌ Error:" >&2
@@ -164,14 +164,14 @@ run_timed_benchmark() {
       done
     fi
   fi
-  
+
   rm -f "$output_file"
 }
 
 # Function to detect project type and language
 detect_project_type() {
   local project_types=()
-  
+
   [ -f "package.json" ] && project_types+=("nodejs")
   [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] && project_types+=("python")
   [ -f "go.mod" ] && project_types+=("go")
@@ -179,7 +179,7 @@ detect_project_type() {
   [ -f "composer.json" ] && project_types+=("php")
   [ -f "Gemfile" ] && project_types+=("ruby")
   [ -f "pom.xml" ] || [ -f "build.gradle" ] && project_types+=("java")
-  
+
   echo "${project_types[@]}"
 }
 
@@ -205,11 +205,11 @@ fi
 # 1. Node.js Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
   echo "📦 Node.js Performance Benchmarks" >&2
-  
+
   # Check for benchmark scripts in package.json
   if [ -f "package.json" ]; then
     BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
-    
+
     if [ -n "$BENCHMARK_SCRIPTS" ]; then
       echo "$BENCHMARK_SCRIPTS" | while read script; do
         run_timed_benchmark "npm run $script" "npm run $script" 180
@@ -217,18 +217,18 @@ if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
     else
       report_benchmark "SKIP" "Node.js benchmarks" "No benchmark scripts found in package.json"
     fi
-    
+
     # Bundle size analysis
     if command -v npx &> /dev/null; then
       if [ -f "dist/" ] || [ -f "build/" ]; then
         run_timed_benchmark "Bundle size analysis" "npx bundlesize" 60
       fi
-      
+
       # Build performance
       if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
         run_timed_benchmark "Build performance" "npm run build" 300
       fi
-      
+
       # Test performance
       if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
         run_timed_benchmark "Test suite performance" "npm test" 180
@@ -240,17 +240,17 @@ fi
 # 2. Python Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " python " ]]; then
   echo "🐍 Python Performance Benchmarks" >&2
-  
+
   # pytest-benchmark
   if command -v pytest &> /dev/null && ([ -f "pytest.ini" ] || [ -f "pyproject.toml" ]); then
     run_timed_benchmark "pytest benchmarks" "pytest --benchmark-only --benchmark-json=/tmp/pytest_benchmark.json" 300
   fi
-  
+
   # Python timeit benchmarks
   if [ -f "benchmark.py" ]; then
     run_timed_benchmark "Python benchmark.py" "python benchmark.py" 120
   fi
-  
+
   # Memory profiling
   if command -v python &> /dev/null && command -v pip &> /dev/null; then
     run_timed_benchmark "Memory profiling" "python -c 'import psutil; print(f\"Memory usage: {psutil.virtual_memory().percent}%\")'" 10
@@ -260,14 +260,14 @@ fi
 # 3. Go Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " go " ]]; then
   echo "🐹 Go Performance Benchmarks" >&2
-  
+
   if command -v go &> /dev/null; then
     # Go test benchmarks
     run_timed_benchmark "Go benchmarks" "go test -bench=. -benchmem" 180
-    
+
     # Build performance
     run_timed_benchmark "Go build performance" "go build -o /tmp/go_build_test" 60
-    
+
     # Clean up
     rm -f /tmp/go_build_test
   fi
@@ -276,14 +276,14 @@ fi
 # 4. Rust Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " rust " ]]; then
   echo "🦀 Rust Performance Benchmarks" >&2
-  
+
   if command -v cargo &> /dev/null; then
     # Cargo bench
     run_timed_benchmark "Cargo benchmarks" "cargo bench" 300
-    
+
     # Build performance
     run_timed_benchmark "Cargo build performance" "cargo build --release" 180
-    
+
     # Test performance
     run_timed_benchmark "Cargo test performance" "cargo test" 120
   fi
@@ -314,7 +314,7 @@ if [ "$WEB_PROJECT" = true ]; then
   else
     report_benchmark "SKIP" "Lighthouse audit" "Lighthouse not installed"
   fi
-  
+
   # Bundle analyzer (if available)
   if command -v npx &> /dev/null && [ -f "package.json" ]; then
     if [ -d "dist" ] || [ -d "build" ] || [ -d ".next" ]; then
@@ -331,12 +331,12 @@ echo "🗄️ Database Performance Analysis" >&2
 # Check for database connections
 if [ -f ".env" ] && grep -q 'DATABASE_URL\\|DB_' .env; then
   report_benchmark "INFO" "Database configuration detected"
-  
+
   # Simple connection test
   if command -v psql &> /dev/null && grep -q 'postgres' .env 2>/dev/null; then
     run_timed_benchmark "PostgreSQL connection test" "timeout 10s psql \"$(grep DATABASE_URL .env | cut -d'=' -f2)\" -c 'SELECT 1;'" 15
   fi
-  
+
   if command -v mysql &> /dev/null && grep -q 'mysql' .env 2>/dev/null; then
     run_timed_benchmark "MySQL connection test" "timeout 10s mysql --execute='SELECT 1;'" 15
   fi
@@ -376,14 +376,14 @@ PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null 
 if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
   LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
   echo "   📊 Comparing with previous run: $(basename "$LATEST_PREVIOUS")" >&2
-  
+
   if [ -f "$LATEST_PREVIOUS" ] && command -v jq &> /dev/null; then
     PREV_DURATION=$(jq -r '.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
-    
+
     if [ "$PREV_DURATION" -gt 0 ] && [ "$TOTAL_DURATION" -gt 0 ]; then
       DURATION_DIFF=$((TOTAL_DURATION - PREV_DURATION))
       PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
-      
+
       if [ "$DURATION_DIFF" -gt 0 ]; then
         echo "   ⬆️ Performance regression: +${PERCENT_CHANGE}% slower" >&2
       elif [ "$DURATION_DIFF" -lt 0 ]; then
@@ -410,7 +410,7 @@ cat >> "$REPORT_FILE" << EOF
     "total_duration": $TOTAL_DURATION,
     "session_duration": $SESSION_DURATION
   },
-  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]  
+  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]
 }
 EOF
 
@@ -476,9 +476,9 @@ report_benchmark() {
   local name="$2"
   local duration="$3"
   local details="$4"
-  
+
   BENCHMARKS_RUN=$((BENCHMARKS_RUN + 1))
-  
+
   case "$status" in
     "PASS")
       echo "✅ PASS: $name (${duration}s)" >&2
@@ -495,7 +495,7 @@ report_benchmark() {
       echo "ℹ️ INFO: $name" >&2
       ;;
   esac
-  
+
   if [ -n "$duration" ] && [ "$duration" != "0" ]; then
     TOTAL_DURATION=$((TOTAL_DURATION + duration))
   fi
@@ -506,17 +506,17 @@ run_timed_benchmark() {
   local name="$1"
   local command="$2"
   local timeout_seconds="${3:-60}"
-  
+
   echo "   🏃 Running: $name..." >&2
-  
+
   local start_time=$(date +%s)
   local output_file="/tmp/benchmark_${name//[^a-zA-Z0-9]/_}_$$"
-  
+
   if timeout "${timeout_seconds}s" bash -c "$command" > "$output_file" 2>&1; then
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     report_benchmark "PASS" "$name" "$duration"
-    
+
     # Show brief output
     if [ -s "$output_file" ]; then
       echo "     📊 Results:" >&2
@@ -528,7 +528,7 @@ run_timed_benchmark() {
     local end_time=$(date +%s)
     local duration=$((end_time - start_time))
     report_benchmark "FAIL" "$name" "$duration"
-    
+
     # Show error output
     if [ -s "$output_file" ]; then
       echo "     ❌ Error:" >&2
@@ -537,14 +537,14 @@ run_timed_benchmark() {
       done
     fi
   fi
-  
+
   rm -f "$output_file"
 }
 
 # Function to detect project type and language
 detect_project_type() {
   local project_types=()
-  
+
   [ -f "package.json" ] && project_types+=("nodejs")
   [ -f "requirements.txt" ] || [ -f "pyproject.toml" ] && project_types+=("python")
   [ -f "go.mod" ] && project_types+=("go")
@@ -552,7 +552,7 @@ detect_project_type() {
   [ -f "composer.json" ] && project_types+=("php")
   [ -f "Gemfile" ] && project_types+=("ruby")
   [ -f "pom.xml" ] || [ -f "build.gradle" ] && project_types+=("java")
-  
+
   echo "${project_types[@]}"
 }
 
@@ -578,11 +578,11 @@ fi
 # 1. Node.js Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
   echo "📦 Node.js Performance Benchmarks" >&2
-  
+
   # Check for benchmark scripts in package.json
   if [ -f "package.json" ]; then
     BENCHMARK_SCRIPTS=$(jq -r '.scripts | to_entries[] | select(.key | test("benchmark|perf")) | .key' package.json 2>/dev/null || echo "")
-    
+
     if [ -n "$BENCHMARK_SCRIPTS" ]; then
       echo "$BENCHMARK_SCRIPTS" | while read script; do
         run_timed_benchmark "npm run $script" "npm run $script" 180
@@ -590,18 +590,18 @@ if [[ " ${PROJECT_TYPES[*]} " =~ " nodejs " ]]; then
     else
       report_benchmark "SKIP" "Node.js benchmarks" "No benchmark scripts found in package.json"
     fi
-    
+
     # Bundle size analysis
     if command -v npx &> /dev/null; then
       if [ -f "dist/" ] || [ -f "build/" ]; then
         run_timed_benchmark "Bundle size analysis" "npx bundlesize" 60
       fi
-      
+
       # Build performance
       if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
         run_timed_benchmark "Build performance" "npm run build" 300
       fi
-      
+
       # Test performance
       if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
         run_timed_benchmark "Test suite performance" "npm test" 180
@@ -613,17 +613,17 @@ fi
 # 2. Python Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " python " ]]; then
   echo "🐍 Python Performance Benchmarks" >&2
-  
+
   # pytest-benchmark
   if command -v pytest &> /dev/null && ([ -f "pytest.ini" ] || [ -f "pyproject.toml" ]); then
     run_timed_benchmark "pytest benchmarks" "pytest --benchmark-only --benchmark-json=/tmp/pytest_benchmark.json" 300
   fi
-  
+
   # Python timeit benchmarks
   if [ -f "benchmark.py" ]; then
     run_timed_benchmark "Python benchmark.py" "python benchmark.py" 120
   fi
-  
+
   # Memory profiling
   if command -v python &> /dev/null && command -v pip &> /dev/null; then
     run_timed_benchmark "Memory profiling" "python -c 'import psutil; print(f\"Memory usage: {psutil.virtual_memory().percent}%\")'" 10
@@ -633,14 +633,14 @@ fi
 # 3. Go Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " go " ]]; then
   echo "🐹 Go Performance Benchmarks" >&2
-  
+
   if command -v go &> /dev/null; then
     # Go test benchmarks
     run_timed_benchmark "Go benchmarks" "go test -bench=. -benchmem" 180
-    
+
     # Build performance
     run_timed_benchmark "Go build performance" "go build -o /tmp/go_build_test" 60
-    
+
     # Clean up
     rm -f /tmp/go_build_test
   fi
@@ -649,14 +649,14 @@ fi
 # 4. Rust Benchmarks
 if [[ " ${PROJECT_TYPES[*]} " =~ " rust " ]]; then
   echo "🦀 Rust Performance Benchmarks" >&2
-  
+
   if command -v cargo &> /dev/null; then
     # Cargo bench
     run_timed_benchmark "Cargo benchmarks" "cargo bench" 300
-    
+
     # Build performance
     run_timed_benchmark "Cargo build performance" "cargo build --release" 180
-    
+
     # Test performance
     run_timed_benchmark "Cargo test performance" "cargo test" 120
   fi
@@ -687,7 +687,7 @@ if [ "$WEB_PROJECT" = true ]; then
   else
     report_benchmark "SKIP" "Lighthouse audit" "Lighthouse not installed"
   fi
-  
+
   # Bundle analyzer (if available)
   if command -v npx &> /dev/null && [ -f "package.json" ]; then
     if [ -d "dist" ] || [ -d "build" ] || [ -d ".next" ]; then
@@ -704,12 +704,12 @@ echo "🗄️ Database Performance Analysis" >&2
 # Check for database connections
 if [ -f ".env" ] && grep -q 'DATABASE_URL\\|DB_' .env; then
   report_benchmark "INFO" "Database configuration detected"
-  
+
   # Simple connection test
   if command -v psql &> /dev/null && grep -q 'postgres' .env 2>/dev/null; then
     run_timed_benchmark "PostgreSQL connection test" "timeout 10s psql \"$(grep DATABASE_URL .env | cut -d'=' -f2)\" -c 'SELECT 1;'" 15
   fi
-  
+
   if command -v mysql &> /dev/null && grep -q 'mysql' .env 2>/dev/null; then
     run_timed_benchmark "MySQL connection test" "timeout 10s mysql --execute='SELECT 1;'" 15
   fi
@@ -749,14 +749,14 @@ PREVIOUS_REPORTS=($(ls -t "$BENCHMARK_RESULTS_DIR"/benchmark-*.json 2>/dev/null 
 if [ ${#PREVIOUS_REPORTS[@]} -gt 1 ]; then
   LATEST_PREVIOUS="${PREVIOUS_REPORTS[1]}"
   echo "   📊 Comparing with previous run: $(basename "$LATEST_PREVIOUS")" >&2
-  
+
   if [ -f "$LATEST_PREVIOUS" ] && command -v jq &> /dev/null; then
     PREV_DURATION=$(jq -r '.total_duration // 0' "$LATEST_PREVIOUS" 2>/dev/null || echo "0")
-    
+
     if [ "$PREV_DURATION" -gt 0 ] && [ "$TOTAL_DURATION" -gt 0 ]; then
       DURATION_DIFF=$((TOTAL_DURATION - PREV_DURATION))
       PERCENT_CHANGE=$(echo "scale=1; $DURATION_DIFF * 100 / $PREV_DURATION" | bc -l 2>/dev/null || echo "0")
-      
+
       if [ "$DURATION_DIFF" -gt 0 ]; then
         echo "   ⬆️ Performance regression: +${PERCENT_CHANGE}% slower" >&2
       elif [ "$DURATION_DIFF" -lt 0 ]; then
@@ -783,7 +783,7 @@ cat >> "$REPORT_FILE" << EOF
     "total_duration": $TOTAL_DURATION,
     "session_duration": $SESSION_DURATION
   },
-  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]  
+  "project_types": [$(printf '"%s",' "${PROJECT_TYPES[@]}" | sed 's/,$//')]
 }
 EOF
 
@@ -853,6 +853,7 @@ fi
 echo "📄 Report saved: $REPORT_FILE" >&2
 exit 0
 ```
+
 ### Lighthouse Web Performance Auditing
 
 Enhanced hook script for Lighthouse web performance auditing with Core Web Vitals
@@ -881,6 +882,7 @@ if [ -f "package.json" ]; then
 fi
 exit 0
 ```
+
 ### Go Performance Benchmarks
 
 Enhanced hook script for Go performance benchmarking with go test -bench
@@ -907,6 +909,7 @@ if [ -f "go.mod" ] && command -v go &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Historical Benchmark Comparison
 
 Enhanced hook script for historical benchmark comparison and trend analysis
@@ -1044,24 +1047,31 @@ exit 0
 ### Hook timeout reached before benchmarks complete execution
 
 Increase timeout in hookConfig: timeout: 300000 for 5 minutes. Reduce benchmark scope by skipping slow tests. Use timeout 120s wrapper around individual benchmark commands to prevent single test blocking. Verify benchmark duration. Test with various timeout values.
+
 ### npm run benchmark fails with 'script not found' in package.json
 
 Check script existence: jq -e '.scripts.benchmark' package.json before execution. Add fallback: if ! jq -e '.scripts.benchmark' package.json; then echo 'No benchmark script'; exit 0; fi. Skip gracefully instead of failing. Verify package.json structure. Test with various script names.
+
 ### Lighthouse audit fails with 'No Chrome installation found'
 
 Install Chrome/Chromium: brew install chromium on macOS or apt-get install chromium-browser on Linux. Set CHROME_PATH environment variable. Use --chrome-flags='--headless --no-sandbox' for CI environments. Verify Chrome installation. Test with various Chrome configurations.
+
 ### Historical comparison crashes with jq parse errors on old reports
 
 Validate JSON before parsing: jq empty "$REPORT_FILE" 2>/dev/null || continue. Handle malformed reports gracefully. Add schema version field to new reports: {"schema_version": "1.0", ...}. Verify JSON structure. Test with various report formats.
+
 ### Stop hook runs benchmarks even when session ends with errors
 
 Check exit status context if available. Add conditional execution: [ -f .benchmark-enabled ] || exit 0. Create .benchmark-enabled flag only when user explicitly requests benchmarking to avoid unnecessary runs. Verify hook execution conditions. Test with various session states.
+
 ### Go benchmarks fail with 'no test files' error
 
-Verify Go test files exist: find . -name '*_test.go'. Check go.mod location. Ensure benchmark functions use Benchmark prefix: func BenchmarkFunction(b *testing.B). Verify Go project structure. Test with various Go test configurations.
+Verify Go test files exist: find . -name '*\_test.go'. Check go.mod location. Ensure benchmark functions use Benchmark prefix: func BenchmarkFunction(b *testing.B). Verify Go project structure. Test with various Go test configurations.
+
 ### Python pytest-benchmark not found
 
 Install pytest-benchmark: pip install pytest-benchmark. Verify pytest installation: pytest --version. Check pytest.ini or pyproject.toml configuration. Ensure benchmark tests use @pytest.mark.benchmark decorator. Verify Python environment. Test with various pytest configurations.
+
 ### Bundle size analysis fails with webpack-bundle-analyzer
 
 Install webpack-bundle-analyzer: npm install --save-dev webpack-bundle-analyzer. Verify webpack configuration. Check for dist/ or build/ directories. Ensure build is completed before analysis. Verify bundle analyzer configuration. Test with various webpack setups.

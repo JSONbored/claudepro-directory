@@ -27,9 +27,16 @@ async function readAssetBuffer(asset: string, requestUrl: string) {
   } catch {
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as {
-      ASSETS: { fetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> };
+      ASSETS: {
+        fetch: (
+          input: RequestInfo | URL,
+          init?: RequestInit,
+        ) => Promise<Response>;
+      };
     };
-    const response = await envRecord.ASSETS.fetch(new Request(new URL(asset, requestUrl)));
+    const response = await envRecord.ASSETS.fetch(
+      new Request(new URL(asset, requestUrl)),
+    );
     if (!response.ok) {
       throw new Error(`asset_not_found:${response.status}`);
     }
@@ -38,7 +45,14 @@ async function readAssetBuffer(asset: string, requestUrl: string) {
 }
 
 export async function GET(request: Request) {
-  if (isRateLimited({ request, scope: "asset-download", limit: 180, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "asset-download",
+      limit: 180,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "download.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -69,8 +83,8 @@ export async function GET(request: Request) {
         "content-type": getContentType(asset),
         "content-disposition": `attachment; filename="${filename}"`,
         "cache-control": "public, max-age=31536000, immutable",
-        "x-content-type-options": "nosniff"
-      }
+        "x-content-type-options": "nosniff",
+      },
     });
   } catch {
     logApiError(request, "download.not_found", { asset });

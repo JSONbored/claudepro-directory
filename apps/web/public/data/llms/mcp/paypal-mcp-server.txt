@@ -98,36 +98,52 @@ Streamline your payment processing and financial operations by connecting Claude
 
 ## Examples
 ### Process a refund for transaction ID ABC123
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Process a refund for transaction ID ABC123"
 ```
+
 ### Show today's payment activity
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Show today's payment activity"
 ```
+
 ### Generate monthly transaction report
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate monthly transaction report"
 ```
+
 ### Check account balance
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Check account balance"
 ```
+
 ### Create Payment
+
 Create a new PayPal payment with amount and currency
+
 ```typescript
 // Create PayPal payment
 const payment = await paypal.payments.create({
   intent: "sale",
   payer: { payment_method: "paypal" },
-  transactions: [{
-    amount: { total: "10.00", currency: "USD" },
-    description: "Payment description"
-  }]
+  transactions: [
+    {
+      amount: { total: "10.00", currency: "USD" },
+      description: "Payment description",
+    },
+  ],
 });
 ```
 ```plaintext
@@ -147,10 +163,12 @@ Ask Claude: "Check account balance"
 const payment = await paypal.payments.create({
   intent: "sale",
   payer: { payment_method: "paypal" },
-  transactions: [{
-    amount: { total: "10.00", currency: "USD" },
-    description: "Payment description"
-  }]
+  transactions: [
+    {
+      amount: { total: "10.00", currency: "USD" },
+      description: "Payment description",
+    },
+  ],
 });
 ```
 
@@ -170,24 +188,31 @@ const payment = await paypal.payments.create({
 ### Rate limit reached - 429 RATE_LIMIT_REACHED error
 
 PayPal doesn't publish rate limits but blocks anomalous traffic. Use webhooks instead of polling to reduce API calls. Cache OAuth tokens (valid 8 hours) to minimize authentication requests. Implement exponential backoff on 429 errors. Monitor request patterns and avoid burst traffic. Contact PayPal support if legitimate traffic is blocked.
+
 ### Authentication failed - 401 Unauthorized error
 
 Verify API credentials match environment (sandbox vs production). Check client ID and client secret are correct from PayPal Developer Dashboard. Generate new OAuth token if expired (8 hour lifetime). Use https://api-m.sandbox.paypal.com for sandbox testing. Ensure OAuth token endpoint URL matches your environment. Verify credentials are for the correct app in developer dashboard.
+
 ### Sandbox vs production environment confusion
 
 Sandbox URL: https://api-m.sandbox.paypal.com. Production URL: https://api-m.paypal.com. Use separate API credentials for each environment. Test all operations in sandbox before going live. Sandbox credentials are available in Developer Dashboard > Apps & Credentials. Production credentials require app approval and going live process.
+
 ### Insufficient permissions for refund or transaction operation
 
 Verify PayPal account is Business account (not Personal). Check API app has required scopes enabled in developer dashboard. Ensure transaction is eligible for refund (not expired, within refund window). Review account restrictions and verification status. Some operations require verified business accounts. Check API app permissions in Developer Dashboard > Apps & Credentials > Your App > Permissions.
+
 ### PayPal MCP server authentication errors with API credentials
 
 Verify API credentials (Client ID and Secret) are valid and not expired. Check credentials match the correct environment (sandbox vs production). Ensure credentials format is correct (Basic Auth or OAuth Bearer token). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### PayPal rate limit errors when processing multiple payment requests
 
 Implement exponential backoff retry logic with jitter. Use PayPal API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed payment data. PayPal allows 500 requests per minute per API key.
+
 ### PayPal payment or transaction access denied errors
 
 Verify API credentials have access to the payment or transaction. Check account permissions and merchant account status. Ensure API credentials have required scopes for target operations.
+
 ### PayPal MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify PayPal API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

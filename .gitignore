@@ -5,6 +5,8 @@ node_modules
 .DS_Store
 dist
 coverage
+reports
+test-results
 .dev.vars
 .dev.vars.*
 AGENTS.md

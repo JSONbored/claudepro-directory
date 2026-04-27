@@ -5,6 +5,19 @@ info:
 servers:
   - url: https://heyclau.de
   - url: https://dev.heyclau.de
+components:
+  securitySchemes:
+    OriginCheck:
+      type: apiKey
+      in: header
+      name: Origin
+      description: Public API requests are protected with origin checks and route-level rate limits.
+    AdminBearer:
+      type: http
+      scheme: bearer
+      description: Token required for listing lead review and status transitions.
+security:
+  - OriginCheck: []
 paths:
   /api/votes/query:
     post:
@@ -82,7 +95,7 @@ paths:
         "500":
           description: Internal error
         "503":
-          description: Votes DB not configured
+          description: Site DB not configured
   /api/newsletter/subscribe:
     post:
       requestBody:
@@ -172,6 +185,72 @@ paths:
           description: Not found
         "429":
           description: Rate limited
+  /api/registry/manifest:
+    get:
+      summary: Fetch the versioned registry artifact manifest
+      responses:
+        "200":
+          description: Registry manifest
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  schemaVersion:
+                    type: integer
+                  generatedAt:
+                    type: string
+                    format: date-time
+                  totalEntries:
+                    type: integer
+                  artifacts:
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                  - schemaVersion
+                  - generatedAt
+                  - totalEntries
+                  - artifacts
+        "403":
+          description: Forbidden origin
+        "429":
+          description: Rate limited
+  /api/registry/categories:
+    get:
+      summary: Fetch active registry categories
+      responses:
+        "200":
+          description: Category envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  schemaVersion:
+                    type: integer
+                  generatedAt:
+                    type: string
+                    format: date-time
+                  count:
+                    type: integer
+                  entries:
+                    type: array
+                    maxItems: 16
+                    items:
+                      type: object
+                      additionalProperties: true
+                required:
+                  - schemaVersion
+                  - generatedAt
+                  - count
+                  - entries
+        "403":
+          description: Forbidden origin
+        "429":
+          description: Rate limited
   /api/registry/search:
     get:
       parameters:
@@ -210,6 +289,7 @@ paths:
                     type: integer
                   results:
                     type: array
+                    maxItems: 50
                     items:
                       type: object
                       additionalProperties: true
@@ -221,6 +301,77 @@ paths:
                   - results
         "403":
           description: Forbidden origin
+        "429":
+          description: Rate limited
+  /api/registry/entries/{category}/{slug}:
+    get:
+      summary: Fetch one full registry entry
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          description: Entry detail envelope
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  schemaVersion:
+                    type: integer
+                  key:
+                    type: string
+                  entry:
+                    type: object
+                    additionalProperties: true
+                required:
+                  - schemaVersion
+                  - key
+                  - entry
+        "403":
+          description: Forbidden origin
+        "404":
+          description: Entry not found
+        "429":
+          description: Rate limited
+  /api/registry/entries/{category}/{slug}/llms:
+    get:
+      summary: Fetch one per-entry LLM text artifact
+      parameters:
+        - in: path
+          name: category
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "200":
+          description: Plain-text LLM export for one entry
+          content:
+            text/plain:
+              schema:
+                type: string
+        "403":
+          description: Forbidden origin
+        "404":
+          description: Entry LLM artifact not found
         "429":
           description: Rate limited
   /api/listing-leads:
@@ -305,6 +456,99 @@ paths:
           description: Rate limited
         "500":
           description: D1 insert failed
+        "503":
+          description: Site DB not configured
+  /api/admin/listing-leads:
+    get:
+      summary: Review listing leads
+      description: Token-protected lead review/export endpoint for manual moderation.
+      security:
+        - AdminBearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          schema:
+            type: string
+            example: "Bearer $LEADS_ADMIN_TOKEN"
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum:
+              - job
+              - tool
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum:
+              - new
+              - pending_review
+              - approved
+              - active
+              - rejected
+              - expired
+              - archived
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Lead review envelope
+        "401":
+          description: Missing or invalid admin token
+        "403":
+          description: Forbidden origin
+        "429":
+          description: Rate limited
+        "503":
+          description: Site DB not configured
+    patch:
+      summary: Apply a lead status transition
+      description: Moves a listing lead through the manual review status transition model.
+      security:
+        - AdminBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: integer
+                  minimum: 1
+                action:
+                  type: string
+                  enum:
+                    - review
+                    - approve
+                    - activate
+                    - reject
+                    - expire
+                    - archive
+              required:
+                - id
+                - action
+      responses:
+        "200":
+          description: Lead status transition applied
+        "400":
+          description: Invalid payload or invalid status transition
+        "401":
+          description: Missing or invalid admin token
+        "403":
+          description: Forbidden origin
+        "404":
+          description: Lead not found
+        "413":
+          description: Payload too large
+        "415":
+          description: Invalid content type
         "503":
           description: Site DB not configured
   /api/github-stats:

@@ -2,14 +2,14 @@
 title: tRPC Type-Safe API Builder Skill
 slug: trpc-type-safe-api
 category: skills
-description: 'Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL.'
-cardDescription: 'Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications.'
+description: "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL."
+cardDescription: "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications."
 seoTitle: tRPC Type-Safe API Builder Skill
-seoDescription: 'Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end...'
+seoDescription: "Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://trpc.io/docs/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://trpc.io/docs/"
 downloadUrl: /downloads/skills/trpc-type-safe-api.zip
 installable: true
 installCommand: npm install @trpc/server @trpc/client @trpc/react-query zod
@@ -76,9 +76,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-16'
+verifiedAt: "2025-10-16"
 retrievalSources:
-  - 'https://trpc.io/docs/'
+  - "https://trpc.io/docs/"
 testedPlatforms:
   - Claude
   - Codex
@@ -89,9 +89,9 @@ testedPlatforms:
 prerequisites:
   - Node.js 18+
   - TypeScript 5.0+
-  - '@trpc/server ^10.0.0'
-  - '@trpc/client ^10.0.0'
-  - '@trpc/react-query ^10.0.0'
+  - "@trpc/server ^10.0.0"
+  - "@trpc/client ^10.0.0"
+  - "@trpc/react-query ^10.0.0"
   - TypeScript 5.0+ for full type inference and end-to-end type safety between client and server
 tags:
   - trpc
@@ -121,6 +121,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Call), part of the T3 Stack explosion in 2025. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL. With zero dependencies, tiny client-side footprint, and automatic type inference, tRPC makes full-stack TypeScript development actually enjoyable.
@@ -136,16 +137,17 @@ Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Ca
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
-- Claude Pro subscription or Claude Code CLI  
+
+- Claude Pro subscription or Claude Code CLI
 - Node.js 18+ with TypeScript 5.0+
 - Understanding of React or Next.js
 - Basic API development knowledge
 
 **What Claude handles automatically:**
+
 - Setting up tRPC server with Express, Next.js, or standalone
 - Creating type-safe routers and procedures
 - Implementing middleware for authentication
@@ -162,6 +164,7 @@ Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Ca
 **Prompt:** "Set up a tRPC API with Next.js 15 that has procedures for creating, reading, updating, and deleting todos. Include Zod validation and automatic React Query hooks."
 
 Claude will:
+
 1. Initialize tRPC router with type-safe procedures
 2. Add Zod schemas for input validation
 3. Create CRUD operations with proper types
@@ -175,6 +178,7 @@ Claude will:
 **Prompt:** "Add JWT authentication middleware to my tRPC API. Protected procedures should verify the token and attach user data to context."
 
 Claude will:
+
 1. Create authentication middleware
 2. Verify JWT tokens with jose library
 3. Extend tRPC context with user data
@@ -188,6 +192,7 @@ Claude will:
 **Prompt:** "Build a tRPC subscription that sends real-time notifications when new messages are posted. Use WebSocket transport."
 
 Claude will:
+
 1. Configure WebSocket link on client
 2. Create subscription procedure
 3. Implement event emitter pattern
@@ -201,6 +206,7 @@ Claude will:
 **Prompt:** "Create a complete T3 Stack application with tRPC, Prisma, NextAuth, and Tailwind. Include user authentication, database models, and type-safe API routes."
 
 Claude will:
+
 1. Initialize T3 app with create-t3-app
 2. Set up Prisma schema and migrations
 3. Configure NextAuth providers
@@ -226,6 +232,7 @@ Claude will:
 ## Common Workflows
 
 ### E-Commerce API
+
 ```
 "Build a type-safe e-commerce API with tRPC:
 1. Product catalog with filtering and search
@@ -238,6 +245,7 @@ Claude will:
 ```
 
 ### Social Media Backend
+
 ```
 "Create a social media backend using tRPC:
 1. User profiles with follow/unfollow
@@ -250,6 +258,7 @@ Claude will:
 ```
 
 ### SaaS Multi-Tenant API
+
 ```
 "Build a multi-tenant SaaS API with tRPC:
 1. Organization and team management
@@ -262,6 +271,7 @@ Claude will:
 ```
 
 ### AI Chat Application
+
 ```
 "Create a chat app with tRPC and streaming:
 1. OpenAI integration with streaming responses

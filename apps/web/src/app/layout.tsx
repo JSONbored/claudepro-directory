@@ -10,7 +10,10 @@ import { NewsletterPrompt } from "@/components/newsletter-prompt";
 import { RelaunchPrompt } from "@/components/relaunch-prompt";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { siteConfig } from "@/lib/site";
-import { buildOrganizationJsonLd, buildWebsiteJsonLd } from "@heyclaude/registry/seo";
+import {
+  buildOrganizationJsonLd,
+  buildWebsiteJsonLd,
+} from "@heyclaude/registry/seo";
 
 import "./globals.css";
 
@@ -19,11 +22,11 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
   title: {
     default: `${siteConfig.name} | Claude Directory`,
-    template: `%s | ${siteConfig.name}`
+    template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   alternates: {
-    canonical: siteConfig.url
+    canonical: siteConfig.url,
   },
   openGraph: {
     type: "website",
@@ -36,19 +39,19 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name} Claude directory`
-      }
-    ]
+        alt: `${siteConfig.name} Claude directory`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: `${siteConfig.name} | Claude Directory`,
     description: siteConfig.description,
-    images: ["/og-image.png"]
+    images: ["/og-image.png"],
   },
   icons: {
-    icon: "/icon.svg"
-  }
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -68,7 +71,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <html lang="en" suppressHydrationWarning className={`dark ${GeistSans.variable} ${GeistMono.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`dark ${GeistSans.variable} ${GeistMono.variable}`}
+    >
       <body className="antialiased">
         <JsonLd data={siteJsonLd} />
         <Script id="theme-init" strategy="beforeInteractive">

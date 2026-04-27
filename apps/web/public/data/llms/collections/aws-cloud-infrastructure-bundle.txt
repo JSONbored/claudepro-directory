@@ -73,15 +73,19 @@ Browse the collection items below to find the specific AWS resources you need. E
 ### AWS MCP server fails: 'Credentials not configured' error
 
 Run aws configure to set credentials. Ensure AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY are in environment or ~/.aws/credentials file.
+
 ### CloudFormation validator conflicts with AWS services MCP
 
 Install validator hook after AWS MCP server. Update config order: MCP servers first, then hooks. Restart to reinitialize hook dependency chain.
+
 ### Backend architect agent and AWS rules give contradictory advice
 
 Prioritize AWS cloud architect rule for AWS-specific patterns. Use backend architect for general design. Set rule precedence in config hierarchy.
+
 ### AWS CLI version 1.x incompatible with MCP server features
 
 Upgrade to AWS CLI v2: curl https://awscli.amazonaws.com/install | bash. Verify with aws --version. MCP server requires CLI v2.0+ for SSO support.
+
 ### Permission errors when validator checks CloudFormation templates
 
 Grant IAM permissions: cloudformation:ValidateTemplate and cloudformation:DescribeStacks. Add to AWS user/role policy, then restart validator hook.

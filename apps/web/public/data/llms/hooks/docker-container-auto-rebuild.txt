@@ -58,10 +58,7 @@ Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml f
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/docker-container-auto-rebuild.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -71,10 +68,7 @@ Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml f
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/docker-container-auto-rebuild.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -96,36 +90,36 @@ fi
 # Check if it's a Docker-related file
 if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] || [[ "$FILE_PATH" == *.dockerfile ]] || [[ "$FILE_PATH" == *dockerignore* ]]; then
   echo "🐳 Docker file detected: $FILE_PATH" >&2
-  
+
   # Check if Docker is available
   if ! command -v docker &> /dev/null; then
     echo "⚠️ Docker not found - install Docker to enable auto-rebuild" >&2
     exit 0
   fi
-  
+
   # Check if Docker daemon is running
   if ! docker info &> /dev/null; then
     echo "⚠️ Docker daemon not running - start Docker to enable auto-rebuild" >&2
     exit 0
   fi
-  
+
   # Handle different Docker file types
   if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *.dockerfile ]]; then
     echo "🔨 Dockerfile modified - rebuilding Docker image..." >&2
-    
+
     # Determine image name (use directory name by default)
     IMAGE_NAME=$(basename "$(pwd)"):latest
-    
+
     # Check if there's a specific Dockerfile path
     DOCKERFILE_DIR=$(dirname "$FILE_PATH")
-    
+
     echo "📦 Building image: $IMAGE_NAME" >&2
     echo "📁 Build context: $DOCKERFILE_DIR" >&2
-    
+
     # Build the Docker image
     if docker build -t "$IMAGE_NAME" "$DOCKERFILE_DIR" 2>&1; then
       echo "✅ Docker image '$IMAGE_NAME' rebuilt successfully" >&2
-      
+
       # Show image details
       IMAGE_ID=$(docker images -q "$IMAGE_NAME" | head -1)
       if [ -n "$IMAGE_ID" ]; then
@@ -136,19 +130,19 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "❌ Docker image build failed" >&2
       exit 1
     fi
-    
+
   elif [[ "$FILE_PATH" == *docker-compose* ]]; then
     echo "🔨 Docker Compose file modified - rebuilding services..." >&2
-    
+
     COMPOSE_FILE=$(basename "$FILE_PATH")
     COMPOSE_DIR=$(dirname "$FILE_PATH")
-    
+
     echo "📁 Compose file: $COMPOSE_FILE" >&2
     echo "📁 Working directory: $COMPOSE_DIR" >&2
-    
+
     # Change to the directory containing the compose file
     cd "$COMPOSE_DIR" || exit 1
-    
+
     # Check if docker-compose or docker compose is available
     if command -v docker-compose &> /dev/null; then
       COMPOSE_CMD="docker-compose"
@@ -158,12 +152,12 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "⚠️ Neither docker-compose nor 'docker compose' found" >&2
       exit 0
     fi
-    
+
     # Build the services
     echo "🔧 Using: $COMPOSE_CMD" >&2
     if $COMPOSE_CMD -f "$COMPOSE_FILE" build 2>&1; then
       echo "✅ Docker Compose services rebuilt successfully" >&2
-      
+
       # Show service status
       echo "📊 Service status:" >&2
       $COMPOSE_CMD -f "$COMPOSE_FILE" ps --format "table {{.Service}}\t{{.Status}}" 2>/dev/null || true
@@ -171,25 +165,25 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "❌ Docker Compose build failed" >&2
       exit 1
     fi
-    
+
   elif [[ "$FILE_PATH" == *dockerignore* ]]; then
     echo "📝 .dockerignore file modified" >&2
     echo "💡 This will affect the next Docker build by excluding specified files" >&2
-    
+
     # Show dockerignore contents for reference
     if [ -f "$FILE_PATH" ]; then
       echo "📋 Current .dockerignore rules:" >&2
       head -10 "$FILE_PATH" >&2
     fi
   fi
-  
+
   # General Docker tips
   echo "" >&2
   echo "💡 Docker Development Tips:" >&2
   echo "   • Use .dockerignore to exclude unnecessary files" >&2
   echo "   • Consider multi-stage builds for smaller images" >&2
   echo "   • Use docker system prune to clean up unused resources" >&2
-  
+
 else
   echo "File $FILE_PATH is not a Docker-related file, skipping rebuild" >&2
 fi
@@ -211,36 +205,36 @@ fi
 # Check if it's a Docker-related file
 if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] || [[ "$FILE_PATH" == *.dockerfile ]] || [[ "$FILE_PATH" == *dockerignore* ]]; then
   echo "🐳 Docker file detected: $FILE_PATH" >&2
-  
+
   # Check if Docker is available
   if ! command -v docker &> /dev/null; then
     echo "⚠️ Docker not found - install Docker to enable auto-rebuild" >&2
     exit 0
   fi
-  
+
   # Check if Docker daemon is running
   if ! docker info &> /dev/null; then
     echo "⚠️ Docker daemon not running - start Docker to enable auto-rebuild" >&2
     exit 0
   fi
-  
+
   # Handle different Docker file types
   if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *.dockerfile ]]; then
     echo "🔨 Dockerfile modified - rebuilding Docker image..." >&2
-    
+
     # Determine image name (use directory name by default)
     IMAGE_NAME=$(basename "$(pwd)"):latest
-    
+
     # Check if there's a specific Dockerfile path
     DOCKERFILE_DIR=$(dirname "$FILE_PATH")
-    
+
     echo "📦 Building image: $IMAGE_NAME" >&2
     echo "📁 Build context: $DOCKERFILE_DIR" >&2
-    
+
     # Build the Docker image
     if docker build -t "$IMAGE_NAME" "$DOCKERFILE_DIR" 2>&1; then
       echo "✅ Docker image '$IMAGE_NAME' rebuilt successfully" >&2
-      
+
       # Show image details
       IMAGE_ID=$(docker images -q "$IMAGE_NAME" | head -1)
       if [ -n "$IMAGE_ID" ]; then
@@ -251,19 +245,19 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "❌ Docker image build failed" >&2
       exit 1
     fi
-    
+
   elif [[ "$FILE_PATH" == *docker-compose* ]]; then
     echo "🔨 Docker Compose file modified - rebuilding services..." >&2
-    
+
     COMPOSE_FILE=$(basename "$FILE_PATH")
     COMPOSE_DIR=$(dirname "$FILE_PATH")
-    
+
     echo "📁 Compose file: $COMPOSE_FILE" >&2
     echo "📁 Working directory: $COMPOSE_DIR" >&2
-    
+
     # Change to the directory containing the compose file
     cd "$COMPOSE_DIR" || exit 1
-    
+
     # Check if docker-compose or docker compose is available
     if command -v docker-compose &> /dev/null; then
       COMPOSE_CMD="docker-compose"
@@ -273,12 +267,12 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "⚠️ Neither docker-compose nor 'docker compose' found" >&2
       exit 0
     fi
-    
+
     # Build the services
     echo "🔧 Using: $COMPOSE_CMD" >&2
     if $COMPOSE_CMD -f "$COMPOSE_FILE" build 2>&1; then
       echo "✅ Docker Compose services rebuilt successfully" >&2
-      
+
       # Show service status
       echo "📊 Service status:" >&2
       $COMPOSE_CMD -f "$COMPOSE_FILE" ps --format "table {{.Service}}\t{{.Status}}" 2>/dev/null || true
@@ -286,25 +280,25 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]] 
       echo "❌ Docker Compose build failed" >&2
       exit 1
     fi
-    
+
   elif [[ "$FILE_PATH" == *dockerignore* ]]; then
     echo "📝 .dockerignore file modified" >&2
     echo "💡 This will affect the next Docker build by excluding specified files" >&2
-    
+
     # Show dockerignore contents for reference
     if [ -f "$FILE_PATH" ]; then
       echo "📋 Current .dockerignore rules:" >&2
       head -10 "$FILE_PATH" >&2
     fi
   fi
-  
+
   # General Docker tips
   echo "" >&2
   echo "💡 Docker Development Tips:" >&2
   echo "   • Use .dockerignore to exclude unnecessary files" >&2
   echo "   • Consider multi-stage builds for smaller images" >&2
   echo "   • Use docker system prune to clean up unused resources" >&2
-  
+
 else
   echo "File $FILE_PATH is not a Docker-related file, skipping rebuild" >&2
 fi
@@ -349,6 +343,7 @@ if [[ "$FILE_PATH" == *Dockerfile* ]] || [[ "$FILE_PATH" == *docker-compose* ]];
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable automatic Docker container rebuilding
@@ -363,6 +358,7 @@ Complete hook configuration for .claude/settings.json to enable automatic Docker
   }
 }
 ```
+
 ### Docker Compose Auto Rebuild with BuildKit
 
 Enhanced hook script for Docker Compose v2 with BuildKit support and --no-cache flag
@@ -395,6 +391,7 @@ if [[ "$FILE_PATH" == *docker-compose* ]]; then
 fi
 exit 0
 ```
+
 ### Docker Build with BuildKit and Progress Reporting
 
 Enhanced hook script with BuildKit support and detailed build progress reporting
@@ -422,6 +419,7 @@ if [[ "$FILE_PATH" == *Dockerfile* ]]; then
 fi
 exit 0
 ```
+
 ### Docker Ignore File Handler with Auto Rebuild
 
 Enhanced hook script that triggers rebuild when .dockerignore is modified
@@ -572,24 +570,31 @@ exit 0
 ### Docker build fails with daemon not running error despite Docker Desktop being active
 
 Verify Docker socket accessibility with docker info command. Restart Docker daemon or add user to docker group on Linux: sudo usermod -aG docker $USER then log out and back in. Check Docker Desktop is running and Docker socket is accessible: docker ps.
+
 ### Hook triggers rebuild but uses wrong Dockerfile when multiple exist in project
 
 Specify Dockerfile path explicitly using docker build -f $FILE_PATH instead of relying on directory context. Detect Dockerfile name pattern and use as -f argument for targeted builds. Use absolute paths for Dockerfile specification to avoid ambiguity.
+
 ### Docker Compose rebuild hangs indefinitely when services have dependency conflicts
 
 Add --no-cache flag to force clean rebuild: docker compose build --no-cache. Stop running containers first with docker compose down before rebuild to prevent port and resource conflicts. Check service dependencies in docker-compose.yml for circular dependencies.
+
 ### Build context too large error when .dockerignore changes not respected in hook
 
 Ensure .dockerignore is in same directory as Dockerfile being built. Docker reads .dockerignore from build context root, not from Dockerfile directory if using -f flag with different path. Verify .dockerignore location matches build context root directory.
+
 ### Hook exits successfully but image not updated with latest changes after rebuild
 
 Verify Docker build cache invalidation by checking layer hashes in build output. Add COPY instruction for modified files or use docker build --pull --no-cache to force complete rebuild without cache. Check if BuildKit cache is interfering: DOCKER_BUILDKIT=0 docker build.
+
 ### Docker Compose v2 (docker compose) not detected despite installation
 
 Verify Docker Compose v2 installation: docker compose version. Check Docker Engine version is 20.10.13+ for native compose support. Use docker compose instead of docker-compose for v2. Verify PATH includes Docker binary location.
+
 ### BuildKit builds fail with cache mount errors
 
 Ensure BuildKit is enabled: export DOCKER_BUILDKIT=1. Check Docker Engine version supports BuildKit (20.10+). Verify cache mount syntax in Dockerfile is correct. Use --progress=plain for detailed BuildKit error messages.
+
 ### Multiple Docker Compose files not handled correctly by hook
 
-Detect all compose files in project: find . -name docker-compose*.yml. Use -f flag to specify compose file explicitly: docker compose -f docker-compose.dev.yml build. Support multiple compose files: docker compose -f docker-compose.yml -f docker-compose.override.yml build.
+Detect all compose files in project: find . -name docker-compose\*.yml. Use -f flag to specify compose file explicitly: docker compose -f docker-compose.dev.yml build. Support multiple compose files: docker compose -f docker-compose.yml -f docker-compose.override.yml build.

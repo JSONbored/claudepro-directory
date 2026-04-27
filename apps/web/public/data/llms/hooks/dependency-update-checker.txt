@@ -59,10 +59,7 @@ Automatically checks for outdated dependencies and suggests updates with securit
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/dependency-update-checker.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -72,10 +69,7 @@ Automatically checks for outdated dependencies and suggests updates with securit
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/dependency-update-checker.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -97,29 +91,29 @@ fi
 # Check if it's a dependency file
 if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]] || [[ "$FILE_PATH" == *Gemfile ]] || [[ "$FILE_PATH" == *go.mod ]] || [[ "$FILE_PATH" == *Cargo.toml ]]; then
   echo "📦 Dependency file detected: $FILE_PATH" >&2
-  
+
   # Node.js projects
   if [[ "$FILE_PATH" == *package.json ]]; then
     echo "🟢 Node.js project detected - checking dependencies..." >&2
-    
+
     if command -v npm &> /dev/null; then
       echo "🔍 Running npm outdated check..." >&2
       OUTDATED_OUTPUT=$(npm outdated --depth=0 2>/dev/null || echo "No outdated packages")
-      
+
       if [ "$OUTDATED_OUTPUT" = "No outdated packages" ]; then
         echo "✅ All npm packages are up to date" >&2
       else
         echo "📊 Found outdated npm packages:" >&2
         echo "$OUTDATED_OUTPUT" | head -10 >&2
-        
+
         OUTDATED_COUNT=$(echo "$OUTDATED_OUTPUT" | wc -l)
         echo "📈 Total outdated packages: $OUTDATED_COUNT" >&2
       fi
-      
+
       # Check for security vulnerabilities
       echo "🔒 Checking for security vulnerabilities..." >&2
       AUDIT_OUTPUT=$(npm audit --audit-level=moderate 2>&1)
-      
+
       if echo "$AUDIT_OUTPUT" | grep -q "found 0 vulnerabilities"; then
         echo "✅ No security vulnerabilities found" >&2
       else
@@ -127,7 +121,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
         echo "⚠️ Security audit found: $VULN_COUNT" >&2
         echo "💡 Run 'npm audit fix' to automatically fix vulnerabilities" >&2
       fi
-      
+
       # Check for npm-check-updates availability
       if command -v npx &> /dev/null && npx ncu --version &> /dev/null 2>&1; then
         echo "🔧 Running npm-check-updates for detailed analysis..." >&2
@@ -139,15 +133,15 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ npm command not available" >&2
     fi
-    
+
   # Python projects
   elif [[ "$FILE_PATH" == *requirements.txt ]] || [[ "$FILE_PATH" == *pyproject.toml ]]; then
     echo "🐍 Python project detected - checking dependencies..." >&2
-    
+
     if command -v pip &> /dev/null; then
       echo "🔍 Checking for outdated Python packages..." >&2
       PIP_OUTDATED=$(pip list --outdated 2>/dev/null || echo "Unable to check outdated packages")
-      
+
       if [ "$PIP_OUTDATED" = "Unable to check outdated packages" ]; then
         echo "⚠️ Unable to check pip packages" >&2
       else
@@ -159,12 +153,12 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
           echo "✅ All Python packages are up to date" >&2
         fi
       fi
-      
+
       # Check for security issues with safety
       if command -v safety &> /dev/null; then
         echo "🔒 Running Safety security check..." >&2
         SAFETY_OUTPUT=$(safety check --json 2>/dev/null || safety check 2>/dev/null || echo "Safety check completed")
-        
+
         if echo "$SAFETY_OUTPUT" | grep -q "No known security vulnerabilities"; then
           echo "✅ No known security vulnerabilities in Python dependencies" >&2
         else
@@ -176,21 +170,21 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ pip command not available" >&2
     fi
-    
+
   # Ruby projects
   elif [[ "$FILE_PATH" == *Gemfile ]]; then
     echo "💎 Ruby project detected - checking dependencies..." >&2
-    
+
     if command -v bundle &> /dev/null; then
       echo "🔍 Checking for outdated Ruby gems..." >&2
       BUNDLE_OUTDATED=$(bundle outdated 2>/dev/null | head -10 || echo "Unable to check outdated gems")
       echo "$BUNDLE_OUTDATED" >&2
-      
+
       # Check for security issues
       if bundle exec bundler-audit --version &> /dev/null; then
         echo "🔒 Running bundler-audit security check..." >&2
         BUNDLE_AUDIT=$(bundle exec bundler-audit check 2>&1 || echo "Bundle audit completed")
-        
+
         if echo "$BUNDLE_AUDIT" | grep -q "No vulnerabilities found"; then
           echo "✅ No vulnerabilities found in Ruby gems" >&2
         else
@@ -202,18 +196,18 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ bundle command not available" >&2
     fi
-    
+
   # Go projects
   elif [[ "$FILE_PATH" == *go.mod ]]; then
     echo "🐹 Go project detected - checking dependencies..." >&2
-    
+
     if command -v go &> /dev/null; then
       echo "🔍 Checking Go module dependencies..." >&2
-      
+
       # List modules
       GO_LIST=$(go list -m -u all 2>/dev/null | head -10 || echo "Unable to list Go modules")
       echo "$GO_LIST" >&2
-      
+
       # Check for available updates
       OUTDATED_MODULES=$(echo "$GO_LIST" | grep -c '\[' 2>/dev/null || echo "0")
       if [ "$OUTDATED_MODULES" -gt 0 ]; then
@@ -225,11 +219,11 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ go command not available" >&2
     fi
-    
+
   # Rust projects
   elif [[ "$FILE_PATH" == *Cargo.toml ]]; then
     echo "🦀 Rust project detected - checking dependencies..." >&2
-    
+
     if command -v cargo &> /dev/null; then
       # Check for outdated crates
       if cargo outdated --version &> /dev/null; then
@@ -239,12 +233,12 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
       else
         echo "💡 Install cargo-outdated: cargo install cargo-outdated" >&2
       fi
-      
+
       # Security audit
       if cargo audit --version &> /dev/null; then
         echo "🔒 Running Rust security audit..." >&2
         CARGO_AUDIT=$(cargo audit 2>&1 || echo "Audit completed")
-        
+
         if echo "$CARGO_AUDIT" | grep -q "Success No vulnerable packages found"; then
           echo "✅ No vulnerable crates found" >&2
         else
@@ -257,7 +251,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
       echo "⚠️ cargo command not available" >&2
     fi
   fi
-  
+
   # General recommendations
   echo "" >&2
   echo "📋 Dependency Update Best Practices:" >&2
@@ -265,7 +259,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
   echo "   • Test thoroughly after dependency updates" >&2
   echo "   • Update security-critical packages immediately" >&2
   echo "   • Use lockfiles for reproducible builds" >&2
-  
+
 else
   echo "File $FILE_PATH is not a recognized dependency file, skipping analysis" >&2
 fi
@@ -287,29 +281,29 @@ fi
 # Check if it's a dependency file
 if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]] || [[ "$FILE_PATH" == *Gemfile ]] || [[ "$FILE_PATH" == *go.mod ]] || [[ "$FILE_PATH" == *Cargo.toml ]]; then
   echo "📦 Dependency file detected: $FILE_PATH" >&2
-  
+
   # Node.js projects
   if [[ "$FILE_PATH" == *package.json ]]; then
     echo "🟢 Node.js project detected - checking dependencies..." >&2
-    
+
     if command -v npm &> /dev/null; then
       echo "🔍 Running npm outdated check..." >&2
       OUTDATED_OUTPUT=$(npm outdated --depth=0 2>/dev/null || echo "No outdated packages")
-      
+
       if [ "$OUTDATED_OUTPUT" = "No outdated packages" ]; then
         echo "✅ All npm packages are up to date" >&2
       else
         echo "📊 Found outdated npm packages:" >&2
         echo "$OUTDATED_OUTPUT" | head -10 >&2
-        
+
         OUTDATED_COUNT=$(echo "$OUTDATED_OUTPUT" | wc -l)
         echo "📈 Total outdated packages: $OUTDATED_COUNT" >&2
       fi
-      
+
       # Check for security vulnerabilities
       echo "🔒 Checking for security vulnerabilities..." >&2
       AUDIT_OUTPUT=$(npm audit --audit-level=moderate 2>&1)
-      
+
       if echo "$AUDIT_OUTPUT" | grep -q "found 0 vulnerabilities"; then
         echo "✅ No security vulnerabilities found" >&2
       else
@@ -317,7 +311,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
         echo "⚠️ Security audit found: $VULN_COUNT" >&2
         echo "💡 Run 'npm audit fix' to automatically fix vulnerabilities" >&2
       fi
-      
+
       # Check for npm-check-updates availability
       if command -v npx &> /dev/null && npx ncu --version &> /dev/null 2>&1; then
         echo "🔧 Running npm-check-updates for detailed analysis..." >&2
@@ -329,15 +323,15 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ npm command not available" >&2
     fi
-    
+
   # Python projects
   elif [[ "$FILE_PATH" == *requirements.txt ]] || [[ "$FILE_PATH" == *pyproject.toml ]]; then
     echo "🐍 Python project detected - checking dependencies..." >&2
-    
+
     if command -v pip &> /dev/null; then
       echo "🔍 Checking for outdated Python packages..." >&2
       PIP_OUTDATED=$(pip list --outdated 2>/dev/null || echo "Unable to check outdated packages")
-      
+
       if [ "$PIP_OUTDATED" = "Unable to check outdated packages" ]; then
         echo "⚠️ Unable to check pip packages" >&2
       else
@@ -349,12 +343,12 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
           echo "✅ All Python packages are up to date" >&2
         fi
       fi
-      
+
       # Check for security issues with safety
       if command -v safety &> /dev/null; then
         echo "🔒 Running Safety security check..." >&2
         SAFETY_OUTPUT=$(safety check --json 2>/dev/null || safety check 2>/dev/null || echo "Safety check completed")
-        
+
         if echo "$SAFETY_OUTPUT" | grep -q "No known security vulnerabilities"; then
           echo "✅ No known security vulnerabilities in Python dependencies" >&2
         else
@@ -366,21 +360,21 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ pip command not available" >&2
     fi
-    
+
   # Ruby projects
   elif [[ "$FILE_PATH" == *Gemfile ]]; then
     echo "💎 Ruby project detected - checking dependencies..." >&2
-    
+
     if command -v bundle &> /dev/null; then
       echo "🔍 Checking for outdated Ruby gems..." >&2
       BUNDLE_OUTDATED=$(bundle outdated 2>/dev/null | head -10 || echo "Unable to check outdated gems")
       echo "$BUNDLE_OUTDATED" >&2
-      
+
       # Check for security issues
       if bundle exec bundler-audit --version &> /dev/null; then
         echo "🔒 Running bundler-audit security check..." >&2
         BUNDLE_AUDIT=$(bundle exec bundler-audit check 2>&1 || echo "Bundle audit completed")
-        
+
         if echo "$BUNDLE_AUDIT" | grep -q "No vulnerabilities found"; then
           echo "✅ No vulnerabilities found in Ruby gems" >&2
         else
@@ -392,18 +386,18 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ bundle command not available" >&2
     fi
-    
+
   # Go projects
   elif [[ "$FILE_PATH" == *go.mod ]]; then
     echo "🐹 Go project detected - checking dependencies..." >&2
-    
+
     if command -v go &> /dev/null; then
       echo "🔍 Checking Go module dependencies..." >&2
-      
+
       # List modules
       GO_LIST=$(go list -m -u all 2>/dev/null | head -10 || echo "Unable to list Go modules")
       echo "$GO_LIST" >&2
-      
+
       # Check for available updates
       OUTDATED_MODULES=$(echo "$GO_LIST" | grep -c '\[' 2>/dev/null || echo "0")
       if [ "$OUTDATED_MODULES" -gt 0 ]; then
@@ -415,11 +409,11 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
     else
       echo "⚠️ go command not available" >&2
     fi
-    
+
   # Rust projects
   elif [[ "$FILE_PATH" == *Cargo.toml ]]; then
     echo "🦀 Rust project detected - checking dependencies..." >&2
-    
+
     if command -v cargo &> /dev/null; then
       # Check for outdated crates
       if cargo outdated --version &> /dev/null; then
@@ -429,12 +423,12 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
       else
         echo "💡 Install cargo-outdated: cargo install cargo-outdated" >&2
       fi
-      
+
       # Security audit
       if cargo audit --version &> /dev/null; then
         echo "🔒 Running Rust security audit..." >&2
         CARGO_AUDIT=$(cargo audit 2>&1 || echo "Audit completed")
-        
+
         if echo "$CARGO_AUDIT" | grep -q "Success No vulnerable packages found"; then
           echo "✅ No vulnerable crates found" >&2
         else
@@ -447,7 +441,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
       echo "⚠️ cargo command not available" >&2
     fi
   fi
-  
+
   # General recommendations
   echo "" >&2
   echo "📋 Dependency Update Best Practices:" >&2
@@ -455,7 +449,7 @@ if [[ "$FILE_PATH" == *package.json ]] || [[ "$FILE_PATH" == *requirements.txt ]
   echo "   • Test thoroughly after dependency updates" >&2
   echo "   • Update security-critical packages immediately" >&2
   echo "   • Use lockfiles for reproducible builds" >&2
-  
+
 else
   echo "File $FILE_PATH is not a recognized dependency file, skipping analysis" >&2
 fi
@@ -492,6 +486,7 @@ if [[ "$FILE_PATH" == *package.json ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable dependency update checking on dependency file changes
@@ -506,6 +501,7 @@ Complete hook configuration for .claude/settings.json to enable dependency updat
   }
 }
 ```
+
 ### Python Dependency Update Checker with pip-audit
 
 Enhanced hook script for Python dependency update checking using pip-audit 2.9.0+
@@ -532,6 +528,7 @@ if [[ "$FILE_PATH" == *requirements.txt ]] || [[ "$FILE_PATH" == *pyproject.toml
 fi
 exit 0
 ```
+
 ### Rust Dependency Update Checker with cargo-outdated
 
 Enhanced hook script for Rust dependency update checking using cargo-outdated and cargo-audit
@@ -557,6 +554,7 @@ if [[ "$FILE_PATH" == *Cargo.toml ]]; then
 fi
 exit 0
 ```
+
 ### Go Dependency Update Checker with govulncheck
 
 Enhanced hook script for Go dependency update checking using govulncheck
@@ -687,24 +685,31 @@ exit 0
 ### Hook triggers on every file write but only dependency files should activate it
 
 Verify matchers array includes only write and edit tools. Add file path validation in script header to exit early when FILE_PATH does not match dependency file patterns (package.json, requirements.txt, Gemfile, go.mod, Cargo.toml). Use explicit file extension checks for better accuracy.
+
 ### npm outdated command returns empty output despite outdated packages existing
 
 Run npm update --dry-run instead of npm outdated to see available updates. Check npm cache with npm cache verify and clear if corrupted using npm cache clean --force. Verify package-lock.json exists and is up to date. Use npm-check-updates (ncu) for more reliable results: npx ncu.
+
 ### Hook execution floods stderr with security warnings during rapid file edits
 
 Add debouncing by storing last check timestamp in temp file: .claude/.last-dependency-check. Skip audit if less than 5 minutes elapsed since previous check to reduce noise during active development sessions. Use file modification time comparison to avoid redundant checks.
+
 ### jq command not found error prevents hook from parsing tool input JSON
 
 Install jq JSON processor using package manager: brew install jq on macOS, apt-get install jq on Ubuntu/Debian, yum install jq on RHEL/CentOS. Verify installation with jq --version before testing hook again. Consider using Python json module as fallback if jq unavailable.
+
 ### Python safety check fails in virtual environments with permission errors
 
 Activate correct virtual environment before running hook or detect venv using VIRTUAL_ENV variable. Install safety in project venv rather than globally: pip install safety within activated environment. Consider using pip-audit 2.9.0+ as alternative with better virtual environment support.
+
 ### npm-check-updates (ncu) not found despite npm installation
 
 Install npm-check-updates globally: npm install -g npm-check-updates or use npx: npx npm-check-updates. Verify installation: ncu --version. Check npm global bin path is in PATH. Use npx ncu for one-time execution without global installation.
+
 ### cargo-outdated fails with index update errors in CI
 
 Pre-update cargo registry index: cargo update in CI setup. Use offline mode if network restricted. Cache cargo registry between runs. Check firewall rules for crates.io access. Verify cargo-outdated is installed: cargo install cargo-outdated. Ensure Rust toolchain is properly configured.
+
 ### Go module update check shows incorrect version information
 
 Ensure go.mod and go.sum are up to date: go mod tidy. Verify Go version is 1.18+ for reliable module updates. Use go list -m -u all for accurate update information. Check module proxy settings: go env GOPROXY. Verify network connectivity to Go module proxy.

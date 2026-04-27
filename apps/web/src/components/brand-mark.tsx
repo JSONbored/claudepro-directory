@@ -22,7 +22,11 @@ export function BrandMark({ className, variant = "soft" }: BrandMarkProps) {
         width="29"
         height="29"
         rx="9"
-        className={solid ? "fill-primary stroke-primary" : "fill-primary/14 stroke-primary/45"}
+        className={
+          solid
+            ? "fill-primary stroke-primary"
+            : "fill-primary/14 stroke-primary/45"
+        }
         strokeWidth="1.2"
       />
       <g

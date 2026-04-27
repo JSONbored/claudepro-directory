@@ -58,10 +58,7 @@ Automatically compiles SCSS/Sass files to CSS when they are modified.
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/scss-auto-compiler.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -71,10 +68,7 @@ Automatically compiles SCSS/Sass files to CSS when they are modified.
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/scss-auto-compiler.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -97,13 +91,13 @@ fi
 if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
     echo "🎨 SCSS Auto-Compiler - Processing stylesheet..."
     echo "📄 File: $FILE_PATH"
-    
+
     # Check if file exists
     if [ ! -f "$FILE_PATH" ]; then
         echo "⚠️ File not found: $FILE_PATH"
         exit 1
     fi
-    
+
     # Determine output CSS file path
     if [[ "$FILE_PATH" == *.scss ]]; then
         CSS_OUTPUT="${FILE_PATH%.scss}.css"
@@ -112,9 +106,9 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
         CSS_OUTPUT="${FILE_PATH%.sass}.css"
         MAP_OUTPUT="${FILE_PATH%.sass}.css.map"
     fi
-    
+
     echo "📁 Output: $CSS_OUTPUT"
-    
+
     # Check if Sass compiler is available
     if command -v sass >/dev/null 2>&1; then
         SASS_CMD="sass"
@@ -131,9 +125,9 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
         echo "  • brew install sass/sass/sass (macOS)"
         exit 1
     fi
-    
+
     echo "🔧 Compiling with $SASS_CMD..."
-    
+
     # Compile SCSS/Sass to CSS with source maps
     if [[ "$SASS_CMD" == "node-sass" ]]; then
         # node-sass syntax
@@ -152,59 +146,59 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
             exit 1
         fi
     fi
-    
+
     # Check output file size
     if [ -f "$CSS_OUTPUT" ]; then
         CSS_SIZE=$(stat -f%z "$CSS_OUTPUT" 2>/dev/null || stat -c%s "$CSS_OUTPUT" 2>/dev/null || echo "unknown")
         echo "📊 Generated CSS: ${CSS_SIZE} bytes"
-        
+
         # Check for source map
         if [ -f "$MAP_OUTPUT" ]; then
             echo "🗺️ Source map: $MAP_OUTPUT"
         fi
     fi
-    
+
     # Additional analysis
     echo ""
     echo "🔍 SCSS Analysis:"
-    
+
     # Count SCSS features used
     if grep -q '@import\|@use' "$FILE_PATH" 2>/dev/null; then
         IMPORT_COUNT=$(grep -c '@import\|@use' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Imports/Uses: $IMPORT_COUNT"
     fi
-    
+
     if grep -q '@mixin' "$FILE_PATH" 2>/dev/null; then
         MIXIN_COUNT=$(grep -c '@mixin' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Mixins defined: $MIXIN_COUNT"
     fi
-    
+
     if grep -q '@include' "$FILE_PATH" 2>/dev/null; then
         INCLUDE_COUNT=$(grep -c '@include' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Mixin includes: $INCLUDE_COUNT"
     fi
-    
+
     if grep -q '\$[a-zA-Z]' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Variables detected - using SCSS features"
     fi
-    
+
     if grep -q '&' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Nested selectors detected"
     fi
-    
+
     # Check for common issues
     echo ""
     echo "🔍 Code Quality Check:"
-    
+
     if grep -q '!important' "$FILE_PATH" 2>/dev/null; then
         IMPORTANT_COUNT=$(grep -c '!important' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • ⚠️ !important usage: $IMPORTANT_COUNT (consider refactoring)"
     fi
-    
+
     if grep -q 'color: #[0-9a-fA-F]\{3,6\}' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Consider using CSS custom properties for colors"
     fi
-    
+
     echo ""
     echo "💡 SCSS Development Tips:"
     echo "  • Use @use instead of @import for better performance"
@@ -212,10 +206,10 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
     echo "  • Use mixins for reusable style patterns"
     echo "  • Leverage SCSS variables for consistent theming"
     echo "  • Use nested selectors sparingly (max 3-4 levels)"
-    
+
     echo ""
     echo "🎯 SCSS compilation complete!"
-    
+
 else
     echo "ℹ️ File is not a SCSS/Sass file: $FILE_PATH"
 fi
@@ -238,13 +232,13 @@ fi
 if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
     echo "🎨 SCSS Auto-Compiler - Processing stylesheet..."
     echo "📄 File: $FILE_PATH"
-    
+
     # Check if file exists
     if [ ! -f "$FILE_PATH" ]; then
         echo "⚠️ File not found: $FILE_PATH"
         exit 1
     fi
-    
+
     # Determine output CSS file path
     if [[ "$FILE_PATH" == *.scss ]]; then
         CSS_OUTPUT="${FILE_PATH%.scss}.css"
@@ -253,9 +247,9 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
         CSS_OUTPUT="${FILE_PATH%.sass}.css"
         MAP_OUTPUT="${FILE_PATH%.sass}.css.map"
     fi
-    
+
     echo "📁 Output: $CSS_OUTPUT"
-    
+
     # Check if Sass compiler is available
     if command -v sass >/dev/null 2>&1; then
         SASS_CMD="sass"
@@ -272,9 +266,9 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
         echo "  • brew install sass/sass/sass (macOS)"
         exit 1
     fi
-    
+
     echo "🔧 Compiling with $SASS_CMD..."
-    
+
     # Compile SCSS/Sass to CSS with source maps
     if [[ "$SASS_CMD" == "node-sass" ]]; then
         # node-sass syntax
@@ -293,59 +287,59 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
             exit 1
         fi
     fi
-    
+
     # Check output file size
     if [ -f "$CSS_OUTPUT" ]; then
         CSS_SIZE=$(stat -f%z "$CSS_OUTPUT" 2>/dev/null || stat -c%s "$CSS_OUTPUT" 2>/dev/null || echo "unknown")
         echo "📊 Generated CSS: ${CSS_SIZE} bytes"
-        
+
         # Check for source map
         if [ -f "$MAP_OUTPUT" ]; then
             echo "🗺️ Source map: $MAP_OUTPUT"
         fi
     fi
-    
+
     # Additional analysis
     echo ""
     echo "🔍 SCSS Analysis:"
-    
+
     # Count SCSS features used
     if grep -q '@import\|@use' "$FILE_PATH" 2>/dev/null; then
         IMPORT_COUNT=$(grep -c '@import\|@use' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Imports/Uses: $IMPORT_COUNT"
     fi
-    
+
     if grep -q '@mixin' "$FILE_PATH" 2>/dev/null; then
         MIXIN_COUNT=$(grep -c '@mixin' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Mixins defined: $MIXIN_COUNT"
     fi
-    
+
     if grep -q '@include' "$FILE_PATH" 2>/dev/null; then
         INCLUDE_COUNT=$(grep -c '@include' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • Mixin includes: $INCLUDE_COUNT"
     fi
-    
+
     if grep -q '\$[a-zA-Z]' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Variables detected - using SCSS features"
     fi
-    
+
     if grep -q '&' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Nested selectors detected"
     fi
-    
+
     # Check for common issues
     echo ""
     echo "🔍 Code Quality Check:"
-    
+
     if grep -q '!important' "$FILE_PATH" 2>/dev/null; then
         IMPORTANT_COUNT=$(grep -c '!important' "$FILE_PATH" 2>/dev/null || echo 0)
         echo "  • ⚠️ !important usage: $IMPORTANT_COUNT (consider refactoring)"
     fi
-    
+
     if grep -q 'color: #[0-9a-fA-F]\{3,6\}' "$FILE_PATH" 2>/dev/null; then
         echo "  • 💡 Consider using CSS custom properties for colors"
     fi
-    
+
     echo ""
     echo "💡 SCSS Development Tips:"
     echo "  • Use @use instead of @import for better performance"
@@ -353,10 +347,10 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
     echo "  • Use mixins for reusable style patterns"
     echo "  • Leverage SCSS variables for consistent theming"
     echo "  • Use nested selectors sparingly (max 3-4 levels)"
-    
+
     echo ""
     echo "🎯 SCSS compilation complete!"
-    
+
 else
     echo "ℹ️ File is not a SCSS/Sass file: $FILE_PATH"
 fi
@@ -398,6 +392,7 @@ if [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable SCSS auto compilation
@@ -412,9 +407,10 @@ Complete hook configuration for .claude/settings.json to enable SCSS auto compil
   }
 }
 ```
+
 ### SCSS Compilation with Partial Detection
 
-Enhanced hook script that skips SCSS partials (files starting with _) and compiles with compressed output
+Enhanced hook script that skips SCSS partials (files starting with \_) and compiles with compressed output
 
 ```bash
 #!/bin/bash
@@ -434,6 +430,7 @@ if [[ "$FILE_PATH" == *.scss ]]; then
 fi
 exit 0
 ```
+
 ### SCSS Compilation with Source Map Details
 
 Enhanced hook script with source map include sources and source map size reporting
@@ -455,6 +452,7 @@ if [[ "$FILE_PATH" == *.scss ]]; then
 fi
 exit 0
 ```
+
 ### Sass Configuration Example
 
 Example sass configuration for SCSS compilation options
@@ -558,24 +556,31 @@ exit 0
 ### Compilation fails with 'sass command not found'
 
 Install Dart Sass globally with `npm install -g sass` or locally `npm install sass`, then restart terminal. For project-specific, hook uses `npx sass` which auto-detects local installations. Verify installation with `sass --version`. Check PATH environment variable.
+
 ### Source maps not generated in output directory
 
 Ensure write permissions on output directory. Hook generates maps automatically: `sass "$FILE_PATH" "$CSS_OUTPUT" --source-map`. Check if MAP_OUTPUT path is writable and not gitignored. Verify source map generation with `--source-map-include-sources` option. Test with various output directory configurations.
+
 ### Hook compiles partials creating unwanted CSS
 
-Add early exit for partials: `if [[ "$(basename "$FILE_PATH")" == _* ]]; then exit 0; fi` before compilation. SCSS partials (prefixed with _) shouldn't compile to separate CSS files. Verify partial detection. Test with various partial naming conventions.
+Add early exit for partials: `if [[ "$(basename "$FILE_PATH")" == _* ]]; then exit 0; fi` before compilation. SCSS partials (prefixed with \_) shouldn't compile to separate CSS files. Verify partial detection. Test with various partial naming conventions.
+
 ### node-sass deprecated warnings appear in output
 
 Migrate to Dart Sass: uninstall `npm uninstall node-sass`, install `npm install sass`. Hook automatically prefers Dart Sass over node-sass when both are available and shows migration notice. Verify Dart Sass installation. Test with various Sass compiler configurations.
+
 ### Cannot parse @import vs @use distinction
 
 Hook uses regex `grep -q '@import\|@use'` to detect both. For separate counts, use: `IMPORT=$(grep -c '@import' ...)` and `USE=$(grep -c '@use' ...)` to distinguish modern @use from legacy @import. Verify regex patterns. Test with various SCSS import patterns.
+
 ### SCSS compilation is slow on large projects
 
 Use incremental compilation with Dart Sass. Consider using `--watch` mode for development. Optimize SCSS imports and use @use instead of @import. Use loadPaths for faster module resolution. Verify compilation settings. Test with various project sizes.
+
 ### Source maps point to wrong file locations
 
 Ensure source map paths are relative to CSS output location. Use `--source-map-embed` for embedded source maps. Verify source map configuration. Check file path resolution. Test with various source map configurations.
+
 ### Compiled CSS has incorrect formatting or style
 
 Configure output style with `--style=expanded` (default), `--style=compressed`, or `--style=compact`. Use sass configuration file for consistent formatting. Verify style options. Test with various output style configurations.

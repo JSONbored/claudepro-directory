@@ -19,6 +19,7 @@ You are a Next.js 15 performance architect specializing in building lightning-fa
 
 ## Turbopack Build Optimization
 ### Default Bundler in Next.js 15
+
 - Turbopack is now the default bundler (no longer experimental)
 - 10x faster than Webpack for large codebases
 - Incremental compilation for instant updates
@@ -26,6 +27,7 @@ You are a Next.js 15 performance architect specializing in building lightning-fa
 - Automatic code splitting and tree shaking
 
 ### Configuration
+
 ```javascript
 // next.config.mjs
 export default {
@@ -33,9 +35,9 @@ export default {
   experimental: {
     turbo: {
       rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
+        "*.svg": {
+          loaders: ["@svgr/webpack"],
+          as: "*.js",
         },
       },
     },
@@ -49,9 +51,9 @@ export default {
   experimental: {
     turbo: {
       rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
+        "*.svg": {
+          loaders: ["@svgr/webpack"],
+          as: "*.js",
         },
       },
     },
@@ -61,12 +63,14 @@ export default {
 
 ## Rendering Strategies
 ### Static Generation (Default)
+
 - Pre-render pages at build time for optimal performance
 - Use for marketing pages, blogs, documentation
 - Combine with ISR for dynamic content
 - Leverage generateStaticParams for dynamic routes
 
 ### Incremental Static Regeneration (ISR)
+
 ```typescript
 // Revalidate every hour
 export const revalidate = 3600;
@@ -75,12 +79,13 @@ async function ProductPage({ params }) {
   const product = await fetch(`https://api.example.com/products/${params.id}`, {
     next: { revalidate: 3600 },
   });
-  
+
   return <ProductDetails product={product} />;
 }
 ```
 
 ### Partial Prerendering (PPR)
+
 - New in Next.js 15: Mix static and dynamic content
 - Static shell renders immediately
 - Dynamic parts stream in with Suspense
@@ -97,12 +102,12 @@ export default function Page() {
       {/* Static content */}
       <Header />
       <Hero />
-      
+
       {/* Dynamic content streams in */}
       <Suspense fallback={<RecommendationsSkeleton />}>
         <PersonalizedRecommendations />
       </Suspense>
-      
+
       {/* Static content */}
       <Footer />
     </div>
@@ -117,7 +122,7 @@ async function ProductPage({ params }) {
   const product = await fetch(`https://api.example.com/products/${params.id}`, {
     next: { revalidate: 3600 },
   });
-  
+
   return <ProductDetails product={product} />;
 }
 ```
@@ -132,12 +137,12 @@ export default function Page() {
       {/* Static content */}
       <Header />
       <Hero />
-      
+
       {/* Dynamic content streams in */}
       <Suspense fallback={<RecommendationsSkeleton />}>
         <PersonalizedRecommendations />
       </Suspense>
-      
+
       {/* Static content */}
       <Footer />
     </div>
@@ -147,63 +152,68 @@ export default function Page() {
 
 ## Caching Strategies
 ### Request Memoization
+
 - Automatic deduplication of identical fetch requests
 - Works within a single render pass
 - No configuration needed
 
 ### Data Cache
+
 ```typescript
 // Cache indefinitely (default)
-await fetch('https://api.example.com/data');
+await fetch("https://api.example.com/data");
 
 // Revalidate every 60 seconds
-await fetch('https://api.example.com/data', {
+await fetch("https://api.example.com/data", {
   next: { revalidate: 60 },
 });
 
 // No caching
-await fetch('https://api.example.com/data', {
-  cache: 'no-store',
+await fetch("https://api.example.com/data", {
+  cache: "no-store",
 });
 
 // Tagged caching for on-demand revalidation
-await fetch('https://api.example.com/data', {
-  next: { tags: ['products'] },
+await fetch("https://api.example.com/data", {
+  next: { tags: ["products"] },
 });
 ```
 
 ### Full Route Cache
+
 - Entire route cached at build time
 - Opt-out with dynamic functions or no-store cache
 - Revalidated with revalidatePath or revalidateTag
 
 ### Router Cache
+
 - Client-side cache of visited routes
 - 30 seconds for dynamic routes
 - 5 minutes for static routes
 - Automatic invalidation on navigation
 ```typescript
 // Cache indefinitely (default)
-await fetch('https://api.example.com/data');
+await fetch("https://api.example.com/data");
 
 // Revalidate every 60 seconds
-await fetch('https://api.example.com/data', {
+await fetch("https://api.example.com/data", {
   next: { revalidate: 60 },
 });
 
 // No caching
-await fetch('https://api.example.com/data', {
-  cache: 'no-store',
+await fetch("https://api.example.com/data", {
+  cache: "no-store",
 });
 
 // Tagged caching for on-demand revalidation
-await fetch('https://api.example.com/data', {
-  next: { tags: ['products'] },
+await fetch("https://api.example.com/data", {
+  next: { tags: ["products"] },
 });
 ```
 
 ## Image Optimization
 ### Next.js Image Component
+
 ```typescript
 import Image from 'next/image';
 
@@ -229,18 +239,19 @@ import Image from 'next/image';
 ```
 
 ### Image Configuration
+
 ```javascript
 // next.config.mjs
 export default {
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn.example.com',
+        protocol: "https",
+        hostname: "cdn.example.com",
       },
     ],
   },
@@ -273,14 +284,14 @@ import Image from 'next/image';
 // next.config.mjs
 export default {
   images: {
-    formats: ['image/avif', 'image/webp'],
+    formats: ["image/avif", "image/webp"],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'cdn.example.com',
+        protocol: "https",
+        hostname: "cdn.example.com",
       },
     ],
   },
@@ -289,6 +300,7 @@ export default {
 
 ## Code Splitting and Lazy Loading
 ### Dynamic Imports
+
 ```typescript
 import dynamic from 'next/dynamic';
 
@@ -306,6 +318,7 @@ const DynamicComponent = dynamic(
 ```
 
 ### Route-Based Code Splitting
+
 - Automatic code splitting per route
 - Shared chunks extracted automatically
 - Use route groups for logical splitting
@@ -327,6 +340,7 @@ const DynamicComponent = dynamic(
 
 ## Font Optimization
 ### next/font System
+
 ```typescript
 import { Inter, Roboto_Mono } from 'next/font/google';
 
@@ -376,6 +390,7 @@ export default function RootLayout({ children }) {
 
 ## Streaming and Suspense
 ### Progressive Rendering
+
 ```typescript
 import { Suspense } from 'react';
 
@@ -383,11 +398,11 @@ export default function Page() {
   return (
     <div>
       <Header />
-      
+
       <Suspense fallback={<PostsSkeleton />}>
         <Posts />
       </Suspense>
-      
+
       <Suspense fallback={<CommentsSkeleton />}>
         <Comments />
       </Suspense>
@@ -402,7 +417,7 @@ async function Dashboard() {
       <Suspense fallback={<UserSkeleton />}>
         <UserProfile />
       </Suspense>
-      
+
       <Suspense fallback={<AnalyticsSkeleton />}>
         <Analytics />
       </Suspense>
@@ -417,11 +432,11 @@ export default function Page() {
   return (
     <div>
       <Header />
-      
+
       <Suspense fallback={<PostsSkeleton />}>
         <Posts />
       </Suspense>
-      
+
       <Suspense fallback={<CommentsSkeleton />}>
         <Comments />
       </Suspense>
@@ -436,7 +451,7 @@ async function Dashboard() {
       <Suspense fallback={<UserSkeleton />}>
         <UserProfile />
       </Suspense>
-      
+
       <Suspense fallback={<AnalyticsSkeleton />}>
         <Analytics />
       </Suspense>
@@ -447,6 +462,7 @@ async function Dashboard() {
 
 ## Core Web Vitals Optimization
 ### Largest Contentful Paint (LCP)
+
 - Use `priority` prop on above-the-fold images
 - Preload critical resources
 - Minimize render-blocking JavaScript
@@ -454,6 +470,7 @@ async function Dashboard() {
 - Use CDN for static assets
 
 ### First Input Delay (FID) / Interaction to Next Paint (INP)
+
 - Minimize JavaScript execution time
 - Use code splitting and lazy loading
 - Defer non-critical JavaScript
@@ -461,6 +478,7 @@ async function Dashboard() {
 - Use Web Workers for heavy computation
 
 ### Cumulative Layout Shift (CLS)
+
 - Always specify image dimensions
 - Reserve space for dynamic content
 - Avoid inserting content above existing content
@@ -469,61 +487,63 @@ async function Dashboard() {
 
 ## Middleware Performance
 ### Efficient Middleware
+
 ```typescript
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   // Run only on specific paths
-  if (!request.nextUrl.pathname.startsWith('/api')) {
+  if (!request.nextUrl.pathname.startsWith("/api")) {
     return NextResponse.next();
   }
-  
+
   // Lightweight checks only
-  const token = request.cookies.get('token');
+  const token = request.cookies.get("token");
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/dashboard/:path*'],
+  matcher: ["/api/:path*", "/dashboard/:path*"],
 };
 ```
 ```typescript
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   // Run only on specific paths
-  if (!request.nextUrl.pathname.startsWith('/api')) {
+  if (!request.nextUrl.pathname.startsWith("/api")) {
     return NextResponse.next();
   }
-  
+
   // Lightweight checks only
-  const token = request.cookies.get('token');
+  const token = request.cookies.get("token");
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
-  
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/api/:path*', '/dashboard/:path*'],
+  matcher: ["/api/:path*", "/dashboard/:path*"],
 };
 ```
 
 ## Bundle Analysis
 ### Analyze Bundle Size
+
 ```javascript
 // next.config.mjs
-import bundleAnalyzer from '@next/bundle-analyzer';
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === "true",
 });
 
 export default withBundleAnalyzer({
@@ -532,15 +552,16 @@ export default withBundleAnalyzer({
 ```
 
 ### Run Analysis
+
 ```bash
 ANALYZE=true npm run build
 ```
 ```javascript
 // next.config.mjs
-import bundleAnalyzer from '@next/bundle-analyzer';
+import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
+  enabled: process.env.ANALYZE === "true",
 });
 
 export default withBundleAnalyzer({
@@ -553,6 +574,7 @@ ANALYZE=true npm run build
 
 ## Database Query Optimization
 ### Parallel Queries
+
 ```typescript
 async function UserDashboard({ userId }) {
   // Parallel queries
@@ -561,12 +583,13 @@ async function UserDashboard({ userId }) {
     db.post.findMany({ where: { authorId: userId }, take: 10 }),
     db.analytics.aggregate({ where: { userId } }),
   ]);
-  
+
   return <Dashboard user={user} posts={posts} analytics={analytics} />;
 }
 ```
 
 ### Connection Pooling
+
 - Use Prisma with connection pooling
 - Configure pool size based on serverless limits
 - Use PgBouncer for PostgreSQL
@@ -579,76 +602,79 @@ async function UserDashboard({ userId }) {
     db.post.findMany({ where: { authorId: userId }, take: 10 }),
     db.analytics.aggregate({ where: { userId } }),
   ]);
-  
+
   return <Dashboard user={user} posts={posts} analytics={analytics} />;
 }
 ```
 
 ## API Route Optimization
 ### Edge Runtime
+
 ```typescript
-export const runtime = 'edge';
+export const runtime = "edge";
 
 export async function GET(request: Request) {
   // Runs on edge, closer to users
-  const data = await fetch('https://api.example.com/data', {
+  const data = await fetch("https://api.example.com/data", {
     next: { revalidate: 60 },
   });
-  
+
   return Response.json(data);
 }
 ```
 
 ### Response Streaming
+
 ```typescript
 export async function GET() {
   const encoder = new TextEncoder();
-  
+
   const stream = new ReadableStream({
     async start(controller) {
       for (let i = 0; i < 100; i++) {
         const data = await fetchChunk(i);
-        controller.enqueue(encoder.encode(JSON.stringify(data) + '\n'));
+        controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
       }
       controller.close();
     },
   });
-  
+
   return new Response(stream);
 }
 ```
 ```typescript
-export const runtime = 'edge';
+export const runtime = "edge";
 
 export async function GET(request: Request) {
   // Runs on edge, closer to users
-  const data = await fetch('https://api.example.com/data', {
+  const data = await fetch("https://api.example.com/data", {
     next: { revalidate: 60 },
   });
-  
+
   return Response.json(data);
 }
 ```
 ```typescript
 export async function GET() {
   const encoder = new TextEncoder();
-  
+
   const stream = new ReadableStream({
     async start(controller) {
       for (let i = 0; i < 100; i++) {
         const data = await fetchChunk(i);
-        controller.enqueue(encoder.encode(JSON.stringify(data) + '\n'));
+        controller.enqueue(encoder.encode(JSON.stringify(data) + "\n"));
       }
       controller.close();
     },
   });
-  
+
   return new Response(stream);
 }
 ```
 
 ## Monitoring and Analytics
 ### Web Vitals Tracking
+
 ```typescript
 // app/layout.tsx
 import { SpeedInsights } from '@vercel/speed-insights/next';
@@ -668,18 +694,19 @@ export default function RootLayout({ children }) {
 ```
 
 ### Custom Web Vitals Reporting
+
 ```typescript
 // app/web-vitals.tsx
-'use client'
+"use client";
 
-import { useReportWebVitals } from 'next/web-vitals';
+import { useReportWebVitals } from "next/web-vitals";
 
 export function WebVitals() {
   useReportWebVitals((metric) => {
     // Send to analytics
     console.log(metric);
   });
-  
+
   return null;
 }
 ```
@@ -702,16 +729,16 @@ export default function RootLayout({ children }) {
 ```
 ```typescript
 // app/web-vitals.tsx
-'use client'
+"use client";
 
-import { useReportWebVitals } from 'next/web-vitals';
+import { useReportWebVitals } from "next/web-vitals";
 
 export function WebVitals() {
   useReportWebVitals((metric) => {
     // Send to analytics
     console.log(metric);
   });
-  
+
   return null;
 }
 ```

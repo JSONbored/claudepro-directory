@@ -93,32 +93,46 @@ Analyze dependency security and supply chain risks with Socket's comprehensive v
 
 ## Examples
 ### Scan my package.json for vulnerabilities
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Scan my package.json for vulnerabilities"
 ```
+
 ### Check the security score of lodash
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Check the security score of lodash"
 ```
+
 ### Find risky dependencies in my project
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find risky dependencies in my project"
 ```
+
 ### Generate a security report
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate a security report"
 ```
+
 ### Emit Event to Room
+
 Broadcast a message to all clients in a Socket.io room
+
 ```typescript
 // Emit event to Socket.io room
 io.to("room-id").emit("message", {
   text: "Hello, room!",
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 ```plaintext
@@ -137,7 +151,7 @@ Ask Claude: "Generate a security report"
 // Emit event to Socket.io room
 io.to("room-id").emit("message", {
   text: "Hello, room!",
-  timestamp: Date.now()
+  timestamp: Date.now(),
 });
 ```
 
@@ -157,24 +171,31 @@ io.to("room-id").emit("message", {
 ### Rate limit exceeded - 429 Too Many Requests error
 
 Socket API rate limit is 600 requests/minute (average 10 requests/second). Implement random exponential backoff for retries (wait time increases with each retry). Space out API calls to stay under the 10 req/second average. Monitor rate limit headers in API responses. Batch multiple package scans when possible. Cache scan results to avoid redundant requests. Contact support@socket.dev to request rate limit increase for your organization. Consider upgrading to a plan with higher rate limits.
+
 ### Authentication failed or API key invalid
 
 Socket API uses API key authentication. Provide API token via HTTP Basic auth (token as username, blank password) or use `Authorization: Bearer YOUR_API_KEY` header format. Verify API key in Socket Dashboard settings (Settings > API Keys). Generate new key if expired or compromised. Ensure API key has required permissions for the operations you're performing. For MCP server connection, ensure OAuth authentication is completed at https://mcp.socket.dev/. Check token not revoked or disabled in dashboard.
+
 ### Package scan failed or unsupported package manager
 
 Socket supports npm (package.json, package-lock.json), PyPI (requirements.txt), Go modules (go.mod), Maven (pom.xml), and Packagist (composer.json). Verify package file format is valid JSON or proper dependency format. Check package exists in the registry (npm, PyPI, Maven Central, etc.). Ensure package file paths are correct and accessible. Review scan output for specific error messages. For npm, ensure package-lock.json is present for accurate dependency resolution. Check package manager version compatibility.
+
 ### SBOM export or security report generation errors
 
 Verify account has access to SBOM export features (may require paid plan). Check report snapshot hash authentication (SHA2) is correct. Ensure sufficient permissions for license policy management in organization settings. Review API response for specific error details. Verify organization membership and access level. Check if report ID exists and hasn't expired. Ensure file paths in report creation are valid and accessible. For license policy errors, verify organization has license policy management enabled.
+
 ### Socket.io MCP server connection errors with authentication
 
 Verify authentication token is valid. Check Socket.io server authentication middleware. Ensure token format is correct. For JWT authentication, verify token signature and expiration. Check CORS configuration allows connections.
+
 ### Socket.io connection failures or disconnections
 
 Check network connectivity to Socket.io server. Verify server is running and accessible. Check firewall rules allow WebSocket connections. Verify Socket.io version compatibility between client and server. Check connection timeout settings.
+
 ### Socket.io event delivery failures or message loss
 
 Check room membership and event authorization. Verify event names match between client and server. Check message acknowledgment if using acknowledgments. Monitor connection state and implement reconnection logic. Verify event payload size limits.
+
 ### Socket.io MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Socket.io server endpoints are accessible. Increase connection timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

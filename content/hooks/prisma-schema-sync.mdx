@@ -14,9 +14,9 @@ seoDescription: >-
   schema.prisma is modified. This PostToolUse hook provides comprehensive Prisma
   schema synch...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
-documentationUrl: 'https://www.prisma.io/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
+documentationUrl: "https://www.prisma.io/docs"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/prisma-schema-sync.sh && chmod
@@ -76,6 +76,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic Prisma client generation including Prisma client generation (npx prisma generate command execution with proper configuration, TypeScript type generation with type-safe database access and full type safety, client regeneration on schema changes with automatic detection, client caching and optimization with incremental generation), TypeScript type generation (database model types with full type safety and IntelliSense support, relation types with relationship mapping and foreign key types, enum types with enum value types and type-safe enums, scalar types with database column types and type mapping), client optimization (client code generation optimization with tree shaking, client bundle size optimization with code splitting, client performance optimization with query optimization), and client validation (client generation validation with error checking, client type checking with TypeScript validation, client compatibility verification with schema compatibility)
@@ -126,10 +127,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/prisma-schema-sync.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -153,13 +151,13 @@ fi
 if [[ "$FILE_PATH" == *schema.prisma ]]; then
     echo "🔄 Prisma Schema Sync - Processing schema changes..."
     echo "📄 Schema file: $FILE_PATH"
-    
+
     # Check if Prisma is available
     if ! command -v npx >/dev/null 2>&1; then
         echo "⚠️ npx not found. Please install Node.js and npm"
         exit 1
     fi
-    
+
     # Step 1: Validate schema
     echo "🔍 Validating Prisma schema..."
     if npx prisma validate; then
@@ -168,7 +166,7 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
         echo "❌ Schema validation failed - Please fix errors before proceeding"
         exit 1
     fi
-    
+
     # Step 2: Format schema
     echo "📝 Formatting Prisma schema..."
     if npx prisma format; then
@@ -176,7 +174,7 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
     else
         echo "⚠️ Schema formatting failed"
     fi
-    
+
     # Step 3: Generate Prisma client
     echo "🏗️ Generating Prisma client..."
     if npx prisma generate; then
@@ -185,12 +183,12 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
         echo "❌ Prisma client generation failed"
         exit 1
     fi
-    
+
     # Step 4: Create migration (dev mode only)
     if [ "$NODE_ENV" != "production" ]; then
         echo "🗄️ Creating database migration..."
         MIGRATION_NAME="auto_migration_$(date +%Y%m%d_%H%M%S)"
-        
+
         if npx prisma migrate dev --name "$MIGRATION_NAME" --create-only; then
             echo "✅ Migration created: $MIGRATION_NAME"
             echo "⚠️ Please review the migration before applying it to your database"
@@ -201,17 +199,17 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
     else
         echo "ℹ️ Production environment - skipping migration creation"
     fi
-    
+
     echo ""
     echo "💡 Prisma Sync Tips:"
     echo "  • Review generated migrations before applying"
     echo "  • Use 'npx prisma studio' to explore your database"
     echo "  • Run 'npx prisma db push' for prototyping"
     echo "  • Use 'npx prisma migrate reset' to reset development database"
-    
+
     echo ""
     echo "🎯 Prisma schema sync complete!"
-    
+
 else
     echo "ℹ️ File is not a Prisma schema file: $FILE_PATH"
 fi
@@ -220,6 +218,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Prisma Schema Sync Hook Script
 
 Complete hook script that performs Prisma schema synchronization
@@ -247,6 +246,7 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Prisma schema synchronization
@@ -261,6 +261,7 @@ Complete hook configuration for .claude/settings.json to enable Prisma schema sy
   }
 }
 ```
+
 ### Schema Validation and Formatting
 
 Enhanced hook script with schema validation, formatting, and client generation
@@ -290,6 +291,7 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
 fi
 exit 0
 ```
+
 ### Migration Creation with Environment Detection
 
 Enhanced hook script with environment detection and migration creation
@@ -319,6 +321,7 @@ if [[ "$FILE_PATH" == *schema.prisma ]]; then
 fi
 exit 0
 ```
+
 ### Database Connection Validation
 
 Enhanced hook script with database connection validation before operations
@@ -351,27 +354,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### npx prisma generate fails with 'generator not found' error
 
 Prisma client not installed or wrong version. Run: 'npm install @prisma/client' matching schema generator. Verify: 'npx prisma version' showing versions. Re-generate with full schema path. Verify Prisma installation. Test with various Prisma versions.
+
 ### Migration creation hangs waiting for database connection that fails
 
 DATABASE_URL missing or incorrect in .env. Verify: 'echo $DATABASE_URL' showing connection. Test: 'npx prisma db pull' for connectivity. Or use '--skip-generate' flag bypassing DB. Verify database connection. Test with various database configurations.
+
 ### Auto-migration creates duplicate migrations for identical schema changes
 
 Timestamp-based naming always creates new migration. Add check: 'git diff prisma/schema.prisma | grep "^+model"' detecting real changes. Or use 'npx prisma migrate diff' to compare first. Verify schema changes. Test with various migration scenarios.
+
 ### prisma format changes schema but hook shows no modifications
 
 Formatting occurs after file write completing hook execution. Move format before validation: reorder script or use: 'npx prisma format && npx prisma validate' ensuring formatted state checked. Verify script order. Test with various schema formats.
+
 ### Hook runs in production despite NODE_ENV check skipping migrations
 
 NODE_ENV not set in deployment defaulting to undefined. Export: 'export NODE_ENV=production' in shell profile. Or check: 'if [ "$NODE_ENV" = "production" ] || [ -z "$NODE_ENV" ]'. Verify environment variables. Test with various environment configurations.
+
 ### Prisma client generation fails with type errors
 
 Schema syntax errors or missing dependencies. Run 'npx prisma validate' to identify issues. Check @prisma/client version matches prisma version. Verify TypeScript configuration. Test with various schema configurations.
+
 ### Migration files created but not applied to database
 
 Migration created with --create-only flag requires manual application. Apply with 'npx prisma migrate dev' or 'npx prisma migrate deploy' for production. Verify migration status. Test with various migration scenarios.
+
 ### Schema validation passes but client generation fails
 
 Generator configuration issues or missing dependencies. Check generator block in schema.prisma. Verify @prisma/client installation. Check node_modules/.prisma directory. Verify generator configuration. Test with various generator settings.

@@ -18,18 +18,18 @@ Debug Claude Code authentication failures, OAuth errors, and API key configurati
 Claude Code configuration errors commonly affect authentication, OAuth handling, and permission settings. This guide provides platform-specific fixes for Windows WSL, macOS, and Linux. Security best practices protect API keys with layered approaches. Automated management with direnv simplifies environment setup.
 
 > **Critical Configuration Alert**
-> 
+>
 > Configuration issues represent a significant portion of Claude Code support requests. OAuth callback failures and API key exposure risks remain top concerns. This guide addresses the most common configuration problems through proper setup patterns.
 
 ## Problem Overview
 > **Claude Code Configuration Error Indicators**
-> 
+>
 > **Primary Symptoms:** OAuth account information missing, API key not found errors, permission denied on file operations, MCP server connection failures
-> 
+>
 > **Common Triggers:** SSH environment limitations, corporate network restrictions, cross-platform path conflicts, expired OAuth tokens
-> 
+>
 > **Affected Versions:** Claude Code 3.0+, all platforms (Windows/macOS/Linux)
-> 
+>
 > **Impact Level:** Complete workflow disruption - no code generation possible
 
 ## Quick Diagnosis
@@ -40,16 +40,12 @@ Claude Code configuration errors commonly affect authentication, OAuth handling,
 
 ## Step-by-Step Solutions
 1. **Platform-Specific Setup**
-   
 
 2. **Authentication Configuration**
-   
 
 3. **Permission Configuration**
-   
 
 4. **Debug and Verify**
-   
 
 <!-- Section type: comparison_table -->
 
@@ -58,11 +54,11 @@ Claude Code configuration errors commonly affect authentication, OAuth handling,
 
 ## Prevention Strategies
 > **Prevent Future Configuration Issues**
-> 
+>
 > **Automated Environment Management:** Use direnv for directory-based configuration loading
-> 
+>
 > **Container-Based Development:** Docker ensures consistent environments - Prevents platform-specific issues entirely
-> 
+>
 > **Regular Validation Checks:** Run claude doctor weekly - Early detection of configuration drift
 
 ## Alternative Solutions
@@ -74,7 +70,7 @@ Claude Code configuration errors commonly affect authentication, OAuth handling,
 ```
 
 ## Security Best Practices
-- [ ] {"task": "Never commit .env files containing API keys", "required": true, "description": "Use .gitignore patterns: .env*, secrets/**, *.key to prevent exposure"}
+- [ ] {"task": "Never commit .env files containing API keys", "required": true, "description": "Use .gitignore patterns: .env*, secrets/\*\*, *.key to prevent exposure"}
 - [ ] {"task": "Implement regular API key rotation policies", "required": true, "description": "Use vault integration or cloud secret managers for automatic rotation"}
 - [ ] {"task": "Enable file access deny rules for sensitive paths", "required": true, "description": "Block ~/.ssh, ~/.aws, ~/.env with explicit deny permissions"}
 - [ ] {"task": "Use separate API keys for each environment", "required": false, "description": "Development, staging, production require isolated credentials"}
@@ -86,23 +82,22 @@ Claude Code configuration errors commonly affect authentication, OAuth handling,
 
 ## Team Setup Guide
 > **Team and Enterprise Configuration**
-> 
+>
 > **Team Plans:** Enhanced usage limits per seat
-> 
+>
 > **Enterprise Plans:** Maximum usage with priority support
-> 
+>
 > **Shared Configuration:** CLAUDE.md files define team standards
-> 
+>
 > **Role Management:** Settings → Members for seat allocation
 
 1. **Create Team Configuration Template**
-   
 
 2. **Configure direnv for Auto-Loading**
 
 ## Common Pitfalls
 > **Critical Anti-Patterns to Avoid**
-> 
+>
 > - Hardcoding API keys in source code - exposed in version control
 > - Using same API key across all environments - security breach risk
 > - Mixing Windows and WSL paths - causes significant performance degradation
@@ -113,11 +108,11 @@ Claude Code configuration errors commonly affect authentication, OAuth handling,
 <!-- Section type: related_content -->
 
 > **Issue Resolved?**
-> 
+>
 > **Problem solved?** Great! Consider implementing direnv for automatic environment management to prevent recurrence.
-> 
+>
 > **Still having issues?** Join our [community](/community) for additional support or contact Anthropic support for enterprise assistance.
-> 
+>
 > **Found a new solution?** Share it with the community to help others facing the same issue.
 
-*Last updated: September 2025 | Solutions verified against Claude Code 3.0+ | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*
+_Last updated: September 2025 | Solutions verified against Claude Code 3.0+ | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting)._

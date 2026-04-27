@@ -14,8 +14,8 @@ seoDescription: >-
   are modified. This PostToolUse hook provides comprehensive Python import
   optim...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/python-import-optimizer.sh &&
@@ -76,6 +76,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic import sorting with isort including isort integration (isort command execution with PEP 8 compliant sorting, import grouping by type with standard library/third-party/local separation, import alphabetization with consistent ordering, import formatting with consistent style), PEP 8 compliant import organization (PEP 8 import ordering standards with standard library first, third-party imports second, local imports last, import grouping with blank line separation, import sorting with alphabetical ordering), import configuration (pyproject.toml configuration for isort settings, setup.cfg configuration for isort settings, .isort.cfg configuration for isort settings, configuration file support for project-wide settings), and import validation (import syntax validation with syntax checking, import order validation with order checking, import format validation with format checking)
@@ -84,7 +85,7 @@ robotsFollow: true
 - Black profile compatibility including Black integration (isort --profile black flag for Black compatibility, line length configuration with --line-length 88 for Black default, import formatting with Black-compatible style, import ordering with Black-compatible ordering), Black profile settings (profile black configuration for consistent formatting, line length 88 matching Black default, import style matching Black preferences, import formatting matching Black output), Black compatibility (Black-compatible import sorting with consistent style, Black-compatible import formatting with matching output, Black-compatible import ordering with consistent ordering), and Black workflow integration (automatic import sorting before Black formatting, import formatting compatible with Black output, import ordering compatible with Black preferences)
 - Import grouping by type including standard library imports (standard library import detection with built-in module detection, standard library import grouping with stdlib section, standard library import sorting with alphabetical ordering), third-party imports (third-party import detection with external package detection, third-party import grouping with third-party section, third-party import sorting with alphabetical ordering), local imports (local import detection with project module detection, local import grouping with local section, local import sorting with alphabetical ordering), and import section separation (blank line separation between import groups, import section organization with clear separation, import section formatting with consistent style)
 - Code formatting integration including formatting integration (isort integration with code formatters like Black, Ruff, autopep8, formatting compatibility with multiple formatters, formatting consistency with project standards), formatting configuration (pyproject.toml configuration for isort settings, setup.cfg configuration for isort settings, .isort.cfg configuration for isort settings, configuration file support for project-wide settings), formatting workflow (automatic formatting on file changes, formatting consistency across project, formatting integration with development workflow), and formatting tools (Black integration with isort, Ruff integration with isort, autopep8 integration with isort, multiple formatter support)
-- Import analysis and statistics including import analysis (import count by type with standard library/third-party/local counts, import structure analysis with import hierarchy, import dependency analysis with dependency tracking), import statistics (import count statistics with detailed counts, import type statistics with type distribution, import usage statistics with usage tracking), import warnings (star import warnings with import * detection, large import count warnings with import count thresholds, import optimization suggestions with recommendations), and import reporting (import summary reporting with detailed summary, import analysis reporting with analysis results, import optimization reporting with optimization suggestions)
+- Import analysis and statistics including import analysis (import count by type with standard library/third-party/local counts, import structure analysis with import hierarchy, import dependency analysis with dependency tracking), import statistics (import count statistics with detailed counts, import type statistics with type distribution, import usage statistics with usage tracking), import warnings (star import warnings with import \* detection, large import count warnings with import count thresholds, import optimization suggestions with recommendations), and import reporting (import summary reporting with detailed summary, import analysis reporting with analysis results, import optimization reporting with optimization suggestions)
 - Development workflow integration including continuous optimization (real-time import optimization on file changes, immediate import sorting on file updates, automatic import cleanup on file modifications), workflow automation (automated import optimization without manual intervention, import sorting automation with automatic sorting, import cleanup automation with automatic cleanup), and workflow optimization (import change detection with change tracking, incremental import optimization with optimization, import consistency maintenance with consistency checks)
 
 ## Use Cases
@@ -127,10 +128,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/python-import-optimizer.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -154,13 +152,13 @@ fi
 if [[ "$FILE_PATH" == *.py ]]; then
     echo "🐍 Python Import Optimizer - Processing Python file..."
     echo "📄 File: $FILE_PATH"
-    
+
     # Check if file exists
     if [ ! -f "$FILE_PATH" ]; then
         echo "⚠️ File not found: $FILE_PATH"
         exit 1
     fi
-    
+
     # Step 1: Sort imports with isort
     echo "📋 Sorting imports with isort..."
     if command -v isort >/dev/null 2>&1; then
@@ -174,7 +172,7 @@ if [[ "$FILE_PATH" == *.py ]]; then
     else
         echo "⚠️ isort not found. Install with: pip install isort"
     fi
-    
+
     # Step 2: Remove unused imports with autoflake (optional)
     echo "🧹 Removing unused imports..."
     if command -v autoflake >/dev/null 2>&1; then
@@ -189,39 +187,39 @@ if [[ "$FILE_PATH" == *.py ]]; then
     else
         echo "ℹ️ autoflake not found (optional). Install with: pip install autoflake"
     fi
-    
+
     # Step 3: Additional import analysis
     echo "🔍 Analyzing import structure..."
-    
+
     # Count different types of imports
     STDLIB_IMPORTS=$(grep -c "^import \(os\|sys\|re\|json\|datetime\|collections\|itertools\|functools\|pathlib\)" "$FILE_PATH" 2>/dev/null || echo 0)
     THIRD_PARTY_IMPORTS=$(grep -c "^\(import\|from\) \(numpy\|pandas\|requests\|flask\|django\|fastapi\)" "$FILE_PATH" 2>/dev/null || echo 0)
     RELATIVE_IMPORTS=$(grep -c "^from \.[.]*" "$FILE_PATH" 2>/dev/null || echo 0)
-    
+
     echo "📊 Import Summary:"
     echo "  • Standard Library: $STDLIB_IMPORTS"
     echo "  • Third Party: $THIRD_PARTY_IMPORTS"
     echo "  • Relative: $RELATIVE_IMPORTS"
-    
+
     # Check for potential issues
     if grep -q "^import \*" "$FILE_PATH" 2>/dev/null; then
         echo "⚠️ Warning: Star imports detected (import *) - consider specific imports"
     fi
-    
+
     if [ "$(grep -c '^import\|^from' "$FILE_PATH" 2>/dev/null || echo 0)" -gt 20 ]; then
         echo "💡 Tip: Consider grouping related imports or using a package structure"
     fi
-    
+
     echo ""
     echo "💡 Python Import Tips:"
     echo "  • Use absolute imports when possible"
     echo "  • Group imports: stdlib, third-party, local"
     echo "  • Avoid star imports (import *)"
     echo "  • Use 'from module import specific_function' for clarity"
-    
+
     echo ""
     echo "🎯 Python import optimization complete!"
-    
+
 else
     echo "ℹ️ File is not a Python file: $FILE_PATH"
 fi
@@ -230,6 +228,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Python Import Optimizer Hook Script
 
 Complete hook script that performs Python import optimization
@@ -253,6 +252,7 @@ if [[ "$FILE_PATH" == *.py ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Python import optimization
@@ -267,6 +267,7 @@ Complete hook configuration for .claude/settings.json to enable Python import op
   }
 }
 ```
+
 ### Import Sorting with Unused Import Removal
 
 Enhanced hook script with isort sorting and autoflake unused import removal
@@ -299,6 +300,7 @@ if [[ "$FILE_PATH" == *.py ]]; then
 fi
 exit 0
 ```
+
 ### Import Analysis and Statistics
 
 Enhanced hook script with import analysis and statistics reporting
@@ -326,6 +328,7 @@ if [[ "$FILE_PATH" == *.py ]]; then
 fi
 exit 0
 ```
+
 ### pyproject.toml Configuration
 
 Example pyproject.toml configuration for isort and Black integration
@@ -344,27 +347,35 @@ include = '\.pyi?$'
 ```
 
 ## Troubleshooting
+
 ### isort conflicts with Black formatter settings
 
 Hook already uses --profile black flag for compatibility. Ensure Black and isort versions are current. Add .isort.cfg with profile = black and line_length = 88 for project-wide consistency. Verify pyproject.toml configuration. Test with various Black versions.
+
 ### autoflake removes imports that are actually used
 
-Add # noqa comments to imports that should be preserved. Configure autoflake to exclude specific files with --exclude in hook script, or use __all__ exports to signal intentional module-level imports. Verify import usage. Test with various autoflake configurations.
-### Hook processes __init__.py and breaks package exports
+Add # noqa comments to imports that should be preserved. Configure autoflake to exclude specific files with --exclude in hook script, or use **all** exports to signal intentional module-level imports. Verify import usage. Test with various autoflake configurations.
 
-Exclude __init__.py from autoflake processing by modifying hook to check filename. Add special handling for package files where import * is intentional for re-exporting. Verify package structure. Test with various package configurations.
+### Hook processes **init**.py and breaks package exports
+
+Exclude **init**.py from autoflake processing by modifying hook to check filename. Add special handling for package files where import \* is intentional for re-exporting. Verify package structure. Test with various package configurations.
+
 ### Relative imports get converted to absolute incorrectly
 
 Configure isort with known_first_party setting in setup.cfg or pyproject.toml. Use --src-path flag in hook to help isort determine project root for proper import classification. Verify project structure. Test with various project configurations.
+
 ### isort not found error when hook runs
 
 Install isort with 'pip install isort' or 'pip install isort[black]' for Black profile support. Verify isort installation with 'isort --version'. Check Python environment and PATH. Test with various Python environments.
+
 ### Import sorting changes break existing code
 
 Review isort configuration and ensure --profile black is used for Black compatibility. Check for import side effects and verify import order doesn't affect functionality. Test with various import configurations.
+
 ### autoflake removes type hints or annotations
 
 Configure autoflake to preserve type hints with --remove-unused-variables but keep type annotations. Use --in-place flag carefully and review changes. Verify type hint preservation. Test with various type hint configurations.
+
 ### Hook performance is slow on large Python files
 
 Optimize hook script with timeout protection and file size checks. Consider excluding large files or using incremental processing. Verify file size limits. Test with various file sizes.

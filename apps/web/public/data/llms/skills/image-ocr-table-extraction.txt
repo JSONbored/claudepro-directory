@@ -36,11 +36,13 @@ Claude can extract text and tables from images, screenshots, scanned documents, 
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - Image file uploaded (PNG, JPG, PDF with images)
 
 **What Claude handles:**
+
 - Installing Tesseract OCR and vision libraries
 - Image preprocessing and enhancement
 - Text recognition and layout analysis
@@ -53,6 +55,7 @@ Claude can extract text and tables from images, screenshots, scanned documents, 
 **Prompt:** "Extract all text from this screenshot and give me the content as plain text."
 
 Claude will:
+
 1. Preprocess the image
 2. Run OCR
 3. Extract text with layout preservation
@@ -63,6 +66,7 @@ Claude will:
 **Prompt:** "Extract the table from this image and export it as CSV."
 
 Claude will:
+
 1. Detect table boundaries
 2. Identify rows and columns
 3. Extract cell contents
@@ -72,14 +76,16 @@ Claude will:
 ### Form Data Extraction
 
 **Prompt:** "Extract data from this invoice image:
+
 - Invoice number
 - Date
 - Vendor name
 - Line items (description, quantity, price)
 - Total amount
-Format as JSON."
+  Format as JSON."
 
 Claude will:
+
 1. OCR the entire image
 2. Identify fields by labels
 3. Extract values
@@ -89,13 +95,15 @@ Claude will:
 ### Receipt Processing
 
 **Prompt:** "Process this receipt image and extract:
+
 - Merchant name
 - Date and time
 - All item names and prices
 - Subtotal, tax, total
-Create a structured expense record."
+  Create a structured expense record."
 
 Claude will:
+
 1. OCR the receipt
 2. Parse line items
 3. Extract financial data
@@ -104,6 +112,7 @@ Claude will:
 
 ## Common Workflows
 ### Batch Invoice Processing
+
 ```
 "Process all invoice images I upload and:
 1. Extract: invoice #, date, vendor, total
@@ -113,6 +122,7 @@ Claude will:
 ```
 
 ### Screenshot Text Recovery
+
 ```
 "Extract all code from this screenshot of a terminal:
 1. Recognize monospace text accurately
@@ -122,6 +132,7 @@ Claude will:
 ```
 
 ### Business Card Digitization
+
 ```
 "Extract contact information from this business card:
 1. Name
@@ -134,6 +145,7 @@ Format as vCard or CSV for import to contacts."
 ```
 
 ### Table from PDF Extraction
+
 ```
 "This PDF contains a table that I can't copy/paste properly:
 1. Extract the table using OCR
@@ -186,6 +198,7 @@ Format as vCard or CSV for import to contacts."
 
 ## Image Quality Enhancements
 ### Preprocessing Options
+
 - Rotate/deskew images
 - Increase contrast
 - Remove noise and artifacts
@@ -194,6 +207,7 @@ Format as vCard or CSV for import to contacts."
 - Crop to region of interest
 
 ### Common Issues Claude Can Fix
+
 - Skewed/rotated images
 - Low contrast
 - Background noise
@@ -202,12 +216,14 @@ Format as vCard or CSV for import to contacts."
 
 ## Advanced Extraction
 ### Multi-Column Layouts
+
 - Newspaper-style columns
 - Magazine layouts
 - Academic papers
 - Forms with complex layouts
 
 ### Special Document Types
+
 - Passports and IDs
 - Medical forms
 - Financial statements

@@ -13,13 +13,13 @@ seoDescription: >-
   Advanced test suite generator with property-based testing, mutation testing,
   and intelligent test case discovery Discover tools for AI development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
-documentationUrl: 'https://docs.claude.ai/commands/test'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
+documentationUrl: "https://docs.claude.ai/commands/test"
 installable: true
-installCommand: '/test [options] <file_or_function>'
-usageSnippet: '/test [options] <file_or_function>'
-copySnippet: '/test [options] <file_or_function>'
+installCommand: "/test [options] <file_or_function>"
+usageSnippet: "/test [options] <file_or_function>"
+copySnippet: "/test [options] <file_or_function>"
 tags:
   - testing
   - unit-tests
@@ -45,8 +45,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/test [options] <file_or_function>'
+commandSyntax: "/test [options] <file_or_function>"
 ---
+
 The `/test` command generates comprehensive test suites with advanced testing methodologies including property-based testing, mutation testing, snapshot testing, and intelligent edge case discovery.
 
 ## Usage
@@ -58,6 +59,7 @@ The `/test` command generates comprehensive test suites with advanced testing me
 ## Options
 
 ### Test Types
+
 - `--unit` - Unit tests with mocking and isolation
 - `--integration` - Integration tests with real dependencies
 - `--e2e` - End-to-end tests with full system simulation
@@ -69,6 +71,7 @@ The `/test` command generates comprehensive test suites with advanced testing me
 - `--all` - Comprehensive test suite (default)
 
 ### Testing Frameworks
+
 - `--jest` - Jest testing framework (JavaScript/TypeScript)
 - `--vitest` - Vitest testing framework (faster Jest alternative)
 - `--pytest` - pytest framework (Python)
@@ -78,6 +81,7 @@ The `/test` command generates comprehensive test suites with advanced testing me
 - `--rust-test` - Rust testing framework
 
 ### Advanced Features
+
 - `--coverage` - Generate code coverage reports with detailed metrics
 - `--baseline` - Generate performance baselines and regression detection
 - `--fuzz` - Fuzzing tests with random input generation
@@ -85,6 +89,7 @@ The `/test` command generates comprehensive test suites with advanced testing me
 - `--visual` - Visual regression testing for UI components
 
 ### AI-Powered Features
+
 - `--smart-cases` - AI-generated edge cases and corner cases
 - `--behavior-discovery` - Automatic behavior pattern recognition
 - `--test-oracle` - AI-powered test oracle generation
@@ -96,10 +101,10 @@ The `/test` command generates comprehensive test suites with advanced testing me
 
 ```jsx
 // Component to test: UserProfileCard.jsx
-import React, { useState, useEffect } from 'react';
-import { fetchUserProfile, updateUserProfile } from '../api/users';
-import { useAuth } from '../hooks/useAuth';
-import { toast } from '../utils/toast';
+import React, { useState, useEffect } from "react";
+import { fetchUserProfile, updateUserProfile } from "../api/users";
+import { useAuth } from "../hooks/useAuth";
+import { toast } from "../utils/toast";
 
 const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
   const [profile, setProfile] = useState(null);
@@ -107,13 +112,13 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState({});
-  
+
   const { user: currentUser } = useAuth();
-  
+
   useEffect(() => {
     loadProfile();
   }, [userId]);
-  
+
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -122,76 +127,77 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
       setFormData({
         name: userProfile.name,
         email: userProfile.email,
-        bio: userProfile.bio || ''
+        bio: userProfile.bio || "",
       });
     } catch (error) {
-      toast.error('Failed to load profile');
+      toast.error("Failed to load profile");
     } finally {
       setLoading(false);
     }
   };
-  
+
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name?.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = "Name must be at least 2 characters";
     } else if (formData.name.length > 100) {
-      newErrors.name = 'Name must be less than 100 characters';
+      newErrors.name = "Name must be less than 100 characters";
     }
-    
+
     if (!formData.email?.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = "Invalid email format";
     }
-    
+
     if (formData.bio && formData.bio.length > 500) {
-      newErrors.bio = 'Bio must be less than 500 characters';
+      newErrors.bio = "Bio must be less than 500 characters";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     try {
       setLoading(true);
       const updatedProfile = await updateUserProfile(userId, formData);
       setProfile(updatedProfile);
       setEditing(false);
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       onProfileUpdate?.(updatedProfile);
     } catch (error) {
       if (error.status === 409) {
-        setErrors({ email: 'Email already exists' });
+        setErrors({ email: "Email already exists" });
       } else {
-        toast.error('Failed to update profile');
+        toast.error("Failed to update profile");
       }
     } finally {
       setLoading(false);
     }
   };
-  
-  const canEdit = editable && (currentUser?.id === userId || currentUser?.role === 'admin');
-  
+
+  const canEdit =
+    editable && (currentUser?.id === userId || currentUser?.role === "admin");
+
   if (loading && !profile) {
     return <div data-testid="loading-spinner">Loading...</div>;
   }
-  
+
   if (!profile) {
     return <div data-testid="error-message">Profile not found</div>;
   }
-  
+
   return (
     <div data-testid="user-profile-card" className="profile-card">
       <div className="profile-header">
-        <img 
-          src={profile.avatar || '/default-avatar.png'} 
+        <img
+          src={profile.avatar || "/default-avatar.png"}
           alt={`${profile.name}'s avatar`}
           data-testid="profile-avatar"
         />
@@ -199,17 +205,23 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
           <input
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, name: e.target.value }))
+            }
             data-testid="name-input"
-            className={errors.name ? 'error' : ''}
+            className={errors.name ? "error" : ""}
             placeholder="Enter name"
           />
         ) : (
           <h2 data-testid="profile-name">{profile.name}</h2>
         )}
-        {errors.name && <span data-testid="name-error" className="error">{errors.name}</span>}
+        {errors.name && (
+          <span data-testid="name-error" className="error">
+            {errors.name}
+          </span>
+        )}
       </div>
-      
+
       <div className="profile-details">
         <div className="detail-item">
           <label>Email:</label>
@@ -217,34 +229,46 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
+              }
               data-testid="email-input"
-              className={errors.email ? 'error' : ''}
+              className={errors.email ? "error" : ""}
             />
           ) : (
             <span data-testid="profile-email">{profile.email}</span>
           )}
-          {errors.email && <span data-testid="email-error" className="error">{errors.email}</span>}
+          {errors.email && (
+            <span data-testid="email-error" className="error">
+              {errors.email}
+            </span>
+          )}
         </div>
-        
+
         <div className="detail-item">
           <label>Bio:</label>
           {editing ? (
             <textarea
               value={formData.bio}
-              onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, bio: e.target.value }))
+              }
               data-testid="bio-input"
-              className={errors.bio ? 'error' : ''}
+              className={errors.bio ? "error" : ""}
               placeholder="Tell us about yourself..."
               maxLength={500}
             />
           ) : (
-            <p data-testid="profile-bio">{profile.bio || 'No bio available'}</p>
+            <p data-testid="profile-bio">{profile.bio || "No bio available"}</p>
           )}
-          {errors.bio && <span data-testid="bio-error" className="error">{errors.bio}</span>}
+          {errors.bio && (
+            <span data-testid="bio-error" className="error">
+              {errors.bio}
+            </span>
+          )}
         </div>
       </div>
-      
+
       {canEdit && (
         <div className="profile-actions">
           {editing ? (
@@ -255,7 +279,7 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
                 data-testid="save-button"
                 className="btn-primary"
               >
-                {loading ? 'Saving...' : 'Save Changes'}
+                {loading ? "Saving..." : "Save Changes"}
               </button>
               <button
                 onClick={() => {
@@ -263,7 +287,7 @@ const UserProfileCard = ({ userId, onProfileUpdate, editable = false }) => {
                   setFormData({
                     name: profile.name,
                     email: profile.email,
-                    bio: profile.bio || ''
+                    bio: profile.bio || "",
                   });
                   setErrors({});
                 }}
@@ -296,26 +320,32 @@ export default UserProfileCard;
 
 ```javascript
 // UserProfileCard.test.jsx - Comprehensive Test Suite
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { faker } from '@faker-js/faker';
-import fc from 'fast-check';
-import { axe, toHaveNoViolations } from 'jest-axe';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { faker } from "@faker-js/faker";
+import fc from "fast-check";
+import { axe, toHaveNoViolations } from "jest-axe";
 
-import UserProfileCard from '../UserProfileCard';
-import { fetchUserProfile, updateUserProfile } from '../api/users';
-import { useAuth } from '../hooks/useAuth';
-import { toast } from '../utils/toast';
+import UserProfileCard from "../UserProfileCard";
+import { fetchUserProfile, updateUserProfile } from "../api/users";
+import { useAuth } from "../hooks/useAuth";
+import { toast } from "../utils/toast";
 
 // Extend Jest matchers
 expect.extend(toHaveNoViolations);
 
 // Mock dependencies
-vi.mock('../api/users');
-vi.mock('../hooks/useAuth');
-vi.mock('../utils/toast');
+vi.mock("../api/users");
+vi.mock("../hooks/useAuth");
+vi.mock("../utils/toast");
 
 const mockFetchUserProfile = vi.mocked(fetchUserProfile);
 const mockUpdateUserProfile = vi.mocked(updateUserProfile);
@@ -330,15 +360,15 @@ const generateValidUser = () => ({
   bio: faker.lorem.paragraph(),
   avatar: faker.image.avatar(),
   createdAt: faker.date.past().toISOString(),
-  updatedAt: faker.date.recent().toISOString()
+  updatedAt: faker.date.recent().toISOString(),
 });
 
 const generateInvalidUser = () => ({
-  id: '',
-  name: '',
-  email: 'invalid-email',
-  bio: 'x'.repeat(600), // Exceeds 500 char limit
-  avatar: null
+  id: "",
+  name: "",
+  email: "invalid-email",
+  bio: "x".repeat(600), // Exceeds 500 char limit
+  avatar: null,
 });
 
 // Custom render function with providers
@@ -347,516 +377,563 @@ const renderUserProfileCard = (props = {}) => {
     userId: faker.string.uuid(),
     editable: false,
     onProfileUpdate: vi.fn(),
-    ...props
+    ...props,
   };
-  
+
   return {
     ...render(<UserProfileCard {...defaultProps} />),
-    props: defaultProps
+    props: defaultProps,
   };
 };
 
-describe('UserProfileCard', () => {
+describe("UserProfileCard", () => {
   let mockCurrentUser;
-  
+
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Default auth state
     mockCurrentUser = generateValidUser();
     mockUseAuth.mockReturnValue({ user: mockCurrentUser });
-    
+
     // Default toast implementation
     mockToast.success = vi.fn();
     mockToast.error = vi.fn();
   });
-  
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
-  
-  describe('Loading States', () => {
-    it('should show loading spinner while fetching profile', () => {
+
+  describe("Loading States", () => {
+    it("should show loading spinner while fetching profile", () => {
       mockFetchUserProfile.mockImplementation(() => new Promise(() => {})); // Never resolves
-      
+
       renderUserProfileCard();
-      
-      expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+      expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+      expect(screen.getByText("Loading...")).toBeInTheDocument();
     });
-    
-    it('should show loading button text while saving', async () => {
+
+    it("should show loading button text while saving", async () => {
       const user = userEvent.setup();
       const mockProfile = generateValidUser();
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
       mockUpdateUserProfile.mockImplementation(() => new Promise(() => {})); // Never resolves
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent(mockProfile.name);
+        expect(screen.getByTestId("profile-name")).toHaveTextContent(
+          mockProfile.name,
+        );
       });
-      
-      await user.click(screen.getByTestId('edit-button'));
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('save-button')).toHaveTextContent('Saving...');
-      expect(screen.getByTestId('save-button')).toBeDisabled();
-      expect(screen.getByTestId('cancel-button')).toBeDisabled();
+
+      await user.click(screen.getByTestId("edit-button"));
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("save-button")).toHaveTextContent("Saving...");
+      expect(screen.getByTestId("save-button")).toBeDisabled();
+      expect(screen.getByTestId("cancel-button")).toBeDisabled();
     });
   });
-  
-  describe('Profile Display', () => {
-    it('should display profile information correctly', async () => {
+
+  describe("Profile Display", () => {
+    it("should display profile information correctly", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent(mockProfile.name);
+        expect(screen.getByTestId("profile-name")).toHaveTextContent(
+          mockProfile.name,
+        );
       });
-      
-      expect(screen.getByTestId('profile-email')).toHaveTextContent(mockProfile.email);
-      expect(screen.getByTestId('profile-bio')).toHaveTextContent(mockProfile.bio);
-      expect(screen.getByTestId('profile-avatar')).toHaveAttribute('src', mockProfile.avatar);
-      expect(screen.getByTestId('profile-avatar')).toHaveAttribute('alt', `${mockProfile.name}'s avatar`);
+
+      expect(screen.getByTestId("profile-email")).toHaveTextContent(
+        mockProfile.email,
+      );
+      expect(screen.getByTestId("profile-bio")).toHaveTextContent(
+        mockProfile.bio,
+      );
+      expect(screen.getByTestId("profile-avatar")).toHaveAttribute(
+        "src",
+        mockProfile.avatar,
+      );
+      expect(screen.getByTestId("profile-avatar")).toHaveAttribute(
+        "alt",
+        `${mockProfile.name}'s avatar`,
+      );
     });
-    
-    it('should display default avatar when user has no avatar', async () => {
+
+    it("should display default avatar when user has no avatar", async () => {
       const mockProfile = { ...generateValidUser(), avatar: null };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-avatar')).toHaveAttribute('src', '/default-avatar.png');
+        expect(screen.getByTestId("profile-avatar")).toHaveAttribute(
+          "src",
+          "/default-avatar.png",
+        );
       });
     });
-    
+
     it('should display "No bio available" when user has no bio', async () => {
       const mockProfile = { ...generateValidUser(), bio: null };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-bio')).toHaveTextContent('No bio available');
+        expect(screen.getByTestId("profile-bio")).toHaveTextContent(
+          "No bio available",
+        );
       });
     });
   });
-  
-  describe('Error Handling', () => {
-    it('should show error message when profile fetch fails', async () => {
-      const errorMessage = 'Network error';
+
+  describe("Error Handling", () => {
+    it("should show error message when profile fetch fails", async () => {
+      const errorMessage = "Network error";
       mockFetchUserProfile.mockRejectedValue(new Error(errorMessage));
-      
+
       renderUserProfileCard();
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('error-message')).toBeInTheDocument();
+        expect(screen.getByTestId("error-message")).toBeInTheDocument();
       });
-      
-      expect(mockToast.error).toHaveBeenCalledWith('Failed to load profile');
+
+      expect(mockToast.error).toHaveBeenCalledWith("Failed to load profile");
     });
-    
-    it('should handle API errors during profile update', async () => {
+
+    it("should handle API errors during profile update", async () => {
       const user = userEvent.setup();
       const mockProfile = generateValidUser();
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      mockUpdateUserProfile.mockRejectedValue(new Error('Server error'));
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+      mockUpdateUserProfile.mockRejectedValue(new Error("Server error"));
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await user.click(screen.getByTestId('edit-button'));
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), 'Updated Name');
-      await user.click(screen.getByTestId('save-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), "Updated Name");
+      await user.click(screen.getByTestId("save-button"));
+
       await waitFor(() => {
-        expect(mockToast.error).toHaveBeenCalledWith('Failed to update profile');
+        expect(mockToast.error).toHaveBeenCalledWith(
+          "Failed to update profile",
+        );
       });
     });
-    
-    it('should handle email conflict error specifically', async () => {
+
+    it("should handle email conflict error specifically", async () => {
       const user = userEvent.setup();
       const mockProfile = generateValidUser();
-      const conflictError = new Error('Conflict');
+      const conflictError = new Error("Conflict");
       conflictError.status = 409;
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
       mockUpdateUserProfile.mockRejectedValue(conflictError);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await user.click(screen.getByTestId('edit-button'));
-      await user.clear(screen.getByTestId('email-input'));
-      await user.type(screen.getByTestId('email-input'), 'existing@example.com');
-      await user.click(screen.getByTestId('save-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+      await user.clear(screen.getByTestId("email-input"));
+      await user.type(
+        screen.getByTestId("email-input"),
+        "existing@example.com",
+      );
+      await user.click(screen.getByTestId("save-button"));
+
       await waitFor(() => {
-        expect(screen.getByTestId('email-error')).toHaveTextContent('Email already exists');
+        expect(screen.getByTestId("email-error")).toHaveTextContent(
+          "Email already exists",
+        );
       });
     });
   });
-  
-  describe('Permission System', () => {
-    it('should show edit button for profile owner', async () => {
+
+  describe("Permission System", () => {
+    it("should show edit button for profile owner", async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
     });
-    
-    it('should show edit button for admin users', async () => {
+
+    it("should show edit button for admin users", async () => {
       const mockProfile = generateValidUser();
-      const adminUser = { ...mockCurrentUser, role: 'admin' };
-      
+      const adminUser = { ...mockCurrentUser, role: "admin" };
+
       mockUseAuth.mockReturnValue({ user: adminUser });
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
     });
-    
-    it('should not show edit button for other users', async () => {
+
+    it("should not show edit button for other users", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toBeInTheDocument();
+        expect(screen.getByTestId("profile-name")).toBeInTheDocument();
       });
-      
-      expect(screen.queryByTestId('edit-button')).not.toBeInTheDocument();
+
+      expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
     });
-    
-    it('should not show edit button when editable is false', async () => {
+
+    it("should not show edit button when editable is false", async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: false 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: false,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toBeInTheDocument();
+        expect(screen.getByTestId("profile-name")).toBeInTheDocument();
       });
-      
-      expect(screen.queryByTestId('edit-button')).not.toBeInTheDocument();
+
+      expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
     });
   });
-  
-  describe('Form Validation', () => {
+
+  describe("Form Validation", () => {
     beforeEach(async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await userEvent.setup().click(screen.getByTestId('edit-button'));
+
+      await userEvent.setup().click(screen.getByTestId("edit-button"));
     });
-    
-    it('should validate required name field', async () => {
+
+    it("should validate required name field", async () => {
       const user = userEvent.setup();
-      
-      await user.clear(screen.getByTestId('name-input'));
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('name-error')).toHaveTextContent('Name is required');
+
+      await user.clear(screen.getByTestId("name-input"));
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("name-error")).toHaveTextContent(
+        "Name is required",
+      );
       expect(mockUpdateUserProfile).not.toHaveBeenCalled();
     });
-    
-    it('should validate minimum name length', async () => {
+
+    it("should validate minimum name length", async () => {
       const user = userEvent.setup();
-      
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), 'A');
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('name-error')).toHaveTextContent('Name must be at least 2 characters');
+
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), "A");
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("name-error")).toHaveTextContent(
+        "Name must be at least 2 characters",
+      );
     });
-    
-    it('should validate maximum name length', async () => {
+
+    it("should validate maximum name length", async () => {
       const user = userEvent.setup();
-      const longName = 'A'.repeat(101);
-      
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), longName);
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('name-error')).toHaveTextContent('Name must be less than 100 characters');
+      const longName = "A".repeat(101);
+
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), longName);
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("name-error")).toHaveTextContent(
+        "Name must be less than 100 characters",
+      );
     });
-    
-    it('should validate required email field', async () => {
+
+    it("should validate required email field", async () => {
       const user = userEvent.setup();
-      
-      await user.clear(screen.getByTestId('email-input'));
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('email-error')).toHaveTextContent('Email is required');
+
+      await user.clear(screen.getByTestId("email-input"));
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("email-error")).toHaveTextContent(
+        "Email is required",
+      );
     });
-    
-    it('should validate email format', async () => {
+
+    it("should validate email format", async () => {
       const user = userEvent.setup();
-      
-      await user.clear(screen.getByTestId('email-input'));
-      await user.type(screen.getByTestId('email-input'), 'invalid-email');
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('email-error')).toHaveTextContent('Invalid email format');
+
+      await user.clear(screen.getByTestId("email-input"));
+      await user.type(screen.getByTestId("email-input"), "invalid-email");
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("email-error")).toHaveTextContent(
+        "Invalid email format",
+      );
     });
-    
-    it('should validate bio length', async () => {
+
+    it("should validate bio length", async () => {
       const user = userEvent.setup();
-      const longBio = 'A'.repeat(501);
-      
-      await user.clear(screen.getByTestId('bio-input'));
-      await user.type(screen.getByTestId('bio-input'), longBio);
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.getByTestId('bio-error')).toHaveTextContent('Bio must be less than 500 characters');
+      const longBio = "A".repeat(501);
+
+      await user.clear(screen.getByTestId("bio-input"));
+      await user.type(screen.getByTestId("bio-input"), longBio);
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.getByTestId("bio-error")).toHaveTextContent(
+        "Bio must be less than 500 characters",
+      );
     });
-    
-    it('should allow empty bio', async () => {
+
+    it("should allow empty bio", async () => {
       const user = userEvent.setup();
       const updatedProfile = generateValidUser();
-      
+
       mockUpdateUserProfile.mockResolvedValue(updatedProfile);
-      
-      await user.clear(screen.getByTestId('bio-input'));
-      await user.click(screen.getByTestId('save-button'));
-      
-      expect(screen.queryByTestId('bio-error')).not.toBeInTheDocument();
+
+      await user.clear(screen.getByTestId("bio-input"));
+      await user.click(screen.getByTestId("save-button"));
+
+      expect(screen.queryByTestId("bio-error")).not.toBeInTheDocument();
       expect(mockUpdateUserProfile).toHaveBeenCalled();
     });
   });
-  
-  describe('Edit Mode Functionality', () => {
+
+  describe("Edit Mode Functionality", () => {
     let mockProfile;
-    
+
     beforeEach(async () => {
       mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
     });
-    
-    it('should switch to edit mode when edit button is clicked', async () => {
+
+    it("should switch to edit mode when edit button is clicked", async () => {
       const user = userEvent.setup();
-      
-      await user.click(screen.getByTestId('edit-button'));
-      
-      expect(screen.getByTestId('name-input')).toHaveValue(mockProfile.name);
-      expect(screen.getByTestId('email-input')).toHaveValue(mockProfile.email);
-      expect(screen.getByTestId('bio-input')).toHaveValue(mockProfile.bio);
-      expect(screen.getByTestId('save-button')).toBeInTheDocument();
-      expect(screen.getByTestId('cancel-button')).toBeInTheDocument();
-      expect(screen.queryByTestId('edit-button')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId("edit-button"));
+
+      expect(screen.getByTestId("name-input")).toHaveValue(mockProfile.name);
+      expect(screen.getByTestId("email-input")).toHaveValue(mockProfile.email);
+      expect(screen.getByTestId("bio-input")).toHaveValue(mockProfile.bio);
+      expect(screen.getByTestId("save-button")).toBeInTheDocument();
+      expect(screen.getByTestId("cancel-button")).toBeInTheDocument();
+      expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
     });
-    
-    it('should cancel edit mode and restore original values', async () => {
+
+    it("should cancel edit mode and restore original values", async () => {
       const user = userEvent.setup();
-      
-      await user.click(screen.getByTestId('edit-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+
       // Make changes
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), 'Changed Name');
-      
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), "Changed Name");
+
       // Cancel
-      await user.click(screen.getByTestId('cancel-button'));
-      
-      expect(screen.getByTestId('profile-name')).toHaveTextContent(mockProfile.name);
-      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
-      expect(screen.queryByTestId('save-button')).not.toBeInTheDocument();
+      await user.click(screen.getByTestId("cancel-button"));
+
+      expect(screen.getByTestId("profile-name")).toHaveTextContent(
+        mockProfile.name,
+      );
+      expect(screen.getByTestId("edit-button")).toBeInTheDocument();
+      expect(screen.queryByTestId("save-button")).not.toBeInTheDocument();
     });
-    
-    it('should save changes and exit edit mode', async () => {
+
+    it("should save changes and exit edit mode", async () => {
       const user = userEvent.setup();
       const updatedProfile = {
         ...mockProfile,
-        name: 'Updated Name',
-        email: 'updated@example.com'
+        name: "Updated Name",
+        email: "updated@example.com",
       };
-      
+
       mockUpdateUserProfile.mockResolvedValue(updatedProfile);
-      
-      await user.click(screen.getByTestId('edit-button'));
-      
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), updatedProfile.name);
-      
-      await user.clear(screen.getByTestId('email-input'));
-      await user.type(screen.getByTestId('email-input'), updatedProfile.email);
-      
-      await user.click(screen.getByTestId('save-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), updatedProfile.name);
+
+      await user.clear(screen.getByTestId("email-input"));
+      await user.type(screen.getByTestId("email-input"), updatedProfile.email);
+
+      await user.click(screen.getByTestId("save-button"));
+
       await waitFor(() => {
         expect(mockUpdateUserProfile).toHaveBeenCalledWith(mockProfile.id, {
           name: updatedProfile.name,
           email: updatedProfile.email,
-          bio: mockProfile.bio
+          bio: mockProfile.bio,
         });
       });
-      
-      expect(mockToast.success).toHaveBeenCalledWith('Profile updated successfully');
-      expect(screen.getByTestId('profile-name')).toHaveTextContent(updatedProfile.name);
-      expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+
+      expect(mockToast.success).toHaveBeenCalledWith(
+        "Profile updated successfully",
+      );
+      expect(screen.getByTestId("profile-name")).toHaveTextContent(
+        updatedProfile.name,
+      );
+      expect(screen.getByTestId("edit-button")).toBeInTheDocument();
     });
   });
-  
-  describe('Callback Functions', () => {
-    it('should call onProfileUpdate callback after successful save', async () => {
+
+  describe("Callback Functions", () => {
+    it("should call onProfileUpdate callback after successful save", async () => {
       const user = userEvent.setup();
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
-      const updatedProfile = { ...mockProfile, name: 'Updated Name' };
+      const updatedProfile = { ...mockProfile, name: "Updated Name" };
       const mockOnProfileUpdate = vi.fn();
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
       mockUpdateUserProfile.mockResolvedValue(updatedProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
         editable: true,
-        onProfileUpdate: mockOnProfileUpdate
+        onProfileUpdate: mockOnProfileUpdate,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await user.click(screen.getByTestId('edit-button'));
-      await user.clear(screen.getByTestId('name-input'));
-      await user.type(screen.getByTestId('name-input'), updatedProfile.name);
-      await user.click(screen.getByTestId('save-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+      await user.clear(screen.getByTestId("name-input"));
+      await user.type(screen.getByTestId("name-input"), updatedProfile.name);
+      await user.click(screen.getByTestId("save-button"));
+
       await waitFor(() => {
         expect(mockOnProfileUpdate).toHaveBeenCalledWith(updatedProfile);
       });
     });
-    
-    it('should not call onProfileUpdate callback on save failure', async () => {
+
+    it("should not call onProfileUpdate callback on save failure", async () => {
       const user = userEvent.setup();
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       const mockOnProfileUpdate = vi.fn();
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      mockUpdateUserProfile.mockRejectedValue(new Error('Save failed'));
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
+      mockUpdateUserProfile.mockRejectedValue(new Error("Save failed"));
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
         editable: true,
-        onProfileUpdate: mockOnProfileUpdate
+        onProfileUpdate: mockOnProfileUpdate,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await user.click(screen.getByTestId('edit-button'));
-      await user.click(screen.getByTestId('save-button'));
-      
+
+      await user.click(screen.getByTestId("edit-button"));
+      await user.click(screen.getByTestId("save-button"));
+
       await waitFor(() => {
         expect(mockToast.error).toHaveBeenCalled();
       });
-      
+
       expect(mockOnProfileUpdate).not.toHaveBeenCalled();
     });
   });
-  
-  describe('Accessibility', () => {
-    it('should have no accessibility violations', async () => {
+
+  describe("Accessibility", () => {
+    it("should have no accessibility violations", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       const { container } = renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toBeInTheDocument();
+        expect(screen.getByTestId("profile-name")).toBeInTheDocument();
       });
-      
+
       const results = await axe(container);
       expect(results).toHaveNoViolations();
     });
-    
-    it('should have proper ARIA labels and roles', async () => {
+
+    it("should have proper ARIA labels and roles", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id, editable: true });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      const avatar = screen.getByTestId('profile-avatar');
-      expect(avatar).toHaveAttribute('alt', `${mockProfile.name}'s avatar`);
-      
-      await userEvent.setup().click(screen.getByTestId('edit-button'));
-      
-      const nameInput = screen.getByTestId('name-input');
-      expect(nameInput).toHaveAttribute('placeholder', 'Enter name');
-      
-      const bioInput = screen.getByTestId('bio-input');
-      expect(bioInput).toHaveAttribute('placeholder', 'Tell us about yourself...');
-      expect(bioInput).toHaveAttribute('maxLength', '500');
+
+      const avatar = screen.getByTestId("profile-avatar");
+      expect(avatar).toHaveAttribute("alt", `${mockProfile.name}'s avatar`);
+
+      await userEvent.setup().click(screen.getByTestId("edit-button"));
+
+      const nameInput = screen.getByTestId("name-input");
+      expect(nameInput).toHaveAttribute("placeholder", "Enter name");
+
+      const bioInput = screen.getByTestId("bio-input");
+      expect(bioInput).toHaveAttribute(
+        "placeholder",
+        "Tell us about yourself...",
+      );
+      expect(bioInput).toHaveAttribute("maxLength", "500");
     });
   });
-  
-  describe('Property-Based Testing', () => {
-    it('should handle any valid user profile data', () => {
+
+  describe("Property-Based Testing", () => {
+    it("should handle any valid user profile data", () => {
       fc.assert(
         fc.property(
           fc.record({
@@ -864,273 +941,287 @@ describe('UserProfileCard', () => {
             name: fc.string({ minLength: 2, maxLength: 100 }),
             email: fc.emailAddress(),
             bio: fc.option(fc.string({ maxLength: 500 }), { nil: undefined }),
-            avatar: fc.option(fc.webUrl(), { nil: undefined })
+            avatar: fc.option(fc.webUrl(), { nil: undefined }),
           }),
           (profile) => {
             mockFetchUserProfile.mockResolvedValue(profile);
-            
+
             const { unmount } = renderUserProfileCard({ userId: profile.id });
-            
+
             // Should not throw any errors
             expect(() => {
-              screen.getByTestId('user-profile-card');
+              screen.getByTestId("user-profile-card");
             }).not.toThrow();
-            
+
             unmount();
-          }
+          },
         ),
-        { numRuns: 100 }
+        { numRuns: 100 },
       );
     });
-    
-    it('should validate form inputs with random invalid data', () => {
+
+    it("should validate form inputs with random invalid data", () => {
       fc.assert(
         fc.property(
           fc.record({
             name: fc.oneof(
-              fc.constant(''), // Empty string
+              fc.constant(""), // Empty string
               fc.string({ minLength: 1, maxLength: 1 }), // Too short
               fc.string({ minLength: 101, maxLength: 200 }), // Too long
             ),
             email: fc.oneof(
-              fc.constant(''), // Empty string
-              fc.string().filter(s => !s.includes('@')), // Invalid format
-              fc.string().map(s => s + '@'), // Incomplete email
+              fc.constant(""), // Empty string
+              fc.string().filter((s) => !s.includes("@")), // Invalid format
+              fc.string().map((s) => s + "@"), // Incomplete email
             ),
-            bio: fc.string({ minLength: 501, maxLength: 1000 }) // Too long
+            bio: fc.string({ minLength: 501, maxLength: 1000 }), // Too long
           }),
           async (invalidData) => {
-            const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
+            const mockProfile = {
+              ...generateValidUser(),
+              id: mockCurrentUser.id,
+            };
             mockFetchUserProfile.mockResolvedValue(mockProfile);
-            
-            const { unmount } = renderUserProfileCard({ 
-              userId: mockProfile.id, 
-              editable: true 
+
+            const { unmount } = renderUserProfileCard({
+              userId: mockProfile.id,
+              editable: true,
             });
-            
+
             await waitFor(() => {
-              expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+              expect(screen.getByTestId("edit-button")).toBeInTheDocument();
             });
-            
+
             const user = userEvent.setup();
-            await user.click(screen.getByTestId('edit-button'));
-            
+            await user.click(screen.getByTestId("edit-button"));
+
             // Fill form with invalid data
-            await user.clear(screen.getByTestId('name-input'));
-            await user.type(screen.getByTestId('name-input'), invalidData.name);
-            
-            await user.clear(screen.getByTestId('email-input'));
-            await user.type(screen.getByTestId('email-input'), invalidData.email);
-            
-            await user.clear(screen.getByTestId('bio-input'));
-            await user.type(screen.getByTestId('bio-input'), invalidData.bio);
-            
-            await user.click(screen.getByTestId('save-button'));
-            
+            await user.clear(screen.getByTestId("name-input"));
+            await user.type(screen.getByTestId("name-input"), invalidData.name);
+
+            await user.clear(screen.getByTestId("email-input"));
+            await user.type(
+              screen.getByTestId("email-input"),
+              invalidData.email,
+            );
+
+            await user.clear(screen.getByTestId("bio-input"));
+            await user.type(screen.getByTestId("bio-input"), invalidData.bio);
+
+            await user.click(screen.getByTestId("save-button"));
+
             // Should show validation errors
             expect(
-              screen.queryByTestId('name-error') ||
-              screen.queryByTestId('email-error') ||
-              screen.queryByTestId('bio-error')
+              screen.queryByTestId("name-error") ||
+                screen.queryByTestId("email-error") ||
+                screen.queryByTestId("bio-error"),
             ).toBeInTheDocument();
-            
+
             // Should not call update API
             expect(mockUpdateUserProfile).not.toHaveBeenCalled();
-            
+
             unmount();
-          }
+          },
         ),
-        { numRuns: 50 }
+        { numRuns: 50 },
       );
     });
   });
-  
-  describe('Performance Testing', () => {
-    it('should render within performance budget', async () => {
+
+  describe("Performance Testing", () => {
+    it("should render within performance budget", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       const startTime = performance.now();
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toBeInTheDocument();
+        expect(screen.getByTestId("profile-name")).toBeInTheDocument();
       });
-      
+
       const endTime = performance.now();
       const renderTime = endTime - startTime;
-      
+
       // Should render within 100ms
       expect(renderTime).toBeLessThan(100);
     });
-    
-    it('should handle rapid state changes without performance degradation', async () => {
+
+    it("should handle rapid state changes without performance degradation", async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
       mockUpdateUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
+
       const user = userEvent.setup();
       const startTime = performance.now();
-      
+
       // Rapid edit mode toggling
       for (let i = 0; i < 10; i++) {
-        await user.click(screen.getByTestId('edit-button'));
-        await user.click(screen.getByTestId('cancel-button'));
+        await user.click(screen.getByTestId("edit-button"));
+        await user.click(screen.getByTestId("cancel-button"));
       }
-      
+
       const endTime = performance.now();
       const totalTime = endTime - startTime;
-      
+
       // Should complete all operations within 500ms
       expect(totalTime).toBeLessThan(500);
     });
   });
-  
-  describe('Visual Regression Testing', () => {
-    it('should match visual snapshot in display mode', async () => {
+
+  describe("Visual Regression Testing", () => {
+    it("should match visual snapshot in display mode", async () => {
       const mockProfile = generateValidUser();
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       const { container } = renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toBeInTheDocument();
+        expect(screen.getByTestId("profile-name")).toBeInTheDocument();
       });
-      
-      expect(container.firstChild).toMatchSnapshot('user-profile-display-mode');
+
+      expect(container.firstChild).toMatchSnapshot("user-profile-display-mode");
     });
-    
-    it('should match visual snapshot in edit mode', async () => {
+
+    it("should match visual snapshot in edit mode", async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      const { container } = renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      const { container } = renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      await userEvent.setup().click(screen.getByTestId('edit-button'));
-      
-      expect(container.firstChild).toMatchSnapshot('user-profile-edit-mode');
+
+      await userEvent.setup().click(screen.getByTestId("edit-button"));
+
+      expect(container.firstChild).toMatchSnapshot("user-profile-edit-mode");
     });
   });
-  
-  describe('Integration Testing', () => {
-    it('should integrate correctly with auth system', async () => {
-      const adminUser = { ...mockCurrentUser, role: 'admin' };
+
+  describe("Integration Testing", () => {
+    it("should integrate correctly with auth system", async () => {
+      const adminUser = { ...mockCurrentUser, role: "admin" };
       const regularUser = generateValidUser();
-      
+
       // Test as admin
       mockUseAuth.mockReturnValue({ user: adminUser });
       mockFetchUserProfile.mockResolvedValue(regularUser);
-      
-      const { rerender } = renderUserProfileCard({ 
-        userId: regularUser.id, 
-        editable: true 
+
+      const { rerender } = renderUserProfileCard({
+        userId: regularUser.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
+
       // Switch to regular user
       mockUseAuth.mockReturnValue({ user: regularUser });
-      
+
       rerender(
-        <UserProfileCard 
-          userId={regularUser.id} 
+        <UserProfileCard
+          userId={regularUser.id}
           editable={true}
           onProfileUpdate={vi.fn()}
-        />
+        />,
       );
-      
-      expect(screen.queryByTestId('edit-button')).not.toBeInTheDocument();
+
+      expect(screen.queryByTestId("edit-button")).not.toBeInTheDocument();
     });
   });
-  
-  describe('Edge Cases', () => {
-    it('should handle extremely long profile data gracefully', async () => {
+
+  describe("Edge Cases", () => {
+    it("should handle extremely long profile data gracefully", async () => {
       const mockProfile = {
         ...generateValidUser(),
-        name: 'A'.repeat(1000),
-        bio: 'B'.repeat(10000)
+        name: "A".repeat(1000),
+        bio: "B".repeat(10000),
       };
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('user-profile-card')).toBeInTheDocument();
+        expect(screen.getByTestId("user-profile-card")).toBeInTheDocument();
       });
-      
+
       // Should not break rendering
-      expect(screen.getByTestId('profile-name')).toBeInTheDocument();
-      expect(screen.getByTestId('profile-bio')).toBeInTheDocument();
+      expect(screen.getByTestId("profile-name")).toBeInTheDocument();
+      expect(screen.getByTestId("profile-bio")).toBeInTheDocument();
     });
-    
-    it('should handle special characters in profile data', async () => {
+
+    it("should handle special characters in profile data", async () => {
       const mockProfile = {
         ...generateValidUser(),
         name: '测试用户 🚀 <script>alert("xss")</script>',
-        bio: 'Bio with 🎉 emojis and <b>HTML</b> & special chars: @#$%^&*()'
+        bio: "Bio with 🎉 emojis and <b>HTML</b> & special chars: @#$%^&*()",
       };
-      
+
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
+
       renderUserProfileCard({ userId: mockProfile.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent(mockProfile.name);
+        expect(screen.getByTestId("profile-name")).toHaveTextContent(
+          mockProfile.name,
+        );
       });
-      
+
       // Should display special characters safely
-      expect(screen.getByTestId('profile-bio')).toHaveTextContent(mockProfile.bio);
+      expect(screen.getByTestId("profile-bio")).toHaveTextContent(
+        mockProfile.bio,
+      );
     });
-    
-    it('should handle rapid prop changes', async () => {
+
+    it("should handle rapid prop changes", async () => {
       const user1 = generateValidUser();
       const user2 = generateValidUser();
-      
+
       mockFetchUserProfile.mockImplementation((id) => {
         if (id === user1.id) return Promise.resolve(user1);
         if (id === user2.id) return Promise.resolve(user2);
-        return Promise.reject(new Error('User not found'));
+        return Promise.reject(new Error("User not found"));
       });
-      
+
       const { rerender } = renderUserProfileCard({ userId: user1.id });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent(user1.name);
+        expect(screen.getByTestId("profile-name")).toHaveTextContent(
+          user1.name,
+        );
       });
-      
+
       // Rapidly change user ID
       rerender(
-        <UserProfileCard 
+        <UserProfileCard
           userId={user2.id}
           editable={false}
           onProfileUpdate={vi.fn()}
-        />
+        />,
       );
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('profile-name')).toHaveTextContent(user2.name);
+        expect(screen.getByTestId("profile-name")).toHaveTextContent(
+          user2.name,
+        );
       });
-      
+
       expect(mockFetchUserProfile).toHaveBeenCalledWith(user1.id);
       expect(mockFetchUserProfile).toHaveBeenCalledWith(user2.id);
     });
@@ -1139,33 +1230,33 @@ describe('UserProfileCard', () => {
 
 // Mutation Testing Configuration
 export const mutationTestConfig = {
-  testMatch: ['**/*.test.{js,jsx}'],
+  testMatch: ["**/*.test.{js,jsx}"],
   mutators: [
-    'ArithmeticOperator',
-    'ArrayDeclaration',
-    'ArrowFunction',
-    'Block',
-    'BooleanLiteral',
-    'ConditionalExpression',
-    'EqualityOperator',
-    'LogicalOperator',
-    'MethodExpression',
-    'ObjectLiteral',
-    'StringLiteral',
-    'UnaryOperator',
-    'UpdateOperator'
+    "ArithmeticOperator",
+    "ArrayDeclaration",
+    "ArrowFunction",
+    "Block",
+    "BooleanLiteral",
+    "ConditionalExpression",
+    "EqualityOperator",
+    "LogicalOperator",
+    "MethodExpression",
+    "ObjectLiteral",
+    "StringLiteral",
+    "UnaryOperator",
+    "UpdateOperator",
   ],
   thresholds: {
     high: 90,
-    low: 80
+    low: 80,
   },
   timeoutMS: 30000,
-  maxConcurrentTestRunners: 4
+  maxConcurrentTestRunners: 4,
 };
 
 // Performance benchmarking
 export const performanceBenchmarks = {
-  'UserProfileCard render time': {
+  "UserProfileCard render time": {
     threshold: 100, // milliseconds
     setup: () => {
       const mockProfile = generateValidUser();
@@ -1176,58 +1267,62 @@ export const performanceBenchmarks = {
       const start = performance.now();
       renderUserProfileCard(props);
       return performance.now() - start;
-    }
+    },
   },
-  'Edit mode transition': {
+  "Edit mode transition": {
     threshold: 50,
     setup: async () => {
       const mockProfile = { ...generateValidUser(), id: mockCurrentUser.id };
       mockFetchUserProfile.mockResolvedValue(mockProfile);
-      
-      renderUserProfileCard({ 
-        userId: mockProfile.id, 
-        editable: true 
+
+      renderUserProfileCard({
+        userId: mockProfile.id,
+        editable: true,
       });
-      
+
       await waitFor(() => {
-        expect(screen.getByTestId('edit-button')).toBeInTheDocument();
+        expect(screen.getByTestId("edit-button")).toBeInTheDocument();
       });
-      
-      return { editButton: screen.getByTestId('edit-button') };
+
+      return { editButton: screen.getByTestId("edit-button") };
     },
     test: async ({ editButton }) => {
       const start = performance.now();
       await userEvent.setup().click(editButton);
       await waitFor(() => {
-        expect(screen.getByTestId('save-button')).toBeInTheDocument();
+        expect(screen.getByTestId("save-button")).toBeInTheDocument();
       });
       return performance.now() - start;
-    }
-  }
+    },
+  },
 };
 ```
 
 ## Advanced Testing Features
 
 ### Mutation Testing
+
 - **Code Quality Assessment**: Measures test suite effectiveness
 - **Fault Detection**: Identifies weak test coverage areas
 - **Test Improvement**: Suggests additional test cases
 - **Quality Metrics**: Provides mutation score and coverage analytics
 
 ### Property-Based Testing
+
 - **Hypothesis Generation**: AI-powered test case creation
 - **Edge Case Discovery**: Automatic boundary value testing
 - **Invariant Verification**: Ensures consistent behavior patterns
 - **Input Space Exploration**: Comprehensive input combination testing
 
 ### Visual Regression Testing
+
 - **UI Consistency**: Detects unintended visual changes
 - **Cross-browser Testing**: Validates appearance across platforms
 - **Responsive Testing**: Ensures mobile/desktop compatibility
 - **Component Isolation**: Tests individual component rendering
 
 ### Performance Testing
+
 - **Render Performance**: Measures component render times
 - **Memory Usage**: Tracks memory leaks and optimization opportunities
 - **User Interaction**: Benchmarks user interaction responsiveness

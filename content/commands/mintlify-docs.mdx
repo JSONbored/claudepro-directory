@@ -14,13 +14,13 @@ seoDescription: >-
   content generation, API reference automation, and MDX components Discover
   tools f...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-16'
-documentationUrl: 'https://mintlify.com/docs'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-16"
+documentationUrl: "https://mintlify.com/docs"
 installable: true
-installCommand: '/mintlify-docs [options] <documentation_scope>'
-usageSnippet: '/mintlify-docs [options] <documentation_scope>'
-copySnippet: '/mintlify-docs [options] <documentation_scope>'
+installCommand: "/mintlify-docs [options] <documentation_scope>"
+usageSnippet: "/mintlify-docs [options] <documentation_scope>"
+copySnippet: "/mintlify-docs [options] <documentation_scope>"
 scriptLanguage: text
 scriptBody: >-
   The `/mintlify-docs` command generates comprehensive, production-ready
@@ -851,8 +851,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/mintlify-docs [options] <documentation_scope>'
+commandSyntax: "/mintlify-docs [options] <documentation_scope>"
 ---
+
 The `/mintlify-docs` command generates comprehensive, production-ready documentation using Mintlify with AI-powered content creation, API reference automation, and interactive MDX components.
 
 ## Usage
@@ -864,6 +865,7 @@ The `/mintlify-docs` command generates comprehensive, production-ready documenta
 ## Options
 
 ### Documentation Types
+
 - `--quickstart` - Generate quickstart guide
 - `--api-reference` - Generate API reference from code
 - `--tutorial` - Generate step-by-step tutorial
@@ -871,18 +873,21 @@ The `/mintlify-docs` command generates comprehensive, production-ready documenta
 - `--changelog` - Generate changelog from git history
 
 ### Source Analysis
+
 - `--from-code=<path>` - Generate docs from source code
 - `--from-openapi=<path>` - Generate API docs from OpenAPI spec
 - `--from-types=<path>` - Generate docs from TypeScript types
 - `--from-jsdoc` - Extract JSDoc comments
 
 ### Output Format
+
 - `--mdx` - Generate MDX with components (default)
 - `--markdown` - Generate plain Markdown
 - `--with-examples` - Include code examples
 - `--with-snippets` - Include interactive snippets
 
 ### Features
+
 - `--search` - Configure search integration
 - `--navigation` - Generate navigation structure
 - `--analytics` - Add analytics tracking
@@ -893,12 +898,14 @@ The `/mintlify-docs` command generates comprehensive, production-ready documenta
 ### API Reference from TypeScript
 
 **Command:**
+
 ```
 /mintlify-docs --api-reference --from-types=src/api/users.ts --with-examples
 ```
 
 **Input Code:**
-```typescript
+
+````typescript
 // src/api/users.ts
 /**
  * User management API client
@@ -913,7 +920,7 @@ export interface User {
   /** Display name */
   name: string;
   /** User role */
-  role: 'admin' | 'user' | 'guest';
+  role: "admin" | "user" | "guest";
   /** Account creation timestamp */
   createdAt: Date;
 }
@@ -938,7 +945,7 @@ export interface CreateUserInput {
  */
 export async function getUser(userId: string): Promise<User> {
   const response = await fetch(`/api/users/${userId}`);
-  if (!response.ok) throw new Error('Failed to fetch user');
+  if (!response.ok) throw new Error("Failed to fetch user");
   return response.json();
 }
 
@@ -958,22 +965,23 @@ export async function getUser(userId: string): Promise<User> {
  * ```
  */
 export async function createUser(input: CreateUserInput): Promise<User> {
-  const response = await fetch('/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("/api/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
-  if (!response.ok) throw new Error('Failed to create user');
+  if (!response.ok) throw new Error("Failed to create user");
   return response.json();
 }
-```
+````
 
 **Generated Documentation:**
-```mdx
+
+````mdx
 ---
-title: 'User API'
-description: 'Manage user accounts and profiles'
-icon: 'users'
+title: "User API"
+description: "Manage user accounts and profiles"
+icon: "users"
 ---
 
 # User Management API
@@ -1011,10 +1019,11 @@ interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user' | 'guest';
+  role: "admin" | "user" | "guest";
   createdAt: Date;
 }
 ```
+````
 
 ```json Example
 {
@@ -1062,14 +1071,14 @@ Retrieves a user by their unique identifier.
 <CodeGroup>
 
 ```typescript TypeScript SDK
-import { getUser } from '@/api/users';
+import { getUser } from "@/api/users";
 
-const user = await getUser('user_123');
+const user = await getUser("user_123");
 console.log(user.name); // "John Doe"
 ```
 
 ```javascript JavaScript
-const response = await fetch('/api/users/user_123');
+const response = await fetch("/api/users/user_123");
 const user = await response.json();
 ```
 
@@ -1157,24 +1166,24 @@ Creates a new user account.
 <CodeGroup>
 
 ```typescript TypeScript SDK
-import { createUser } from '@/api/users';
+import { createUser } from "@/api/users";
 
 const newUser = await createUser({
-  email: 'user@example.com',
-  name: 'John Doe',
-  password: 'secure-password'
+  email: "user@example.com",
+  name: "John Doe",
+  password: "secure-password",
 });
 ```
 
 ```javascript JavaScript
-const response = await fetch('/api/users', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/users", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    email: 'user@example.com',
-    name: 'John Doe',
-    password: 'secure-password'
-  })
+    email: "user@example.com",
+    name: "John Doe",
+    password: "secure-password",
+  }),
 });
 const user = await response.json();
 ```
@@ -1182,23 +1191,26 @@ const user = await response.json();
 </CodeGroup>
 
 <Tip>
-  Passwords are automatically hashed using Argon2 before storage. Never log or expose raw passwords.
+  Passwords are automatically hashed using Argon2 before storage. Never log or
+  expose raw passwords.
 </Tip>
 ```
 
 ### Quickstart Guide Generation
 
 **Command:**
+
 ```
 /mintlify-docs --quickstart --from-code=src/ "Getting started with our authentication system"
 ```
 
 **Generated Documentation:**
-```mdx
+
+````mdx
 ---
-title: 'Quickstart'
-description: 'Get started with authentication in 5 minutes'
-icon: 'rocket'
+title: "Quickstart"
+description: "Get started with authentication in 5 minutes"
+icon: "rocket"
 ---
 
 # Getting Started
@@ -1212,17 +1224,18 @@ This guide will help you integrate authentication into your application in under
 
   <CodeGroup>
 
-  ```bash npm
-  npm install @yourapp/auth
-  ```
+```bash npm
+npm install @yourapp/auth
+```
+````
 
-  ```bash pnpm
-  pnpm add @yourapp/auth
-  ```
+```bash pnpm
+pnpm add @yourapp/auth
+```
 
-  ```bash yarn
-  yarn add @yourapp/auth
-  ```
+```bash yarn
+yarn add @yourapp/auth
+```
 
   </CodeGroup>
 </Step>
@@ -1230,12 +1243,12 @@ This guide will help you integrate authentication into your application in under
 <Step title="Configure Environment Variables">
   Add your API credentials to your `.env` file:
 
-  ```bash .env
-  AUTH_SECRET=your-secret-key
-  AUTH_URL=https://api.yourapp.com
-  GITHUB_CLIENT_ID=your-github-client-id
-  GITHUB_CLIENT_SECRET=your-github-client-secret
-  ```
+```bash .env
+AUTH_SECRET=your-secret-key
+AUTH_URL=https://api.yourapp.com
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+```
 
   <Warning>
     Never commit your `.env` file to version control. Add it to `.gitignore`.
@@ -1245,70 +1258,73 @@ This guide will help you integrate authentication into your application in under
 <Step title="Initialize the Client">
   Create an authentication client instance:
 
-  ```typescript lib/auth.ts
-  import { createAuthClient } from '@yourapp/auth';
+```typescript lib/auth.ts
+import { createAuthClient } from "@yourapp/auth";
 
-  export const auth = createAuthClient({
-    secret: process.env.AUTH_SECRET!,
-    baseUrl: process.env.AUTH_URL!,
-    providers: {
-      github: {
-        clientId: process.env.GITHUB_CLIENT_ID!,
-        clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      },
+export const auth = createAuthClient({
+  secret: process.env.AUTH_SECRET!,
+  baseUrl: process.env.AUTH_URL!,
+  providers: {
+    github: {
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
     },
-  });
-  ```
+  },
+});
+```
+
 </Step>
 
 <Step title="Add Authentication to Your App">
   Wrap your application with the authentication provider:
 
-  ```typescript app/layout.tsx
-  import { AuthProvider } from '@yourapp/auth/react';
-  import { auth } from '@/lib/auth';
+```typescript app/layout.tsx
+import { AuthProvider } from '@yourapp/auth/react';
+import { auth } from '@/lib/auth';
 
-  export default function RootLayout({ children }) {
-    return (
-      <html>
-        <body>
-          <AuthProvider client={auth}>
-            {children}
-          </AuthProvider>
-        </body>
-      </html>
-    );
-  }
-  ```
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <AuthProvider client={auth}>
+          {children}
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
+```
+
 </Step>
 
 <Step title="Use Authentication Hooks">
   Access authentication state in your components:
 
-  ```typescript components/profile.tsx
-  'use client';
+```typescript components/profile.tsx
+'use client';
 
-  import { useAuth } from '@yourapp/auth/react';
+import { useAuth } from '@yourapp/auth/react';
 
-  export function UserProfile() {
-    const { user, signIn, signOut } = useAuth();
+export function UserProfile() {
+  const { user, signIn, signOut } = useAuth();
 
-    if (!user) {
-      return (
-        <button onClick={() => signIn('github')}>
-          Sign in with GitHub
-        </button>
-      );
-    }
-
+  if (!user) {
     return (
-      <div>
-        <p>Welcome, {user.name}!</p>
-        <button onClick={signOut}>Sign out</button>
-      </div>
+      <button onClick={() => signIn('github')}>
+        Sign in with GitHub
+      </button>
     );
   }
-  ```
+
+  return (
+    <div>
+      <p>Welcome, {user.name}!</p>
+      <button onClick={signOut}>Sign out</button>
+    </div>
+  );
+}
+```
+
 </Step>
 
 </Steps>
@@ -1339,11 +1355,13 @@ This guide will help you integrate authentication into your application in under
 ### OpenAPI to Documentation
 
 **Command:**
+
 ```
 /mintlify-docs --api-reference --from-openapi=openapi.yaml
 ```
 
 **Generated mint.json Configuration:**
+
 ```json
 {
   "$schema": "https://mintlify.com/schema.json",
@@ -1402,11 +1420,7 @@ This guide will help you integrate authentication into your application in under
   "navigation": [
     {
       "group": "Get Started",
-      "pages": [
-        "introduction",
-        "quickstart",
-        "development"
-      ]
+      "pages": ["introduction", "quickstart", "development"]
     },
     {
       "group": "API Reference",
@@ -1439,26 +1453,26 @@ This guide will help you integrate authentication into your application in under
 ## Interactive Components
 
 ### Custom MDX Components
+
 ```mdx
 <Accordion title="How does authentication work?">
-  Our authentication system uses JWT tokens with automatic refresh. Sessions last 7 days by default.
+  Our authentication system uses JWT tokens with automatic refresh. Sessions
+  last 7 days by default.
 </Accordion>
 
 <Info>
-  All API requests must include a valid Bearer token in the Authorization header.
+  All API requests must include a valid Bearer token in the Authorization
+  header.
 </Info>
 
-<Warning>
-  Never expose your API secret key in client-side code.
-</Warning>
+<Warning>Never expose your API secret key in client-side code.</Warning>
 
 <Tip>
-  Use environment variables to manage different API keys for development and production.
+  Use environment variables to manage different API keys for development and
+  production.
 </Tip>
 
-<Check>
-  Your API credentials are correctly configured!
-</Check>
+<Check>Your API credentials are correctly configured!</Check>
 ```
 
 ## Best Practices

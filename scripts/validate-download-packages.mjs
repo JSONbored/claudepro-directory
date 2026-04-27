@@ -24,7 +24,7 @@ function isLocalDownloadUrl(downloadUrl) {
 function unzipList(archivePath) {
   try {
     const output = execFileSync("unzip", ["-Z1", archivePath], {
-      encoding: "utf8"
+      encoding: "utf8",
     });
     return output
       .split("\n")
@@ -32,7 +32,7 @@ function unzipList(archivePath) {
       .filter(Boolean);
   } catch {
     warnings.push(
-      `Could not inspect archive contents with unzip: ${path.relative(repoRoot, archivePath)}`
+      `Could not inspect archive contents with unzip: ${path.relative(repoRoot, archivePath)}`,
     );
     return [];
   }
@@ -43,16 +43,19 @@ function validateSkillArchive(filePath, entry) {
   if (!names.length) return;
 
   const invalidPath = names.find(
-    (name) => name.startsWith("/") || name.includes("..") || name.includes("\\")
+    (name) =>
+      name.startsWith("/") || name.includes("..") || name.includes("\\"),
   );
   if (invalidPath) {
     failures.push(`${entry}: unsafe archive path detected (${invalidPath})`);
   }
 
-  const disallowed = names.find((name) => !name.toLowerCase().endsWith("skill.md"));
+  const disallowed = names.find(
+    (name) => !name.toLowerCase().endsWith("skill.md"),
+  );
   if (disallowed) {
     failures.push(
-      `${entry}: skills archive should only include SKILL.md files (found ${disallowed})`
+      `${entry}: skills archive should only include SKILL.md files (found ${disallowed})`,
     );
   }
 }
@@ -62,13 +65,19 @@ function validateMcpArchive(filePath, entry) {
   if (!names.length) return;
 
   const invalidPath = names.find(
-    (name) => name.startsWith("/") || name.includes("..") || name.includes("\\")
+    (name) =>
+      name.startsWith("/") || name.includes("..") || name.includes("\\"),
   );
   if (invalidPath) {
     failures.push(`${entry}: unsafe archive path detected (${invalidPath})`);
   }
 
-  const required = ["manifest.json", "package.json", "README.md", "server/index.js"];
+  const required = [
+    "manifest.json",
+    "package.json",
+    "README.md",
+    "server/index.js",
+  ];
   for (const requiredPath of required) {
     if (!names.includes(requiredPath)) {
       failures.push(`${entry}: missing required MCPB file (${requiredPath})`);
@@ -114,32 +123,45 @@ for (const category of ["skills", "mcp"]) {
 
     if (!firstPartyPackage) {
       failures.push(
-        `${entry}: local /downloads hosting requires packageVerified: true`
+        `${entry}: local /downloads hosting requires packageVerified: true`,
       );
       continue;
     }
 
-    if (category === "skills" && !downloadUrl.startsWith("/downloads/skills/")) {
-      failures.push(`${entry}: skills local downloadUrl must use /downloads/skills/...`);
+    if (
+      category === "skills" &&
+      !downloadUrl.startsWith("/downloads/skills/")
+    ) {
+      failures.push(
+        `${entry}: skills local downloadUrl must use /downloads/skills/...`,
+      );
       continue;
     }
 
     if (category === "mcp" && !downloadUrl.startsWith("/downloads/mcp/")) {
-      failures.push(`${entry}: mcp local downloadUrl must use /downloads/mcp/...`);
+      failures.push(
+        `${entry}: mcp local downloadUrl must use /downloads/mcp/...`,
+      );
       continue;
     }
 
-    const sourceArchive = path.join(contentRoot, category, path.basename(downloadUrl));
+    const sourceArchive = path.join(
+      contentRoot,
+      category,
+      path.basename(downloadUrl),
+    );
     if (!fs.existsSync(sourceArchive)) {
       failures.push(
-        `${entry}: referenced local package file is missing (${path.relative(repoRoot, sourceArchive)})`
+        `${entry}: referenced local package file is missing (${path.relative(repoRoot, sourceArchive)})`,
       );
       continue;
     }
 
     const stat = fs.statSync(sourceArchive);
     if (stat.size > 5 * 1024 * 1024) {
-      failures.push(`${entry}: package exceeds 5MB limit (${Math.round(stat.size / 1024)}KB)`);
+      failures.push(
+        `${entry}: package exceeds 5MB limit (${Math.round(stat.size / 1024)}KB)`,
+      );
       continue;
     }
 

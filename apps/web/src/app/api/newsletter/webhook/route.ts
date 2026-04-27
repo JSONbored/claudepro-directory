@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { Webhook } from "svix";
-import { hasBodyWithinLimit, hasJsonContentType, isRateLimited } from "@/lib/api-security";
-import { logApiError, logApiInfo, logApiWarn, redactEmail } from "@/lib/api-logs";
+import {
+  hasBodyWithinLimit,
+  hasJsonContentType,
+  isRateLimited,
+} from "@/lib/api-security";
+import {
+  logApiError,
+  logApiInfo,
+  logApiWarn,
+  redactEmail,
+} from "@/lib/api-logs";
 
 type ResendEvent = {
   type?: string;
@@ -65,7 +74,7 @@ function verifyWebhookSignature(params: {
     webhook.verify(rawBody, {
       "svix-id": svixId,
       "svix-timestamp": svixTimestamp,
-      "svix-signature": svixSignature
+      "svix-signature": svixSignature,
     });
     return true;
   } catch {
@@ -81,10 +90,20 @@ export async function POST(request: Request) {
 
   if (!hasJsonContentType(request)) {
     logApiWarn(request, "newsletter.webhook.invalid_content_type");
-    return NextResponse.json({ error: "invalid_content_type" }, { status: 415 });
+    return NextResponse.json(
+      { error: "invalid_content_type" },
+      { status: 415 },
+    );
   }
 
-  if (isRateLimited({ request, scope: "newsletter-webhook", limit: 120, windowMs: 60_000 })) {
+  if (
+    isRateLimited({
+      request,
+      scope: "newsletter-webhook",
+      limit: 120,
+      windowMs: 60_000,
+    })
+  ) {
     logApiWarn(request, "newsletter.webhook.rate_limited");
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
@@ -98,13 +117,16 @@ export async function POST(request: Request) {
 
   if (!resendWebhookSecret) {
     logApiError(request, "newsletter.webhook.not_configured");
-    return NextResponse.json({ error: "webhook_not_configured" }, { status: 503 });
+    return NextResponse.json(
+      { error: "webhook_not_configured" },
+      { status: 503 },
+    );
   }
 
   const verified = verifyWebhookSignature({
     rawBody,
     request,
-    secret: resendWebhookSecret
+    secret: resendWebhookSecret,
   });
   if (!verified) {
     logApiWarn(request, "newsletter.webhook.invalid_signature");
@@ -120,7 +142,9 @@ export async function POST(request: Request) {
   }
 
   if (!discordWebhookUrl || !shouldNotify(payload)) {
-    logApiInfo(request, "newsletter.webhook.skipped", { eventType: String(payload.type ?? "unknown") });
+    logApiInfo(request, "newsletter.webhook.skipped", {
+      eventType: String(payload.type ?? "unknown"),
+    });
     return NextResponse.json({ ok: true, forwarded: false });
   }
 
@@ -129,21 +153,21 @@ export async function POST(request: Request) {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        content: toDiscordContent(payload)
+        content: toDiscordContent(payload),
       }),
-      signal: AbortSignal.timeout(8000)
+      signal: AbortSignal.timeout(8000),
     });
   } catch {
     logApiError(request, "newsletter.webhook.notification_failed", {
       eventType: String(payload.type ?? "unknown"),
-      email: redactEmail(getEventEmail(payload.data))
+      email: redactEmail(getEventEmail(payload.data)),
     });
     return NextResponse.json({ error: "notification_failed" }, { status: 502 });
   }
 
   logApiInfo(request, "newsletter.webhook.forwarded", {
     eventType: String(payload.type ?? "unknown"),
-    email: redactEmail(getEventEmail(payload.data))
+    email: redactEmail(getEventEmail(payload.data)),
   });
   return NextResponse.json({ ok: true, forwarded: true });
 }

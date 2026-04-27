@@ -63,11 +63,13 @@ The `/mcp-setup` command guides you through configuring Model Context Protocol (
 ### Remote GitHub MCP Server with OAuth
 
 **Command:**
+
 ```bash
 /mcp-setup --remote --github --project
 ```
 
 **What happens:**
+
 1. Claude detects project needs GitHub integration
 2. Generates `.mcp.json` configuration:
 
@@ -110,6 +112,7 @@ The `/mcp-setup` command guides you through configuring Model Context Protocol (
    - Confirms tool access
 
 **Usage in Claude Code:**
+
 ```bash
 # Claude can now use GitHub tools automatically
 User: "Create a PR for my authentication refactor"
@@ -122,45 +125,38 @@ Claude: *uses list_issues tool to fetch assigned issues*
 ### Local Postgres MCP Server with Docker
 
 **Command:**
+
 ```bash
 /mcp-setup --local --postgres --project
 ```
 
 **Generated Configuration:**
+
 ```json
 {
   "mcpServers": {
     "postgres": {
       "type": "stdio",
       "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--network=host",
-        "mcp/postgres"
-      ],
+      "args": ["run", "-i", "--rm", "--network=host", "mcp/postgres"],
       "env": {
         "POSTGRES_CONNECTION_STRING": "postgresql://localhost:5432/mydb"
       },
-      "tools": [
-        "execute_query",
-        "list_tables",
-        "describe_table",
-        "get_schema"
-      ]
+      "tools": ["execute_query", "list_tables", "describe_table", "get_schema"]
     }
   }
 }
 ```
 
 **Environment Setup:**
+
 ```bash
 # Claude creates .env.local for secrets
 POSTGRES_CONNECTION_STRING=postgresql://user:password@localhost:5432/mydb
 ```
 
 **Usage:**
+
 ```bash
 User: "What tables are in the database?"
 Claude: *uses list_tables tool*
@@ -172,11 +168,13 @@ Claude: *uses execute_query tool with date filtering*
 ### Multiple MCP Servers for Full-Stack Project
 
 **Command:**
+
 ```bash
 /mcp-setup --project --github --linear --sentry --postgres
 ```
 
 **Generated `.mcp.json`:**
+
 ```json
 {
   "mcpServers": {
@@ -211,6 +209,7 @@ Claude: *uses execute_query tool with date filtering*
 ```
 
 **Workflow Integration:**
+
 ```bash
 User: "Check Sentry for errors related to authentication, create Linear tickets for each unique error, and analyze the auth database table"
 
@@ -225,16 +224,19 @@ Claude:
 ### User-Global MCP Servers (Personal Setup)
 
 **Command:**
+
 ```bash
 /mcp-setup --user --slack --google-drive
 ```
 
 **Configuration Location:**
+
 ```
 ~/.config/claude/mcp.json
 ```
 
 **Benefit:**
+
 - Available across ALL projects
 - Personal authentication (not shared with team)
 - Useful for productivity tools
@@ -285,22 +287,11 @@ Claude: *uses list_issues tool to fetch assigned issues*
     "postgres": {
       "type": "stdio",
       "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--network=host",
-        "mcp/postgres"
-      ],
+      "args": ["run", "-i", "--rm", "--network=host", "mcp/postgres"],
       "env": {
         "POSTGRES_CONNECTION_STRING": "postgresql://localhost:5432/mydb"
       },
-      "tools": [
-        "execute_query",
-        "list_tables",
-        "describe_table",
-        "get_schema"
-      ]
+      "tools": ["execute_query", "list_tables", "describe_table", "get_schema"]
     }
   }
 }
@@ -370,21 +361,25 @@ Claude:
 
 ## MCP Server Marketplace
 ### Development Tools
+
 - **GitHub** - Repository management, PRs, issues, CI/CD
 - **GitLab** - GitLab API integration
 - **Bitbucket** - Bitbucket Cloud/Server integration
 
 ### Issue Tracking
+
 - **Linear** - Issue tracking and project management
 - **Jira** - Atlassian Jira integration
 - **Asana** - Task management
 
 ### Monitoring & Observability
+
 - **Sentry** - Error tracking and monitoring
 - **Datadog** - Infrastructure monitoring
 - **New Relic** - Application performance monitoring
 
 ### Databases
+
 - **PostgreSQL** - PostgreSQL database access
 - **MongoDB** - MongoDB document database
 - **MySQL** - MySQL/MariaDB integration
@@ -392,6 +387,7 @@ Claude:
 - **Supabase** - Supabase backend platform
 
 ### Cloud Platforms
+
 - **AWS** - Amazon Web Services integration
 - **Google Cloud** - GCP service integration
 - **Azure** - Microsoft Azure integration
@@ -399,17 +395,20 @@ Claude:
 - **Cloudflare** - Cloudflare edge platform
 
 ### Communication
+
 - **Slack** - Slack messaging and notifications
 - **Discord** - Discord server integration
 - **Notion** - Notion workspace access
 
 ### AI & ML
+
 - **Pinecone** - Vector database for embeddings
 - **Weaviate** - Vector search engine
 - **Chroma** - Embedding database
 
 ## Authentication Methods
 ### OAuth 2.0 (Recommended for Remote Servers)
+
 ```json
 {
   "auth": {
@@ -421,12 +420,14 @@ Claude:
 ```
 
 **Benefits:**
+
 - No API keys to manage
 - Automatic token refresh
 - Secure credential storage
 - One-click authentication
 
 ### Bearer Token
+
 ```json
 {
   "auth": {
@@ -437,11 +438,13 @@ Claude:
 ```
 
 **Use When:**
+
 - Service doesn't support OAuth
 - Using API keys or personal access tokens
 - Environment variables preferred
 
 ### No Authentication (Local/Docker)
+
 ```json
 {
   "type": "stdio",
@@ -451,6 +454,7 @@ Claude:
 ```
 
 **Use When:**
+
 - Local development servers
 - Containerized services
 - Internal network resources
@@ -481,25 +485,29 @@ Claude:
 
 ## Docker MCP Toolkit
 ### Installing MCP Toolkit
+
 ```bash
 # Claude runs this automatically
 docker pull mcp/toolkit
 ```
 
 ### Available Containerized Servers (200+)
+
 - Pre-built, security-audited containers
 - One-command installation
 - Isolated environments
 - Automatic updates
 
 ### Example: Setup Multiple Servers via Docker
+
 ```bash
 /mcp-setup --local --postgres --redis --mongodb
 ```
 
 **Generated docker-compose.yml:**
+
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   mcp-postgres:
     image: mcp/postgres
@@ -527,7 +535,7 @@ docker pull mcp/toolkit
 /mcp-setup --local --postgres --redis --mongodb
 ```
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   mcp-postgres:
     image: mcp/postgres
@@ -550,11 +558,13 @@ services:
 
 ## Health Monitoring & Troubleshooting
 ### Check Server Status
+
 ```bash
 /mcp-setup --status
 ```
 
 **Output:**
+
 ```
 ✓ github (remote) - Connected, 6 tools available
 ✓ linear (remote) - Connected, 8 tools available
@@ -563,11 +573,13 @@ services:
 ```
 
 ### Test Server Connection
+
 ```bash
 /mcp-setup --test github
 ```
 
 **Verification Steps:**
+
 1. Ping server endpoint
 2. Verify authentication
 3. List available tools
@@ -590,6 +602,7 @@ services:
 ### Project vs User Configuration
 
 **Project (`.mcp.json` - checked into git):**
+
 ```json
 {
   "mcpServers": {
@@ -604,16 +617,19 @@ services:
   }
 }
 ```
+
 - ✅ Server configuration (URLs, tool lists)
-- ✅ Authentication *method* (oauth, bearer)
+- ✅ Authentication _method_ (oauth, bearer)
 - ❌ NO secrets or tokens
 
 **User (`~/.config/claude/mcp.json` - personal):**
+
 - ✅ OAuth tokens (stored in system keychain)
 - ✅ Personal API keys
 - ✅ User-specific servers
 
 ### Environment Variables for Secrets
+
 ```bash
 # .env.local (NOT checked into git)
 SENTRY_AUTH_TOKEN=abc123...
@@ -623,6 +639,7 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 **Reference in `.mcp.json`:**
+
 ```json
 {
   "auth": {
@@ -663,6 +680,7 @@ AWS_SECRET_ACCESS_KEY=...
 
 ## Advanced Configuration
 ### Tool Permissions (Restrict Access)
+
 ```json
 {
   "mcpServers": {
@@ -675,6 +693,7 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 ### Resource Filtering
+
 ```json
 {
   "mcpServers": {
@@ -687,6 +706,7 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 ### Rate Limiting
+
 ```json
 {
   "mcpServers": {
@@ -734,6 +754,7 @@ AWS_SECRET_ACCESS_KEY=...
 
 ## Migration from Manual Setup
 ### Before (Manual Configuration)
+
 ```json
 // Scattered across multiple config files
 // Manual OAuth flow
@@ -741,6 +762,7 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 ### After (`/mcp-setup`)
+
 ```bash
 /mcp-setup --project --github --linear --sentry
 # One command, automatic OAuth, team-ready config
@@ -757,6 +779,7 @@ AWS_SECRET_ACCESS_KEY=...
 
 ## Team Collaboration
 ### Shared Project Setup
+
 1. Lead developer runs `/mcp-setup --project --github --linear`
 2. Commits `.mcp.json` to git
 3. Team members clone repo
@@ -764,6 +787,7 @@ AWS_SECRET_ACCESS_KEY=...
 5. Everyone has same tool access
 
 ### Onboarding New Developers
+
 ```bash
 # New team member clones repo
 git clone repo.git

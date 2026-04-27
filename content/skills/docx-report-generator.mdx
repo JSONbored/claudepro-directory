@@ -2,18 +2,18 @@
 title: DOCX Report Generator Skill
 slug: docx-report-generator
 category: skills
-description: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling.'
-cardDescription: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents.'
+description: "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling."
+cardDescription: "Fill templated DOCX with data to produce reports, invoices, and formatted documents."
 seoTitle: DOCX Report Generator Skill
-seoDescription: 'Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o...'
+seoDescription: "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o..."
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-15'
-documentationUrl: 'https://docxtpl.readthedocs.io/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-15"
+documentationUrl: "https://docxtpl.readthedocs.io/"
 downloadUrl: /downloads/skills/docx-report-generator.zip
 installable: true
-installCommand: 'curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator'
-usageSnippet: 'Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.'
+installCommand: "curl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator"
+usageSnippet: "Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling."
 copySnippet: |-
   from docxtpl import DocxTemplate
 
@@ -24,9 +24,9 @@ copySnippet: |-
 skillType: general
 skillLevel: advanced
 verificationStatus: draft
-verifiedAt: '2025-10-15'
+verifiedAt: "2025-10-15"
 retrievalSources:
-  - 'https://docxtpl.readthedocs.io/'
+  - "https://docxtpl.readthedocs.io/"
 testedPlatforms:
   - Claude
   - Codex
@@ -40,7 +40,7 @@ prerequisites:
   - docx2pdf or libreoffice for PDF
   - File system read/write access for template files and generated DOCX documents
   - Python environment with pip for installing python-docx and docxtpl packages
-  - 'Optional: LibreOffice or docx2pdf for PDF conversion (requires system installation of LibreOffice for cross-platform PDF export)'
+  - "Optional: LibreOffice or docx2pdf for PDF conversion (requires system installation of LibreOffice for cross-platform PDF export)"
 tags:
   - docx
   - reports
@@ -66,6 +66,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## What This Skill Enables
 
 Claude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.
@@ -81,15 +82,16 @@ Claude can create, edit, and format Microsoft Word documents (.docx) programmati
 
 - **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
-
 ## Prerequisites
 
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - Template document uploaded (optional, for editing existing docs)
 
 **What Claude handles:**
+
 - Installing python-docx and document libraries
 - Document structure and formatting
 - Table generation and styling
@@ -101,13 +103,15 @@ Claude can create, edit, and format Microsoft Word documents (.docx) programmati
 ### Create a New Document
 
 **Prompt:** "Create a professional business proposal document with:
+
 - Title page with company logo placeholder
 - Executive summary section
 - 3-column pricing table
 - Terms and conditions
-Save as proposal.docx"
+  Save as proposal.docx"
 
 Claude will:
+
 1. Create document structure
 2. Add formatted sections
 3. Generate styled tables
@@ -117,12 +121,14 @@ Claude will:
 ### Edit Existing Document
 
 **Prompt:** "Open this contract template and:
+
 1. Replace all [COMPANY_NAME] with 'Acme Corp'
 2. Update the pricing table in section 3
 3. Add a new clause about termination
 4. Save as acme_contract.docx"
 
 Claude will:
+
 1. Load the existing document
 2. Find and replace text
 3. Modify tables
@@ -132,6 +138,7 @@ Claude will:
 ### Generate Report from Data
 
 **Prompt:** "Create a monthly sales report from this CSV data:
+
 - Executive summary with key metrics
 - Sales by region table
 - Top performers list
@@ -139,6 +146,7 @@ Claude will:
 - Save as sales_report_october.docx"
 
 Claude will:
+
 1. Analyze the CSV data
 2. Calculate metrics
 3. Generate formatted sections
@@ -148,12 +156,14 @@ Claude will:
 ### Format Conversion
 
 **Prompt:** "Convert this Markdown document to a formatted Word document with:
+
 - Headings styled with built-in heading styles
 - Code blocks in monospace font
 - Bullet lists properly formatted
 - Save as documentation.docx"
 
 Claude will:
+
 1. Parse Markdown structure
 2. Map to Word styles
 3. Apply formatting
@@ -162,6 +172,7 @@ Claude will:
 ## Common Workflows
 
 ### Meeting Minutes Template
+
 ```
 "Create a meeting minutes template with:
 1. Header: Date, Time, Location, Attendees
@@ -173,6 +184,7 @@ Use professional formatting with the 'Office' built-in style."
 ```
 
 ### Invoice Generation
+
 ```
 "Generate an invoice document:
 1. Company header (name, address, logo placeholder)
@@ -185,6 +197,7 @@ Make it look professional with borders and shading."
 ```
 
 ### Technical Documentation
+
 ```
 "Create technical documentation:
 1. Cover page with title and version
@@ -197,6 +210,7 @@ Use consistent styling throughout."
 ```
 
 ### Resume/CV Formatting
+
 ```
 "Format this resume data into a professional document:
 1. Header with name and contact info
@@ -221,18 +235,21 @@ Save as resume.docx"
 ## Advanced Features
 
 ### Headers & Footers
+
 - Different first page headers
 - Page numbers with custom formatting
 - Chapter/section titles in headers
 - Watermarks and background
 
 ### Table Enhancements
+
 - Merged cells
 - Repeating header rows
 - Conditional formatting
 - Auto-width columns
 
 ### Document Automation
+
 - Mail merge from data files
 - Template-based generation
 - Batch document creation

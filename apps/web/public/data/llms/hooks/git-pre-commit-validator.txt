@@ -60,9 +60,7 @@ Comprehensive pre-commit hook that validates code quality, runs tests, and enfor
   "hooks": {
     "preToolUse": {
       "script": "./.claude/hooks/git-pre-commit-validator.sh",
-      "matchers": [
-        "git"
-      ]
+      "matchers": ["git"]
     }
   }
 }
@@ -72,9 +70,7 @@ Comprehensive pre-commit hook that validates code quality, runs tests, and enfor
   "hooks": {
     "preToolUse": {
       "script": "./.claude/hooks/git-pre-commit-validator.sh",
-      "matchers": [
-        "git"
-      ]
+      "matchers": ["git"]
     }
   }
 }
@@ -239,6 +235,7 @@ fi
 echo "✅ Pre-commit validation completed" >&2
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable pre-commit validation
@@ -253,6 +250,7 @@ Complete hook configuration for .claude/settings.json to enable pre-commit valid
   }
 }
 ```
+
 ### Security Scanning for Sensitive Files
 
 Enhanced hook script for security scanning and sensitive file detection
@@ -282,6 +280,7 @@ if [ "$SENSITIVE_FOUND" = true ]; then
 fi
 exit 0
 ```
+
 ### File Size Validation
 
 Enhanced hook script for file size validation with Git LFS recommendations
@@ -313,6 +312,7 @@ for file in $STAGED_FILES; do
 done
 exit 0
 ```
+
 ### Commit Message Format Validation
 
 Enhanced hook script for commit message format validation with conventional commits
@@ -441,25 +441,32 @@ exit 0
 ## Troubleshooting
 ### Hook blocks all git commits even when validation passes
 
-Ensure script exits with exit 0 on success. Check that matchers pattern ['git'] doesn't intercept non-commit git commands like status or diff which should bypass validation. Verify command detection logic: 'if [[ "$COMMAND" != *"git commit"* ]]; then exit 0; fi'. Test with different git commands to ensure only commits are validated.
+Ensure script exits with exit 0 on success. Check that matchers pattern ['git'] doesn't intercept non-commit git commands like status or diff which should bypass validation. Verify command detection logic: 'if [["$COMMAND" != *"git commit"*]]; then exit 0; fi'. Test with different git commands to ensure only commits are validated.
+
 ### npm run lint fails with 'script not found' error
 
 Add existence check before running: '[ -f package.json ] && grep -q '"lint"' package.json' before npm run lint. Provide fallback or skip linting gracefully if unavailable. Check package.json for lint script: 'grep -q '"lint"' package.json'. Use conditional execution: 'if command -v npm &> /dev/null && [ -f package.json ] && grep -q '"lint"' package.json; then npm run lint; fi'.
+
 ### Prettier check prevents commits due to formatting differences
 
 Auto-fix formatting instead of blocking: 'prettier --write $STAGED_FILES && git add $STAGED_FILES'. Alternatively, set --warn-only flag to log issues without exit code. Use prettier --check for validation only. Consider using lint-staged for automatic formatting. Add SKIP_FORMAT environment variable for emergency overrides.
+
 ### Test suite runs entire test set causing slow commit times
 
 Run only tests related to changed files: 'npm test -- --findRelatedTests $STAGED_FILES'. Add timeout: 'npm test -- --maxWorkers=2 --bail' for faster feedback. Use test filtering: 'npm test -- --testPathPattern=$(echo $STAGED_FILES | tr ' ' '|')'. Consider using SKIP_TESTS environment variable for local development. Add test timeout limits.
+
 ### Hook rejects large files but files are already in history
 
 Check if file is new vs modified: 'git diff --cached --diff-filter=A' to detect additions only. Skip size check for existing tracked files to avoid retroactive enforcement. Use 'git ls-files --cached' to check if file is already tracked. Add logic to skip size validation for modified files: 'if git ls-files --error-unmatch "$file" &> /dev/null; then continue; fi'.
+
 ### Security scanning false positives for legitimate files
 
 Refine sensitive file patterns to avoid false positives. Use whitelist for known safe files: 'if echo "$file" | grep -qE "(test|spec|example|sample)"; then continue; fi'. Add configuration file for custom patterns. Use git-secrets or similar tools for more accurate detection. Consider using SKIP_SECURITY environment variable for development.
+
 ### Commit message validation too strict for project conventions
 
 Customize commit message patterns based on project requirements. Use environment variable for custom patterns: 'COMMIT_MSG_PATTERN'. Add project-specific configuration file. Make validation optional with SKIP_COMMIT_MSG environment variable. Support multiple commit message formats. Use case-insensitive matching for flexibility.
+
 ### Validation fails in CI/CD environments with different tool versions
 
 Use version pinning for validation tools. Check tool versions before running: 'eslint --version'. Add version compatibility checks. Use Docker containers for consistent environments. Consider using pre-commit framework for tool management. Add SKIP_VALIDATION environment variable for CI/CD overrides. Document required tool versions.

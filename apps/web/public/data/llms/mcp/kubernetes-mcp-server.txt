@@ -81,9 +81,7 @@ Streamline your Kubernetes cluster management by connecting Claude to your Kuber
     "env": {
       "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
     },
-    "args": [
-      "mcp-kubernetes-server"
-    ],
+    "args": ["mcp-kubernetes-server"],
     "command": "uvx"
   }
 }
@@ -94,9 +92,7 @@ Streamline your Kubernetes cluster management by connecting Claude to your Kuber
     "env": {
       "KUBECONFIG": "${KUBECONFIG:-~/.kube/config}"
     },
-    "args": [
-      "mcp-kubernetes-server"
-    ],
+    "args": ["mcp-kubernetes-server"],
     "command": "uvx"
   }
 }
@@ -104,27 +100,41 @@ Streamline your Kubernetes cluster management by connecting Claude to your Kuber
 
 ## Examples
 ### List all pods in the default namespace
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "List all pods in the default namespace"
 ```
+
 ### Create a new deployment with specified image
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a new deployment with specified image"
 ```
+
 ### Scale a deployment to 5 replicas
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Scale a deployment to 5 replicas"
 ```
+
 ### Get cluster node information and status
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Get cluster node information and status"
 ```
+
 ### Deploy Application
+
 Create a Kubernetes deployment with replica configuration
+
 ```typescript
 // Deploy application to Kubernetes
 const deployment = await k8s.apps.v1.deployments.create({
@@ -136,10 +146,10 @@ const deployment = await k8s.apps.v1.deployments.create({
       selector: { matchLabels: { app: "my-app" } },
       template: {
         metadata: { labels: { app: "my-app" } },
-        spec: { containers: [{ name: "app", image: "nginx:latest" }] }
-      }
-    }
-  }
+        spec: { containers: [{ name: "app", image: "nginx:latest" }] },
+      },
+    },
+  },
 });
 ```
 ```plaintext
@@ -165,10 +175,10 @@ const deployment = await k8s.apps.v1.deployments.create({
       selector: { matchLabels: { app: "my-app" } },
       template: {
         metadata: { labels: { app: "my-app" } },
-        spec: { containers: [{ name: "app", image: "nginx:latest" }] }
-      }
-    }
-  }
+        spec: { containers: [{ name: "app", image: "nginx:latest" }] },
+      },
+    },
+  },
 });
 ```
 
@@ -188,27 +198,35 @@ const deployment = await k8s.apps.v1.deployments.create({
 ### Unauthorized: server has asked for client credentials
 
 Verify kubeconfig file is correctly configured at ~/.kube/config. Check IAM entity is authenticated by cluster. Run `kubectl config view` to verify context and credentials are set properly. Ensure kubeconfig file has valid certificates and hasn't expired. For cloud providers (EKS, GKE, AKS), regenerate kubeconfig using provider-specific commands (e.g., `aws eks update-kubeconfig --name cluster-name`).
+
 ### Connection refused: localhost:8080 error
 
 Set KUBECONFIG environment variable to correct path. Export `KUBECONFIG=~/.kube/config` or specify in MCP server config. Verify kubeconfig file exists and has valid cluster endpoint, not localhost:8080. Check cluster API server URL in kubeconfig matches your actual cluster endpoint. For remote clusters, ensure network connectivity and firewall rules allow access.
+
 ### RBAC permission denied for cluster operations
 
 Verify your user has appropriate RBAC permissions. Check if IAM principal needs system:masters group for admin access. For EKS, use access entries with API or API_AND_CONFIG_MAP authentication mode. Review RoleBinding or ClusterRoleBinding to ensure your user/service account has required permissions. Use `kubectl auth can-i <verb> <resource>` to test permissions.
+
 ### kubectl version incompatibility with cluster
 
 Ensure kubectl version within ±1 minor version of cluster. For Kubernetes 1.29 cluster, use kubectl 1.28-1.30. Run `kubectl version --client` and `kubectl version` to check client and server versions. Update kubectl if needed using official installation methods. Version skew can cause unexpected behavior and API compatibility issues.
+
 ### TLS certificate errors or chain of trust invalid
 
 Check certificate hasn't expired: `kubectl config view --raw`. Verify CA certificate in kubeconfig matches cluster CA. For EKS, regenerate kubeconfig: `aws eks update-kubeconfig --name cluster-name`. For self-signed certificates, ensure CA certificate is properly included in kubeconfig. Check certificate validity dates and renew if expired.
+
 ### Kubernetes MCP server authentication errors with kubeconfig
 
 Verify kubeconfig file is valid and accessible. Check certificate expiration dates. Ensure service account token is valid. For remote clusters, verify network connectivity and TLS certificate configuration.
+
 ### Kubernetes resource creation or update failures
 
 Check resource quotas and limits in namespace. Verify RBAC permissions allow resource creation. Ensure resource specifications are valid. Check cluster capacity and node resources. Review Kubernetes API server logs for detailed errors.
+
 ### Kubernetes MCP server connection timeouts or network errors
 
 Check network connectivity to Kubernetes API server. Verify kubeconfig points to correct cluster endpoint. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
+
 ### Kubernetes pod or deployment failures
 
 Check pod logs for application errors. Verify image pull secrets are configured correctly. Check resource requests and limits. Ensure container images are accessible. Review events using kubectl get events for detailed error information.

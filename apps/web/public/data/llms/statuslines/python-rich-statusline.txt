@@ -63,7 +63,9 @@ Feature-rich statusline using Python's Rich library for beautiful formatting, pr
 
 ## Examples
 ### Enhanced Python Rich Statusline with Progress Bar
+
 Extended version with Rich progress bar showing token usage percentage
+
 ```python
 #!/usr/bin/env python3
 
@@ -141,8 +143,11 @@ if cost > 0:
 
 console.print(status)
 ```
+
 ### Python Rich Statusline with Custom Themes
+
 Version with configurable color themes via environment variables
+
 ```python
 #!/usr/bin/env python3
 
@@ -250,8 +255,11 @@ if cost > 0:
 
 console.print(status)
 ```
+
 ### Python Rich Statusline Installation Example
+
 Complete setup script with Rich library installation and Python version verification
+
 ```bash
 #!/bin/bash
 # Installation script for Python Rich Statusline
@@ -714,25 +722,32 @@ echo "Set with: export COLORTERM=truecolor"
 ## Troubleshooting
 ### ModuleNotFoundError: No module named 'rich'
 
-Install the Rich library: pip3 install rich or python3 -m pip install rich. Verify installation: python3 -c 'import rich'. Check Python path: python3 -c 'import sys; print(sys.path)'. If using virtual environment, activate it first. For user installation: python3 -m pip install --user rich. Verify Rich version: python3 -c 'import rich; print(rich.__version__)'.
+Install the Rich library: pip3 install rich or python3 -m pip install rich. Verify installation: python3 -c 'import rich'. Check Python path: python3 -c 'import sys; print(sys.path)'. If using virtual environment, activate it first. For user installation: python3 -m pip install --user rich. Verify Rich version: python3 -c 'import rich; print(rich.**version**)'.
+
 ### Emojis displaying as boxes or not rendering
 
 Ensure terminal supports Unicode emojis. Use iTerm2, Kitty, or Windows Terminal. Test with: python3 -c 'print("🤖 Test")'. Verify terminal encoding: locale charmap (should be UTF-8). Set encoding: export LANG=en_US.UTF-8. Check font supports emojis: Install emoji-capable font (e.g., Noto Color Emoji). Test emoji rendering: python3 -c "from rich.console import Console; Console().print('🤖 📁 🎯 💰')".
+
 ### Colors look washed out or incorrect
 
 Enable truecolor support. Set COLORTERM=truecolor environment variable or use a terminal that supports 24-bit color. Verify truecolor: python3 -c "from rich.console import Console; c = Console(); print(c.is_terminal, c.color_system)". Check terminal: iTerm2, Kitty, Windows Terminal support truecolor. Test colors: python3 -c "from rich.console import Console; Console().print('[bold red]Red[/bold red] [bold green]Green[/bold green]')". If still issues, check terminal color settings.
+
 ### Script execution too slow
 
 Rich has some startup overhead. Consider increasing refreshInterval to 2000-3000ms or use the minimal-powerline statusline instead. Check Python startup time: time python3 -c 'import rich'. Optimize imports: Only import what's needed (from rich.console import Console, from rich.text import Text). Consider using faster alternatives: Use bash statusline for better performance. Profile script: python3 -m cProfile script.py to identify bottlenecks.
+
 ### Python version error or incompatible
 
 Rich requires Python 3.7+. Check Python version: python3 --version (should be 3.7+). Verify Python 3: which python3 (should return path). If Python 3.6 or older, upgrade: macOS (brew install python3), Linux (sudo apt-get install python3.8 or newer). Check if python3 points to correct version: python3 -c 'import sys; print(sys.version)'.
+
 ### Git branch not detected despite being in repository
 
 Check Git installed: git --version. Verify subprocess works: python3 -c "import subprocess; print(subprocess.run(['git', '--version'], capture_output=True, text=True).stdout)". Check timeout: Script uses 1 second timeout - increase if Git is slow. Verify Git command: python3 -c "import subprocess; result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], capture_output=True, text=True, timeout=1); print(result.stdout)". Check .git directory: os.path.exists('.git') should return True.
+
 ### JSON parsing errors or invalid input
 
 Verify JSON input: echo '$input' | python3 -m json.tool (should parse without errors). Check JSON structure: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print(data.keys())". Verify stdin: Script reads from sys.stdin - ensure JSON is piped correctly. Test with sample JSON: echo '{"model":{"display_name":"test"}}' | python3 script.py. Check error handling: Script should print error message and exit gracefully on invalid JSON.
+
 ### Token count or cost showing as 0 or incorrect values
 
 Check JSON field names: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print(data.get('cost', {}).get('total_cost_usd'))". Verify field extraction: Script checks multiple field names (cost.total_cost_usd, session.estimatedCost). Check if fields exist: echo '$input' | python3 -c "import json, sys; data = json.load(sys.stdin); print('cost' in data, 'session' in data)". Verify data structure: Some Claude Code versions may use different field names. Update script to check additional field names if needed.

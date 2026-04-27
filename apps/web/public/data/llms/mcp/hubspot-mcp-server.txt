@@ -83,27 +83,41 @@ Seamlessly connect Claude to your HubSpot CRM to manage contacts, companies, and
 
 ## Examples
 ### Create a new contact for John Doe
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a new contact for John Doe"
 ```
+
 ### Update deal stage to closed-won
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update deal stage to closed-won"
 ```
+
 ### Find all contacts from Microsoft
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find all contacts from Microsoft"
 ```
+
 ### Generate pipeline report
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate pipeline report"
 ```
+
 ### Create Contact with Properties
+
 Create a new HubSpot contact with email and custom properties
+
 ```typescript
 // Create HubSpot contact with custom properties
 const contact = await hubspot.contacts.create({
@@ -111,8 +125,8 @@ const contact = await hubspot.contacts.create({
     email: "contact@example.com",
     firstname: "John",
     lastname: "Doe",
-    company: "Example Corp"
-  }
+    company: "Example Corp",
+  },
 });
 ```
 ```plaintext
@@ -134,8 +148,8 @@ const contact = await hubspot.contacts.create({
     email: "contact@example.com",
     firstname: "John",
     lastname: "Doe",
-    company: "Example Corp"
-  }
+    company: "Example Corp",
+  },
 });
 ```
 
@@ -154,27 +168,35 @@ const contact = await hubspot.contacts.create({
 ### HTTP 429 error: rate limit exceeded on API calls
 
 OAuth apps limited to 110 requests per 10 seconds per account. Wait for rate limit window to reset. Implement throttling with max 11 requests/second to stay within burst limit.
+
 ### Search API hitting rate limit with only few requests
 
 Search endpoints limited to 4 requests per second per token. Add 250ms delays between search operations. Consider caching search results to reduce API calls.
+
 ### HTTP 401 unauthorized - OAuth token invalid
 
 Check access token expiration (look at expires_in parameter). Re-authenticate to get new OAuth token. Verify token has correct scopes for HubSpot API access (contacts, deals, etc).
+
 ### HTTP 403 forbidden when accessing CRM objects
 
 Verify OAuth token has required scopes. Contacts access needed for contacts, content access for deals. Check account permissions in HubSpot settings and re-authenticate with correct scopes.
+
 ### Error rate exceeds 5% causing marketplace issues
 
 Reduce failed requests by implementing proper error handling. Validate input before API calls. Check API responses and fix 4xx errors in your code to lower error rate below 5%.
+
 ### HubSpot MCP server authentication errors with API keys
 
 Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### HubSpot rate limit errors when processing multiple requests
 
 Implement exponential backoff retry logic with jitter. Use HubSpot API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed contact data. HubSpot allows 100 requests per 10 seconds per API key.
+
 ### HubSpot contact or deal access denied errors
 
 Verify API key has access to the contact or deal. Check account permissions and user role. Ensure API key has required scopes (contacts, deals, companies) for target operations.
+
 ### HubSpot MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify HubSpot API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

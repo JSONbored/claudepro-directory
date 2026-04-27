@@ -1,7 +1,12 @@
 import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
 export type JobTier = "standard" | "featured" | "sponsored";
-export type JobStatus = "draft" | "pending_review" | "active" | "closed" | "archived";
+export type JobStatus =
+  | "draft"
+  | "pending_review"
+  | "active"
+  | "closed"
+  | "archived";
 
 export type JobListing = {
   slug: string;
@@ -63,7 +68,7 @@ const fallbackJobs: JobListing[] = [
     applyUrl: "/jobs/post",
     tier: "sponsored",
     status: "active",
-    isPlaceholder: true
+    isPlaceholder: true,
   },
   {
     slug: "featured-placement-available",
@@ -77,7 +82,7 @@ const fallbackJobs: JobListing[] = [
     applyUrl: "/jobs/post",
     tier: "featured",
     status: "active",
-    isPlaceholder: true
+    isPlaceholder: true,
   },
   {
     slug: "standard-listing-available",
@@ -91,8 +96,8 @@ const fallbackJobs: JobListing[] = [
     applyUrl: "/jobs/post",
     tier: "standard",
     status: "active",
-    isPlaceholder: true
-  }
+    isPlaceholder: true,
+  },
 ];
 
 function parseList(value: string | null | undefined) {
@@ -136,7 +141,7 @@ function toJobListing(row: JobListingRow): JobListing {
     postedByEmail: row.posted_by_email || undefined,
     expiresAt: row.expires_at || undefined,
     isRemote: Number(row.is_remote ?? 1) === 1,
-    isWorldwide: Number(row.is_worldwide ?? 0) === 1
+    isWorldwide: Number(row.is_worldwide ?? 0) === 1,
   };
 }
 
@@ -149,8 +154,9 @@ export async function getJobs(): Promise<JobListing[]> {
   if (!db) return fallbackJobs;
 
   try {
-    const { results } = await db.prepare(
-      `SELECT
+    const { results } = await db
+      .prepare(
+        `SELECT
         slug,
         title,
         company_name,
@@ -180,8 +186,10 @@ export async function getJobs(): Promise<JobListing[]> {
           ELSE 1
         END DESC,
         datetime(posted_at) DESC,
-        datetime(created_at) DESC`
-    ).bind().all<JobListingRow>();
+        datetime(created_at) DESC`,
+      )
+      .bind()
+      .all<JobListingRow>();
 
     if (!results.length) return fallbackJobs;
     return results.map((row) => toJobListing(row));

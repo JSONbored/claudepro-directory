@@ -30,11 +30,13 @@ Claude can clean, transform, analyze, and merge CSV and Excel files with pandas.
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - CSV or Excel file uploaded to conversation
 
 **What Claude handles:**
+
 - Installing pandas, openpyxl, and data processing libraries
 - Detecting file encodings and formats
 - Type inference and conversion
@@ -46,6 +48,7 @@ Claude can clean, transform, analyze, and merge CSV and Excel files with pandas.
 **Prompt:** "Clean this CSV file: remove duplicates, fix missing values, standardize column names, and export as clean.csv"
 
 Claude will:
+
 1. Load and analyze the file structure
 2. Identify data quality issues
 3. Apply cleaning transformations
@@ -56,6 +59,7 @@ Claude will:
 **Prompt:** "Merge customers.csv and orders.csv on customer_id. Show me the combined data and export as customer_orders.xlsx"
 
 Claude will:
+
 1. Load both files
 2. Detect join keys
 3. Perform the merge (inner/left/right/outer)
@@ -67,6 +71,7 @@ Claude will:
 **Prompt:** "Analyze this sales data: show me summary statistics, identify top products, calculate monthly trends, and create a pivot table by region."
 
 Claude will:
+
 1. Generate descriptive statistics
 2. Perform aggregations
 3. Create pivot tables
@@ -78,6 +83,7 @@ Claude will:
 **Prompt:** "Convert this Excel workbook to CSV files, one per sheet, with UTF-8 encoding."
 
 Claude will:
+
 1. Read all Excel sheets
 2. Export each as separate CSV
 3. Handle encoding properly
@@ -85,6 +91,7 @@ Claude will:
 
 ## Common Workflows
 ### CRM Data Cleanup
+
 ```
 "Clean this customer export:
 1. Remove duplicate emails (keep most recent)
@@ -95,6 +102,7 @@ Claude will:
 ```
 
 ### Sales Report Generation
+
 ```
 "Analyze this sales data:
 1. Calculate total revenue by product category
@@ -105,6 +113,7 @@ Claude will:
 ```
 
 ### Data Validation
+
 ```
 "Validate this CSV:
 1. Check for duplicate IDs
@@ -115,6 +124,7 @@ Claude will:
 ```
 
 ### Multi-File Consolidation
+
 ```
 "Combine all CSV files I upload into one master file:
 1. Ensure columns match (add missing ones)
@@ -167,6 +177,7 @@ Claude will:
 
 ## Advanced Operations
 ### Complex Transformations
+
 - Unpivoting (melt) wide data to long format
 - Creating calculated columns with business logic
 - Grouping and aggregating with custom functions
@@ -174,6 +185,7 @@ Claude will:
 - Time series resampling and rolling windows
 
 ### Data Quality Checks
+
 - Outlier detection and reporting
 - Referential integrity validation
 - Format consistency checks

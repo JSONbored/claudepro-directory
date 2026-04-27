@@ -51,7 +51,9 @@ export function SiteHeader() {
                   </span>
                 </>
               ) : (
-                <span className="inline-block max-w-[12rem] truncate align-bottom">{githubRepoLabel}</span>
+                <span className="inline-block max-w-[12rem] truncate align-bottom">
+                  {githubRepoLabel}
+                </span>
               )}
             </span>
             <span className="h-3 w-px bg-border/90" aria-hidden />
@@ -74,7 +76,10 @@ export function SiteHeader() {
               <DiscordMark className="size-4" />
             </a>
           ) : null}
-          <span className="hidden h-5 w-px bg-border/80 md:inline-block" aria-hidden />
+          <span
+            className="hidden h-5 w-px bg-border/80 md:inline-block"
+            aria-hidden
+          />
           <ThemeToggle />
           <Link
             href="/submit"

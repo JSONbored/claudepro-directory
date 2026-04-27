@@ -27,6 +27,7 @@ The `/refactor` command provides intelligent code refactoring capabilities with 
 
 ## Options
 ### Refactoring Types
+
 - `--extract-function` - Extract repeated code into functions
 - `--extract-variable` - Extract complex expressions into variables
 - `--extract-constant` - Move magic numbers/strings to constants
@@ -37,12 +38,14 @@ The `/refactor` command provides intelligent code refactoring capabilities with 
 - `--performance` - Apply performance optimizations
 
 ### Safety Options
+
 - `--dry-run` - Show proposed changes without applying
 - `--interactive` - Prompt for each change
 - `--backup` - Create backup before refactoring
 - `--test-first` - Run tests before and after changes
 
 ### Language-Specific Options
+
 - `--javascript` - Apply JS/TS specific refactoring
 - `--python` - Apply Python-specific refactoring
 - `--java` - Apply Java-specific refactoring
@@ -50,13 +53,14 @@ The `/refactor` command provides intelligent code refactoring capabilities with 
 
 ## Examples
 ### Extract Function
+
 ```javascript
 // Before
 function processUsers(users) {
   for (let user of users) {
-    if (user.email && user.email.includes('@')) {
+    if (user.email && user.email.includes("@")) {
       user.isValid = true;
-      user.domain = user.email.split('@')[1];
+      user.domain = user.email.split("@")[1];
     } else {
       user.isValid = false;
       user.domain = null;
@@ -66,11 +70,11 @@ function processUsers(users) {
 
 // After refactoring with --extract-function
 function validateEmail(email) {
-  return email && email.includes('@');
+  return email && email.includes("@");
 }
 
 function extractDomain(email) {
-  return email.split('@')[1];
+  return email.split("@")[1];
 }
 
 function processUsers(users) {
@@ -87,6 +91,7 @@ function processUsers(users) {
 ```
 
 ### Extract Constants
+
 ```python
 # Before
 def calculate_discount(price, customer_type):
@@ -113,6 +118,7 @@ def calculate_discount(price, customer_type):
 ```
 
 ### Modernize Code
+
 ```javascript
 // Before (ES5 style)
 function getUserNames(users) {
@@ -127,18 +133,16 @@ function getUserNames(users) {
 
 // After refactoring with --modernize
 function getUserNames(users) {
-  return users
-    .filter(user => user.active)
-    .map(user => user.name);
+  return users.filter((user) => user.active).map((user) => user.name);
 }
 ```
 ```javascript
 // Before
 function processUsers(users) {
   for (let user of users) {
-    if (user.email && user.email.includes('@')) {
+    if (user.email && user.email.includes("@")) {
       user.isValid = true;
-      user.domain = user.email.split('@')[1];
+      user.domain = user.email.split("@")[1];
     } else {
       user.isValid = false;
       user.domain = null;
@@ -148,11 +152,11 @@ function processUsers(users) {
 
 // After refactoring with --extract-function
 function validateEmail(email) {
-  return email && email.includes('@');
+  return email && email.includes("@");
 }
 
 function extractDomain(email) {
-  return email.split('@')[1];
+  return email.split("@")[1];
 }
 
 function processUsers(users) {
@@ -205,20 +209,20 @@ function getUserNames(users) {
 
 // After refactoring with --modernize
 function getUserNames(users) {
-  return users
-    .filter(user => user.active)
-    .map(user => user.name);
+  return users.filter((user) => user.active).map((user) => user.name);
 }
 ```
 
 ## Refactoring Patterns
 ### Design Patterns
+
 - **Strategy Pattern** - Replace conditional logic with strategy objects
 - **Factory Pattern** - Extract object creation logic
 - **Observer Pattern** - Implement event-driven architecture
 - **Decorator Pattern** - Add functionality without inheritance
 
 ### Code Smells Detection
+
 - **Long Method** - Break down large functions
 - **Large Class** - Split into focused classes
 - **Duplicate Code** - Extract common functionality
@@ -226,6 +230,7 @@ function getUserNames(users) {
 - **Feature Envy** - Move methods to appropriate classes
 
 ### Performance Optimizations
+
 - **Lazy Loading** - Load resources only when needed
 - **Memoization** - Cache expensive computations
 - **Batch Operations** - Combine multiple operations
@@ -233,12 +238,14 @@ function getUserNames(users) {
 
 ## Safety Measures
 ### Pre-refactoring Checks
+
 - Syntax validation
 - Type checking (TypeScript, etc.)
 - Lint rule compliance
 - Test coverage analysis
 
 ### Post-refactoring Validation
+
 - Automated test execution
 - Code quality metrics comparison
 - Performance benchmarking
@@ -246,12 +253,14 @@ function getUserNames(users) {
 
 ## Integration
 ### IDE Integration
+
 - VS Code extension support
 - IntelliJ plugin compatibility
 - Vim/Neovim integration
 - Emacs package support
 
 ### CI/CD Integration
+
 - Pre-commit hooks
 - GitHub Actions workflow
 - GitLab CI pipeline
@@ -268,11 +277,7 @@ Create a `.refactor.json` file in your project root:
     "enforceConstantExtraction": true,
     "modernizeFeatures": true
   },
-  "exclude": [
-    "node_modules/**",
-    "dist/**",
-    "*.test.js"
-  ],
+  "exclude": ["node_modules/**", "dist/**", "*.test.js"],
   "backup": {
     "enabled": true,
     "directory": ".refactor-backups"
@@ -287,11 +292,7 @@ Create a `.refactor.json` file in your project root:
     "enforceConstantExtraction": true,
     "modernizeFeatures": true
   },
-  "exclude": [
-    "node_modules/**",
-    "dist/**",
-    "*.test.js"
-  ],
+  "exclude": ["node_modules/**", "dist/**", "*.test.js"],
   "backup": {
     "enabled": true,
     "directory": ".refactor-backups"

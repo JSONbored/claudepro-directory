@@ -60,9 +60,7 @@ Generates and sends a comprehensive summary email to the team when session ends.
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/team-summary-email-generator.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -72,9 +70,7 @@ Generates and sends a comprehensive summary email to the team when session ends.
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/team-summary-email-generator.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -126,16 +122,16 @@ PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
 # Git analysis
 if git rev-parse --git-dir >/dev/null 2>&1; then
     echo "📊 Analyzing git changes..."
-    
+
     BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
     FILES_LIST=$(git diff --name-only 2>/dev/null | head -10)
-    
+
     # Get detailed diff stats
     DIFF_STATS=$(git diff --stat 2>/dev/null)
     INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
     DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
-    
+
     # Recent commits
     RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
 else
@@ -290,7 +286,7 @@ case "$EMAIL_METHOD" in
 }
 EOF
         )
-        
+
         if curl -X POST \
              -H "Authorization: Bearer $SENDGRID_API_KEY" \
              -H "Content-Type: application/json" \
@@ -375,16 +371,16 @@ PROJECT_NAME=$(basename "$WORKDIR" 2>/dev/null || echo "project")
 # Git analysis
 if git rev-parse --git-dir >/dev/null 2>&1; then
     echo "📊 Analyzing git changes..."
-    
+
     BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     FILES_CHANGED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
     FILES_LIST=$(git diff --name-only 2>/dev/null | head -10)
-    
+
     # Get detailed diff stats
     DIFF_STATS=$(git diff --stat 2>/dev/null)
     INSERTIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ insertion' | grep -oE '[0-9]+' || echo "0")
     DELETIONS=$(echo "$DIFF_STATS" | tail -1 | grep -oE '[0-9]+ deletion' | grep -oE '[0-9]+' || echo "0")
-    
+
     # Recent commits
     RECENT_COMMITS=$(git log --oneline -5 2>/dev/null || echo "No recent commits")
 else
@@ -539,7 +535,7 @@ case "$EMAIL_METHOD" in
 }
 EOF
         )
-        
+
         if curl -X POST \
              -H "Authorization: Bearer $SENDGRID_API_KEY" \
              -H "Content-Type: application/json" \
@@ -613,6 +609,7 @@ fi
 echo "🎯 Team summary email generation complete!"
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable team summary emails
@@ -627,6 +624,7 @@ Complete hook configuration for .claude/settings.json to enable team summary ema
   }
 }
 ```
+
 ### Enhanced Team Summary with Git and Test Analysis
 
 Enhanced hook script with comprehensive Git analysis, test results, and build status
@@ -670,6 +668,7 @@ elif command -v mail >/dev/null 2>&1 && [ -n "$TEAM_EMAIL" ]; then
 fi
 exit 0
 ```
+
 ### Responsive HTML Email Template
 
 Enhanced hook script with responsive HTML email template and modern styling
@@ -690,6 +689,7 @@ if [ -n "$SENDGRID_API_KEY" ] && [ -n "$TEAM_EMAIL" ]; then
 fi
 exit 0
 ```
+
 ### Team Summary Email Generator Configuration Example
 
 Example team summary email generator configuration for customizing email behavior
@@ -826,24 +826,31 @@ exit 0
 ### Hook skips email sending with TEAM_EMAIL not configured
 
 Set the TEAM_EMAIL environment variable before starting Claude Code: export TEAM_EMAIL=team@example.com. Add to .bashrc or .zshrc for persistence across sessions. Verify environment variable. Test with echo $TEAM_EMAIL.
+
 ### SendGrid API returns 401 unauthorized error
 
 Verify SENDGRID_API_KEY is valid and has Mail Send permissions. Create API keys at SendGrid dashboard. Test with curl command before troubleshooting hook. Check key is not expired or revoked. Verify API key format.
+
 ### Email content shows HTML markup instead of formatted text
 
 Your email client may not support HTML rendering. The hook sends multipart emails with HTML content. Check spam folder, or configure email client to render HTML. Use plain text fallback in email settings. Verify Content-Type header.
+
 ### Test and build checks timeout causing incomplete reports
 
 The hook uses 30-60 second timeouts to prevent hanging. For slower builds, adjust timeout values in the script or disable build checks. Results show 'No test results available' on timeout. Consider increasing timeout values. Test build duration separately.
+
 ### Git statistics show zero changes despite file modifications
 
 The hook analyzes uncommitted changes using 'git diff'. Stage or commit changes to see them in git analysis. For committed work, check recent commits section which shows last 5 commits regardless of current diff. Verify Git repository state. Check git status.
+
 ### System mail command fails with 'mail: command not found'
 
 Install mailutils package: apt-get install mailutils (Ubuntu/Debian) or brew install mailutils (macOS). Configure SMTP settings. Verify mail command availability. Test with: echo 'test' | mail -s 'Test' your@email.com.
+
 ### SendGrid email delivery fails with rate limit errors
 
 SendGrid has rate limits based on plan. Check SendGrid dashboard for rate limit status. Implement retry logic with exponential backoff. Consider upgrading SendGrid plan. Monitor email sending frequency.
+
 ### HTML email template rendering issues in email clients
 
 Use inline CSS instead of external stylesheets. Test email template in multiple email clients. Use email-safe HTML (avoid modern CSS features). Consider using email template frameworks. Verify HTML structure.

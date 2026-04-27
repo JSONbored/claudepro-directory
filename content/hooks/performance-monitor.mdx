@@ -14,9 +14,9 @@ seoDescription: >-
   optimization recommendations. This Stop hook provides comprehensive
   performanc...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
-documentationUrl: 'https://web.dev/vitals/'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
+documentationUrl: "https://web.dev/vitals/"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/performance-monitor.sh && chmod
@@ -54,6 +54,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Application performance tracking including API response time tracking (endpoint response time measurement with millisecond precision, slow endpoint identification with threshold-based filtering, response time statistics with percentile analysis P50/P95/P99, average response time calculation), memory usage monitoring (memory consumption tracking with real-time monitoring, memory leak detection with growth pattern analysis, memory growth analysis with trend tracking), CPU usage monitoring (CPU utilization tracking with core-specific analysis, CPU bottleneck identification with process-specific tracking, process-specific CPU analysis with resource attribution), and application performance metrics (request throughput measurement, error rates tracking, latency percentiles with statistical analysis)
@@ -104,9 +105,7 @@ robotsFollow: true
   "hooks": {
     "Stop": [
       {
-        "matchers": [
-          "*"
-        ],
+        "matchers": ["*"],
         "description": "Monitor performance metrics and provide optimization insights"
       }
     ]
@@ -151,6 +150,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable performance monitoring on session end
@@ -158,13 +158,16 @@ Complete hook configuration for .claude/settings.json to enable performance moni
 ```json
 {
   "hooks": {
-    "stop": [{
-      "matchers": ["*"],
-      "description": "Monitor performance metrics and provide optimization insights"
-    }]
+    "stop": [
+      {
+        "matchers": ["*"],
+        "description": "Monitor performance metrics and provide optimization insights"
+      }
+    ]
   }
 }
 ```
+
 ### System Resource Monitoring
 
 Enhanced hook script for cross-platform system resource monitoring
@@ -194,6 +197,7 @@ if command -v uptime >/dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### Web Vitals Tracking with Lighthouse
 
 Enhanced hook script for Web Vitals tracking using Lighthouse
@@ -217,6 +221,7 @@ if command -v lighthouse >/dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### Bundle Size Analysis
 
 Enhanced hook script for bundle size analysis with multiple tools
@@ -241,27 +246,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Memory usage calculation fails on macOS systems
 
 Hook uses free command which is Linux-only. On macOS, install free via brew install free or modify hook to use vm_stat | grep 'Pages active' for memory statistics instead. Verify system commands. Test with various operating systems.
+
 ### bc command not found error on minimal systems
 
 Install bc for floating-point arithmetic (apt-get install bc or brew install bc). Alternatively, modify memory comparison to use integer math with awk instead of bc -l for percentage checks. Verify bc installation. Test with various system configurations.
+
 ### Lighthouse or Artillery tools not detected
 
 Install globally with npm install -g lighthouse @artillery/core or install locally and modify hook to check npx lighthouse and npx artillery instead of direct commands. Verify tool installation. Test with various tool configurations.
+
 ### Hook shows same performance data every run
 
 This is a stop hook providing system snapshot at session end. For continuous monitoring, integrate with dedicated APM tools or add timestamped logging to track changes over multiple sessions. Verify hook execution timing. Test with various session durations.
+
 ### Load average shows very high values but system responsive
 
 Load average is relative to CPU core count. Value of 8 is normal for 8-core system. Divide load average by core count (sysctl -n hw.ncpu on macOS, nproc on Linux) for actual load percentage. Verify CPU core count. Test with various system configurations.
+
 ### Web Vitals tracking fails with Chrome not found
 
 Install Chrome/Chromium: brew install chromium on macOS or apt-get install chromium-browser on Linux. Set CHROME_PATH environment variable. Use --chrome-flags='--headless --no-sandbox' for CI environments. Verify Chrome installation. Test with various Chrome configurations.
+
 ### Bundle size analysis tools not available
 
 Install bundle analyzers: npm install --save-dev webpack-bundle-analyzer for webpack, npm install --save-dev vite-bundle-visualizer for Vite. Verify build output directories exist. Ensure build is completed before analysis. Verify tool installation. Test with various build configurations.
+
 ### Performance monitoring overhead affects system performance
 
 Reduce monitoring frequency or scope. Use lightweight monitoring tools. Add conditional execution based on system load. Consider sampling instead of continuous monitoring. Verify monitoring overhead. Test with various system loads.

@@ -19,6 +19,7 @@ You are a parallel subagent workload distributor, coordinating multiple Claude C
 
 ## Parallel Subagents Overview
 **Hacker News (October 2025):**
+
 > "How to use Claude Code subagents to parallelize development - 10x speedup"
 
 **Key Capability:** Claude Code's Task tool runs subagents in separate threads with isolated context windows.
@@ -28,7 +29,7 @@ You are a parallel subagent workload distributor, coordinating multiple Claude C
 
 ```typescript
 // Distribute linting across 100 files
-const files = glob('src/**/*.ts'); // 100 TypeScript files
+const files = glob("src/**/*.ts"); // 100 TypeScript files
 
 // Sequential (slow): 10 minutes
 for (const file of files) {
@@ -38,13 +39,13 @@ for (const file of files) {
 // Parallel (fast): 1 minute with 10 subagents
 const chunks = chunkArray(files, 10); // 10 files per subagent
 await Promise.all(
-  chunks.map(chunk => 
+  chunks.map((chunk) =>
     Task({
-      subagent_type: 'general-purpose',
-      prompt: `Fix linting in: ${chunk.join(', ')}`,
-      description: 'Lint file batch'
-    })
-  )
+      subagent_type: "general-purpose",
+      prompt: `Fix linting in: ${chunk.join(", ")}`,
+      description: "Lint file batch",
+    }),
+  ),
 );
 ```
 
@@ -76,7 +77,7 @@ await Promise.all(
 ```bash
 # Create separate worktrees for each subagent
 git worktree add ../project-auth feature/auth
-git worktree add ../project-dashboard feature/dashboard  
+git worktree add ../project-dashboard feature/dashboard
 git worktree add ../project-migrations feature/migrations
 
 # Run Claude Code in each worktree concurrently
@@ -84,7 +85,7 @@ git worktree add ../project-migrations feature/migrations
 ```
 ```typescript
 // Distribute linting across 100 files
-const files = glob('src/**/*.ts'); // 100 TypeScript files
+const files = glob("src/**/*.ts"); // 100 TypeScript files
 
 // Sequential (slow): 10 minutes
 for (const file of files) {
@@ -94,13 +95,13 @@ for (const file of files) {
 // Parallel (fast): 1 minute with 10 subagents
 const chunks = chunkArray(files, 10); // 10 files per subagent
 await Promise.all(
-  chunks.map(chunk => 
+  chunks.map((chunk) =>
     Task({
-      subagent_type: 'general-purpose',
-      prompt: `Fix linting in: ${chunk.join(', ')}`,
-      description: 'Lint file batch'
-    })
-  )
+      subagent_type: "general-purpose",
+      prompt: `Fix linting in: ${chunk.join(", ")}`,
+      description: "Lint file batch",
+    }),
+  ),
 );
 ```
 ```markdown
@@ -126,7 +127,7 @@ await Promise.all(
 ```bash
 # Create separate worktrees for each subagent
 git worktree add ../project-auth feature/auth
-git worktree add ../project-dashboard feature/dashboard  
+git worktree add ../project-dashboard feature/dashboard
 git worktree add ../project-migrations feature/migrations
 
 # Run Claude Code in each worktree concurrently
@@ -145,15 +146,15 @@ interface SubagentWorkload {
 
 const workloads: SubagentWorkload[] = [
   {
-    id: 'auth-agent',
-    files: ['src/lib/auth.ts', 'src/app/api/auth/**'],
-    dependencies: [] // No dependencies, start immediately
+    id: "auth-agent",
+    files: ["src/lib/auth.ts", "src/app/api/auth/**"],
+    dependencies: [], // No dependencies, start immediately
   },
   {
-    id: 'ui-agent',
-    files: ['src/components/**', 'src/app/**/page.tsx'],
-    dependencies: ['auth-agent'] // Wait for auth API
-  }
+    id: "ui-agent",
+    files: ["src/components/**", "src/app/**/page.tsx"],
+    dependencies: ["auth-agent"], // Wait for auth API
+  },
 ];
 ```
 
@@ -175,15 +176,15 @@ interface SubagentWorkload {
 
 const workloads: SubagentWorkload[] = [
   {
-    id: 'auth-agent',
-    files: ['src/lib/auth.ts', 'src/app/api/auth/**'],
-    dependencies: [] // No dependencies, start immediately
+    id: "auth-agent",
+    files: ["src/lib/auth.ts", "src/app/api/auth/**"],
+    dependencies: [], // No dependencies, start immediately
   },
   {
-    id: 'ui-agent',
-    files: ['src/components/**', 'src/app/**/page.tsx'],
-    dependencies: ['auth-agent'] // Wait for auth API
-  }
+    id: "ui-agent",
+    files: ["src/components/**", "src/app/**/page.tsx"],
+    dependencies: ["auth-agent"], // Wait for auth API
+  },
 ];
 ```
 ```bash
@@ -197,11 +198,11 @@ git merge feature/migrations # No conflicts (independent)
 ## Performance Benchmarks
 **Test Case:** Refactor 50-file codebase
 
-| Approach | Duration | Speedup |
-|----------|----------|--------|
-| Single agent | 10 hours | 1x |
-| 5 parallel subagents | 2.5 hours | 4x |
-| 10 parallel subagents | 1.5 hours | 6.7x |
+| Approach              | Duration  | Speedup |
+| --------------------- | --------- | ------- |
+| Single agent          | 10 hours  | 1x      |
+| 5 parallel subagents  | 2.5 hours | 4x      |
+| 10 parallel subagents | 1.5 hours | 6.7x    |
 
 ## Best Practices
 1. **Partition by file paths** - Minimize overlap

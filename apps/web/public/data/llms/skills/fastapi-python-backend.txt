@@ -30,12 +30,14 @@ Claude can build production-ready REST APIs using FastAPI, Python's fastest web 
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Python 3.9+ (3.11+ recommended for best performance)
 - pip or poetry package manager
 - Basic Python knowledge
 
 **What Claude handles automatically:**
+
 - Writing FastAPI route handlers with type hints
 - Creating Pydantic models for request/response validation
 - Adding automatic OpenAPI/Swagger documentation
@@ -51,6 +53,7 @@ Claude can build production-ready REST APIs using FastAPI, Python's fastest web 
 **Prompt:** "Create a FastAPI CRUD API for blog posts with: GET /posts (list), POST /posts (create), GET /posts/{id} (get one), PUT /posts/{id} (update), DELETE /posts/{id} (delete). Use Pydantic for validation."
 
 Claude will:
+
 1. Create FastAPI app with routers
 2. Define Pydantic models for Post
 3. Implement all 5 CRUD endpoints
@@ -64,6 +67,7 @@ Claude will:
 **Prompt:** "Build FastAPI app with PostgreSQL using SQLAlchemy ORM. Include: user authentication, database models for users/posts, async queries, connection pooling, and migrations with Alembic."
 
 Claude will:
+
 1. Set up async SQLAlchemy engine
 2. Create database models with relationships
 3. Implement dependency injection for sessions
@@ -77,6 +81,7 @@ Claude will:
 **Prompt:** "Create FastAPI auth system with JWT tokens. Include: user registration, login, password hashing with bcrypt, protected routes with dependencies, refresh tokens, and role-based access control."
 
 Claude will:
+
 1. Implement password hashing with passlib
 2. Create JWT token generation/validation
 3. Add OAuth2 password bearer scheme
@@ -90,6 +95,7 @@ Claude will:
 **Prompt:** "Build FastAPI endpoint that processes uploaded CSV file in background. Include: file upload validation, background task with progress tracking, webhook notification on completion, and error handling."
 
 Claude will:
+
 1. Create file upload endpoint
 2. Validate CSV format with Pydantic
 3. Launch background task
@@ -113,6 +119,7 @@ Claude will:
 
 ## Common Workflows
 ### E-Commerce API
+
 ```
 "Build FastAPI e-commerce backend:
 1. Products: CRUD with search, filtering, pagination
@@ -126,6 +133,7 @@ Claude will:
 ```
 
 ### Real-Time Analytics API
+
 ```
 "Create FastAPI analytics dashboard backend:
 1. Ingest endpoint: accept events via POST with Pydantic validation
@@ -139,6 +147,7 @@ Claude will:
 ```
 
 ### Multi-Tenant SaaS API
+
 ```
 "Build multi-tenant SaaS API with FastAPI:
 1. Tenant isolation: subdomain-based routing
@@ -152,6 +161,7 @@ Claude will:
 ```
 
 ### GraphQL + REST Hybrid
+
 ```
 "Create FastAPI app with both REST and GraphQL:
 1. REST endpoints: CRUD operations with OpenAPI docs

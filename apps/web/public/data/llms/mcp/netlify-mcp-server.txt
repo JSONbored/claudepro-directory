@@ -94,36 +94,50 @@ Streamline your web deployment and site management by connecting Claude to Netli
 
 ## Examples
 ### Deploy my site to production
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Deploy my site to production"
 ```
+
 ### Update the API_KEY environment variable
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update the API_KEY environment variable"
 ```
+
 ### Show recent form submissions
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Show recent form submissions"
 ```
+
 ### Configure domain redirect
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Configure domain redirect"
 ```
+
 ### Deploy Site
+
 Deploy a site to Netlify with files and configuration
+
 ```typescript
 // Deploy site to Netlify
 const deployment = await netlify.deploys.create({
   site_id: "site-id",
   files: {
     "index.html": "<html>...</html>",
-    "style.css": "body { ... }"
+    "style.css": "body { ... }",
   },
-  draft: false
+  draft: false,
 });
 ```
 ```plaintext
@@ -144,9 +158,9 @@ const deployment = await netlify.deploys.create({
   site_id: "site-id",
   files: {
     "index.html": "<html>...</html>",
-    "style.css": "body { ... }"
+    "style.css": "body { ... }",
   },
-  draft: false
+  draft: false,
 });
 ```
 
@@ -155,7 +169,7 @@ const deployment = await netlify.deploys.create({
 - Secure secret management system (environment variables encrypted at rest)
 - Access control configuration options (site-level and team-level permissions)
 - Build hook security measures (unique URLs for triggering builds)
-- Monitor rate limit headers (X-RateLimit-*) to avoid service disruption
+- Monitor rate limit headers (X-RateLimit-\*) to avoid service disruption
 - Netlify API tokens and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
 - Netlify OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
 - Netlify site IDs and deployment identifiers may expose infrastructure architecture and deployment patterns - ensure Netlify resource identifiers are kept private and not shared in public configurations
@@ -166,24 +180,31 @@ const deployment = await netlify.deploys.create({
 ### Build minutes quota exceeded - site paused
 
 Legacy plans: Check build minutes usage at app.netlify.com under team settings. Free plan: 300 build minutes/month. Upgrade plan for more minutes or switch to Credit-based pricing. Site auto-resumes next billing cycle or upgrade immediately. Credit-based plans use credits instead of build minutes. Monitor usage in Usage & billing dashboard.
+
 ### API rate limit exceeded - 429 error code returned
 
 Netlify API limit: 500 requests/minute for general operations, 3 deployments/minute, 100 deployments/day. Check X-RateLimit-Limit, X-RateLimit-Remaining, and X-RateLimit-Reset headers in responses. Monitor rate limit headers to avoid exceeding limits. Implement exponential backoff. Contact Netlify support for higher limits if needed.
+
 ### OAuth authentication fails or permissions denied
 
 Re-authenticate at https://netlify-mcp.netlify.app/mcp. Verify Personal Access Token is correctly configured (Authorization: Bearer <TOKEN>). Generate new PAT from Applications > Personal access tokens if expired. Verify account has team member role with deploy permissions. Check site access settings allow API operations. For OAuth2, ensure client key and secret are valid.
+
 ### Environment variable not available during build
 
 Add variables in site settings under Build & deploy > Environment. Use exact key names (case-sensitive). Redeploy site after adding variables. Check build logs for variable loading confirmation. Variables are scoped to site, branch, or deploy context. Verify variable is set for correct context (production, deploy-preview, branch-deploy).
+
 ### Netlify MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Netlify rate limit errors when processing multiple deployment requests
 
 Implement exponential backoff retry logic with jitter. Use Netlify API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed site data. Netlify allows 1,000 requests per hour per API token.
+
 ### Netlify site or deployment access denied errors
 
 Verify API token has access to the site. Check site permissions and account membership. Ensure API token has required permissions for target operations.
+
 ### Netlify MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Netlify API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

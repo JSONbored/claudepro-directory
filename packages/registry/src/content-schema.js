@@ -1,6 +1,7 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
 
-const DEFAULT_DIRECTORY_REPO_URL = "https://github.com/JSONbored/claudepro-directory";
+const DEFAULT_DIRECTORY_REPO_URL =
+  "https://github.com/JSONbored/claudepro-directory";
 const DEFAULT_SITE_URL = "https://heyclau.de";
 
 export const CATEGORY_SCHEMAS = Object.fromEntries(
@@ -8,12 +9,16 @@ export const CATEGORY_SCHEMAS = Object.fromEntries(
     category,
     {
       required: spec.contentRequired,
-      recommended: spec.contentRecommended
-    }
-  ])
+      recommended: spec.contentRecommended,
+    },
+  ]),
 );
 
-export const FORBIDDEN_CONTENT_FIELDS = ["viewCount", "copyCount", "popularityScore"];
+export const FORBIDDEN_CONTENT_FIELDS = [
+  "viewCount",
+  "copyCount",
+  "popularityScore",
+];
 export const SKILL_TYPE_VALUES = categorySpec.skillTypeValues;
 export const SKILL_LEVEL_VALUES = categorySpec.skillLevelValues;
 export const VERIFICATION_STATUS_VALUES = categorySpec.verificationStatusValues;
@@ -25,6 +30,13 @@ export function headingId(text) {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-");
+}
+
+function uniqueHeadingId(text, counts) {
+  const base = headingId(text) || "section";
+  const count = counts.get(base) ?? 0;
+  counts.set(base, count + 1);
+  return count === 0 ? base : `${base}-${count + 1}`;
 }
 
 export function deriveCardDescription(description = "") {
@@ -42,12 +54,13 @@ export function extractCodeBlocks(body) {
   const matches = [...body.matchAll(/```([\w-]*)\n([\s\S]*?)```/g)];
   return matches.map((match) => ({
     language: match[1] || "text",
-    code: match[2].trim()
+    code: match[2].trim(),
   }));
 }
 
 export function extractHeadings(body) {
   const headings = [];
+  const idCounts = new Map();
   let inCodeBlock = false;
 
   for (const line of String(body || "").split("\n")) {
@@ -64,7 +77,7 @@ export function extractHeadings(body) {
     headings.push({
       depth: match[1].length,
       text: match[2].trim(),
-      id: headingId(match[2].trim())
+      id: uniqueHeadingId(match[2].trim(), idCounts),
     });
   }
 
@@ -96,7 +109,7 @@ function extractLeadParagraph(markdown) {
 
 function extractUsageCodeBlock(markdown) {
   const usageMatch = String(markdown || "").match(
-    /##\s+Usage[\s\S]*?```[\w-]*\n([\s\S]*?)```/i
+    /##\s+Usage[\s\S]*?```[\w-]*\n([\s\S]*?)```/i,
   );
 
   return usageMatch?.[1]?.trim() || "";
@@ -105,6 +118,7 @@ function extractUsageCodeBlock(markdown) {
 export function extractSections(body) {
   const lines = String(body || "").split("\n");
   const sections = [];
+  const idCounts = new Map();
   let current = { title: "Overview", markdown: "" };
   let inCodeBlock = false;
 
@@ -113,8 +127,8 @@ export function extractSections(body) {
     if (!markdown) return;
     sections.push({
       title: current.title,
-      id: headingId(current.title),
-      markdown
+      id: uniqueHeadingId(current.title, idCounts),
+      markdown,
     });
   };
 
@@ -135,7 +149,7 @@ export function extractSections(body) {
       pushCurrent();
       current = {
         title: headingMatch[1].trim(),
-        markdown: ""
+        markdown: "",
       };
       continue;
     }
@@ -157,23 +171,21 @@ export function looksLikeRawScript(body) {
   if (!body) return false;
   if (body.startsWith("#!/")) return true;
 
-  const signalCount = body
-    .split("\n")
-    .filter((line) => {
-      const trimmed = line.trim();
-      return (
-        trimmed.startsWith("#!/") ||
-        trimmed.startsWith("echo ") ||
-        trimmed.startsWith("export ") ||
-        trimmed.startsWith("read -r ") ||
-        trimmed.startsWith("if [") ||
-        trimmed.startsWith("fi") ||
-        trimmed.includes("jq -r") ||
-        trimmed.includes("\\033[") ||
-        trimmed.includes("statusline+=") ||
-        trimmed.includes("2>/dev/null")
-      );
-    }).length;
+  const signalCount = body.split("\n").filter((line) => {
+    const trimmed = line.trim();
+    return (
+      trimmed.startsWith("#!/") ||
+      trimmed.startsWith("echo ") ||
+      trimmed.startsWith("export ") ||
+      trimmed.startsWith("read -r ") ||
+      trimmed.startsWith("if [") ||
+      trimmed.startsWith("fi") ||
+      trimmed.includes("jq -r") ||
+      trimmed.includes("\\033[") ||
+      trimmed.includes("statusline+=") ||
+      trimmed.includes("2>/dev/null")
+    );
+  }).length;
 
   return signalCount >= 4;
 }
@@ -193,13 +205,18 @@ export function normalizeBody(body, category) {
 }
 
 export function inferRepoUrl(data = {}) {
-  if (data.repoUrl && String(data.repoUrl).trim() !== DEFAULT_DIRECTORY_REPO_URL) {
+  if (
+    data.repoUrl &&
+    String(data.repoUrl).trim() !== DEFAULT_DIRECTORY_REPO_URL
+  ) {
     return String(data.repoUrl);
   }
 
   if (
     data.documentationUrl &&
-    /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/i.test(String(data.documentationUrl).trim())
+    /^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/i.test(
+      String(data.documentationUrl).trim(),
+    )
   ) {
     return String(data.documentationUrl).trim();
   }
@@ -211,12 +228,14 @@ export function inferSectionBooleans(body = "") {
   const normalized = String(body || "");
 
   return {
-    hasPrerequisites: /^##\s+Prerequisites\b|^##\s+Prerequisites\s+&|^##\s+Prerequisites\s+and\b/i.test(
-      normalized
-    ),
-    hasTroubleshooting: /^##\s+Troubleshooting\b|^##\s+Troubleshooting\s+Guide\b|^##\s+Troubleshooting\s+Common\b/im.test(
-      normalized
-    )
+    hasPrerequisites:
+      /^##\s+Prerequisites\b|^##\s+Prerequisites\s+&|^##\s+Prerequisites\s+and\b/i.test(
+        normalized,
+      ),
+    hasTroubleshooting:
+      /^##\s+Troubleshooting\b|^##\s+Troubleshooting\s+Guide\b|^##\s+Troubleshooting\s+Common\b/im.test(
+        normalized,
+      ),
   };
 }
 
@@ -228,7 +247,7 @@ export function inferHookTrigger(text = "") {
     "Notification",
     "Stop",
     "SubagentStop",
-    "SessionStart"
+    "SessionStart",
   ];
 
   return triggers.find((trigger) => text.includes(trigger)) || "";
@@ -240,7 +259,8 @@ export function inferStructuredFields(data, body, category) {
   const combinedText = `${data.description ?? ""}\n${body}`;
   const leadParagraph = extractLeadParagraph(body);
   const usageCodeBlock = extractUsageCodeBlock(body);
-  const commandFromTitle = String(data.title || "").match(/^(\/[^\s]+)/)?.[1] || "";
+  const commandFromTitle =
+    String(data.title || "").match(/^(\/[^\s]+)/)?.[1] || "";
 
   const normalizedDownloadUrl = String(data.downloadUrl || "").trim();
   const downloadInstallCommand =
@@ -248,69 +268,69 @@ export function inferStructuredFields(data, body, category) {
       ? `curl -L ${DEFAULT_SITE_URL}${normalizedDownloadUrl} -o ${String(data.slug || "skill")}.zip && unzip -o ${String(data.slug || "skill")}.zip -d ./${String(data.slug || "skill")}`
       : "";
 
-  const installCommand =
-    data.installCommand
-      ? String(data.installCommand)
-      : category === "commands" && usageCodeBlock
-        ? usageCodeBlock.split("\n")[0].trim()
-        : category === "commands" && commandFromTitle
-          ? commandFromTitle
-          : downloadInstallCommand
-            ? downloadInstallCommand
-            : firstCodeBlock && firstCodeBlock.code.split("\n").length === 1
-              ? firstCodeBlock.code.trim()
-              : "";
+  const installCommand = data.installCommand
+    ? String(data.installCommand)
+    : category === "commands" && usageCodeBlock
+      ? usageCodeBlock.split("\n")[0].trim()
+      : category === "commands" && commandFromTitle
+        ? commandFromTitle
+        : downloadInstallCommand
+          ? downloadInstallCommand
+          : firstCodeBlock && firstCodeBlock.code.split("\n").length === 1
+            ? firstCodeBlock.code.trim()
+            : "";
 
-  const commandSyntax =
-    data.commandSyntax
-      ? String(data.commandSyntax)
-      : category === "commands"
-        ? usageCodeBlock || commandFromTitle
-        : "";
+  const commandSyntax = data.commandSyntax
+    ? String(data.commandSyntax)
+    : category === "commands"
+      ? usageCodeBlock || commandFromTitle
+      : "";
 
-  const usageSnippet =
-    data.usageSnippet
-      ? String(data.usageSnippet)
-      : commandSyntax
-        ? commandSyntax
-        : category === "guides"
+  const usageSnippet = data.usageSnippet
+    ? String(data.usageSnippet)
+    : commandSyntax
+      ? commandSyntax
+      : category === "guides"
+        ? leadParagraph
+        : category === "agents" || category === "rules"
           ? leadParagraph
-          : category === "agents" || category === "rules"
+          : category === "skills" && leadParagraph
             ? leadParagraph
-            : category === "skills" && leadParagraph
-              ? leadParagraph
-        : installCommand || "";
+            : installCommand || "";
 
   const copySnippet =
     category === "guides" || category === "collections"
       ? ""
       : category === "agents" || category === "rules"
-      ? String(body || "").trim()
-      : data.copySnippet
-        ? String(data.copySnippet)
-        : firstCodeBlock?.code?.trim() || usageSnippet || "";
+        ? String(body || "").trim()
+        : data.copySnippet
+          ? String(data.copySnippet)
+          : firstCodeBlock?.code?.trim() || usageSnippet || "";
 
-  const scriptLanguage =
-    data.scriptLanguage
-      ? String(data.scriptLanguage)
-      : looksLikeRawScript(body)
-        ? inferLanguageFromCategory(category)
-        : "";
+  const scriptLanguage = data.scriptLanguage
+    ? String(data.scriptLanguage)
+    : looksLikeRawScript(body)
+      ? inferLanguageFromCategory(category)
+      : "";
 
-  const scriptBody =
-    data.scriptBody
-      ? String(data.scriptBody)
-      : looksLikeRawScript(body)
-        ? body.replace(/^```[\w-]*\n/, "").replace(/\n```$/, "").trim()
-        : "";
+  const scriptBody = data.scriptBody
+    ? String(data.scriptBody)
+    : looksLikeRawScript(body)
+      ? body
+          .replace(/^```[\w-]*\n/, "")
+          .replace(/\n```$/, "")
+          .trim()
+      : "";
 
   const installable =
     typeof data.installable === "boolean"
       ? data.installable
       : Boolean(
           installCommand ||
-            data.downloadUrl ||
-            ["mcp", "skills", "hooks", "statuslines", "commands"].includes(category)
+          data.downloadUrl ||
+          ["mcp", "skills", "hooks", "statuslines", "commands"].includes(
+            category,
+          ),
         );
 
   const normalizedSkillType =
@@ -352,7 +372,10 @@ export function inferStructuredFields(data, body, category) {
   const retrievalSources =
     category === "skills"
       ? Array.isArray(data.retrievalSources)
-        ? data.retrievalSources.map(String).map((value) => value.trim()).filter(Boolean)
+        ? data.retrievalSources
+            .map(String)
+            .map((value) => value.trim())
+            .filter(Boolean)
         : data.documentationUrl
           ? [String(data.documentationUrl).trim()]
           : []
@@ -360,7 +383,10 @@ export function inferStructuredFields(data, body, category) {
   const testedPlatforms =
     category === "skills"
       ? Array.isArray(data.testedPlatforms)
-        ? data.testedPlatforms.map(String).map((value) => value.trim()).filter(Boolean)
+        ? data.testedPlatforms
+            .map(String)
+            .map((value) => value.trim())
+            .filter(Boolean)
         : [...DEFAULT_TESTED_PLATFORMS]
       : [];
 
@@ -390,7 +416,7 @@ export function inferStructuredFields(data, body, category) {
     verificationStatus: category === "skills" ? verificationStatus : "",
     verifiedAt,
     retrievalSources,
-    testedPlatforms
+    testedPlatforms,
   };
 }
 
@@ -452,15 +478,25 @@ export function validateEntry(category, data, inferred = {}) {
   }
 
   if (category === "skills") {
-    const skillType = String(merged.skillType || "").trim().toLowerCase();
-    const skillLevel = String(merged.skillLevel || "").trim().toLowerCase();
-    const verificationStatus = String(merged.verificationStatus || "").trim().toLowerCase();
+    const skillType = String(merged.skillType || "")
+      .trim()
+      .toLowerCase();
+    const skillLevel = String(merged.skillLevel || "")
+      .trim()
+      .toLowerCase();
+    const verificationStatus = String(merged.verificationStatus || "")
+      .trim()
+      .toLowerCase();
     const verifiedAt = String(merged.verifiedAt || "").trim();
     const retrievalSources = Array.isArray(merged.retrievalSources)
-      ? merged.retrievalSources.map((value) => String(value).trim()).filter(Boolean)
+      ? merged.retrievalSources
+          .map((value) => String(value).trim())
+          .filter(Boolean)
       : [];
     const testedPlatforms = Array.isArray(merged.testedPlatforms)
-      ? merged.testedPlatforms.map((value) => String(value).trim()).filter(Boolean)
+      ? merged.testedPlatforms
+          .map((value) => String(value).trim())
+          .filter(Boolean)
       : [];
 
     if (skillType && !SKILL_TYPE_VALUES.includes(skillType)) {
@@ -469,7 +505,10 @@ export function validateEntry(category, data, inferred = {}) {
     if (skillLevel && !SKILL_LEVEL_VALUES.includes(skillLevel)) {
       enumErrors.push(`Invalid skillLevel: ${skillLevel}`);
     }
-    if (verificationStatus && !VERIFICATION_STATUS_VALUES.includes(verificationStatus)) {
+    if (
+      verificationStatus &&
+      !VERIFICATION_STATUS_VALUES.includes(verificationStatus)
+    ) {
       enumErrors.push(`Invalid verificationStatus: ${verificationStatus}`);
     }
     if (verifiedAt && !/^\d{4}-\d{2}-\d{2}$/.test(verifiedAt)) {
@@ -478,13 +517,17 @@ export function validateEntry(category, data, inferred = {}) {
 
     if (skillType === "capability-pack") {
       if (!retrievalSources.length) {
-        semanticErrors.push("capability-pack skills must include retrievalSources");
+        semanticErrors.push(
+          "capability-pack skills must include retrievalSources",
+        );
       }
       if (!verifiedAt) {
         semanticErrors.push("capability-pack skills must include verifiedAt");
       }
       if (skillLevel && skillLevel !== "expert") {
-        semanticErrors.push("capability-pack skills must use skillLevel: expert");
+        semanticErrors.push(
+          "capability-pack skills must use skillLevel: expert",
+        );
       }
     }
 
@@ -495,20 +538,35 @@ export function validateEntry(category, data, inferred = {}) {
 
   if (category === "tools") {
     const websiteUrl = String(merged.websiteUrl || "").trim();
-    const disclosure = String(merged.disclosure || "editorial").trim().toLowerCase();
-    const pricingModel = String(merged.pricingModel || "").trim().toLowerCase();
+    const disclosure = String(merged.disclosure || "editorial")
+      .trim()
+      .toLowerCase();
+    const pricingModel = String(merged.pricingModel || "")
+      .trim()
+      .toLowerCase();
 
     if (websiteUrl && !/^https:\/\//i.test(websiteUrl)) {
       semanticErrors.push("websiteUrl must use https");
     }
-    if (disclosure && !["editorial", "affiliate", "sponsored"].includes(disclosure)) {
-      semanticErrors.push("disclosure must be editorial, affiliate, or sponsored");
+    if (
+      disclosure &&
+      !["editorial", "affiliate", "sponsored"].includes(disclosure)
+    ) {
+      semanticErrors.push(
+        "disclosure must be editorial, affiliate, or sponsored",
+      );
     }
     if (
       pricingModel &&
-      !["free", "freemium", "paid", "open-source", "subscription", "usage-based", "contact-sales"].includes(
-        pricingModel
-      )
+      ![
+        "free",
+        "freemium",
+        "paid",
+        "open-source",
+        "subscription",
+        "usage-based",
+        "contact-sales",
+      ].includes(pricingModel)
     ) {
       semanticErrors.push("pricingModel is not recognized");
     }
@@ -558,7 +616,7 @@ export function orderFrontmatter(data) {
     "prerequisites",
     "tags",
     "keywords",
-    "readingTime"
+    "readingTime",
   ];
 
   const ordered = {};

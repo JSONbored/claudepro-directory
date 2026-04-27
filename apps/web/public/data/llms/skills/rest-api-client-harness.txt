@@ -30,11 +30,13 @@ Claude can interact with REST APIs: make requests, handle authentication (API ke
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled
 - API credentials (if required by the API)
 
 **What Claude handles:**
+
 - Installing HTTP libraries (requests, axios, fetch)
 - Making authenticated requests
 - Handling pagination
@@ -50,6 +52,7 @@ Use API key: [your-key]
 Show me the first 10 results."
 
 Claude will:
+
 1. Make GET request with auth header
 2. Parse JSON response
 3. Extract and display data
@@ -64,6 +67,7 @@ API Key: [your-key]
 Save all results to items.json"
 
 Claude will:
+
 1. Make first request
 2. Loop through pages using cursor
 3. Collect all results
@@ -79,6 +83,7 @@ Auth: Bearer token [your-token]
 Show me the response."
 
 Claude will:
+
 1. Prepare POST request
 2. Set headers (auth, content-type)
 3. Send JSON payload
@@ -88,6 +93,7 @@ Claude will:
 ### Batch Operations
 
 **Prompt:** "Upload all these records to the API:
+
 - Read from users.csv
 - For each row, POST to /users endpoint
 - Handle rate limits (max 10 requests/second)
@@ -95,6 +101,7 @@ Claude will:
 - Retry failures once"
 
 Claude will:
+
 1. Read CSV data
 2. Iterate through rows
 3. Make POST requests with rate limiting
@@ -103,6 +110,7 @@ Claude will:
 
 ## Common Workflows
 ### API Testing & Exploration
+
 ```
 "Test this API endpoint:
 1. Make GET request to /api/products
@@ -113,6 +121,7 @@ Claude will:
 ```
 
 ### Data Migration
+
 ```
 "Migrate data from API A to API B:
 1. Fetch all records from source API (paginated)
@@ -124,6 +133,7 @@ Save unmigrated records to errors.json"
 ```
 
 ### Webhook Testing
+
 ```
 "Test this webhook:
 1. POST sample payload to webhook URL
@@ -134,6 +144,7 @@ Save unmigrated records to errors.json"
 ```
 
 ### API Monitoring
+
 ```
 "Monitor API health:
 1. Hit /health endpoint every minute for 10 minutes
@@ -178,44 +189,52 @@ Save unmigrated records to errors.json"
 
 ## Authentication Methods
 ### API Key Authentication
+
 - Header: `X-API-Key: your-key`
 - Query parameter: `?api_key=your-key`
 - Custom header format
 
 ### Bearer Token (JWT)
+
 - Header: `Authorization: Bearer your-token`
 - Token refresh handling
 - Expiration detection
 
 ### Basic Authentication
+
 - Header: `Authorization: Basic base64(user:pass)`
 - Credentials encoding
 
 ### OAuth 2.0
+
 - Client credentials flow
 - Authorization code flow
 - Token refresh logic
 
 ## Advanced Features
 ### Rate Limiting & Retries
+
 - Respect rate limit headers
 - Exponential backoff
 - Jitter for retry timing
 - Max retry attempts
 
 ### Response Handling
+
 - JSON parsing
 - XML/HTML parsing
 - Binary data (images, files)
 - Streaming responses
 
 ### Error Handling
+
 - HTTP status code detection
 - Custom error messages
 - Validation errors
 - Network timeouts
 
 ### Data Transformation
+
 - JSON to CSV conversion
 - Field mapping and renaming
 - Data type coercion
@@ -232,6 +251,7 @@ Save unmigrated records to errors.json"
 
 ## Common Patterns
 ### Cursor-Based Pagination
+
 ```python
 url = "https://api.example.com/items"
 all_items = []
@@ -247,6 +267,7 @@ while True:
 ```
 
 ### Retry with Exponential Backoff
+
 ```python
 import time
 max_retries = 3

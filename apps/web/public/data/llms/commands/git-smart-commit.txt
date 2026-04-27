@@ -35,11 +35,12 @@ Analyze the changes and create a git commit following these guidelines:
    - chore: Other changes
 
 2. **Commit Message Structure**:
+
    ```
    <type>(<scope>): <subject>
-   
+
    <body>
-   
+
    <footer>
    ```
 
@@ -60,9 +61,9 @@ If arguments provided: Use $1 as type and $2 as message.
 Otherwise: Analyze changes and suggest appropriate commit.
 ```text
 <type>(<scope>): <subject>
-   
+
    <body>
-   
+
    <footer>
 ```
 

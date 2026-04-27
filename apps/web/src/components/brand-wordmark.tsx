@@ -17,7 +17,7 @@ export function BrandWordmark({
   className,
   mode = "lockup",
   variant = "soft",
-  label = "HeyClaude"
+  label = "HeyClaude",
 }: BrandWordmarkProps) {
   const mark =
     mode === "icon" ? (
@@ -32,7 +32,11 @@ export function BrandWordmark({
     );
 
   return (
-    <Link href={href} aria-label="HeyClaude home" className="inline-flex items-center">
+    <Link
+      href={href}
+      aria-label="HeyClaude home"
+      className="inline-flex items-center"
+    >
       {mark}
     </Link>
   );

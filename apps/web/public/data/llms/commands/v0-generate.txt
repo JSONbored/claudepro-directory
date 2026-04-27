@@ -27,6 +27,7 @@ The `/v0-generate` command generates production-ready React components using V0.
 
 ## Options
 ### Component Types
+
 - `--page` - Generate full page layout (default)
 - `--component` - Generate reusable component
 - `--form` - Generate form with validation
@@ -34,24 +35,28 @@ The `/v0-generate` command generates production-ready React components using V0.
 - `--landing` - Generate landing page section
 
 ### Framework Integration
+
 - `--next15` - Next.js 15 App Router (default)
 - `--react19` - Standalone React 19
 - `--remix` - Remix framework
 - `--astro` - Astro with React islands
 
 ### UI Libraries
+
 - `--shadcn` - Use shadcn/ui components (default)
 - `--radix` - Raw Radix UI primitives
 - `--headless` - Headless UI components
 - `--custom` - Custom styled components
 
 ### Styling Options
+
 - `--tailwind` - TailwindCSS v4 (default)
 - `--css-modules` - CSS Modules
 - `--styled` - Styled Components
 - `--vanilla` - Vanilla Extract
 
 ### Features
+
 - `--responsive` - Mobile-first responsive design (default: true)
 - `--dark-mode` - Include dark mode support
 - `--animated` - Add framer-motion animations
@@ -63,11 +68,13 @@ The `/v0-generate` command generates production-ready React components using V0.
 ### Dashboard Page Generation
 
 **Command:**
+
 ```
 /v0-generate --page --dashboard --dark-mode "Analytics dashboard with revenue chart, user stats cards, and recent activity table"
 ```
 
 **Generated Code:**
+
 ```typescript
 // app/dashboard/page.tsx
 import { Suspense } from 'react';
@@ -180,6 +187,7 @@ export default async function DashboardPage() {
 ```
 
 **Generated Revenue Chart Component:**
+
 ```typescript
 // components/dashboard/revenue-chart.tsx
 'use client';
@@ -229,11 +237,13 @@ export function RevenueChart() {
 ### Form Component Generation
 
 **Command:**
+
 ```
 /v0-generate --form --accessible "User registration form with email, password, and terms acceptance"
 ```
 
 **Generated Code:**
+
 ```typescript
 // components/forms/registration-form.tsx
 'use client';
@@ -404,11 +414,13 @@ export function RegistrationForm({ onSubmit }: RegistrationFormProps) {
 ### Landing Page Section
 
 **Command:**
+
 ```
 /v0-generate --landing --animated "Hero section with gradient background, CTA buttons, and feature highlights"
 ```
 
 **Generated Code:**
+
 ```typescript
 // components/landing/hero-section.tsx
 'use client';
@@ -968,6 +980,7 @@ export function HeroSection() {
 
 ## Configuration
 ### shadcn/ui Setup
+
 ```json
 // components.json
 {
@@ -989,6 +1002,7 @@ export function HeroSection() {
 ```
 
 ### Dark Mode Support
+
 ```typescript
 // Generated theme provider
 'use client';

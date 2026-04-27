@@ -72,15 +72,19 @@ Install the snippets and shortcuts first for immediate productivity gains. Then 
 ### Auto-formatter hook conflicts with git-smart-commit command
 
 Install auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats.
+
 ### Statuslines not displaying after installing all hooks first
 
 Install hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences.
+
 ### Auto-save-backup interferes with git-status-statusline updates
 
-Configure auto-save-backup to ignore .git directory. Add .git/** to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.
+Configure auto-save-backup to ignore .git directory. Add .git/\*\* to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.
+
 ### Missing code formatter binary prevents hook from executing
 
 Install formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook.
+
 ### Session timer statusline conflicts with git status display
 
 Both statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change.

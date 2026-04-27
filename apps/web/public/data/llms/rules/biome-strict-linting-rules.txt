@@ -21,6 +21,7 @@ You are a Biome linting expert specializing in strict, production-ready code qua
 
 ## Core Philosophy
 Biome is a performant, all-in-one toolchain for web projects that provides:
+
 - **Fast linting**: 35x faster than ESLint
 - **Unified tooling**: Single tool for formatting and linting
 - **Zero config**: Sensible defaults out of the box
@@ -96,19 +97,8 @@ Start with this comprehensive `biome.json` configuration:
     "defaultBranch": "main"
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      "build",
-      ".next",
-      "coverage"
-    ],
-    "include": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "src/**/*.js",
-      "src/**/*.jsx"
-    ]
+    "ignore": ["node_modules", "dist", "build", ".next", "coverage"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
   }
 }
 ```
@@ -177,19 +167,8 @@ Start with this comprehensive `biome.json` configuration:
     "defaultBranch": "main"
   },
   "files": {
-    "ignore": [
-      "node_modules",
-      "dist",
-      "build",
-      ".next",
-      "coverage"
-    ],
-    "include": [
-      "src/**/*.ts",
-      "src/**/*.tsx",
-      "src/**/*.js",
-      "src/**/*.jsx"
-    ]
+    "ignore": ["node_modules", "dist", "build", ".next", "coverage"],
+    "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
   }
 }
 ```
@@ -198,7 +177,9 @@ Start with this comprehensive `biome.json` configuration:
 Biome organizes rules into semantic groups:
 
 ### Correctness Rules
+
 Detect code that is guaranteed to be incorrect:
+
 ```json
 "correctness": {
   "noUnusedVariables": "error",
@@ -209,8 +190,10 @@ Detect code that is guaranteed to be incorrect:
 }
 ```
 
-### Suspicious Rules  
+### Suspicious Rules
+
 Detect code that is likely to be incorrect:
+
 ```json
 "suspicious": {
   "noDebugger": "error",
@@ -222,7 +205,9 @@ Detect code that is likely to be incorrect:
 ```
 
 ### Style Rules
+
 Enforce consistent code style:
+
 ```json
 "style": {
   "noVar": "error",
@@ -234,7 +219,9 @@ Enforce consistent code style:
 ```
 
 ### Complexity Rules
+
 Prevent overly complex code:
+
 ```json
 "complexity": {
   "noStaticOnlyClass": "warn",
@@ -244,7 +231,9 @@ Prevent overly complex code:
 ```
 
 ### Nursery Rules
+
 New rules under development (opt-in required):
+
 ```json
 "nursery": {
   "noFloatingPromises": "error",
@@ -395,6 +384,7 @@ Optimize for Git workflows:
 ```
 
 Use `--changed` flag to lint only modified files:
+
 ```bash
 # Lint files changed since main branch
 biome check --changed
@@ -449,12 +439,14 @@ Customize how rules are enforced:
 ```
 
 **Severity levels:**
+
 - `"error"`: Fails build, exits with code 1
 - `"warn"`: Shows warning, doesn't fail build
 - `"info"`: Informational only
 - `"off"`: Disables the rule
 
 **Fix kinds:**
+
 - `"safe"`: Auto-fix is guaranteed safe
 - `"unsafe"`: Auto-fix may change behavior
 - `"none"`: No auto-fix available
@@ -555,6 +547,7 @@ npx @biomejs/biome migrate prettier --write
 ```
 
 Biome will:
+
 1. Read your `.eslintrc.json` or `.prettierrc`
 2. Convert compatible rules to Biome format
 3. Update `biome.json` with equivalent configuration
@@ -630,6 +623,7 @@ Biome is already fast, but optimize further:
 ```
 
 **Performance tips:**
+
 - Use `--changed` to lint only modified files
 - Configure `files.ignore` to skip large generated files
 - Set `files.maxSize` to skip very large files

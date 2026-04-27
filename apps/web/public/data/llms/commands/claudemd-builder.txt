@@ -63,11 +63,13 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ### Initialize Project with /init
 
 **Command:**
+
 ```bash
 /claudemd-builder --init
 ```
 
 **Claude's Process:**
+
 ```
 [Scanning Project]
 ✓ Detected: Next.js 15.5.2
@@ -87,7 +89,8 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ```
 
 **Generated CLAUDE.md:**
-```markdown
+
+````markdown
 # Project Context for Claude Code
 
 **Last Updated:** 2025-10-25
@@ -97,6 +100,7 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ## Technology Stack
 
 ### Frontend
+
 - React 19.1.1 (React Compiler enabled)
 - Next.js 15.5.2 (App Router)
 - TailwindCSS v4.1.13
@@ -104,17 +108,20 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 - Framer Motion for animations
 
 ### Backend
+
 - Next.js API Routes
 - Prisma ORM (PostgreSQL)
 - tRPC for type-safe APIs
 - better-auth v1.3.9
 
 ### Testing
+
 - Vitest (unit/integration)
 - Playwright (E2E)
 - React Testing Library
 
 ### Tooling
+
 - TypeScript 5.x (strict mode)
 - Biome (linting/formatting)
 - pnpm (package manager)
@@ -122,6 +129,7 @@ The `/claudemd-builder` command generates CLAUDE.md files that store coding stan
 ## Coding Standards
 
 ### TypeScript
+
 - **Strict mode enabled**: No `any`, use `unknown`
 - **Explicit return types**: For public functions
 - **Interfaces over types**: For public APIs
@@ -143,8 +151,10 @@ async function getData(id: string): Promise<UserData> {
   return response.json();
 }
 ```
+````
 
 ### React Components
+
 - **Server Components by default**: Only use 'use client' when necessary
 - **Async Server Components**: For data fetching
 - **Named exports**: For components
@@ -166,6 +176,7 @@ export function InteractiveButton() {
 ```
 
 ### File Organization
+
 ```
 app/
 ├── (auth)/          # Auth routes group
@@ -184,300 +195,11 @@ lib/
 ```
 
 ### Naming Conventions
+
 - Files: kebab-case (`user-profile.tsx`)
 - Components: PascalCase (`UserProfile`)
 - Functions: camelCase (`getUserById`)
 - Constants: UPPER_SNAKE_CASE (`MAX_RETRIES`)
-
-## Architecture Decisions
-
-### Authentication
-- **Library**: better-auth v1.3.9
-- **Strategy**: JWT with refresh tokens
-- **Session**: 15min access, 7d refresh
-- **Storage**: HTTP-only cookies
-
-### Database
-- **ORM**: Prisma
-- **Database**: PostgreSQL
-- **Migrations**: Prisma Migrate
-- **Seeding**: `prisma/seed.ts`
-
-### API Layer
-- **Type Safety**: tRPC for internal APIs
-- **REST**: For public/webhook endpoints
-- **Validation**: Zod schemas
-
-## Common Patterns
-
-### Data Fetching
-```typescript
-// Use async Server Components
-export async function ProductList() {
-  const products = await db.product.findMany();
-  return <div>{products.map(p => <ProductCard key={p.id} product={p} />)}</div>;
-}
-```
-
-### Form Handling
-```typescript
-// Use react-hook-form + Zod
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-const formSchema = z.object({
-  email: z.string().email(),
-});
-
-export function ContactForm() {
-  const form = useForm({ resolver: zodResolver(formSchema) });
-  return <form onSubmit={form.handleSubmit(onSubmit)}>...</form>;
-}
-```
-
-### Error Handling
-```typescript
-// Always use Error Boundaries
-import { ErrorBoundary } from '@/components/error-boundary';
-
-export default function Layout({ children }) {
-  return (
-    <ErrorBoundary fallback={<ErrorPage />}>
-      {children}
-    </ErrorBoundary>
-  );
-}
-```
-
-## Testing Guidelines
-
-- **Coverage target**: 80% for business logic
-- **Test naming**: `describe` + `it` pattern
-- **Async tests**: Use `async/await`, not callbacks
-- **Mocking**: Minimal mocking, prefer real implementations
-
-## Development Workflow
-
-1. **Branch naming**: `feat/`, `fix/`, `refactor/`, `docs/`
-2. **Commit messages**: Conventional Commits format
-3. **PR requirements**: Tests + passing CI + review
-4. **Deployment**: Auto-deploy on merge to `main`
-
-## Important Constraints
-
-- **No barrel exports**: Use explicit imports
-- **No default exports**: Use named exports
-- **No any type**: Use unknown or proper types
-- **Server Components default**: Only 'use client' when necessary
-
-## AI Assistant Instructions
-
-When writing code:
-1. Follow TypeScript strict mode
-2. Use Server Components by default
-3. Validate with Zod schemas
-4. Add error boundaries
-5. Write tests for new features
-6. Follow file naming conventions
-```
-
-### Use Pre-Built Template
-
-**Command:**
-```bash
-/claudemd-builder --template=react
-```
-
-**Generated React Template:**
-```markdown
-# React Project - Claude Code Context
-
-## Stack
-- React 19.1.1
-- Vite 6.x
-- TypeScript 5.x
-- TailwindCSS
-- React Router 6
-
-## Component Patterns
-
-### Functional Components (Required)
-```typescript
-// ✅ Use function declarations
-export function MyComponent({ prop }: Props) {
-  return <div>{prop}</div>;
-}
-
-// ❌ Avoid arrow functions for components
-const MyComponent = ({ prop }: Props) => <div>{prop}</div>;
-```
-
-### Hooks Rules
-- Call hooks at top level only
-- Custom hooks start with 'use'
-- Extract complex logic to custom hooks
-
-### State Management
-- Local state: `useState`
-- Global state: Zustand
-- Server state: TanStack Query
-- Form state: react-hook-form
-
-## Code Organization
-```
-src/
-├── components/
-│   ├── ui/          # Reusable UI components
-│   └── features/    # Feature-specific components
-├── hooks/           # Custom React hooks
-├── lib/            # Utilities and helpers
-├── pages/          # Route components
-└── stores/         # Zustand stores
-```
-
-## Styling
-- **Primary**: TailwindCSS utility classes
-- **Components**: shadcn/ui
-- **Dynamic**: CSS variables + Tailwind
-
-## Testing
-- **Unit**: Vitest + React Testing Library
-- **E2E**: Playwright
-- **Coverage**: 80% minimum
-```
-
-### Directory-Specific CLAUDE.md
-
-**Command:**
-```bash
-/claudemd-builder --directory=src/components/forms
-```
-
-**Generated src/components/forms/CLAUDE.md:**
-```markdown
-# Forms Directory Context
-
-## Purpose
-Reusable form components with validation and error handling
-
-## Patterns
-
-### Form Component Structure
-```typescript
-interface FormProps {
-  onSubmit: (data: FormData) => Promise<void>;
-  defaultValues?: Partial<FormData>;
-}
-
-export function MyForm({ onSubmit, defaultValues }: FormProps) {
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues
-  });
-  
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* fields */}
-      </form>
-    </Form>
-  );
-}
-```
-
-## Validation
-- **Always use Zod**: Define schema in same file
-- **Field-level errors**: Display immediately
-- **Submit-level errors**: Show in toast/alert
-
-## Accessibility
-- Label every input
-- Use proper ARIA attributes
-- Keyboard navigation support
-- Error announcements
-```
-
-### Hierarchical CLAUDE.md Generation
-
-**Command:**
-```bash
-/claudemd-builder --hierarchy
-```
-
-**Generated Structure:**
-```
-project/
-├── CLAUDE.md                    # Root context (project-wide)
-├── src/
-│   ├── CLAUDE.md               # Source code context
-│   ├── components/
-│   │   ├── CLAUDE.md           # Component patterns
-│   │   └── forms/
-│   │       └── CLAUDE.md       # Form-specific patterns
-│   ├── api/
-│   │   └── CLAUDE.md           # API design patterns
-│   └── lib/
-│       └── CLAUDE.md           # Utility guidelines
-└── tests/
-    └── CLAUDE.md                # Testing standards
-```
-
-**Context Resolution:**
-Claude reads from most specific → general:
-1. `src/components/forms/CLAUDE.md` (most specific)
-2. `src/components/CLAUDE.md`
-3. `src/CLAUDE.md`
-4. `CLAUDE.md` (root - most general)
-
-### Update Existing CLAUDE.md
-
-**Command:**
-```bash
-/claudemd-builder --update
-```
-
-**Process:**
-```
-[Analyzing Changes]
-✓ New patterns detected:
-  - React 19 use() hook usage
-  - Server Actions implementation
-  - Updated TypeScript to 5.3
-
-[Updating CLAUDE.md]
-✓ Added React 19 patterns section
-✓ Updated Technology Stack versions
-✓ Added Server Actions examples
-✓ Updated TypeScript guidelines
-
-✓ CLAUDE.md updated successfully
-```
-
-### Validate CLAUDE.md
-
-**Command:**
-```bash
-/claudemd-builder --validate
-```
-
-**Validation Report:**
-```
-[CLAUDE.md Validation]
-
-✓ Technology Stack: Complete
-✓ Coding Standards: Complete
-✓ File Organization: Complete
-⚠ Architecture Decisions: Missing database strategy
-⚠ Testing Guidelines: Missing E2E test patterns
-✗ Common Patterns: Section missing
-
-Recommendations:
-1. Add database architecture decisions
-2. Document E2E testing approach
-3. Create Common Patterns section with examples
-
-Completeness: 70%
-```
 ```bash
 /claudemd-builder --init
 ```
@@ -508,6 +230,7 @@ Completeness: 70%
 ## Technology Stack
 
 ### Frontend
+
 - React 19.1.1 (React Compiler enabled)
 - Next.js 15.5.2 (App Router)
 - TailwindCSS v4.1.13
@@ -515,17 +238,20 @@ Completeness: 70%
 - Framer Motion for animations
 
 ### Backend
+
 - Next.js API Routes
 - Prisma ORM (PostgreSQL)
 - tRPC for type-safe APIs
 - better-auth v1.3.9
 
 ### Testing
+
 - Vitest (unit/integration)
 - Playwright (E2E)
 - React Testing Library
 
 ### Tooling
+
 - TypeScript 5.x (strict mode)
 - Biome (linting/formatting)
 - pnpm (package manager)
@@ -533,92 +259,189 @@ Completeness: 70%
 ## Coding Standards
 
 ### TypeScript
+
 - **Strict mode enabled**: No `any`, use `unknown`
 - **Explicit return types**: For public functions
 - **Interfaces over types**: For public APIs
 ```
-```text
-### React Components
-- **Server Components by default**: Only use 'use client' when necessary
-- **Async Server Components**: For data fetching
-- **Named exports**: For components
+```typescript
+// ✅ Server Component (default)
+export async function UserProfile({ userId }: { userId: string }) {
+  const user = await db.user.findUnique({ where: { id: userId } });
+  return <div>{user.name}</div>;
+}
+
+// ✅ Client Component (when needed)
+'use client';
+
+export function InteractiveButton() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+}
 ```
 ```text
-### File Organization
+app/
+├── (auth)/          # Auth routes group
+├── (dashboard)/     # Dashboard routes group
+└── api/            # API routes
+
+components/
+├── ui/             # shadcn/ui components
+├── forms/          # Form components
+└── layout/         # Layout components
+
+lib/
+├── api/            # API clients
+├── db/             # Prisma client
+└── utils/          # Utilities
 ```
-```text
-### Naming Conventions
-- Files: kebab-case (`user-profile.tsx`)
-- Components: PascalCase (`UserProfile`)
-- Functions: camelCase (`getUserById`)
-- Constants: UPPER_SNAKE_CASE (`MAX_RETRIES`)
 
 ## Architecture Decisions
-
 ### Authentication
+
 - **Library**: better-auth v1.3.9
 - **Strategy**: JWT with refresh tokens
 - **Session**: 15min access, 7d refresh
 - **Storage**: HTTP-only cookies
 
 ### Database
+
 - **ORM**: Prisma
 - **Database**: PostgreSQL
 - **Migrations**: Prisma Migrate
 - **Seeding**: `prisma/seed.ts`
 
 ### API Layer
+
 - **Type Safety**: tRPC for internal APIs
 - **REST**: For public/webhook endpoints
 - **Validation**: Zod schemas
 
 ## Common Patterns
-
 ### Data Fetching
-```
-```text
-### Form Handling
-```
-```text
-### Error Handling
-```
-```text
-## Testing Guidelines
 
+```typescript
+// Use async Server Components
+export async function ProductList() {
+  const products = await db.product.findMany();
+  return <div>{products.map(p => <ProductCard key={p.id} product={p} />)}</div>;
+}
+```
+
+### Form Handling
+
+```typescript
+// Use react-hook-form + Zod
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const formSchema = z.object({
+  email: z.string().email(),
+});
+
+export function ContactForm() {
+  const form = useForm({ resolver: zodResolver(formSchema) });
+  return <form onSubmit={form.handleSubmit(onSubmit)}>...</form>;
+}
+```
+
+### Error Handling
+
+```typescript
+// Always use Error Boundaries
+import { ErrorBoundary } from '@/components/error-boundary';
+
+export default function Layout({ children }) {
+  return (
+    <ErrorBoundary fallback={<ErrorPage />}>
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
+```typescript
+// Use async Server Components
+export async function ProductList() {
+  const products = await db.product.findMany();
+  return <div>{products.map(p => <ProductCard key={p.id} product={p} />)}</div>;
+}
+```
+```typescript
+// Use react-hook-form + Zod
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const formSchema = z.object({
+  email: z.string().email(),
+});
+
+export function ContactForm() {
+  const form = useForm({ resolver: zodResolver(formSchema) });
+  return <form onSubmit={form.handleSubmit(onSubmit)}>...</form>;
+}
+```
+```typescript
+// Always use Error Boundaries
+import { ErrorBoundary } from '@/components/error-boundary';
+
+export default function Layout({ children }) {
+  return (
+    <ErrorBoundary fallback={<ErrorPage />}>
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
+
+## Testing Guidelines
 - **Coverage target**: 80% for business logic
 - **Test naming**: `describe` + `it` pattern
 - **Async tests**: Use `async/await`, not callbacks
 - **Mocking**: Minimal mocking, prefer real implementations
 
 ## Development Workflow
-
 1. **Branch naming**: `feat/`, `fix/`, `refactor/`, `docs/`
 2. **Commit messages**: Conventional Commits format
 3. **PR requirements**: Tests + passing CI + review
 4. **Deployment**: Auto-deploy on merge to `main`
 
 ## Important Constraints
-
 - **No barrel exports**: Use explicit imports
 - **No default exports**: Use named exports
 - **No any type**: Use unknown or proper types
 - **Server Components default**: Only 'use client' when necessary
 
 ## AI Assistant Instructions
-
 When writing code:
+
 1. Follow TypeScript strict mode
 2. Use Server Components by default
 3. Validate with Zod schemas
 4. Add error boundaries
 5. Write tests for new features
 6. Follow file naming conventions
-```
+
+````
+
+### Use Pre-Built Template
+
+**Command:**
 ```bash
 /claudemd-builder --template=react
-```
-```markdown
+````
+
+**Generated React Template:**
+
+````markdown
 # React Project - Claude Code Context
+```text
+### Use Pre-Built Template
+
+**Command:**
+```
+```text
+**Generated React Template:**
+```
 
 ## Stack
 - React 19.1.1
@@ -628,16 +451,119 @@ When writing code:
 - React Router 6
 
 ## Component Patterns
-
 ### Functional Components (Required)
+
+```typescript
+// ✅ Use function declarations
+export function MyComponent({ prop }: Props) {
+  return <div>{prop}</div>;
+}
+
+// ❌ Avoid arrow functions for components
+const MyComponent = ({ prop }: Props) => <div>{prop}</div>;
 ```
-```text
+````
+
 ### Hooks Rules
+
 - Call hooks at top level only
 - Custom hooks start with 'use'
 - Extract complex logic to custom hooks
 
 ### State Management
+
+- Local state: `useState`
+- Global state: Zustand
+- Server state: TanStack Query
+- Form state: react-hook-form
+
+## Code Organization
+
+```
+src/
+├── components/
+│   ├── ui/          # Reusable UI components
+│   └── features/    # Feature-specific components
+├── hooks/           # Custom React hooks
+├── lib/            # Utilities and helpers
+├── pages/          # Route components
+└── stores/         # Zustand stores
+```
+
+## Styling
+
+- **Primary**: TailwindCSS utility classes
+- **Components**: shadcn/ui
+- **Dynamic**: CSS variables + Tailwind
+
+## Testing
+
+- **Unit**: Vitest + React Testing Library
+- **E2E**: Playwright
+- **Coverage**: 80% minimum
+
+````
+
+### Directory-Specific CLAUDE.md
+
+**Command:**
+```bash
+/claudemd-builder --directory=src/components/forms
+````
+
+**Generated src/components/forms/CLAUDE.md:**
+
+````markdown
+# Forms Directory Context
+
+## Purpose
+
+Reusable form components with validation and error handling
+
+## Patterns
+
+### Form Component Structure
+
+```typescript
+interface FormProps {
+  onSubmit: (data: FormData) => Promise<void>;
+  defaultValues?: Partial<FormData>;
+}
+
+export function MyForm({ onSubmit, defaultValues }: FormProps) {
+  const form = useForm({
+    resolver: zodResolver(schema),
+    defaultValues
+  });
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {/* fields */}
+      </form>
+    </Form>
+  );
+}
+```
+````
+```typescript
+// ✅ Use function declarations
+export function MyComponent({ prop }: Props) {
+  return <div>{prop}</div>;
+}
+
+// ❌ Avoid arrow functions for components
+const MyComponent = ({ prop }: Props) => <div>{prop}</div>;
+```
+```text
+### Hooks Rules
+
+- Call hooks at top level only
+- Custom hooks start with 'use'
+- Extract complex logic to custom hooks
+
+### State Management
+
 - Local state: `useState`
 - Global state: Zustand
 - Server state: TanStack Query
@@ -647,11 +573,13 @@ When writing code:
 ```
 ```text
 ## Styling
+
 - **Primary**: TailwindCSS utility classes
 - **Components**: shadcn/ui
 - **Dynamic**: CSS variables + Tailwind
 
 ## Testing
+
 - **Unit**: Vitest + React Testing Library
 - **E2E**: Playwright
 - **Coverage**: 80% minimum
@@ -663,13 +591,14 @@ When writing code:
 # Forms Directory Context
 
 ## Purpose
+
 Reusable form components with validation and error handling
 
 ## Patterns
 
 ### Form Component Structure
 ```
-```text
+
 ## Validation
 - **Always use Zod**: Define schema in same file
 - **Field-level errors**: Display immediately
@@ -680,11 +609,19 @@ Reusable form components with validation and error handling
 - Use proper ARIA attributes
 - Keyboard navigation support
 - Error announcements
-```
+
+````
+
+### Hierarchical CLAUDE.md Generation
+
+**Command:**
 ```bash
 /claudemd-builder --hierarchy
+````
+
+**Generated Structure:**
+
 ```
-```text
 project/
 ├── CLAUDE.md                    # Root context (project-wide)
 ├── src/
@@ -700,10 +637,26 @@ project/
 └── tests/
     └── CLAUDE.md                # Testing standards
 ```
+
+**Context Resolution:**
+Claude reads from most specific → general:
+
+1. `src/components/forms/CLAUDE.md` (most specific)
+2. `src/components/CLAUDE.md`
+3. `src/CLAUDE.md`
+4. `CLAUDE.md` (root - most general)
+
+### Update Existing CLAUDE.md
+
+**Command:**
+
 ```bash
 /claudemd-builder --update
 ```
-```text
+
+**Process:**
+
+```
 [Analyzing Changes]
 ✓ New patterns detected:
   - React 19 use() hook usage
@@ -718,10 +671,18 @@ project/
 
 ✓ CLAUDE.md updated successfully
 ```
+
+### Validate CLAUDE.md
+
+**Command:**
+
 ```bash
 /claudemd-builder --validate
 ```
-```text
+
+**Validation Report:**
+
+```
 [CLAUDE.md Validation]
 
 ✓ Technology Stack: Complete
@@ -740,9 +701,11 @@ Completeness: 70%
 ```
 
 ## Best Practices
+
 ### What to Include
 
 ✅ **Do Include:**
+
 - Technology stack and versions
 - Coding standards with examples
 - File organization structure
@@ -753,6 +716,7 @@ Completeness: 70%
 - Development workflow
 
 ❌ **Don't Include:**
+
 - Implementation details (code duplicates)
 - Frequently changing data
 - Secrets or credentials
@@ -762,7 +726,69 @@ Completeness: 70%
 ### Writing Effective Context
 
 **Good Context (Specific):**
+
 ```markdown
+```text
+### Hierarchical CLAUDE.md Generation
+
+**Command:**
+```
+```text
+**Generated Structure:**
+```
+```text
+**Context Resolution:**
+Claude reads from most specific → general:
+
+1. `src/components/forms/CLAUDE.md` (most specific)
+2. `src/components/CLAUDE.md`
+3. `src/CLAUDE.md`
+4. `CLAUDE.md` (root - most general)
+
+### Update Existing CLAUDE.md
+
+**Command:**
+```
+```text
+**Process:**
+```
+```text
+### Validate CLAUDE.md
+
+**Command:**
+```
+```text
+**Validation Report:**
+```
+```text
+## Best Practices
+
+### What to Include
+
+✅ **Do Include:**
+
+- Technology stack and versions
+- Coding standards with examples
+- File organization structure
+- Naming conventions
+- Common patterns
+- Architecture decisions
+- Testing guidelines
+- Development workflow
+
+❌ **Don't Include:**
+
+- Implementation details (code duplicates)
+- Frequently changing data
+- Secrets or credentials
+- Personal preferences
+- Obvious best practices
+
+### Writing Effective Context
+
+**Good Context (Specific):**
+```
+
 ## Authentication
 - Library: better-auth v1.3.9
 - Session: 15min access token, 7d refresh
@@ -771,7 +797,12 @@ Completeness: 70%
 ```
 
 **Bad Context (Vague):**
+
 ```markdown
+```text
+**Bad Context (Vague):**
+```
+
 ## Authentication
 - We use authentication
 - Sessions expire eventually
@@ -790,32 +821,11 @@ Completeness: 70%
 git add CLAUDE.md src/**/*.ts
 git commit -m "feat: Add user authentication + update CLAUDE.md"
 ```
-```markdown
-## Authentication
-- Library: better-auth v1.3.9
-- Session: 15min access token, 7d refresh
-- Storage: HTTP-only secure cookies
-- Middleware: app/middleware.ts verifies on every request
-```
-```markdown
-## Authentication
-- We use authentication
-- Sessions expire eventually
-- Cookies store tokens
-```
-```bash
-# Every major change:
-1. Add new pattern to CLAUDE.md
-2. Update technology versions
-3. Document architectural decisions
-4. Commit with code changes
-
-git add CLAUDE.md src/**/*.ts
-git commit -m "feat: Add user authentication + update CLAUDE.md"
-```
 
 ## Team Collaboration
+
 ### Onboarding New Developers
+
 ```bash
 # Day 1: New developer clones repo
 git clone repo.git
@@ -832,30 +842,7 @@ Result: Productive in hours, not days
 ```
 
 ### Consistency Across Team
-```bash
-# All developers use same CLAUDE.md
-# AI generates consistent code:
-- Same naming conventions
-- Same file structure
-- Same patterns
-- Same testing approach
 
-Result: Uniform codebase, easier reviews
-```
-```bash
-# Day 1: New developer clones repo
-git clone repo.git
-cd repo
-
-# Claude Code reads CLAUDE.md automatically
-# New developer gets instant context:
-- Coding standards
-- Architecture patterns
-- Testing approach
-- Common pitfalls
-
-Result: Productive in hours, not days
-```
 ```bash
 # All developers use same CLAUDE.md
 # AI generates consistent code:
@@ -868,18 +855,7 @@ Result: Uniform codebase, easier reviews
 ```
 
 ## Integration with /init
-```bash
-# Claude Code built-in command
-/init
 
-# Automatically:
-1. Scans project structure
-2. Detects frameworks and tools
-3. Generates starter CLAUDE.md
-4. Prompts for customization
-
-Result: Quick-start CLAUDE.md in seconds
-```
 ```bash
 # Claude Code built-in command
 /init
@@ -894,7 +870,9 @@ Result: Quick-start CLAUDE.md in seconds
 ```
 
 ## Advanced Patterns
+
 ### Monorepo CLAUDE.md
+
 ```
 monorepo/
 ├── CLAUDE.md                    # Monorepo-wide standards
@@ -911,42 +889,40 @@ monorepo/
 ```
 
 ### Environment-Specific Context
+
 ```markdown
-## Development vs Production
-
-### Development
-- Database: Local PostgreSQL
-- API: http://localhost:3000
-- Auth: Mock OAuth for testing
-
-### Production  
-- Database: Supabase PostgreSQL
-- API: https://api.example.com
-- Auth: Real OAuth2 providers
+```text
+### Keep It Updated
 ```
 ```text
-monorepo/
-├── CLAUDE.md                    # Monorepo-wide standards
-├── apps/
-│   ├── web/
-│   │   └── CLAUDE.md           # Web app specific
-│   └── api/
-│       └── CLAUDE.md           # API specific
-└── packages/
-    ├── ui/
-    │   └── CLAUDE.md           # UI library patterns
-    └── database/
-        └── CLAUDE.md            # Database patterns
-```
-```markdown
-## Development vs Production
+## Team Collaboration
 
+### Onboarding New Developers
+```
+```text
+### Consistency Across Team
+```
+```text
+## Integration with /init
+```
+```text
+## Advanced Patterns
+
+### Monorepo CLAUDE.md
+```
+```text
+### Environment-Specific Context
+```
+
+## Development vs Production
 ### Development
+
 - Database: Local PostgreSQL
 - API: http://localhost:3000
 - Auth: Mock OAuth for testing
 
-### Production  
+### Production
+
 - Database: Supabase PostgreSQL
 - API: https://api.example.com
 - Auth: Real OAuth2 providers

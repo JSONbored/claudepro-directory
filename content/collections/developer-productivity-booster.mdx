@@ -16,8 +16,8 @@ seoDescription: >-
   code formatting, and enhanced visual feedback. This collection combines
   product...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-02'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-02"
 installable: false
 usageSnippet: >-
   Start with `auto-code-formatter-hook` → `auto-save-backup` →
@@ -46,7 +46,7 @@ estimatedSetupTime: 15 minutes
 difficulty: beginner
 prerequisites:
   - Git repository initialized
-  - 'Code formatter (Prettier, Black, etc.) installed'
+  - "Code formatter (Prettier, Black, etc.) installed"
   - Basic git workflow knowledge
 tags:
   - productivity
@@ -74,6 +74,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.
 
 ## Features
@@ -139,18 +140,23 @@ Install the snippets and shortcuts first for immediate productivity gains. Then 
 6. `git-smart-commit`
 
 ## Troubleshooting
+
 ### Auto-formatter hook conflicts with git-smart-commit command
 
 Install auto-code-formatter-hook before git-smart-commit. Configure formatter exclusions in .prettierignore or similar. Ensure both use same formatter version to prevent conflicting reformats.
+
 ### Statuslines not displaying after installing all hooks first
 
 Install hooks first, then statuslines, then commands per installationOrder. Restart Claude Code after installing statuslines. Check View > Statusline is enabled in preferences.
+
 ### Auto-save-backup interferes with git-status-statusline updates
 
-Configure auto-save-backup to ignore .git directory. Add .git/** to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.
+Configure auto-save-backup to ignore .git directory. Add .git/\*\* to backup exclusions. Ensure git-status-statusline polling interval allows backup completion between updates.
+
 ### Missing code formatter binary prevents hook from executing
 
 Install formatter globally: npm install -g prettier or pip install black. Verify formatter command available in PATH: which prettier. Then reinstall auto-code-formatter-hook.
+
 ### Session timer statusline conflicts with git status display
 
 Both statuslines can coexist. Configure statusline layout in Claude Code settings: place session-timer-statusline on left, git-status-statusline on right. Restart after configuration change.

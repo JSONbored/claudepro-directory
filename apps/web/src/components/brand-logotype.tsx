@@ -5,7 +5,10 @@ type BrandLogotypeProps = {
   label?: string;
 };
 
-export function BrandLogotype({ className, label = "HeyClaude" }: BrandLogotypeProps) {
+export function BrandLogotype({
+  className,
+  label = "HeyClaude",
+}: BrandLogotypeProps) {
   return (
     <svg
       viewBox="0 0 160 24"
@@ -23,7 +26,7 @@ export function BrandLogotype({ className, label = "HeyClaude" }: BrandLogotypeP
           fontWeight: 640,
           letterSpacing: "-0.045em",
           fontFamily:
-            '"Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+            '"Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}
       >
         {label}

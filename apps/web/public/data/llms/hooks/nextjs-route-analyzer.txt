@@ -14,9 +14,9 @@ Analyzes Next.js page routes and generates a route map when pages are added or m
 - documentation
 ## Content
 ## Features
-- Comprehensive Next.js route analysis for both Pages and App Router including Pages Router detection (pages/, src/pages/ directories), App Router detection (app/, src/app/ directories), route file detection (page.tsx, page.jsx, route.tsx, route.jsx for App Router, *.tsx, *.jsx for Pages Router), layout file detection (layout.tsx, layout.jsx) for App Router, and project structure validation (package.json with next dependency)
+- Comprehensive Next.js route analysis for both Pages and App Router including Pages Router detection (pages/, src/pages/ directories), App Router detection (app/, src/app/ directories), route file detection (page.tsx, page.jsx, route.tsx, route.jsx for App Router, _.tsx, _.jsx for Pages Router), layout file detection (layout.tsx, layout.jsx) for App Router, and project structure validation (package.json with next dependency)
 - Dynamic route detection with parameter mapping including bracket notation detection ([id], [slug] patterns), catch-all route detection ([...slug] patterns), optional catch-all route detection ([[...slug]] patterns), parameter name extraction from bracket notation, and route parameter documentation with parameter types and constraints
-- API endpoint discovery and documentation generation including API route detection (/api/ path segments), route.tsx/jsx detection in App Router (app/api/*/route.tsx), pages/api/ detection in Pages Router (pages/api/*.tsx), API endpoint listing with HTTP method detection, and API route documentation with endpoint descriptions
+- API endpoint discovery and documentation generation including API route detection (/api/ path segments), route.tsx/jsx detection in App Router (app/api/_/route.tsx), pages/api/ detection in Pages Router (pages/api/_.tsx), API endpoint listing with HTTP method detection, and API route documentation with endpoint descriptions
 - Route hierarchy visualization and structure analysis including route tree generation with parent-child relationships, nested route detection (nested directories), route depth analysis (route nesting levels), and route hierarchy visualization with indentation and tree structure
 - Catch-all and optional catch-all route detection with catch-all pattern matching ([...slug] bracket patterns), optional catch-all pattern matching ([[...slug]] double bracket patterns), catch-all route classification with route type identification, and catch-all route recommendations with usage guidelines
 - Route groups and parallel routes analysis including route group detection ((group) directory patterns), parallel route detection (@parallel directory patterns), route group organization with group name extraction, parallel route structure analysis, and route group/parallel route documentation
@@ -58,10 +58,7 @@ Analyzes Next.js page routes and generates a route map when pages are added or m
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/nextjs-route-analyzer.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -71,10 +68,7 @@ Analyzes Next.js page routes and generates a route map when pages are added or m
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/nextjs-route-analyzer.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -96,7 +90,7 @@ fi
 # Check if this is a Next.js page, component, or route file
 if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FILE_PATH" == *src/pages/*.* ]] || [[ "$FILE_PATH" == *src/app/*.* ]]; then
   echo "🗺️ Next.js Route Analysis for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize analysis counters
   TOTAL_ROUTES=0
   STATIC_ROUTES=0
@@ -105,12 +99,12 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   CATCH_ALL_ROUTES=0
   ERRORS=0
   WARNINGS=0
-  
+
   # Function to report analysis results
   report_analysis() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -128,30 +122,30 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
         ;;
     esac
   }
-  
+
   # Detect Next.js project structure
   PROJECT_ROOT="."
   PAGES_DIR=""
   APP_DIR=""
   SRC_PAGES_DIR=""
   SRC_APP_DIR=""
-  
+
   # Find project root and routing directories
   if [ -f "./package.json" ]; then
     # Check if this is a Next.js project
     if grep -q '"next"' "./package.json" 2>/dev/null; then
       echo "   📦 Next.js project detected" >&2
-      
+
       # Check for different routing structures
       [ -d "./pages" ] && PAGES_DIR="./pages"
       [ -d "./app" ] && APP_DIR="./app"
       [ -d "./src/pages" ] && SRC_PAGES_DIR="./src/pages"
       [ -d "./src/app" ] && SRC_APP_DIR="./src/app"
-      
+
       if [ -n "$APP_DIR" ] || [ -n "$SRC_APP_DIR" ]; then
         echo "   🔧 App Router structure detected" >&2
       fi
-      
+
       if [ -n "$PAGES_DIR" ] || [ -n "$SRC_PAGES_DIR" ]; then
         echo "   📄 Pages Router structure detected" >&2
       fi
@@ -161,26 +155,26 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   else
     report_analysis "WARNING" "No package.json found - may not be in project root"
   fi
-  
+
   # Create temporary files for route analysis
   ROUTES_FILE="/tmp/nextjs_routes_$$"
   API_ROUTES_FILE="/tmp/nextjs_api_routes_$$"
   ROUTE_MAP_FILE="/tmp/nextjs_route_map_$$"
-  
+
   echo "📊 Analyzing route structure..." >&2
-  
+
   # Function to analyze route type
   analyze_route_type() {
     local route_path="$1"
     local file_path="$2"
-    
+
     # Check if it's an API route
     if [[ "$file_path" == *"/api/"* ]] || [[ "$route_path" == *"/api/"* ]]; then
       API_ROUTES=$((API_ROUTES + 1))
       echo "api|$route_path|$file_path" >> "$API_ROUTES_FILE"
       return
     fi
-    
+
     # Check route complexity
     if [[ "$route_path" == *"[..."* ]]; then
       # Catch-all route
@@ -196,34 +190,34 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       echo "static|$route_path|$file_path" >> "$ROUTES_FILE"
     fi
   }
-  
+
   # Function to convert file path to route
   file_to_route() {
     local file_path="$1"
     local base_dir="$2"
-    
+
     # Remove base directory and file extension
     local route=$(echo "$file_path" | sed "s|^$base_dir||" | sed 's|\\.[jt]sx\\?$||')
-    
+
     # Handle special Next.js file names
     route=$(echo "$route" | sed 's|/page$||')  # Remove /page suffix
     route=$(echo "$route" | sed 's|/route$||') # Remove /route suffix
     route=$(echo "$route" | sed 's|/index$||') # Remove /index suffix
-    
+
     # Convert empty route to root
     [ -z "$route" ] && route="/"
-    
+
     # Ensure route starts with /
     [[ "$route" != /* ]] && route="/$route"
-    
+
     echo "$route"
   }
-  
+
   # Analyze Pages Router (if exists)
   for pages_dir in "$PAGES_DIR" "$SRC_PAGES_DIR"; do
     if [ -n "$pages_dir" ] && [ -d "$pages_dir" ]; then
       echo "   📄 Analyzing Pages Router in $pages_dir..." >&2
-      
+
       # Find all page files
       find "$pages_dir" -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -234,12 +228,12 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   done
-  
+
   # Analyze App Router (if exists)
   for app_dir in "$APP_DIR" "$SRC_APP_DIR"; do
     if [ -n "$app_dir" ] && [ -d "$app_dir" ]; then
       echo "   🔧 Analyzing App Router in $app_dir..." >&2
-      
+
       # Find page.tsx/jsx and route.tsx/jsx files
       find "$app_dir" -type f \( -name "page.js" -o -name "page.jsx" -o -name "page.ts" -o -name "page.tsx" -o -name "route.js" -o -name "route.jsx" -o -name "route.ts" -o -name "route.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -248,7 +242,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
           echo "     📋 $route <- $file" >&2
         fi
       done
-      
+
       # Find layout files
       find "$app_dir" -type f \( -name "layout.js" -o -name "layout.jsx" -o -name "layout.ts" -o -name "layout.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -260,10 +254,10 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   done
-  
+
   # Calculate totals
   TOTAL_ROUTES=$((STATIC_ROUTES + DYNAMIC_ROUTES + CATCH_ALL_ROUTES))
-  
+
   # Generate route analysis report
   echo "" >&2
   echo "📊 Route Analysis Results:" >&2
@@ -273,7 +267,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   echo "   🔧 Dynamic Routes: $DYNAMIC_ROUTES" >&2
   echo "   🌐 Catch-all Routes: $CATCH_ALL_ROUTES" >&2
   echo "   🚀 API Routes: $API_ROUTES" >&2
-  
+
   # Route complexity analysis
   if [ "$TOTAL_ROUTES" -eq 0 ]; then
     report_analysis "WARNING" "No routes found in the project"
@@ -282,11 +276,11 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   else
     report_analysis "INFO" "Application has $TOTAL_ROUTES routes"
   fi
-  
+
   # API route analysis
   if [ "$API_ROUTES" -gt 0 ]; then
     report_analysis "FOUND" "$API_ROUTES API endpoints detected"
-    
+
     if [ -f "$API_ROUTES_FILE" ]; then
       echo "   🚀 API Endpoints:" >&2
       cat "$API_ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -294,11 +288,11 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   fi
-  
+
   # Dynamic route analysis
   if [ "$DYNAMIC_ROUTES" -gt 0 ] || [ "$CATCH_ALL_ROUTES" -gt 0 ]; then
     report_analysis "FOUND" "$((DYNAMIC_ROUTES + CATCH_ALL_ROUTES)) dynamic routes detected"
-    
+
     if [ -f "$ROUTES_FILE" ]; then
       echo "   🔧 Dynamic Routes:" >&2
       grep -E "^(dynamic|catch-all)" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -306,13 +300,13 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   fi
-  
+
   # Generate route map file
   if [ "$TOTAL_ROUTES" -gt 0 ] || [ "$API_ROUTES" -gt 0 ]; then
     echo "📄 Generating route map..." >&2
-    
+
     ROUTE_MAP_OUTPUT="nextjs-routes.json"
-    
+
     cat > "$ROUTE_MAP_OUTPUT" << EOF
 {
   "generated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -322,7 +316,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   "routes": {
     "static": [
 EOF
-    
+
     # Add static routes
     if [ -f "$ROUTES_FILE" ]; then
       grep "^static" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -331,12 +325,12 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ],
     "dynamic": [
 EOF
-    
+
     # Add dynamic routes
     if [ -f "$ROUTES_FILE" ]; then
       grep "^dynamic" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -348,12 +342,12 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ],
     "api": [
 EOF
-    
+
     # Add API routes
     if [ -f "$API_ROUTES_FILE" ]; then
       cat "$API_ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -362,38 +356,38 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ]
   }
 }
 EOF
-    
+
     report_analysis "FOUND" "Route map generated: $ROUTE_MAP_OUTPUT"
   fi
-  
+
   # Performance and optimization recommendations
   echo "💡 Route optimization recommendations..." >&2
-  
+
   if [ "$DYNAMIC_ROUTES" -gt 10 ]; then
     echo "   • Consider using ISR for frequently accessed dynamic routes" >&2
   fi
-  
+
   if [ "$API_ROUTES" -gt 0 ]; then
     echo "   • Consider API route optimization and caching strategies" >&2
   fi
-  
+
   if [ "$CATCH_ALL_ROUTES" -gt 3 ]; then
     echo "   • Review catch-all routes for potential over-use" >&2
   fi
-  
+
   if [ "$TOTAL_ROUTES" -gt 100 ]; then
     echo "   • Large application - consider route-based code splitting" >&2
   fi
-  
+
   # Clean up temporary files
   rm -f "$ROUTES_FILE" "$API_ROUTES_FILE" "$ROUTE_MAP_FILE"
-  
+
   echo "" >&2
   echo "📋 Next.js Route Analysis Summary:" >&2
   echo "=================================" >&2
@@ -402,7 +396,7 @@ EOF
   echo "   📊 Route breakdown: $STATIC_ROUTES static, $DYNAMIC_ROUTES dynamic, $API_ROUTES API" >&2
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   ❌ Errors: $ERRORS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ]; then
     if [ "$TOTAL_ROUTES" -gt 0 ] || [ "$API_ROUTES" -gt 0 ]; then
       echo "   🎉 Status: SUCCESS - Route analysis complete" >&2
@@ -412,7 +406,7 @@ EOF
   else
     echo "   ❌ Status: ISSUES - Route analysis completed with errors" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Next.js Routing Best Practices:" >&2
   echo "   • Use static routes when possible for better performance" >&2
@@ -421,7 +415,7 @@ EOF
   echo "   • Use API routes for server-side functionality" >&2
   echo "   • Organize routes logically with proper folder structure" >&2
   echo "   • Document your routing strategy for team collaboration" >&2
-  
+
 else
   # Not a Next.js file, exit silently
   exit 0
@@ -444,7 +438,7 @@ fi
 # Check if this is a Next.js page, component, or route file
 if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FILE_PATH" == *src/pages/*.* ]] || [[ "$FILE_PATH" == *src/app/*.* ]]; then
   echo "🗺️ Next.js Route Analysis for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize analysis counters
   TOTAL_ROUTES=0
   STATIC_ROUTES=0
@@ -453,12 +447,12 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   CATCH_ALL_ROUTES=0
   ERRORS=0
   WARNINGS=0
-  
+
   # Function to report analysis results
   report_analysis() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -476,30 +470,30 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
         ;;
     esac
   }
-  
+
   # Detect Next.js project structure
   PROJECT_ROOT="."
   PAGES_DIR=""
   APP_DIR=""
   SRC_PAGES_DIR=""
   SRC_APP_DIR=""
-  
+
   # Find project root and routing directories
   if [ -f "./package.json" ]; then
     # Check if this is a Next.js project
     if grep -q '"next"' "./package.json" 2>/dev/null; then
       echo "   📦 Next.js project detected" >&2
-      
+
       # Check for different routing structures
       [ -d "./pages" ] && PAGES_DIR="./pages"
       [ -d "./app" ] && APP_DIR="./app"
       [ -d "./src/pages" ] && SRC_PAGES_DIR="./src/pages"
       [ -d "./src/app" ] && SRC_APP_DIR="./src/app"
-      
+
       if [ -n "$APP_DIR" ] || [ -n "$SRC_APP_DIR" ]; then
         echo "   🔧 App Router structure detected" >&2
       fi
-      
+
       if [ -n "$PAGES_DIR" ] || [ -n "$SRC_PAGES_DIR" ]; then
         echo "   📄 Pages Router structure detected" >&2
       fi
@@ -509,26 +503,26 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   else
     report_analysis "WARNING" "No package.json found - may not be in project root"
   fi
-  
+
   # Create temporary files for route analysis
   ROUTES_FILE="/tmp/nextjs_routes_$$"
   API_ROUTES_FILE="/tmp/nextjs_api_routes_$$"
   ROUTE_MAP_FILE="/tmp/nextjs_route_map_$$"
-  
+
   echo "📊 Analyzing route structure..." >&2
-  
+
   # Function to analyze route type
   analyze_route_type() {
     local route_path="$1"
     local file_path="$2"
-    
+
     # Check if it's an API route
     if [[ "$file_path" == *"/api/"* ]] || [[ "$route_path" == *"/api/"* ]]; then
       API_ROUTES=$((API_ROUTES + 1))
       echo "api|$route_path|$file_path" >> "$API_ROUTES_FILE"
       return
     fi
-    
+
     # Check route complexity
     if [[ "$route_path" == *"[..."* ]]; then
       # Catch-all route
@@ -544,34 +538,34 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       echo "static|$route_path|$file_path" >> "$ROUTES_FILE"
     fi
   }
-  
+
   # Function to convert file path to route
   file_to_route() {
     local file_path="$1"
     local base_dir="$2"
-    
+
     # Remove base directory and file extension
     local route=$(echo "$file_path" | sed "s|^$base_dir||" | sed 's|\\.[jt]sx\\?$||')
-    
+
     # Handle special Next.js file names
     route=$(echo "$route" | sed 's|/page$||')  # Remove /page suffix
     route=$(echo "$route" | sed 's|/route$||') # Remove /route suffix
     route=$(echo "$route" | sed 's|/index$||') # Remove /index suffix
-    
+
     # Convert empty route to root
     [ -z "$route" ] && route="/"
-    
+
     # Ensure route starts with /
     [[ "$route" != /* ]] && route="/$route"
-    
+
     echo "$route"
   }
-  
+
   # Analyze Pages Router (if exists)
   for pages_dir in "$PAGES_DIR" "$SRC_PAGES_DIR"; do
     if [ -n "$pages_dir" ] && [ -d "$pages_dir" ]; then
       echo "   📄 Analyzing Pages Router in $pages_dir..." >&2
-      
+
       # Find all page files
       find "$pages_dir" -type f \( -name "*.js" -o -name "*.jsx" -o -name "*.ts" -o -name "*.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -582,12 +576,12 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   done
-  
+
   # Analyze App Router (if exists)
   for app_dir in "$APP_DIR" "$SRC_APP_DIR"; do
     if [ -n "$app_dir" ] && [ -d "$app_dir" ]; then
       echo "   🔧 Analyzing App Router in $app_dir..." >&2
-      
+
       # Find page.tsx/jsx and route.tsx/jsx files
       find "$app_dir" -type f \( -name "page.js" -o -name "page.jsx" -o -name "page.ts" -o -name "page.tsx" -o -name "route.js" -o -name "route.jsx" -o -name "route.ts" -o -name "route.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -596,7 +590,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
           echo "     📋 $route <- $file" >&2
         fi
       done
-      
+
       # Find layout files
       find "$app_dir" -type f \( -name "layout.js" -o -name "layout.jsx" -o -name "layout.ts" -o -name "layout.tsx" \) 2>/dev/null | while read -r file; do
         if [ -f "$file" ]; then
@@ -608,10 +602,10 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   done
-  
+
   # Calculate totals
   TOTAL_ROUTES=$((STATIC_ROUTES + DYNAMIC_ROUTES + CATCH_ALL_ROUTES))
-  
+
   # Generate route analysis report
   echo "" >&2
   echo "📊 Route Analysis Results:" >&2
@@ -621,7 +615,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   echo "   🔧 Dynamic Routes: $DYNAMIC_ROUTES" >&2
   echo "   🌐 Catch-all Routes: $CATCH_ALL_ROUTES" >&2
   echo "   🚀 API Routes: $API_ROUTES" >&2
-  
+
   # Route complexity analysis
   if [ "$TOTAL_ROUTES" -eq 0 ]; then
     report_analysis "WARNING" "No routes found in the project"
@@ -630,11 +624,11 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   else
     report_analysis "INFO" "Application has $TOTAL_ROUTES routes"
   fi
-  
+
   # API route analysis
   if [ "$API_ROUTES" -gt 0 ]; then
     report_analysis "FOUND" "$API_ROUTES API endpoints detected"
-    
+
     if [ -f "$API_ROUTES_FILE" ]; then
       echo "   🚀 API Endpoints:" >&2
       cat "$API_ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -642,11 +636,11 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   fi
-  
+
   # Dynamic route analysis
   if [ "$DYNAMIC_ROUTES" -gt 0 ] || [ "$CATCH_ALL_ROUTES" -gt 0 ]; then
     report_analysis "FOUND" "$((DYNAMIC_ROUTES + CATCH_ALL_ROUTES)) dynamic routes detected"
-    
+
     if [ -f "$ROUTES_FILE" ]; then
       echo "   🔧 Dynamic Routes:" >&2
       grep -E "^(dynamic|catch-all)" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -654,13 +648,13 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
       done
     fi
   fi
-  
+
   # Generate route map file
   if [ "$TOTAL_ROUTES" -gt 0 ] || [ "$API_ROUTES" -gt 0 ]; then
     echo "📄 Generating route map..." >&2
-    
+
     ROUTE_MAP_OUTPUT="nextjs-routes.json"
-    
+
     cat > "$ROUTE_MAP_OUTPUT" << EOF
 {
   "generated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -670,7 +664,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]] || [[ "$FI
   "routes": {
     "static": [
 EOF
-    
+
     # Add static routes
     if [ -f "$ROUTES_FILE" ]; then
       grep "^static" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -679,12 +673,12 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ],
     "dynamic": [
 EOF
-    
+
     # Add dynamic routes
     if [ -f "$ROUTES_FILE" ]; then
       grep "^dynamic" "$ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -696,12 +690,12 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ],
     "api": [
 EOF
-    
+
     # Add API routes
     if [ -f "$API_ROUTES_FILE" ]; then
       cat "$API_ROUTES_FILE" | while IFS='|' read -r type route file; do
@@ -710,38 +704,38 @@ EOF
       # Remove trailing comma from last entry
       sed -i '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null || sed -i '' '$ s/,$//' "$ROUTE_MAP_OUTPUT" 2>/dev/null
     fi
-    
+
     cat >> "$ROUTE_MAP_OUTPUT" << EOF
     ]
   }
 }
 EOF
-    
+
     report_analysis "FOUND" "Route map generated: $ROUTE_MAP_OUTPUT"
   fi
-  
+
   # Performance and optimization recommendations
   echo "💡 Route optimization recommendations..." >&2
-  
+
   if [ "$DYNAMIC_ROUTES" -gt 10 ]; then
     echo "   • Consider using ISR for frequently accessed dynamic routes" >&2
   fi
-  
+
   if [ "$API_ROUTES" -gt 0 ]; then
     echo "   • Consider API route optimization and caching strategies" >&2
   fi
-  
+
   if [ "$CATCH_ALL_ROUTES" -gt 3 ]; then
     echo "   • Review catch-all routes for potential over-use" >&2
   fi
-  
+
   if [ "$TOTAL_ROUTES" -gt 100 ]; then
     echo "   • Large application - consider route-based code splitting" >&2
   fi
-  
+
   # Clean up temporary files
   rm -f "$ROUTES_FILE" "$API_ROUTES_FILE" "$ROUTE_MAP_FILE"
-  
+
   echo "" >&2
   echo "📋 Next.js Route Analysis Summary:" >&2
   echo "=================================" >&2
@@ -750,7 +744,7 @@ EOF
   echo "   📊 Route breakdown: $STATIC_ROUTES static, $DYNAMIC_ROUTES dynamic, $API_ROUTES API" >&2
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   ❌ Errors: $ERRORS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ]; then
     if [ "$TOTAL_ROUTES" -gt 0 ] || [ "$API_ROUTES" -gt 0 ]; then
       echo "   🎉 Status: SUCCESS - Route analysis complete" >&2
@@ -760,7 +754,7 @@ EOF
   else
     echo "   ❌ Status: ISSUES - Route analysis completed with errors" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Next.js Routing Best Practices:" >&2
   echo "   • Use static routes when possible for better performance" >&2
@@ -769,7 +763,7 @@ EOF
   echo "   • Use API routes for server-side functionality" >&2
   echo "   • Organize routes logically with proper folder structure" >&2
   echo "   • Document your routing strategy for team collaboration" >&2
-  
+
 else
   # Not a Next.js file, exit silently
   exit 0
@@ -805,6 +799,7 @@ if [[ "$FILE_PATH" == *pages/*.* ]] || [[ "$FILE_PATH" == *app/*.* ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable Next.js route analysis
@@ -819,6 +814,7 @@ Complete hook configuration for .claude/settings.json to enable Next.js route an
   }
 }
 ```
+
 ### Route Type Classification
 
 Enhanced hook script for route type classification (static, dynamic, catch-all)
@@ -846,6 +842,7 @@ if [[ "$FILE_PATH" == *app/* ]] || [[ "$FILE_PATH" == *pages/* ]]; then
 fi
 exit 0
 ```
+
 ### API Route Discovery
 
 Enhanced hook script for API route discovery in both App Router and Pages Router
@@ -874,6 +871,7 @@ if [[ "$FILE_PATH" == *app/* ]] || [[ "$FILE_PATH" == *pages/* ]]; then
 fi
 exit 0
 ```
+
 ### Route Groups and Parallel Routes Analysis
 
 Enhanced hook script for route groups and parallel routes detection
@@ -1014,24 +1012,31 @@ exit 0
 ### Hook reports no Next.js project despite valid setup
 
 Verify package.json contains 'next' dependency and run from project root. The hook checks both /pages and /app directories, and /src variants. Ensure at least one routing directory exists. Verify package.json location. Test with various project structures.
+
 ### Route map JSON has trailing commas or invalid format
 
 The sed command to remove trailing commas may fail on macOS. Update to use 'sed -i "" ' syntax for BSD sed, or install GNU sed with 'brew install gnu-sed'. Validate output with jq. Verify sed syntax. Test with various sed versions.
+
 ### API routes not detected in App Router structure
 
-Ensure API routes use route.js/ts naming convention in App Router. The hook scans for /api/ path segments and route.* files. Pages Router uses pages/api/ directory structure. Verify route file naming. Test with various API route structures.
+Ensure API routes use route.js/ts naming convention in App Router. The hook scans for /api/ path segments and route.\* files. Pages Router uses pages/api/ directory structure. Verify route file naming. Test with various API route structures.
+
 ### Dynamic routes show incorrect parameter extraction
 
 The hook identifies brackets in paths but doesn't parse parameter names. Use the generated nextjs-routes.json for accurate mapping. Review file paths in the 'file' property for exact parameter structure. Verify bracket pattern matching. Test with various dynamic route patterns.
+
 ### Hook runs on every file change causing performance issues
 
-The hook processes all files in pages/ or app/ directories. For large projects, consider adding file type filtering (*.tsx, *.jsx only) or exclude non-route files like components and utilities. Verify file path patterns. Test with various file types.
+The hook processes all files in pages/ or app/ directories. For large projects, consider adding file type filtering (_.tsx, _.jsx only) or exclude non-route files like components and utilities. Verify file path patterns. Test with various file types.
+
 ### Route groups not detected in App Router
 
-Route groups use (group) directory naming. Verify directory names match pattern: find with -name '(*)' pattern. Check for route group directories in app/ structure. Verify directory naming conventions. Test with various route group structures.
+Route groups use (group) directory naming. Verify directory names match pattern: find with -name '(\*)' pattern. Check for route group directories in app/ structure. Verify directory naming conventions. Test with various route group structures.
+
 ### Parallel routes not detected in App Router
 
-Parallel routes use @parallel directory naming. Verify directory names start with @: find with -name '@*' pattern. Check for parallel route directories in app/ structure. Verify directory naming conventions. Test with various parallel route structures.
+Parallel routes use @parallel directory naming. Verify directory names start with @: find with -name '@\*' pattern. Check for parallel route directories in app/ structure. Verify directory naming conventions. Test with various parallel route structures.
+
 ### Layout files not included in route map
 
 Layout files are detected but not included in route map by default. Modify route map generation to include layout files in separate 'layouts' section. Verify layout file detection. Test with various layout structures.

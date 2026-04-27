@@ -23,7 +23,8 @@ export function absoluteUrl(path: string) {
 function toTwitterHandle(url: string) {
   try {
     const parsed = new URL(url);
-    if (parsed.hostname !== "x.com" && parsed.hostname !== "twitter.com") return undefined;
+    if (parsed.hostname !== "x.com" && parsed.hostname !== "twitter.com")
+      return undefined;
     const handle = parsed.pathname.split("/").filter(Boolean)[0];
     if (!handle) return undefined;
     return `@${handle.replace(/^@/, "")}`;
@@ -45,7 +46,7 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
     description,
     keywords: input.keywords,
     alternates: {
-      canonical
+      canonical,
     },
     openGraph: {
       type: "website",
@@ -58,17 +59,17 @@ export function buildPageMetadata(input: PageMetadataInput): Metadata {
           url: defaultSocialImage,
           width: 1200,
           height: 630,
-          alt: `${siteConfig.name} Claude directory`
-        }
-      ]
+          alt: `${siteConfig.name} Claude directory`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
       creator: twitterCreator,
-      images: [defaultSocialImage]
+      images: [defaultSocialImage],
     },
-    robots: input.robots
+    robots: input.robots,
   };
 }

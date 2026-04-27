@@ -63,7 +63,9 @@ Multi-provider AI performance dashboard with context occupancy tracking, truncat
 
 ## Examples
 ### Enhanced Performance Dashboard with Cost Tracking
+
 Extended version with cost per token and total cost metrics
+
 ```bash
 #!/usr/bin/env bash
 
@@ -137,8 +139,11 @@ echo -e "${BOLD}📊 ${model_display}${RESET}"
 echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit)) | ${TRUNC_COLOR}${truncation}${RESET}"
 echo -e "Rate: $(formatNumber $tokens_per_min) tok/min | Cost: $${cost} | Total: $(formatNumber $total_tokens)"
 ```
+
 ### Performance Dashboard with Custom Reliable Limit
+
 Configurable truncation threshold for different risk tolerances
+
 ```bash
 #!/usr/bin/env bash
 
@@ -201,8 +206,11 @@ echo -e "${BOLD}📊 ${model_display}${RESET}"
 echo -e "${OCC_COLOR}Occupancy: ${occupancy}%${RESET} ($(formatNumber $prompt_tokens)/$(formatNumber $context_limit)) | ${TRUNC_COLOR}${truncation}${RESET} (limit: ${RELIABLE_LIMIT_PERCENT}%)"
 echo -e "Total: $(formatNumber $total_tokens) tokens"
 ```
+
 ### Performance Dashboard Installation Example
+
 Complete setup script with model limit updates
+
 ```bash
 #!/bin/bash
 # Installation script for AI Model Performance Dashboard
@@ -391,24 +399,31 @@ echo "Note: Update model context limits in script as new models are released."
 ### Occupancy percentage always showing 0% or incorrect values
 
 Verify session.promptTokens exists in JSON: jq .session.promptTokens. Check context_limit set correctly for model. Test calculation: echo $((100000 * 100 / 1000000)) (should be 10). Ensure integer division working. Verify prompt_tokens is numeric: echo "$prompt_tokens" | grep -E '^[0-9]+$'.
+
 ### Model not recognized, showing default context_limit 100000
 
-Check model string extraction: jq -r '.model.id // .model.display_name'. Verify case statement matches model name pattern. Test model matching: echo "$model" | grep -i 'claude-sonnet-4'. Add custom model: Add case for *"your-model"*) context_limit=X ;; before default case. Check model name format in Claude Code JSON output.
+Check model string extraction: jq -r '.model.id // .model.display*name'. Verify case statement matches model name pattern. Test model matching: echo "$model" | grep -i 'claude-sonnet-4'. Add custom model: Add case for *"your-model"\_) context_limit=X ;; before default case. Check model name format in Claude Code JSON output.
+
 ### Tokens per minute showing 0 or extremely high numbers
 
 Verify session.startTime format: jq -r '.session.startTime'. Check date parsing works: macOS (date -j -f '%Y-%m-%dT%H:%M:%SZ' '2025-10-23T10:00:00Z' +%s) or Linux (date -d '2025-10-23T10:00:00Z' +%s). Ensure elapsed_seconds > 0. Check timezone handling. Verify session_start is not empty.
+
 ### Number formatting with commas not working (showing raw numbers)
 
 Check printf thousands separator support: printf "%'d" 1000000. If unsupported, formatNumber falls back to raw echo. Enable locale: export LC_NUMERIC=en_US.UTF-8. Test: locale | grep LC_NUMERIC. Verify printf supports ' flag (POSIX extension). Use alternative: sed 's/\([0-9]\{1,3\}\)$/\1/' for basic formatting.
+
 ### Truncation warning appearing too early or too late
 
-Adjust reliable_limit calculation (currently 65% of context_limit). Research shows models fail 30-35% before claimed limits. Increase for conservative: reliable_limit=$((context_limit * 50 / 100)). Decrease for aggressive: reliable_limit=$((context_limit * 75 / 100)). Set via environment variable: export RELIABLE_LIMIT_PERCENT=70. Test with known token counts.
+Adjust reliable_limit calculation (currently 65% of context_limit). Research shows models fail 30-35% before claimed limits. Increase for conservative: reliable_limit=$((context_limit * 50 / 100)). Decrease for aggressive: reliable_limit=$((context_limit \* 75 / 100)). Set via environment variable: export RELIABLE_LIMIT_PERCENT=70. Test with known token counts.
+
 ### TTFT (Time to First Token) estimation always shows same value
 
 TTFT is estimated based on prompt_tokens, not actual measured latency. For accurate TTFT, integrate with Claude Code API response timing. Current estimation: <10k tokens (~0.8s), 10k-50k (~1.2s), >50k (~2.5s). Consider adding actual timing measurement if Claude Code exposes response start time in JSON.
+
 ### Color codes not displaying correctly in terminal
 
 Verify terminal supports 256-color mode: echo $TERM (should include '256color' or 'xterm-256color'). Check ANSI code format: Use \033[38;5;Xm for 256-color mode. Test colors: echo -e '\033[38;5;46mGreen\033[0m'. Verify echo -e flag is used. Check terminal emulator color support settings.
+
 ### Multi-line dashboard not displaying correctly (showing as single line)
 
 Verify echo -e flag is used for escape sequence interpretation. Check terminal supports multi-line statuslines (Claude Code feature). Test: echo -e "Line 1\nLine 2". Some terminals may collapse multi-line output. Consider single-line format if multi-line not supported.

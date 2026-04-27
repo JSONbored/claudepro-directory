@@ -214,7 +214,6 @@ export function buildRegistryManifest(entries) {
     categoryOrder: categorySpec.categoryOrder,
     categories,
     artifacts: {
-      content: dataUrl("content-index.json"),
       directory: dataUrl("directory-index.json"),
       search: dataUrl("search-index.json"),
       raycast: dataUrl("raycast-index.json"),

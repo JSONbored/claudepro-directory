@@ -10,7 +10,7 @@ import {
   inferSectionBooleans,
   inferStructuredFields,
   normalizeBody,
-  validateEntry
+  validateEntry,
 } from "@heyclaude/registry/content-schema";
 
 const repoRoot = process.cwd();
@@ -30,7 +30,11 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
     const source = fs.readFileSync(filePath, "utf8");
     const parsed = matter(source);
     const normalizedBody = normalizeBody(parsed.content, category);
-    const inferred = inferStructuredFields(parsed.data, normalizedBody, category);
+    const inferred = inferStructuredFields(
+      parsed.data,
+      normalizedBody,
+      category,
+    );
     const validation = validateEntry(category, parsed.data, inferred);
     const sectionFlags = inferSectionBooleans(normalizedBody);
     const issues = [];
@@ -51,7 +55,10 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       issues.push("missing_seoDescription");
     }
 
-    if (!Array.isArray(parsed.data.keywords) || parsed.data.keywords.length === 0) {
+    if (
+      !Array.isArray(parsed.data.keywords) ||
+      parsed.data.keywords.length === 0
+    ) {
       issues.push("missing_keywords");
     }
 
@@ -63,7 +70,10 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       issues.push("placeholder_script_marker");
     }
 
-    if (parsed.data.category && String(parsed.data.category).trim() !== category) {
+    if (
+      parsed.data.category &&
+      String(parsed.data.category).trim() !== category
+    ) {
       issues.push("category_mismatch");
     }
 
@@ -89,11 +99,17 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       issues.push("collection_copy_snippet_present");
     }
 
-    if (parsed.data.hasPrerequisites === false && sectionFlags.hasPrerequisites) {
+    if (
+      parsed.data.hasPrerequisites === false &&
+      sectionFlags.hasPrerequisites
+    ) {
       issues.push("hasPrerequisites_false_but_section_exists");
     }
 
-    if (parsed.data.hasTroubleshooting === false && sectionFlags.hasTroubleshooting) {
+    if (
+      parsed.data.hasTroubleshooting === false &&
+      sectionFlags.hasTroubleshooting
+    ) {
       issues.push("hasTroubleshooting_false_but_section_exists");
     }
 
@@ -102,21 +118,26 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
       filePath: path.relative(repoRoot, filePath),
       slug: String(parsed.data.slug ?? fileName.replace(/\.mdx$/, "")),
       sourceType:
-        String(parsed.data.repoUrl ?? "").trim() || String(parsed.data.documentationUrl ?? "").trim()
+        String(parsed.data.repoUrl ?? "").trim() ||
+        String(parsed.data.documentationUrl ?? "").trim()
           ? "external"
           : "first_party",
       metadataOnly: !normalizedBody.trim(),
       missingRequired: validation.missingRequired,
       missingRecommended: validation.missingRecommended,
-      issues
+      issues,
     });
   }
 }
 
 fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
 
-const requiredIssues = report.filter((item) => item.missingRequired.length > 0).length;
-const recommendedIssues = report.filter((item) => item.missingRecommended.length > 0).length;
+const requiredIssues = report.filter(
+  (item) => item.missingRequired.length > 0,
+).length;
+const recommendedIssues = report.filter(
+  (item) => item.missingRecommended.length > 0,
+).length;
 const metadataOnly = report.filter((item) => item.metadataOnly).length;
 const semanticIssues = report.filter((item) => item.issues.length > 0).length;
 

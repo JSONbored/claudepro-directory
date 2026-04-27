@@ -3,22 +3,33 @@ name: Content Validation
 on:
   pull_request:
     paths:
+      - "apps/web/**"
+      - "packages/**"
       - "content/**"
       - "scripts/**"
       - "examples/content/**"
       - "integrations/raycast/**"
+      - "tests/**"
+      - ".trunk/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/content-validation.yml"
+      - "cloudflare/api-schema-heyclaude-openapi.yaml"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "playwright.config.ts"
+      - "vitest.config.ts"
   workflow_dispatch:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   validate-content:
     runs-on: ubuntu-latest
+    env:
+      TRUNK_TOKEN: ${{ secrets.TRUNK_TOKEN }}
+      TRUNK_ORG_SLUG: ${{ secrets.TRUNK_ORG_SLUG }}
     concurrency:
       group: content-validation-${{ github.ref }}
       cancel-in-progress: true
@@ -39,6 +50,33 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Clean test reports
+        run: rm -rf reports/junit
+
+      - name: Build registry artifacts
+        run: pnpm --filter web run prebuild
+
+      - name: Validate cleanup policy
+        run: pnpm validate:clean
+
+      - name: Run Vitest suite
+        run: pnpm test
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run browser smoke
+        run: pnpm test:e2e
+
+      - name: Upload test results to Trunk
+        if: ${{ always() && env.TRUNK_TOKEN != '' && env.TRUNK_ORG_SLUG != '' }}
+        continue-on-error: true
+        uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa
+        with:
+          junit-paths: reports/junit/*.xml
+          org-slug: ${{ env.TRUNK_ORG_SLUG }}
+          token: ${{ env.TRUNK_TOKEN }}
+
       - name: Validate content schema
         run: pnpm validate:content:strict
 
@@ -47,12 +85,6 @@ jobs:
 
       - name: Validate downloadable packages
         run: pnpm validate:packages
-
-      - name: Build registry artifacts
-        run: pnpm --filter web run prebuild
-
-      - name: Test registry artifact contracts
-        run: pnpm test:registry-artifacts
 
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
@@ -68,5 +100,25 @@ jobs:
           pnpm generate:readme
           git diff --exit-code README.md
 
+      - name: Type-check web app
+        run: pnpm type-check
+
       - name: Build web app
         run: pnpm build
+
+      - name: Install Raycast dependencies
+        working-directory: integrations/raycast
+        run: npm ci
+
+      - name: Lint Raycast extension
+        working-directory: integrations/raycast
+        run: npm run lint
+
+      - name: Build Raycast extension
+        working-directory: integrations/raycast
+        run: npm run build
+
+      - name: Trunk Check
+        uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b
+        with:
+          check-mode: all

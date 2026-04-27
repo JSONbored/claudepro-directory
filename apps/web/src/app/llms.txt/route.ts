@@ -5,8 +5,12 @@ export const revalidate = 3600;
 
 export async function GET() {
   const entries = await getDirectoryEntries();
-  const categoryPages = siteConfig.categoryOrder.map((category) => `${siteConfig.url}/${category}`);
-  const detailPages = entries.map((entry) => `${siteConfig.url}/${entry.category}/${entry.slug}`);
+  const categoryPages = siteConfig.categoryOrder.map(
+    (category) => `${siteConfig.url}/${category}`,
+  );
+  const detailPages = entries.map(
+    (entry) => `${siteConfig.url}/${entry.category}/${entry.slug}`,
+  );
 
   const lines = [
     `# ${siteConfig.name}`,
@@ -23,13 +27,15 @@ export async function GET() {
     ...detailPages,
     "",
     "## Per-Entry LLM Exports",
-    ...entries.map((entry) => `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`)
+    ...entries.map(
+      (entry) => `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`,
+    ),
   ];
 
   return new Response(lines.join("\n"), {
     headers: {
       "content-type": "text/plain; charset=utf-8",
-      "cache-control": "public, max-age=3600, stale-while-revalidate=86400"
-    }
+      "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+    },
   });
 }

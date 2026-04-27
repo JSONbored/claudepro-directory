@@ -27,6 +27,7 @@ The `/docs` command automatically generates comprehensive documentation includin
 
 ## Options
 ### Documentation Types
+
 - `--api` - Generate API documentation (OpenAPI/Swagger)
 - `--code` - Code documentation with JSDoc/docstrings
 - `--user` - User guides and tutorials
@@ -35,6 +36,7 @@ The `/docs` command automatically generates comprehensive documentation includin
 - `--all` - Comprehensive documentation suite (default)
 
 ### Output Formats
+
 - `--format=markdown` - Markdown documentation (default)
 - `--format=html` - Static HTML documentation
 - `--format=interactive` - Interactive documentation with examples
@@ -42,6 +44,7 @@ The `/docs` command automatically generates comprehensive documentation includin
 - `--format=confluence` - Confluence wiki format
 
 ### Documentation Features
+
 - `--examples` - Include runnable code examples
 - `--tutorials` - Generate step-by-step tutorials
 - `--diagrams` - Generate architecture and flow diagrams
@@ -49,6 +52,7 @@ The `/docs` command automatically generates comprehensive documentation includin
 - `--multilingual` - Generate documentation in multiple languages
 
 ### Customization
+
 - `--template=default` - Use default documentation template
 - `--template=minimal` - Minimal documentation template
 - `--template=enterprise` - Enterprise documentation template
@@ -57,11 +61,11 @@ The `/docs` command automatically generates comprehensive documentation includin
 ## Examples
 ### API Documentation Generation
 
-```javascript
+````javascript
 // Express.js API with comprehensive documentation
-const express = require('express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const express = require("express");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
 
@@ -120,7 +124,7 @@ const app = express();
  *         role: "user"
  *         createdAt: "2025-09-16T10:30:00Z"
  *         updatedAt: "2025-09-16T14:45:00Z"
- *   
+ *
  *     UserInput:
  *       type: object
  *       required:
@@ -141,7 +145,7 @@ const app = express();
  *           minimum: 13
  *           maximum: 120
  *           description: User's age in years
- *   
+ *
  *     Error:
  *       type: object
  *       properties:
@@ -160,7 +164,7 @@ const app = express();
  *         details:
  *           field: "email"
  *           message: "Invalid email format"
- *   
+ *
  *   responses:
  *     NotFound:
  *       description: Resource not found
@@ -183,7 +187,7 @@ const app = express();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Error'
- *   
+ *
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
@@ -198,30 +202,30 @@ const app = express();
  *     summary: Get all users
  *     description: |
  *       Retrieve a paginated list of all users in the system.
- *       
+ *
  *       ## Features
  *       - Pagination support with configurable page size
  *       - Filtering by role, status, and creation date
  *       - Sorting by multiple fields
  *       - Search functionality across name and email
- *       
+ *
  *       ## Usage Examples
- *       
+ *
  *       ### Basic usage
  *       ```
  *       GET /api/users
  *       ```
- *       
+ *
  *       ### With pagination
  *       ```
  *       GET /api/users?page=2&limit=20
  *       ```
- *       
+ *
  *       ### With filtering
  *       ```
  *       GET /api/users?role=admin&status=active
  *       ```
- *       
+ *
  *       ### With search
  *       ```
  *       GET /api/users?search=john&sort=name:asc
@@ -354,23 +358,23 @@ const app = express();
  *               code: "FORBIDDEN"
  *       500:
  *         $ref: '#/components/responses/ServerError'
- *   
+ *
  *   post:
  *     summary: Create a new user
  *     description: |
  *       Create a new user account in the system.
- *       
+ *
  *       ## Validation Rules
  *       - Name must be 2-100 characters long
  *       - Email must be unique and valid format
  *       - Age must be between 13-120 (if provided)
  *       - Password must meet complexity requirements
- *       
+ *
  *       ## Business Logic
  *       - New users are created with 'user' role by default
  *       - Email verification is sent upon creation
  *       - Account is initially inactive until email verification
- *       
+ *
  *       ## Rate Limiting
  *       - Maximum 5 user creations per hour per IP
  *       - Additional restrictions for automated requests
@@ -438,11 +442,11 @@ const app = express();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-app.get('/api/users', async (req, res) => {
+app.get("/api/users", async (req, res) => {
   // Implementation here...
 });
 
-app.post('/api/users', async (req, res) => {
+app.post("/api/users", async (req, res) => {
   // Implementation here...
 });
 
@@ -453,12 +457,12 @@ app.post('/api/users', async (req, res) => {
  *     summary: Get user by ID
  *     description: |
  *       Retrieve a specific user by their unique identifier.
- *       
+ *
  *       ## Access Control
  *       - Users can only access their own profile
  *       - Admins can access any user profile
  *       - Moderators can access non-admin user profiles
- *       
+ *
  *       ## Data Privacy
  *       - Sensitive fields are filtered based on access level
  *       - Full profile data only available to user themselves or admins
@@ -489,12 +493,12 @@ app.post('/api/users', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *   
+ *
  *   put:
  *     summary: Update user
  *     description: |
  *       Update an existing user's information.
- *       
+ *
  *       ## Update Rules
  *       - Users can only update their own profile
  *       - Admins can update any user profile
@@ -534,12 +538,12 @@ app.post('/api/users', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *   
+ *
  *   delete:
  *     summary: Delete user
  *     description: |
  *       Delete a user account from the system.
- *       
+ *
  *       ## Deletion Policy
  *       - Soft delete by default (marks as inactive)
  *       - Hard delete requires admin privileges and confirmation
@@ -586,18 +590,18 @@ app.post('/api/users', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
 
-app.put('/api/users/:id', async (req, res) => {
+app.put("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+app.delete("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
-```
+````
 
 **Generated API Documentation:**
 
@@ -610,22 +614,26 @@ The User Management API provides comprehensive functionality for managing user a
 
 ### Base URL
 ```
+
 https://api.example.com/v1
-```
+
+````
 
 ### Authentication
 All API endpoints require authentication using JWT Bearer tokens:
 
 ```bash
 Authorization: Bearer <your-jwt-token>
-```
+````
 
 ### Rate Limiting
+
 - **Standard endpoints**: 100 requests per 15 minutes
 - **Authentication endpoints**: 5 requests per 15 minutes
 - **User creation**: 5 requests per hour
 
 ### Response Format
+
 All responses are in JSON format with consistent error handling:
 
 ```json
@@ -639,6 +647,7 @@ All responses are in JSON format with consistent error handling:
 ## Quick Start
 
 ### 1. Authentication
+
 First, obtain an authentication token:
 
 ```bash
@@ -651,6 +660,7 @@ curl -X POST https://api.example.com/v1/auth/login \
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -665,6 +675,7 @@ curl -X POST https://api.example.com/v1/auth/login \
 ```
 
 ### 2. Get All Users
+
 Retrieve a list of users with pagination:
 
 ```bash
@@ -673,6 +684,7 @@ curl -X GET "https://api.example.com/v1/api/users?page=1&limit=20" \
 ```
 
 ### 3. Create a New User
+
 ```bash
 curl -X POST https://api.example.com/v1/api/users \
   -H "Authorization: Bearer <your-token>" \
@@ -685,6 +697,7 @@ curl -X POST https://api.example.com/v1/api/users \
 ```
 
 ### 4. Update User Information
+
 ```bash
 curl -X PUT https://api.example.com/v1/api/users/123e4567-e89b-12d3-a456-426614174000 \
   -H "Authorization: Bearer <your-token>" \
@@ -700,37 +713,37 @@ curl -X PUT https://api.example.com/v1/api/users/123e4567-e89b-12d3-a456-4266141
 ### JavaScript/Node.js
 
 ```javascript
-const axios = require('axios');
+const axios = require("axios");
 
 class UserAPIClient {
   constructor(baseURL, token) {
     this.client = axios.create({
       baseURL,
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
   }
-  
+
   async getUsers(params = {}) {
     try {
-      const response = await this.client.get('/api/users', { params });
+      const response = await this.client.get("/api/users", { params });
       return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
-  
+
   async createUser(userData) {
     try {
-      const response = await this.client.post('/api/users', userData);
+      const response = await this.client.post("/api/users", userData);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
     }
   }
-  
+
   async getUserById(id) {
     try {
       const response = await this.client.get(`/api/users/${id}`);
@@ -739,7 +752,7 @@ class UserAPIClient {
       throw this.handleError(error);
     }
   }
-  
+
   handleError(error) {
     if (error.response) {
       // Server responded with error status
@@ -747,7 +760,7 @@ class UserAPIClient {
       return new Error(`API Error ${status}: ${data.error || data.message}`);
     } else if (error.request) {
       // Network error
-      return new Error('Network error: Unable to reach API');
+      return new Error("Network error: Unable to reach API");
     } else {
       // Other error
       return new Error(`Request error: ${error.message}`);
@@ -756,19 +769,22 @@ class UserAPIClient {
 }
 
 // Usage example
-const userAPI = new UserAPIClient('https://api.example.com/v1', 'your-jwt-token');
+const userAPI = new UserAPIClient(
+  "https://api.example.com/v1",
+  "your-jwt-token",
+);
 
 // Get paginated users
-const users = await userAPI.getUsers({ page: 1, limit: 20, role: 'user' });
-console.log('Users:', users);
+const users = await userAPI.getUsers({ page: 1, limit: 20, role: "user" });
+console.log("Users:", users);
 
 // Create new user
 const newUser = await userAPI.createUser({
-  name: 'Bob Wilson',
-  email: 'bob@example.com',
-  age: 30
+  name: "Bob Wilson",
+  email: "bob@example.com",
+  age: 30,
 });
-console.log('Created user:', newUser);
+console.log("Created user:", newUser);
 ```
 
 ### Python
@@ -786,14 +802,14 @@ class UserAPIClient:
             'Authorization': f'Bearer {token}',
             'Content-Type': 'application/json'
         })
-    
+
     def get_users(self, page: int = 1, limit: int = 20, **filters) -> Dict:
         """Get paginated list of users with optional filters."""
         params = {'page': page, 'limit': limit, **filters}
         response = self.session.get(f'{self.base_url}/api/users', params=params)
         response.raise_for_status()
         return response.json()
-    
+
     def create_user(self, user_data: Dict) -> Dict:
         """Create a new user."""
         response = self.session.post(
@@ -802,13 +818,13 @@ class UserAPIClient:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_user_by_id(self, user_id: str) -> Dict:
         """Get user by ID."""
         response = self.session.get(f'{self.base_url}/api/users/{user_id}')
         response.raise_for_status()
         return response.json()
-    
+
     def update_user(self, user_id: str, updates: Dict) -> Dict:
         """Update user information."""
         response = self.session.put(
@@ -817,7 +833,7 @@ class UserAPIClient:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def delete_user(self, user_id: str, hard_delete: bool = False) -> Dict:
         """Delete user (soft delete by default)."""
         params = {'hard': hard_delete} if hard_delete else {}
@@ -900,6 +916,7 @@ curl -s -X GET "$BASE_URL/api/users?search=david&sort=name:asc" \
 ## Error Handling
 
 ### Error Response Format
+
 All errors follow a consistent format:
 
 ```json
@@ -917,15 +934,15 @@ All errors follow a consistent format:
 
 ### Common Error Codes
 
-| Status Code | Error Code | Description | Action |
-|-------------|------------|-------------|--------|
-| 400 | `VALIDATION_ERROR` | Request validation failed | Check request format and required fields |
-| 401 | `UNAUTHORIZED` | Authentication required | Provide valid JWT token |
-| 403 | `FORBIDDEN` | Insufficient permissions | Check user role and permissions |
-| 404 | `USER_NOT_FOUND` | User does not exist | Verify user ID |
-| 409 | `EMAIL_EXISTS` | Email already registered | Use different email address |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests | Wait before retrying |
-| 500 | `INTERNAL_ERROR` | Server error | Contact support if persistent |
+| Status Code | Error Code            | Description               | Action                                   |
+| ----------- | --------------------- | ------------------------- | ---------------------------------------- |
+| 400         | `VALIDATION_ERROR`    | Request validation failed | Check request format and required fields |
+| 401         | `UNAUTHORIZED`        | Authentication required   | Provide valid JWT token                  |
+| 403         | `FORBIDDEN`           | Insufficient permissions  | Check user role and permissions          |
+| 404         | `USER_NOT_FOUND`      | User does not exist       | Verify user ID                           |
+| 409         | `EMAIL_EXISTS`        | Email already registered  | Use different email address              |
+| 429         | `RATE_LIMIT_EXCEEDED` | Too many requests         | Wait before retrying                     |
+| 500         | `INTERNAL_ERROR`      | Server error              | Contact support if persistent            |
 
 ### Error Handling Best Practices
 
@@ -940,30 +957,53 @@ async function handleUserOperation(apiCall) {
       success: false,
       error: error.message,
       code: error.code,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-    
+
     // Log error for debugging
-    console.error('API Error:', errorInfo);
-    
+    console.error("API Error:", errorInfo);
+
     // Handle specific error types
     switch (error.response?.status) {
       case 400:
-        return { ...errorInfo, userMessage: 'Please check your input and try again.' };
+        return {
+          ...errorInfo,
+          userMessage: "Please check your input and try again.",
+        };
       case 401:
-        return { ...errorInfo, userMessage: 'Please log in again.', requiresAuth: true };
+        return {
+          ...errorInfo,
+          userMessage: "Please log in again.",
+          requiresAuth: true,
+        };
       case 403:
-        return { ...errorInfo, userMessage: 'You don\'t have permission for this action.' };
+        return {
+          ...errorInfo,
+          userMessage: "You don't have permission for this action.",
+        };
       case 404:
-        return { ...errorInfo, userMessage: 'The requested user was not found.' };
+        return {
+          ...errorInfo,
+          userMessage: "The requested user was not found.",
+        };
       case 409:
-        return { ...errorInfo, userMessage: 'This email is already registered.' };
+        return {
+          ...errorInfo,
+          userMessage: "This email is already registered.",
+        };
       case 429:
-        return { ...errorInfo, userMessage: 'Too many requests. Please try again later.', retryAfter: 60 };
+        return {
+          ...errorInfo,
+          userMessage: "Too many requests. Please try again later.",
+          retryAfter: 60,
+        };
       case 500:
-        return { ...errorInfo, userMessage: 'Server error. Please try again or contact support.' };
+        return {
+          ...errorInfo,
+          userMessage: "Server error. Please try again or contact support.",
+        };
       default:
-        return { ...errorInfo, userMessage: 'An unexpected error occurred.' };
+        return { ...errorInfo, userMessage: "An unexpected error occurred." };
     }
   }
 }
@@ -971,7 +1011,7 @@ async function handleUserOperation(apiCall) {
 // Usage
 const result = await handleUserOperation(() => userAPI.createUser(userData));
 if (result.success) {
-  console.log('User created:', result.data);
+  console.log("User created:", result.data);
 } else {
   showErrorMessage(result.userMessage);
   if (result.requiresAuth) {
@@ -983,12 +1023,14 @@ if (result.success) {
 ## SDKs and Libraries
 
 ### Official SDKs
+
 - **JavaScript/TypeScript**: `npm install @example/user-api-client`
 - **Python**: `pip install example-user-api`
 - **Go**: `go get github.com/example/user-api-go`
 - **PHP**: `composer require example/user-api-php`
 
 ### Community Libraries
+
 - **Ruby**: [user-api-ruby](https://github.com/community/user-api-ruby)
 - **Java**: [user-api-java](https://github.com/community/user-api-java)
 - **C#**: [UserApi.NET](https://github.com/community/user-api-dotnet)
@@ -996,10 +1038,13 @@ if (result.success) {
 ## Testing
 
 ### Postman Collection
+
 Download our [Postman collection](https://api.example.com/postman/user-api.json) with pre-configured requests and environment variables.
 
 ### Test Data
+
 Use our test environment with sample data:
+
 - **Base URL**: `https://api-test.example.com/v1`
 - **Test Token**: Contact support for test credentials
 
@@ -1007,59 +1052,60 @@ Use our test environment with sample data:
 
 ```javascript
 // Jest test examples
-describe('User API', () => {
+describe("User API", () => {
   let userAPI;
   let testUserId;
-  
+
   beforeAll(() => {
     userAPI = new UserAPIClient(
       process.env.TEST_API_URL,
-      process.env.TEST_API_TOKEN
+      process.env.TEST_API_TOKEN,
     );
   });
-  
-  test('should create a new user', async () => {
+
+  test("should create a new user", async () => {
     const userData = {
-      name: 'Test User',
+      name: "Test User",
       email: `test-${Date.now()}@example.com`,
-      age: 25
+      age: 25,
     };
-    
+
     const result = await userAPI.createUser(userData);
-    
+
     expect(result.user).toMatchObject({
       name: userData.name,
       email: userData.email,
       age: userData.age,
-      role: 'user'
+      role: "user",
     });
     expect(result.user.id).toBeDefined();
-    
+
     testUserId = result.user.id;
   });
-  
-  test('should get user by ID', async () => {
+
+  test("should get user by ID", async () => {
     const user = await userAPI.getUserById(testUserId);
-    
+
     expect(user.id).toBe(testUserId);
-    expect(user.name).toBe('Test User');
+    expect(user.name).toBe("Test User");
   });
-  
-  test('should update user information', async () => {
-    const updates = { name: 'Updated Test User', age: 26 };
+
+  test("should update user information", async () => {
+    const updates = { name: "Updated Test User", age: 26 };
     const updatedUser = await userAPI.updateUser(testUserId, updates);
-    
+
     expect(updatedUser.name).toBe(updates.name);
     expect(updatedUser.age).toBe(updates.age);
   });
-  
-  test('should handle validation errors', async () => {
-    const invalidData = { name: '', email: 'invalid-email' };
-    
-    await expect(userAPI.createUser(invalidData))
-      .rejects.toThrow(/validation/i);
+
+  test("should handle validation errors", async () => {
+    const invalidData = { name: "", email: "invalid-email" };
+
+    await expect(userAPI.createUser(invalidData)).rejects.toThrow(
+      /validation/i,
+    );
   });
-  
+
   afterAll(async () => {
     if (testUserId) {
       await userAPI.deleteUser(testUserId, true); // Hard delete test user
@@ -1071,32 +1117,36 @@ describe('User API', () => {
 ## Support and Resources
 
 ### Documentation
+
 - **API Reference**: [https://docs.example.com/api](https://docs.example.com/api)
 - **Interactive API Explorer**: [https://api.example.com/docs](https://api.example.com/docs)
 - **Changelog**: [https://docs.example.com/changelog](https://docs.example.com/changelog)
 
 ### Support Channels
+
 - **Developer Support**: [dev-support@example.com](mailto:dev-support@example.com)
 - **Stack Overflow**: Tag questions with `example-api`
 - **Discord Community**: [https://discord.gg/example-dev](https://discord.gg/example-dev)
 - **GitHub Issues**: [https://github.com/example/api-issues](https://github.com/example/api-issues)
 
 ### Status and Monitoring
+
 - **API Status**: [https://status.example.com](https://status.example.com)
 - **Performance Metrics**: [https://metrics.example.com](https://metrics.example.com)
 - **Incident Reports**: [https://incidents.example.com](https://incidents.example.com)
 
 ---
 
-*Last updated: September 16, 2025*  
-*API Version: 1.2.0*  
-*Documentation Version: 2.1.0*
+_Last updated: September 16, 2025_
+_API Version: 1.2.0_
+_Documentation Version: 2.1.0_
+
 ```
 ```javascript
 // Express.js API with comprehensive documentation
-const express = require('express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const express = require("express");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
 
@@ -1155,7 +1205,7 @@ const app = express();
  *         role: "user"
  *         createdAt: "2025-09-16T10:30:00Z"
  *         updatedAt: "2025-09-16T14:45:00Z"
- *   
+ *
  *     UserInput:
  *       type: object
  *       required:
@@ -1176,7 +1226,7 @@ const app = express();
  *           minimum: 13
  *           maximum: 120
  *           description: User's age in years
- *   
+ *
  *     Error:
  *       type: object
  *       properties:
@@ -1195,7 +1245,7 @@ const app = express();
  *         details:
  *           field: "email"
  *           message: "Invalid email format"
- *   
+ *
  *   responses:
  *     NotFound:
  *       description: Resource not found
@@ -1218,7 +1268,7 @@ const app = express();
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/Error'
- *   
+ *
  *   securitySchemes:
  *     bearerAuth:
  *       type: http
@@ -1233,30 +1283,30 @@ const app = express();
  *     summary: Get all users
  *     description: |
  *       Retrieve a paginated list of all users in the system.
- *       
+ *
  *       ## Features
  *       - Pagination support with configurable page size
  *       - Filtering by role, status, and creation date
  *       - Sorting by multiple fields
  *       - Search functionality across name and email
- *       
+ *
  *       ## Usage Examples
- *       
+ *
  *       ### Basic usage
  *
 ```
 ```text
-*       
+*
  *       ### With pagination
  *
 ```
 ```text
-*       
+*
  *       ### With filtering
  *
 ```
 ```text
-*       
+*
  *       ### With search
  *
 ```
@@ -1389,23 +1439,23 @@ const app = express();
  *               code: "FORBIDDEN"
  *       500:
  *         $ref: '#/components/responses/ServerError'
- *   
+ *
  *   post:
  *     summary: Create a new user
  *     description: |
  *       Create a new user account in the system.
- *       
+ *
  *       ## Validation Rules
  *       - Name must be 2-100 characters long
  *       - Email must be unique and valid format
  *       - Age must be between 13-120 (if provided)
  *       - Password must meet complexity requirements
- *       
+ *
  *       ## Business Logic
  *       - New users are created with 'user' role by default
  *       - Email verification is sent upon creation
  *       - Account is initially inactive until email verification
- *       
+ *
  *       ## Rate Limiting
  *       - Maximum 5 user creations per hour per IP
  *       - Additional restrictions for automated requests
@@ -1473,11 +1523,11 @@ const app = express();
  *       500:
  *         $ref: '#/components/responses/ServerError'
  */
-app.get('/api/users', async (req, res) => {
+app.get("/api/users", async (req, res) => {
   // Implementation here...
 });
 
-app.post('/api/users', async (req, res) => {
+app.post("/api/users", async (req, res) => {
   // Implementation here...
 });
 
@@ -1488,12 +1538,12 @@ app.post('/api/users', async (req, res) => {
  *     summary: Get user by ID
  *     description: |
  *       Retrieve a specific user by their unique identifier.
- *       
+ *
  *       ## Access Control
  *       - Users can only access their own profile
  *       - Admins can access any user profile
  *       - Moderators can access non-admin user profiles
- *       
+ *
  *       ## Data Privacy
  *       - Sensitive fields are filtered based on access level
  *       - Full profile data only available to user themselves or admins
@@ -1524,12 +1574,12 @@ app.post('/api/users', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *   
+ *
  *   put:
  *     summary: Update user
  *     description: |
  *       Update an existing user's information.
- *       
+ *
  *       ## Update Rules
  *       - Users can only update their own profile
  *       - Admins can update any user profile
@@ -1569,12 +1619,12 @@ app.post('/api/users', async (req, res) => {
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *   
+ *
  *   delete:
  *     summary: Delete user
  *     description: |
  *       Delete a user account from the system.
- *       
+ *
  *       ## Deletion Policy
  *       - Soft delete by default (marks as inactive)
  *       - Hard delete requires admin privileges and confirmation
@@ -1621,15 +1671,15 @@ app.post('/api/users', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-app.get('/api/users/:id', async (req, res) => {
+app.get("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
 
-app.put('/api/users/:id', async (req, res) => {
+app.put("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
 
-app.delete('/api/users/:id', async (req, res) => {
+app.delete("/api/users/:id", async (req, res) => {
   // Implementation here...
 });
 ```
@@ -1648,17 +1698,20 @@ All API endpoints require authentication using JWT Bearer tokens:
 ```
 ```text
 ### Rate Limiting
+
 - **Standard endpoints**: 100 requests per 15 minutes
 - **Authentication endpoints**: 5 requests per 15 minutes
 - **User creation**: 5 requests per hour
 
 ### Response Format
+
 All responses are in JSON format with consistent error handling:
 ```
 ```text
 ## Quick Start
 
 ### 1. Authentication
+
 First, obtain an authentication token:
 ```
 ```text
@@ -1666,6 +1719,7 @@ First, obtain an authentication token:
 ```
 ```text
 ### 2. Get All Users
+
 Retrieve a list of users with pagination:
 ```
 ```text
@@ -1689,20 +1743,21 @@ Retrieve a list of users with pagination:
 ## Error Handling
 
 ### Error Response Format
+
 All errors follow a consistent format:
 ```
 ```text
 ### Common Error Codes
 
-| Status Code | Error Code | Description | Action |
-|-------------|------------|-------------|--------|
-| 400 | `VALIDATION_ERROR` | Request validation failed | Check request format and required fields |
-| 401 | `UNAUTHORIZED` | Authentication required | Provide valid JWT token |
-| 403 | `FORBIDDEN` | Insufficient permissions | Check user role and permissions |
-| 404 | `USER_NOT_FOUND` | User does not exist | Verify user ID |
-| 409 | `EMAIL_EXISTS` | Email already registered | Use different email address |
-| 429 | `RATE_LIMIT_EXCEEDED` | Too many requests | Wait before retrying |
-| 500 | `INTERNAL_ERROR` | Server error | Contact support if persistent |
+| Status Code | Error Code            | Description               | Action                                   |
+| ----------- | --------------------- | ------------------------- | ---------------------------------------- |
+| 400         | `VALIDATION_ERROR`    | Request validation failed | Check request format and required fields |
+| 401         | `UNAUTHORIZED`        | Authentication required   | Provide valid JWT token                  |
+| 403         | `FORBIDDEN`           | Insufficient permissions  | Check user role and permissions          |
+| 404         | `USER_NOT_FOUND`      | User does not exist       | Verify user ID                           |
+| 409         | `EMAIL_EXISTS`        | Email already registered  | Use different email address              |
+| 429         | `RATE_LIMIT_EXCEEDED` | Too many requests         | Wait before retrying                     |
+| 500         | `INTERNAL_ERROR`      | Server error              | Contact support if persistent            |
 
 ### Error Handling Best Practices
 ```
@@ -1710,12 +1765,14 @@ All errors follow a consistent format:
 ## SDKs and Libraries
 
 ### Official SDKs
+
 - **JavaScript/TypeScript**: `npm install @example/user-api-client`
 - **Python**: `pip install example-user-api`
 - **Go**: `go get github.com/example/user-api-go`
 - **PHP**: `composer require example/user-api-php`
 
 ### Community Libraries
+
 - **Ruby**: [user-api-ruby](https://github.com/community/user-api-ruby)
 - **Java**: [user-api-java](https://github.com/community/user-api-java)
 - **C#**: [UserApi.NET](https://github.com/community/user-api-dotnet)
@@ -1723,10 +1780,13 @@ All errors follow a consistent format:
 ## Testing
 
 ### Postman Collection
+
 Download our [Postman collection](https://api.example.com/postman/user-api.json) with pre-configured requests and environment variables.
 
 ### Test Data
+
 Use our test environment with sample data:
+
 - **Base URL**: `https://api-test.example.com/v1`
 - **Test Token**: Contact support for test credentials
 
@@ -1736,26 +1796,29 @@ Use our test environment with sample data:
 ## Support and Resources
 
 ### Documentation
+
 - **API Reference**: [https://docs.example.com/api](https://docs.example.com/api)
 - **Interactive API Explorer**: [https://api.example.com/docs](https://api.example.com/docs)
 - **Changelog**: [https://docs.example.com/changelog](https://docs.example.com/changelog)
 
 ### Support Channels
+
 - **Developer Support**: [dev-support@example.com](mailto:dev-support@example.com)
 - **Stack Overflow**: Tag questions with `example-api`
 - **Discord Community**: [https://discord.gg/example-dev](https://discord.gg/example-dev)
 - **GitHub Issues**: [https://github.com/example/api-issues](https://github.com/example/api-issues)
 
 ### Status and Monitoring
+
 - **API Status**: [https://status.example.com](https://status.example.com)
 - **Performance Metrics**: [https://metrics.example.com](https://metrics.example.com)
 - **Incident Reports**: [https://incidents.example.com](https://incidents.example.com)
 
 ---
 
-*Last updated: September 16, 2025*  
-*API Version: 1.2.0*  
-*Documentation Version: 2.1.0*
+_Last updated: September 16, 2025_
+_API Version: 1.2.0_
+_Documentation Version: 2.1.0_
 ```
 
 ## Advanced Documentation Features
@@ -1778,3 +1841,4 @@ Use our test environment with sample data:
 - **Analytics**: Track documentation usage and effectiveness
 
 This documentation generator creates comprehensive, interactive, and maintainable documentation that enhances developer experience and reduces support overhead.
+```

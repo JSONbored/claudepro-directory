@@ -62,7 +62,9 @@ WCAG-compliant accessible statusline with screen reader announcements, high-cont
 
 ## Examples
 ### Enhanced Accessibility Statusline with Cost Tracking
+
 Extended version with cost information and improved error handling
+
 ```bash
 #!/usr/bin/env bash
 
@@ -113,8 +115,11 @@ if [ $token_threshold -ne $((last_tokens / 1000 * 1000)) ]; then
   echo $tokens > /tmp/claude_statusline_last_tokens
 fi
 ```
+
 ### Accessibility Statusline with Custom Announcement Threshold
+
 Configurable announcement frequency for different screen reader preferences
+
 ```bash
 #!/usr/bin/env bash
 
@@ -160,8 +165,11 @@ if [ $token_threshold -ne $((last_tokens / ANNOUNCE_THRESHOLD * ANNOUNCE_THRESHO
   echo $tokens > /tmp/claude_statusline_last_tokens
 fi
 ```
+
 ### Accessibility First Statusline Installation Example
+
 Complete setup instructions with directory creation and permissions
+
 ```bash
 #!/bin/bash
 # Installation script for Accessibility First Statusline
@@ -316,24 +324,31 @@ echo "Accessibility First Statusline installed successfully!"
 ### Screen reader not announcing status updates even though script outputs to stderr
 
 Verify screen reader is configured to read stderr output. Test with: echo 'test announcement' >&2. Check that /tmp/claude_statusline_last_tokens file exists and updates correctly. Adjust announcement threshold (currently 1000 tokens) in script if announcements are too frequent or infrequent. Some screen readers require specific terminal emulator settings to read stderr.
+
 ### Colors appear too dim or hard to read on terminal background despite WCAG compliance
 
 WCAG contrast ratios assume black/dark background. For light backgrounds, invert color scheme: Use dark ANSI codes (30-37) instead of bright (90-97). Test contrast using WebAIM contrast checker or similar tool. Adjust ANSI color codes based on terminal theme. Check terminal color profile settings.
+
 ### Animation indicator (▪) still showing even with PREFERS_REDUCED_MOTION=1 set
 
 Set environment variable: export PREFERS_REDUCED_MOTION=1. Add to ~/.bashrc or ~/.zshrc for persistence. Verify with: echo $PREFERS_REDUCED_MOTION (should show 1). Restart Claude Code session after setting environment variable. Check that script is reading environment variable correctly.
+
 ### Keyboard navigation hints appearing every session instead of just once
 
 Check /tmp/claude_statusline_initialized file exists and persists. Verify /tmp is writable: touch /tmp/test && rm /tmp/test. On system reboot, /tmp clears - this is expected behavior. Move initialization marker to ~/.cache/claude-statusline/ for persistence across reboots. Check file permissions on /tmp directory.
+
 ### Semantic labels (Model:, Directory:, Tokens:) making statusline too verbose or crowded
 
 Labels are essential for screen readers but can be shortened: 'M:' instead of 'Model:', 'D:' for 'Directory:', 'T:' for 'Tokens:'. Balance visual brevity with semantic meaning. Test with screen reader first before removing labels. Consider using abbreviated labels that maintain semantic meaning.
+
 ### jq command not found error when script executes
 
 Install jq: macOS (brew install jq), Linux (sudo apt-get install jq or sudo yum install jq), or download from https://stedolan.github.io/jq/download/. Verify installation: which jq. Check PATH includes jq location. Use full path to jq if not in PATH: /usr/local/bin/jq or /usr/bin/jq.
+
 ### Statusline not appearing in Claude Code interface
 
 Verify script is executable: chmod +x .claude/statuslines/accessibility-first-statusline.sh. Check script outputs to stdout (not stderr for main display). Verify .claude/settings.json has correct statusLine configuration. Test script manually: echo '{"model":{"display_name":"Test"},"workspace":{"current_dir":"/test"}}' | ./accessibility-first-statusline.sh
+
 ### Token count always shows 0 or incorrect value
 
 Check JSON input structure: jq -r '.cost.total_tokens' should extract token count. Verify Claude Code is passing cost data in JSON. Use fallback: jq -r '.cost.total_tokens // 0' for missing values. Test JSON parsing: echo '$input' | jq '.cost' to inspect cost object structure.

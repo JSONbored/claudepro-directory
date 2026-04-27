@@ -10,8 +10,8 @@ seoDescription: >-
   This PostToolUse hook provides comprehensive GraphQL schema validation with
   com...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/graphql-schema-validator.sh &&
@@ -71,6 +71,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive GraphQL schema syntax validation using graphql-inspector (recommended) or basic pattern matching with fallback methods ensuring validation works even without graphql-inspector installed and providing multiple validation levels
@@ -112,7 +113,7 @@ robotsFollow: true
 - Bash shell available
 - Node.js/npm (optional, for graphql-inspector)
 - graphql-inspector (optional, recommended for comprehensive validation)
-- File system read access for GraphQL schema files (.graphql, .gql, *schema*) and write access for creating backups in .graphql_backups directory
+- File system read access for GraphQL schema files (.graphql, .gql, _schema_) and write access for creating backups in .graphql_backups directory
 
 ## Hook Configuration
 
@@ -121,10 +122,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/graphql-schema-validator.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -147,18 +145,18 @@ fi
 # Check if this is a GraphQL schema file
 if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_PATH" == *schema* ]]; then
   echo "🔍 GraphQL Schema Validation for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize validation counters
   ERRORS=0
   WARNINGS=0
   VALIDATIONS=0
   BREAKING_CHANGES=0
-  
+
   # Function to report validation results
   report_validation() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -181,55 +179,55 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
         ;;
     esac
   }
-  
+
   # Check if file exists and is readable
   if [ ! -f "$FILE_PATH" ]; then
     report_validation "ERROR" "Schema file not found: $FILE_PATH"
     exit 1
   fi
-  
+
   if [ ! -r "$FILE_PATH" ]; then
     report_validation "ERROR" "Schema file is not readable: $FILE_PATH"
     exit 1
   fi
-  
+
   # Basic file info
   FILE_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
   echo "📊 Schema file: $(basename "$FILE_PATH") ($(( FILE_SIZE / 1024 ))KB)" >&2
-  
+
   # 1. Basic GraphQL Syntax Validation
   echo "📋 Checking GraphQL syntax..." >&2
-  
+
   # Check for basic GraphQL structure
   if ! grep -q -E '(type|interface|enum|scalar|input|directive)' "$FILE_PATH" 2>/dev/null; then
     report_validation "ERROR" "File doesn't appear to contain valid GraphQL schema definitions"
   else
     report_validation "PASS" "Basic GraphQL structure detected"
   fi
-  
+
   # Check for common syntax errors
   if grep -q ',$' "$FILE_PATH" 2>/dev/null; then
     report_validation "WARNING" "Trailing commas detected - may cause parsing issues"
   fi
-  
+
   # Check for proper type definitions
   TYPE_COUNT=$(grep -c '^type ' "$FILE_PATH" 2>/dev/null || echo "0")
   INTERFACE_COUNT=$(grep -c '^interface ' "$FILE_PATH" 2>/dev/null || echo "0")
   ENUM_COUNT=$(grep -c '^enum ' "$FILE_PATH" 2>/dev/null || echo "0")
   INPUT_COUNT=$(grep -c '^input ' "$FILE_PATH" 2>/dev/null || echo "0")
-  
+
   echo "   📊 Schema composition:" >&2
   echo "      Types: $TYPE_COUNT" >&2
   echo "      Interfaces: $INTERFACE_COUNT" >&2
   echo "      Enums: $ENUM_COUNT" >&2
   echo "      Inputs: $INPUT_COUNT" >&2
-  
+
   # 2. Advanced Validation with graphql-inspector (if available)
   echo "🔍 Running advanced validation..." >&2
-  
+
   if command -v npx &> /dev/null; then
     echo "   Using graphql-inspector for comprehensive validation..." >&2
-    
+
     # Try to validate with graphql-inspector
     if npx graphql-inspector validate "$FILE_PATH" 2>/dev/null; then
       report_validation "PASS" "graphql-inspector validation successful"
@@ -239,7 +237,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
         echo "   📦 Installing graphql-inspector..." >&2
         if npm install -g @graphql-inspector/cli 2>/dev/null; then
           echo "   ✅ graphql-inspector installed" >&2
-          
+
           if npx graphql-inspector validate "$FILE_PATH" 2>/dev/null; then
             report_validation "PASS" "graphql-inspector validation successful (after install)"
           else
@@ -255,28 +253,28 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
   else
     report_validation "WARNING" "Node.js/npm not available - using basic validation only"
   fi
-  
+
   # 3. Breaking Change Detection
   echo "💥 Checking for breaking changes..." >&2
-  
+
   BACKUP_FILE="${FILE_PATH}.backup"
   SCHEMA_BACKUP_DIR=".graphql_backups"
-  
+
   # Create backup directory if it doesn't exist
   [ ! -d "$SCHEMA_BACKUP_DIR" ] && mkdir -p "$SCHEMA_BACKUP_DIR"
-  
+
   # Generate timestamped backup filename
   TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
   TIMESTAMPED_BACKUP="$SCHEMA_BACKUP_DIR/$(basename "$FILE_PATH").${TIMESTAMP}.backup"
-  
+
   if [ -f "$BACKUP_FILE" ]; then
     echo "   📋 Comparing with previous version..." >&2
-    
+
     # Try graphql-inspector diff if available
     if command -v npx &> /dev/null && npx graphql-inspector --version &> /dev/null; then
       DIFF_OUTPUT=$(npx graphql-inspector diff "$BACKUP_FILE" "$FILE_PATH" 2>&1)
       DIFF_EXIT_CODE=$?
-      
+
       if [ $DIFF_EXIT_CODE -eq 0 ]; then
         report_validation "PASS" "No breaking changes detected"
       else
@@ -292,7 +290,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
       # Basic diff comparison
       if ! diff -q "$BACKUP_FILE" "$FILE_PATH" > /dev/null 2>&1; then
         report_validation "WARNING" "Schema has changed (basic diff check)"
-        
+
         # Look for potentially breaking changes
         if diff "$BACKUP_FILE" "$FILE_PATH" | grep -q '^<.*type\|^<.*field\|^<.*enum'; then
           report_validation "BREAKING" "Potential breaking changes detected (type/field/enum removals)"
@@ -301,40 +299,40 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
         report_validation "PASS" "No changes detected"
       fi
     fi
-    
+
     # Create timestamped backup of previous version
     cp "$BACKUP_FILE" "$TIMESTAMPED_BACKUP"
     echo "   📁 Previous version backed up to: $TIMESTAMPED_BACKUP" >&2
   else
     echo "   ℹ️ No previous version found - first time validation" >&2
   fi
-  
+
   # 4. Schema Quality Analysis
   echo "📊 Analyzing schema quality..." >&2
-  
+
   # Check for Query, Mutation, Subscription types
   if grep -q '^type Query' "$FILE_PATH" 2>/dev/null; then
     report_validation "PASS" "Query type found"
   else
     report_validation "WARNING" "No Query type defined - schema may be incomplete"
   fi
-  
+
   if grep -q '^type Mutation' "$FILE_PATH" 2>/dev/null; then
     echo "   ✅ Mutation type found" >&2
   else
     echo "   ℹ️ No Mutation type (read-only API)" >&2
   fi
-  
+
   if grep -q '^type Subscription' "$FILE_PATH" 2>/dev/null; then
     echo "   ✅ Subscription type found" >&2
   else
     echo "   ℹ️ No Subscription type (no real-time features)" >&2
   fi
-  
+
   # Check for proper field documentation
   DOCUMENTED_FIELDS=$(grep -c '"""' "$FILE_PATH" 2>/dev/null || echo "0")
   TOTAL_FIELDS=$(grep -c ':' "$FILE_PATH" 2>/dev/null || echo "1")
-  
+
   if [ "$DOCUMENTED_FIELDS" -gt 0 ]; then
     DOCUMENTATION_RATIO=$((DOCUMENTED_FIELDS * 100 / TOTAL_FIELDS))
     if [ "$DOCUMENTATION_RATIO" -gt 50 ]; then
@@ -345,52 +343,52 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
   else
     report_validation "WARNING" "No field documentation found - consider adding descriptions"
   fi
-  
+
   # 5. Federation Schema Checks (if applicable)
   if grep -q '@key\|@external\|@provides\|@requires' "$FILE_PATH" 2>/dev/null; then
     echo "🌐 Federation directives detected - checking federation compatibility..." >&2
-    
+
     if grep -q '@key' "$FILE_PATH" && grep -q 'extend type' "$FILE_PATH" 2>/dev/null; then
       report_validation "PASS" "Federation schema structure looks valid"
     else
       report_validation "WARNING" "Federation directives found but schema structure may be incomplete"
     fi
   fi
-  
+
   # 6. Schema Complexity Analysis
   echo "📈 Analyzing schema complexity..." >&2
-  
+
   NESTING_DEPTH=$(grep -o '  ' "$FILE_PATH" | wc -l 2>/dev/null || echo "0")
   if [ "$NESTING_DEPTH" -gt 1000 ]; then
     report_validation "WARNING" "High schema complexity detected - consider simplification"
   else
     echo "   ✅ Schema complexity within acceptable range" >&2
   fi
-  
+
   # Check for circular references (basic check)
   if grep -E 'type.*:.*\[.*\]' "$FILE_PATH" | grep -q -E '(User.*User|Post.*Post|Comment.*Comment)' 2>/dev/null; then
     report_validation "WARNING" "Potential circular references detected - review carefully"
   fi
-  
+
   # 7. Security and Best Practices
   echo "🔒 Security and best practices check..." >&2
-  
+
   # Check for potentially dangerous query patterns
   if grep -q 'allUsers\|allPosts\|everything' "$FILE_PATH" 2>/dev/null; then
     report_validation "WARNING" "Potentially dangerous 'all' queries detected - ensure proper pagination"
   fi
-  
+
   # Check for proper input validation types
   if [ "$INPUT_COUNT" -gt 0 ]; then
     echo "   ✅ Input types defined for mutations" >&2
   elif grep -q '^type Mutation' "$FILE_PATH" 2>/dev/null; then
     report_validation "WARNING" "Mutations found but no input types - consider using input types"
   fi
-  
+
   # Update backup for next comparison
   cp "$FILE_PATH" "$BACKUP_FILE"
   echo "   💾 Current version backed up for future comparisons" >&2
-  
+
   # 8. Generate Validation Summary
   echo "" >&2
   echo "📋 GraphQL Schema Validation Summary:" >&2
@@ -402,7 +400,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   ❌ Errors: $ERRORS" >&2
   echo "   💥 Breaking Changes: $BREAKING_CHANGES" >&2
-  
+
   if [ "$ERRORS" -eq 0 ] && [ "$BREAKING_CHANGES" -eq 0 ]; then
     if [ "$WARNINGS" -eq 0 ]; then
       echo "   🎉 Status: EXCELLENT - Schema is valid and well-formed" >&2
@@ -414,7 +412,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
   else
     echo "   ❌ Status: ERRORS - Schema has critical issues that must be fixed" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 GraphQL Schema Best Practices:" >&2
   echo "   • Use descriptive type and field names" >&2
@@ -423,18 +421,18 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]] || [[ "$FILE_P
   echo "   • Implement proper pagination for collections" >&2
   echo "   • Version your schema changes carefully" >&2
   echo "   • Use enums for predefined values" >&2
-  
+
   # Clean up old backups (keep last 10)
   if [ -d "$SCHEMA_BACKUP_DIR" ]; then
     ls -t "$SCHEMA_BACKUP_DIR"/*.backup 2>/dev/null | tail -n +11 | xargs rm -f 2>/dev/null || true
   fi
-  
+
   # Exit with error if there are critical issues
   if [ "$ERRORS" -gt 0 ]; then
     echo "⚠️ Schema validation completed with errors" >&2
     exit 1
   fi
-  
+
 else
   # Not a GraphQL file, exit silently
   exit 0
@@ -444,6 +442,7 @@ exit 0
 ```
 
 ## Examples
+
 ### GraphQL Schema Validator Hook Script
 
 Complete hook script that performs GraphQL schema validation
@@ -475,6 +474,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable schema validation
@@ -489,6 +489,7 @@ Complete hook configuration for .claude/settings.json to enable schema validatio
   }
 }
 ```
+
 ### Breaking Change Detection
 
 Enhanced hook script for breaking change detection with graphql-inspector
@@ -513,6 +514,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]]; then
 fi
 exit 0
 ```
+
 ### Schema Quality and Federation Analysis
 
 Enhanced hook script for schema quality analysis and federation compatibility checking
@@ -542,6 +544,7 @@ if [[ "$FILE_PATH" == *.graphql ]] || [[ "$FILE_PATH" == *.gql ]]; then
 fi
 exit 0
 ```
+
 ### Automatic Schema Backup Management
 
 Enhanced hook script for automatic schema backup with timestamped backups and cleanup
@@ -564,27 +567,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook triggers on non-GraphQL files despite .graphql extension check
 
 Tighten matchers to specific paths: 'matchers': ['write:.*\\.(graphql|gql)$', 'edit:.*schema.*']. Prevents false positives on files with 'schema' in non-GraphQL contexts. Verify file extension matching logic. Test with various file names containing 'schema'.
+
 ### graphql-inspector installation fails during hook execution
 
 Pre-install globally: 'npm install -g @graphql-inspector/cli'. Hook's mid-execution installs timeout. Add installation check at project setup instead of runtime. Verify npm and Node.js are available. Check network connectivity for npm install.
+
 ### Breaking change detection misses field type modifications
 
 Requires valid schemas. If backup corrupted, create fresh: 'cp schema.graphql schema.graphql.backup'. Verify parsing with 'npx graphql-inspector validate' before comparison. Ensure backup file is valid GraphQL schema. Check graphql-inspector version compatibility.
+
 ### Backup files accumulate despite cleanup logic (10 file limit)
 
-Cleanup misses timestamped backups in .graphql_backups/. Add: 'find .graphql_backups -name "*.backup" -type f | sort -r | tail -n +11 | xargs rm -f' to retention. Verify cleanup command executes correctly. Check file permissions for backup directory.
+Cleanup misses timestamped backups in .graphql_backups/. Add: 'find .graphql_backups -name "\*.backup" -type f | sort -r | tail -n +11 | xargs rm -f' to retention. Verify cleanup command executes correctly. Check file permissions for backup directory.
+
 ### Diff output shows false positives for unchanged schemas
 
-graphql-inspector is whitespace-sensitive. Run 'prettier --write **/*.graphql' before comparisons. Add normalization: format both schemas with GraphQL formatter before diff. Use graphql-inspector format command. Verify schema formatting consistency.
+graphql-inspector is whitespace-sensitive. Run 'prettier --write \*_/_.graphql' before comparisons. Add normalization: format both schemas with GraphQL formatter before diff. Use graphql-inspector format command. Verify schema formatting consistency.
+
 ### Federation directive validation fails for valid federation schemas
 
 Verify federation directives are properly formatted. Check @key directive usage: '@key(fields: "id")'. Ensure extend type is used correctly for federation. Use graphql-inspector for federation-specific validation. Verify Apollo Federation version compatibility.
+
 ### Schema complexity warnings appear for simple schemas
 
 Complexity analysis uses basic heuristics. Adjust complexity thresholds in hook script. Consider using graphql-inspector for more accurate complexity analysis. Verify nesting depth calculation logic. Use schema-specific complexity rules.
+
 ### Validation fails on schema files with custom directives
 
 graphql-inspector may require directive definitions. Add directive definitions to schema: 'directive @custom on FIELD_DEFINITION'. Verify custom directive syntax. Use graphql-inspector with --require-directives flag. Check directive definition format.

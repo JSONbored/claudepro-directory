@@ -19,12 +19,13 @@
     "validate:packages": "node scripts/validate-download-packages.mjs",
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
-    "test": "node scripts/test-all.mjs",
-    "test:seo-jsonld": "node scripts/test-seo-jsonld.mjs",
-    "test:commercial-intake": "node scripts/test-commercial-intake.mjs",
-    "test:registry-artifacts": "node scripts/test-registry-artifacts.mjs",
+    "test": "vitest run",
+    "test:e2e": "env -u NO_COLOR playwright test",
+    "test:seo-jsonld": "vitest run tests/seo-jsonld.test.ts",
+    "test:commercial-intake": "vitest run tests/commercial-intake.test.ts",
+    "test:registry-artifacts": "vitest run tests/registry-artifacts.test.ts",
     "validate:submission-issue": "node scripts/validate-submission-issue.mjs",
-    "test:submission-intake": "node scripts/test-submission-intake.mjs",
+    "test:submission-intake": "vitest run tests/submission-intake.test.ts",
     "refresh:github-stats": "ENABLE_GITHUB_REPO_STATS=1 node scripts/build-content-index.mjs",
     "changelog:preview": "git cliff --unreleased --config .git-cliff.toml",
     "changelog:generate": "git cliff --config .git-cliff.toml",
@@ -38,6 +39,14 @@
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
-    "husky": "9.1.7"
+    "@playwright/test": "^1.59.1",
+    "husky": "9.1.7",
+    "vitest": "^4.1.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-xml-parser": "5.7.2",
+      "postcss": "8.5.12"
+    }
   }
 }

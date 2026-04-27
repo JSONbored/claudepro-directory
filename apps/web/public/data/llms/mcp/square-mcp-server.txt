@@ -92,27 +92,41 @@ Integrate Square's commerce platform with Claude for payment processing and busi
 
 ## Examples
 ### Process a $50 payment
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Process a $50 payment"
 ```
+
 ### Check inventory for SKU-123
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Check inventory for SKU-123"
 ```
+
 ### Create order for customer
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create order for customer"
 ```
+
 ### Generate today's sales report
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate today's sales report"
 ```
+
 ### Create Payment
+
 Create a new Square payment with idempotency key
+
 ```typescript
 // Create Square payment
 const payment = await square.payments.createPayment({
@@ -120,8 +134,8 @@ const payment = await square.payments.createPayment({
   idempotency_key: "unique-key",
   amount_money: {
     amount: 1000,
-    currency: "USD"
-  }
+    currency: "USD",
+  },
 });
 ```
 ```plaintext
@@ -143,8 +157,8 @@ const payment = await square.payments.createPayment({
   idempotency_key: "unique-key",
   amount_money: {
     amount: 1000,
-    currency: "USD"
-  }
+    currency: "USD",
+  },
 });
 ```
 
@@ -164,24 +178,31 @@ const payment = await square.payments.createPayment({
 ### Rate limit exceeded - 429 RATE_LIMITED error returned
 
 Square doesn't publish specific REST API rate limits but throttles high request volumes. For GraphQL: maximum 10 queries per second (QPS), max depth 10, max complexity 250 points. Implement exponential backoff with randomized jitter for retries (wait time increases with each retry). Reduce request frequency. Batch operations where possible. Use worker queue system to manage API call frequency. Monitor 429 errors in API Logs. Contact Square support if legitimate traffic blocked. For GraphQL, optimize queries to reduce complexity score.
+
 ### Authentication failed - UNAUTHORIZED error using wrong environment
 
 Square uses separate environments with different base URLs and access tokens. Production: `https://connect.squareup.com/v2` requires production access token. Sandbox: `https://connect.squareupsandbox.com/v2` requires sandbox access token. Use correct access token for environment from Developer Console. Verify application ID matches environment (production vs sandbox). Check token not expired (access tokens expire after 30 days) or revoked. Ensure token has required OAuth scopes for the API endpoint. Verify token corresponds to the correct base URL.
+
 ### Sandbox limitations - payment method not supported
 
 Square Sandbox only supports credit/debit card payments for testing. Afterpay, Cash App Pay, Google Pay, Apple Pay, and other payment methods are not available in Sandbox. Test payment flows in production with real cards after Sandbox validation. Use Sandbox for testing basic payment flows, order management, and inventory operations. For production testing, use small transaction amounts and test cards. Verify payment method availability in production environment before deploying.
+
 ### Location permissions insufficient for operation
 
 Square API operations require an active location. Verify merchant account has active location enabled in Square Dashboard. Check access token has permissions for specific location ID (include location_id in API requests). Ensure user role allows API operations (check OAuth scopes: ORDERS_READ, PAYMENTS_WRITE, etc.). Review location settings in Square Dashboard. Verify location is not archived or disabled. For multi-location accounts, ensure token has access to the target location. Check location capabilities match required operations (e.g., CREDIT_CARD_PROCESSING for payments).
+
 ### Square MCP server authentication errors with API credentials
 
 Verify API credentials (Application ID and Access Token) are valid and not expired. Check credentials match the correct environment (sandbox vs production). Ensure credentials format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Square rate limit errors when processing multiple payment requests
 
 Implement exponential backoff retry logic with jitter. Use Square API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed payment data. Square allows 1,000 requests per minute per application.
+
 ### Square payment or transaction access denied errors
 
 Verify API credentials have access to the payment or transaction. Check location permissions and merchant account status. Ensure API credentials have required scopes for target operations.
+
 ### Square MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Square API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

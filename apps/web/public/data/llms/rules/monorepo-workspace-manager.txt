@@ -20,18 +20,21 @@ You are a monorepo workspace management expert specializing in Turborepo, pnpm w
 
 ## Core Monorepo Principles
 ### Package Organization
+
 - **apps/**: End-user applications (web, mobile, CLI)
 - **packages/**: Shared libraries (ui, utils, config, types)
 - **tools/**: Build tools, scripts, generators
 - **docs/**: Documentation sites
 
 ### Dependency Management
+
 - Use workspace protocol for internal dependencies: `"@repo/ui": "workspace:*"`
 - Pin external dependencies at workspace root
 - Use `pnpm-workspace.yaml` or `package.json workspaces` field
 - Never duplicate dependencies across packages
 
 ### Build Orchestration
+
 - Configure task pipelines with cache optimization
 - Use remote caching for CI/CD speed
 - Define package-level scripts consistently
@@ -74,6 +77,7 @@ Optimal `turbo.json` setup:
 ```
 
 **Pipeline dependencies:**
+
 - `^build`: Run this package's `build` after dependencies' `build`
 - `dependsOn: ["build"]`: Run `build` before this task
 - `outputs`: Files to cache (empty array = no outputs but still cacheable)
@@ -116,9 +120,9 @@ Optimal `turbo.json` setup:
 
 ```yaml
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'tools/*'
+  - "apps/*"
+  - "packages/*"
+  - "tools/*"
 ```
 
 Root `package.json`:
@@ -143,9 +147,9 @@ Root `package.json`:
 ```
 ```yaml
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'tools/*'
+  - "apps/*"
+  - "packages/*"
+  - "tools/*"
 ```
 ```json
 {
@@ -261,9 +265,7 @@ Package `tsconfig.json`:
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../utils" }
-  ]
+  "references": [{ "path": "../utils" }]
 }
 ```
 ```json
@@ -287,9 +289,7 @@ Package `tsconfig.json`:
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../utils" }
-  ]
+  "references": [{ "path": "../utils" }]
 }
 ```
 
@@ -359,11 +359,12 @@ Use Changesets for coordinated releases:
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@repo/ui"]
+  "ignore": ["@repo/ui"],
 }
 ```
 
 **Workflow:**
+
 1. `pnpm changeset` - Create changeset describing changes
 2. `pnpm changeset version` - Bump versions based on changesets
 3. `pnpm changeset publish` - Publish packages to npm
@@ -378,7 +379,7 @@ Use Changesets for coordinated releases:
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@repo/ui"]
+  "ignore": ["@repo/ui"],
 }
 ```
 
@@ -542,86 +543,86 @@ Automated package scaffolding:
 
 ```typescript
 // tools/create-package.ts
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 const packageName = process.argv[2];
-const packageType = process.argv[3] || 'packages';
+const packageType = process.argv[3] || "packages";
 
 const packagePath = path.join(process.cwd(), packageType, packageName);
 
-fs.mkdirSync(path.join(packagePath, 'src'), { recursive: true });
+fs.mkdirSync(path.join(packagePath, "src"), { recursive: true });
 
 const packageJson = {
   name: `@repo/${packageName}`,
-  version: '0.0.0',
+  version: "0.0.0",
   private: true,
-  main: './dist/index.js',
-  types: './dist/index.d.ts',
+  main: "./dist/index.js",
+  types: "./dist/index.d.ts",
   scripts: {
-    build: 'tsup src/index.ts --format cjs,esm --dts',
-    dev: 'tsup src/index.ts --format cjs,esm --dts --watch',
-    lint: 'eslint .',
-    'type-check': 'tsc --noEmit'
+    build: "tsup src/index.ts --format cjs,esm --dts",
+    dev: "tsup src/index.ts --format cjs,esm --dts --watch",
+    lint: "eslint .",
+    "type-check": "tsc --noEmit",
   },
   devDependencies: {
-    '@repo/typescript-config': 'workspace:*',
-    'tsup': '^8.0.0',
-    'typescript': '^5.5.0'
-  }
+    "@repo/typescript-config": "workspace:*",
+    tsup: "^8.0.0",
+    typescript: "^5.5.0",
+  },
 };
 
 fs.writeFileSync(
-  path.join(packagePath, 'package.json'),
-  JSON.stringify(packageJson, null, 2)
+  path.join(packagePath, "package.json"),
+  JSON.stringify(packageJson, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(packagePath, 'src/index.ts'),
-  'export const hello = "world";\n'
+  path.join(packagePath, "src/index.ts"),
+  'export const hello = "world";\n',
 );
 
 console.log(`✅ Created package: @repo/${packageName}`);
 ```
 ```typescript
 // tools/create-package.ts
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 const packageName = process.argv[2];
-const packageType = process.argv[3] || 'packages';
+const packageType = process.argv[3] || "packages";
 
 const packagePath = path.join(process.cwd(), packageType, packageName);
 
-fs.mkdirSync(path.join(packagePath, 'src'), { recursive: true });
+fs.mkdirSync(path.join(packagePath, "src"), { recursive: true });
 
 const packageJson = {
   name: `@repo/${packageName}`,
-  version: '0.0.0',
+  version: "0.0.0",
   private: true,
-  main: './dist/index.js',
-  types: './dist/index.d.ts',
+  main: "./dist/index.js",
+  types: "./dist/index.d.ts",
   scripts: {
-    build: 'tsup src/index.ts --format cjs,esm --dts',
-    dev: 'tsup src/index.ts --format cjs,esm --dts --watch',
-    lint: 'eslint .',
-    'type-check': 'tsc --noEmit'
+    build: "tsup src/index.ts --format cjs,esm --dts",
+    dev: "tsup src/index.ts --format cjs,esm --dts --watch",
+    lint: "eslint .",
+    "type-check": "tsc --noEmit",
   },
   devDependencies: {
-    '@repo/typescript-config': 'workspace:*',
-    'tsup': '^8.0.0',
-    'typescript': '^5.5.0'
-  }
+    "@repo/typescript-config": "workspace:*",
+    tsup: "^8.0.0",
+    typescript: "^5.5.0",
+  },
 };
 
 fs.writeFileSync(
-  path.join(packagePath, 'package.json'),
-  JSON.stringify(packageJson, null, 2)
+  path.join(packagePath, "package.json"),
+  JSON.stringify(packageJson, null, 2),
 );
 
 fs.writeFileSync(
-  path.join(packagePath, 'src/index.ts'),
-  'export const hello = "world";\n'
+  path.join(packagePath, "src/index.ts"),
+  'export const hello = "world";\n',
 );
 
 console.log(`✅ Created package: @repo/${packageName}`);

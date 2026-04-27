@@ -30,11 +30,13 @@ Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured 
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription
 - Code Interpreter feature enabled in Claude Desktop settings
 - Audio file uploaded to conversation (drag and drop)
 
 **What Claude handles automatically:**
+
 - Installing and running Whisper AI models
 - Audio format conversion with ffmpeg
 - Timestamp extraction and alignment
@@ -46,6 +48,7 @@ Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured 
 **Prompt:** "Transcribe this audio file and give me a clean text transcript."
 
 Claude will:
+
 1. Detect the audio format
 2. Convert to optimal format for transcription
 3. Run Whisper AI transcription
@@ -56,6 +59,7 @@ Claude will:
 **Prompt:** "Transcribe this meeting recording and create a timestamped summary with key discussion points every 5 minutes."
 
 Claude will:
+
 1. Transcribe the full audio
 2. Chunk by time intervals
 3. Summarize each segment
@@ -66,6 +70,7 @@ Claude will:
 **Prompt:** "Transcribe this audio and extract all action items, decisions, and to-dos mentioned."
 
 Claude will:
+
 1. Transcribe the audio
 2. Analyze for actionable items
 3. List action items with timestamps
@@ -76,6 +81,7 @@ Claude will:
 **Prompt:** "Transcribe this conversation and identify different speakers. Label them as Speaker 1, Speaker 2, etc."
 
 Claude will:
+
 1. Detect speaker changes in the audio
 2. Segment by speaker
 3. Label each segment
@@ -90,6 +96,7 @@ Claude will:
 
 ## Common Workflows
 ### Meeting Minutes Generation
+
 ```
 "Transcribe this meeting and create:
 1. Attendee list (if mentioned)
@@ -100,6 +107,7 @@ Claude will:
 ```
 
 ### Podcast Summary
+
 ```
 "Transcribe this podcast episode and create:
 1. Episode summary (2-3 sentences)
@@ -109,6 +117,7 @@ Claude will:
 ```
 
 ### Interview Transcription
+
 ```
 "Transcribe this interview with speaker labels.
 Format as Q&A with:

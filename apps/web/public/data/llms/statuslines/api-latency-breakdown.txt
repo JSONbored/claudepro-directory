@@ -60,7 +60,9 @@ API latency breakdown monitor showing network time vs processing time split, p95
 
 ## Examples
 ### Enhanced Latency Breakdown with P95 Tracking
+
 Extended version with percentile latency tracking and historical comparison
+
 ```bash
 #!/usr/bin/env bash
 
@@ -123,8 +125,11 @@ net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
 
 echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%)${p95_info} | ${api_bar}${net_bar}"
 ```
+
 ### Latency Breakdown with Custom Thresholds
+
 Configurable performance thresholds for different network environments
+
 ```bash
 #!/usr/bin/env bash
 
@@ -179,8 +184,11 @@ net_bar=$(printf "${NET_BAR} %.0s" $(seq 1 $net_chars))${RESET}
 
 echo -e "${PERF_COLOR}${PERF_STATUS}${RESET} | API: ${api_seconds}s (${api_percentage}%) | Network: ${network_seconds}s (${network_percentage}%) | ${api_bar}${net_bar}"
 ```
+
 ### API Latency Breakdown Installation Example
+
 Complete setup script with bc installation check
+
 ```bash
 #!/bin/bash
 # Installation script for API Latency Breakdown
@@ -374,24 +382,31 @@ echo "Note: bc is required for floating point calculations. If not installed, sc
 ### Network time showing negative or zero despite slow responses
 
 Verify both cost.total_duration_ms and cost.total_api_duration_ms fields exist: echo '$input' | jq .cost. Negative protection caps network_time at 0. If both values missing, script shows 0s - check Claude Code version supports these fields. Verify JSON structure: jq '.cost | keys' to see available fields.
+
 ### API percentage always showing 100% with no network time
 
 This indicates total_duration_ms equals total_api_duration_ms (no measurable network overhead). Verify calculations: network_time = total - API. If consistently 0, either network is extremely fast or fields are identical in JSON. Check actual JSON values: echo '$input' | jq '.cost.total_duration_ms, .cost.total_api_duration_ms'. Test with known slow network to verify detection works.
+
 ### Performance status showing BOTTLENECK incorrectly
 
 Thresholds: <1s green (FAST), 1-5s yellow (SLOW), >5s red (BOTTLENECK). Adjust thresholds in script if your network baseline differs. VPN users may see higher normal latency. Modify: network_time -lt 5000 to higher value for VPN environments. Use custom thresholds version: export LATENCY_FAST_THRESHOLD=2000 LATENCY_SLOW_THRESHOLD=10000.
+
 ### Ratio bar not displaying or showing as empty
 
 Bar uses ANSI background colors (\033[48;5;Xm). Ensure terminal supports 256-color mode: tput colors (should return 256). If bars show as spaces only, verify ANSI escape codes working: echo -e '\033[48;5;75m BLUE \033[0m'. Check terminal emulator color support settings. Verify echo -e flag is used for escape sequence interpretation.
+
 ### bc: command not found when calculating percentages
 
-Install bc: brew install bc (macOS), apt install bc (Linux), or download from https://www.gnu.org/software/bc/. Alternative: use integer math only: api_percentage=$((api_duration_ms * 100 / total_duration_ms)) - removes decimal precision but works without bc. Script includes fallback to integer math if bc unavailable. Verify bc installation: which bc.
+Install bc: brew install bc (macOS), apt install bc (Linux), or download from https://www.gnu.org/software/bc/. Alternative: use integer math only: api_percentage=$((api_duration_ms \* 100 / total_duration_ms)) - removes decimal precision but works without bc. Script includes fallback to integer math if bc unavailable. Verify bc installation: which bc.
+
 ### Floating point seconds showing as integers (no decimals)
 
 This indicates bc is not working or fallback to integer math is active. Check bc installation: bc --version. Verify bc command in script: echo 'scale=2; 1234 / 1000' | bc (should return 1.34). If bc fails, script uses integer division: $((api_duration_ms / 1000)) which truncates decimals. Install bc for decimal precision.
+
 ### Percentage calculations showing incorrect values
 
-Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_duration_ms > 0 before division. Test calculation: api_percentage=$((api_duration_ms * 100 / total_duration_ms)). Ensure values are numeric: echo "$api_duration_ms" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large.
+Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_duration_ms > 0 before division. Test calculation: api_percentage=$((api_duration_ms \* 100 / total_duration_ms)). Ensure values are numeric: echo "$api_duration_ms" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large.
+
 ### Statusline output showing raw ANSI codes instead of colors
 
 Verify echo -e flag is used for escape sequence interpretation. Check terminal supports ANSI colors: echo -e '\033[38;5;46mGreen\033[0m'. Some terminals require explicit color support enabled. Check TERM environment variable: echo $TERM (should include 'xterm' or '256color'). Verify terminal emulator settings for color support.

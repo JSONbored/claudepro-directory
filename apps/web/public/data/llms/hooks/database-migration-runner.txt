@@ -59,10 +59,7 @@ Automated database migration management with rollback capabilities, validation, 
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/database-migration-runner.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -72,10 +69,7 @@ Automated database migration management with rollback capabilities, validation, 
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/database-migration-runner.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -97,35 +91,35 @@ fi
 # Check if it's a migration-related file
 if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$FILE_PATH" == *.sql ]]; then
   echo "🗃️ Database migration file detected: $FILE_PATH" >&2
-  
+
   # Check for common migration frameworks
   if [ -f "package.json" ] && (grep -q "knex" package.json || grep -q "sequelize" package.json || grep -q "typeorm" package.json); then
     echo "📦 Node.js migration framework detected" >&2
-    
+
     # Knex migrations
     if command -v npx &> /dev/null && npx knex --version &> /dev/null 2>&1; then
       echo "🔧 Running Knex migration status check..." >&2
       MIGRATION_STATUS=$(npx knex migrate:status 2>/dev/null || echo "No pending migrations")
       echo "📊 Migration Status: $MIGRATION_STATUS" >&2
-      
+
       # Check for pending migrations
       if echo "$MIGRATION_STATUS" | grep -q "pending"; then
         echo "⚠️ Pending migrations detected. Run 'npx knex migrate:latest' to apply them" >&2
       else
         echo "✅ All migrations are up to date" >&2
       fi
-      
+
     # Sequelize migrations
     elif command -v npx &> /dev/null && npx sequelize-cli --version &> /dev/null 2>&1; then
       echo "🔧 Sequelize CLI detected" >&2
       echo "💡 Run 'npx sequelize-cli db:migrate:status' to check migration status" >&2
-      
+
     # TypeORM migrations
     elif command -v npx &> /dev/null && npx typeorm --version &> /dev/null 2>&1; then
       echo "🔧 TypeORM detected" >&2
       echo "💡 Run 'npx typeorm migration:show' to check migration status" >&2
     fi
-    
+
   # Django migrations
   elif [ -f "manage.py" ]; then
     echo "🐍 Django project detected" >&2
@@ -133,7 +127,7 @@ if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$F
       echo "🔧 Checking Django migration status..." >&2
       python manage.py showmigrations --plan 2>/dev/null | tail -5 | head -3 || echo "💡 Run 'python manage.py showmigrations' to check status" >&2
     fi
-    
+
   # Rails migrations
   elif [ -f "Gemfile" ] && grep -q "rails" Gemfile; then
     echo "💎 Rails project detected" >&2
@@ -141,40 +135,40 @@ if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$F
       echo "🔧 Checking Rails migration status..." >&2
       bundle exec rails db:migrate:status 2>/dev/null | tail -5 || echo "💡 Run 'rails db:migrate:status' to check status" >&2
     fi
-    
+
   # Raw SQL files
   elif [[ "$FILE_PATH" == *.sql ]]; then
     echo "📜 Raw SQL migration file detected" >&2
-    
+
     # Check file size and complexity
     if [ -f "$FILE_PATH" ]; then
       LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
       echo "📊 SQL file contains $LINE_COUNT lines" >&2
-      
+
       # Check for potentially destructive operations
       if grep -i "DROP\|DELETE\|TRUNCATE" "$FILE_PATH" >/dev/null 2>&1; then
         echo "⚠️ WARNING: Potentially destructive SQL operations detected (DROP/DELETE/TRUNCATE)" >&2
         echo "💡 Consider creating a backup before executing this migration" >&2
       fi
-      
+
       # Check for common patterns
       if grep -i "CREATE TABLE\|ALTER TABLE\|CREATE INDEX" "$FILE_PATH" >/dev/null 2>&1; then
         echo "🏗️ Schema modification statements detected" >&2
       fi
-      
+
       if grep -i "INSERT\|UPDATE" "$FILE_PATH" >/dev/null 2>&1; then
         echo "📝 Data modification statements detected" >&2
       fi
     fi
   fi
-  
+
   # General migration best practices reminder
   echo "📋 Migration Best Practices:" >&2
   echo "   • Always backup database before running migrations" >&2
   echo "   • Test migrations on development/staging first" >&2
   echo "   • Ensure migrations are reversible when possible" >&2
   echo "   • Use transactions for atomic operations" >&2
-  
+
 else
   echo "File $FILE_PATH is not a migration file, skipping analysis" >&2
 fi
@@ -196,35 +190,35 @@ fi
 # Check if it's a migration-related file
 if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$FILE_PATH" == *.sql ]]; then
   echo "🗃️ Database migration file detected: $FILE_PATH" >&2
-  
+
   # Check for common migration frameworks
   if [ -f "package.json" ] && (grep -q "knex" package.json || grep -q "sequelize" package.json || grep -q "typeorm" package.json); then
     echo "📦 Node.js migration framework detected" >&2
-    
+
     # Knex migrations
     if command -v npx &> /dev/null && npx knex --version &> /dev/null 2>&1; then
       echo "🔧 Running Knex migration status check..." >&2
       MIGRATION_STATUS=$(npx knex migrate:status 2>/dev/null || echo "No pending migrations")
       echo "📊 Migration Status: $MIGRATION_STATUS" >&2
-      
+
       # Check for pending migrations
       if echo "$MIGRATION_STATUS" | grep -q "pending"; then
         echo "⚠️ Pending migrations detected. Run 'npx knex migrate:latest' to apply them" >&2
       else
         echo "✅ All migrations are up to date" >&2
       fi
-      
+
     # Sequelize migrations
     elif command -v npx &> /dev/null && npx sequelize-cli --version &> /dev/null 2>&1; then
       echo "🔧 Sequelize CLI detected" >&2
       echo "💡 Run 'npx sequelize-cli db:migrate:status' to check migration status" >&2
-      
+
     # TypeORM migrations
     elif command -v npx &> /dev/null && npx typeorm --version &> /dev/null 2>&1; then
       echo "🔧 TypeORM detected" >&2
       echo "💡 Run 'npx typeorm migration:show' to check migration status" >&2
     fi
-    
+
   # Django migrations
   elif [ -f "manage.py" ]; then
     echo "🐍 Django project detected" >&2
@@ -232,7 +226,7 @@ if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$F
       echo "🔧 Checking Django migration status..." >&2
       python manage.py showmigrations --plan 2>/dev/null | tail -5 | head -3 || echo "💡 Run 'python manage.py showmigrations' to check status" >&2
     fi
-    
+
   # Rails migrations
   elif [ -f "Gemfile" ] && grep -q "rails" Gemfile; then
     echo "💎 Rails project detected" >&2
@@ -240,40 +234,40 @@ if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$F
       echo "🔧 Checking Rails migration status..." >&2
       bundle exec rails db:migrate:status 2>/dev/null | tail -5 || echo "💡 Run 'rails db:migrate:status' to check status" >&2
     fi
-    
+
   # Raw SQL files
   elif [[ "$FILE_PATH" == *.sql ]]; then
     echo "📜 Raw SQL migration file detected" >&2
-    
+
     # Check file size and complexity
     if [ -f "$FILE_PATH" ]; then
       LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
       echo "📊 SQL file contains $LINE_COUNT lines" >&2
-      
+
       # Check for potentially destructive operations
       if grep -i "DROP\|DELETE\|TRUNCATE" "$FILE_PATH" >/dev/null 2>&1; then
         echo "⚠️ WARNING: Potentially destructive SQL operations detected (DROP/DELETE/TRUNCATE)" >&2
         echo "💡 Consider creating a backup before executing this migration" >&2
       fi
-      
+
       # Check for common patterns
       if grep -i "CREATE TABLE\|ALTER TABLE\|CREATE INDEX" "$FILE_PATH" >/dev/null 2>&1; then
         echo "🏗️ Schema modification statements detected" >&2
       fi
-      
+
       if grep -i "INSERT\|UPDATE" "$FILE_PATH" >/dev/null 2>&1; then
         echo "📝 Data modification statements detected" >&2
       fi
     fi
   fi
-  
+
   # General migration best practices reminder
   echo "📋 Migration Best Practices:" >&2
   echo "   • Always backup database before running migrations" >&2
   echo "   • Test migrations on development/staging first" >&2
   echo "   • Ensure migrations are reversible when possible" >&2
   echo "   • Use transactions for atomic operations" >&2
-  
+
 else
   echo "File $FILE_PATH is not a migration file, skipping analysis" >&2
 fi
@@ -306,6 +300,7 @@ if [[ "$FILE_PATH" == *migration* ]] || [[ "$FILE_PATH" == *schema* ]] || [[ "$F
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable database migration detection on file write/edit
@@ -320,6 +315,7 @@ Complete hook configuration for .claude/settings.json to enable database migrati
   }
 }
 ```
+
 ### SQL Migration Analysis
 
 Enhanced hook script that analyzes SQL migration files for destructive operations and schema changes
@@ -343,6 +339,7 @@ if [[ "$FILE_PATH" == *.sql ]]; then
 fi
 exit 0
 ```
+
 ### Django Migration Detection
 
 Enhanced hook script for Django migration detection and status checking
@@ -360,6 +357,7 @@ if [[ "$FILE_PATH" == *migration* ]] && [ -f "manage.py" ]; then
 fi
 exit 0
 ```
+
 ### Rails Migration Detection
 
 Enhanced hook script for Rails migration detection and status checking
@@ -457,24 +455,31 @@ exit 0
 ### Hook detects migration file but framework check fails
 
 Verify package.json contains knex, sequelize, or typeorm dependency. Run npm install to ensure frameworks are installed. Check npx command availability and node_modules/.bin in PATH. Verify framework versions: Knex 3.x, Sequelize 6.x/7.x, TypeORM 0.3.x.
+
 ### Knex migration status shows no pending despite new files
 
 Run npx knex migrate:list to verify migration discovery. Check migration file naming follows timestamp pattern. Ensure knexfile.js configuration points to correct migrations directory. Verify Knex version 3.x compatibility.
+
 ### PostToolUse hook triggers on non-migration SQL files
 
-Refine file path pattern matching to exclude seed/query files. Add migration directory check: [[ $FILE_PATH == *migrations/* ]]. Update matchers to prevent false positives. Consider adding file extension checks.
+Refine file path pattern matching to exclude seed/query files. Add migration directory check: [[$FILE_PATH == *migrations/*]]. Update matchers to prevent false positives. Consider adding file extension checks.
+
 ### Destructive operation warning for safe rollback scripts
 
 Hook warns on DROP/DELETE/TRUNCATE in any context. Add migration safety comments to suppress warnings. Consider splitting destructive down migrations into separate reviewed files. Verify rollback scripts are properly tested.
+
 ### Django migration detection fails in virtual environment
 
 Activate virtualenv before hook runs: source venv/bin/activate in shell config. Use absolute python path from which python. Ensure manage.py is executable and in project root. Verify Django 5.x compatibility.
+
 ### TypeORM migration status check fails with datasource error
 
 Verify TypeORM datasource configuration file exists and is properly configured. Check datasource path in migration:run command. Ensure TypeORM 0.3.x compatibility. Test manually: npx typeorm migration:show -d path-to-datasource-config.
+
 ### Sequelize migration detection fails with sequelize-cli not found
 
 Install sequelize-cli globally: npm install -g sequelize-cli or locally: npm install --save-dev sequelize-cli. Verify Sequelize 6.x/7.x compatibility. Check npx sequelize-cli --version. Ensure sequelize-cli is in node_modules/.bin.
+
 ### Rails migration detection fails with bundle exec error
 
 Verify bundle is installed and Gemfile contains rails gem. Run bundle install to ensure dependencies are installed. Check Rails 7.x compatibility. Test manually: bundle exec rails db:migrate:status. Ensure bundle exec is in PATH.

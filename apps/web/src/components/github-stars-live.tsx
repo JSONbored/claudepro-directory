@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { compactCount } from "@/lib/entry-presentation";
+import { compactCount } from "@heyclaude/registry/presentation";
 import { siteConfig } from "@/lib/site";
 
 type GitHubStatsResponse = {
@@ -29,12 +29,18 @@ async function fetchStarsFromShields() {
   if (!repoPath) return null;
 
   try {
-    const response = await fetch(`https://img.shields.io/github/stars/${repoPath}.json`, {
-      method: "GET",
-      cache: "force-cache"
-    });
+    const response = await fetch(
+      `https://img.shields.io/github/stars/${repoPath}.json`,
+      {
+        method: "GET",
+        cache: "force-cache",
+      },
+    );
     if (!response.ok) return null;
-    const payload = (await response.json()) as { value?: string; message?: string };
+    const payload = (await response.json()) as {
+      value?: string;
+      message?: string;
+    };
     const raw = String(payload.value ?? payload.message ?? "").trim();
     const numeric = Number.parseFloat(raw.replace(/[^\d.]/g, ""));
     return Number.isFinite(numeric) ? Math.round(numeric) : null;
@@ -53,12 +59,14 @@ async function fetchStarsFromGitHub() {
       cache: "force-cache",
       headers: {
         accept: "application/vnd.github+json",
-        "x-github-api-version": "2022-11-28"
-      }
+        "x-github-api-version": "2022-11-28",
+      },
     });
     if (!response.ok) return null;
     const payload = (await response.json()) as { stargazers_count?: number };
-    return typeof payload.stargazers_count === "number" ? payload.stargazers_count : null;
+    return typeof payload.stargazers_count === "number"
+      ? payload.stargazers_count
+      : null;
   } catch {
     return null;
   }
@@ -70,7 +78,7 @@ async function loadStars() {
 
   inFlight = fetch("/api/github-stats", {
     method: "GET",
-    cache: "force-cache"
+    cache: "force-cache",
   })
     .then(async (response) => {
       let stars: number | null = null;
@@ -93,7 +101,7 @@ async function loadStars() {
 
 export function GitHubStarsLive({
   fallback = null,
-  withPlus = false
+  withPlus = false,
 }: {
   fallback?: number | null;
   withPlus?: boolean;

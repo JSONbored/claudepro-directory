@@ -10,8 +10,8 @@ seoDescription: >-
   This PostToolUse hook provides interactive bundle size visualization and
   analys...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/webpack-bundle-analyzer.sh &&
@@ -71,6 +71,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Interactive bundle size visualization and analysis including bundle visualization (interactive bundle size visualization with treemap visualization, bundle size analysis with size analysis, bundle composition analysis with composition analysis, bundle visualization reporting with visualization status), visualization management (visualization configuration with visualization settings, visualization customization with custom visualization, visualization monitoring with visualization tracking, visualization updates with visualization updates), visualization optimization (visualization performance optimization with performance improvement, visualization accuracy optimization with accuracy improvement, visualization completeness optimization with completeness improvement, visualization analytics with visualization statistics), and visualization reporting (bundle visualization reporting with visualization status, bundle size reporting with size status, bundle composition reporting with composition status, visualization analytics with visualization statistics)
@@ -125,10 +126,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/webpack-bundle-analyzer.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -212,7 +210,7 @@ fi
 case "$BUILD_SYSTEM" in
     "webpack")
         echo "📊 Analyzing Webpack bundle..."
-        
+
         # Check if dist directory exists
         if [ ! -d "dist" ] && [ ! -d "build" ]; then
             echo "🏗️ Building project to generate bundle..."
@@ -223,7 +221,7 @@ case "$BUILD_SYSTEM" in
                 exit 1
             fi
         fi
-        
+
         # Find stats file or generate one
         STATS_FILE=""
         if [ -f "dist/stats.json" ]; then
@@ -240,7 +238,7 @@ case "$BUILD_SYSTEM" in
                 exit 1
             fi
         fi
-        
+
         # Run bundle analyzer
         if [ "$ANALYZER_AVAILABLE" = true ] && [ -n "$STATS_FILE" ]; then
             echo "🔍 Running bundle analysis..."
@@ -255,7 +253,7 @@ case "$BUILD_SYSTEM" in
         ;;
     "vite")
         echo "⚡ Analyzing Vite bundle..."
-        
+
         # Check if Vite has bundle analysis plugin
         if grep -q 'vite-bundle-analyzer\|rollup-plugin-analyzer' package.json 2>/dev/null; then
             echo "📊 Running Vite bundle analysis..."
@@ -267,7 +265,7 @@ case "$BUILD_SYSTEM" in
         else
             echo "💡 Install vite-bundle-analyzer for detailed analysis:"
             echo "    npm install --save-dev vite-bundle-analyzer"
-            
+
             # Basic build size analysis
             echo "📏 Running basic build analysis..."
             if npm run build 2>/dev/null; then
@@ -280,7 +278,7 @@ case "$BUILD_SYSTEM" in
         ;;
     "next")
         echo "🔺 Analyzing Next.js bundle..."
-        
+
         if grep -q '@next/bundle-analyzer' package.json 2>/dev/null; then
             echo "📊 Running Next.js bundle analysis..."
             if ANALYZE=true npm run build 2>/dev/null; then
@@ -295,7 +293,7 @@ case "$BUILD_SYSTEM" in
         ;;
     "cra")
         echo "⚛️ Analyzing Create React App bundle..."
-        
+
         if npm list --depth=0 | grep -q 'source-map-explorer' 2>/dev/null; then
             echo "📊 Running source-map-explorer..."
             if npm run build && npx source-map-explorer 'build/static/js/*.js' 2>/dev/null; then
@@ -310,7 +308,7 @@ case "$BUILD_SYSTEM" in
         ;;
     *)
         echo "❓ Unknown build system - attempting generic analysis"
-        
+
         # Try to analyze any existing build output
         for dir in dist build public; do
             if [ -d "$dir" ]; then
@@ -351,6 +349,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Webpack Bundle Analyzer Hook Script
 
 Complete hook script that automatically analyzes webpack bundle size when webpack config or entry files are modified
@@ -408,6 +407,7 @@ fi
 echo "🎯 Bundle analysis complete!"
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable automatic bundle analysis
@@ -422,6 +422,7 @@ Complete hook configuration for .claude/settings.json to enable automatic bundle
   }
 }
 ```
+
 ### Enhanced Multi-Build Tool Bundle Analyzer
 
 Enhanced hook script with support for Webpack, Vite, and Rollup bundle analysis
@@ -471,6 +472,7 @@ fi
 echo "🎯 Bundle analysis complete!"
 exit 0
 ```
+
 ### Webpack Bundle Analyzer with Build Cache
 
 Enhanced hook script with build cache to skip rebuilds for unchanged configurations
@@ -528,6 +530,7 @@ fi
 echo "🎯 Bundle analysis complete!"
 exit 0
 ```
+
 ### Webpack Bundle Analyzer Configuration Example
 
 Example webpack bundle analyzer configuration for customizing bundle analysis behavior
@@ -562,34 +565,49 @@ Example webpack bundle analyzer configuration for customizing bundle analysis be
         "build_command": "npm run build"
       }
     },
-    "file_patterns": ["*webpack.config.*", "*vite.config.*", "*rollup.config.*", "package.json", "src/index.*", "src/main.*"],
+    "file_patterns": [
+      "*webpack.config.*",
+      "*vite.config.*",
+      "*rollup.config.*",
+      "package.json",
+      "src/index.*",
+      "src/main.*"
+    ],
     "exclude_patterns": ["**/node_modules/**", "**/dist/**", "**/build/**"]
   }
 }
 ```
 
 ## Troubleshooting
+
 ### Build triggered on every config edit is slow
 
 Add build skip flag or cache check: `if [ -f .bundle-analyzed-$(md5sum webpack.config.js | cut -d' ' -f1) ]; then exit 0; fi` to track analyzed configs and skip rebuilds for unchanged hashes. Verify cache file creation. Check config hash calculation.
+
 ### webpack-bundle-analyzer opens browser automatically
 
 Hook uses `--no-open` flag: `npx webpack-bundle-analyzer "$STATS_FILE" --mode static --report bundle-report.html --no-open`. Verify flag is present in script to prevent browser launch. Check webpack-bundle-analyzer version.
+
 ### Stats file generation fails with webpack errors
 
 Check webpack config validity first: `npx webpack --config webpack.config.js --json > /dev/null 2>&1` to test. If fails, examine error with `npx webpack --profile --json 2>&1 | tee webpack-errors.log`. Verify webpack configuration. Check webpack version compatibility.
+
 ### Vite build doesn't support --analyze flag
 
 Install plugin: `npm i -D rollup-plugin-visualizer`, add to vite.config: `import { visualizer } from 'rollup-plugin-visualizer'; plugins: [visualizer()]`, rebuild. Verify vite.config.js. Check Vite version compatibility.
+
 ### Hook detects wrong build system for monorepo
 
 Detection scans root only. For workspace builds, modify check: `if [[ "$FILE_PATH" == packages/app/* ]]; then cd packages/app; BUILD_SYSTEM=...; fi`. Verify monorepo structure. Check workspace configuration.
+
 ### webpack-bundle-analyzer not found despite npm installation
 
 Verify webpack-bundle-analyzer installation: 'npm list webpack-bundle-analyzer' or 'npx webpack-bundle-analyzer --version'. Install: 'npm install --save-dev webpack-bundle-analyzer'. Check PATH. Verify Node.js version compatibility.
+
 ### Bundle report HTML file not generated
 
 Verify stats file exists and is valid JSON. Check webpack-bundle-analyzer version supports --report flag. Ensure write permissions for report directory. Verify --mode static flag. Test webpack-bundle-analyzer command manually.
+
 ### Next.js bundle analyzer requires ANALYZE environment variable
 
 Set ANALYZE environment variable: 'ANALYZE=true npm run build'. Or configure @next/bundle-analyzer in next.config.js. Verify Next.js configuration. Check @next/bundle-analyzer installation.

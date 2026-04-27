@@ -15,8 +15,8 @@ seoDescription: >-
   pipelines, and data infrastructure. Includes database design, optimization,
   and cloud se...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-02'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-02"
 installable: false
 usageSnippet: >-
   Start with `database-specialist-agent` → `database-expert` →
@@ -74,6 +74,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 Comprehensive toolkit for data engineers working with databases, ETL pipelines, and data infrastructure. Includes database design, optimization, and cloud services integration.
 
 ## Features
@@ -139,18 +140,23 @@ Start with ETL templates for your data sources, then build warehouse schemas and
 6. `debug`
 
 ## Troubleshooting
+
 ### AWS MCP server auth conflicts with Airtable MCP credentials
 
 Configure separate credential stores for each MCP server. Use AWS_PROFILE env var for aws-services-mcp-server, AIRTABLE_API_KEY for airtable-mcp-server. Keep credentials in different config files.
+
 ### Database agent and rules provide contradicting optimization advice
 
 Install database-expert rules before database-specialist-agent. Agent will defer to rules for best practices. Update rules file to match your database engine (PostgreSQL, MySQL, etc.).
+
 ### MCP servers fail to initialize due to missing AWS SDK dependencies
 
 Install AWS SDK before MCP servers: npm install @aws-sdk/client-rds @aws-sdk/client-dynamodb @aws-sdk/client-s3. Then reinstall aws-services-mcp-server to detect installed SDKs.
+
 ### Optimize command incompatible with database agent's schema format
 
 Ensure database-specialist-agent and optimize command use same schema definition format. Install agent first to establish format, then install optimize command to inherit conventions.
+
 ### Collection setup fails without proper AWS region configuration
 
 Set AWS_REGION environment variable before installing MCP servers: export AWS_REGION=us-east-1. Configure region in Claude Code settings under MCP server preferences. Restart Claude after setting.

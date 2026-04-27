@@ -36,12 +36,14 @@ Claude can build and deploy AI-powered serverless functions on Cloudflare's glob
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Cloudflare account (free tier available)
 - Wrangler CLI installed (`npm install -g wrangler`)
 - Basic understanding of JavaScript/TypeScript
 
 **What Claude handles automatically:**
+
 - Writing Workers code with TypeScript types
 - Configuring wrangler.toml for deployments
 - Implementing AI model bindings (Llama-2, Whisper, Stable Diffusion)
@@ -56,6 +58,7 @@ Claude can build and deploy AI-powered serverless functions on Cloudflare's glob
 **Prompt:** "Create a Cloudflare Worker that responds to HTTP requests with JSON data and deploys to the edge."
 
 Claude will:
+
 1. Generate a Worker with proper `fetch` event handler
 2. Create `wrangler.toml` configuration
 3. Set up TypeScript types for Request/Response
@@ -68,6 +71,7 @@ Claude will:
 **Prompt:** "Build a Cloudflare Worker that uses Llama-2 to generate chat responses. Accept POST requests with user messages and stream the AI responses back."
 
 Claude will:
+
 1. Configure AI binding in wrangler.toml
 2. Implement streaming response with ReadableStream
 3. Add proper prompt formatting for Llama-2
@@ -80,6 +84,7 @@ Claude will:
 **Prompt:** "Create an edge function that generates images using Stable Diffusion XL. Accept a text prompt via API and return the generated image URL stored in R2."
 
 Claude will:
+
 1. Set up Workers AI binding for Stable Diffusion
 2. Configure R2 bucket for image storage
 3. Implement image generation with proper parameters
@@ -92,6 +97,7 @@ Claude will:
 **Prompt:** "Build a translation API using Cloudflare Workers AI that detects the source language and translates to the target language. Support 50+ languages with edge caching."
 
 Claude will:
+
 1. Use Workers AI translation models
 2. Implement language detection
 3. Set up KV namespace for translation caching
@@ -114,6 +120,7 @@ Claude will:
 
 ## Common Workflows
 ### Full-Stack AI Application
+
 ```
 "Create a complete AI-powered application on Cloudflare:
 1. Workers AI for text generation (Llama-2)
@@ -126,6 +133,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Content Moderation API
+
 ```
 "Build an edge API that:
 1. Accepts text content via POST request
@@ -137,6 +145,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Smart Image CDN
+
 ```
 "Create a Cloudflare Worker that:
 1. Intercepts image requests
@@ -148,6 +157,7 @@ Include TypeScript types and deployment scripts."
 ```
 
 ### Real-Time Sentiment Analysis
+
 ```
 "Build a WebSocket-based sentiment analysis service:
 1. Accept streaming text via WebSocket
@@ -203,7 +213,7 @@ Include TypeScript types and deployment scripts."
 **Solution:** Use smaller model variants (e.g., Llama-2-7B instead of 13B), implement request queuing with Workers Queue, or cache common responses in KV storage.
 
 **Issue:** CORS errors when calling from frontend
-**Solution:** Add proper CORS headers in Worker response. Ask Claude to include OPTIONS method handler and appropriate Access-Control-* headers.
+**Solution:** Add proper CORS headers in Worker response. Ask Claude to include OPTIONS method handler and appropriate Access-Control-\* headers.
 
 **Issue:** Workers AI billing concerns
 **Solution:** Implement rate limiting with Durable Objects or KV, cache responses aggressively, use smaller models for simpler tasks, and set up billing alerts in Cloudflare dashboard.

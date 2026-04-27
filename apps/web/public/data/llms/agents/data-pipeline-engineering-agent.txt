@@ -59,9 +59,9 @@ def extract_api_data(**context):
     import requests
     import pandas as pd
     from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-    
+
     execution_date = context['ds']
-    
+
     # Extract data from API
     response = requests.get(
         f'https://api.company.com/sales?date={execution_date}',
@@ -69,42 +69,42 @@ def extract_api_data(**context):
         timeout=300
     )
     response.raise_for_status()
-    
+
     # Convert to DataFrame
     df = pd.DataFrame(response.json()['data'])
-    
+
     # Save to S3 (raw layer)
     s3_hook = S3Hook(aws_conn_id='aws_default')
     s3_key = f'raw/sales/{execution_date}/sales.parquet'
-    
+
     df.to_parquet(
         f's3://company-data-lake/{s3_key}',
         engine='pyarrow',
         compression='snappy',
         index=False
     )
-    
+
     # Push metadata to XCom
     context['ti'].xcom_push(key='s3_key', value=s3_key)
     context['ti'].xcom_push(key='row_count', value=len(df))
-    
+
     return s3_key
 
 def validate_raw_data(**context):
     """Validate data quality using Great Expectations"""
     import great_expectations as gx
     from great_expectations.checkpoint import Checkpoint
-    
+
     s3_key = context['ti'].xcom_pull(key='s3_key', task_ids='extract_api_data')
-    
+
     # Initialize Great Expectations context
     context_gx = gx.get_context()
-    
+
     # Define expectations
     validator = context_gx.sources.add_or_update_pandas(
         name="sales_data"
     ).read_parquet(f's3://company-data-lake/{s3_key}')
-    
+
     # Run validation suite
     validator.expect_table_row_count_to_be_between(min_value=100, max_value=1000000)
     validator.expect_column_values_to_not_be_null(column='sale_id')
@@ -119,36 +119,36 @@ def validate_raw_data(**context):
         column='email',
         regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     )
-    
+
     # Execute checkpoint
     results = validator.validate()
-    
+
     if not results['success']:
         raise ValueError(f"Data quality validation failed: {results['statistics']}")
-    
+
     return results['statistics']
 
 def transform_to_bronze(**context):
     """Transform raw data to bronze layer (cleaned)"""
     import pandas as pd
     from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-    
+
     execution_date = context['ds']
     s3_key = context['ti'].xcom_pull(key='s3_key', task_ids='extract_api_data')
-    
+
     # Read raw data
     df = pd.read_parquet(f's3://company-data-lake/{s3_key}')
-    
+
     # Data cleaning transformations
     df['sale_timestamp'] = pd.to_datetime(df['sale_timestamp'])
     df['amount'] = df['amount'].astype(float)
     df['email'] = df['email'].str.lower().str.strip()
     df['processed_at'] = datetime.utcnow()
-    
+
     # Add metadata columns
     df['_ingestion_date'] = execution_date
     df['_source'] = 'sales_api'
-    
+
     # Write to bronze layer (partitioned by date)
     bronze_key = f'bronze/sales/date={execution_date}/data.parquet'
     df.to_parquet(
@@ -157,7 +157,7 @@ def transform_to_bronze(**context):
         engine='pyarrow',
         compression='snappy'
     )
-    
+
     return bronze_key
 
 # Task: Extract from API
@@ -217,7 +217,7 @@ with TaskGroup('gold_aggregations', dag=dag) as gold_group:
                 created_at = EXCLUDED.created_at;
         """,
     )
-    
+
     product_summary = PostgresOperator(
         task_id='create_product_summary',
         postgres_conn_id='warehouse',
@@ -274,9 +274,9 @@ def extract_api_data(**context):
     import requests
     import pandas as pd
     from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-    
+
     execution_date = context['ds']
-    
+
     # Extract data from API
     response = requests.get(
         f'https://api.company.com/sales?date={execution_date}',
@@ -284,42 +284,42 @@ def extract_api_data(**context):
         timeout=300
     )
     response.raise_for_status()
-    
+
     # Convert to DataFrame
     df = pd.DataFrame(response.json()['data'])
-    
+
     # Save to S3 (raw layer)
     s3_hook = S3Hook(aws_conn_id='aws_default')
     s3_key = f'raw/sales/{execution_date}/sales.parquet'
-    
+
     df.to_parquet(
         f's3://company-data-lake/{s3_key}',
         engine='pyarrow',
         compression='snappy',
         index=False
     )
-    
+
     # Push metadata to XCom
     context['ti'].xcom_push(key='s3_key', value=s3_key)
     context['ti'].xcom_push(key='row_count', value=len(df))
-    
+
     return s3_key
 
 def validate_raw_data(**context):
     """Validate data quality using Great Expectations"""
     import great_expectations as gx
     from great_expectations.checkpoint import Checkpoint
-    
+
     s3_key = context['ti'].xcom_pull(key='s3_key', task_ids='extract_api_data')
-    
+
     # Initialize Great Expectations context
     context_gx = gx.get_context()
-    
+
     # Define expectations
     validator = context_gx.sources.add_or_update_pandas(
         name="sales_data"
     ).read_parquet(f's3://company-data-lake/{s3_key}')
-    
+
     # Run validation suite
     validator.expect_table_row_count_to_be_between(min_value=100, max_value=1000000)
     validator.expect_column_values_to_not_be_null(column='sale_id')
@@ -334,36 +334,36 @@ def validate_raw_data(**context):
         column='email',
         regex=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     )
-    
+
     # Execute checkpoint
     results = validator.validate()
-    
+
     if not results['success']:
         raise ValueError(f"Data quality validation failed: {results['statistics']}")
-    
+
     return results['statistics']
 
 def transform_to_bronze(**context):
     """Transform raw data to bronze layer (cleaned)"""
     import pandas as pd
     from airflow.providers.amazon.aws.hooks.s3 import S3Hook
-    
+
     execution_date = context['ds']
     s3_key = context['ti'].xcom_pull(key='s3_key', task_ids='extract_api_data')
-    
+
     # Read raw data
     df = pd.read_parquet(f's3://company-data-lake/{s3_key}')
-    
+
     # Data cleaning transformations
     df['sale_timestamp'] = pd.to_datetime(df['sale_timestamp'])
     df['amount'] = df['amount'].astype(float)
     df['email'] = df['email'].str.lower().str.strip()
     df['processed_at'] = datetime.utcnow()
-    
+
     # Add metadata columns
     df['_ingestion_date'] = execution_date
     df['_source'] = 'sales_api'
-    
+
     # Write to bronze layer (partitioned by date)
     bronze_key = f'bronze/sales/date={execution_date}/data.parquet'
     df.to_parquet(
@@ -372,7 +372,7 @@ def transform_to_bronze(**context):
         engine='pyarrow',
         compression='snappy'
     )
-    
+
     return bronze_key
 
 # Task: Extract from API
@@ -432,7 +432,7 @@ with TaskGroup('gold_aggregations', dag=dag) as gold_group:
                 created_at = EXCLUDED.created_at;
         """,
     )
-    
+
     product_summary = PostgresOperator(
         task_id='create_product_summary',
         postgres_conn_id='warehouse',
@@ -481,7 +481,7 @@ WITH sales_raw AS (
     DATE(sale_timestamp) as sale_date,
     _ingestion_date
   FROM {{ source('bronze', 'sales') }}
-  
+
   {% if is_incremental() %}
     WHERE _ingestion_date >= (SELECT MAX(sale_date) - INTERVAL '7 days' FROM {{ this }})
   {% endif %}
@@ -520,11 +520,11 @@ SELECT
   s.amount - p.product_cost AS profit,
   s.sale_timestamp,
   s.sale_date,
-  
+
   -- Customer metrics
   c.customer_lifetime_value,
   DATEDIFF('day', c.customer_join_date, s.sale_date) AS days_since_customer_join,
-  
+
   -- Time dimensions
   EXTRACT(YEAR FROM s.sale_timestamp) AS sale_year,
   EXTRACT(MONTH FROM s.sale_timestamp) AS sale_month,
@@ -539,10 +539,10 @@ SELECT
     WHEN 5 THEN 'Friday'
     WHEN 6 THEN 'Saturday'
   END AS day_of_week,
-  
+
   -- Metadata
   CURRENT_TIMESTAMP AS _dbt_updated_at
-  
+
 FROM sales_raw s
 LEFT JOIN customers c ON s.customer_id = c.customer_id
 LEFT JOIN products p ON s.product_id = p.product_id
@@ -557,14 +557,14 @@ version: 2
 models:
   - name: sales_enriched
     description: Enriched sales transactions with customer and product dimensions
-    
+
     columns:
       - name: sale_id
         description: Unique sale identifier
         tests:
           - unique
           - not_null
-      
+
       - name: customer_id
         description: Customer identifier
         tests:
@@ -572,7 +572,7 @@ models:
           - relationships:
               to: ref('dim_customers')
               field: customer_id
-      
+
       - name: product_id
         description: Product identifier
         tests:
@@ -580,7 +580,7 @@ models:
           - relationships:
               to: ref('dim_products')
               field: product_id
-      
+
       - name: amount
         description: Sale amount in USD
         tests:
@@ -588,7 +588,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: 0
               max_value: 1000000
-      
+
       - name: profit
         description: Sale profit (amount - cost)
         tests:
@@ -596,7 +596,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: -100000
               max_value: 900000
-    
+
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 1000
@@ -629,7 +629,7 @@ WITH sales_raw AS (
     DATE(sale_timestamp) as sale_date,
     _ingestion_date
   FROM {{ source('bronze', 'sales') }}
-  
+
   {% if is_incremental() %}
     WHERE _ingestion_date >= (SELECT MAX(sale_date) - INTERVAL '7 days' FROM {{ this }})
   {% endif %}
@@ -668,11 +668,11 @@ SELECT
   s.amount - p.product_cost AS profit,
   s.sale_timestamp,
   s.sale_date,
-  
+
   -- Customer metrics
   c.customer_lifetime_value,
   DATEDIFF('day', c.customer_join_date, s.sale_date) AS days_since_customer_join,
-  
+
   -- Time dimensions
   EXTRACT(YEAR FROM s.sale_timestamp) AS sale_year,
   EXTRACT(MONTH FROM s.sale_timestamp) AS sale_month,
@@ -687,10 +687,10 @@ SELECT
     WHEN 5 THEN 'Friday'
     WHEN 6 THEN 'Saturday'
   END AS day_of_week,
-  
+
   -- Metadata
   CURRENT_TIMESTAMP AS _dbt_updated_at
-  
+
 FROM sales_raw s
 LEFT JOIN customers c ON s.customer_id = c.customer_id
 LEFT JOIN products p ON s.product_id = p.product_id
@@ -704,14 +704,14 @@ version: 2
 models:
   - name: sales_enriched
     description: Enriched sales transactions with customer and product dimensions
-    
+
     columns:
       - name: sale_id
         description: Unique sale identifier
         tests:
           - unique
           - not_null
-      
+
       - name: customer_id
         description: Customer identifier
         tests:
@@ -719,7 +719,7 @@ models:
           - relationships:
               to: ref('dim_customers')
               field: customer_id
-      
+
       - name: product_id
         description: Product identifier
         tests:
@@ -727,7 +727,7 @@ models:
           - relationships:
               to: ref('dim_products')
               field: product_id
-      
+
       - name: amount
         description: Sale amount in USD
         tests:
@@ -735,7 +735,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: 0
               max_value: 1000000
-      
+
       - name: profit
         description: Sale profit (amount - cost)
         tests:
@@ -743,7 +743,7 @@ models:
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: -100000
               max_value: 900000
-    
+
     tests:
       - dbt_expectations.expect_table_row_count_to_be_between:
           min_value: 1000
@@ -769,7 +769,7 @@ class SalesEventProcessor:
         self.schema_registry = SchemaRegistryClient({
             'url': 'http://schema-registry:8081'
         })
-        
+
         self.consumer = KafkaConsumer(
             'sales-events',
             bootstrap_servers=['kafka:9092'],
@@ -780,7 +780,7 @@ class SalesEventProcessor:
             max_poll_records=500,
             session_timeout_ms=30000,
         )
-        
+
         self.producer = KafkaProducer(
             bootstrap_servers=['kafka:9092'],
             value_serializer=self._serialize_avro,
@@ -788,17 +788,17 @@ class SalesEventProcessor:
             retries=3,
             max_in_flight_requests_per_connection=1,
         )
-        
+
         self.db_conn = psycopg2.connect(
             host='warehouse',
             database='analytics',
             user='etl_user',
             password=get_secret('DB_PASSWORD')
         )
-        
+
         self.batch = []
         self.batch_size = 100
-    
+
     def _deserialize_avro(self, msg_value: bytes) -> Dict:
         """Deserialize Avro message"""
         avro_deserializer = AvroDeserializer(
@@ -806,7 +806,7 @@ class SalesEventProcessor:
             schema_str=self._get_schema('sales-event-value')
         )
         return avro_deserializer(msg_value, None)
-    
+
     def _serialize_avro(self, data: Dict) -> bytes:
         """Serialize to Avro"""
         avro_serializer = AvroSerializer(
@@ -814,37 +814,37 @@ class SalesEventProcessor:
             schema_str=self._get_schema('enriched-sales-value')
         )
         return avro_serializer(data, None)
-    
+
     def process_events(self):
         """Process incoming sales events"""
         try:
             for message in self.consumer:
                 try:
                     event = message.value
-                    
+
                     # Enrich event
                     enriched = self.enrich_event(event)
-                    
+
                     # Validate
                     if not self.validate_event(enriched):
                         logging.warning(f"Invalid event: {event}")
                         continue
-                    
+
                     # Add to batch
                     self.batch.append(enriched)
-                    
+
                     # Process batch when full
                     if len(self.batch) >= self.batch_size:
                         self.flush_batch()
-                    
+
                     # Commit offset after successful processing
                     self.consumer.commit()
-                    
+
                 except Exception as e:
                     logging.error(f"Error processing message: {e}")
                     # Send to dead letter queue
                     self.producer.send('sales-events-dlq', value=message.value)
-                    
+
         except KeyboardInterrupt:
             logging.info("Shutting down processor...")
         finally:
@@ -852,27 +852,27 @@ class SalesEventProcessor:
             self.consumer.close()
             self.producer.close()
             self.db_conn.close()
-    
+
     def enrich_event(self, event: Dict) -> Dict:
         """Enrich event with additional data"""
         cursor = self.db_conn.cursor()
-        
+
         # Fetch customer data
         cursor.execute(
             "SELECT customer_segment, customer_lifetime_value FROM dim_customers WHERE customer_id = %s",
             (event['customer_id'],)
         )
         customer_data = cursor.fetchone()
-        
+
         # Fetch product data
         cursor.execute(
             "SELECT product_category, product_price FROM dim_products WHERE product_id = %s",
             (event['product_id'],)
         )
         product_data = cursor.fetchone()
-        
+
         cursor.close()
-        
+
         return {
             **event,
             'customer_segment': customer_data[0] if customer_data else None,
@@ -881,26 +881,26 @@ class SalesEventProcessor:
             'product_price': product_data[1] if product_data else 0,
             'enriched_at': datetime.utcnow().isoformat()
         }
-    
+
     def validate_event(self, event: Dict) -> bool:
         """Validate event data"""
         required_fields = ['sale_id', 'customer_id', 'product_id', 'amount']
-        
+
         if not all(field in event for field in required_fields):
             return False
-        
+
         if event['amount'] <= 0 or event['amount'] > 1000000:
             return False
-        
+
         return True
-    
+
     def flush_batch(self):
         """Flush batch to database and downstream topic"""
         if not self.batch:
             return
-        
+
         cursor = self.db_conn.cursor()
-        
+
         try:
             # Batch insert to warehouse
             execute_batch(
@@ -918,18 +918,18 @@ class SalesEventProcessor:
                   e['customer_segment'], e['product_category'], e['enriched_at'])
                  for e in self.batch]
             )
-            
+
             self.db_conn.commit()
-            
+
             # Publish enriched events
             for event in self.batch:
                 self.producer.send('enriched-sales-events', value=event)
-            
+
             self.producer.flush()
-            
+
             logging.info(f"Flushed batch of {len(self.batch)} events")
             self.batch = []
-            
+
         except Exception as e:
             logging.error(f"Error flushing batch: {e}")
             self.db_conn.rollback()
@@ -952,7 +952,7 @@ class SalesEventProcessor:
         self.schema_registry = SchemaRegistryClient({
             'url': 'http://schema-registry:8081'
         })
-        
+
         self.consumer = KafkaConsumer(
             'sales-events',
             bootstrap_servers=['kafka:9092'],
@@ -963,7 +963,7 @@ class SalesEventProcessor:
             max_poll_records=500,
             session_timeout_ms=30000,
         )
-        
+
         self.producer = KafkaProducer(
             bootstrap_servers=['kafka:9092'],
             value_serializer=self._serialize_avro,
@@ -971,17 +971,17 @@ class SalesEventProcessor:
             retries=3,
             max_in_flight_requests_per_connection=1,
         )
-        
+
         self.db_conn = psycopg2.connect(
             host='warehouse',
             database='analytics',
             user='etl_user',
             password=get_secret('DB_PASSWORD')
         )
-        
+
         self.batch = []
         self.batch_size = 100
-    
+
     def _deserialize_avro(self, msg_value: bytes) -> Dict:
         """Deserialize Avro message"""
         avro_deserializer = AvroDeserializer(
@@ -989,7 +989,7 @@ class SalesEventProcessor:
             schema_str=self._get_schema('sales-event-value')
         )
         return avro_deserializer(msg_value, None)
-    
+
     def _serialize_avro(self, data: Dict) -> bytes:
         """Serialize to Avro"""
         avro_serializer = AvroSerializer(
@@ -997,37 +997,37 @@ class SalesEventProcessor:
             schema_str=self._get_schema('enriched-sales-value')
         )
         return avro_serializer(data, None)
-    
+
     def process_events(self):
         """Process incoming sales events"""
         try:
             for message in self.consumer:
                 try:
                     event = message.value
-                    
+
                     # Enrich event
                     enriched = self.enrich_event(event)
-                    
+
                     # Validate
                     if not self.validate_event(enriched):
                         logging.warning(f"Invalid event: {event}")
                         continue
-                    
+
                     # Add to batch
                     self.batch.append(enriched)
-                    
+
                     # Process batch when full
                     if len(self.batch) >= self.batch_size:
                         self.flush_batch()
-                    
+
                     # Commit offset after successful processing
                     self.consumer.commit()
-                    
+
                 except Exception as e:
                     logging.error(f"Error processing message: {e}")
                     # Send to dead letter queue
                     self.producer.send('sales-events-dlq', value=message.value)
-                    
+
         except KeyboardInterrupt:
             logging.info("Shutting down processor...")
         finally:
@@ -1035,27 +1035,27 @@ class SalesEventProcessor:
             self.consumer.close()
             self.producer.close()
             self.db_conn.close()
-    
+
     def enrich_event(self, event: Dict) -> Dict:
         """Enrich event with additional data"""
         cursor = self.db_conn.cursor()
-        
+
         # Fetch customer data
         cursor.execute(
             "SELECT customer_segment, customer_lifetime_value FROM dim_customers WHERE customer_id = %s",
             (event['customer_id'],)
         )
         customer_data = cursor.fetchone()
-        
+
         # Fetch product data
         cursor.execute(
             "SELECT product_category, product_price FROM dim_products WHERE product_id = %s",
             (event['product_id'],)
         )
         product_data = cursor.fetchone()
-        
+
         cursor.close()
-        
+
         return {
             **event,
             'customer_segment': customer_data[0] if customer_data else None,
@@ -1064,26 +1064,26 @@ class SalesEventProcessor:
             'product_price': product_data[1] if product_data else 0,
             'enriched_at': datetime.utcnow().isoformat()
         }
-    
+
     def validate_event(self, event: Dict) -> bool:
         """Validate event data"""
         required_fields = ['sale_id', 'customer_id', 'product_id', 'amount']
-        
+
         if not all(field in event for field in required_fields):
             return False
-        
+
         if event['amount'] <= 0 or event['amount'] > 1000000:
             return False
-        
+
         return True
-    
+
     def flush_batch(self):
         """Flush batch to database and downstream topic"""
         if not self.batch:
             return
-        
+
         cursor = self.db_conn.cursor()
-        
+
         try:
             # Batch insert to warehouse
             execute_batch(
@@ -1101,18 +1101,18 @@ class SalesEventProcessor:
                   e['customer_segment'], e['product_category'], e['enriched_at'])
                  for e in self.batch]
             )
-            
+
             self.db_conn.commit()
-            
+
             # Publish enriched events
             for event in self.batch:
                 self.producer.send('enriched-sales-events', value=event)
-            
+
             self.producer.flush()
-            
+
             logging.info(f"Flushed batch of {len(self.batch)} events")
             self.batch = []
-            
+
         except Exception as e:
             logging.error(f"Error flushing batch: {e}")
             self.db_conn.rollback()
@@ -1132,9 +1132,9 @@ from great_expectations.checkpoint import Checkpoint
 def create_sales_quality_suite() -> ExpectationSuite:
     """Create comprehensive quality suite for sales data"""
     context = gx.get_context()
-    
+
     suite = context.add_expectation_suite("sales_quality_suite")
-    
+
     # Table-level expectations
     suite.add_expectation(
         gx.expectations.ExpectTableRowCountToBeBetween(
@@ -1142,25 +1142,25 @@ def create_sales_quality_suite() -> ExpectationSuite:
             max_value=10000000
         )
     )
-    
+
     # Column existence
     required_columns = ['sale_id', 'customer_id', 'product_id', 'amount', 'sale_timestamp']
     for col in required_columns:
         suite.add_expectation(
             gx.expectations.ExpectColumnToExist(column=col)
         )
-    
+
     # Uniqueness
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeUnique(column='sale_id')
     )
-    
+
     # Null checks
     for col in required_columns:
         suite.add_expectation(
             gx.expectations.ExpectColumnValuesToNotBeNull(column=col)
         )
-    
+
     # Value ranges
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeBetween(
@@ -1170,7 +1170,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             mostly=0.99  # Allow 1% outliers
         )
     )
-    
+
     # Data types
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeOfType(
@@ -1178,7 +1178,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             type_='float64'
         )
     )
-    
+
     # Regex patterns
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToMatchRegex(
@@ -1187,7 +1187,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             mostly=0.95
         )
     )
-    
+
     # Referential integrity
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeInSet(
@@ -1195,7 +1195,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             value_set=get_valid_customer_ids()  # From dimension table
         )
     )
-    
+
     # Custom expectations
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeBetween(
@@ -1204,13 +1204,13 @@ def create_sales_quality_suite() -> ExpectationSuite:
             max_value=1.0
         )
     )
-    
+
     return suite
 
 def run_quality_checkpoint(data_source: str, suite_name: str) -> Dict:
     """Run quality checkpoint"""
     context = gx.get_context()
-    
+
     checkpoint = Checkpoint(
         name="sales_checkpoint",
         data_context=context,
@@ -1233,9 +1233,9 @@ def run_quality_checkpoint(data_source: str, suite_name: str) -> Dict:
             },
         ],
     )
-    
+
     results = checkpoint.run()
-    
+
     return {
         'success': results['success'],
         'statistics': results.statistics,
@@ -1251,9 +1251,9 @@ from great_expectations.checkpoint import Checkpoint
 def create_sales_quality_suite() -> ExpectationSuite:
     """Create comprehensive quality suite for sales data"""
     context = gx.get_context()
-    
+
     suite = context.add_expectation_suite("sales_quality_suite")
-    
+
     # Table-level expectations
     suite.add_expectation(
         gx.expectations.ExpectTableRowCountToBeBetween(
@@ -1261,25 +1261,25 @@ def create_sales_quality_suite() -> ExpectationSuite:
             max_value=10000000
         )
     )
-    
+
     # Column existence
     required_columns = ['sale_id', 'customer_id', 'product_id', 'amount', 'sale_timestamp']
     for col in required_columns:
         suite.add_expectation(
             gx.expectations.ExpectColumnToExist(column=col)
         )
-    
+
     # Uniqueness
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeUnique(column='sale_id')
     )
-    
+
     # Null checks
     for col in required_columns:
         suite.add_expectation(
             gx.expectations.ExpectColumnValuesToNotBeNull(column=col)
         )
-    
+
     # Value ranges
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeBetween(
@@ -1289,7 +1289,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             mostly=0.99  # Allow 1% outliers
         )
     )
-    
+
     # Data types
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeOfType(
@@ -1297,7 +1297,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             type_='float64'
         )
     )
-    
+
     # Regex patterns
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToMatchRegex(
@@ -1306,7 +1306,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             mostly=0.95
         )
     )
-    
+
     # Referential integrity
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeInSet(
@@ -1314,7 +1314,7 @@ def create_sales_quality_suite() -> ExpectationSuite:
             value_set=get_valid_customer_ids()  # From dimension table
         )
     )
-    
+
     # Custom expectations
     suite.add_expectation(
         gx.expectations.ExpectColumnValuesToBeBetween(
@@ -1323,13 +1323,13 @@ def create_sales_quality_suite() -> ExpectationSuite:
             max_value=1.0
         )
     )
-    
+
     return suite
 
 def run_quality_checkpoint(data_source: str, suite_name: str) -> Dict:
     """Run quality checkpoint"""
     context = gx.get_context()
-    
+
     checkpoint = Checkpoint(
         name="sales_checkpoint",
         data_context=context,
@@ -1352,9 +1352,9 @@ def run_quality_checkpoint(data_source: str, suite_name: str) -> Dict:
             },
         ],
     )
-    
+
     results = checkpoint.run()
-    
+
     return {
         'success': results['success'],
         'statistics': results.statistics,
@@ -1382,35 +1382,35 @@ class DebeziumCDCProcessor:
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             auto_offset_reset='earliest',
         )
-        
+
         self.warehouse_conn = psycopg2.connect(
             host='warehouse',
             database='analytics',
             user='cdc_user',
             password=get_secret('DB_PASSWORD')
         )
-    
+
     def process_changes(self):
         """Process CDC events from Debezium"""
         for message in self.consumer:
             payload = message.value
-            
+
             if payload is None:
                 continue
-            
+
             operation = payload.get('op')  # c=create, u=update, d=delete
-            
+
             if operation == 'c':
                 self.handle_insert(payload['after'])
             elif operation == 'u':
                 self.handle_update(payload['before'], payload['after'])
             elif operation == 'd':
                 self.handle_delete(payload['before'])
-    
+
     def handle_insert(self, record: Dict):
         """Handle INSERT operation"""
         cursor = self.warehouse_conn.cursor()
-        
+
         cursor.execute(
             """
             INSERT INTO bronze.sales_cdc (sale_id, customer_id, amount, cdc_operation, cdc_timestamp)
@@ -1418,7 +1418,7 @@ class DebeziumCDCProcessor:
             """,
             (record['sale_id'], record['customer_id'], record['amount'], datetime.utcnow())
         )
-        
+
         self.warehouse_conn.commit()
         cursor.close()
 ```
@@ -1441,35 +1441,35 @@ class DebeziumCDCProcessor:
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             auto_offset_reset='earliest',
         )
-        
+
         self.warehouse_conn = psycopg2.connect(
             host='warehouse',
             database='analytics',
             user='cdc_user',
             password=get_secret('DB_PASSWORD')
         )
-    
+
     def process_changes(self):
         """Process CDC events from Debezium"""
         for message in self.consumer:
             payload = message.value
-            
+
             if payload is None:
                 continue
-            
+
             operation = payload.get('op')  # c=create, u=update, d=delete
-            
+
             if operation == 'c':
                 self.handle_insert(payload['after'])
             elif operation == 'u':
                 self.handle_update(payload['before'], payload['after'])
             elif operation == 'd':
                 self.handle_delete(payload['before'])
-    
+
     def handle_insert(self, record: Dict):
         """Handle INSERT operation"""
         cursor = self.warehouse_conn.cursor()
-        
+
         cursor.execute(
             """
             INSERT INTO bronze.sales_cdc (sale_id, customer_id, amount, cdc_operation, cdc_timestamp)
@@ -1477,7 +1477,7 @@ class DebeziumCDCProcessor:
             """,
             (record['sale_id'], record['customer_id'], record['amount'], datetime.utcnow())
         )
-        
+
         self.warehouse_conn.commit()
         cursor.close()
 ```

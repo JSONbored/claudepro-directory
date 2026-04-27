@@ -62,7 +62,9 @@ Claude Code prompt caching efficiency monitor tracking cache hits, write efficie
 
 ## Examples
 ### Enhanced Cache Monitor with Write Efficiency Tracking
+
 Extended version with detailed write efficiency metrics and recommendations
+
 ```bash
 #!/usr/bin/env bash
 
@@ -132,8 +134,11 @@ else
   echo -e "${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}% | Write: ${write_percentage}% ${RECOMMENDATION}"
 fi
 ```
+
 ### Cache Monitor with Custom Efficiency Thresholds
+
 Configurable efficiency thresholds for different caching strategies
+
 ```bash
 #!/usr/bin/env bash
 
@@ -196,8 +201,11 @@ else
   echo -e "${CACHE_ICON} Cache: ${CACHE_COLOR}${hit_bar}${RESET} ${cache_hit_rate}%"
 fi
 ```
+
 ### Cache Efficiency Monitor Installation Example
+
 Complete setup script with cache field verification
+
 ```bash
 #!/bin/bash
 # Installation script for Cache Efficiency Monitor
@@ -396,24 +404,31 @@ echo "Verify cache fields exist: echo '{"cost":{}}' | jq '.cost.cache_read_input
 ### Cache hit rate always showing 0% despite caching enabled
 
 Verify cache fields exist in JSON: echo '$input' | jq '.cost | {cache_read: .cache_read_input_tokens, cache_create: .cache_creation_input_tokens}'. If fields missing, Claude Code version may not expose cache metrics. Check official docs for required version. Caching requires Claude 3.5 Sonnet or Opus with prompt caching feature enabled. Verify prompt caching is configured in Claude Code settings.
+
 ### Cost savings calculation showing unrealistic numbers
 
-Script estimates savings using 90% discount formula (cache reads cost 10% of regular input). Verify cache_read_tokens value: echo '$input' | jq .cost.cache_read_input_tokens. Formula: savings = cache_read_tokens * 0.9. Adjust discount percentage in script if Claude pricing changes. Check bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900).
+Script estimates savings using 90% discount formula (cache reads cost 10% of regular input). Verify cache*read_tokens value: echo '$input' | jq .cost.cache_read_input_tokens. Formula: savings = cache_read_tokens * 0.9. Adjust discount percentage in script if Claude pricing changes. Check bc calculation: echo 'scale=0; 1000 \_ 0.9 / 1' | bc (should return 900).
+
 ### Recommendation showing 'Enable caching?' when caching is on
 
 Recommendation triggers when both cache_read_tokens and cache_create_tokens are 0. This means no cache activity detected. Verify prompt caching is configured in Claude Code settings. Check that prompts contain cacheable prefixes (system messages, long contexts). Short sessions may not benefit from caching. Verify cache fields are being read: echo '$input' | jq '.cost.cache_read_input_tokens'.
+
 ### Hit rate bar not displaying correctly or showing as empty
 
-Ensure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. Bar uses hit_rate / 5 for scaling (each char = 5%). If hit_rate is 0, shows full empty bar (20x ░). Verify cache_hit_rate calculation: (cache_read_tokens * 100) / total_input. Check printf command works: printf '█%.0s' $(seq 1 5) (should show 5 blocks).
+Ensure terminal supports Unicode block characters (█ and ░). Test with: echo -e '█████░░░░░'. Bar uses hit_rate / 5 for scaling (each char = 5%). If hit_rate is 0, shows full empty bar (20x ░). Verify cache_hit_rate calculation: (cache_read_tokens \* 100) / total_input. Check printf command works: printf '█%.0s' $(seq 1 5) (should show 5 blocks).
+
 ### Write efficiency showing 'More reads needed' incorrectly
 
-Recommendation appears when hit_rate <25% AND write_percentage >50% (creating more cache entries than using them). This indicates inefficient caching pattern. Solution: Reuse prompts more, reduce unique cache writes. Check if session involves many one-off queries vs repeated patterns. Verify write_percentage calculation: (cache_create_tokens * 100) / total_input.
+Recommendation appears when hit_rate <25% AND write_percentage >50% (creating more cache entries than using them). This indicates inefficient caching pattern. Solution: Reuse prompts more, reduce unique cache writes. Check if session involves many one-off queries vs repeated patterns. Verify write_percentage calculation: (cache_create_tokens \* 100) / total_input.
+
 ### Cache efficiency color always showing gray (NONE) even with cache activity
 
 Check cache_hit_rate calculation: cache_hit_rate=$(( (cache_read_tokens * 100) / total_input )). Verify cache_read_tokens > 0: echo '$input' | jq .cost.cache_read_input_tokens. Ensure total_input includes all token types: total_input=$((cache_read_tokens + cache_create_tokens + regular_input_tokens)). Test threshold logic: if [ $cache_hit_rate -ge 50 ]; then echo "EXCELLENT"; fi.
+
 ### Percentage calculations showing incorrect values (e.g., >100%)
 
-Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_input > 0 before division. Test calculation: cache_hit_rate=$((cache_read_tokens * 100 / total_input)). Ensure values are numeric: echo "$cache_read_tokens" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large. Verify total_input includes all components.
+Verify integer division is working correctly: echo $((100 * 50 / 100)) (should be 50). Check total_input > 0 before division. Test calculation: cache_hit_rate=$((cache_read_tokens \* 100 / total_input)). Ensure values are numeric: echo "$cache_read_tokens" | grep -E '^[0-9]+$'. Check for integer overflow if values are very large. Verify total_input includes all components.
+
 ### Savings display showing 'tok saved' with zero or missing value
 
-Check cache_read_tokens > 0 before calculating savings. Verify bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900). If bc unavailable, script uses integer math: savings_tokens=$((cache_read_tokens * 9 / 10)). Test: cache_read=1000; savings=$((cache_read * 9 / 10)); echo $savings (should be 900). Verify savings_display is set: if [ -n "$savings_display" ]; then echo "Has savings"; fi.
+Check cache*read_tokens > 0 before calculating savings. Verify bc calculation: echo 'scale=0; 1000 * 0.9 / 1' | bc (should return 900). If bc unavailable, script uses integer math: savings*tokens=$((cache_read_tokens * 9 / 10)). Test: cache_read=1000; savings=$((cache_read * 9 / 10)); echo $savings (should be 900). Verify savings_display is set: if [ -n "$savings_display" ]; then echo "Has savings"; fi.

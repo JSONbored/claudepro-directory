@@ -36,12 +36,14 @@ Claude can build complete backend systems using Supabase, the open-source Fireba
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Supabase account (free tier available)
 - Node.js 18+ for client libraries
 - Basic SQL and JavaScript knowledge
 
 **What Claude handles automatically:**
+
 - Setting up Supabase project and database schema
 - Creating Row Level Security (RLS) policies
 - Generating TypeScript types from database
@@ -57,6 +59,7 @@ Claude can build complete backend systems using Supabase, the open-source Fireba
 **Prompt:** "Set up a Supabase project for a task management app with users, projects, tasks tables. Include RLS policies and TypeScript types."
 
 Claude will:
+
 1. Create database schema with foreign keys
 2. Set up RLS policies for multi-tenant data
 3. Generate migration files
@@ -70,6 +73,7 @@ Claude will:
 **Prompt:** "Build real-time chat functionality where users see messages instantly when posted. Include typing indicators and online presence."
 
 Claude will:
+
 1. Create messages table with indexes
 2. Set up real-time subscription channel
 3. Implement message broadcasting
@@ -83,6 +87,7 @@ Claude will:
 **Prompt:** "Create a semantic search system using pgvector. Store document embeddings from OpenAI and enable similarity search with cosine distance."
 
 Claude will:
+
 1. Enable pgvector extension
 2. Create table with vector column
 3. Generate embeddings with OpenAI
@@ -96,6 +101,7 @@ Claude will:
 **Prompt:** "Build Edge Functions that: send welcome emails on signup, process webhook from Stripe, and run nightly data aggregation job."
 
 Claude will:
+
 1. Create Deno Edge Functions
 2. Set up function triggers (database, HTTP, cron)
 3. Implement email sending with Resend
@@ -119,6 +125,7 @@ Claude will:
 
 ## Common Workflows
 ### Complete SaaS Backend
+
 ```
 "Build a SaaS backend with Supabase:
 1. Authentication with email, Google, GitHub OAuth
@@ -132,6 +139,7 @@ Claude will:
 ```
 
 ### Social Media Platform
+
 ```
 "Create social media backend:
 1. User profiles with avatars in Storage
@@ -145,6 +153,7 @@ Claude will:
 ```
 
 ### IoT Data Collection
+
 ```
 "Build IoT data collection system:
 1. Device registration and authentication
@@ -158,6 +167,7 @@ Claude will:
 ```
 
 ### AI-Powered Knowledge Base
+
 ```
 "Create knowledge base with AI:
 1. Document storage with chunking

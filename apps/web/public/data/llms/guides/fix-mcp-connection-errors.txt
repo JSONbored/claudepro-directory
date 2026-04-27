@@ -25,7 +25,7 @@ Quick fix for MCP server error -32000: Use cmd wrapper on Windows for npx comman
 Experiencing MCP server disconnection error -32000 with Claude Desktop? This comprehensive guide provides proven solutions based on community reports and official Anthropic support resources. The issue typically manifests as garbled text messages, immediate disconnections, or server disconnect notifications.
 
 > **Problem Summary**
-> 
+>
 > **Error:** Server disconnected. error -32000
 > **Symptoms:** Garbled messages, immediate disconnection, server fails to start
 > **Impact:** All MCP server functionality disabled
@@ -34,10 +34,8 @@ Experiencing MCP server disconnection error -32000 with Claude Desktop? This com
 
 ## Quick Fix (5-Minute Solution)
 1. **Verify Current Status**
-   
 
 2. **Apply Primary Fix**
-   
 
 3. **Confirm Resolution**
 
@@ -52,11 +50,11 @@ Experiencing MCP server disconnection error -32000 with Claude Desktop? This com
 
 ## Prevention Strategies
 > **Prevent Future Occurrences**
-> 
+>
 > **Use absolute paths always:** Full paths in configurations prevent ambiguity
-> 
+>
 > **Redirect server logs to stderr:** console.error() instead of console.log() prevents stream pollution
-> 
+>
 > **Pin Node.js version:** Use nvm with specific version (v20-22 recommended) for version consistency
 
 ## Alternative Solutions
@@ -67,13 +65,10 @@ Experiencing MCP server disconnection error -32000 with Claude Desktop? This com
 
 ## Success Verification
 1. **Functional Testing**
-   
 
 2. **Edge Case Testing**
-   
 
 3. **Performance Validation**
-   
 
 4. **Long-term Stability**
 
@@ -83,11 +78,11 @@ Experiencing MCP server disconnection error -32000 with Claude Desktop? This com
 ---
 
 > **Issue Resolved?**
-> 
+>
 > **Problem solved?** Great! Consider implementing absolute paths and stderr logging to prevent recurrence.
-> 
+>
 > **Still having issues?** Join our [community](/community) for additional support or file a GitHub issue at github.com/modelcontextprotocol/issues.
-> 
+>
 > **Found a new solution?** Share it with the community to help others facing the same issue.
 
-*Last updated: September 2025 | Solutions verified against MCP Protocol v2025-06-18 | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting).*
+_Last updated: September 2025 | Solutions verified against MCP Protocol v2025-06-18 | Found this helpful? Bookmark for future reference and explore more [troubleshooting guides](/guides/troubleshooting)._

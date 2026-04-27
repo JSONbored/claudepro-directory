@@ -16,8 +16,8 @@ seoDescription: >-
   using PurgeCSS, PostCSS, and content analysis. This hook runs on CSS/SCSS file
   wr...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/css-unused-selector-detector.sh
@@ -79,6 +79,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Automatic unused CSS selector detection with PurgeCSS ^6.0.0+ for comprehensive content scanning across multiple file types and frameworks
@@ -129,10 +130,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/css-unused-selector-detector.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -155,42 +153,42 @@ fi
 # Check if it's a CSS/SCSS file
 if [[ "$FILE_PATH" == *.css ]] || [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH" == *.sass ]]; then
   echo "🔍 Analyzing CSS file for unused selectors: $FILE_PATH" >&2
-  
+
   # Check if file exists
   if [ ! -f "$FILE_PATH" ]; then
     echo "📁 CSS file does not exist yet, skipping analysis" >&2
     exit 0
   fi
-  
+
   # Get original file size
   ORIGINAL_LINES=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
   ORIGINAL_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
-  
+
   echo "📊 Original CSS: $ORIGINAL_LINES lines, $ORIGINAL_SIZE bytes" >&2
-  
+
   # Try PurgeCSS if available
   if command -v npx &> /dev/null && npx purgecss --version &> /dev/null; then
     echo "🧹 Running PurgeCSS analysis..." >&2
-    
+
     # Create analysis directory
     mkdir -p css-analysis
-    
+
     # Run PurgeCSS with multiple content patterns
     if npx purgecss --css "$FILE_PATH" \
       --content './src/**/*.{html,js,jsx,ts,tsx,vue,svelte}' \
       --content './**/*.{html,js,jsx,ts,tsx,vue,svelte}' \
       --output ./css-analysis/ 2>/dev/null; then
-      
+
       # Analyze results
       PURGED_FILE="./css-analysis/$(basename "$FILE_PATH")"
       if [ -f "$PURGED_FILE" ]; then
         PURGED_LINES=$(wc -l < "$PURGED_FILE" 2>/dev/null || echo "0")
         PURGED_SIZE=$(wc -c < "$PURGED_FILE" 2>/dev/null || echo "0")
-        
+
         SAVED_LINES=$((ORIGINAL_LINES - PURGED_LINES))
         SAVED_SIZE=$((ORIGINAL_SIZE - PURGED_SIZE))
         REDUCTION_PERCENT=$((SAVED_SIZE * 100 / ORIGINAL_SIZE))
-        
+
         echo "📉 Optimized CSS: $PURGED_LINES lines, $PURGED_SIZE bytes" >&2
         echo "✅ Potential savings: $SAVED_LINES lines, $SAVED_SIZE bytes ($REDUCTION_PERCENT% reduction)" >&2
         echo "📁 Check css-analysis/$(basename "$FILE_PATH") for optimized version" >&2
@@ -202,12 +200,12 @@ if [[ "$FILE_PATH" == *.css ]] || [[ "$FILE_PATH" == *.scss ]] || [[ "$FILE_PATH
     fi
   else
     echo "💡 Install PurgeCSS (npm install -g purgecss) for CSS optimization analysis" >&2
-    
+
     # Basic analysis without PurgeCSS
     SELECTOR_COUNT=$(grep -o '[.#][a-zA-Z][-a-zA-Z0-9_]*' "$FILE_PATH" 2>/dev/null | sort -u | wc -l || echo "0")
     echo "📊 Found $SELECTOR_COUNT unique CSS selectors in file" >&2
   fi
-  
+
   echo "✅ CSS analysis completed for $FILE_PATH" >&2
 else
   echo "File $FILE_PATH is not a CSS/SCSS file, skipping analysis" >&2
@@ -217,6 +215,7 @@ exit 0
 ```
 
 ## Examples
+
 ### CSS Unused Selector Detector Hook Script
 
 Complete hook script that detects unused CSS selectors when stylesheets are modified
@@ -244,6 +243,7 @@ if [[ "$FILE_PATH" == *.css ]] || [[ "$FILE_PATH" == *.scss ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable CSS unused selector detection on file changes
@@ -265,6 +265,7 @@ Complete hook configuration for .claude/settings.json to enable CSS unused selec
   }
 }
 ```
+
 ### CSS Analysis with Safelist
 
 Enhanced hook script using PurgeCSS with safelist patterns to protect framework classes
@@ -285,6 +286,7 @@ if command -v npx &> /dev/null && npx purgecss --version &> /dev/null; then
 fi
 exit 0
 ```
+
 ### CSS Analysis with Percentage Reporting
 
 Enhanced hook script with detailed percentage reduction reporting
@@ -309,6 +311,7 @@ if command -v npx &> /dev/null && npx purgecss --version &> /dev/null; then
 fi
 exit 0
 ```
+
 ### Basic Selector Count Analysis
 
 Basic hook script that counts CSS selectors without requiring PurgeCSS
@@ -327,27 +330,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### PurgeCSS not detecting any unused selectors in CSS
 
 Verify content paths match your project structure: update --content patterns to include all HTML/JSX/TSX files. Check PurgeCSS config safelist if critical selectors are protected. Ensure content files are accessible: test with ls command. Verify file extensions match: use --content pattern with correct glob syntax.
+
 ### PostToolUse hook only runs for write, not edit operations
 
 Add both matchers to hook config: matchers array should include write and edit. Verify tool_name extraction from stdin matches expected values. Test with echo command to debug tool input parsing. Check hook configuration in .claude/settings.json.
+
 ### css-analysis directory not created or files missing
 
 Check write permissions in project root directory. Ensure mkdir -p succeeds without errors. Verify PurgeCSS output path is writable. Check disk space if directory creation fails silently. Test directory creation manually: mkdir -p css-analysis && echo OK.
+
 ### PurgeCSS removes critical CSS framework classes
 
 Add safelist patterns to PurgeCSS config for framework classes using --safelist flag. Use safelist syntax with regex patterns for framework prefixes. Consider extracting framework CSS to separate file excluded from purging. Use safelist patterns like /^btn-/, /^nav-/ for framework class prefixes.
+
 ### No output generated message despite PurgeCSS success
 
 Check PURGED_FILE path construction matches PurgeCSS output format. Verify basename command extracts correct filename. Ensure output directory exists before PurgeCSS runs. Check PurgeCSS output format and verify --output flag creates files correctly.
+
 ### CSS analysis is too slow for large stylesheets
 
 Add timeout wrapper to limit execution time. Limit analysis scope to files under specific size threshold. Use faster content scanning by limiting --content patterns to specific directories. Skip analysis for generated files: exclude node_modules, dist, build directories.
+
 ### PurgeCSS not finding content files in subdirectories
 
-Use recursive glob patterns with ** syntax for subdirectory scanning. Check file permissions to ensure content files are readable. Verify glob pattern syntax matches your file structure. Use absolute paths if relative paths fail. Check PurgeCSS version and upgrade to latest for improved file discovery.
+Use recursive glob patterns with \*\* syntax for subdirectory scanning. Check file permissions to ensure content files are readable. Verify glob pattern syntax matches your file structure. Use absolute paths if relative paths fail. Check PurgeCSS version and upgrade to latest for improved file discovery.
+
 ### Percentage calculation shows incorrect reduction values
 
 Verify file size calculation uses wc -c for byte count, not wc -l for lines. Check for division by zero errors before percentage calculation. Use proper integer math for percentage calculation. Test with known values to verify calculation logic.

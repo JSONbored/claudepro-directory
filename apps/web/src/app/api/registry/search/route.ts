@@ -1,75 +1,9 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { NextResponse } from "next/server";
+import type { SearchDocument } from "@heyclaude/registry";
 
 import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
 import { logApiWarn } from "@/lib/api-logs";
-
-type SearchEntry = {
-  category: string;
-  slug: string;
-  title: string;
-  description: string;
-  tags?: string[];
-  keywords?: string[];
-  author?: string;
-  verificationStatus?: string;
-  downloadTrust?: string | null;
-  url: string;
-};
-
-type SearchPayload = {
-  schemaVersion?: number;
-  generatedAt?: string;
-  entries?: SearchEntry[];
-};
-
-const DATA_ORIGIN = "https://heyclau.de";
-let searchIndexPromise: Promise<SearchEntry[]> | null = null;
-
-async function loadSearchIndexFile(): Promise<SearchPayload> {
-  try {
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      "data",
-      "search-index.json",
-    );
-    return JSON.parse(await readFile(filePath, "utf8")) as SearchPayload;
-  } catch {
-    const { env } = getCloudflareContext();
-    const envRecord = env as unknown as {
-      ASSETS: {
-        fetch: (
-          input: RequestInfo | URL,
-          init?: RequestInit,
-        ) => Promise<Response>;
-      };
-    };
-    const response = await envRecord.ASSETS.fetch(
-      new Request(`${DATA_ORIGIN}/data/search-index.json`),
-    );
-    if (!response.ok) {
-      throw new Error(
-        `Failed to load search-index.json asset (${response.status})`,
-      );
-    }
-    return (await response.json()) as SearchPayload;
-  }
-}
-
-async function loadSearchIndex() {
-  searchIndexPromise ??= loadSearchIndexFile().then((payload) => {
-    if (!Array.isArray(payload.entries)) {
-      throw new Error(
-        "Invalid registry search artifact: expected entries envelope",
-      );
-    }
-    return payload.entries;
-  });
-  return searchIndexPromise;
-}
+import { getSearchIndex } from "@/lib/content";
 
 function normalizeLimit(value: string | null) {
   const parsed = Number(value ?? 20);
@@ -84,7 +18,7 @@ function normalizeCategory(value: string | null) {
   return /^[a-z0-9-]+$/.test(normalized) ? normalized : "";
 }
 
-function matchesQuery(entry: SearchEntry, query: string) {
+function matchesQuery(entry: SearchDocument, query: string) {
   if (!query) return true;
   const haystack = [
     entry.category,
@@ -128,7 +62,7 @@ export async function GET(request: Request) {
   const category = normalizeCategory(url.searchParams.get("category"));
   const limit = normalizeLimit(url.searchParams.get("limit"));
 
-  const entries = await loadSearchIndex();
+  const entries = await getSearchIndex();
   const results = entries
     .filter((entry) => !category || entry.category === category)
     .filter((entry) => matchesQuery(entry, query))

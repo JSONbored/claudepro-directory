@@ -13,7 +13,8 @@ const categories = fs
   .map((entry) => entry.name)
   .sort();
 
-const modeArg = process.argv.find((arg) => arg.startsWith("--mode=")) ?? "--mode=both";
+const modeArg =
+  process.argv.find((arg) => arg.startsWith("--mode=")) ?? "--mode=both";
 const mode = modeArg.split("=")[1] ?? "both";
 if (!["local", "remote", "both"].includes(mode)) {
   console.error(`Invalid mode "${mode}". Use --mode=local|remote|both.`);
@@ -23,7 +24,9 @@ if (!["local", "remote", "both"].includes(mode)) {
 const expected = new Set();
 for (const category of categories) {
   const categoryDir = path.join(contentRoot, category);
-  const files = fs.readdirSync(categoryDir).filter((fileName) => fileName.endsWith(".mdx"));
+  const files = fs
+    .readdirSync(categoryDir)
+    .filter((fileName) => fileName.endsWith(".mdx"));
   for (const fileName of files) {
     const filePath = path.join(categoryDir, fileName);
     const source = fs.readFileSync(filePath, "utf8");
@@ -45,9 +48,12 @@ function getRows(runMode) {
     d1Binding,
     runMode === "remote" ? "--remote" : "--local",
     "--command",
-    "SELECT entry_key, upvote_count FROM votes_entries;"
+    "SELECT entry_key, upvote_count FROM votes_entries;",
   ];
-  const output = execFileSync("pnpm", args, { cwd: repoRoot, encoding: "utf8" });
+  const output = execFileSync("pnpm", args, {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
   const jsonMatch = output.match(/(\[\s*\{[\s\S]*\])\s*$/);
   if (!jsonMatch) {
     throw new Error(`Could not parse wrangler output for ${runMode}`);
@@ -59,7 +65,7 @@ function getRows(runMode) {
 function verifyRunMode(runMode) {
   const rows = getRows(runMode);
   const actual = new Map(
-    rows.map((row) => [String(row.entry_key), Number(row.upvote_count ?? 0)])
+    rows.map((row) => [String(row.entry_key), Number(row.upvote_count ?? 0)]),
   );
 
   const missing = [];
@@ -80,7 +86,7 @@ function verifyRunMode(runMode) {
     totalExpected: expected.size,
     totalRows: rows.length,
     missing,
-    negativeCounts
+    negativeCounts,
   };
 }
 
@@ -90,17 +96,22 @@ if (mode === "remote" || mode === "both") results.push(verifyRunMode("remote"));
 
 let failed = false;
 for (const result of results) {
-  if (result.missing.length > 0 || result.negativeCounts.length > 0 || result.totalRows < result.totalExpected) {
+  if (
+    result.missing.length > 0 ||
+    result.negativeCounts.length > 0 ||
+    result.totalRows < result.totalExpected
+  ) {
     failed = true;
   }
 
   console.log(
-    `${result.runMode}: expected=${result.totalExpected} rows=${result.totalRows} missing=${result.missing.length} invalidCounts=${result.negativeCounts.length}`
+    `${result.runMode}: expected=${result.totalExpected} rows=${result.totalRows} missing=${result.missing.length} invalidCounts=${result.negativeCounts.length}`,
   );
 
   if (result.missing.length > 0) {
     console.log("First missing rows:");
-    for (const entryKey of result.missing.slice(0, 20)) console.log(`- ${entryKey}`);
+    for (const entryKey of result.missing.slice(0, 20))
+      console.log(`- ${entryKey}`);
   }
 
   if (result.negativeCounts.length > 0) {

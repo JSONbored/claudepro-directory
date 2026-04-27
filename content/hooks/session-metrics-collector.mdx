@@ -14,8 +14,8 @@ seoDescription: >-
   stops. This Stop hook provides comprehensive session analytics with
   comprehensive ...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/session-metrics-collector.sh &&
@@ -74,6 +74,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive session analytics including session analytics integration (session metrics collection on session stop, detailed session reporting with comprehensive reports, session data aggregation with data aggregation, session analytics visualization with analytics visualization), analytics optimization (analytics performance with fast collection, analytics accuracy with accurate metrics, analytics efficiency with efficient processing, analytics coverage with comprehensive metrics), analytics validation (session data validation with data verification, analytics accuracy validation with accuracy checking, analytics completeness validation with completeness checking, analytics consistency validation with consistency checking), and analytics reporting (session analytics reporting with analytics results, session metrics reporting with metrics details, session statistics reporting with statistics, session insights reporting with insights)
@@ -125,9 +126,7 @@ robotsFollow: true
   "hooks": {
     "stop": {
       "script": "./.claude/hooks/session-metrics-collector.sh",
-      "matchers": [
-        "*"
-      ]
+      "matchers": ["*"]
     }
   }
 }
@@ -174,12 +173,12 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     FILES_MODIFIED=$(git diff --name-only 2>/dev/null | wc -l | tr -d ' ')
     FILES_ADDED=$(git diff --name-status 2>/dev/null | grep '^A' | wc -l | tr -d ' ')
     FILES_DELETED=$(git diff --name-status 2>/dev/null | grep '^D' | wc -l | tr -d ' ')
-    
+
     # Line statistics
     LINE_STATS=$(git diff --shortstat 2>/dev/null || echo "0 files changed")
     LINES_ADDED=$(echo "$LINE_STATS" | grep -o '[0-9]\+ insertion' | grep -o '[0-9]\+' || echo 0)
     LINES_DELETED=$(echo "$LINE_STATS" | grep -o '[0-9]\+ deletion' | grep -o '[0-9]\+' || echo 0)
-    
+
     # Languages used
     LANGUAGES=$(git diff --name-only 2>/dev/null | sed 's/.*\.//' | sort | uniq -c | sort -nr | head -5)
 else
@@ -204,7 +203,7 @@ if git rev-parse --git-dir >/dev/null 2>&1; then
     REPO_NAME=$(basename "$(git rev-parse --show-toplevel)" 2>/dev/null || echo "unknown")
     CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
     COMMIT_COUNT=$(git rev-list --count HEAD 2>/dev/null || echo "unknown")
-    
+
     echo "📂 Repository Info:"
     echo "  • Repository: $REPO_NAME"
     echo "  • Branch: $CURRENT_BRANCH"
@@ -299,6 +298,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Session Metrics Collector Hook Script
 
 Complete hook script that collects session metrics on session stop
@@ -337,6 +337,7 @@ EOF
 echo "📄 Metrics saved to: $METRICS_FILE"
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable session metrics collection
@@ -351,6 +352,7 @@ Complete hook configuration for .claude/settings.json to enable session metrics 
   }
 }
 ```
+
 ### Enhanced Metrics Collection with jq
 
 Enhanced hook script using jq for safe JSON generation and Git diff HEAD for all uncommitted changes
@@ -378,6 +380,7 @@ PRODUCTIVITY=$(awk "BEGIN {printf \"%.2f\", $FILES_MODIFIED * 3600 / $SESSION_DU
 jq -n --arg id "$SESSION_ID" --argjson duration $SESSION_DURATION --argjson files $FILES_MODIFIED --argjson added $LINES_ADDED --argjson deleted $LINES_DELETED --argjson productivity $PRODUCTIVITY '{session: {id: $id, duration_seconds: $duration}, files: {modified: $files}, lines: {added: $added, deleted: $deleted}, productivity: {files_per_hour: $productivity}}' > "$METRICS_FILE"
 exit 0
 ```
+
 ### Session Comparison and Language Analysis
 
 Enhanced hook script with historical session comparison and language usage analysis
@@ -404,6 +407,7 @@ fi
 jq -n --arg id "$SESSION_ID" --argjson files $FILES_MODIFIED --arg langs "$LANGUAGES" '{session: {id: $id}, files: {modified: $files}, languages: $langs}' > "$METRICS_FILE"
 exit 0
 ```
+
 ### Session Metrics Configuration Example
 
 Example session metrics configuration for customizing metrics collection
@@ -422,27 +426,35 @@ Example session metrics configuration for customizing metrics collection
 ```
 
 ## Troubleshooting
+
 ### Session metrics show 'unknown' duration or incorrect timing data
 
 Hook relies on .claude directory timestamps. Ensure .claude exists before sessions. On Linux use 'stat -c %Y' instead of macOS 'stat -f %B' for timestamp extraction compatibility. Verify timestamp extraction. Test with various timestamp formats.
+
 ### Git-based statistics return zero despite file modifications
 
 Run 'git add .' before stopping to stage changes. Hook uses 'git diff' showing only unstaged. Modify script to use 'git diff HEAD' for all uncommitted changes instead. Verify Git status. Test with various Git states.
+
 ### bc command errors: 'command not found' during metrics calculation
 
-Install bc: 'brew install bc' (macOS) or 'apt-get install bc' (Linux). Or replace with awk: 'awk "BEGIN {printf \"%.2f\", $FILES_MODIFIED * 3600 / $SESSION_DURATION}"'. Verify calculation tools. Test with various calculation methods.
+Install bc: 'brew install bc' (macOS) or 'apt-get install bc' (Linux). Or replace with awk: 'awk "BEGIN {printf \"%.2f\", $FILES_MODIFIED \* 3600 / $SESSION_DURATION}"'. Verify calculation tools. Test with various calculation methods.
+
 ### JSON metrics file has invalid format breaking parsers
 
 Script appends without validation. Variables with special chars break JSON. Escape values: use jq for generation: 'jq -n --arg id "$SESSION_ID" '{session: {id: $id}}' > "$METRICS_FILE"'. Verify JSON format. Test with various data values.
+
 ### Productivity calculations show zero or negative values
 
 Division by zero when SESSION_DURATION=0. Add check: 'if [ "$SESSION_DURATION" -lt 60 ]; then SESSION_DURATION=60; fi' setting minimum 1-minute before calculations. Verify duration calculation. Test with various session durations.
+
 ### Language statistics are incomplete or missing
 
 Language detection relies on file extensions. Files without extensions or with uncommon extensions may not be detected. Use more sophisticated language detection or manual language mapping. Verify language detection. Test with various file types.
+
 ### Historical session comparison fails or shows incorrect data
 
 Previous session file may be missing or corrupted. Add file existence check: 'if [ -f "$PREV_SESSION" ]; then ...'. Verify file paths. Test with various session history scenarios.
+
 ### Metrics directory grows too large with old session files
 
-Add cleanup logic: 'find .metrics -name 'session-*.json' -mtime +30 -delete' to remove files older than 30 days. Or limit retention: 'find .metrics -name 'session-*.json' | sort | head -n -30 | xargs rm -f'. Verify cleanup logic. Test with various retention policies.
+Add cleanup logic: 'find .metrics -name 'session-_.json' -mtime +30 -delete' to remove files older than 30 days. Or limit retention: 'find .metrics -name 'session-_.json' | sort | head -n -30 | xargs rm -f'. Verify cleanup logic. Test with various retention policies.

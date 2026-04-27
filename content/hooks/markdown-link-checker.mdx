@@ -10,8 +10,8 @@ seoDescription: >-
   This PostToolUse hook provides comprehensive markdown link validation with
   compr...
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-19'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-19"
 installable: true
 installCommand: >-
   mkdir -p .claude/hooks && touch .claude/hooks/markdown-link-checker.sh &&
@@ -72,6 +72,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Comprehensive markdown link validation using markdown-link-check with npx markdown-link-check for external URL validation (HTTP status code checking, timeout configuration, retry on 429 rate limit errors), curl fallback for basic URL validation when markdown-link-check unavailable, and configurable validation settings (timeout, retry count, ignore patterns)
@@ -122,10 +123,7 @@ robotsFollow: true
   "hooks": {
     "postToolUse": {
       "script": "./.claude/hooks/markdown-link-checker.sh",
-      "matchers": [
-        "write",
-        "edit"
-      ]
+      "matchers": ["write", "edit"]
     }
   }
 }
@@ -148,7 +146,7 @@ fi
 # Check if this is a markdown file
 if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.mdx ]] || [[ "$FILE_PATH" == *.markdown ]]; then
   echo "🔗 Markdown Link Validation for: $(basename "$FILE_PATH")" >&2
-  
+
   # Initialize validation counters
   ERRORS=0
   WARNINGS=0
@@ -156,12 +154,12 @@ if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.mdx ]] || [[ "$FILE_PATH" 
   TOTAL_LINKS=0
   EXTERNAL_LINKS=0
   INTERNAL_LINKS=0
-  
+
   # Function to report validation results
   report_validation() {
     local level="$1"
     local message="$2"
-    
+
     case "$level" in
       "ERROR")
         echo "❌ ERROR: $message" >&2
@@ -180,64 +178,64 @@ if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.mdx ]] || [[ "$FILE_PATH" 
         ;;
     esac
   }
-  
+
   # Check if file exists and is readable
   if [ ! -f "$FILE_PATH" ]; then
     report_validation "ERROR" "Markdown file not found: $FILE_PATH"
     exit 1
   fi
-  
+
   if [ ! -r "$FILE_PATH" ]; then
     report_validation "ERROR" "Markdown file is not readable: $FILE_PATH"
     exit 1
   fi
-  
+
   # Get file information
   FILE_NAME="$(basename "$FILE_PATH")"
   FILE_DIR="$(dirname "$FILE_PATH")"
   FILE_SIZE=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
   LINE_COUNT=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
-  
+
   echo "📊 Markdown file: $FILE_NAME ($(( FILE_SIZE / 1024 ))KB, $LINE_COUNT lines)" >&2
-  
+
   # 1. Extract All Links from Markdown
   echo "🔍 Extracting links from markdown..." >&2
-  
+
   # Create temporary files for link analysis
   TEMP_LINKS="/tmp/markdown_links_$$"
   TEMP_IMAGES="/tmp/markdown_images_$$"
   TEMP_ANCHORS="/tmp/markdown_anchors_$$"
-  
+
   # Extract markdown links [text](url)
   grep -oE '\[([^\]]+)\]\(([^)]+)\)' "$FILE_PATH" | sed 's/\[.*\](\(.*\))/\1/' > "$TEMP_LINKS" 2>/dev/null || true
-  
+
   # Extract image links ![alt](url)
   grep -oE '!\[([^\]]*)\]\(([^)]+)\)' "$FILE_PATH" | sed 's/!\[.*\](\(.*\))/\1/' > "$TEMP_IMAGES" 2>/dev/null || true
-  
+
   # Extract reference-style links
   grep -oE '\[([^\]]+)\]\[([^\]]+)\]' "$FILE_PATH" | sed 's/\[.*\]\[\(.*\)\]/\1/' >> "$TEMP_LINKS" 2>/dev/null || true
-  
+
   # Count total links
   TOTAL_LINKS=$(cat "$TEMP_LINKS" "$TEMP_IMAGES" 2>/dev/null | wc -l || echo "0")
-  
+
   if [ "$TOTAL_LINKS" -eq 0 ]; then
     echo "   📋 No links found in markdown file" >&2
     report_validation "INFO" "No links to validate"
   else
     echo "   📊 Found $TOTAL_LINKS total links/images" >&2
   fi
-  
+
   # 2. Validate External Links
   echo "🌐 Validating external links..." >&2
-  
+
   # Try using markdown-link-check if available
   if command -v npx &> /dev/null; then
     echo "   🔍 Using markdown-link-check for comprehensive validation..." >&2
-    
+
     # Create a temporary config if none exists
     CONFIG_FILE=".markdown-link-check.json"
     TEMP_CONFIG=false
-    
+
     if [ ! -f "$CONFIG_FILE" ]; then
       TEMP_CONFIG=true
       CONFIG_FILE="/tmp/markdown_link_config_$$"
@@ -256,13 +254,13 @@ if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.mdx ]] || [[ "$FILE_PATH" 
 }
 EOF
     fi
-    
+
     MLC_OUTPUT_FILE="/tmp/mlc_output_$$"
     if timeout 60s npx markdown-link-check "$FILE_PATH" --config "$CONFIG_FILE" > "$MLC_OUTPUT_FILE" 2>&1; then
       # Parse results
       DEAD_LINKS=$(grep -c '✖' "$MLC_OUTPUT_FILE" 2>/dev/null || echo "0")
       ALIVE_LINKS=$(grep -c '✓' "$MLC_OUTPUT_FILE" 2>/dev/null || echo "0")
-      
+
       if [ "$DEAD_LINKS" -eq 0 ]; then
         report_validation "PASS" "All external links are valid ($ALIVE_LINKS checked)"
       else
@@ -275,14 +273,14 @@ EOF
     else
       # Fallback to basic URL validation
       echo "   ⚠️ markdown-link-check failed, using basic validation..." >&2
-      
+
       # Extract HTTP/HTTPS URLs
       EXTERNAL_URLS=$(grep -oE 'https?://[^)]+' "$TEMP_LINKS" 2>/dev/null || true)
-      
+
       if [ -n "$EXTERNAL_URLS" ]; then
         EXTERNAL_COUNT=$(echo "$EXTERNAL_URLS" | wc -l)
         echo "   🌐 Found $EXTERNAL_COUNT external URLs to validate" >&2
-        
+
         # Basic URL validation using curl
         if command -v curl &> /dev/null; then
           EXTERNAL_ERRORS=0
@@ -303,38 +301,38 @@ EOF
         echo "   📋 No external URLs found" >&2
       fi
     fi
-    
+
     # Clean up temporary config if created
     [ "$TEMP_CONFIG" = true ] && rm -f "$CONFIG_FILE"
     rm -f "$MLC_OUTPUT_FILE"
-    
+
   else
     echo "   ⚠️ npx not available, using basic link validation" >&2
   fi
-  
+
   # 3. Validate Internal Links
   echo "📁 Validating internal links and references..." >&2
-  
+
   # Extract internal links (relative paths)
   INTERNAL_URLS=$(cat "$TEMP_LINKS" "$TEMP_IMAGES" 2>/dev/null | grep -E '^\./|^\.\./' || true)
   ABSOLUTE_PATHS=$(cat "$TEMP_LINKS" "$TEMP_IMAGES" 2>/dev/null | grep -E '^/' || true)
-  
+
   INTERNAL_ERRORS=0
-  
+
   # Check relative path links
   if [ -n "$INTERNAL_URLS" ]; then
     echo "   📂 Checking relative path links..." >&2
-    
+
     echo "$INTERNAL_URLS" | while read -r link; do
       if [ -n "$link" ]; then
         # Remove anchor if present
         FILE_PART=$(echo "$link" | cut -d'#' -f1)
         ANCHOR_PART=$(echo "$link" | cut -d'#' -f2)
-        
+
         if [ -n "$FILE_PART" ]; then
           # Resolve relative path
           RESOLVED_PATH="$(cd "$FILE_DIR" && realpath "$FILE_PART" 2>/dev/null || echo "$FILE_PART")"
-          
+
           if [ -f "$RESOLVED_PATH" ] || [ -d "$RESOLVED_PATH" ]; then
             echo "     ✅ Valid: $link" >&2
           else
@@ -342,7 +340,7 @@ EOF
             INTERNAL_ERRORS=$((INTERNAL_ERRORS + 1))
           fi
         fi
-        
+
         # Check anchor if present (simplified check)
         if [ "$link" != "$FILE_PART" ] && [ -n "$ANCHOR_PART" ]; then
           echo "     ℹ️ Anchor found: #$ANCHOR_PART" >&2
@@ -350,15 +348,15 @@ EOF
       fi
     done
   fi
-  
+
   # Check absolute path links
   if [ -n "$ABSOLUTE_PATHS" ]; then
     echo "   📁 Checking absolute path links..." >&2
-    
+
     echo "$ABSOLUTE_PATHS" | while read -r link; do
       if [ -n "$link" ]; then
         FILE_PART=$(echo "$link" | cut -d'#' -f1)
-        
+
         if [ -f "$FILE_PART" ] || [ -d "$FILE_PART" ]; then
           echo "     ✅ Valid: $link" >&2
         else
@@ -368,23 +366,23 @@ EOF
       fi
     done
   fi
-  
+
   if [ "$INTERNAL_ERRORS" -eq 0 ]; then
     report_validation "PASS" "All internal links are valid"
   else
     report_validation "ERROR" "Found $INTERNAL_ERRORS broken internal links"
   fi
-  
+
   # 4. Validate Image Links
   echo "🖼️ Validating image links..." >&2
-  
+
   IMAGE_COUNT=$(cat "$TEMP_IMAGES" 2>/dev/null | wc -l || echo "0")
-  
+
   if [ "$IMAGE_COUNT" -gt 0 ]; then
     echo "   📊 Found $IMAGE_COUNT image links" >&2
-    
+
     IMAGE_ERRORS=0
-    
+
     cat "$TEMP_IMAGES" | while read -r img_link; do
       if [ -n "$img_link" ]; then
         if [[ "$img_link" == http* ]]; then
@@ -396,7 +394,7 @@ EOF
           else
             IMG_PATH="$FILE_DIR/$img_link"
           fi
-          
+
           if [ -f "$IMG_PATH" ]; then
             echo "     ✅ Valid image: $img_link" >&2
           else
@@ -406,7 +404,7 @@ EOF
         fi
       fi
     done
-    
+
     if [ "$IMAGE_ERRORS" -eq 0 ]; then
       report_validation "PASS" "All local images found"
     else
@@ -415,26 +413,26 @@ EOF
   else
     echo "   📋 No image links found" >&2
   fi
-  
+
   # 5. Validate Internal Anchors
   echo "⚓ Validating document anchors..." >&2
-  
+
   # Extract anchor-only links (starting with #)
   ANCHOR_LINKS=$(cat "$TEMP_LINKS" | grep '^#' 2>/dev/null || true)
-  
+
   if [ -n "$ANCHOR_LINKS" ]; then
     echo "   🔗 Found anchor links to validate" >&2
-    
+
     # Extract headers from markdown to validate anchors
     HEADERS_FILE="/tmp/markdown_headers_$$"
     grep -E '^#{1,6} ' "$FILE_PATH" | sed 's/^#* *//' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 -]//g' | sed 's/ /-/g' > "$HEADERS_FILE" 2>/dev/null || true
-    
+
     ANCHOR_ERRORS=0
-    
+
     echo "$ANCHOR_LINKS" | while read -r anchor; do
       if [ -n "$anchor" ]; then
         CLEAN_ANCHOR=$(echo "$anchor" | sed 's/^#//' | tr '[:upper:]' '[:lower:]')
-        
+
         if grep -q "^$CLEAN_ANCHOR$" "$HEADERS_FILE" 2>/dev/null; then
           echo "     ✅ Valid anchor: $anchor" >&2
         else
@@ -443,9 +441,9 @@ EOF
         fi
       fi
     done
-    
+
     rm -f "$HEADERS_FILE"
-    
+
     if [ "$ANCHOR_ERRORS" -eq 0 ]; then
       report_validation "PASS" "All document anchors valid"
     else
@@ -454,13 +452,13 @@ EOF
   else
     echo "   📋 No document anchors found" >&2
   fi
-  
+
   # 6. Markdown Quality Checks
   echo "📝 Markdown quality and accessibility checks..." >&2
-  
+
   # Check for alt text in images
   IMAGES_WITHOUT_ALT=$(grep -c '!\[\](' "$FILE_PATH" 2>/dev/null || echo "0")
-  
+
   if [ "$IMAGES_WITHOUT_ALT" -gt 0 ]; then
     report_validation "WARNING" "$IMAGES_WITHOUT_ALT images missing alt text for accessibility"
   else
@@ -468,14 +466,14 @@ EOF
       report_validation "PASS" "All images have alt text"
     fi
   fi
-  
+
   # Check for bare URLs (not wrapped in markdown links)
   BARE_URLS=$(grep -oE 'https?://[^\s\)\]]+' "$FILE_PATH" | grep -v '](http' | head -5 | wc -l || echo "0")
-  
+
   if [ "$BARE_URLS" -gt 0 ]; then
     report_validation "WARNING" "Found $BARE_URLS bare URLs - consider wrapping in markdown links"
   fi
-  
+
   # 7. Generate Validation Summary
   echo "" >&2
   echo "📋 Markdown Link Validation Summary:" >&2
@@ -487,7 +485,7 @@ EOF
   echo "   ✅ Validations passed: $VALIDATIONS_PASSED" >&2
   echo "   ⚠️ Warnings: $WARNINGS" >&2
   echo "   ❌ Errors: $ERRORS" >&2
-  
+
   if [ "$ERRORS" -eq 0 ]; then
     if [ "$WARNINGS" -eq 0 ]; then
       echo "   🎉 Status: EXCELLENT - All links are valid and accessible" >&2
@@ -497,7 +495,7 @@ EOF
   else
     echo "   ❌ Status: ERRORS - Found broken links that must be fixed" >&2
   fi
-  
+
   echo "" >&2
   echo "💡 Markdown Link Best Practices:" >&2
   echo "   • Use descriptive link text instead of 'click here'" >&2
@@ -506,16 +504,16 @@ EOF
   echo "   • Validate external links regularly" >&2
   echo "   • Keep anchor links synchronized with headers" >&2
   echo "   • Consider using reference-style links for readability" >&2
-  
+
   # Clean up temporary files
   rm -f "$TEMP_LINKS" "$TEMP_IMAGES" "$TEMP_ANCHORS"
-  
+
   # Exit with error if there are critical link issues
   if [ "$ERRORS" -gt 0 ]; then
     echo "⚠️ Markdown link validation completed with errors" >&2
     exit 1
   fi
-  
+
 else
   # Not a markdown file
   exit 0
@@ -525,6 +523,7 @@ exit 0
 ```
 
 ## Examples
+
 ### Markdown Link Checker Hook Script
 
 Complete hook script that performs markdown link validation
@@ -549,6 +548,7 @@ if [[ "$FILE_PATH" == *.md ]] || [[ "$FILE_PATH" == *.mdx ]]; then
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable markdown link validation
@@ -563,6 +563,7 @@ Complete hook configuration for .claude/settings.json to enable markdown link va
   }
 }
 ```
+
 ### markdown-link-check Configuration
 
 Example .markdown-link-check.json configuration file for customizing link validation settings
@@ -581,6 +582,7 @@ Example .markdown-link-check.json configuration file for customizing link valida
   ]
 }
 ```
+
 ### Internal Link Validation
 
 Enhanced hook script for internal link validation with path resolution
@@ -606,6 +608,7 @@ if [[ "$FILE_PATH" == *.md ]]; then
 fi
 exit 0
 ```
+
 ### Anchor Link Validation
 
 Enhanced hook script for anchor link validation with heading ID matching
@@ -632,27 +635,35 @@ exit 0
 ```
 
 ## Troubleshooting
+
 ### Hook times out on markdown files with many links
 
 Increase timeout in markdown-link-check config from 30s to 60s. Reduce retryCount from 3 to 1 for faster failures. Use --quiet flag or limit external link checking to critical links only. Verify timeout settings. Test with various file sizes.
+
 ### False positives for localhost or development URLs
 
 Add localhost patterns to ignorePatterns in .markdown-link-check.json config. Hook creates temp config with common exclusions but customize project config for development server URLs. Verify ignore patterns. Test with various URL patterns.
+
 ### Anchor validation fails for generated heading IDs
 
 Heading ID generation varies by markdown processor. Update anchor cleaning logic in hook to match your tool's slug generation (GitHub uses lowercase with dashes, Jekyll may differ). Verify heading ID format. Test with various markdown processors.
+
 ### Image links show as broken but files exist
 
 Check path resolution relative to markdown file location. Hook resolves paths from file directory, not repo root. Use absolute paths from repo root with leading slash for consistency. Verify path resolution. Test with various path formats.
+
 ### External link validation causes rate limiting errors
 
 Enable retryOn429 in config and increase timeout. Add rate-limited domains to ignorePatterns temporarily. Consider running full external validation in CI only, not on every file edit. Verify retry settings. Test with various external URLs.
+
 ### Internal link validation fails for symlinked files
 
 realpath resolves symlinks by default. Check if symlink target exists: readlink -f "$link" or use -s flag with realpath. Verify symlink handling. Test with various symlink configurations.
+
 ### Reference-style links not detected
 
 Hook extracts reference-style links with pattern: grep -oE '\\[([^\\]]+)\\]\\[([^\\]]+)\\]'. Verify link format matches expected pattern. Check for link definition section. Test with various reference-style link formats.
+
 ### Image alt text validation shows false positives
 
 Hook checks for empty alt text: grep -c '!\\[\\]('. Some images may legitimately have empty alt text (decorative images). Adjust validation logic or add exceptions. Verify alt text patterns. Test with various image formats.

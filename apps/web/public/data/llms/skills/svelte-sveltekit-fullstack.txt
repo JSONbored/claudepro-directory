@@ -30,12 +30,14 @@ Claude can build reactive web applications using Svelte's compile-time approach 
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - Node.js 18+ (20+ recommended)
 - npm or pnpm package manager
 - Basic JavaScript knowledge
 
 **What Claude handles automatically:**
+
 - Creating reactive Svelte components with stores
 - Building SvelteKit routes with +page.svelte files
 - Implementing server-side logic in +page.server.ts
@@ -51,6 +53,7 @@ Claude can build reactive web applications using Svelte's compile-time approach 
 **Prompt:** "Create Svelte component for user profile with: editable bio, avatar upload with preview, reactive form validation, and optimistic UI updates. Use Svelte stores for state."
 
 Claude will:
+
 1. Create component with $: reactive statements
 2. Set up writable stores for form state
 3. Add two-way binding with bind:value
@@ -64,6 +67,7 @@ Claude will:
 **Prompt:** "Build SvelteKit blog with: file-based routing, Markdown posts with frontmatter, server-side API routes for CRUD, authentication with JWT, and SQLite database with Prisma."
 
 Claude will:
+
 1. Set up SvelteKit project structure
 2. Create +page.svelte routes
 3. Add +page.server.ts load functions
@@ -77,6 +81,7 @@ Claude will:
 **Prompt:** "Create SvelteKit form for product creation with: server-side validation, progressive enhancement (works without JS), file uploads, and optimistic UI. Show errors next to fields."
 
 Claude will:
+
 1. Create form in +page.svelte
 2. Add form action in +page.server.ts
 3. Implement server-side validation
@@ -90,6 +95,7 @@ Claude will:
 **Prompt:** "Build real-time analytics dashboard with Svelte: WebSocket connection, reactive charts with Chart.js, derived stores for calculated metrics, and auto-refreshing data every 30s."
 
 Claude will:
+
 1. Set up WebSocket in SvelteKit
 2. Create writable stores for data
 3. Add derived stores for calculations
@@ -113,6 +119,7 @@ Claude will:
 
 ## Common Workflows
 ### E-Commerce Store
+
 ```
 "Build SvelteKit e-commerce with:
 1. Product catalog: +page.svelte with load function, search/filter
@@ -126,6 +133,7 @@ Claude will:
 ```
 
 ### SaaS Dashboard
+
 ```
 "Create multi-tenant SvelteKit SaaS:
 1. Auth: +hooks.server.ts for session management
@@ -139,6 +147,7 @@ Claude will:
 ```
 
 ### Static Site Generator
+
 ```
 "Build Svelte static site generator:
 1. Content: Markdown files with frontmatter
@@ -152,6 +161,7 @@ Claude will:
 ```
 
 ### Real-Time Collaboration
+
 ```
 "Build collaborative doc editor with Svelte:
 1. Editor: rich text with ProseMirror

@@ -88,13 +88,13 @@ fi
 # Check if it's a supported file type
 if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH" == *.py ]]; then
   echo "🔍 Analyzing code complexity for $FILE_PATH..." >&2
-  
+
   # Check file exists
   if [ ! -f "$FILE_PATH" ]; then
     echo "📁 File does not exist yet, skipping complexity analysis" >&2
     exit 0
   fi
-  
+
   # Line count analysis
   LINES=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
   if [ "$LINES" -gt 500 ]; then
@@ -102,7 +102,7 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
   elif [ "$LINES" -gt 300 ]; then
     echo "📊 INFO: File is getting large ($LINES lines) - monitor for complexity" >&2
   fi
-  
+
   # Function/method count analysis
   FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
   if [ "$FUNCTION_COUNT" -gt 20 ]; then
@@ -110,15 +110,15 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
   elif [ "$FUNCTION_COUNT" -gt 15 ]; then
     echo "📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring" >&2
   fi
-  
+
   # Nesting level analysis (rough estimate)
   OPEN_BRACES=$(grep -o '{' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
   CLOSE_BRACES=$(grep -o '}' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
-  
+
   if [ "$OPEN_BRACES" -gt 50 ]; then
     echo "⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic" >&2
   fi
-  
+
   # Python-specific checks
   if [[ "$FILE_PATH" == *.py ]]; then
     INDENT_DEPTH=$(grep -E '^[ ]{12,}' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
@@ -126,7 +126,7 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
       echo "⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction" >&2
     fi
   fi
-  
+
   echo "✅ Complexity analysis completed for $FILE_PATH" >&2
 else
   echo "File $FILE_PATH is not a supported type for complexity analysis" >&2
@@ -149,13 +149,13 @@ fi
 # Check if it's a supported file type
 if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" == *.tsx ]] || [[ "$FILE_PATH" == *.py ]]; then
   echo "🔍 Analyzing code complexity for $FILE_PATH..." >&2
-  
+
   # Check file exists
   if [ ! -f "$FILE_PATH" ]; then
     echo "📁 File does not exist yet, skipping complexity analysis" >&2
     exit 0
   fi
-  
+
   # Line count analysis
   LINES=$(wc -l < "$FILE_PATH" 2>/dev/null || echo "0")
   if [ "$LINES" -gt 500 ]; then
@@ -163,7 +163,7 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
   elif [ "$LINES" -gt 300 ]; then
     echo "📊 INFO: File is getting large ($LINES lines) - monitor for complexity" >&2
   fi
-  
+
   # Function/method count analysis
   FUNCTION_COUNT=$(grep -E '(function|def |const.*=>|class |async |export function)' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
   if [ "$FUNCTION_COUNT" -gt 20 ]; then
@@ -171,15 +171,15 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
   elif [ "$FUNCTION_COUNT" -gt 15 ]; then
     echo "📊 INFO: High function count ($FUNCTION_COUNT) - good candidate for refactoring" >&2
   fi
-  
+
   # Nesting level analysis (rough estimate)
   OPEN_BRACES=$(grep -o '{' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
   CLOSE_BRACES=$(grep -o '}' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
-  
+
   if [ "$OPEN_BRACES" -gt 50 ]; then
     echo "⚠️ COMPLEXITY: High nesting detected ($OPEN_BRACES braces) - consider flattening logic" >&2
   fi
-  
+
   # Python-specific checks
   if [[ "$FILE_PATH" == *.py ]]; then
     INDENT_DEPTH=$(grep -E '^[ ]{12,}' "$FILE_PATH" 2>/dev/null | wc -l || echo "0")
@@ -187,7 +187,7 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.jsx ]] || [[ "$FILE_PATH" 
       echo "⚠️ COMPLEXITY: Deep indentation detected in Python code - consider function extraction" >&2
     fi
   fi
-  
+
   echo "✅ Complexity analysis completed for $FILE_PATH" >&2
 else
   echo "File $FILE_PATH is not a supported type for complexity analysis" >&2
@@ -215,6 +215,7 @@ if [[ "$FILE_PATH" == *.js ]] || [[ "$FILE_PATH" == *.ts ]] || [[ "$FILE_PATH" =
 fi
 exit 0
 ```
+
 ### Hook Configuration
 
 Complete hook configuration for .claude/settings.json to enable complexity monitoring on file write operations
@@ -235,6 +236,7 @@ Complete hook configuration for .claude/settings.json to enable complexity monit
   }
 }
 ```
+
 ### Python Complexity with Radon
 
 Enhanced hook script using Radon for accurate Python cyclomatic complexity analysis
@@ -252,6 +254,7 @@ if command -v radon >/dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### JavaScript/TypeScript Complexity with ESLint
 
 Enhanced hook script using ESLint complexity rule for accurate JavaScript/TypeScript cyclomatic complexity analysis
@@ -269,6 +272,7 @@ if command -v eslint >/dev/null 2>&1; then
 fi
 exit 0
 ```
+
 ### Multi-Metric Complexity Analysis
 
 Comprehensive hook script that analyzes multiple complexity metrics simultaneously for better detection
@@ -360,24 +364,31 @@ exit 0
 ### Notification hook not running on file write operations
 
 Verify hook is registered under hooks.notification in .claude/settings.json. Check script has executable permissions: chmod +x. Ensure jq is installed for JSON parsing from stdin input. Test hook manually with a test JSON input. Verify Notification hook type is correct in configuration.
+
 ### Complexity alerts not showing for TypeScript files
 
 Check file extension matches supported types: .js, .jsx, .ts, .tsx, .py. Verify FILE_PATH extraction from tool_input using jq processes correctly. Test with echo command to debug input parsing. Ensure file exists before analysis.
+
 ### False positives for brace count in JSX files
 
 Hook counts all braces including JSX elements which inflates nesting metrics. Adjust thresholds in script for JSX-heavy files: increase OPEN_BRACES threshold from 50 to 100. Consider implementing AST-based complexity analysis using ESLint instead of regex pattern matching. Use ESLint complexity rule for accurate cyclomatic complexity.
+
 ### File does not exist error during notification processing
 
 Hook runs after tool execution but file may not be written yet. Add delay with sleep 1 before analysis. Check tool_name matches write or edit operations. Verify path resolution is absolute. Add file existence check before processing.
+
 ### Python indentation warnings incorrect for valid code
 
 Hook detects 12+ space indentation as deep nesting. Adjust threshold for projects using different indent styles. Use Radon for accurate Python complexity: radon cc file.py -a. Consider using 8-space threshold for projects with 4-space indentation.
+
 ### Complexity analysis is too slow for large files
 
 Add timeout wrapper: timeout 5s complexity-command. Limit analysis scope: only analyze files under 1000 lines. Use faster tools: ESLint with --cache for JavaScript, Radon with --min B for Python. Skip analysis for generated files: exclude node_modules, dist, build directories.
+
 ### ESLint complexity rule not detecting issues
 
 Verify ESLint is installed: eslint --version. Check ESLint configuration includes complexity rule. Ensure ESLint can parse file type: install @typescript-eslint/parser for TypeScript. Test manually with eslint --rule complexity command. Check ESLint version: upgrade to ESLint ^9.37.0 for latest complexity analysis.
+
 ### Radon not calculating Python complexity correctly
 
 Verify Radon is installed: radon --version. Check Python version compatibility: Radon requires Python 3.7+. Test manually: radon cc file.py -a. Ensure file is valid Python syntax. Use specific complexity threshold: radon cc file.py -nc. Check Radon version: upgrade to Radon ^6.0.0 for latest features.

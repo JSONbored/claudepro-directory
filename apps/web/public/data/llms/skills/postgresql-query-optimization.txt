@@ -36,12 +36,14 @@ Claude can analyze PostgreSQL query performance, interpret EXPLAIN plans, design
 
 ## Prerequisites
 **Required:**
+
 - Claude Pro subscription or Claude Code CLI
 - PostgreSQL 14+ installed (16+ recommended)
 - Access to database with slow queries or performance issues
 - Basic SQL knowledge
 
 **What Claude handles automatically:**
+
 - Analyzing EXPLAIN ANALYZE output
 - Identifying missing or inefficient indexes
 - Suggesting query rewrites for better performance
@@ -57,6 +59,7 @@ Claude can analyze PostgreSQL query performance, interpret EXPLAIN plans, design
 **Prompt:** "My PostgreSQL query is taking 5 seconds. Here's the query: [paste query]. Analyze the execution plan and suggest optimizations."
 
 Claude will:
+
 1. Run EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
 2. Identify bottlenecks (seq scans, nested loops)
 3. Suggest missing indexes with CREATE INDEX statements
@@ -69,6 +72,7 @@ Claude will:
 **Prompt:** "Design an optimal indexing strategy for a high-traffic e-commerce database with 10M products. Include queries: product search by name, filter by category and price range, sort by popularity."
 
 Claude will:
+
 1. Analyze query patterns and access patterns
 2. Create B-tree indexes for equality/range queries
 3. Add GIN indexes for full-text search
@@ -82,6 +86,7 @@ Claude will:
 **Prompt:** "Tune PostgreSQL configuration for a 32GB RAM server running high-write OLTP workload with 200 concurrent connections."
 
 Claude will:
+
 1. Set shared_buffers (25% of RAM = 8GB)
 2. Configure work_mem per connection
 3. Adjust max_connections and connection pooling
@@ -95,6 +100,7 @@ Claude will:
 **Prompt:** "Rewrite this slow query to eliminate the N+1 problem: [paste ORM-generated query with multiple subqueries]."
 
 Claude will:
+
 1. Identify N+1 or N+M pattern
 2. Convert subqueries to JOINs
 3. Use CTEs for readability
@@ -118,6 +124,7 @@ Claude will:
 
 ## Common Workflows
 ### Complete Performance Audit
+
 ```
 "Perform a comprehensive PostgreSQL performance audit:
 1. Identify top 10 slowest queries from pg_stat_statements
@@ -130,6 +137,7 @@ Claude will:
 ```
 
 ### Time-Series Optimization
+
 ```
 "Optimize PostgreSQL for time-series data:
 1. 100M rows of sensor data per month
@@ -142,6 +150,7 @@ Claude will:
 ```
 
 ### Full-Text Search Tuning
+
 ```
 "Build high-performance full-text search:
 1. Search across title, description, tags fields
@@ -154,6 +163,7 @@ Claude will:
 ```
 
 ### Replication Lag Analysis
+
 ```
 "Debug PostgreSQL replication lag:
 1. Replica is 30 seconds behind primary

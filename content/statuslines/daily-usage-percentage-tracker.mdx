@@ -15,9 +15,9 @@ seoDescription: >-
   consumed with visual progress bar, time remaining, and budget pacing
   indicators.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-10-25'
-documentationUrl: 'https://docs.claude.com/en/docs/claude-code/statusline'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-10-25"
+documentationUrl: "https://docs.claude.com/en/docs/claude-code/statusline"
 installable: true
 usageSnippet: "✓ Daily: ████████░░░░░░░░░░░░ 40% | $6.00 left \U0001F4C9 below pace"
 copySnippet: |-
@@ -81,6 +81,7 @@ hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
 ---
+
 ## Features
 
 - Daily usage quota tracking against configurable budget limit (default $10/day)
@@ -123,8 +124,11 @@ robotsFollow: true
 ```
 
 ## Examples
+
 ### Enhanced Daily Usage Tracker with Session Deduplication
+
 Extended version with session ID tracking to prevent duplicate cost additions
+
 ```bash
 #!/usr/bin/env bash
 
@@ -160,7 +164,7 @@ else
   daily_usage=$(cat "$USAGE_FILE")
   updated_usage=$(echo "$daily_usage + $session_cost" | bc 2>/dev/null || echo "$daily_usage")
   echo "$updated_usage" > "$USAGE_FILE"
-  
+
   if [ -n "$session_id" ]; then
     echo "$session_id:$session_cost" >> "$SESSION_FILE"
   fi
@@ -211,8 +215,11 @@ RESET="\033[0m"
 
 echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display}"
 ```
+
 ### Daily Usage Tracker with Custom Budget Limit
+
 Configurable daily budget limit via environment variable
+
 ```bash
 #!/usr/bin/env bash
 
@@ -281,8 +288,11 @@ RESET="\033[0m"
 
 echo -e "${USAGE_ICON} Daily: ${USAGE_COLOR}${bar}${RESET} ${usage_percentage}% | ${remaining_display} (limit: $${DAILY_LIMIT})"
 ```
+
 ### Daily Usage Percentage Tracker Installation Example
+
 Complete setup script with usage directory creation and bc verification
+
 ```bash
 #!/bin/bash
 # Installation script for Daily Usage Percentage Tracker
@@ -327,27 +337,35 @@ echo "Usage files stored in: ~/.claude-code-usage/"
 ```
 
 ## Troubleshooting
+
 ### Usage percentage not updating or stuck at 0%
 
 Verify cost.total_cost_usd field exists: echo '$input' | jq .cost.total_cost_usd. Check usage file exists: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage. Ensure bc is installed: which bc. Script uses simple addition - may need session deduplication for accuracy across multiple statusline updates. Verify file is writable: touch ~/.claude-code-usage/test && rm ~/.claude-code-usage/test.
+
 ### Daily limit showing OVER BUDGET when under actual budget
 
 Default DAILY_LIMIT is $10.00. Configure your actual limit in script: DAILY_LIMIT=25.00 (for $25/day budget) or export DAILY_USAGE_LIMIT=25.00. Verify limit calculation: usage_percentage = (updated_usage * 100) / DAILY_LIMIT. Check usage file value matches expected spending: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage.
+
 ### Usage not resetting at midnight
 
-Script uses date-based filenames: daily-YYYY-MM-DD.usage. Each new day creates new file automatically. Old files remain for history. Check current file: ls ~/.claude-code-usage/daily-*.usage. If date command timezone incorrect, reset may occur at wrong time. Verify: date +%Y-%m-%d. Check system timezone: timedatectl (Linux) or systemsetup -gettimezone (macOS).
+Script uses date-based filenames: daily-YYYY-MM-DD.usage. Each new day creates new file automatically. Old files remain for history. Check current file: ls ~/.claude-code-usage/daily-\*.usage. If date command timezone incorrect, reset may occur at wrong time. Verify: date +%Y-%m-%d. Check system timezone: timedatectl (Linux) or systemsetup -gettimezone (macOS).
+
 ### Pacing indicator showing incorrect ahead/below pace status
 
-Pacing compares actual usage % vs expected % based on hours elapsed. Formula: expected = (24 - hours_remaining) * 100 / 24. At noon (12 hours), expected is 50%. If actual usage is 40%, shows 'below pace'. Adjust logic if you have non-24-hour daily windows. Verify current_hour calculation: date +%H. Check hours_remaining calculation: hours_remaining=$((24 - current_hour)).
+Pacing compares actual usage % vs expected % based on hours elapsed. Formula: expected = (24 - hours_remaining) \* 100 / 24. At noon (12 hours), expected is 50%. If actual usage is 40%, shows 'below pace'. Adjust logic if you have non-24-hour daily windows. Verify current_hour calculation: date +%H. Check hours_remaining calculation: hours_remaining=$((24 - current_hour)).
+
 ### Remaining budget showing negative or incorrect values
 
 Remaining = DAILY_LIMIT - updated_usage. If negative, script displays '$0.00 left' and OVER BUDGET status. Verify DAILY_LIMIT setting matches your actual budget. Check updated_usage calculation: cat ~/.claude-code-usage/daily-$(date +%Y-%m-%d).usage. bc arithmetic: echo '$DAILY_LIMIT - $updated_usage' | bc. Ensure bc is working: echo '10.00 - 4.50' | bc (should return 5.50).
+
 ### Multiple sessions causing duplicate cost additions
 
 Script adds session_cost every update - can over-count if same session updates multiple times. For accuracy, track by unique session_id and update (don't add) session totals. Use enhanced version with session deduplication. Alternative: integrate with official usage API if available. Current implementation optimized for real-time awareness, not perfect accounting. Check session_id exists: echo '$input' | jq .session_id.
+
 ### Progress bar showing all filled or all empty incorrectly
 
-Verify usage_percentage calculation: usage_percentage=$(echo "scale=1; ($updated_usage * 100) / $DAILY_LIMIT" | bc). Check bar_filled calculation: bar_filled=$((usage_percentage_int / 5)) (each char = 5%). Test: usage=50%; bar_filled=$((50 / 5)); echo $bar_filled (should be 10). Verify Unicode block characters work: echo '█░'.
+Verify usage_percentage calculation: usage_percentage=$(echo "scale=1; ($updated_usage \* 100) / $DAILY_LIMIT" | bc). Check bar_filled calculation: bar_filled=$((usage_percentage_int / 5)) (each char = 5%). Test: usage=50%; bar_filled=$((50 / 5)); echo $bar_filled (should be 10). Verify Unicode block characters work: echo '█░'.
+
 ### Usage file not being created or permission denied
 
 Check home directory writable: touch ~/test && rm ~/test. Verify ~/.claude-code-usage directory exists: mkdir -p ~/.claude-code-usage. Check directory permissions: ls -ld ~/.claude-code-usage. Ensure script has permission to create files: touch ~/.claude-code-usage/test && rm ~/.claude-code-usage/test. Check disk space: df -h ~.

@@ -13,7 +13,10 @@ type PlacementRow = {
   expires_at: string | null;
 };
 
-function toToolListing(entry: DirectoryEntry, placement?: PlacementRow): ToolListing {
+function toToolListing(
+  entry: DirectoryEntry,
+  placement?: PlacementRow,
+): ToolListing {
   const sponsored = placement?.tier === "sponsored";
   const featured = sponsored || placement?.tier === "featured";
 
@@ -21,13 +24,18 @@ function toToolListing(entry: DirectoryEntry, placement?: PlacementRow): ToolLis
     ...entry,
     featured,
     sponsored,
-    disclosure: (placement?.disclosure || entry.disclosure || "editorial") as ToolListing["disclosure"],
+    disclosure: (placement?.disclosure ||
+      entry.disclosure ||
+      "editorial") as ToolListing["disclosure"],
     placement: placement
       ? {
           targetKind: "tool",
           targetKey: placement.target_key,
           tier: placement.tier as "standard" | "featured" | "sponsored",
-          disclosure: placement.disclosure as "editorial" | "affiliate" | "sponsored",
+          disclosure: placement.disclosure as
+            | "editorial"
+            | "affiliate"
+            | "sponsored",
           startsAt: placement.starts_at || undefined,
           expiresAt: placement.expires_at || undefined,
         }
@@ -47,7 +55,7 @@ async function getActivePlacements() {
          WHERE target_kind = 'tool'
            AND status = 'active'
            AND (starts_at IS NULL OR datetime(starts_at) <= datetime('now'))
-           AND (expires_at IS NULL OR datetime(expires_at) >= datetime('now'))`
+           AND (expires_at IS NULL OR datetime(expires_at) >= datetime('now'))`,
       )
       .bind()
       .all<PlacementRow>();
@@ -65,12 +73,23 @@ export async function getTools(): Promise<ToolListing[]> {
   ]);
 
   return entries
-    .map((entry) => toToolListing(entry, placements.get(`tools:${entry.slug}`) ?? placements.get(entry.slug)))
+    .map((entry) =>
+      toToolListing(
+        entry,
+        placements.get(`tools:${entry.slug}`) ?? placements.get(entry.slug),
+      ),
+    )
     .sort((left, right) => {
-      const leftScore = Number(Boolean(left.sponsored)) * 3 + Number(Boolean(left.featured)) * 2;
-      const rightScore = Number(Boolean(right.sponsored)) * 3 + Number(Boolean(right.featured)) * 2;
+      const leftScore =
+        Number(Boolean(left.sponsored)) * 3 +
+        Number(Boolean(left.featured)) * 2;
+      const rightScore =
+        Number(Boolean(right.sponsored)) * 3 +
+        Number(Boolean(right.featured)) * 2;
       if (leftScore !== rightScore) return rightScore - leftScore;
-      return String(right.dateAdded || "").localeCompare(String(left.dateAdded || ""));
+      return String(right.dateAdded || "").localeCompare(
+        String(left.dateAdded || ""),
+      );
     });
 }
 

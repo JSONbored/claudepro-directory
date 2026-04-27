@@ -28,13 +28,13 @@ class HealthcareAgent:
     def __init__(self):
         self.phi_encryption_key = self._load_encryption_key()
         self.audit_logger = AuditLogger()
-    
+
     async def generate_clinical_note(self, patient_id: str, encounter_data: Dict) -> str:
         # Verify HIPAA authorization
         if not await self._verify_hipaa_authorization(patient_id):
             await self.audit_logger.log_unauthorized_access(patient_id)
             raise PermissionError("Unauthorized access to PHI")
-        
+
         # Generate SOAP note
         soap_note = f"""
 Subjective: {encounter_data['chief_complaint']}
@@ -42,24 +42,24 @@ Objective: Vitals - BP: {encounter_data['vitals']['bp']}, HR: {encounter_data['v
 Assessment: {await self._generate_assessment(encounter_data)}
 Plan: {await self._generate_treatment_plan(encounter_data)}
         """
-        
+
         # Encrypt PHI
         encrypted_note = self._encrypt_phi(soap_note)
-        
+
         # Audit log
         await self.audit_logger.log_phi_access(
             user_id=encounter_data['provider_id'],
             patient_id=patient_id,
             action='clinical_note_generated'
         )
-        
+
         return encrypted_note
-    
+
     async def medical_coding_assistant(self, clinical_note: str) -> Dict:
         # Extract ICD-10 and CPT codes
         icd_codes = await self._extract_icd10_codes(clinical_note)
         cpt_codes = await self._extract_cpt_codes(clinical_note)
-        
+
         return {
             'icd10_codes': icd_codes,
             'cpt_codes': cpt_codes,
@@ -75,13 +75,13 @@ class HealthcareAgent:
     def __init__(self):
         self.phi_encryption_key = self._load_encryption_key()
         self.audit_logger = AuditLogger()
-    
+
     async def generate_clinical_note(self, patient_id: str, encounter_data: Dict) -> str:
         # Verify HIPAA authorization
         if not await self._verify_hipaa_authorization(patient_id):
             await self.audit_logger.log_unauthorized_access(patient_id)
             raise PermissionError("Unauthorized access to PHI")
-        
+
         # Generate SOAP note
         soap_note = f"""
 Subjective: {encounter_data['chief_complaint']}
@@ -89,24 +89,24 @@ Objective: Vitals - BP: {encounter_data['vitals']['bp']}, HR: {encounter_data['v
 Assessment: {await self._generate_assessment(encounter_data)}
 Plan: {await self._generate_treatment_plan(encounter_data)}
         """
-        
+
         # Encrypt PHI
         encrypted_note = self._encrypt_phi(soap_note)
-        
+
         # Audit log
         await self.audit_logger.log_phi_access(
             user_id=encounter_data['provider_id'],
             patient_id=patient_id,
             action='clinical_note_generated'
         )
-        
+
         return encrypted_note
-    
+
     async def medical_coding_assistant(self, clinical_note: str) -> Dict:
         # Extract ICD-10 and CPT codes
         icd_codes = await self._extract_icd10_codes(clinical_note)
         cpt_codes = await self._extract_cpt_codes(clinical_note)
-        
+
         return {
             'icd10_codes': icd_codes,
             'cpt_codes': cpt_codes,
@@ -122,7 +122,7 @@ class LegalAgent:
     def __init__(self):
         self.contract_kb = ContractKnowledgeBase()
         self.regulatory_db = RegulatoryDatabase()
-    
+
     async def analyze_contract(self, contract_text: str, contract_type: str) -> Dict:
         analysis = {
             'key_clauses': await self._extract_key_clauses(contract_text),
@@ -130,14 +130,14 @@ class LegalAgent:
             'obligations': await self._extract_obligations(contract_text),
             'compliance': await self._check_regulatory_compliance(contract_text, contract_type)
         }
-        
+
         # Flag high-risk clauses
         for clause in analysis['key_clauses']:
             if clause['risk_level'] == 'high':
                 analysis['requires_attorney_review'] = True
-        
+
         return analysis
-    
+
     async def generate_s1_filing(self, company_data: Dict) -> str:
         # Harvey-style S-1 filing automation
         sections = {
@@ -146,10 +146,10 @@ class LegalAgent:
             'use_of_proceeds': await self._generate_use_of_proceeds(company_data),
             'financial_statements': await self._format_financial_statements(company_data['financials'])
         }
-        
+
         # SEC compliance validation
         compliance_check = await self._validate_sec_compliance(sections)
-        
+
         return self._compile_s1_document(sections, compliance_check)
 ```
 ```python
@@ -157,7 +157,7 @@ class LegalAgent:
     def __init__(self):
         self.contract_kb = ContractKnowledgeBase()
         self.regulatory_db = RegulatoryDatabase()
-    
+
     async def analyze_contract(self, contract_text: str, contract_type: str) -> Dict:
         analysis = {
             'key_clauses': await self._extract_key_clauses(contract_text),
@@ -165,14 +165,14 @@ class LegalAgent:
             'obligations': await self._extract_obligations(contract_text),
             'compliance': await self._check_regulatory_compliance(contract_text, contract_type)
         }
-        
+
         # Flag high-risk clauses
         for clause in analysis['key_clauses']:
             if clause['risk_level'] == 'high':
                 analysis['requires_attorney_review'] = True
-        
+
         return analysis
-    
+
     async def generate_s1_filing(self, company_data: Dict) -> str:
         # Harvey-style S-1 filing automation
         sections = {
@@ -181,10 +181,10 @@ class LegalAgent:
             'use_of_proceeds': await self._generate_use_of_proceeds(company_data),
             'financial_statements': await self._format_financial_statements(company_data['financials'])
         }
-        
+
         # SEC compliance validation
         compliance_check = await self._validate_sec_compliance(sections)
-        
+
         return self._compile_s1_document(sections, compliance_check)
 ```
 
@@ -196,7 +196,7 @@ class FinancialAgent:
     def __init__(self):
         self.risk_model = RiskAssessmentModel()
         self.forecasting_model = ForecastingModel()
-    
+
     async def portfolio_risk_analysis(self, portfolio: Dict) -> Dict:
         return {
             'var_95': await self._calculate_var(portfolio, confidence=0.95),
@@ -205,14 +205,14 @@ class FinancialAgent:
             'concentration_risk': await self._analyze_concentration(portfolio),
             'recommendations': await self._generate_risk_recommendations(portfolio)
         }
-    
+
     async def financial_forecast(self, historical_data: List, horizon: int) -> Dict:
         forecast = await self.forecasting_model.predict(
             data=historical_data,
             periods=horizon,
             include_confidence_intervals=True
         )
-        
+
         return {
             'point_forecast': forecast['predictions'],
             'confidence_intervals': forecast['ci'],
@@ -227,7 +227,7 @@ class FinancialAgent:
     def __init__(self):
         self.risk_model = RiskAssessmentModel()
         self.forecasting_model = ForecastingModel()
-    
+
     async def portfolio_risk_analysis(self, portfolio: Dict) -> Dict:
         return {
             'var_95': await self._calculate_var(portfolio, confidence=0.95),
@@ -236,14 +236,14 @@ class FinancialAgent:
             'concentration_risk': await self._analyze_concentration(portfolio),
             'recommendations': await self._generate_risk_recommendations(portfolio)
         }
-    
+
     async def financial_forecast(self, historical_data: List, horizon: int) -> Dict:
         forecast = await self.forecasting_model.predict(
             data=historical_data,
             periods=horizon,
             include_confidence_intervals=True
         )
-        
+
         return {
             'point_forecast': forecast['predictions'],
             'confidence_intervals': forecast['ci'],

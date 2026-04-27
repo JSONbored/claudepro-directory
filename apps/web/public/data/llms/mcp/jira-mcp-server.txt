@@ -92,27 +92,41 @@ Streamline your project management and documentation workflows by connecting Cla
 
 ## Examples
 ### Create a Jira bug for the login issue
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Create a Jira bug for the login issue"
 ```
+
 ### Update the API documentation in Confluence
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Update the API documentation in Confluence"
 ```
+
 ### Find all issues assigned to me
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Find all issues assigned to me"
 ```
+
 ### Generate a sprint report
+
 Common usage pattern for this MCP server
+
 ```plaintext
 Ask Claude: "Generate a sprint report"
 ```
+
 ### Create Issue with Custom Fields
+
 Create a new Jira issue with custom fields and metadata
+
 ```typescript
 // Create Jira issue with custom fields
 const issue = await jira.issues.create({
@@ -120,7 +134,7 @@ const issue = await jira.issues.create({
   summary: "Fix authentication bug",
   description: "Issue description",
   issuetype: { name: "Bug" },
-  customfield_10001: "custom-value"
+  customfield_10001: "custom-value",
 });
 ```
 ```plaintext
@@ -142,7 +156,7 @@ const issue = await jira.issues.create({
   summary: "Fix authentication bug",
   description: "Issue description",
   issuetype: { name: "Bug" },
-  customfield_10001: "custom-value"
+  customfield_10001: "custom-value",
 });
 ```
 
@@ -162,27 +176,35 @@ const issue = await jira.issues.create({
 ### HTTP 429 rate limit error starting November 2025
 
 Atlassian enforces rate limits on API tokens from Nov 22, 2025. Check Retry-After and X-RateLimit-Reset headers in API responses. Implement caching to reduce redundant API calls, use pagination for large result sets, and leverage webhooks for real-time updates instead of polling. Monitor rate limit headers to stay within token limits.
+
 ### Free app rate limiting starting August 2025
 
 Free apps rate limited from Aug 18, 2025, with burst limits from Aug 28, 2025. Upgrade to paid tier for higher limits. Implement jitter on scheduled tasks to distribute load, optimize JQL queries to reduce API calls, and batch operations when possible. Consider using webhooks instead of polling for updates.
+
 ### OAuth token authentication failed or expired
 
 Re-authenticate via OAuth flow to get new token. Verify token hasn't been revoked in Atlassian admin settings. Check token scope includes required permissions for Jira (read:jira-work, write:jira-work) and Confluence (read:confluence-content.all, write:confluence-content). For Jira Cloud, you can also use API token authentication (email + API token) as an alternative.
+
 ### Cannot access project or issues - permission denied
 
 Verify your Atlassian account has project access. Check project visibility settings allow API access. Ensure OAuth scope includes appropriate permissions (read:jira-work, write:jira-work). Verify you're using the correct Jira instance URL and that the project key is correct. Check if project requires specific user roles or permissions.
+
 ### JQL search queries returning no results or errors
 
 Validate JQL syntax is correct using Jira's JQL builder or JQL validator. Check field names match custom field IDs (use cf[10001] format for custom fields). Verify search permissions for projects in query. Use /rest/api/3/search endpoint with proper authentication. Ensure field names are correct (e.g., 'assignee' not 'assignedTo'). Test JQL query directly in Jira UI first to verify it works.
+
 ### Jira MCP server authentication errors with API tokens
 
 Verify API token is valid and not expired. Check token permissions match required operations. Ensure token format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
+
 ### Jira rate limit errors when making multiple API calls
 
 Implement exponential backoff retry logic with jitter. Use Jira API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed issue data. Jira allows 100 requests per minute per user.
+
 ### Jira issue or project access denied errors
 
 Verify token has access to the issue or project. Check project permissions and user role. Ensure token has required scopes (read:jira-work, write:jira-work) for target operations.
+
 ### Jira MCP server connection timeouts or network errors
 
 Check network connectivity and firewall settings. Verify Jira API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.

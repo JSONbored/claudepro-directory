@@ -1,4 +1,4 @@
-import categorySpec from "@/generated/content-category-spec.json";
+import categorySpec from "@heyclaude/registry/category-spec.json";
 
 type CategorySpecEntry = {
   label: string;
@@ -19,42 +19,45 @@ export const siteConfig = {
   jobsEmail: "jobs@heyclau.de",
   twitterUrl: process.env.NEXT_PUBLIC_TWITTER_URL || "https://x.com/jsonbored",
   discordUrl:
-    process.env.NEXT_PUBLIC_DISCORD_URL || "https://discord.com/invite/Ax3Py4YDrq",
+    process.env.NEXT_PUBLIC_DISCORD_URL ||
+    "https://discord.com/invite/Ax3Py4YDrq",
   polarJobBoardUrl: process.env.NEXT_PUBLIC_POLAR_JOB_BOARD_URL || "/advertise",
-  polarFeaturedJobUrl: process.env.NEXT_PUBLIC_POLAR_FEATURED_JOB_URL || "/advertise",
-  polarSponsoredJobUrl: process.env.NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL || "/advertise",
+  polarFeaturedJobUrl:
+    process.env.NEXT_PUBLIC_POLAR_FEATURED_JOB_URL || "/advertise",
+  polarSponsoredJobUrl:
+    process.env.NEXT_PUBLIC_POLAR_SPONSORED_JOB_URL || "/advertise",
   nav: [
     { href: "/browse", label: "Browse" },
     { href: "/tools", label: "Tools" },
     { href: "/jobs", label: "Jobs" },
-    { href: "/about", label: "About" }
+    { href: "/about", label: "About" },
   ],
-  categoryOrder: categorySpec.categoryOrder
+  categoryOrder: categorySpec.categoryOrder,
 } as const;
 
 export const categoryLabels: Record<string, string> = Object.fromEntries(
-  Object.entries(categories).map(([category, spec]) => [category, spec.label])
+  Object.entries(categories).map(([category, spec]) => [category, spec.label]),
 );
 
 export const categoryDescriptions: Record<string, string> = Object.fromEntries(
   Object.entries(categories).map(([category, spec]) => [
     category,
-    spec.description
-  ])
+    spec.description,
+  ]),
 );
 
 export const categoryUsageHints: Record<string, string> = Object.fromEntries(
   Object.entries(categories).map(([category, spec]) => [
     category,
-    spec.usageHint
-  ])
+    spec.usageHint,
+  ]),
 );
 
 export const categoryQuickstarts: Record<string, string[]> = Object.fromEntries(
   Object.entries(categories).map(([category, spec]) => [
     category,
-    Array.isArray(spec.quickstart) ? spec.quickstart : []
-  ])
+    Array.isArray(spec.quickstart) ? spec.quickstart : [],
+  ]),
 );
 
 export const categoryAccentClasses: Record<string, string> = {
@@ -67,5 +70,5 @@ export const categoryAccentClasses: Record<string, string> = {
   hooks: "text-chart-4 border-border bg-secondary/30",
   guides: "text-chart-2 border-border bg-secondary/30",
   collections: "text-chart-3 border-border bg-secondary/30",
-  statuslines: "text-chart-4 border-border bg-secondary/30"
+  statuslines: "text-chart-4 border-border bg-secondary/30",
 };

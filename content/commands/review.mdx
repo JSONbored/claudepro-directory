@@ -13,13 +13,13 @@ seoDescription: >-
   Comprehensive code review with security analysis, performance optimization,
   and best practices validation Discover tools for AI development.
 author: JSONbored
-authorProfileUrl: 'https://github.com/JSONbored'
-dateAdded: '2025-09-16'
-documentationUrl: 'https://docs.claude.ai/commands/review'
+authorProfileUrl: "https://github.com/JSONbored"
+dateAdded: "2025-09-16"
+documentationUrl: "https://docs.claude.ai/commands/review"
 installable: true
-installCommand: '/review [options] <file_or_directory>'
-usageSnippet: '/review [options] <file_or_directory>'
-copySnippet: '/review [options] <file_or_directory>'
+installCommand: "/review [options] <file_or_directory>"
+usageSnippet: "/review [options] <file_or_directory>"
+copySnippet: "/review [options] <file_or_directory>"
 tags:
   - code-review
   - security
@@ -44,8 +44,9 @@ hasPrerequisites: false
 hasBreakingChanges: false
 robotsIndex: true
 robotsFollow: true
-commandSyntax: '/review [options] <file_or_directory>'
+commandSyntax: "/review [options] <file_or_directory>"
 ---
+
 The `/review` command provides comprehensive code analysis including security vulnerabilities, performance optimizations, code quality improvements, and adherence to best practices.
 
 ## Usage
@@ -57,6 +58,7 @@ The `/review` command provides comprehensive code analysis including security vu
 ## Options
 
 ### Review Types
+
 - `--security` - Focus on security vulnerabilities and threats
 - `--performance` - Analyze performance bottlenecks and optimizations
 - `--style` - Check coding style and formatting
@@ -64,18 +66,21 @@ The `/review` command provides comprehensive code analysis including security vu
 - `--all` - Comprehensive review (default)
 
 ### Output Formats
+
 - `--format=markdown` - Markdown report (default)
 - `--format=json` - Machine-readable JSON output
 - `--format=html` - Rich HTML report
 - `--format=sarif` - SARIF format for CI/CD integration
 
 ### Severity Filtering
+
 - `--severity=critical` - Only critical issues
 - `--severity=high` - High and critical issues
 - `--severity=medium` - Medium, high, and critical issues
 - `--severity=all` - All issues including low severity
 
 ### Language-Specific Options
+
 - `--eslint` - Use ESLint rules for JavaScript/TypeScript
 - `--pylint` - Use Pylint for Python code
 - `--rustfmt` - Use Rust formatting and clippy
@@ -93,38 +98,39 @@ class UserService {
     this.users = [];
     this.database = new Database(process.env.DB_PASSWORD); // 🚨 Security Issue
   }
-  
+
   async createUser(userData) {
     // 🚨 No input validation
     const user = {
       id: Math.random(), // 🚨 Poor ID generation
       ...userData,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
-    
+
     // 🚨 SQL injection vulnerability
     const query = `INSERT INTO users (name, email) VALUES ('${user.name}', '${user.email}')`;
     await this.database.query(query);
-    
+
     this.users.push(user);
     return user;
   }
-  
+
   // 🚨 No access control
   async deleteUser(userId) {
-    const index = this.users.findIndex(u => u.id == userId); // 🚨 Type coercion
+    const index = this.users.findIndex((u) => u.id == userId); // 🚨 Type coercion
     if (index > -1) {
       this.users.splice(index, 1);
       return true;
     }
     return false;
   }
-  
+
   // 🚨 Inefficient search
   async searchUsers(query) {
-    return this.users.filter(user => 
-      user.name.toLowerCase().includes(query.toLowerCase()) ||
-      user.email.toLowerCase().includes(query.toLowerCase())
+    return this.users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(query.toLowerCase()) ||
+        user.email.toLowerCase().includes(query.toLowerCase()),
     );
   }
 }
@@ -132,15 +138,16 @@ class UserService {
 
 **Generated Review Report:**
 
-```markdown
+````markdown
 # Code Review Report: user-service.js
 
 ## 🚨 Critical Issues (4)
 
 ### 1. SQL Injection Vulnerability
+
 **Location:** Line 15  
 **Severity:** Critical  
-**Category:** Security  
+**Category:** Security
 
 **Issue:** Direct string concatenation in SQL query allows SQL injection attacks.
 
@@ -149,16 +156,18 @@ class UserService {
 const query = `INSERT INTO users (name, email) VALUES ('${user.name}', '${user.email}')`;
 
 // ✅ Recommended fix
-const query = 'INSERT INTO users (name, email) VALUES (?, ?)';
+const query = "INSERT INTO users (name, email) VALUES (?, ?)";
 await this.database.query(query, [user.name, user.email]);
 ```
+````
 
 **Impact:** Attackers could execute arbitrary SQL commands, potentially accessing or deleting sensitive data.
 
 ### 2. Exposed Database Credentials
+
 **Location:** Line 4  
 **Severity:** Critical  
-**Category:** Security  
+**Category:** Security
 
 **Issue:** Database password exposed in environment variable without proper encryption.
 
@@ -172,15 +181,16 @@ const dbConfig = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   ssl: true,
-  connectionLimit: 10
+  connectionLimit: 10,
 };
 this.database = new Database(dbConfig);
 ```
 
 ### 3. Missing Input Validation
+
 **Location:** Line 7  
 **Severity:** Critical  
-**Category:** Security  
+**Category:** Security
 
 **Issue:** No validation of user input allows injection of malicious data.
 
@@ -204,31 +214,33 @@ async createUser(userData) {
 ```
 
 ### 4. Weak ID Generation
+
 **Location:** Line 9  
 **Severity:** High  
-**Category:** Security  
+**Category:** Security
 
 **Issue:** Math.random() is predictable and not suitable for ID generation.
 
 ```javascript
 // ❌ Vulnerable code
-id: Math.random()
+id: Math.random();
 
 // ✅ Recommended fix
-const { v4: uuidv4 } = require('uuid');
-id: uuidv4()
+const { v4: uuidv4 } = require("uuid");
+id: uuidv4();
 
 // Or for numeric IDs:
-const crypto = require('crypto');
-id: crypto.randomBytes(16).toString('hex')
+const crypto = require("crypto");
+id: crypto.randomBytes(16).toString("hex");
 ```
 
 ## ⚠️ High Priority Issues (2)
 
 ### 5. Missing Access Control
+
 **Location:** Line 25  
 **Severity:** High  
-**Category:** Security  
+**Category:** Security
 
 **Issue:** No authorization checks allow any user to delete any other user.
 
@@ -239,32 +251,34 @@ async deleteUser(userId, requestingUserId, userRole) {
   if (userId !== requestingUserId && userRole !== 'admin') {
     throw new AuthorizationError('Insufficient permissions');
   }
-  
+
   // Additional checks...
 }
 ```
 
 ### 6. Type Safety Issue
+
 **Location:** Line 26  
 **Severity:** High  
-**Category:** Quality  
+**Category:** Quality
 
 **Issue:** Using loose equality (==) instead of strict equality (===).
 
 ```javascript
 // ❌ Problematic code
-const index = this.users.findIndex(u => u.id == userId);
+const index = this.users.findIndex((u) => u.id == userId);
 
 // ✅ Recommended fix
-const index = this.users.findIndex(u => u.id === userId);
+const index = this.users.findIndex((u) => u.id === userId);
 ```
 
 ## 📊 Performance Issues (1)
 
 ### 7. Inefficient Search Algorithm
+
 **Location:** Line 33  
 **Severity:** Medium  
-**Category:** Performance  
+**Category:** Performance
 
 **Issue:** O(n) search operation doesn't scale with large user datasets.
 
@@ -276,7 +290,7 @@ class UserService {
     this.userIndex = new Map(); // For fast lookups
     this.searchIndex = {}; // For text search
   }
-  
+
   async searchUsers(query, limit = 20, offset = 0) {
     // Use database query for large datasets
     const sql = `
@@ -292,6 +306,7 @@ class UserService {
 ## 🏗️ Architecture Recommendations
 
 ### 1. Separation of Concerns
+
 ```javascript
 // ✅ Improved architecture
 class UserService {
@@ -306,20 +321,22 @@ class UserRepository {
   constructor(database) {
     this.database = database;
   }
-  
+
   async create(userData) {
-    const query = 'INSERT INTO users (id, name, email, created_at) VALUES (?, ?, ?, ?)';
+    const query =
+      "INSERT INTO users (id, name, email, created_at) VALUES (?, ?, ?, ?)";
     return await this.database.query(query, [
       userData.id,
       userData.name,
       userData.email,
-      userData.createdAt
+      userData.createdAt,
     ]);
   }
 }
 ```
 
 ### 2. Error Handling
+
 ```javascript
 // ✅ Proper error handling
 class UserService {
@@ -327,16 +344,19 @@ class UserService {
     try {
       await this.validator.validate(userData);
       const user = await this.userRepository.create(userData);
-      this.logger.info('User created successfully', { userId: user.id });
+      this.logger.info("User created successfully", { userId: user.id });
       return user;
     } catch (error) {
-      this.logger.error('Failed to create user', { error: error.message, userData });
-      
+      this.logger.error("Failed to create user", {
+        error: error.message,
+        userData,
+      });
+
       if (error instanceof ValidationError) {
-        throw new BadRequestError('Invalid user data', error.details);
+        throw new BadRequestError("Invalid user data", error.details);
       }
-      
-      throw new InternalServerError('Failed to create user');
+
+      throw new InternalServerError("Failed to create user");
     }
   }
 }
@@ -346,51 +366,57 @@ class UserService {
 
 ```javascript
 // ✅ Comprehensive test suite
-describe('UserService', () => {
+describe("UserService", () => {
   let userService, mockRepository, mockValidator;
-  
+
   beforeEach(() => {
     mockRepository = {
       create: jest.fn(),
       findById: jest.fn(),
-      delete: jest.fn()
+      delete: jest.fn(),
     };
     mockValidator = {
-      validate: jest.fn()
+      validate: jest.fn(),
     };
     userService = new UserService(mockRepository, mockValidator);
   });
-  
-  describe('createUser', () => {
-    it('should create user with valid data', async () => {
-      const userData = { name: 'John Doe', email: 'john@example.com' };
+
+  describe("createUser", () => {
+    it("should create user with valid data", async () => {
+      const userData = { name: "John Doe", email: "john@example.com" };
       mockValidator.validate.mockResolvedValue(userData);
-      mockRepository.create.mockResolvedValue({ id: '123', ...userData });
-      
+      mockRepository.create.mockResolvedValue({ id: "123", ...userData });
+
       const result = await userService.createUser(userData);
-      
-      expect(result.id).toBe('123');
+
+      expect(result.id).toBe("123");
       expect(mockRepository.create).toHaveBeenCalledWith(userData);
     });
-    
-    it('should throw error for invalid data', async () => {
-      mockValidator.validate.mockRejectedValue(new ValidationError('Invalid email'));
-      
-      await expect(userService.createUser({ email: 'invalid' }))
-        .rejects.toThrow(BadRequestError);
+
+    it("should throw error for invalid data", async () => {
+      mockValidator.validate.mockRejectedValue(
+        new ValidationError("Invalid email"),
+      );
+
+      await expect(
+        userService.createUser({ email: "invalid" }),
+      ).rejects.toThrow(BadRequestError);
     });
-    
-    it('should handle SQL injection attempts', async () => {
+
+    it("should handle SQL injection attempts", async () => {
       const maliciousData = {
         name: "'; DROP TABLE users; --",
-        email: 'test@example.com'
+        email: "test@example.com",
       };
-      
+
       // Should be caught by validation
-      mockValidator.validate.mockRejectedValue(new ValidationError('Invalid characters'));
-      
-      await expect(userService.createUser(maliciousData))
-        .rejects.toThrow(BadRequestError);
+      mockValidator.validate.mockRejectedValue(
+        new ValidationError("Invalid characters"),
+      );
+
+      await expect(userService.createUser(maliciousData)).rejects.toThrow(
+        BadRequestError,
+      );
     });
   });
 });
@@ -412,6 +438,7 @@ describe('UserService', () => {
 ## 📈 Performance Optimizations
 
 1. **Database Indexing**
+
    ```sql
    CREATE INDEX idx_users_email ON users(email);
    CREATE INDEX idx_users_name ON users(name);
@@ -419,13 +446,14 @@ describe('UserService', () => {
    ```
 
 2. **Caching Strategy**
+
    ```javascript
    const cache = new Redis();
-   
+
    async getUser(id) {
      const cached = await cache.get(`user:${id}`);
      if (cached) return JSON.parse(cached);
-     
+
      const user = await this.userRepository.findById(id);
      await cache.setex(`user:${id}`, 3600, JSON.stringify(user));
      return user;
@@ -435,13 +463,13 @@ describe('UserService', () => {
 3. **Connection Pooling**
    ```javascript
    const pool = new Pool({
-     host: 'localhost',
-     user: 'user',
-     password: 'password',
-     database: 'myapp',
+     host: "localhost",
+     user: "user",
+     password: "password",
+     database: "myapp",
      connectionLimit: 10,
      acquireTimeout: 60000,
-     timeout: 60000
+     timeout: 60000,
    });
    ```
 
@@ -451,31 +479,31 @@ describe('UserService', () => {
 // ✅ Environment-based configuration
 const config = {
   database: {
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || "localhost",
     port: parseInt(process.env.DB_PORT) || 5432,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    ssl: process.env.NODE_ENV === 'production',
+    ssl: process.env.NODE_ENV === "production",
     pool: {
       min: 2,
       max: 10,
       acquire: 30000,
-      idle: 10000
-    }
+      idle: 10000,
+    },
   },
   security: {
     jwtSecret: process.env.JWT_SECRET,
     bcryptRounds: 12,
     rateLimitWindowMs: 15 * 60 * 1000, // 15 minutes
-    rateLimitMax: 100 // requests per window
+    rateLimitMax: 100, // requests per window
   },
   validation: {
     nameMinLength: 2,
     nameMaxLength: 50,
     passwordMinLength: 8,
-    emailDomainWhitelist: process.env.ALLOWED_EMAIL_DOMAINS?.split(',')
-  }
+    emailDomainWhitelist: process.env.ALLOWED_EMAIL_DOMAINS?.split(","),
+  },
 };
 ```
 
@@ -484,22 +512,25 @@ const config = {
 **Issues Found:** 7  
 **Critical:** 4  
 **High:** 2  
-**Medium:** 1  
+**Medium:** 1
 
 **Primary Concerns:**
+
 1. Critical security vulnerabilities (SQL injection, exposed credentials)
 2. Missing input validation and access controls
 3. Poor error handling and logging
 4. Performance bottlenecks in search functionality
 
 **Recommended Actions:**
+
 1. **Immediate:** Fix SQL injection and input validation (Critical)
 2. **High Priority:** Implement access controls and proper ID generation
 3. **Medium Priority:** Optimize search performance and add comprehensive testing
 4. **Long Term:** Refactor architecture for better separation of concerns
 
 **Estimated Effort:** 2-3 days for critical fixes, 1-2 weeks for complete refactoring
-```
+
+````
 
 ## Advanced Analysis Features
 
@@ -524,12 +555,12 @@ rules:
     - require-input-validation
     - no-hardcoded-secrets
     - require-https
-  
+
   performance:
     - no-n-plus-one-queries
     - require-database-indexes
     - limit-memory-usage
-  
+
   style:
     - consistent-naming
     - max-function-length: 50
@@ -545,4 +576,4 @@ thresholds:
   critical: 0
   high: 5
   medium: 20
-```
+````

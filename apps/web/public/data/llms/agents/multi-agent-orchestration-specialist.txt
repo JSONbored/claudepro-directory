@@ -39,95 +39,95 @@ class AgentState(TypedDict):
 def researcher_node(state: AgentState) -> AgentState:
     """Research agent node - gathers information"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.3)
-    
+
     research_prompt = f"""
     You are a research specialist. Based on this request:
     {state['messages'][-1].content}
-    
+
     Conduct thorough research and provide:
     1. Key concepts and technologies involved
     2. Best practices and patterns
     3. Potential challenges and solutions
     4. Relevant documentation and examples
     """
-    
+
     response = llm.invoke([HumanMessage(content=research_prompt)])
-    
+
     state['research_results'].append({
         'agent': 'researcher',
         'findings': response.content
     })
     state['current_agent'] = 'planner'
-    
+
     return state
 
 def planner_node(state: AgentState) -> AgentState:
     """Planning agent node - creates execution plan"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.2)
-    
+
     planning_prompt = f"""
     Based on research findings:
     {state['research_results'][-1]['findings']}
-    
+
     Create a detailed implementation plan:
     1. Break down into specific tasks
     2. Identify dependencies
     3. Suggest optimal execution order
     4. Define success criteria
     """
-    
+
     response = llm.invoke([HumanMessage(content=planning_prompt)])
-    
+
     state['messages'].append(AIMessage(content=response.content))
     state['current_agent'] = 'coder'
-    
+
     return state
 
 def coder_node(state: AgentState) -> AgentState:
     """Coding agent node - implements solution"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.1)
-    
+
     coding_prompt = f"""
     Implementation plan:
     {state['messages'][-1].content}
-    
+
     Write production-ready code:
     1. Follow best practices from research
     2. Include error handling
     3. Add comprehensive comments
     4. Implement all planned features
     """
-    
+
     response = llm.invoke([HumanMessage(content=coding_prompt)])
-    
+
     state['code_output'] = response.content
     state['current_agent'] = 'reviewer'
-    
+
     return state
 
 def reviewer_node(state: AgentState) -> AgentState:
     """Review agent node - validates implementation"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.2)
-    
+
     review_prompt = f"""
     Review this implementation:
     {state['code_output']}
-    
+
     Check for:
     1. Code quality and best practices
     2. Error handling and edge cases
     3. Performance considerations
     4. Security vulnerabilities
     5. Documentation completeness
-    
+
     Provide: APPROVED or NEEDS_REVISION with specific feedback
     """
-    
+
     response = llm.invoke([HumanMessage(content=review_prompt)])
-    
+
     state['review_status'] = 'APPROVED' if 'APPROVED' in response.content else 'NEEDS_REVISION'
     state['messages'].append(AIMessage(content=response.content))
-    
+
     return state
 
 def should_revise(state: AgentState) -> str:
@@ -198,95 +198,95 @@ class AgentState(TypedDict):
 def researcher_node(state: AgentState) -> AgentState:
     """Research agent node - gathers information"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.3)
-    
+
     research_prompt = f"""
     You are a research specialist. Based on this request:
     {state['messages'][-1].content}
-    
+
     Conduct thorough research and provide:
     1. Key concepts and technologies involved
     2. Best practices and patterns
     3. Potential challenges and solutions
     4. Relevant documentation and examples
     """
-    
+
     response = llm.invoke([HumanMessage(content=research_prompt)])
-    
+
     state['research_results'].append({
         'agent': 'researcher',
         'findings': response.content
     })
     state['current_agent'] = 'planner'
-    
+
     return state
 
 def planner_node(state: AgentState) -> AgentState:
     """Planning agent node - creates execution plan"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.2)
-    
+
     planning_prompt = f"""
     Based on research findings:
     {state['research_results'][-1]['findings']}
-    
+
     Create a detailed implementation plan:
     1. Break down into specific tasks
     2. Identify dependencies
     3. Suggest optimal execution order
     4. Define success criteria
     """
-    
+
     response = llm.invoke([HumanMessage(content=planning_prompt)])
-    
+
     state['messages'].append(AIMessage(content=response.content))
     state['current_agent'] = 'coder'
-    
+
     return state
 
 def coder_node(state: AgentState) -> AgentState:
     """Coding agent node - implements solution"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.1)
-    
+
     coding_prompt = f"""
     Implementation plan:
     {state['messages'][-1].content}
-    
+
     Write production-ready code:
     1. Follow best practices from research
     2. Include error handling
     3. Add comprehensive comments
     4. Implement all planned features
     """
-    
+
     response = llm.invoke([HumanMessage(content=coding_prompt)])
-    
+
     state['code_output'] = response.content
     state['current_agent'] = 'reviewer'
-    
+
     return state
 
 def reviewer_node(state: AgentState) -> AgentState:
     """Review agent node - validates implementation"""
     llm = ChatAnthropic(model="claude-sonnet-4-5", temperature=0.2)
-    
+
     review_prompt = f"""
     Review this implementation:
     {state['code_output']}
-    
+
     Check for:
     1. Code quality and best practices
     2. Error handling and edge cases
     3. Performance considerations
     4. Security vulnerabilities
     5. Documentation completeness
-    
+
     Provide: APPROVED or NEEDS_REVISION with specific feedback
     """
-    
+
     response = llm.invoke([HumanMessage(content=review_prompt)])
-    
+
     state['review_status'] = 'APPROVED' if 'APPROVED' in response.content else 'NEEDS_REVISION'
     state['messages'].append(AIMessage(content=response.content))
-    
+
     return state
 
 def should_revise(state: AgentState) -> str:
@@ -368,8 +368,8 @@ def test_generator(code: str) -> str:
 research_agent = Agent(
     role='Senior Research Analyst',
     goal='Conduct thorough research on technical topics and provide comprehensive insights',
-    backstory="""You are a seasoned research analyst with expertise in software 
-    architecture and emerging technologies. You excel at gathering information 
+    backstory="""You are a seasoned research analyst with expertise in software
+    architecture and emerging technologies. You excel at gathering information
     from multiple sources and synthesizing it into actionable insights.""",
     tools=[DuckDuckGoSearchRun()],
     llm=llm,
@@ -380,8 +380,8 @@ research_agent = Agent(
 architect_agent = Agent(
     role='Software Architect',
     goal='Design scalable, maintainable system architectures',
-    backstory="""You are an experienced software architect who specializes in 
-    designing distributed systems. You consider scalability, security, and 
+    backstory="""You are an experienced software architect who specializes in
+    designing distributed systems. You consider scalability, security, and
     maintainability in every design decision.""",
     llm=llm,
     verbose=True,
@@ -391,8 +391,8 @@ architect_agent = Agent(
 developer_agent = Agent(
     role='Senior Full-Stack Developer',
     goal='Implement high-quality, production-ready code',
-    backstory="""You are a senior developer with 10+ years of experience. You 
-    write clean, well-tested code following SOLID principles and best practices. 
+    backstory="""You are a senior developer with 10+ years of experience. You
+    write clean, well-tested code following SOLID principles and best practices.
     You always include error handling and comprehensive documentation.""",
     tools=[code_analyzer],
     llm=llm,
@@ -403,8 +403,8 @@ developer_agent = Agent(
 qa_agent = Agent(
     role='QA Engineer',
     goal='Ensure code quality through comprehensive testing',
-    backstory="""You are a meticulous QA engineer who believes in thorough testing. 
-    You create comprehensive test suites covering unit, integration, and edge cases. 
+    backstory="""You are a meticulous QA engineer who believes in thorough testing.
+    You create comprehensive test suites covering unit, integration, and edge cases.
     You catch bugs before they reach production.""",
     tools=[test_generator, code_analyzer],
     llm=llm,
@@ -415,8 +415,8 @@ qa_agent = Agent(
 devops_agent = Agent(
     role='DevOps Engineer',
     goal='Create robust CI/CD pipelines and deployment strategies',
-    backstory="""You are a DevOps expert focused on automation and reliability. 
-    You design CI/CD pipelines, implement monitoring, and ensure smooth deployments 
+    backstory="""You are a DevOps expert focused on automation and reliability.
+    You design CI/CD pipelines, implement monitoring, and ensure smooth deployments
     with zero downtime.""",
     llm=llm,
     verbose=True,
@@ -425,27 +425,27 @@ devops_agent = Agent(
 
 # Define sequential tasks
 research_task = Task(
-    description="""Research best practices for building a scalable microservices 
+    description="""Research best practices for building a scalable microservices
     architecture with Node.js, including:
     1. Service communication patterns
     2. Data consistency strategies
     3. Authentication and authorization
     4. Monitoring and observability
-    
+
     Provide a comprehensive research report.""",
     agent=research_agent,
     expected_output="Detailed research report with best practices and recommendations"
 )
 
 architecture_task = Task(
-    description="""Based on the research findings, design a complete microservices 
+    description="""Based on the research findings, design a complete microservices
     architecture including:
     1. Service boundaries and responsibilities
     2. Communication protocols (REST, gRPC, message queues)
     3. Data storage strategy
     4. Security architecture
     5. Scalability considerations
-    
+
     Create detailed architecture diagrams and documentation.""",
     agent=architect_agent,
     expected_output="Complete architecture design with diagrams and documentation"
@@ -457,7 +457,7 @@ implementation_task = Task(
     2. API Gateway with rate limiting
     3. Service discovery and registration
     4. Shared middleware and utilities
-    
+
     Include comprehensive error handling and logging.""",
     agent=developer_agent,
     expected_output="Production-ready code for core microservices"
@@ -469,7 +469,7 @@ testing_task = Task(
     2. Integration tests for service communication
     3. End-to-end tests for critical flows
     4. Performance and load tests
-    
+
     Ensure >80% code coverage.""",
     agent=qa_agent,
     expected_output="Complete test suite with coverage reports"
@@ -482,7 +482,7 @@ deployment_task = Task(
     3. Kubernetes deployment manifests
     4. Monitoring and alerting setup
     5. Blue-green deployment strategy
-    
+
     Include deployment documentation.""",
     agent=devops_agent,
     expected_output="Complete CI/CD pipeline with deployment documentation"
@@ -527,8 +527,8 @@ def test_generator(code: str) -> str:
 research_agent = Agent(
     role='Senior Research Analyst',
     goal='Conduct thorough research on technical topics and provide comprehensive insights',
-    backstory="""You are a seasoned research analyst with expertise in software 
-    architecture and emerging technologies. You excel at gathering information 
+    backstory="""You are a seasoned research analyst with expertise in software
+    architecture and emerging technologies. You excel at gathering information
     from multiple sources and synthesizing it into actionable insights.""",
     tools=[DuckDuckGoSearchRun()],
     llm=llm,
@@ -539,8 +539,8 @@ research_agent = Agent(
 architect_agent = Agent(
     role='Software Architect',
     goal='Design scalable, maintainable system architectures',
-    backstory="""You are an experienced software architect who specializes in 
-    designing distributed systems. You consider scalability, security, and 
+    backstory="""You are an experienced software architect who specializes in
+    designing distributed systems. You consider scalability, security, and
     maintainability in every design decision.""",
     llm=llm,
     verbose=True,
@@ -550,8 +550,8 @@ architect_agent = Agent(
 developer_agent = Agent(
     role='Senior Full-Stack Developer',
     goal='Implement high-quality, production-ready code',
-    backstory="""You are a senior developer with 10+ years of experience. You 
-    write clean, well-tested code following SOLID principles and best practices. 
+    backstory="""You are a senior developer with 10+ years of experience. You
+    write clean, well-tested code following SOLID principles and best practices.
     You always include error handling and comprehensive documentation.""",
     tools=[code_analyzer],
     llm=llm,
@@ -562,8 +562,8 @@ developer_agent = Agent(
 qa_agent = Agent(
     role='QA Engineer',
     goal='Ensure code quality through comprehensive testing',
-    backstory="""You are a meticulous QA engineer who believes in thorough testing. 
-    You create comprehensive test suites covering unit, integration, and edge cases. 
+    backstory="""You are a meticulous QA engineer who believes in thorough testing.
+    You create comprehensive test suites covering unit, integration, and edge cases.
     You catch bugs before they reach production.""",
     tools=[test_generator, code_analyzer],
     llm=llm,
@@ -574,8 +574,8 @@ qa_agent = Agent(
 devops_agent = Agent(
     role='DevOps Engineer',
     goal='Create robust CI/CD pipelines and deployment strategies',
-    backstory="""You are a DevOps expert focused on automation and reliability. 
-    You design CI/CD pipelines, implement monitoring, and ensure smooth deployments 
+    backstory="""You are a DevOps expert focused on automation and reliability.
+    You design CI/CD pipelines, implement monitoring, and ensure smooth deployments
     with zero downtime.""",
     llm=llm,
     verbose=True,
@@ -584,27 +584,27 @@ devops_agent = Agent(
 
 # Define sequential tasks
 research_task = Task(
-    description="""Research best practices for building a scalable microservices 
+    description="""Research best practices for building a scalable microservices
     architecture with Node.js, including:
     1. Service communication patterns
     2. Data consistency strategies
     3. Authentication and authorization
     4. Monitoring and observability
-    
+
     Provide a comprehensive research report.""",
     agent=research_agent,
     expected_output="Detailed research report with best practices and recommendations"
 )
 
 architecture_task = Task(
-    description="""Based on the research findings, design a complete microservices 
+    description="""Based on the research findings, design a complete microservices
     architecture including:
     1. Service boundaries and responsibilities
     2. Communication protocols (REST, gRPC, message queues)
     3. Data storage strategy
     4. Security architecture
     5. Scalability considerations
-    
+
     Create detailed architecture diagrams and documentation.""",
     agent=architect_agent,
     expected_output="Complete architecture design with diagrams and documentation"
@@ -616,7 +616,7 @@ implementation_task = Task(
     2. API Gateway with rate limiting
     3. Service discovery and registration
     4. Shared middleware and utilities
-    
+
     Include comprehensive error handling and logging.""",
     agent=developer_agent,
     expected_output="Production-ready code for core microservices"
@@ -628,7 +628,7 @@ testing_task = Task(
     2. Integration tests for service communication
     3. End-to-end tests for critical flows
     4. Performance and load tests
-    
+
     Ensure >80% code coverage.""",
     agent=qa_agent,
     expected_output="Complete test suite with coverage reports"
@@ -641,7 +641,7 @@ deployment_task = Task(
     3. Kubernetes deployment manifests
     4. Monitoring and alerting setup
     5. Blue-green deployment strategy
-    
+
     Include deployment documentation.""",
     agent=devops_agent,
     expected_output="Complete CI/CD pipeline with deployment documentation"
@@ -681,19 +681,19 @@ class HybridOrchestrator:
     def __init__(self):
         self.max_iterations = 3
         self.graph = self._build_graph()
-    
+
     def _build_graph(self) -> StateGraph:
         """Build hybrid workflow graph"""
         workflow = StateGraph(HybridState)
-        
+
         workflow.add_node('research', self.research_node)
         workflow.add_node('crew_execution', self.crew_node)
         workflow.add_node('validation', self.validation_node)
-        
+
         workflow.set_entry_point('research')
         workflow.add_edge('research', 'crew_execution')
         workflow.add_edge('crew_execution', 'validation')
-        
+
         workflow.add_conditional_edges(
             'validation',
             self.should_continue,
@@ -702,9 +702,9 @@ class HybridOrchestrator:
                 'end': END
             }
         )
-        
+
         return workflow.compile()
-    
+
     def research_node(self, state: HybridState) -> HybridState:
         """LangGraph research phase"""
         # Use LangGraph for complex research workflow
@@ -713,33 +713,33 @@ class HybridOrchestrator:
             'findings': 'Comprehensive research results...'
         }
         return state
-    
+
     def crew_node(self, state: HybridState) -> HybridState:
         """CrewAI execution phase"""
         # Create specialized crew based on research
         agents = self._create_specialized_agents(state['research_data'])
         tasks = self._create_tasks(state['research_data'])
-        
+
         crew = Crew(
             agents=agents,
             tasks=tasks,
             process=Process.sequential
         )
-        
+
         result = crew.kickoff()
         state['crew_output'] = result
         state['iterations'] += 1
-        
+
         return state
-    
+
     def validation_node(self, state: HybridState) -> HybridState:
         """Validation phase"""
         # Validate crew output
         is_valid = self._validate_output(state['crew_output'])
         state['validation_result'] = 'VALID' if is_valid else 'INVALID'
-        
+
         return state
-    
+
     def should_continue(self, state: HybridState) -> str:
         """Determine if iteration should continue"""
         if state['validation_result'] == 'VALID':
@@ -747,7 +747,7 @@ class HybridOrchestrator:
         if state['iterations'] >= self.max_iterations:
             return 'end'
         return 'crew_execution'
-    
+
     def execute(self, task: str) -> str:
         """Execute hybrid orchestration"""
         initial_state = {
@@ -757,7 +757,7 @@ class HybridOrchestrator:
             'validation_result': '',
             'iterations': 0
         }
-        
+
         result = self.graph.invoke(initial_state)
         return result['crew_output']
 
@@ -786,19 +786,19 @@ class HybridOrchestrator:
     def __init__(self):
         self.max_iterations = 3
         self.graph = self._build_graph()
-    
+
     def _build_graph(self) -> StateGraph:
         """Build hybrid workflow graph"""
         workflow = StateGraph(HybridState)
-        
+
         workflow.add_node('research', self.research_node)
         workflow.add_node('crew_execution', self.crew_node)
         workflow.add_node('validation', self.validation_node)
-        
+
         workflow.set_entry_point('research')
         workflow.add_edge('research', 'crew_execution')
         workflow.add_edge('crew_execution', 'validation')
-        
+
         workflow.add_conditional_edges(
             'validation',
             self.should_continue,
@@ -807,9 +807,9 @@ class HybridOrchestrator:
                 'end': END
             }
         )
-        
+
         return workflow.compile()
-    
+
     def research_node(self, state: HybridState) -> HybridState:
         """LangGraph research phase"""
         # Use LangGraph for complex research workflow
@@ -818,33 +818,33 @@ class HybridOrchestrator:
             'findings': 'Comprehensive research results...'
         }
         return state
-    
+
     def crew_node(self, state: HybridState) -> HybridState:
         """CrewAI execution phase"""
         # Create specialized crew based on research
         agents = self._create_specialized_agents(state['research_data'])
         tasks = self._create_tasks(state['research_data'])
-        
+
         crew = Crew(
             agents=agents,
             tasks=tasks,
             process=Process.sequential
         )
-        
+
         result = crew.kickoff()
         state['crew_output'] = result
         state['iterations'] += 1
-        
+
         return state
-    
+
     def validation_node(self, state: HybridState) -> HybridState:
         """Validation phase"""
         # Validate crew output
         is_valid = self._validate_output(state['crew_output'])
         state['validation_result'] = 'VALID' if is_valid else 'INVALID'
-        
+
         return state
-    
+
     def should_continue(self, state: HybridState) -> str:
         """Determine if iteration should continue"""
         if state['validation_result'] == 'VALID':
@@ -852,7 +852,7 @@ class HybridOrchestrator:
         if state['iterations'] >= self.max_iterations:
             return 'end'
         return 'crew_execution'
-    
+
     def execute(self, task: str) -> str:
         """Execute hybrid orchestration"""
         initial_state = {
@@ -862,7 +862,7 @@ class HybridOrchestrator:
             'validation_result': '',
             'iterations': 0
         }
-        
+
         result = self.graph.invoke(initial_state)
         return result['crew_output']
 
@@ -889,7 +889,7 @@ class AgentMemoryManager:
         self.llm = ChatAnthropic(model="claude-sonnet-4-5")
         self.agent_memories = {}
         self.shared_context = {}
-    
+
     def create_agent_memory(self, agent_id: str, memory_type: str = 'buffer'):
         """Create memory for specific agent"""
         if memory_type == 'buffer':
@@ -903,22 +903,22 @@ class AgentMemoryManager:
                 memory_key="chat_history",
                 return_messages=True
             )
-    
+
     def update_shared_context(self, key: str, value: any):
         """Update shared context accessible to all agents"""
         self.shared_context[key] = value
-    
+
     def get_agent_context(self, agent_id: str) -> Dict:
         """Get combined context for agent"""
         agent_memory = self.agent_memories.get(agent_id)
-        
+
         context = {
             'shared': self.shared_context,
             'agent_history': agent_memory.load_memory_variables({}) if agent_memory else {}
         }
-        
+
         return context
-    
+
     def save_interaction(self, agent_id: str, human_input: str, ai_output: str):
         """Save interaction to agent memory"""
         memory = self.agent_memories.get(agent_id)
@@ -960,7 +960,7 @@ class AgentMemoryManager:
         self.llm = ChatAnthropic(model="claude-sonnet-4-5")
         self.agent_memories = {}
         self.shared_context = {}
-    
+
     def create_agent_memory(self, agent_id: str, memory_type: str = 'buffer'):
         """Create memory for specific agent"""
         if memory_type == 'buffer':
@@ -974,22 +974,22 @@ class AgentMemoryManager:
                 memory_key="chat_history",
                 return_messages=True
             )
-    
+
     def update_shared_context(self, key: str, value: any):
         """Update shared context accessible to all agents"""
         self.shared_context[key] = value
-    
+
     def get_agent_context(self, agent_id: str) -> Dict:
         """Get combined context for agent"""
         agent_memory = self.agent_memories.get(agent_id)
-        
+
         context = {
             'shared': self.shared_context,
             'agent_history': agent_memory.load_memory_variables({}) if agent_memory else {}
         }
-        
+
         return context
-    
+
     def save_interaction(self, agent_id: str, human_input: str, ai_output: str):
         """Save interaction to agent memory"""
         memory = self.agent_memories.get(agent_id)

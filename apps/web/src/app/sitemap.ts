@@ -6,7 +6,11 @@ import { getTools } from "@/lib/tools";
 import { siteConfig } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [entries, jobs, tools] = await Promise.all([getDirectoryEntries(), getJobs(), getTools()]);
+  const [entries, jobs, tools] = await Promise.all([
+    getDirectoryEntries(),
+    getJobs(),
+    getTools(),
+  ]);
   const staticPaths = [
     "",
     "/browse",
@@ -21,23 +25,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/llms-full.txt",
     ...siteConfig.categoryOrder
       .filter((category) => category !== "tools")
-      .map((category) => `/${category}`)
+      .map((category) => `/${category}`),
   ];
 
   const staticItems = staticPaths.map((pathname) => ({
-    url: `${siteConfig.url}${pathname}`
+    url: `${siteConfig.url}${pathname}`,
   }));
 
-  const entryItems = entries.filter((entry) => entry.category !== "tools").map((entry) => ({
-    url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
-    lastModified:
-      entry.dateAdded && !Number.isNaN(new Date(entry.dateAdded).getTime())
-        ? new Date(entry.dateAdded)
-        : undefined
-  }));
-  const entryLlmsItems = entries.filter((entry) => entry.category !== "tools").map((entry) => ({
-    url: `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`
-  }));
+  const entryItems = entries
+    .filter((entry) => entry.category !== "tools")
+    .map((entry) => ({
+      url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+      lastModified:
+        entry.dateAdded && !Number.isNaN(new Date(entry.dateAdded).getTime())
+          ? new Date(entry.dateAdded)
+          : undefined,
+    }));
+  const entryLlmsItems = entries
+    .filter((entry) => entry.category !== "tools")
+    .map((entry) => ({
+      url: `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`,
+    }));
 
   const jobItems = jobs
     .filter((job) => !job.isPlaceholder)
@@ -46,7 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified:
         job.postedAt && !Number.isNaN(new Date(job.postedAt).getTime())
           ? new Date(job.postedAt)
-          : undefined
+          : undefined,
     }));
 
   const toolItems = tools.map((tool) => ({
@@ -54,8 +62,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified:
       tool.dateAdded && !Number.isNaN(new Date(tool.dateAdded).getTime())
         ? new Date(tool.dateAdded)
-        : undefined
+        : undefined,
   }));
 
-  return [...staticItems, ...entryItems, ...entryLlmsItems, ...jobItems, ...toolItems];
+  return [
+    ...staticItems,
+    ...entryItems,
+    ...entryLlmsItems,
+    ...jobItems,
+    ...toolItems,
+  ];
 }
