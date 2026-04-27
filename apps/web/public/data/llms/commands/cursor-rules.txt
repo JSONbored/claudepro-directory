@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://cursor.com/docs/context/rules
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/cursor-rules.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/cursor-rules
+- Source URLs: https://cursor.com/docs/context/rules, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/cursor-rules.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Generate .cursorrules files for AI-native development with project-specific patterns, coding standards, and intelligent context awareness
 ## Tags

@@ -113,17 +113,57 @@ export function buildEntryJsonLd(entry, params = {}) {
   const url = absoluteSiteUrl(siteUrl, `/${entry.category}/${entry.slug}`);
   const label =
     categorySpec.categories?.[entry.category]?.label || entry.category;
+  const codeLikeCategories = new Set([
+    "commands",
+    "hooks",
+    "mcp",
+    "statuslines",
+  ]);
+  const entryType =
+    entry.category === "guides"
+      ? "TechArticle"
+      : codeLikeCategories.has(entry.category)
+        ? "SoftwareSourceCode"
+        : "CreativeWork";
+  const sourceUrls = [
+    entry.documentationUrl,
+    entry.repoUrl,
+    entry.githubUrl,
+    entry.websiteUrl,
+  ].filter(Boolean);
+  const additionalProperty = [
+    entry.downloadSha256
+      ? {
+          "@type": "PropertyValue",
+          name: "Package SHA256",
+          value: entry.downloadSha256,
+        }
+      : null,
+    entry.platformCompatibility?.length
+      ? {
+          "@type": "PropertyValue",
+          name: "Platform compatibility",
+          value: entry.platformCompatibility
+            .map((item) => `${item.platform}: ${item.supportLevel}`)
+            .join(", "),
+        }
+      : null,
+  ].filter(Boolean);
 
   return {
     "@context": "https://schema.org",
-    "@type": entry.category === "guides" ? "TechArticle" : "CreativeWork",
+    "@type": entryType,
     "@id": `${url}#entry`,
     name: entry.title,
     headline: entry.title,
     description: entry.seoDescription || entry.description,
     url,
     datePublished: entry.dateAdded,
-    dateModified: entry.repoUpdatedAt || entry.dateAdded,
+    dateModified:
+      entry.contentUpdatedAt ||
+      entry.repoUpdatedAt ||
+      entry.verifiedAt ||
+      entry.dateAdded,
     keywords: [...(entry.keywords || []), ...(entry.tags || [])]
       .filter(Boolean)
       .join(", "),
@@ -143,6 +183,16 @@ export function buildEntryJsonLd(entry, params = {}) {
       "@id": `${siteUrl.replace(/\/$/, "")}/#website`,
     },
     sameAs: [entry.documentationUrl, entry.repoUrl].filter(Boolean),
+    isBasedOn: sourceUrls.length ? sourceUrls : undefined,
+    codeRepository:
+      entryType === "SoftwareSourceCode" ? entry.repoUrl : undefined,
+    programmingLanguage:
+      entryType === "SoftwareSourceCode" ? entry.scriptLanguage : undefined,
+    runtimePlatform:
+      entryType === "SoftwareSourceCode" ? "Claude Code" : undefined,
+    additionalProperty: additionalProperty.length
+      ? additionalProperty
+      : undefined,
   };
 }
 

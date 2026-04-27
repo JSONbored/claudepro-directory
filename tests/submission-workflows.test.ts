@@ -14,6 +14,7 @@ describe("submission automation workflows", () => {
     expect(source).toContain("Preview import output");
     expect(source).toContain("--dry-run");
     expect(source).not.toContain("peter-evans/create-pull-request");
+    expect(source).not.toContain("labels.*.name, 'submission'");
   });
 
   it("opens import PRs only after accepted/import-approved labels", () => {
@@ -42,5 +43,17 @@ describe("submission automation workflows", () => {
     expect(source).toContain(
       "Closes #${{ steps.metadata.outputs.issue_number }} after merge.",
     );
+  });
+
+  it("requires preview artifact validation before pull requests can merge", () => {
+    const source = fs.readFileSync(
+      path.join(repoRoot, ".github/workflows/content-validation.yml"),
+      "utf8",
+    );
+
+    expect(source).toContain("Require preview artifact base URL");
+    expect(source).toContain("github.event_name == 'pull_request'");
+    expect(source).toContain("DEPLOYMENT_ARTIFACT_BASE_URL must point");
+    expect(source).toContain("pnpm validate:deployment-artifacts");
   });
 });

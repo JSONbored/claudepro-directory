@@ -107,6 +107,12 @@ jobs:
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
 
+      - name: Require preview artifact base URL
+        if: ${{ github.event_name == 'pull_request' && env.DEPLOYMENT_ARTIFACT_BASE_URL == '' }}
+        run: |
+          echo "::error::DEPLOYMENT_ARTIFACT_BASE_URL must point at the preview deployment before a pull request can merge."
+          exit 1
+
       - name: Validate deployed artifact contract
         if: ${{ env.DEPLOYMENT_ARTIFACT_BASE_URL != '' }}
         run: pnpm validate:deployment-artifacts -- --base-url "$DEPLOYMENT_ARTIFACT_BASE_URL"

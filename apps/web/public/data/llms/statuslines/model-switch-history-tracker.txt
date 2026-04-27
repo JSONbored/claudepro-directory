@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/statusline
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/model-switch-history-tracker.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/model-switch-history-tracker
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/model-switch-history-tracker.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Claude Code model switch detector tracking transitions between Opus/Sonnet/Haiku with switch count, current model indicator, and cost impact visualization.
 ## Tags

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-26
 Documentation: https://platform.claude.com/docs/en/agent-sdk/modifying-system-prompts#method-1-claude-md-files-project-level-instructions
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/production-codebase-auditor.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/production-codebase-auditor
+- Source URLs: https://platform.claude.com/docs/en/agent-sdk/modifying-system-prompts#method-1-claude-md-files-project-level-instructions, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/production-codebase-auditor.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in comprehensive production codebase analysis with Zod validation enforcement, security vulnerability detection, and code consolidation strategies
 ## Tags

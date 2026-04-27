@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://playwright.dev/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/test-automation-engineer-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/test-automation-engineer-agent
+- Source URLs: https://playwright.dev/, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/test-automation-engineer-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in automated testing strategies, test frameworks, and quality assurance across unit, integration, and end-to-end testing
 ## Tags

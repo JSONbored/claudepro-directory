@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://developers.cloudflare.com/workers/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx
 Download: /downloads/skills/zero-budget-saas-launch-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/zero-budget-saas-launch-capability-pack
+- Source URLs: https://developers.cloudflare.com/workers/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zero-budget-saas-launch-capability-pack.mdx
+- Package URL: /downloads/skills/zero-budget-saas-launch-capability-pack.zip
+- Package SHA256: 77fa0891ce8a4bc6ffcc8a8ab9a2110d7a8ea5e073630f3912fefae2f4cc1e6f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert zero-budget launch capability pack for building and shipping SaaS using free-tier infrastructure and constrained execution plans.
 ## Tags
@@ -48,7 +57,9 @@ This skill enables practical bootstrap execution where money is constrained and 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Keep MVP scope to a single painful workflow.

@@ -193,6 +193,9 @@ describe("registry artifacts", () => {
       expect((entry as Record<string, unknown>).body).toBeUndefined();
       expect((entry as Record<string, unknown>).copySnippet).toBeUndefined();
     }
+    expect(
+      searchEntries.some((entry) => entry.platforms?.includes("Gemini")),
+    ).toBe(true);
   });
 
   it("writes per-entry detail, LLM, and Raycast payloads", () => {
@@ -274,14 +277,11 @@ describe("registry artifacts", () => {
           expect.objectContaining({ platform: "Claude" }),
           expect.objectContaining({ platform: "Codex" }),
           expect.objectContaining({ platform: "Windsurf" }),
+          expect.objectContaining({ platform: "Gemini" }),
         ]),
       );
       expect(entry.platformCompatibility).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({
-            platform: "Gemini",
-            supportLevel: "adapter",
-          }),
           expect.objectContaining({
             platform: "Cursor",
             supportLevel: "adapter",
@@ -305,7 +305,9 @@ describe("registry artifacts", () => {
   it("writes the generated full corpus LLM text artifact", () => {
     const llmsFullPath = path.join(dataRoot, "llms-full.txt");
     expect(fs.existsSync(llmsFullPath)).toBe(true);
-    expect(fs.readFileSync(llmsFullPath, "utf8")).toMatch(/## Entry Content/);
+    const llmsFull = fs.readFileSync(llmsFullPath, "utf8");
+    expect(llmsFull).toMatch(/## Citation Facts/);
+    expect(llmsFull).toMatch(/## Entry Content/);
     expect(contentEntries.some((entry) => getCopyText(entry).trim())).toBe(
       true,
     );

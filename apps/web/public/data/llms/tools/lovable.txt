@@ -5,6 +5,12 @@ Author: Lovable
 Date added: 2026-04-27
 Documentation: https://docs.lovable.dev
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lovable.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/lovable
+- Source URLs: https://docs.lovable.dev, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/lovable.mdx, https://lovable.dev
+- Author: Lovable
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 AI app builder for generating and iterating on web applications from natural language product requests.
 ## Tags

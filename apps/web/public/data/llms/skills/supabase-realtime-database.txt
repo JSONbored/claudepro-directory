@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://supabase.com/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx
 Download: /downloads/skills/supabase-realtime-database.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/supabase-realtime-database
+- Source URLs: https://supabase.com/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx
+- Package URL: /downloads/skills/supabase-realtime-database.zip
+- Package SHA256: e4070e1dd49d8c0871cf79e4cf9db65964522b9f8b42579f124530c5c7d858c1
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build full-stack applications with Supabase Postgres, real-time subscriptions, Edge Functions, and pgvector AI integration for 4M+ developers.
 ## Tags
@@ -32,7 +41,9 @@ Claude can build complete backend systems using Supabase, the open-source Fireba
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

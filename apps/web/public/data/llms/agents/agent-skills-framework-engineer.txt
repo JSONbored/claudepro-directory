@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/agent-skills-framework-engineer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/agent-skills-framework-engineer
+- Source URLs: https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/agent-skills-framework-engineer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Agent Skills framework specialist for creating procedural knowledge files, domain-specific expertise, and skill-based agent capabilities using Anthropic's new Skills system.
 ## Tags

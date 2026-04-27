@@ -7,6 +7,15 @@ Documentation: https://github.com/openai/codex
 Repository: https://github.com/openai/codex
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-plugin-creator-capability-pack.mdx
 Download: /downloads/skills/codex-plugin-creator-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/codex-plugin-creator-capability-pack
+- Source URLs: https://github.com/openai/codex, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-plugin-creator-capability-pack.mdx
+- Package URL: /downloads/skills/codex-plugin-creator-capability-pack.zip
+- Package SHA256: 7ea59a73540f97320dc9819720d4dc25f6d117f44096d7aa6011a4857cced8f0
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.
 ## Tags
@@ -49,7 +58,9 @@ This skill helps agents build practical plugins that stay secure and maintainabl
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Minimize plugin permissions and document each permission reason.

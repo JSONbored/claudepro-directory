@@ -6,6 +6,15 @@ Date added: 2025-10-23
 Documentation: https://kit.svelte.dev/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/svelte-sveltekit-fullstack.mdx
 Download: /downloads/skills/svelte-sveltekit-fullstack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/svelte-sveltekit-fullstack
+- Source URLs: https://kit.svelte.dev/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/svelte-sveltekit-fullstack.mdx
+- Package URL: /downloads/skills/svelte-sveltekit-fullstack.zip
+- Package SHA256: 446158b7bf996f8a2538d024e254e925b83c93d8c1ae180f1a7576ed3a654a57
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-23
+- Robots: indexable
 ## Summary
 Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025. Svelte compiles components to vanilla JavaScript at build time, resulting in zero runtime overhead and exceptional performance.
 ## Tags
@@ -26,7 +35,9 @@ Claude can build reactive web applications using Svelte's compile-time approach 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

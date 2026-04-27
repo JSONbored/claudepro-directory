@@ -7,6 +7,15 @@ Documentation: https://github.com/openclaw/openclaw
 Repository: https://github.com/openclaw/openclaw
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-agent-ops-hardening.mdx
 Download: /downloads/skills/openclaw-agent-ops-hardening.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/openclaw-agent-ops-hardening
+- Source URLs: https://github.com/openclaw/openclaw, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-agent-ops-hardening.mdx
+- Package URL: /downloads/skills/openclaw-agent-ops-hardening.zip
+- Package SHA256: a2287d07c870f3070dc22382f0e2a409b098c5115c844429796bfa4424baf21d
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Harden OpenClaw agent environments with secure defaults, policy boundaries, tool governance, and incident response playbooks.
 ## Tags
@@ -27,7 +36,9 @@ This skill provides a practical hardening framework for OpenClaw deployments. It
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Tool and connector inventory

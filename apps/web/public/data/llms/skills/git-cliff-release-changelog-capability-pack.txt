@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://git-cliff.org/docs/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/git-cliff-release-changelog-capability-pack.mdx
 Download: /downloads/skills/git-cliff-release-changelog-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/git-cliff-release-changelog-capability-pack
+- Source URLs: https://git-cliff.org/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/git-cliff-release-changelog-capability-pack.mdx
+- Package URL: /downloads/skills/git-cliff-release-changelog-capability-pack.zip
+- Package SHA256: 88297534195c8e594486b5e5c230f5c99b1053118e534e7dbf598514e79a4741
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert release-changelog capability pack for git-cliff with conventional commits, deterministic release notes, and low-maintenance versioning.
 ## Tags
@@ -48,7 +57,9 @@ This skill gives agents a deterministic release process that produces readable c
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Enforce conventional commits before changelog generation.

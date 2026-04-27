@@ -1,4 +1,4 @@
-export const LLMS_ARTIFACT_SCHEMA_VERSION = 2;
+export const LLMS_ARTIFACT_SCHEMA_VERSION = 3;
 
 function clean(value) {
   return String(value ?? "").trim();
@@ -34,6 +34,58 @@ function sectionText(entry) {
   return chunks.join("\n").trim();
 }
 
+function listValue(values) {
+  return values?.length ? values.join(", ") : "";
+}
+
+function entrySourceUrls(entry) {
+  return [
+    entry.documentationUrl,
+    entry.repoUrl,
+    entry.githubUrl,
+    entry.websiteUrl,
+  ]
+    .map(clean)
+    .filter(Boolean)
+    .filter((value, index, list) => list.indexOf(value) === index);
+}
+
+function entryLastVerified(entry) {
+  return (
+    clean(entry.verifiedAt) ||
+    clean(entry.contentUpdatedAt) ||
+    clean(entry.repoUpdatedAt) ||
+    clean(entry.dateAdded)
+  );
+}
+
+export function buildEntryCitationFacts(entry, params = {}) {
+  const siteUrl = params.siteUrl || "https://heyclau.de";
+  const permalink = `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`;
+  const facts = [
+    ["Canonical URL", permalink],
+    ["Source URLs", listValue(entrySourceUrls(entry))],
+    ["Package URL", clean(entry.downloadUrl)],
+    ["Package SHA256", clean(entry.downloadSha256)],
+    [
+      "Platform compatibility",
+      listValue(
+        entry.platformCompatibility?.map(
+          (item) => `${item.platform} (${item.supportLevel})`,
+        ),
+      ),
+    ],
+    ["Author", clean(entry.author)],
+    ["Last verified", entryLastVerified(entry)],
+    ["Robots", entry.robotsIndex === false ? "noindex" : "indexable"],
+  ];
+
+  return facts
+    .filter(([, value]) => value)
+    .map(([label, value]) => `- ${label}: ${value}`)
+    .join("\n");
+}
+
 export function renderEntryLlms(entry, params = {}) {
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const permalink = `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`;
@@ -48,6 +100,9 @@ export function renderEntryLlms(entry, params = {}) {
     entry.repoUrl ? `Repository: ${entry.repoUrl}` : "",
     entry.githubUrl ? `Directory source: ${entry.githubUrl}` : "",
     entry.downloadUrl ? `Download: ${entry.downloadUrl}` : "",
+    "",
+    "## Citation Facts",
+    buildEntryCitationFacts(entry, { siteUrl }),
     "",
     "## Summary",
     clean(entry.description),

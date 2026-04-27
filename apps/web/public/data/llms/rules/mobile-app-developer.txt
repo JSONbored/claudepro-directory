@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://developer.apple.com/documentation/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/mobile-app-developer
+- Source URLs: https://developer.apple.com/documentation/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in iOS, Android, and cross-platform mobile development with React Native, Flutter, and native frameworks
 ## Tags

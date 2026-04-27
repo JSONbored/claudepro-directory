@@ -53,6 +53,7 @@ export type ContentEntry = {
   author?: string;
   authorProfileUrl?: string;
   dateAdded?: string;
+  contentUpdatedAt?: string;
   tags: string[];
   keywords: string[];
   readingTime?: number;
@@ -348,6 +349,8 @@ export type SearchDocument = {
   installable: boolean;
   downloadTrust: DownloadTrust;
   verificationStatus: string;
+  platforms?: string[];
+  supportLevels?: string[];
   documentationUrl: string;
   repoUrl: string;
   url: string;
@@ -592,6 +595,10 @@ export function buildContentQualityReport(
   entries: Partial<ContentEntry>[],
 ): Record<string, unknown>;
 export function renderEntryLlms(
+  entry: Partial<ContentEntry>,
+  params?: Record<string, unknown>,
+): string;
+export function buildEntryCitationFacts(
   entry: Partial<ContentEntry>,
   params?: Record<string, unknown>,
 ): string;

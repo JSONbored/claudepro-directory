@@ -61,11 +61,11 @@ body:
   - type: input
     id: contact_email
     attributes:
-      label: "Contact email"
-      description: "Required."
-      placeholder: "you@example.com"
+      label: "Public contact"
+      description: "Optional public contact. Do not include private contact details."
+      placeholder: "@github-handle or email if you want it public"
     validations:
-      required: true
+      required: false
   - type: input
     id: tags
     attributes:

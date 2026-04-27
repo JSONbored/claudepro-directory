@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://docs.anthropic.com/claude/docs/prompt-engineering
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/ai-prompt-engineering-expert.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/ai-prompt-engineering-expert
+- Source URLs: https://docs.anthropic.com/claude/docs/prompt-engineering, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/ai-prompt-engineering-expert.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in AI prompt engineering for Claude Code and Claude Desktop, focusing on coding tasks, test-driven development patterns, iterative refinement, and context management for optimal AI assistance
 ## Tags

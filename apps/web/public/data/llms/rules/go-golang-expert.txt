@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://go.dev/doc/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/go-golang-expert
+- Source URLs: https://go.dev/doc/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Transform Claude into a Go language expert with deep knowledge of concurrency, performance optimization, and idiomatic Go
 ## Tags

@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx
 Download: /downloads/mcp/asana-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/asana-mcp-server
+- Source URLs: https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx
+- Package URL: /downloads/mcp/asana-mcp-server.mcpb
+- Package SHA256: 686fda20bfa3699a449ee489e34d4d57de5279ee41755d346bf90c8289e7a7a1
+- Author: Asana
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Interact with Asana workspaces to manage projects and tasks
 ## Tags

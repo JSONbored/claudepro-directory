@@ -11,6 +11,7 @@
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-11",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "husky",
       "git-hooks",
@@ -96,8 +97,8 @@
       },
       {
         "platform": "Gemini",
-        "supportLevel": "adapter",
-        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
         "verifiedAt": "2026-04-11"
       },
       {
@@ -116,7 +117,7 @@
     ],
     "downloadTrust": "first-party",
     "downloadSha256": "aef3f6a1d69042ef5f12ff5dc7958397dd7c5de9bbbcf55d4b7211f0e0eef66b",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://typicode.github.io/husky/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://commitlint.js.org/\n\n## Core Workflow\n\n1. Define minimum local gate set for the repository type.\n2. Keep hooks fast and deterministic to avoid bypass behavior.\n3. Enforce commit message standard with clear error messages.\n4. Align local checks with CI checks to prevent drift.\n5. Document safe bypass conditions for emergency workflows.\n\n## Overview\n\nThis skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.\n\n## Capability Scope\n\n- Hook design and prioritization\n- Runtime/latency optimization\n- Commit message policy enforcement\n- Contributor ergonomics and onboarding\n- Governance drift controls\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Keep pre-commit checks fast enough to avoid bypass patterns.\n- Use the same underlying scripts for local hooks and CI.\n- Document approved bypass conditions for emergency fixes only.\n- Treat commit-msg enforcement as required for changelog quality.\n\n## Troubleshooting\n\n**Issue:** Hooks are too slow and developers bypass them  \n**Fix:** keep pre-commit to staged-file checks only.\n\n**Issue:** Hook failures differ from CI failures  \n**Fix:** use shared scripts for local and CI paths.\n\n**Issue:** Commit message confusion  \n**Fix:** provide examples in failing output and contributor docs.\n\n## Output Contract\n\n1. Minimal hook policy with justifications.\n2. Exact script wiring in package manager config.\n3. Failure UX recommendations.\n4. Maintenance checklist for future contributors.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://typicode.github.io/husky/\n- https://www.conventionalcommits.org/en/v1.0.0/\n- https://commitlint.js.org/\n\n## Core Workflow\n\n1. Define minimum local gate set for the repository type.\n2. Keep hooks fast and deterministic to avoid bypass behavior.\n3. Enforce commit message standard with clear error messages.\n4. Align local checks with CI checks to prevent drift.\n5. Document safe bypass conditions for emergency workflows.\n\n## Overview\n\nThis skill focuses on practical local governance: catch avoidable issues early while preserving fast contributor loops.\n\n## Capability Scope\n\n- Hook design and prioritization\n- Runtime/latency optimization\n- Commit message policy enforcement\n- Contributor ergonomics and onboarding\n- Governance drift controls\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Keep pre-commit checks fast enough to avoid bypass patterns.\n- Use the same underlying scripts for local hooks and CI.\n- Document approved bypass conditions for emergency fixes only.\n- Treat commit-msg enforcement as required for changelog quality.\n\n## Troubleshooting\n\n**Issue:** Hooks are too slow and developers bypass them  \n**Fix:** keep pre-commit to staged-file checks only.\n\n**Issue:** Hook failures differ from CI failures  \n**Fix:** use shared scripts for local and CI paths.\n\n**Issue:** Commit message confusion  \n**Fix:** provide examples in failing output and contributor docs.\n\n## Output Contract\n\n1. Minimal hook policy with justifications.\n2. Exact script wiring in package manager config.\n3. Failure UX recommendations.\n4. Maintenance checklist for future contributors.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -151,7 +152,7 @@
       {
         "title": "Compatibility",
         "id": "compatibility",
-        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
         "codeBlocks": []
       },
       {

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { categorySpec, buildRegistryArtifactSet } from "@heyclaude/registry";
@@ -144,6 +145,24 @@ function sha256File(filePath) {
   return hash.digest("hex");
 }
 
+function gitContentUpdatedAt(filePath) {
+  try {
+    const relativePath = path.relative(repoRoot, filePath);
+    const output = execFileSync(
+      "git",
+      ["log", "-1", "--format=%cI", "--", relativePath],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      },
+    ).trim();
+    return output || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -237,6 +256,7 @@ async function main() {
         source,
         repoRoot,
         contentRoot,
+        contentUpdatedAt: gitContentUpdatedAt(filePath),
         getLocalDownloadSha256(localDownloadPath) {
           return fs.existsSync(localDownloadPath)
             ? sha256File(localDownloadPath)

@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://docs.base.org/get-started/deploy-smart-contracts
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/base-l2-smart-contract-launchpad.mdx
 Download: /downloads/skills/base-l2-smart-contract-launchpad.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/base-l2-smart-contract-launchpad
+- Source URLs: https://docs.base.org/get-started/deploy-smart-contracts, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/base-l2-smart-contract-launchpad.mdx
+- Package URL: /downloads/skills/base-l2-smart-contract-launchpad.zip
+- Package SHA256: 147aaf1222f6161a918b24193e7a74c19f07f4a8df6d4a76c668fe3695376796
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Ship smart contracts on Base with secure deployment, verification, environment management, and production-readiness checklists.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents execute Base contract launches with clear operational
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Chain-specific deployment config

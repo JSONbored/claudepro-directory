@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://docs.github.com/en/actions
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/github-actions-workflow-validator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/github-actions-workflow-validator
+- Source URLs: https://docs.github.com/en/actions, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/github-actions-workflow-validator.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Validates GitHub Actions workflow files for syntax errors and best practices.
 ## Tags

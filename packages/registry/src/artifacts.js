@@ -119,6 +119,12 @@ export function buildSearchEntries(entries) {
     ),
     downloadTrust: entry.downloadTrust ?? null,
     verificationStatus: entry.verificationStatus || "",
+    platforms: buildSkillPlatformCompatibility(entry).map(
+      (item) => item.platform,
+    ),
+    supportLevels: buildSkillPlatformCompatibility(entry).map(
+      (item) => item.supportLevel,
+    ),
     documentationUrl: entry.documentationUrl || "",
     repoUrl: entry.repoUrl || "",
     url: `${SITE_URL}/${entry.category}/${entry.slug}`,
@@ -161,8 +167,9 @@ export function buildSkillPlatformCompatibility(entry) {
     },
     {
       platform: "Gemini",
-      supportLevel: "adapter",
-      installPath: ".gemini/commands/<skill-name>.toml or GEMINI.md",
+      supportLevel: "native-skill",
+      installPath:
+        ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
       verifiedAt,
     },
     {

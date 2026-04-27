@@ -165,6 +165,35 @@ export const getRegistryChangelog = cache(async () => {
   }>("registry-changelog.json");
 });
 
+export const getContentQualityReport = cache(async () => {
+  return loadJsonDataFile<{
+    schemaVersion: number;
+    kind: "content-quality-report";
+    generatedAt: string;
+    count: number;
+    summary: {
+      averageScore: number;
+      noExternalSourceCount: number;
+      firstPartyEditorialCount: number;
+      unprovenancedSourceCount: number;
+      missingSeoCount: number;
+      duplicateBodyGroupCount: number;
+    };
+    categoryBreakdown: Record<
+      string,
+      { count: number; averageScore: number; warningCount: number }
+    >;
+    entries: Array<{
+      key: string;
+      category: string;
+      slug: string;
+      title: string;
+      scores: { total: number };
+      warnings: string[];
+    }>;
+  }>("content-quality-report.json");
+});
+
 export const getSearchIndex = cache(async () => {
   return loadJsonDataFile<RegistryEnvelope<SearchDocument>>(
     "search-index.json",

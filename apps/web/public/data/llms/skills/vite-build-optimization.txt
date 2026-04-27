@@ -6,6 +6,15 @@ Date added: 2025-10-23
 Documentation: https://vitejs.dev/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/vite-build-optimization.mdx
 Download: /downloads/skills/vite-build-optimization.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/vite-build-optimization
+- Source URLs: https://vitejs.dev/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/vite-build-optimization.mdx
+- Package URL: /downloads/skills/vite-build-optimization.zip
+- Package SHA256: 3bc2f1a78615abff0539bd4f50e36337af9c433c6b145a16b2720fa8f00c26b1
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-23
+- Robots: indexable
 ## Summary
 Optimize frontend build performance with Vite's lightning-fast HMR, code splitting, and tree-shaking. Modern build tooling that has replaced Webpack as the developer favorite.
 ## Tags
@@ -26,7 +35,9 @@ Claude can optimize your Vite build configuration for production-ready performan
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

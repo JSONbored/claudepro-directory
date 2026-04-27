@@ -65,7 +65,9 @@ describe("SEO JSON-LD policy", () => {
     const entryJsonLd = buildEntryJsonLd(entry, {
       siteUrl: "https://heyclau.de",
     });
-    expect(["CreativeWork", "TechArticle"]).toContain(entryJsonLd["@type"]);
+    expect(["CreativeWork", "SoftwareSourceCode", "TechArticle"]).toContain(
+      entryJsonLd["@type"],
+    );
     expect(entryJsonLd.url).toBe(
       `https://heyclau.de/${entry.category}/${entry.slug}`,
     );
@@ -73,6 +75,8 @@ describe("SEO JSON-LD policy", () => {
       (entryJsonLd as Record<string, unknown>).aggregateRating,
     ).toBeUndefined();
     expect((entryJsonLd as Record<string, unknown>).review).toBeUndefined();
+    expect(entryJsonLd.dateModified).toBeTruthy();
+    expect((entryJsonLd as Record<string, unknown>).isBasedOn).toBeTruthy();
 
     const snapshot = buildEntryJsonLdSnapshot(entry, {
       siteUrl: "https://heyclau.de",

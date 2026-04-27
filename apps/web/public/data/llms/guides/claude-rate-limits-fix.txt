@@ -4,6 +4,12 @@ Category: guides
 Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-rate-limits-fix.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/claude-rate-limits-fix
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-rate-limits-fix.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Fix Claude 429 errors and usage limits with proven solutions reducing token consumption by 70%. Master rate limit optimization for 18.3M affected users.
 ## Tags

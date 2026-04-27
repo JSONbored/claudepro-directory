@@ -35,6 +35,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://cursor.com/docs/context/rules",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/cursor-rules"
@@ -70,6 +72,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/debug",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/debug"
@@ -105,6 +109,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/docs"
@@ -140,6 +146,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/explain",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/explain"
@@ -175,6 +183,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/optimize",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/optimize"
@@ -210,6 +220,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/refactor",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/refactor"
@@ -245,6 +257,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/refactor",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/refactor-code"
@@ -280,6 +294,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/review",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/review"
@@ -314,6 +330,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/security",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/security"
@@ -354,6 +372,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/security-audit",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/security-audit"
@@ -389,6 +409,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/test",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/test-advanced"
@@ -429,6 +451,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://owasp.org/www-project-top-ten/",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/zod-audit"
@@ -464,6 +488,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/accessibility-checker"
@@ -500,6 +526,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.w3.org/WAI/WCAG21/quickref/",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/accessibility-first-statusline"
@@ -535,6 +563,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://openai.com/index/new-tools-and-features-in-the-responses-api/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/agent-evals-regression-gate"
@@ -570,6 +614,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/agent-operator-growth-master-pack"
@@ -605,6 +651,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.anthropic.com/engineering/building-agents-with-the-claude-agent-sdk",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/agent-skills-framework-engineer"
@@ -641,6 +689,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/skills",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/skills-installer"
@@ -676,6 +726,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://opentelemetry.io/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/ai-agent-observability-incident-response"
@@ -711,6 +777,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://www.ycombinator.com/library",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/ai-business-idea-validation-capability-pack"
@@ -746,6 +828,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/ai-code-review-security-agent"
@@ -781,6 +865,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/ai-devops-automation-engineer-agent"
@@ -818,6 +904,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://epoch.ai/data-insights/context-windows",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/ai-model-performance-dashboard"
@@ -853,6 +941,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.anthropic.com/claude/docs/prompt-engineering",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/ai-prompt-engineering-expert"
@@ -888,6 +978,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developers.google.com/search/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy"
@@ -916,6 +1022,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://aider.chat/docs",
       "repoUrl": "https://github.com/Aider-AI/aider",
       "url": "https://heyclau.de/tools/aider"
@@ -951,6 +1059,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/domdomegg/airtable-mcp-server",
       "repoUrl": "https://github.com/domdomegg/airtable-mcp-server",
       "url": "https://heyclau.de/mcp/airtable-mcp-server"
@@ -987,6 +1097,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/api-builder-agent"
@@ -1023,6 +1135,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://swagger.io/specification/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/api-design-expert"
@@ -1059,6 +1173,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/api-development-starter-kit"
@@ -1094,6 +1210,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://swagger.io/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/api-endpoint-documentation-generator"
@@ -1131,6 +1249,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://swagger.io/specification/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/api-first-development-architect"
@@ -1166,6 +1286,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/api-latency-breakdown"
@@ -1194,6 +1316,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.apify.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/apify"
@@ -1222,6 +1346,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.arcade.dev",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/arcade-ai"
@@ -1250,6 +1376,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://arize.com/docs/phoenix",
       "repoUrl": "https://github.com/Arize-ai/phoenix",
       "url": "https://heyclau.de/tools/arize-phoenix"
@@ -1285,6 +1413,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/asana-mcp-server"
@@ -1319,6 +1449,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openai/whisper",
       "repoUrl": "https://github.com/openai/whisper",
       "url": "https://heyclau.de/skills/audio-transcription-summarization"
@@ -1354,6 +1500,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://prettier.io/docs/en/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/auto-code-formatter-hook"
@@ -1388,6 +1536,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/auto-save-backup"
@@ -1423,6 +1573,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/autogen-conversation-agent-builder"
@@ -1457,6 +1609,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://microsoft.github.io/autogen/",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/autogen-workflow"
@@ -1492,6 +1646,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.aws.amazon.com/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/aws-cloud-architect"
@@ -1527,6 +1683,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://aws.amazon.com/cloudformation/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/aws-cloudformation-validator"
@@ -1563,6 +1721,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/aws-cloud-infrastructure-bundle"
@@ -1598,6 +1758,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/awslabs/mcp",
       "repoUrl": "https://github.com/awslabs/mcp",
       "url": "https://heyclau.de/mcp/aws-services-mcp-server"
@@ -1633,6 +1795,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/backend-architect-agent"
@@ -1669,6 +1833,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/backend-development-suite"
@@ -1704,6 +1870,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.base.org/get-started/deploy-smart-contracts",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/base-l2-smart-contract-launchpad"
@@ -1741,6 +1923,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://biomejs.dev/linter/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/biome-strict-linting-rules"
@@ -1777,6 +1961,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/block-timer-tracker"
@@ -1805,6 +1991,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://support.bolt.new",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/bolt-new"
@@ -1840,6 +2028,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/box-mcp-server"
@@ -1868,6 +2058,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.braintrust.dev/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/braintrust"
@@ -1903,6 +2095,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://playwright.dev/docs/best-practices",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/browser-agent-workflow-automation"
@@ -1931,6 +2139,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.browser-use.com",
       "repoUrl": "https://github.com/browser-use/browser-use",
       "url": "https://heyclau.de/tools/browser-use"
@@ -1959,6 +2169,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.browserbase.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/browserbase"
@@ -1995,6 +2207,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/build-mcp-server"
@@ -2030,6 +2244,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://bun.sh/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/bun-runtime-modern-javascript"
@@ -2065,6 +2295,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/burn-rate-monitor"
@@ -2100,6 +2332,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/cache-efficiency-monitor"
@@ -2135,6 +2369,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/canva-mcp-server"
@@ -2171,6 +2407,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/catppuccin/catppuccin",
       "repoUrl": "https://github.com/catppuccin/catppuccin",
       "url": "https://heyclau.de/statuslines/catppuccin-mocha-theme"
@@ -2205,6 +2443,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/chatgpt-migration-guide"
@@ -2241,6 +2481,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/checkpointing",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/checkpoint-manager"
@@ -2275,6 +2517,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-4-extended-thinking-tutorial"
@@ -2308,6 +2552,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-agent-development-framework"
@@ -2343,6 +2589,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/healthcare-hipaa-guide"
@@ -2368,6 +2616,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.anthropic.com/en/docs/claude-code/overview",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/claude-code"
@@ -2406,6 +2656,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.docker.com/reference/cli/docker/container/stats/",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/docker-health-statusline"
@@ -2440,6 +2692,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/multi-directory-setup"
@@ -2474,6 +2728,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-vs-cursor-codeium"
@@ -2508,6 +2764,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/wsl-setup-guide"
@@ -2542,6 +2800,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/desktop-mcp-setup"
@@ -2576,6 +2836,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/financial-services-guide"
@@ -2612,6 +2874,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.anthropic.com/en/docs/about-claude/models",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/claude-haiku-45-speed-optimizer-agent"
@@ -2647,6 +2911,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-mcp-server-setup-guide"
@@ -2683,6 +2949,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://modelcontextprotocol.io/introduction",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/claude-mcp-skills-integration-agent"
@@ -2717,6 +2985,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/business-process-automation"
@@ -2751,6 +3021,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-rate-limits-fix"
@@ -2785,6 +3057,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-vs-codewhisperer-gemini"
@@ -2819,6 +3093,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/claude-vs-copilot-python"
@@ -2855,6 +3131,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/claude-md",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/claudemd-builder"
@@ -2891,6 +3169,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/custom-instructions",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/claude-md-knowledge-manager-agent"
@@ -2925,6 +3205,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://matplotlib.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/cli-data-viz-quickstart"
@@ -2960,6 +3256,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/hauptsacheNet/clickup-mcp",
       "repoUrl": "https://github.com/hauptsacheNet/clickup-mcp",
       "url": "https://heyclau.de/mcp/clickup-mcp-server"
@@ -2988,6 +3286,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.cline.bot",
       "repoUrl": "https://github.com/cline/cline",
       "url": "https://heyclau.de/tools/cline"
@@ -3023,6 +3323,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/cloud-backup-on-session-stop"
@@ -3059,6 +3361,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/cloud-infrastructure-architect-agent"
@@ -3087,6 +3391,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.cloudflare.com/agents/",
       "repoUrl": "https://github.com/cloudflare/agents",
       "url": "https://heyclau.de/tools/cloudflare-agents-sdk"
@@ -3122,6 +3428,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/cloudflare-mcp-server"
@@ -3157,6 +3465,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developers.cloudflare.com/workers-ai/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/cloudflare-workers-ai-edge"
@@ -3192,6 +3516,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developers.cloudflare.com/workers/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack"
@@ -3227,6 +3567,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/cloudinary-mcp-server"
@@ -3262,6 +3604,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/code-complexity-alert-monitor"
@@ -3297,6 +3641,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/code-quality-toolkit"
@@ -3332,6 +3678,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/code-review/about-pull-request-reviews",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/coderabbit-lite-pr-review-capability-pack"
@@ -3366,6 +3728,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/rules/code-review",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/code-review-expert"
@@ -3401,6 +3765,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://google.github.io/eng-practices/review/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/code-reviewer-agent"
@@ -3436,6 +3802,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://jestjs.io/docs/getting-started",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/code-test-runner-hook"
@@ -3474,6 +3842,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://refactoring.guru/refactoring/catalog",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/codebase-migration-refactoring-agent"
@@ -3502,6 +3872,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.coderabbit.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/coderabbit"
@@ -3537,6 +3909,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openai/codex",
       "repoUrl": "https://github.com/openai/codex",
       "url": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack"
@@ -3572,6 +3960,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openai/codex",
       "repoUrl": "https://github.com/openai/codex",
       "url": "https://heyclau.de/skills/codex-plugin-creator-capability-pack"
@@ -3606,6 +4010,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/migration-workflow-guide"
@@ -3633,6 +4039,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.composio.dev",
       "repoUrl": "https://github.com/ComposioHQ/composio",
       "url": "https://heyclau.de/tools/composio"
@@ -3669,6 +4077,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/content-creation-workflow"
@@ -3705,6 +4115,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/analysis",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/context-analyzer"
@@ -3741,6 +4153,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://epoch.ai/data-insights/context-windows",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/context-window-optimizer-agent"
@@ -3769,6 +4183,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.continue.dev",
       "repoUrl": "https://github.com/continuedev/continue",
       "url": "https://heyclau.de/tools/continue"
@@ -3806,6 +4222,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://api.contrastcyber.com",
       "repoUrl": "https://github.com/UPinar/contrastapi",
       "url": "https://heyclau.de/mcp/contrastapi-mcp-server"
@@ -3834,6 +4252,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.crewai.com",
       "repoUrl": "https://github.com/crewAIInc/crewAI",
       "url": "https://heyclau.de/tools/crewai"
@@ -3869,6 +4289,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/css-unused-selector-detector"
@@ -3904,6 +4326,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://pandas.pydata.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/csv-excel-data-wrangler"
@@ -3932,6 +4370,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.cursor.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/cursor"
@@ -3967,6 +4407,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://cursor.sh/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup"
@@ -4002,6 +4458,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/daily-usage-percentage-tracker"
@@ -4037,6 +4495,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/daloopa-mcp-server"
@@ -4073,6 +4533,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/data-engineering-suite"
@@ -4109,6 +4571,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/data-pipeline-engineering-agent"
@@ -4144,6 +4608,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/database-connection-cleanup"
@@ -4181,6 +4647,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.postgresql.org/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/database-expert"
@@ -4216,6 +4684,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://knexjs.org/guide/migrations.html",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/database-migration-runner"
@@ -4251,6 +4721,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.postgresql.org/docs/current/runtime-config-logging.html",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/database-query-performance-logger"
@@ -4286,6 +4758,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.postgresql.org/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/database-specialist-agent"
@@ -4321,6 +4795,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/nadeesha/ts-prune",
       "repoUrl": "https://github.com/nadeesha/ts-prune",
       "url": "https://heyclau.de/hooks/dead-code-eliminator"
@@ -4356,6 +4832,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/debugging-troubleshooting-system"
@@ -4391,6 +4869,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/debugging-assistant-agent"
@@ -4426,6 +4906,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/dependency-security-audit-on-stop"
@@ -4461,6 +4943,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/dependency-security-scanner"
@@ -4496,6 +4980,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.npmjs.com/cli/v8/commands/npm-audit",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/dependency-update-checker"
@@ -4524,6 +5010,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.devin.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/devin"
@@ -4560,6 +5048,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://kubernetes.io/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/devops-sre-expert"
@@ -4595,6 +5085,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://discord.com/developers/docs/resources/webhook",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/discord-activity-notifier"
@@ -4630,6 +5122,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/saseq/discord-mcp",
       "repoUrl": "https://github.com/saseq/discord-mcp",
       "url": "https://heyclau.de/mcp/discord-mcp-server"
@@ -4665,6 +5159,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/documentation-auto-generator-on-stop"
@@ -4700,6 +5196,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.docker.com/compose/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/docker-compose-production-blueprints"
@@ -4734,6 +5246,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.docker.com/compose/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/docker-container-auto-rebuild"
@@ -4769,6 +5283,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://aquasecurity.github.io/trivy/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/docker-image-security-scanner"
@@ -4804,6 +5320,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.docker.com/engine/api/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/docker-mcp-server"
@@ -4839,6 +5357,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://jsdoc.app/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/documentation-coverage-checker"
@@ -4874,6 +5394,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://jsdoc.app/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/documentation-generator"
@@ -4908,6 +5430,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docxtpl.readthedocs.io/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/docx-report-generator"
@@ -4943,6 +5481,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/domain-specialist-ai-agents"
@@ -4978,6 +5518,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/environment-cleanup-handler"
@@ -5013,6 +5555,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://12factor.net/config",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/environment-variable-validator"
@@ -5048,6 +5592,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/error-rate-monitor"
@@ -5083,6 +5629,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.base.org/get-started/deploy-smart-contracts",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/ethereum-base-smart-contract-security-capability-pack"
@@ -5118,6 +5680,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://ethereum.org/developers/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/ethereum-solidity-security-foundry"
@@ -5146,6 +5724,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.exa.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/exa"
@@ -5181,6 +5761,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/extended-thinking-orchestrator"
@@ -5216,6 +5798,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://fastapi.tiangolo.com/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/fastapi-python-backend"
@@ -5251,6 +5849,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/figma-mcp-server"
@@ -5286,6 +5886,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/file-size-warning-monitor"
@@ -5321,6 +5923,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://modelcontextprotocol.io/examples",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/filesystem-mcp-server"
@@ -5356,6 +5960,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/final-bundle-size-reporter"
@@ -5384,6 +5990,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.firecrawl.dev",
       "repoUrl": "https://github.com/mendableai/firecrawl",
       "url": "https://heyclau.de/tools/firecrawl"
@@ -5419,6 +6027,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/fireflies-mcp-server"
@@ -5454,6 +6064,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/five-hour-window-tracker"
@@ -5490,6 +6102,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/fix-environment-variables"
@@ -5524,6 +6138,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/fix-installation-errors"
@@ -5560,6 +6176,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/fix-memory-leak-performance"
@@ -5594,6 +6212,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/guides/fix-mcp-connection-errors"
@@ -5629,6 +6249,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://react.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/frontend-specialist-agent"
@@ -5665,6 +6287,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/full-stack-ai-development-agent"
@@ -5693,6 +6317,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/NVIDIA/garak",
       "repoUrl": "https://github.com/NVIDIA/garak",
       "url": "https://heyclau.de/tools/garak"
@@ -5728,6 +6354,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.ai/commands/test-gen",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/generate-tests"
@@ -5756,6 +6384,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.giskard.ai",
       "repoUrl": "https://github.com/Giskard-AI/giskard",
       "url": "https://heyclau.de/tools/giskard"
@@ -5791,6 +6421,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/git-auto-commit-on-stop"
@@ -5825,6 +6457,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/git-branch-protection"
@@ -5860,6 +6494,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://modelcontextprotocol.io/examples",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/git-mcp-server"
@@ -5895,6 +6531,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://pre-commit.com/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/git-pre-commit-validator"
@@ -5928,6 +6566,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.conventionalcommits.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/git-smart-commit"
@@ -5964,6 +6604,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://git-scm.com/docs/git-status",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/git-status-statusline"
@@ -5999,6 +6641,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://git-cliff.org/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/git-cliff-release-changelog-capability-pack"
@@ -6034,6 +6692,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.github.com/en/actions",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/github-actions-ai-cicd"
@@ -6069,6 +6743,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.github.com/actions",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack"
@@ -6104,6 +6794,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.github.com/en/actions",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/github-actions-workflow-validator"
@@ -6131,6 +6823,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.github.com/en/copilot",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/github-copilot"
@@ -6166,6 +6860,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/github-copilot-interop-bridge"
@@ -6201,6 +6897,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/github-mcp-server"
@@ -6236,6 +6934,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://go.dev/doc/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/go-golang-expert"
@@ -6273,6 +6973,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://go.dev/doc/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/golang-expert"
@@ -6308,6 +7010,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/go-module-tidy"
@@ -6343,6 +7047,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://ai.google.dev/gemini-api/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/google-workspace-gemini-automation"
@@ -6370,6 +7090,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://graphite.dev",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/graphite-diamond"
@@ -6405,6 +7127,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.apollographql.com/docs/federation/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/graphql-federation-specialist"
@@ -6440,6 +7164,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/graphql-schema-validator"
@@ -6468,6 +7194,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.helicone.ai",
       "repoUrl": "https://github.com/Helicone/helicone",
       "url": "https://heyclau.de/tools/helicone"
@@ -6507,6 +7235,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://heyclau.de/mcp/heyclaude-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/heyclaude-mcp"
@@ -6542,6 +7272,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://heyclau.de/submit",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/heyclaude-skill-submission-factory"
@@ -6578,6 +7324,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/hooks",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/hooks-generator"
@@ -6613,6 +7361,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.hubspot.com/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/hubspot-mcp-server"
@@ -6648,6 +7398,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://huggingface.co/settings/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/hugging-face-mcp-server"
@@ -6683,6 +7435,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://typicode.github.io/husky/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/husky-commit-governance-capability-pack"
@@ -6711,6 +7479,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.hyperbrowser.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/hyperbrowser"
@@ -6746,6 +7516,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/i18n-translation-validator"
@@ -6781,6 +7553,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://tesseract-ocr.github.io/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/image-ocr-table-extraction"
@@ -6816,6 +7604,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://www.indexnow.org/documentation",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/indexnow-search-indexing-accelerator"
@@ -6851,6 +7655,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/intercom-mcp-server"
@@ -6886,6 +7692,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://invideo.io/ai/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/invideo-mcp-server"
@@ -6921,6 +7729,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/jam-mcp-server"
@@ -6956,6 +7766,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/jest-snapshot-auto-updater"
@@ -6991,6 +7803,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/jira-mcp-server"
@@ -7026,6 +7840,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://ajv.js.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/json-schema-validation-transformation"
@@ -7061,6 +7891,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/json-schema-validator"
@@ -7096,6 +7928,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://kubernetes.io/docs/concepts/security/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/kubernetes-devsecops-engineer"
@@ -7131,6 +7965,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/kubernetes-manifest-validator"
@@ -7166,6 +8002,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
       "repoUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
       "url": "https://heyclau.de/mcp/kubernetes-mcp-server"
@@ -7194,6 +8032,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.lakera.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/lakera-guard"
@@ -7222,6 +8062,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://langfuse.com/docs",
       "repoUrl": "https://github.com/langfuse/langfuse",
       "url": "https://heyclau.de/tools/langfuse"
@@ -7250,6 +8092,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://langchain-ai.github.io/langgraph/",
       "repoUrl": "https://github.com/langchain-ai/langgraph",
       "url": "https://heyclau.de/tools/langgraph"
@@ -7278,6 +8122,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.smith.langchain.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/langsmith"
@@ -7313,6 +8159,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/life-sciences-research-specialist"
@@ -7348,6 +8196,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://linear.app/docs/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/linear-mcp-server"
@@ -7383,6 +8233,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/lines-per-minute-tracker"
@@ -7417,6 +8269,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/BurntSushi/ripgrep",
       "repoUrl": "https://github.com/BurntSushi/ripgrep",
       "url": "https://heyclau.de/skills/log-parsing-incident-timeline"
@@ -7445,6 +8313,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.lovable.dev",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/lovable"
@@ -7473,6 +8343,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.make.com/en/help",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/make"
@@ -7507,6 +8379,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/remarkjs/remark",
       "repoUrl": "https://github.com/remarkjs/remark",
       "url": "https://heyclau.de/skills/markdown-knowledge-base-composer"
@@ -7542,6 +8430,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/markdown-link-checker"
@@ -7570,6 +8460,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://mastra.ai/docs",
       "repoUrl": "https://github.com/mastra-ai/mastra",
       "url": "https://heyclau.de/tools/mastra"
@@ -7605,6 +8497,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18/basic/security_best_practices",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/mcp-server-authoring-security-capability-pack"
@@ -7640,6 +8548,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/mcp-server-security-hardening"
@@ -7675,6 +8599,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/mcp-setup"
@@ -7710,6 +8636,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/mcp-server-status-monitor"
@@ -7745,6 +8673,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/mcp-tool-contract-testing"
@@ -7780,6 +8724,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/memory-usage-monitor"
@@ -7808,6 +8754,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://microsoft.github.io/autogen/",
       "repoUrl": "https://github.com/microsoft/autogen",
       "url": "https://heyclau.de/tools/microsoft-autogen"
@@ -7842,6 +8790,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/powerline/powerline",
       "repoUrl": "https://github.com/powerline/powerline",
       "url": "https://heyclau.de/statuslines/minimal-powerline"
@@ -7876,6 +8826,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://mintlify.com/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/mintlify-documentation-automation"
@@ -7911,6 +8877,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://mintlify.com/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/mintlify-docs"
@@ -7948,6 +8916,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developer.apple.com/documentation/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/mobile-app-developer"
@@ -7985,6 +8955,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developer.apple.com/documentation/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/mobile-app-development-expert"
@@ -8020,6 +8992,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://platform.openai.com/docs/guides/latency-optimization",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/model-routing-cost-latency-optimizer"
@@ -8055,6 +9043,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/model-switch-history-tracker"
@@ -8090,6 +9080,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/monday-mcp-server"
@@ -8126,6 +9118,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://turbo.build/repo/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/monorepo-workspace-manager"
@@ -8161,6 +9155,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/multi-agent-orchestration-specialist"
@@ -8197,6 +9193,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/multi-line-statusline"
@@ -8232,6 +9230,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.anthropic.com/claude/docs/models-overview",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/multi-provider-token-counter"
@@ -8267,6 +9267,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/multi-session-overlap-indicator"
@@ -8295,6 +9297,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.n8n.io",
       "repoUrl": "https://github.com/n8n-io/n8n",
       "url": "https://heyclau.de/tools/n8n"
@@ -8330,6 +9334,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.n8n.io/advanced-ai/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect"
@@ -8365,6 +9385,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.n8n.io/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack"
@@ -8400,6 +9436,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.n8n.io/hosting/securing/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/n8n-production-security-capability-pack"
@@ -8435,6 +9487,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/netlify-mcp-server"
@@ -8470,6 +9524,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://nextjs.org/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/nextjs-15-performance-architect"
@@ -8505,6 +9561,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/nextjs-route-analyzer"
@@ -8540,6 +9598,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.notion.com/docs/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/notion-mcp-server"
@@ -8576,6 +9636,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/oh-my-zsh-robbyrussell"
@@ -8611,6 +9673,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openclaw/openclaw",
       "repoUrl": "https://github.com/openclaw/openclaw",
       "url": "https://heyclau.de/skills/openclaw-agent-ops-hardening"
@@ -8646,6 +9724,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openclaw/openclaw",
       "repoUrl": "https://github.com/openclaw/openclaw",
       "url": "https://heyclau.de/skills/openclaw-operator-capability-pack"
@@ -8681,6 +9775,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/openclaw/openclaw",
       "repoUrl": "https://github.com/openclaw/openclaw",
       "url": "https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack"
@@ -8709,6 +9819,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://opencode.ai",
       "repoUrl": "https://github.com/sst/opencode",
       "url": "https://heyclau.de/tools/opencode"
@@ -8744,6 +9856,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://opennext.js.org/cloudflare/get-started",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/opennext-cloudflare-capability-pack"
@@ -8779,6 +9907,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/package-vulnerability-scanner"
@@ -8814,6 +9944,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://web.dev/articles/vitals",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/pagespeed-insights-optimizer"
@@ -8849,6 +9995,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/parallel-subagent-distributor"
@@ -8884,6 +10032,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.paypal.ai/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/paypal-mcp-server"
@@ -8919,6 +10069,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/performance-benchmark-report"
@@ -8954,6 +10106,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/performance-impact-monitor"
@@ -8989,6 +10143,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://web.dev/vitals/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/performance-monitor"
@@ -9024,6 +10180,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://web.dev/performance/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/performance-optimizer-agent"
@@ -9052,6 +10210,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://pipedream.com/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/pipedream"
@@ -9087,6 +10247,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/plaid-mcp-server"
@@ -9123,6 +10285,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/extended-thinking",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/plan-mode"
@@ -9157,6 +10321,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://playwright.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/playwright-e2e-testing"
@@ -9192,6 +10372,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://playwright.dev/docs/getting-started-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/playwright-mcp-browser-automation-engineer"
@@ -9227,6 +10423,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://playwright.dev",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/playwright-test-runner"
@@ -9262,6 +10460,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/plugin-ecosystem-architect"
@@ -9297,6 +10497,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://modelcontextprotocol.io/examples",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/postgresql-mcp-server"
@@ -9332,6 +10534,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://www.postgresql.org/docs/current/performance-tips.html",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/postgresql-query-optimization"
@@ -9367,6 +10585,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.prisma.io/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/prisma-schema-sync"
@@ -9402,6 +10622,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/product-management-ai-agent"
@@ -9441,6 +10663,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://platform.claude.com/docs/en/agent-sdk/modifying-system-prompts#method-1-claude-md-files-project-level-instructions",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/production-codebase-auditor"
@@ -9477,6 +10701,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/production-reliability-engineer"
@@ -9513,6 +10739,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/production-readiness-toolkit"
@@ -9548,6 +10776,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/collections/developer-productivity-booster"
@@ -9583,6 +10813,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/prompt-injection-defense-guardrails"
@@ -9618,6 +10864,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/prompt-optimization-specialist"
@@ -9655,6 +10903,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset#readme",
       "repoUrl": "https://github.com/MohamedAbdallah-14/prompt-to-asset",
       "url": "https://heyclau.de/mcp/prompt-to-asset"
@@ -9682,6 +10932,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.promptfoo.dev/docs",
       "repoUrl": "https://github.com/promptfoo/promptfoo",
       "url": "https://heyclau.de/tools/promptfoo"
@@ -9710,6 +10962,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.protectai.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/protect-ai"
@@ -9745,6 +10999,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/proxmox-ve-api-capability-pack"
@@ -9780,6 +11050,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/proxmox-ve-api-orchestrator"
@@ -9816,6 +11102,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://pandas.pydata.org/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/python-data-science"
@@ -9852,6 +11140,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://pandas.pydata.org/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/python-data-science-expert"
@@ -9887,6 +11177,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/python-import-optimizer"
@@ -9921,6 +11213,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/python-linter-integration"
@@ -9957,6 +11251,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://rich.readthedocs.io/",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/python-rich-statusline"
@@ -9985,6 +11281,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developers.raycast.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/raycast"
@@ -10020,6 +11318,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developers.raycast.com/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack"
@@ -10055,6 +11369,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://react.dev/reference/react",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/react-19-concurrent-features-specialist"
@@ -10090,6 +11406,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://nextjs.org/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/react-expert"
@@ -10125,6 +11443,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://nextjs.org/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/react-next-js-expert"
@@ -10160,6 +11480,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://react.dev/reference/rsc/server-components",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/react-server-components-expert"
@@ -10195,6 +11517,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/react-component-test-generator"
@@ -10230,6 +11554,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/real-time-activity-tracker"
@@ -10265,6 +11591,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/real-time-cost-tracker"
@@ -10300,6 +11628,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
       "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
       "url": "https://heyclau.de/mcp/reddit-mcp-buddy"
@@ -10335,6 +11665,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/redis-cache-invalidator"
@@ -10370,6 +11702,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/redis/mcp-redis",
       "repoUrl": "https://github.com/redis/mcp-redis",
       "url": "https://heyclau.de/mcp/redis-mcp-server"
@@ -10398,6 +11732,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.replit.com/replitai/agent",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/replit-agent"
@@ -10433,6 +11769,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/rest-api-client-harness"
@@ -10461,6 +11813,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.roocode.com",
       "repoUrl": "https://github.com/RooCodeInc/Roo-Code",
       "url": "https://heyclau.de/tools/roo-code"
@@ -10496,6 +11850,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/rust-cargo-check"
@@ -10531,6 +11887,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://stripe.com/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/saas-pricing-experimentation-engine"
@@ -10566,6 +11938,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/scss-auto-compiler"
@@ -10601,6 +11975,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://owasp.org/www-project-top-ten/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/security-auditor"
@@ -10636,6 +12012,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://owasp.org/www-project-top-ten/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/security-auditor-penetration-tester"
@@ -10671,6 +12049,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://owasp.org/www-project-top-ten/",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/security-scanner-hook"
@@ -10706,6 +12086,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://owasp.org/www-project-top-ten/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/security-first-react-components"
@@ -10742,6 +12124,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/semantic-kernel-enterprise-agent"
@@ -10777,6 +12161,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/sensitive-data-alert-scanner"
@@ -10812,6 +12198,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/sentry-mcp-server"
@@ -10847,6 +12235,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/session-health-score"
@@ -10882,6 +12272,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/session-metrics-collector"
@@ -10918,6 +12310,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/session-timer-statusline"
@@ -10954,6 +12348,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/simple-text-statusline"
@@ -10989,6 +12385,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/slack-progress-notifier"
@@ -11025,6 +12423,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/slash-commands",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/slash-command-gen"
@@ -11061,6 +12461,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/slash-commands",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/slash-command-orchestrator-agent"
@@ -11089,6 +12491,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://smithery.ai/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/smithery"
@@ -11124,6 +12528,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://github.com/SocketDev/socket-mcp",
       "repoUrl": "https://github.com/SocketDev/socket-mcp",
       "url": "https://heyclau.de/mcp/socket-mcp-server"
@@ -11151,6 +12557,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://sourcegraph.com/docs/cody",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/sourcegraph-cody"
@@ -11186,6 +12594,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://developer.squareup.com/docs/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/square-mcp-server"
@@ -11214,6 +12624,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.stagehand.dev",
       "repoUrl": "https://github.com/browserbase/stagehand",
       "url": "https://heyclau.de/tools/stagehand"
@@ -11248,6 +12660,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/starship-powerline-theme"
@@ -11283,6 +12697,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.stripe.com/mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/stripe-mcp-server"
@@ -11318,6 +12734,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/stytch-mcp-server"
@@ -11354,6 +12772,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/subagent-create"
@@ -11390,6 +12810,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/sub-agents",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/subagent-factory-agent"
@@ -11425,6 +12847,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://supabase.com/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/supabase-realtime-database"
@@ -11460,6 +12898,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/svelte-component-compiler"
@@ -11495,6 +12935,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://kit.svelte.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/svelte-sveltekit-fullstack"
@@ -11531,6 +12987,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/testing",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/tdd-workflow"
@@ -11566,6 +13024,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/team-summary-email-generator"
@@ -11600,6 +13060,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/technical-documentation-writer-agent"
@@ -11635,6 +13097,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.terraform.io/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/terraform-infrastructure-architect"
@@ -11670,6 +13134,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/terraform-plan-executor"
@@ -11705,6 +13171,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://playwright.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/test-automation-engineer-agent"
@@ -11740,6 +13208,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/test-coverage-final-report"
@@ -11775,6 +13245,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://jestjs.io/docs/getting-started",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/test-runner-hook"
@@ -11811,6 +13283,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://vitest.dev/guide/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/test-driven-development-enforcer"
@@ -11846,6 +13320,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/token-cost-budget-optimizer"
@@ -11874,6 +13350,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://trigger.dev/docs",
       "repoUrl": "https://github.com/triggerdotdev/trigger.dev",
       "url": "https://heyclau.de/tools/trigger-dev"
@@ -11909,6 +13387,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://trpc.io/docs/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/trpc-type-safe-api"
@@ -11944,6 +13438,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.typescriptlang.org/docs/handbook/2/basic-types.html",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/typescript-5x-strict-mode-expert"
@@ -11977,6 +13473,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/typescript-compilation-checker"
@@ -12012,6 +13510,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/ui-ux-design-expert-agent"
@@ -12047,6 +13547,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.unraid.net/API/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/unraid-api-automation-operator"
@@ -12082,6 +13598,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.unraid.net/API/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/unraid-api-v2-capability-pack"
@@ -12117,6 +13649,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://forums.unraid.net/forum/64-docker-engine/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack"
@@ -12145,6 +13693,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://v0.dev/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/vercel-v0"
@@ -12180,6 +13730,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://v0.dev/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/commands/v0-generate"
@@ -12215,6 +13767,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://v0.dev/docs",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/v0-rapid-prototyping"
@@ -12242,6 +13810,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://ai-sdk.dev/docs",
       "repoUrl": "https://github.com/vercel/ai",
       "url": "https://heyclau.de/tools/vercel-ai-sdk"
@@ -12277,6 +13847,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/vercel-mcp-server"
@@ -12312,6 +13884,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://vitejs.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/vite-build-optimization"
@@ -12347,6 +13935,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/vue-composition-api-linter"
@@ -12382,6 +13972,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://www.w3.org/WAI/WCAG22/quickref/",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/wcag-accessibility-auditor"
@@ -12410,6 +14002,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://weave-docs.wandb.ai",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/weave"
@@ -12445,6 +14039,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/web-interface",
       "repoUrl": "",
       "url": "https://heyclau.de/agents/web-async-agent-coordinator"
@@ -12480,6 +14076,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://webassembly.org/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/webassembly-module-development"
@@ -12515,6 +14127,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/webpack-bundle-analyzer"
@@ -12549,6 +14163,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://github.com/mozilla/readability",
       "repoUrl": "https://github.com/mozilla/readability",
       "url": "https://heyclau.de/skills/website-crawler-summarizer"
@@ -12576,6 +14206,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.windsurf.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/windsurf"
@@ -12611,6 +14243,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://docs.codeium.com/windsurf",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/windsurf-collaborative-development"
@@ -12646,6 +14294,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.codeium.com/windsurf",
       "repoUrl": "",
       "url": "https://heyclau.de/rules/windsurf-ai-native-ide-patterns"
@@ -12674,6 +14324,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.workato.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/workato"
@@ -12709,6 +14361,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.workato.com/mcp.html",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/workato-mcp-server"
@@ -12744,6 +14398,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "",
       "repoUrl": "",
       "url": "https://heyclau.de/hooks/workflow-completion-report"
@@ -12779,6 +14435,8 @@
       "installable": true,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://docs.claude.com/en/docs/claude-code/statusline",
       "repoUrl": "",
       "url": "https://heyclau.de/statuslines/workspace-project-depth-indicator"
@@ -12807,6 +14465,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://help.zapier.com",
       "repoUrl": "",
       "url": "https://heyclau.de/tools/zapier-ai"
@@ -12842,6 +14502,8 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
       "repoUrl": "",
       "url": "https://heyclau.de/mcp/zapier-mcp-server"
@@ -12870,6 +14532,8 @@
       "installable": false,
       "downloadTrust": null,
       "verificationStatus": "",
+      "platforms": [],
+      "supportLevels": [],
       "documentationUrl": "https://zed.dev/docs",
       "repoUrl": "https://github.com/zed-industries/zed",
       "url": "https://heyclau.de/tools/zed"
@@ -12905,6 +14569,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "validated",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://developers.cloudflare.com/workers/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/zero-budget-saas-launch-capability-pack"
@@ -12940,6 +14620,22 @@
       "installable": true,
       "downloadTrust": "first-party",
       "verificationStatus": "draft",
+      "platforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "supportLevels": [
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "native-skill",
+        "adapter",
+        "manual-context"
+      ],
       "documentationUrl": "https://zod.dev/",
       "repoUrl": "",
       "url": "https://heyclau.de/skills/zod-schema-validator"

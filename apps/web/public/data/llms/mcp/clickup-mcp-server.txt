@@ -7,6 +7,14 @@ Documentation: https://github.com/hauptsacheNet/clickup-mcp
 Repository: https://github.com/hauptsacheNet/clickup-mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx
 Download: /downloads/mcp/clickup-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/clickup-mcp-server
+- Source URLs: https://github.com/hauptsacheNet/clickup-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx
+- Package URL: /downloads/mcp/clickup-mcp-server.mcpb
+- Package SHA256: f790c531d131631b690c489a7219a986c27295cdddc53fa73f732584bfe5611f
+- Author: hauptsacheNet
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Task management and project tracking with ClickUp integration
 ## Tags

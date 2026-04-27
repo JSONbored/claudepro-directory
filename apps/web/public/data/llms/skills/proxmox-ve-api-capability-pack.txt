@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-capability-pack.mdx
 Download: /downloads/skills/proxmox-ve-api-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/proxmox-ve-api-capability-pack
+- Source URLs: https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-capability-pack.mdx
+- Package URL: /downloads/skills/proxmox-ve-api-capability-pack.zip
+- Package SHA256: 0dd1737529e1488f32e951bd9543fd8cd433619c6dc3547f266e56e8b9bb9be8
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Expert Proxmox VE API capability skill for VM/LXC lifecycle orchestration, task polling, auth safety, and cluster-aware operations.
 ## Tags
@@ -51,7 +60,9 @@ This capability pack teaches agents how to operate Proxmox VE safely and predict
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Gate write operations behind pre-flight checks.

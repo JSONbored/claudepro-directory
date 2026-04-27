@@ -1601,6 +1601,16 @@
   },
   {
     "category": "skills",
+    "filePath": "content/skills/heyclaude-skill-submission-factory.mdx",
+    "slug": "heyclaude-skill-submission-factory",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
     "filePath": "content/skills/husky-commit-governance-capability-pack.mdx",
     "slug": "husky-commit-governance-capability-pack",
     "sourceType": "external",

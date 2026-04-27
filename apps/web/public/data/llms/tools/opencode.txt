@@ -6,6 +6,12 @@ Date added: 2026-04-27
 Documentation: https://opencode.ai
 Repository: https://github.com/sst/opencode
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/opencode
+- Source URLs: https://opencode.ai, https://github.com/sst/opencode, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx
+- Author: SST
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Terminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.
 ## Tags

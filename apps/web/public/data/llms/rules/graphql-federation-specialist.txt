@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://www.apollographql.com/docs/federation/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/graphql-federation-specialist
+- Source URLs: https://www.apollographql.com/docs/federation/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in GraphQL Federation architecture for microservices, specializing in Apollo Federation, schema composition, and distributed graph patterns
 ## Tags

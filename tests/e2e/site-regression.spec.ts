@@ -43,12 +43,25 @@ const htmlRoutes = [
   { path: "/api-docs", heading: /Registry API/i },
   { path: "/claim", heading: /Claim|update/i },
   { path: "/contributors", heading: /Accepted contributor profiles/i },
+  { path: "/quality", heading: /Quality, provenance, and SEO signals/i },
   { path: "/trending", heading: /Popular|trending/i },
   { path: "/ecosystem", heading: /Ecosystem/i },
   { path: "/best/claude-native-tools", heading: /Tools for Claude-native/i },
 ];
 
 test.describe("site regression", () => {
+  test("runs against the HeyClaude app identity", async ({ request }) => {
+    const response = await request.get("/api/registry/manifest");
+    expect(response.ok()).toBe(true);
+    await expect(response.json()).resolves.toMatchObject({
+      kind: "registry-manifest",
+      artifacts: {
+        directory: "/data/directory-index.json",
+        raycast: "/data/raycast-index.json",
+      },
+    });
+  });
+
   for (const route of htmlRoutes) {
     test(`renders ${route.path}`, async ({ page }) => {
       const response = await page.goto(route.path);
@@ -64,6 +77,7 @@ test.describe("site regression", () => {
     for (const route of [
       "/llms.txt",
       "/llms-full.txt",
+      "/feed.xml",
       `/${entry.category}/${entry.slug}/llms.txt`,
       "/api/registry/manifest",
       "/api/registry/categories",
@@ -131,12 +145,26 @@ test.describe("site regression", () => {
       "https://heyclau.de/api-docs",
       "https://heyclau.de/claim",
       "https://heyclau.de/contributors",
+      "https://heyclau.de/quality",
       "https://heyclau.de/trending",
+      "https://heyclau.de/feed.xml",
       "https://heyclau.de/best/claude-native-tools",
       `https://heyclau.de/${entry.category}/${entry.slug}`,
     ]) {
       expect(sitemap).toContain(route);
     }
+    expect(sitemap).toContain("<changefreq>");
+    expect(sitemap).toContain("<priority>");
+  });
+
+  test("serves dynamic social images for generated page metadata", async ({
+    request,
+  }) => {
+    const response = await request.get(
+      "/api/og?title=HeyClaude%20Test&description=Registry%20preview",
+    );
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/png");
   });
 
   test("keeps browse HTML payload below the full-directory serialization budget", async ({

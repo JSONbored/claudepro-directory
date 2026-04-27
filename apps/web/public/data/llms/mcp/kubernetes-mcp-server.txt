@@ -7,6 +7,14 @@ Documentation: https://github.com/feiskyer/mcp-kubernetes-server
 Repository: https://github.com/feiskyer/mcp-kubernetes-server
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx
 Download: /downloads/mcp/kubernetes-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/kubernetes-mcp-server
+- Source URLs: https://github.com/feiskyer/mcp-kubernetes-server, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx
+- Package URL: /downloads/mcp/kubernetes-mcp-server.mcpb
+- Package SHA256: 5a0d7f95e5cc33b35b4d5e3a2f6d4d02c2e6d8bbe50ea6601ac7cb1f95ea1b94
+- Author: feiskyer
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Kubernetes cluster management and container orchestration through MCP integration
 ## Tags

@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://box.dev/guides/box-mcp/remote/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx
 Download: /downloads/mcp/box-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/box-mcp-server
+- Source URLs: https://box.dev/guides/box-mcp/remote/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx
+- Package URL: /downloads/mcp/box-mcp-server.mcpb
+- Package SHA256: 973bd359536505c1000cffb3e754727c536496bc0b05fd56503a91184b6d5d6d
+- Author: Box
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Access enterprise content, analyze unstructured data, and automate workflows
 ## Tags

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-23
 Documentation: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/oh-my-zsh-robbyrussell
+- Source URLs: https://github.com/ohmyzsh/ohmyzsh/wiki/Themes#robbyrussell, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Oh-My-Zsh robbyrussell theme replica with iconic arrow prompt, Git status indicators, and directory path for seamless Claude Code shell integration.
 ## Tags

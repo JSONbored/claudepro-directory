@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-26
 Documentation: https://owasp.org/www-project-top-ten/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/zod-audit
+- Source URLs: https://owasp.org/www-project-top-ten/, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Production codebase auditor specialized in Zod schema validation coverage, security vulnerability detection, and dead code elimination
 ## Tags

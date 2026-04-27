@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://platform.openai.com/docs/guides/latency-optimization
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/model-routing-cost-latency-optimizer.mdx
 Download: /downloads/skills/model-routing-cost-latency-optimizer.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/model-routing-cost-latency-optimizer
+- Source URLs: https://platform.openai.com/docs/guides/latency-optimization, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/model-routing-cost-latency-optimizer.mdx
+- Package URL: /downloads/skills/model-routing-cost-latency-optimizer.zip
+- Package SHA256: 8d45355903bb0faf1b2104e91a605180579611f7647fd252e981b0d4873d574f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Design and validate model routing strategies that reduce cost and latency while preserving output quality.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps teams ship model routing policies that cut spend and latency wi
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Token and latency telemetry by endpoint/workflow

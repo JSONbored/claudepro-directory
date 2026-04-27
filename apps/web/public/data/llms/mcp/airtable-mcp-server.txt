@@ -7,6 +7,14 @@ Documentation: https://github.com/domdomegg/airtable-mcp-server
 Repository: https://github.com/domdomegg/airtable-mcp-server
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx
 Download: /downloads/mcp/airtable-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/airtable-mcp-server
+- Source URLs: https://github.com/domdomegg/airtable-mcp-server, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx
+- Package URL: /downloads/mcp/airtable-mcp-server.mcpb
+- Package SHA256: de3543063d919647fdf25c518ccd6679e32c5e9ae49d94150344fee4dabc3856
+- Author: domdomegg
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Read and write records, manage bases and tables in Airtable directly from Claude
 ## Tags

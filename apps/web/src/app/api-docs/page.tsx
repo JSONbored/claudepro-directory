@@ -31,8 +31,8 @@ const examples = [
   },
   {
     title: "Search",
-    href: "/api/registry/search?q=mcp&limit=5",
-    code: "curl 'https://heyclau.de/api/registry/search?q=mcp&limit=5'",
+    href: "/api/registry/search?q=mcp&platform=gemini&limit=5",
+    code: "curl 'https://heyclau.de/api/registry/search?q=mcp&platform=gemini&limit=5'",
   },
   {
     title: "Entry Detail",
@@ -58,6 +58,16 @@ const examples = [
     title: "Changelog Feed",
     href: "/data/registry-changelog.json",
     code: "curl https://heyclau.de/data/registry-changelog.json",
+  },
+  {
+    title: "RSS Updates",
+    href: "/feed.xml",
+    code: "curl https://heyclau.de/feed.xml",
+  },
+  {
+    title: "Quality Report",
+    href: "/data/content-quality-report.json",
+    code: "curl https://heyclau.de/data/content-quality-report.json",
   },
   {
     title: "Ecosystem Feed",

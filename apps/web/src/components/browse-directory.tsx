@@ -15,12 +15,14 @@ import type { DirectoryEntry } from "@/lib/content";
 import { useBrowseUrlSync } from "@/hooks/use-browse-url-sync";
 import { useClientId } from "@/hooks/use-client-id";
 import { categoryLabels, siteConfig } from "@/lib/site";
+import { categorySpec } from "@heyclaude/registry";
 
 type BrowseDirectoryProps = {
   entries: DirectoryEntry[];
   initialQuery?: string;
   initialCategory?: string;
   initialUtilityFilter?: string;
+  initialPlatformFilter?: string;
   initialSortMode?: string;
   syncUrl?: boolean;
   limit?: number;
@@ -39,6 +41,13 @@ const utilityFilterOptions = [
   { value: "hook-trigger", label: "Hook Trigger" },
   { value: "prerequisites", label: "Prerequisites" },
   { value: "troubleshooting", label: "Troubleshooting" },
+] as const;
+const platformFilterOptions = [
+  { value: "all", label: "All Platforms" },
+  ...categorySpec.defaultTestedPlatforms.map((platform) => ({
+    value: platform.toLowerCase(),
+    label: platform,
+  })),
 ] as const;
 const sortModeOptions = ["popular", "newest", "title"] as const;
 
@@ -59,6 +68,15 @@ function normalizeUtilityFilter(value?: string) {
     .trim()
     .toLowerCase();
   return utilityFilterOptions.some((option) => option.value === normalized)
+    ? normalized
+    : "all";
+}
+
+function normalizePlatformFilter(value?: string) {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  return platformFilterOptions.some((option) => option.value === normalized)
     ? normalized
     : "all";
 }
@@ -107,11 +125,19 @@ function matchesUtilityFilter(entry: DirectoryEntry, filter: string) {
   }
 }
 
+function matchesPlatformFilter(entry: DirectoryEntry, filter: string) {
+  if (filter === "all") return true;
+  return (entry.platformCompatibility ?? []).some(
+    (item) => item.platform.trim().toLowerCase() === filter,
+  );
+}
+
 export function BrowseDirectory({
   entries,
   initialQuery = "",
   initialCategory: initialCategoryProp = "all",
   initialUtilityFilter: initialUtilityFilterProp = "all",
+  initialPlatformFilter: initialPlatformFilterProp = "all",
   initialSortMode: initialSortModeProp = "popular",
   syncUrl = false,
   limit,
@@ -121,6 +147,9 @@ export function BrowseDirectory({
   const initialSortMode = normalizeSortMode(initialSortModeProp);
   const initialCategory = normalizeCategory(initialCategoryProp);
   const initialUtilityFilter = normalizeUtilityFilter(initialUtilityFilterProp);
+  const initialPlatformFilter = normalizePlatformFilter(
+    initialPlatformFilterProp,
+  );
   const [allEntries, setAllEntries] = useState(entries);
   const [hasLoadedFullEntries, setHasLoadedFullEntries] = useState(false);
   const [isLoadingFullEntries, setIsLoadingFullEntries] = useState(false);
@@ -129,6 +158,7 @@ export function BrowseDirectory({
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState(initialCategory);
   const [utilityFilter, setUtilityFilter] = useState(initialUtilityFilter);
+  const [platformFilter, setPlatformFilter] = useState(initialPlatformFilter);
   const [sortMode, setSortMode] = useState(initialSortMode);
   const [visibleCount, setVisibleCount] = useState(limit ?? allEntries.length);
   const [clientId, setClientId] = useClientId("heyclaude-client-id");
@@ -185,13 +215,16 @@ export function BrowseDirectory({
     query,
     category,
     utilityFilter,
+    platformFilter,
     sortMode,
     normalizeCategory,
     normalizeUtilityFilter,
+    normalizePlatformFilter,
     normalizeSortMode,
     setQuery,
     setCategory,
     setUtilityFilter,
+    setPlatformFilter,
     setSortMode,
   });
 
@@ -281,6 +314,7 @@ export function BrowseDirectory({
     const matched = allEntries.filter((entry) => {
       if (category !== "all" && entry.category !== category) return false;
       if (!matchesUtilityFilter(entry, utilityFilter)) return false;
+      if (!matchesPlatformFilter(entry, platformFilter)) return false;
       if (!normalizedQuery) return true;
 
       const haystack = [
@@ -292,6 +326,10 @@ export function BrowseDirectory({
         entry.skillLevel,
         entry.verificationStatus,
         entry.downloadTrust,
+        ...(entry.platformCompatibility ?? []).flatMap((item) => [
+          item.platform,
+          item.supportLevel,
+        ]),
         ...entry.tags,
         ...entry.keywords,
       ]
@@ -325,6 +363,7 @@ export function BrowseDirectory({
     category,
     normalizedQuery,
     popularSortSnapshot,
+    platformFilter,
     sortMode,
     utilityFilter,
   ]);
@@ -336,6 +375,7 @@ export function BrowseDirectory({
     deferredQuery,
     filteredEntries.length,
     limit,
+    platformFilter,
     sortMode,
     utilityFilter,
   ]);
@@ -374,13 +414,14 @@ export function BrowseDirectory({
     if (
       category !== initialCategory ||
       utilityFilter !== initialUtilityFilter ||
+      platformFilter !== initialPlatformFilter ||
       sortMode !== initialSortMode ||
       query.trim().length > 0
     ) {
       void loadFullEntriesIfNeeded();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entriesUrl, category, utilityFilter, sortMode, query]);
+  }, [entriesUrl, category, utilityFilter, platformFilter, sortMode, query]);
 
   const displayedEntries = useMemo(() => {
     if (!limit) return filteredEntries;
@@ -486,6 +527,21 @@ export function BrowseDirectory({
           </SelectTrigger>
           <SelectContent className="directory-select-content">
             {utilityFilterOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={platformFilter} onValueChange={setPlatformFilter}>
+          <SelectTrigger
+            aria-label="Platform filter"
+            className="directory-select-trigger sm:w-[12rem]"
+          >
+            <SelectValue placeholder="All Platforms" />
+          </SelectTrigger>
+          <SelectContent className="directory-select-content">
+            {platformFilterOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>

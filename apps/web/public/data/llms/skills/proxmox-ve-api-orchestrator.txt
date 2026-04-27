@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-orchestrator.mdx
 Download: /downloads/skills/proxmox-ve-api-orchestrator.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/proxmox-ve-api-orchestrator
+- Source URLs: https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/proxmox-ve-api-orchestrator.mdx
+- Package URL: /downloads/skills/proxmox-ve-api-orchestrator.zip
+- Package SHA256: 8c49dff8580bad344aeda18707159b9ad25bc7eef25946d6c429ac65cb7565b0
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Orchestrate Proxmox VM and LXC lifecycle operations via API with safe sequencing, capacity checks, and rollback-aware automation.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents orchestrate Proxmox operations in a way that is safe 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Inventory of target nodes, VMs, and LXCs

@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2026-04-11
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/agent-operator-growth-master-pack
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 High-leverage collection for operators building AI-driven products: secure code review, release governance, automation orchestration, skill authoring, growth execution, and Unraid/n8n operational readiness.
 ## Tags

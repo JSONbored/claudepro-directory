@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://biomejs.dev/linter/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/biome-strict-linting-rules
+- Source URLs: https://biomejs.dev/linter/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Biome linting rules configuration for code quality validation. Strict enforcement, custom overrides, VCS integration, and automated fixes for TypeScript.
 ## Tags

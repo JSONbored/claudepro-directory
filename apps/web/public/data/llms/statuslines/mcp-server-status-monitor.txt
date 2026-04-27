@@ -4,6 +4,12 @@ Category: statuslines
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/mcp-server-status-monitor.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/mcp-server-status-monitor
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/mcp-server-status-monitor.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Real-time MCP server monitoring statusline showing connected servers, active tools, and performance metrics for Claude Code MCP integration
 ## Tags

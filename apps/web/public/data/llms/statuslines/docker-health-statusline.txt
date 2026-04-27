@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://docs.docker.com/reference/cli/docker/container/stats/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/docker-health-statusline.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/docker-health-statusline
+- Source URLs: https://docs.docker.com/reference/cli/docker/container/stats/, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/docker-health-statusline.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Docker statusline configuration for Claude Code CLI. Features real-time health monitoring, color-coded indicators, and container tracking. Production-ready.
 ## Tags

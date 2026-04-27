@@ -5,6 +5,12 @@ Author: StackBlitz
 Date added: 2026-04-27
 Documentation: https://support.bolt.new
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/bolt-new
+- Source URLs: https://support.bolt.new, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/bolt-new.mdx, https://bolt.new
+- Author: StackBlitz
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.
 ## Tags

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-15
 Documentation: https://nextjs.org/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/react-next-js-expert
+- Source URLs: https://nextjs.org/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Transform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices
 ## Tags

@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://ai.google.dev/gemini-api/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/google-workspace-gemini-automation.mdx
 Download: /downloads/skills/google-workspace-gemini-automation.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/google-workspace-gemini-automation
+- Source URLs: https://ai.google.dev/gemini-api/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/google-workspace-gemini-automation.mdx
+- Package URL: /downloads/skills/google-workspace-gemini-automation.zip
+- Package SHA256: 2795143f0a54328d4335b4119fa51310480f6785dc02234b54d7738e85540db2
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Create useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents build practical Google Workspace automations using Ge
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Defined source systems and destination artifacts

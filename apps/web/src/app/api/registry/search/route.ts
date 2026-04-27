@@ -19,6 +19,13 @@ function normalizeCategory(value: string | null) {
   return /^[a-z0-9-]+$/.test(normalized) ? normalized : "";
 }
 
+function normalizePlatform(value: string | null) {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  return /^[a-z0-9][a-z0-9 -]{0,48}$/.test(normalized) ? normalized : "";
+}
+
 function matchesQuery(entry: SearchDocument, query: string) {
   if (!query) return true;
   const haystack = [
@@ -35,6 +42,13 @@ function matchesQuery(entry: SearchDocument, query: string) {
     .join(" ")
     .toLowerCase();
   return haystack.includes(query);
+}
+
+function matchesPlatform(entry: SearchDocument, platform: string) {
+  if (!platform) return true;
+  return (entry.platforms ?? []).some(
+    (item) => String(item).trim().toLowerCase() === platform,
+  );
 }
 
 export async function GET(request: Request) {
@@ -61,11 +75,13 @@ export async function GET(request: Request) {
     .toLowerCase()
     .slice(0, 120);
   const category = normalizeCategory(url.searchParams.get("category"));
+  const platform = normalizePlatform(url.searchParams.get("platform"));
   const limit = normalizeLimit(url.searchParams.get("limit"));
 
   const entries = await getSearchIndex();
   const results = entries
     .filter((entry) => !category || entry.category === category)
+    .filter((entry) => matchesPlatform(entry, platform))
     .filter((entry) => matchesQuery(entry, query))
     .slice(0, limit);
 
@@ -75,6 +91,7 @@ export async function GET(request: Request) {
       schemaVersion: 1,
       query,
       category: category || "all",
+      platform: platform || "all",
       count: results.length,
       results,
     },

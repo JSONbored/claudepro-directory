@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://docs.workato.com/mcp.html
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx
 Download: /downloads/mcp/workato-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/workato-mcp-server
+- Source URLs: https://docs.workato.com/mcp.html, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx
+- Package URL: /downloads/mcp/workato-mcp-server.mcpb
+- Package SHA256: c69f27e627ef47cea43d72c64d4c1425ad1e7e07481aa656188d08ab0af611dc
+- Author: Workato
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Access any application, workflows, or data via Workato's integration platform
 ## Tags

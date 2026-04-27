@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2025-10-02
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/aws-cloud-infrastructure-bundle.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/aws-cloud-infrastructure-bundle
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/aws-cloud-infrastructure-bundle.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Complete AWS infrastructure management toolkit combining cloud architecture expertise, CloudFormation validation, and AWS services integration. Perfect for teams building and maintaining cloud-native applications on AWS.
 ## Tags

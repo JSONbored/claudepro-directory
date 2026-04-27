@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://linear.app/docs/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx
 Download: /downloads/mcp/linear-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/linear-mcp-server
+- Source URLs: https://linear.app/docs/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx
+- Package URL: /downloads/mcp/linear-mcp-server.mcpb
+- Package SHA256: a9f6c46cfbe25cd19a67129ccf249c2f16e590b68f75597008c5192fbf9cfe20
+- Author: Linear
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Integrate with Linear's issue tracking and project management system
 ## Tags

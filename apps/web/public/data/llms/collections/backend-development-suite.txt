@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2025-10-02
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/backend-development-suite.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/backend-development-suite
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/backend-development-suite.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Full-featured backend development environment combining architecture planning, database design, and cloud services integration. Perfect for building scalable server-side applications.
 ## Tags

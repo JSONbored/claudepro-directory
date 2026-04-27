@@ -11,6 +11,7 @@
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
     "tags": [
       "heyclaude",
       "skill-authoring",
@@ -99,8 +100,8 @@
       },
       {
         "platform": "Gemini",
-        "supportLevel": "adapter",
-        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
         "verifiedAt": "2026-04-27"
       },
       {
@@ -119,7 +120,7 @@
     ],
     "downloadTrust": "first-party",
     "downloadSha256": "112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c",
-    "body": "## Knowledge Freshness\n\nThis skill is pinned to Agent Skills and HeyClaude submission behavior verified on **2026-04-27**.\n\n## Retrieval Sources\n\n- https://heyclau.de/submit\n- https://developers.openai.com/codex/skills\n- https://docs.claude.com/en/docs/claude-code/skills\n- https://docs.windsurf.com/windsurf/cascade/skills\n- https://docs.cursor.com/en/context\n- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md\n\n## Core Workflow\n\n1. Define the skill user, trigger language, and out-of-scope behavior.\n2. Create a single root folder with `SKILL.md`.\n3. Keep `SKILL.md` concise, with required `name` and `description` frontmatter.\n4. Add only necessary optional resources under `scripts/`, `references/`, `assets/`, or `agents/openai.yaml`.\n5. Generate compatibility notes for native Agent Skills platforms and adapter-only platforms.\n6. Prepare HeyClaude issue fields from the canonical submission form instead of auto-publishing.\n\n## Capability Scope\n\n- Agent Skill package authoring\n- Compatibility metadata\n- Cursor `.mdc` adapter drafting\n- Package validation checklist\n- HeyClaude issue-first submission preparation\n\n## Compatibility\n\n### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/commands/<skill-name>.toml` or `GEMINI.md`\n- Generic AGENTS or tool-specific context files\n\n## Production Rules\n\n- Do not claim native support for a platform unless its current docs support `SKILL.md`-style skills.\n- Do not include private repo names, secrets, credentials, or internal operating details in a public skill.\n- Do not auto-publish registry content; prepare a maintainer-reviewed issue submission.\n- Keep package resources minimal and directly referenced from `SKILL.md`.\n\n## Troubleshooting\n\n**Issue:** The skill is too broad to trigger reliably\n**Fix:** Narrow the description to the exact workflow and add negative scope.\n\n**Issue:** Cursor users ask how to install it\n**Fix:** Generate a Cursor rule adapter and label it as an adapter, not a native skill.",
+    "body": "## Knowledge Freshness\n\nThis skill is pinned to Agent Skills and HeyClaude submission behavior verified on **2026-04-27**.\n\n## Retrieval Sources\n\n- https://heyclau.de/submit\n- https://developers.openai.com/codex/skills\n- https://docs.claude.com/en/docs/claude-code/skills\n- https://docs.windsurf.com/windsurf/cascade/skills\n- https://docs.cursor.com/en/context\n- https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/custom-commands.md\n\n## Core Workflow\n\n1. Define the skill user, trigger language, and out-of-scope behavior.\n2. Create a single root folder with `SKILL.md`.\n3. Keep `SKILL.md` concise, with required `name` and `description` frontmatter.\n4. Add only necessary optional resources under `scripts/`, `references/`, `assets/`, or `agents/openai.yaml`.\n5. Generate compatibility notes for native Agent Skills platforms and adapter-only platforms.\n6. Prepare HeyClaude issue fields from the canonical submission form instead of auto-publishing.\n\n## Capability Scope\n\n- Agent Skill package authoring\n- Compatibility metadata\n- Cursor `.mdc` adapter drafting\n- Package validation checklist\n- HeyClaude issue-first submission preparation\n\n## Compatibility\n\n### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`\n- Generic AGENTS or tool-specific context files\n\n## Production Rules\n\n- Do not claim native support for a platform unless its current docs support `SKILL.md`-style skills.\n- Do not include private repo names, secrets, credentials, or internal operating details in a public skill.\n- Do not auto-publish registry content; prepare a maintainer-reviewed issue submission.\n- Keep package resources minimal and directly referenced from `SKILL.md`.\n\n## Troubleshooting\n\n**Issue:** The skill is too broad to trigger reliably\n**Fix:** Narrow the description to the exact workflow and add negative scope.\n\n**Issue:** Cursor users ask how to install it\n**Fix:** Generate a Cursor rule adapter and label it as an adapter, not a native skill.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -148,7 +149,7 @@
       {
         "title": "Compatibility",
         "id": "compatibility",
-        "markdown": "### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/commands/<skill-name>.toml` or `GEMINI.md`\n- Generic AGENTS or tool-specific context files",
+        "markdown": "### Native Agent Skills\n\n- Claude\n- Codex/OpenAI\n- Windsurf\n\n### Adapter Targets\n\n- Cursor via `.cursor/rules/<skill-name>.mdc`\n- Gemini CLI via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`\n- Generic AGENTS or tool-specific context files",
         "codeBlocks": []
       },
       {

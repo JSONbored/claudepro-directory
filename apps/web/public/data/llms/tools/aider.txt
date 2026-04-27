@@ -6,6 +6,12 @@ Date added: 2026-04-27
 Documentation: https://aider.chat/docs
 Repository: https://github.com/Aider-AI/aider
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/aider
+- Source URLs: https://aider.chat/docs, https://github.com/Aider-AI/aider, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/aider.mdx, https://aider.chat
+- Author: Aider
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Open-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.
 ## Tags

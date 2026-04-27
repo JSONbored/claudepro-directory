@@ -319,7 +319,7 @@ export function issueLabels(issue) {
 
 export function looksLikeSubmissionIssue(issue = {}) {
   const labels = issueLabels(issue);
-  if (labels.includes("content-submission") || labels.includes("submission")) {
+  if (labels.includes("content-submission")) {
     return true;
   }
 
@@ -382,6 +382,26 @@ function isHttpsUrl(value) {
   try {
     const url = new URL(normalized);
     return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isValidPublicContact(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) return true;
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) return true;
+  if (/^@?[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(normalized)) {
+    return true;
+  }
+
+  try {
+    const url = new URL(normalized);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "github.com" &&
+      url.pathname.split("/").filter(Boolean).length === 1
+    );
   } catch {
     return false;
   }
@@ -512,11 +532,10 @@ export function validateSubmission(issue) {
     errors.push("Invalid slug format: expected kebab-case");
   }
 
-  if (
-    fields.contact_email &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.contact_email)
-  ) {
-    errors.push("Invalid contact email format");
+  if (!isValidPublicContact(fields.contact_email)) {
+    errors.push(
+      "Invalid public contact: use a GitHub handle, GitHub profile URL, or email",
+    );
   }
 
   if (fields.description && normalizeValue(fields.description).length < 12) {

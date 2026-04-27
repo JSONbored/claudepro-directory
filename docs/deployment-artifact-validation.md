@@ -17,6 +17,8 @@ The check verifies:
 - `/data/raycast-index.json`
 - the first `/data/raycast/...` detail payload referenced by the Raycast index
 
-CI runs this check only when `DEPLOYMENT_ARTIFACT_BASE_URL` is configured for a
-preview environment. Local generated files remain covered by
+Pull request CI requires `DEPLOYMENT_ARTIFACT_BASE_URL` to be configured for a
+preview environment and fails before merge when it is missing. Scheduled and
+manual validation jobs still run local generated-file checks even when a preview
+URL is not available. Local generated files remain covered by
 `pnpm test:registry-artifacts` and `pnpm validate:raycast-feed`.

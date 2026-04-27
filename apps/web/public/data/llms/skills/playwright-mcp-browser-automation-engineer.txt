@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://playwright.dev/docs/getting-started-mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-mcp-browser-automation-engineer.mdx
 Download: /downloads/skills/playwright-mcp-browser-automation-engineer.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/playwright-mcp-browser-automation-engineer
+- Source URLs: https://playwright.dev/docs/getting-started-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/playwright-mcp-browser-automation-engineer.mdx
+- Package URL: /downloads/skills/playwright-mcp-browser-automation-engineer.zip
+- Package SHA256: debb75ce2997bba8fcd5fbe24eb7b8cae6cfec0f34f8619611134906f2993b1e
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build resilient browser automations using Playwright MCP with robust selectors, retries, and deterministic task execution.
 ## Tags
@@ -26,7 +35,9 @@ This skill turns browser automation requests into deterministic workflows. It em
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Stable environment URLs (dev/stage/prod)

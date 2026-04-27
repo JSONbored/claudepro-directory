@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://developers.cloudflare.com/workers/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx
 Download: /downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack
+- Source URLs: https://developers.cloudflare.com/workers/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx
+- Package URL: /downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip
+- Package SHA256: 2b0c31db74f9b42751e2c14d8dab16fa3ded453bd4397a1347ac782ce5bc792a
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Expert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.
 ## Tags
@@ -52,7 +61,9 @@ This capability pack teaches agents how to choose the right Cloudflare storage p
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Align storage choice with access pattern, not convenience.

@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://www.paypal.ai/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx
 Download: /downloads/mcp/paypal-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/paypal-mcp-server
+- Source URLs: https://www.paypal.ai/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx
+- Package URL: /downloads/mcp/paypal-mcp-server.mcpb
+- Package SHA256: 4418a41748dff3d809983b7f75e0ba83d90bf6d54df0f8360f97b198087763f2
+- Author: PayPal
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Integrate PayPal commerce capabilities, payment processing, and transaction management
 ## Tags

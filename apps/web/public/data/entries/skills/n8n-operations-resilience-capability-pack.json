@@ -11,6 +11,7 @@
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-11",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "n8n",
       "operations",
@@ -96,8 +97,8 @@
       },
       {
         "platform": "Gemini",
-        "supportLevel": "adapter",
-        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
         "verifiedAt": "2026-04-11"
       },
       {
@@ -116,7 +117,7 @@
     ],
     "downloadTrust": "first-party",
     "downloadSha256": "39e4ad81bf6055fbe1832b8e0344f3e41dd23ae88b6b8e677102b6a0d97aedcc",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://docs.n8n.io/\n- https://docs.n8n.io/hosting/\n- https://docs.n8n.io/workflows/\n\n## Core Workflow\n\n1. Inventory workflows by business criticality.\n2. Add retry, timeout, and idempotency protections.\n3. Enforce credential scope and secret-rotation policy.\n4. Build incident runbooks for queue, node, and downstream failures.\n5. Add monitoring and alerting with actionable thresholds.\n\n## Overview\n\nThis skill gives agents an operational blueprint for running n8n safely in environments where workflow failure has real business impact.\n\n## Capability Scope\n\n- Workflow reliability patterns\n- Credential and secret governance\n- Failure isolation and retries\n- Incident playbook design\n- Monitoring/alert instrumentation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Require idempotency strategy for side-effecting workflows.\n- Scope credentials to least privilege and rotate regularly.\n- Define dead-letter or fallback behavior for failed executions.\n- Publish runbooks for queue, dependency, and auth failures.\n\n## Troubleshooting\n\n**Issue:** Retries cause duplicate side effects  \n**Fix:** enforce idempotency keys and dedupe controls.\n\n**Issue:** Credential sprawl across workflows  \n**Fix:** centralize and scope credentials by workflow domain.\n\n**Issue:** Silent failures in non-critical jobs  \n**Fix:** add alert thresholds and dead-letter visibility.\n\n## Output Contract\n\n1. Reliability architecture by workflow class.\n2. Security controls and credential policy.\n3. Incident runbook actions per failure mode.\n4. Monitoring plan with exact alert thresholds.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\n\n## Retrieval Sources\n\n- https://docs.n8n.io/\n- https://docs.n8n.io/hosting/\n- https://docs.n8n.io/workflows/\n\n## Core Workflow\n\n1. Inventory workflows by business criticality.\n2. Add retry, timeout, and idempotency protections.\n3. Enforce credential scope and secret-rotation policy.\n4. Build incident runbooks for queue, node, and downstream failures.\n5. Add monitoring and alerting with actionable thresholds.\n\n## Overview\n\nThis skill gives agents an operational blueprint for running n8n safely in environments where workflow failure has real business impact.\n\n## Capability Scope\n\n- Workflow reliability patterns\n- Credential and secret governance\n- Failure isolation and retries\n- Incident playbook design\n- Monitoring/alert instrumentation\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Require idempotency strategy for side-effecting workflows.\n- Scope credentials to least privilege and rotate regularly.\n- Define dead-letter or fallback behavior for failed executions.\n- Publish runbooks for queue, dependency, and auth failures.\n\n## Troubleshooting\n\n**Issue:** Retries cause duplicate side effects  \n**Fix:** enforce idempotency keys and dedupe controls.\n\n**Issue:** Credential sprawl across workflows  \n**Fix:** centralize and scope credentials by workflow domain.\n\n**Issue:** Silent failures in non-critical jobs  \n**Fix:** add alert thresholds and dead-letter visibility.\n\n## Output Contract\n\n1. Reliability architecture by workflow class.\n2. Security controls and credential policy.\n3. Incident runbook actions per failure mode.\n4. Monitoring plan with exact alert thresholds.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -151,7 +152,7 @@
       {
         "title": "Compatibility",
         "id": "compatibility",
-        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
         "codeBlocks": []
       },
       {

@@ -41,7 +41,8 @@ export async function GET(request: Request) {
     endpoints: {
       manifest: "/api/registry/manifest",
       categories: "/api/registry/categories",
-      search: "/api/registry/search?q={query}&category={category}&limit=20",
+      search:
+        "/api/registry/search?q={query}&category={category}&platform={platform}&limit=20",
       diff: "/api/registry/diff?since={hash-or-date}&limit=100",
       entry: "/api/registry/entries/{category}/{slug}",
       entryLlms: "/api/registry/entries/{category}/{slug}/llms",
@@ -49,6 +50,8 @@ export async function GET(request: Request) {
       mcpRegistryFeed: "/data/mcp-registry-feed.json",
       pluginExportFeed: "/data/plugin-export-feed.json",
       changelogFeed: "/data/registry-changelog.json",
+      rssFeed: "/feed.xml",
+      contentQuality: "/data/content-quality-report.json",
       raycastFeed: "/data/raycast-index.json",
     },
     artifacts: manifest.artifacts,

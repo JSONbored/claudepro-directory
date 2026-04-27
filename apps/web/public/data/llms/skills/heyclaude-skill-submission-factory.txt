@@ -6,6 +6,15 @@ Date added: 2026-04-27
 Documentation: https://heyclau.de/submit
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx
 Download: /downloads/skills/heyclaude-skill-submission-factory.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/heyclaude-skill-submission-factory
+- Source URLs: https://heyclau.de/submit, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-skill-submission-factory.mdx
+- Package URL: /downloads/skills/heyclaude-skill-submission-factory.zip
+- Package SHA256: 112d0382e993335d17b7ecddf335e7f8a0273e9f5139e9d1653b551a4023ee8c
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-27
+- Robots: indexable
 ## Summary
 Create portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.
 ## Tags
@@ -51,7 +60,7 @@ This skill is pinned to Agent Skills and HeyClaude submission behavior verified 
 ### Adapter Targets
 
 - Cursor via `.cursor/rules/<skill-name>.mdc`
-- Gemini CLI via `.gemini/commands/<skill-name>.toml` or `GEMINI.md`
+- Gemini CLI via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`
 - Generic AGENTS or tool-specific context files
 
 ## Production Rules

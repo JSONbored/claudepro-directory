@@ -6,6 +6,15 @@ Date added: 2025-10-23
 Documentation: https://cursor.sh/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cursor-windsurf-ai-ide-setup.mdx
 Download: /downloads/skills/cursor-windsurf-ai-ide-setup.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/cursor-windsurf-ai-ide-setup
+- Source URLs: https://cursor.sh/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cursor-windsurf-ai-ide-setup.mdx
+- Package URL: /downloads/skills/cursor-windsurf-ai-ide-setup.zip
+- Package SHA256: 4f8ce19de6069c834ec7a452e8c3dbf1de4ff304ce049d5665a8ad56a0e800fe
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-23
+- Robots: indexable
 ## Summary
 Configure and optimize Cursor and Windsurf AI code editors for maximum productivity. Set up agent mode, composer features, keybindings, and AI-powered refactoring workflows. Customize with .cursorrules and .windsurfrules for project-specific guidance.
 ## Tags
@@ -26,7 +35,9 @@ Claude can help you configure and optimize Cursor or Windsurf AI code editors fo
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

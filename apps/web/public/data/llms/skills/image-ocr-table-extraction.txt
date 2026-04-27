@@ -6,6 +6,15 @@ Date added: 2025-10-15
 Documentation: https://tesseract-ocr.github.io/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx
 Download: /downloads/skills/image-ocr-table-extraction.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/image-ocr-table-extraction
+- Source URLs: https://tesseract-ocr.github.io/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/image-ocr-table-extraction.mdx
+- Package URL: /downloads/skills/image-ocr-table-extraction.zip
+- Package SHA256: 9b48b3202b664e1fbe69e162d3193cb5ad7f64a38a929268b4175c3433873764
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-15
+- Robots: indexable
 ## Summary
 Extract text and tabular data from images, scanned documents, and PDFs using Tesseract OCR engine with OpenCV preprocessing. Supports multi-language OCR (100+ languages), table structure detection, confidence scoring, orientation correction, and exports to CSV, JSON, and structured formats.
 ## Tags
@@ -32,7 +41,9 @@ Claude can extract text and tables from images, screenshots, scanned documents, 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://help.zapier.com/hc/en-us/articles/36265392843917
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx
 Download: /downloads/mcp/zapier-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/zapier-mcp-server
+- Source URLs: https://help.zapier.com/hc/en-us/articles/36265392843917, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx
+- Package URL: /downloads/mcp/zapier-mcp-server.mcpb
+- Package SHA256: e43a859d567995a464e662a9b3726830434085c31bea4240635bf4ec61d66abd
+- Author: Zapier
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Connect to nearly 8,000 apps through Zapier's automation platform
 ## Tags

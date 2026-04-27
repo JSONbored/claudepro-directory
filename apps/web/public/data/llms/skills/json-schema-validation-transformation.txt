@@ -6,6 +6,15 @@ Date added: 2025-10-15
 Documentation: https://ajv.js.org/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/json-schema-validation-transformation.mdx
 Download: /downloads/skills/json-schema-validation-transformation.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/json-schema-validation-transformation
+- Source URLs: https://ajv.js.org/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/json-schema-validation-transformation.mdx
+- Package URL: /downloads/skills/json-schema-validation-transformation.zip
+- Package SHA256: 851adc6e2004750ad392111dbccb5a131aec55693c028a0e460cd09f0acb9b8f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-15
+- Robots: indexable
 ## Summary
 Validate JSON data against JSON Schema specifications (draft-07, 2019-09, 2020-12) and perform safe, lossless schema migrations and transformations using Ajv (fastest JSON Schema validator) and Zod (TypeScript-first validation).
 ## Tags
@@ -26,7 +35,9 @@ Claude can validate JSON data against schemas, transform data between formats, m
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

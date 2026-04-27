@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   validate-submission:
-    if: contains(github.event.issue.labels.*.name, 'content-submission') || contains(github.event.issue.labels.*.name, 'submission') || startsWith(github.event.issue.title, 'Submit') || startsWith(github.event.issue.title, '[Submit]') || contains(github.event.issue.body, '### Category') || contains(github.event.issue.body, '**Category:**')
+    if: contains(github.event.issue.labels.*.name, 'content-submission') || startsWith(github.event.issue.title, 'Submit') || startsWith(github.event.issue.title, '[Submit]') || contains(github.event.issue.body, '### Category') || contains(github.event.issue.body, '**Category:**')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:

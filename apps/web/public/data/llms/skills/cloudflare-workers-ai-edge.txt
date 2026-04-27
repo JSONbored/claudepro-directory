@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://developers.cloudflare.com/workers-ai/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-ai-edge.mdx
 Download: /downloads/skills/cloudflare-workers-ai-edge.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/cloudflare-workers-ai-edge
+- Source URLs: https://developers.cloudflare.com/workers-ai/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-ai-edge.mdx
+- Package URL: /downloads/skills/cloudflare-workers-ai-edge.zip
+- Package SHA256: 8cf522b452d3699ef4bc63ebfb8e326609b053e7c7234a44aef1b2b2adeee6d8
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing.
 ## Tags
@@ -32,7 +41,9 @@ Claude can build and deploy AI-powered serverless functions on Cloudflare's glob
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

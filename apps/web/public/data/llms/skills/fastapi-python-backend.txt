@@ -6,6 +6,15 @@ Date added: 2025-10-23
 Documentation: https://fastapi.tiangolo.com/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx
 Download: /downloads/skills/fastapi-python-backend.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/fastapi-python-backend
+- Source URLs: https://fastapi.tiangolo.com/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/fastapi-python-backend.mdx
+- Package URL: /downloads/skills/fastapi-python-backend.zip
+- Package SHA256: a62b1a1e1fcee8faa7b1fb5cd68fa3c5112a74337fea3729a6bc5738c24f36d9
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-23
+- Robots: indexable
 ## Summary
 Build high-performance async REST APIs with FastAPI, Python's fastest-growing web framework. Automatic OpenAPI/Swagger documentation, type-safe validation with Pydantic, native async/await support, and dependency injection for clean architecture.
 ## Tags
@@ -26,7 +35,9 @@ Claude can build production-ready REST APIs using FastAPI, Python's fastest web 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

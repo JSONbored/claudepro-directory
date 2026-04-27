@@ -7,6 +7,15 @@ Documentation: https://github.com/openclaw/openclaw
 Repository: https://github.com/openclaw/openclaw
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-skill-authoring-factory-capability-pack.mdx
 Download: /downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/openclaw-skill-authoring-factory-capability-pack
+- Source URLs: https://github.com/openclaw/openclaw, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/openclaw-skill-authoring-factory-capability-pack.mdx
+- Package URL: /downloads/skills/openclaw-skill-authoring-factory-capability-pack.zip
+- Package SHA256: cf3ec648f0dd4808a709afca8306947b6be5c9bc18e2b481cdf0436e846fe9e3
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert OpenClaw skill-authoring capability pack for repeatable research, validation, packaging, and distribution workflows.
 ## Tags
@@ -49,7 +58,9 @@ This skill operationalizes repeatable skill creation for OpenClaw and adjacent a
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Every skill must include verifiedAt and retrievalSources.

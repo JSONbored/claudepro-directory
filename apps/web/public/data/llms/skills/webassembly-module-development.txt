@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://webassembly.org/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/webassembly-module-development.mdx
 Download: /downloads/skills/webassembly-module-development.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/webassembly-module-development
+- Source URLs: https://webassembly.org/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/webassembly-module-development.mdx
+- Package URL: /downloads/skills/webassembly-module-development.zip
+- Package SHA256: ef8e4038c38a8508ad1afdd7e0152ba4b64babc941ad5deabffb70122e10e75f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build high-performance WebAssembly modules with WASI 0.3, multi-language support, and production-ready deployments for web, serverless, and AI workloads. WebAssembly (WASM) runs at near-native speeds across web browsers, serverless platforms, and edge computing environments.
 ## Tags
@@ -32,7 +41,9 @@ Claude can build production-ready WebAssembly modules that run at near-native sp
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

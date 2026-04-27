@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://web.dev/performance/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/performance-optimizer-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/performance-optimizer-agent
+- Source URLs: https://web.dev/performance/, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/performance-optimizer-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in application performance optimization, profiling, and system tuning across frontend, backend, and infrastructure
 ## Tags

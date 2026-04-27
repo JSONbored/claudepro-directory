@@ -7,13 +7,16 @@ type UseBrowseUrlSyncParams = {
   query: string;
   category: string;
   utilityFilter: string;
+  platformFilter: string;
   sortMode: string;
   normalizeCategory: (value?: string) => string;
   normalizeUtilityFilter: (value?: string) => string;
+  normalizePlatformFilter: (value?: string) => string;
   normalizeSortMode: (value?: string) => string;
   setQuery: (value: string) => void;
   setCategory: (value: string) => void;
   setUtilityFilter: (value: string) => void;
+  setPlatformFilter: (value: string) => void;
   setSortMode: (value: string) => void;
 };
 
@@ -23,13 +26,16 @@ export function useBrowseUrlSync(params: UseBrowseUrlSyncParams) {
     query,
     category,
     utilityFilter,
+    platformFilter,
     sortMode,
     normalizeCategory,
     normalizeUtilityFilter,
+    normalizePlatformFilter,
     normalizeSortMode,
     setQuery,
     setCategory,
     setUtilityFilter,
+    setPlatformFilter,
     setSortMode,
   } = params;
   const hasHydratedUrlState = useRef(false);
@@ -45,19 +51,25 @@ export function useBrowseUrlSync(params: UseBrowseUrlSyncParams) {
     const nextUtility = normalizeUtilityFilter(
       urlParams.get("utility") ?? undefined,
     );
+    const nextPlatform = normalizePlatformFilter(
+      urlParams.get("platform") ?? undefined,
+    );
     const nextSort = normalizeSortMode(urlParams.get("sort") ?? undefined);
 
     if (nextQuery !== null) setQuery(nextQuery);
     setCategory(nextCategory);
     setUtilityFilter(nextUtility);
+    setPlatformFilter(nextPlatform);
     setSortMode(nextSort);
     hasHydratedUrlState.current = true;
   }, [
     enabled,
     normalizeCategory,
+    normalizePlatformFilter,
     normalizeSortMode,
     normalizeUtilityFilter,
     setCategory,
+    setPlatformFilter,
     setQuery,
     setSortMode,
     setUtilityFilter,
@@ -87,6 +99,12 @@ export function useBrowseUrlSync(params: UseBrowseUrlSyncParams) {
       urlParams.delete("utility");
     }
 
+    if (platformFilter !== "all") {
+      urlParams.set("platform", platformFilter);
+    } else {
+      urlParams.delete("platform");
+    }
+
     if (sortMode !== "popular") {
       urlParams.set("sort", sortMode);
     } else {
@@ -96,5 +114,5 @@ export function useBrowseUrlSync(params: UseBrowseUrlSyncParams) {
     const search = urlParams.toString();
     const nextUrl = `${window.location.pathname}${search ? `?${search}` : ""}`;
     window.history.replaceState(null, "", nextUrl);
-  }, [category, enabled, query, sortMode, utilityFilter]);
+  }, [category, enabled, platformFilter, query, sortMode, utilityFilter]);
 }

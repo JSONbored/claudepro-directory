@@ -4,12 +4,6 @@ on:
   issues:
     types:
       - labeled
-  workflow_dispatch:
-    inputs:
-      issue_number:
-        description: Issue number to import after maintainer approval
-        required: true
-        type: number
 
 permissions:
   contents: write
@@ -18,11 +12,11 @@ permissions:
 
 jobs:
   import-submission:
-    if: github.event_name == 'workflow_dispatch' || (github.event.action == 'labeled' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'content-submission') && (github.event.label.name == 'accepted' || github.event.label.name == 'import-approved'))
+    if: github.event.action == 'labeled' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'content-submission') && (github.event.label.name == 'accepted' || github.event.label.name == 'import-approved')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
-      group: submission-import-${{ github.event.issue.number || inputs.issue_number }}
+      group: submission-import-${{ github.event.issue.number }}
       cancel-in-progress: true
 
     steps:
@@ -46,7 +40,7 @@ jobs:
         with:
           script: |
             const fs = require("node:fs");
-            const issueNumber = context.payload.issue?.number || Number("${{ inputs.issue_number }}");
+            const issueNumber = context.payload.issue?.number;
             if (!issueNumber) core.setFailed("Missing issue number");
             const { data: issue } = await github.rest.issues.get({
               ...context.repo,

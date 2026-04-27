@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://www.w3.org/WAI/WCAG22/quickref/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/wcag-accessibility-auditor
+- Source URLs: https://www.w3.org/WAI/WCAG22/quickref/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in WCAG 2.2 Level AA accessibility compliance, automated testing tools, ARIA patterns, and inclusive design for web applications
 ## Tags

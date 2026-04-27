@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://docs.claude.ai/commands/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/docs.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/docs
+- Source URLs: https://docs.claude.ai/commands/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/docs.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides
 ## Tags

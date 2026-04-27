@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://playwright.dev/docs/best-practices
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx
 Download: /downloads/skills/browser-agent-workflow-automation.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/browser-agent-workflow-automation
+- Source URLs: https://playwright.dev/docs/best-practices, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/browser-agent-workflow-automation.mdx
+- Package URL: /downloads/skills/browser-agent-workflow-automation.zip
+- Package SHA256: 6aa6e8c44b99d7cf368236a7567453abefb91476ba74d431c992b409c5cfc8f3
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build robust browser automation workflows for AI agents with deterministic selectors, retries, and safe action boundaries.
 ## Tags
@@ -26,7 +35,9 @@ This skill provides a practical framework for building browser-driven agent work
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Clearly defined desired outcome and termination condition

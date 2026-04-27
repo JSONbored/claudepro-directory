@@ -4,6 +4,12 @@ Category: guides
 Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-codewhisperer-gemini.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/claude-vs-codewhisperer-gemini
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-codewhisperer-gemini.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Compare Claude vs Amazon Q Developer vs Gemini Code for AWS cloud development. Real benchmarks, pricing analysis, and production use cases for selection.
 ## Tags

@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2025-10-02
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/code-quality-toolkit.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/code-quality-toolkit
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/code-quality-toolkit.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Comprehensive suite of tools for maintaining high code quality through automated reviews, testing, and best practice enforcement. Essential for teams focused on code excellence.
 ## Tags

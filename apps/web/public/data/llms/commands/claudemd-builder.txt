@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/claude-md
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/claudemd-builder.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/claudemd-builder
+- Source URLs: https://docs.claude.com/en/docs/claude-code/claude-md, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/claudemd-builder.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Generate project-specific CLAUDE.md files with coding standards, architecture notes, and context preservation for team-wide AI consistency and efficient onboarding
 ## Tags

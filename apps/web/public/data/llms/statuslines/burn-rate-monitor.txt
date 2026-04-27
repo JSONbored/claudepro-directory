@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/statusline
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/burn-rate-monitor
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Real-time burn rate monitor showing cost per minute, tokens per minute, and projected daily spend to prevent budget overruns during Claude Code sessions.
 ## Tags

@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://modelcontextprotocol.io/specification/2025-06-18
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-security-hardening.mdx
 Download: /downloads/skills/mcp-server-security-hardening.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/mcp-server-security-hardening
+- Source URLs: https://modelcontextprotocol.io/specification/2025-06-18, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-server-security-hardening.mdx
+- Package URL: /downloads/skills/mcp-server-security-hardening.zip
+- Package SHA256: d55bf62f2aa6f52fa38a0e362cd9e5da2cc52c9d6012037f4a98919fbd342a88
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Secure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.
 ## Tags
@@ -26,7 +35,9 @@ This skill provides a production security baseline for MCP servers. It focuses o
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - MCP server code and runtime configuration

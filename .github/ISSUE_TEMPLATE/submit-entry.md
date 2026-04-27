@@ -13,7 +13,7 @@ assignees: []
 - GitHub URL:
 - Docs URL:
 - Install / usage:
-- Contact email:
+- Public contact:
 - Tags:
 
 ## What it does

@@ -424,8 +424,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -567,8 +567,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -631,8 +631,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -801,8 +801,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -1169,8 +1169,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -1494,8 +1494,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -1685,8 +1685,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -1822,8 +1822,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -2529,8 +2529,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -2744,8 +2744,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -2808,8 +2808,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -2950,8 +2950,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -3143,8 +3143,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -3207,8 +3207,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -3500,8 +3500,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -3587,8 +3587,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -4173,8 +4173,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -4365,8 +4365,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -4533,8 +4533,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -4597,8 +4597,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -4710,8 +4710,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -5337,8 +5337,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -5401,8 +5401,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -5465,8 +5465,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -5710,8 +5710,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -5902,8 +5902,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-27"
         },
         {
@@ -6045,8 +6045,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -6158,8 +6158,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -6222,8 +6222,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -6416,8 +6416,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -6753,8 +6753,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -6862,8 +6862,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -6975,8 +6975,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -7039,8 +7039,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -7156,8 +7156,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -7295,8 +7295,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -7441,8 +7441,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -7712,8 +7712,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -7776,8 +7776,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -7840,8 +7840,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8035,8 +8035,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8099,8 +8099,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8163,8 +8163,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -8250,8 +8250,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8340,8 +8340,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8636,8 +8636,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -8700,8 +8700,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8842,8 +8842,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -9068,8 +9068,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9232,8 +9232,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9296,8 +9296,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9515,8 +9515,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9862,8 +9862,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -9975,8 +9975,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -10687,8 +10687,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -10777,8 +10777,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -11125,8 +11125,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -11266,8 +11266,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -11330,8 +11330,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -11394,8 +11394,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -11507,8 +11507,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -11620,8 +11620,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -11785,8 +11785,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -11874,8 +11874,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -11961,8 +11961,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -12224,8 +12224,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -12288,8 +12288,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {

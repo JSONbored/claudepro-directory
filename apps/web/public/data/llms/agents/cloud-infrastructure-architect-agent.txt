@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/cloud-infrastructure-architect-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/cloud-infrastructure-architect-agent
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/cloud-infrastructure-architect-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Multi-cloud infrastructure specialist focused on AWS, GCP, and Azure architecture, cost optimization, disaster recovery, high availability, and cloud-native design patterns
 ## Tags

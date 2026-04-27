@@ -6,6 +6,12 @@ Date added: 2026-04-27
 Documentation: https://microsoft.github.io/autogen/
 Repository: https://github.com/microsoft/autogen
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/microsoft-autogen
+- Source URLs: https://microsoft.github.io/autogen/, https://github.com/microsoft/autogen, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx
+- Author: Microsoft
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Open-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.
 ## Tags

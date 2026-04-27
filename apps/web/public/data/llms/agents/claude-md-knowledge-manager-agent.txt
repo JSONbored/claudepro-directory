@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-23
 Documentation: https://docs.claude.com/en/docs/claude-code/custom-instructions
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-md-knowledge-manager-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/claude-md-knowledge-manager-agent
+- Source URLs: https://docs.claude.com/en/docs/claude-code/custom-instructions, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-md-knowledge-manager-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 CLAUDE.md specialist for creating, maintaining, and optimizing project-specific AI instructions that survive context compaction and guide development.
 ## Tags

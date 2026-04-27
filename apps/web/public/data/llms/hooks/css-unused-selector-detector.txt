@@ -4,6 +4,12 @@ Category: hooks
 Author: JSONbored
 Date added: 2025-09-19
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/css-unused-selector-detector.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/css-unused-selector-detector
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/css-unused-selector-detector.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Detects unused CSS selectors when stylesheets are modified to keep CSS lean using PurgeCSS, PostCSS, and content analysis. This hook runs on CSS/SCSS file write/edit operations and analyzes stylesheets to identify unused selectors, generate optimized output, and report before/after size metrics.
 ## Tags

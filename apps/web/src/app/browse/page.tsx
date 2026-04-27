@@ -30,6 +30,7 @@ type BrowsePageProps = {
     q?: string;
     category?: string;
     utility?: string;
+    platform?: string;
     sort?: string;
   }>;
 };
@@ -81,6 +82,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         initialQuery={params?.q ?? ""}
         initialCategory={params?.category ?? "all"}
         initialUtilityFilter={params?.utility ?? "all"}
+        initialPlatformFilter={params?.platform ?? "all"}
         initialSortMode={params?.sort ?? "popular"}
         limit={15}
         entriesUrl="/data/directory-index.json"

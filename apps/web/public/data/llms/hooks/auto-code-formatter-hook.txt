@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://prettier.io/docs/en/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-code-formatter-hook.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/auto-code-formatter-hook
+- Source URLs: https://prettier.io/docs/en/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-code-formatter-hook.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically formats code files after Claude writes or edits them using industry-standard formatters including Prettier 3.6.2+ (JavaScript/TypeScript/Web), Black or Ruff (Python), gofmt (Go), and rustfmt (Rust).
 ## Tags

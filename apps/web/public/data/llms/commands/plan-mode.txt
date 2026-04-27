@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/extended-thinking
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/plan-mode.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/plan-mode
+- Source URLs: https://docs.claude.com/en/docs/claude-code/extended-thinking, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/plan-mode.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Activate Claude's extended thinking mode with multi-level planning depth from 'think' to 'ultrathink' for comprehensive strategy creation before implementation
 ## Tags

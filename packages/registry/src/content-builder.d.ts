@@ -23,5 +23,6 @@ export function buildContentEntryFromMdx(params: {
   source: string;
   repoRoot: string;
   contentRoot: string;
+  contentUpdatedAt?: string;
   getLocalDownloadSha256?: (localDownloadPath: string) => string | null;
 }): ContentEntry;

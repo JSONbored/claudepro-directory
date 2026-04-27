@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/multi-agent-orchestration-specialist.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/multi-agent-orchestration-specialist
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/multi-agent-orchestration-specialist.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Multi-agent orchestration specialist using LangGraph and CrewAI for complex, stateful workflows with graph-driven reasoning and role-based agent coordination
 ## Tags

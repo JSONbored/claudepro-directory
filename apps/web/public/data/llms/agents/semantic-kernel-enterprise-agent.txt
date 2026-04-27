@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/semantic-kernel-enterprise-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/semantic-kernel-enterprise-agent
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/semantic-kernel-enterprise-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Microsoft Semantic Kernel enterprise agent specialist for building Azure-native AI applications with multi-language SDK support, plugin governance, and enterprise-grade deployment
 ## Tags

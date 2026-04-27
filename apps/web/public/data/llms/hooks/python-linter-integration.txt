@@ -4,6 +4,12 @@ Category: hooks
 Author: JSONbored
 Date added: 2025-09-19
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/python-linter-integration
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically runs pylint on Python files after editing to enforce code quality standards.
 ## Tags

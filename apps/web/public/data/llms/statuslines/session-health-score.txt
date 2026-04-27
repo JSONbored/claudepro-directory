@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/statusline
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-health-score.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/session-health-score
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-health-score.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Claude Code session health aggregator providing A-F grade based on cost efficiency, latency performance, productivity velocity, and cache utilization with actionable recommendations.
 ## Tags

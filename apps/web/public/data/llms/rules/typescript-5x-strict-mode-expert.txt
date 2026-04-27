@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://www.typescriptlang.org/docs/handbook/2/basic-types.html
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/typescript-5x-strict-mode-expert.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/typescript-5x-strict-mode-expert
+- Source URLs: https://www.typescriptlang.org/docs/handbook/2/basic-types.html, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/typescript-5x-strict-mode-expert.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 TypeScript 5.x strict mode expert with template literal types, strict null checks, type guards, and ESLint integration for enterprise-grade type safety
 ## Tags

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-15
 Documentation: https://kubernetes.io/docs/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/devops-sre-expert.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/devops-sre-expert
+- Source URLs: https://kubernetes.io/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/devops-sre-expert.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Transform Claude into a DevOps/SRE specialist with expertise in cloud infrastructure, CI/CD, monitoring, and automation
 ## Tags

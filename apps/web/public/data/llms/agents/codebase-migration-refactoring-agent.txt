@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://refactoring.guru/refactoring/catalog
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/codebase-migration-refactoring-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/codebase-migration-refactoring-agent
+- Source URLs: https://refactoring.guru/refactoring/catalog, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/codebase-migration-refactoring-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 AI agent specialized in large-scale codebase migrations and behavior-preserving refactoring. Handles framework upgrades, library migrations, legacy code modernization, and systematic refactoring for Claude Code.
 ## Tags

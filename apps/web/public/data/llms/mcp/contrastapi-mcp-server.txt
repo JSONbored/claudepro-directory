@@ -6,6 +6,12 @@ Date added: 2026-04-20
 Documentation: https://api.contrastcyber.com
 Repository: https://github.com/UPinar/contrastapi
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/contrastapi-mcp-server
+- Source URLs: https://api.contrastcyber.com, https://github.com/UPinar/contrastapi, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx
+- Author: UPinar
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.
 ## Tags

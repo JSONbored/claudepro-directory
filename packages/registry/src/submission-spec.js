@@ -48,10 +48,12 @@ const BASE_FIELDS = [
   },
   {
     id: "contact_email",
-    label: "Contact email",
-    type: "email",
-    required: true,
-    placeholder: "you@example.com",
+    label: "Public contact",
+    type: "text",
+    required: false,
+    placeholder: "@github-handle or email if you want it public",
+    helpText:
+      "Optional. This is copied into a public GitHub issue, so do not include private contact details.",
   },
   {
     id: "tags",

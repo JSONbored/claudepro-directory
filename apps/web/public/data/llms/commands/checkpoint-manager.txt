@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/checkpointing
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/checkpoint-manager.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/checkpoint-manager
+- Source URLs: https://docs.claude.com/en/docs/claude-code/checkpointing, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/checkpoint-manager.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Manage Claude Code checkpoints to safely rewind code changes, restore conversation states, and explore alternatives without fear using ESC+ESC or /rewind commands
 ## Tags

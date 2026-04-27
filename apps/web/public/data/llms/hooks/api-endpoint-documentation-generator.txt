@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://swagger.io/docs/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/api-endpoint-documentation-generator
+- Source URLs: https://swagger.io/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically generates or updates API documentation when endpoint files are modified, supporting OpenAPI 3.1.0, Swagger 2.0, and AsyncAPI 2.0 specifications.
 ## Tags

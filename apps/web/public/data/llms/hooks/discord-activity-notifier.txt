@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://discord.com/developers/docs/resources/webhook
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/discord-activity-notifier.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/discord-activity-notifier
+- Source URLs: https://discord.com/developers/docs/resources/webhook, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/discord-activity-notifier.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Sends development activity updates to Discord channel for team collaboration. This Notification hook automatically sends rich embed messages to Discord webhooks when Claude Code activities occur, providing real-time team visibility into development workflows.
 ## Tags

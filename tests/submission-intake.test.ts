@@ -47,6 +47,14 @@ describe("submission intake", () => {
         (field) => field.id === "download_url" && !field.required,
       ),
     ).toBe(true);
+    expect(
+      model?.fields.some(
+        (field) =>
+          field.id === "contact_email" &&
+          field.label === "Public contact" &&
+          !field.required,
+      ),
+    ).toBe(true);
 
     const issueTemplate = buildIssueTemplateSpec("mcp");
     expect(issueTemplate).toBeTruthy();
@@ -64,7 +72,7 @@ describe("submission intake", () => {
       name: "Website Intake MCP",
       slug: "website-intake-mcp",
       category: "mcp",
-      contact_email: "dev@example.com",
+      contact_email: "@maintainer",
       docs_url: "https://example.com/docs",
       description:
         "MCP server submitted directly through the website intake API.",
@@ -121,7 +129,7 @@ Prompt-to-asset
 ### Category
 Mcp
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -141,10 +149,17 @@ claude mcp add prompt-to-asset -- npx -y prompt-to-asset`),
     expect(report.fields.slug).toBe("prompt-to-asset");
   });
 
-  it("accepts older submission labels without a parser shim", () => {
-    const report = validateSubmission(
-      issue(
-        `### Name
+  it("does not rely on the retired submission label", () => {
+    expect(
+      looksLikeSubmissionIssue({
+        body: "This old label by itself should not trigger the queue.",
+        labels: [{ name: "submission" }],
+        title: "General question",
+      }),
+    ).toBe(false);
+
+    const shapedIssue = issue(
+      `### Name
 ContrastAPI
 
 ### Slug
@@ -152,9 +167,6 @@ ContrastAPI
 
 ### Category
 mcp-server
-
-### Contact email
-dev@example.com
 
 ### Description
 MCP server for contrast checks.
@@ -167,12 +179,10 @@ npx -y contrastapi
 
 ### Usage snippet
 claude mcp add contrastapi -- npx -y contrastapi`,
-        ["submission"],
-      ),
+      ["submission"],
     );
-    expect(report.ok).toBe(true);
-    expect(report.category).toBe("mcp");
-    expect(report.fields.slug).toBe("contrastapi");
+    expect(looksLikeSubmissionIssue(shapedIssue)).toBe(true);
+    expect(validateSubmission(shapedIssue).ok).toBe(true);
   });
 
   it("detects and labels unlabeled submission-shaped issues", () => {
@@ -186,7 +196,7 @@ Prompt-to-asset
 ### Category
 Mcp
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -221,7 +231,7 @@ contrastapi
 ### Category
 mcp
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -244,7 +254,7 @@ unslop
 ### Category
 skills
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -274,7 +284,7 @@ Unslop
 ### Category
 Skill
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -305,7 +315,7 @@ local-package
 ### Category
 skills
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### Description
@@ -349,7 +359,7 @@ referral-tool
 ### Category
 mcp
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### GitHub URL
@@ -384,7 +394,7 @@ insecure-url-tool
 ### Category
 mcp
 
-### Contact email
+### Public contact
 dev@example.com
 
 ### GitHub URL

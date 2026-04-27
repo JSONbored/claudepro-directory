@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-16
 Documentation: https://docs.aws.amazon.com/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/aws-cloud-architect
+- Source URLs: https://docs.aws.amazon.com/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert AWS architect with deep knowledge of cloud services, best practices, and Well-Architected Framework
 ## Tags

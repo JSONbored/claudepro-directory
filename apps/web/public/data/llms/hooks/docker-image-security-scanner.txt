@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://aquasecurity.github.io/trivy/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-image-security-scanner.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/docker-image-security-scanner
+- Source URLs: https://aquasecurity.github.io/trivy/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-image-security-scanner.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Comprehensive Docker image vulnerability scanning with layer analysis, base image recommendations, and security best practices enforcement. This PostToolUse hook automatically scans Docker images for vulnerabilities when Dockerfiles are modified, providing real-time security validation during development.
 ## Tags

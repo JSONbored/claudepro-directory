@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://microsoft.github.io/autogen/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/autogen-workflow.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/autogen-workflow
+- Source URLs: https://microsoft.github.io/autogen/, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/autogen-workflow.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Orchestrate multi-agent workflows using Microsoft AutoGen v0.4 with role-based task delegation, conversation patterns, and collaborative problem solving
 ## Tags

@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2025-10-02
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/api-development-starter-kit.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/api-development-starter-kit
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/api-development-starter-kit.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Complete toolkit for building and documenting RESTful APIs with automated testing and documentation generation. Perfect for backend developers starting new API projects.
 ## Tags

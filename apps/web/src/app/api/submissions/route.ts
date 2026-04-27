@@ -134,6 +134,72 @@ async function createGitHubIssue(params: {
   };
 }
 
+async function findPendingSubmissionIssue(params: {
+  repo: string;
+  token: string;
+  category: string;
+  slug: string;
+}) {
+  const query = [
+    `repo:${params.repo}`,
+    "is:issue",
+    "is:open",
+    "label:content-submission",
+    `"${params.slug}"`,
+  ].join(" ");
+  const url = new URL("https://api.github.com/search/issues");
+  url.searchParams.set("q", query);
+  url.searchParams.set("per_page", "10");
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        accept: "application/vnd.github+json",
+        authorization: `Bearer ${params.token}`,
+        "x-github-api-version": GITHUB_API_VERSION,
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!response.ok) return null;
+    const payload = (await response.json()) as {
+      items?: Array<{
+        html_url?: string;
+        number?: number;
+        title?: string;
+        body?: string;
+        pull_request?: unknown;
+      }>;
+    };
+    const needleSlug = params.slug.toLowerCase();
+    const needleCategory = params.category.toLowerCase();
+    const duplicate = payload.items?.find((item) => {
+      if (item.pull_request) return false;
+      const haystack = `${item.title || ""}\n${item.body || ""}`.toLowerCase();
+      return haystack.includes(needleSlug) && haystack.includes(needleCategory);
+    });
+
+    return duplicate
+      ? {
+          issueUrl: String(duplicate.html_url || ""),
+          issueNumber:
+            typeof duplicate.number === "number" ? duplicate.number : undefined,
+        }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function requiresTurnstile(env: Record<string, unknown>) {
+  const value = envValue(env, [
+    "SUBMISSIONS_REQUIRE_TURNSTILE",
+    "REQUIRE_TURNSTILE",
+  ]).toLowerCase();
+  return value === "1" || value === "true" || value === "yes";
+}
+
 export async function POST(request: Request) {
   if (!isAllowedOrigin(request)) {
     logApiWarn(request, "submissions.forbidden_origin");
@@ -219,6 +285,17 @@ export async function POST(request: Request) {
 
   const env = getEnvRecord();
   const turnstileSecret = envValue(env, ["TURNSTILE_SECRET_KEY"]);
+  if (!turnstileSecret && requiresTurnstile(env)) {
+    logApiError(request, "submissions.turnstile_not_configured", {
+      category,
+      slug,
+    });
+    return NextResponse.json(
+      { error: "turnstile_not_configured", fallbackUrl },
+      { status: 503 },
+    );
+  }
+
   const turnstile = await verifyTurnstile({
     request,
     token: String(payload.turnstileToken || ""),
@@ -252,6 +329,31 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "submissions_not_configured", fallbackUrl },
       { status: 503 },
+    );
+  }
+
+  const pendingDuplicate = await findPendingSubmissionIssue({
+    repo,
+    token,
+    category,
+    slug,
+  });
+  if (pendingDuplicate) {
+    logApiWarn(request, "submissions.duplicate_pending_issue", {
+      category,
+      slug,
+      issueNumber: pendingDuplicate.issueNumber,
+    });
+    return NextResponse.json(
+      {
+        error: "duplicate_pending_issue",
+        category,
+        slug,
+        issueUrl: pendingDuplicate.issueUrl,
+        issueNumber: pendingDuplicate.issueNumber,
+        fallbackUrl,
+      },
+      { status: 409 },
     );
   }
 

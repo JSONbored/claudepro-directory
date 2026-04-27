@@ -4,6 +4,12 @@ Category: hooks
 Author: JSONbored
 Date added: 2025-09-19
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/cloud-backup-on-session-stop.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/cloud-backup-on-session-stop
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/cloud-backup-on-session-stop.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically backs up changed files to cloud storage when Claude Code session ends using AWS S3, Google Cloud Storage, or rclone for universal cloud provider support.
 ## Tags

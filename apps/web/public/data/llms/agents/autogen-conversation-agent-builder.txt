@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/autogen-conversation-agent-builder.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/autogen-conversation-agent-builder
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/autogen-conversation-agent-builder.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 AutoGen v0.4 conversation agent specialist using actor model architecture for building multi-turn dialogue systems with cross-language messaging and real-time tool invocation
 ## Tags

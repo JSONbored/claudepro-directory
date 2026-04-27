@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://docs.stripe.com/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx
 Download: /downloads/mcp/stripe-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/stripe-mcp-server
+- Source URLs: https://docs.stripe.com/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx
+- Package URL: /downloads/mcp/stripe-mcp-server.mcpb
+- Package SHA256: c9da8acb0af76bc240e21f66deab75e26380909a1d2dfb27e7d9965c679b8d9c
+- Author: Stripe
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Payment processing, subscription management, and financial transaction handling
 ## Tags

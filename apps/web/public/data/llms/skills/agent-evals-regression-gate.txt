@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://openai.com/index/new-tools-and-features-in-the-responses-api/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx
 Download: /downloads/skills/agent-evals-regression-gate.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/agent-evals-regression-gate
+- Source URLs: https://openai.com/index/new-tools-and-features-in-the-responses-api/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/agent-evals-regression-gate.mdx
+- Package URL: /downloads/skills/agent-evals-regression-gate.zip
+- Package SHA256: c11d9b5eecae8fa09374644ee91dd77197ecbc11f5f60519b9b161f4754214d3
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build repeatable eval suites that catch quality regressions in AI agent behavior before merge or release.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps you turn subjective "looks good" checks into measurable, repeat
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Baseline behavior snapshot from current stable version

@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://www.ycombinator.com/library
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-business-idea-validation-capability-pack.mdx
 Download: /downloads/skills/ai-business-idea-validation-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/ai-business-idea-validation-capability-pack
+- Source URLs: https://www.ycombinator.com/library, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-business-idea-validation-capability-pack.mdx
+- Package URL: /downloads/skills/ai-business-idea-validation-capability-pack.zip
+- Package SHA256: 9955465ac6dea7ab8837ab2ad18bf6a53f6635c72c85c7cff24025a9efbd8cfe
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert business-validation capability pack for testing AI product ideas, market demand, pricing readiness, and launch feasibility.
 ## Tags
@@ -48,7 +57,9 @@ This skill helps agents pressure-test business ideas before heavy build effort, 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Base decisions on direct demand evidence, not social vanity metrics.

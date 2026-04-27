@@ -5,6 +5,14 @@ Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx
 Download: /downloads/mcp/desktop-mcp-setup.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/desktop-mcp-setup
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx
+- Package URL: /downloads/mcp/desktop-mcp-setup.mcpb
+- Package SHA256: 57690091c83e5827fb0e82a2a6193d2da2171c6637fae598edb894029828d1b5
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.
 ## Tags

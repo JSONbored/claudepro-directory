@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://www.postgresql.org/docs/current/performance-tips.html
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/postgresql-query-optimization.mdx
 Download: /downloads/skills/postgresql-query-optimization.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/postgresql-query-optimization
+- Source URLs: https://www.postgresql.org/docs/current/performance-tips.html, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/postgresql-query-optimization.mdx
+- Package URL: /downloads/skills/postgresql-query-optimization.zip
+- Package SHA256: a180b68a318eb007218f5d5de00e12deaf980f75f5e4519eeecc550cba7715df
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Analyze and optimize PostgreSQL queries for OLTP and OLAP workloads with AI-assisted performance tuning, indexing strategies, and execution plan analysis.
 ## Tags
@@ -32,7 +41,9 @@ Claude can analyze PostgreSQL query performance, interpret EXPLAIN plans, design
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

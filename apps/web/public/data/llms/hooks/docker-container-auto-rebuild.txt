@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://docs.docker.com/compose/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-container-auto-rebuild.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/docker-container-auto-rebuild
+- Source URLs: https://docs.docker.com/compose/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-container-auto-rebuild.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically rebuilds Docker containers when Dockerfile or docker-compose.yml files are modified. This PostToolUse hook triggers automatic Docker image rebuilding when Docker-related files (Dockerfile, docker-compose.yml, .dockerignore) are modified, providing real-time container synchronization during development.
 ## Tags

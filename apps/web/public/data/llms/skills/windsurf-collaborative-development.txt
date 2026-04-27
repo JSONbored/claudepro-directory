@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://docs.codeium.com/windsurf
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/windsurf-collaborative-development.mdx
 Download: /downloads/skills/windsurf-collaborative-development.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/windsurf-collaborative-development
+- Source URLs: https://docs.codeium.com/windsurf, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/windsurf-collaborative-development.mdx
+- Package URL: /downloads/skills/windsurf-collaborative-development.zip
+- Package SHA256: 0dfd4b876ad1f9c90261eb51c6443c2988f0b7857b9e6b26f177e360fc401cd4
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Master collaborative AI-assisted development with Windsurf IDE's Cascade AI, multi-file context awareness, and Flow patterns for team workflows.
 ## Tags
@@ -26,7 +35,9 @@ Claude can guide you through Windsurf's AI-native development environment, featu
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

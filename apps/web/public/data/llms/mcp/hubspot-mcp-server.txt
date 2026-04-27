@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://developers.hubspot.com/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx
 Download: /downloads/mcp/hubspot-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/hubspot-mcp-server
+- Source URLs: https://developers.hubspot.com/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx
+- Package URL: /downloads/mcp/hubspot-mcp-server.mcpb
+- Package SHA256: a3d5e18765768e67f645b91f89c67d7163ebb763932652f693d85d1a260949c8
+- Author: HubSpot
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Access and manage HubSpot CRM data including contacts, companies, and deals
 ## Tags

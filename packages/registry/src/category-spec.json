@@ -27,7 +27,6 @@
     "name",
     "slug",
     "category",
-    "contact_email",
     "description",
     "card_description"
   ],

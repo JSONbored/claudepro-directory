@@ -11,6 +11,7 @@
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-10",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "seo",
       "content-strategy",
@@ -94,8 +95,8 @@
       },
       {
         "platform": "Gemini",
-        "supportLevel": "adapter",
-        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
         "verifiedAt": "2026-04-10"
       },
       {
@@ -114,7 +115,7 @@
     ],
     "downloadTrust": "first-party",
     "downloadSha256": "cc04f016dc2ee3f988e6fd411ff7406fc999b0c5f2377e7fc6e71d5f795dc2e8",
-    "body": "## Overview\n\nThis skill helps AI agents create practical, ranking-oriented content programs. It focuses on intent-driven coverage, robust internal linking, and repeatable publishing operations.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- ICP and audience pain points\n- Topic boundaries and business relevance\n- Publishing capacity estimate\n\n## What This Skill Delivers\n\n- Search intent map by funnel stage\n- Cluster architecture and page-level briefs\n- Internal link model for authority flow\n- Refresh strategy based on performance signals\n\n## How to Use This Skill\n\n1. Build keyword universe from real user problems.\n2. Group by intent and business relevance.\n3. Design pillar/cluster page architecture.\n4. Define internal links and conversion pathways.\n5. Publish, measure, and refresh using clear rules.\n\n## Troubleshooting\n\n**Issue:** Traffic grows but conversions stay flat  \n**Fix:** Align cluster CTAs and page intent with concrete user next steps.\n\n**Issue:** New pages cannibalize each other  \n**Fix:** Tighten intent separation and canonical/internal-link structure.\n\n**Issue:** Rankings plateau  \n**Fix:** Expand cluster depth and update aging pages with new evidence/examples.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://developers.google.com/search/docs\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
+    "body": "## Overview\n\nThis skill helps AI agents create practical, ranking-oriented content programs. It focuses on intent-driven coverage, robust internal linking, and repeatable publishing operations.\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Prerequisites\n\n- ICP and audience pain points\n- Topic boundaries and business relevance\n- Publishing capacity estimate\n\n## What This Skill Delivers\n\n- Search intent map by funnel stage\n- Cluster architecture and page-level briefs\n- Internal link model for authority flow\n- Refresh strategy based on performance signals\n\n## How to Use This Skill\n\n1. Build keyword universe from real user problems.\n2. Group by intent and business relevance.\n3. Design pillar/cluster page architecture.\n4. Define internal links and conversion pathways.\n5. Publish, measure, and refresh using clear rules.\n\n## Troubleshooting\n\n**Issue:** Traffic grows but conversions stay flat  \n**Fix:** Align cluster CTAs and page intent with concrete user next steps.\n\n**Issue:** New pages cannibalize each other  \n**Fix:** Tighten intent separation and canonical/internal-link structure.\n\n**Issue:** Rankings plateau  \n**Fix:** Expand cluster depth and update aging pages with new evidence/examples.\n\n## Knowledge Freshness\n\nTreat tooling details as time-sensitive. Re-validate APIs, limits, pricing, auth models, and deployment flags immediately before implementation. If docs conflict with prior memory, follow current official docs and release notes.\n\n## Retrieval Sources\n\n- https://developers.google.com/search/docs\n\n## Output Contract\n\n1. Return a concrete plan with implementation order.\n2. Provide production-ready commands/config/code snippets (not placeholders).\n3. Include explicit assumptions and unresolved risks.\n4. Include a verification checklist with pass/fail criteria.\n\n## Quality Gates\n\n- All commands are copy/paste ready.\n- Security-sensitive steps call out secret handling and least privilege.\n- Version-sensitive guidance cites current docs used.\n- Rollback path is included for risky changes.\n- Final output includes quick validation commands/tests.",
     "sections": [
       {
         "title": "Overview",
@@ -125,7 +126,7 @@
       {
         "title": "Compatibility",
         "id": "compatibility",
-        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
         "codeBlocks": []
       },
       {

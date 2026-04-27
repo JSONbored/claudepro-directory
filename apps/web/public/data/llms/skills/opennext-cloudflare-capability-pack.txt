@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://opennext.js.org/cloudflare/get-started
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/opennext-cloudflare-capability-pack.mdx
 Download: /downloads/skills/opennext-cloudflare-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/opennext-cloudflare-capability-pack
+- Source URLs: https://opennext.js.org/cloudflare/get-started, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/opennext-cloudflare-capability-pack.mdx
+- Package URL: /downloads/skills/opennext-cloudflare-capability-pack.zip
+- Package SHA256: 0254c5d9edfe925907cfca3f06a24c866ecd42e1e7ef51ad64b2a5518199360c
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Expert OpenNext + Cloudflare capability skill for Next.js on Workers, runtime constraints, cache strategy, and production-safe deploy architecture.
 ## Tags
@@ -51,7 +60,9 @@ This capability pack teaches agents how to correctly design, deploy, and operate
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Treat API routes and static routes with separate cache/security policies.

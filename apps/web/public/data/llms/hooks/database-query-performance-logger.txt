@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://www.postgresql.org/docs/current/runtime-config-logging.html
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-query-performance-logger.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/database-query-performance-logger
+- Source URLs: https://www.postgresql.org/docs/current/runtime-config-logging.html, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-query-performance-logger.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Monitors and logs database query performance metrics with slow query detection, N+1 analysis, and optimization suggestions using PostgreSQL pg_stat_statements, Prisma query logging, Sequelize query logging, TypeORM query logging, and Bullet N+1 detection patterns.
 ## Tags

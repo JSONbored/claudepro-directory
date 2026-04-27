@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://docs.github.com/en/actions
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx
 Download: /downloads/skills/github-actions-ai-cicd.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/github-actions-ai-cicd
+- Source URLs: https://docs.github.com/en/actions, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx
+- Package URL: /downloads/skills/github-actions-ai-cicd.zip
+- Package SHA256: 8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build intelligent CI/CD pipelines with GitHub Actions, AI-assisted workflow generation, automated testing, and deployment orchestration.
 ## Tags
@@ -26,7 +35,9 @@ Claude can design, generate, and optimize GitHub Actions workflows for comprehen
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

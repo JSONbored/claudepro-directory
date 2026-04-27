@@ -6,6 +6,12 @@ Date added: 2025-10-01
 Documentation: https://github.com/powerline/powerline
 Repository: https://github.com/powerline/powerline
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/minimal-powerline
+- Source URLs: https://github.com/powerline/powerline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Clean, performance-optimized statusline with Powerline glyphs showing model, directory, and token count
 ## Tags

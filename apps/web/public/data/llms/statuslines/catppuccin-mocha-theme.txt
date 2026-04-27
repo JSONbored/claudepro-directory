@@ -6,6 +6,12 @@ Date added: 2025-10-23
 Documentation: https://github.com/catppuccin/catppuccin
 Repository: https://github.com/catppuccin/catppuccin
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/catppuccin-mocha-theme
+- Source URLs: https://github.com/catppuccin/catppuccin, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Soothing Catppuccin Mocha theme statusline with 26 pastel colors, Powerline separators, and modular segments for Git, model info, and token tracking.
 ## Tags

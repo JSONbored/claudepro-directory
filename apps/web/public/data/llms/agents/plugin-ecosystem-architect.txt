@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-25
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/plugin-ecosystem-architect.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/plugin-ecosystem-architect
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/plugin-ecosystem-architect.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Design and publish Claude Code plugins for the October 2025 marketplace launch. Handles plugin bundling, custom tool integration, and marketplace distribution workflows.
 ## Tags

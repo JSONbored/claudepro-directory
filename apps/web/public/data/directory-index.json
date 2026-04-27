@@ -14,6 +14,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cursor",
         "ai-rules",
@@ -70,6 +71,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "debugging",
         "troubleshooting",
@@ -125,6 +127,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "api-docs",
@@ -181,6 +184,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "explanation",
         "documentation",
@@ -237,6 +241,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "performance",
         "optimization",
@@ -292,6 +297,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "refactoring",
         "code-quality",
@@ -347,6 +353,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "refactoring",
         "code-quality",
@@ -402,6 +409,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-review",
         "security",
@@ -457,6 +465,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "audit",
@@ -511,6 +520,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security-audit",
         "enterprise",
@@ -571,6 +581,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "unit-tests",
@@ -627,6 +638,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-26",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "zod",
         "validation",
@@ -700,6 +712,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "accessibility",
         "a11y",
@@ -757,6 +770,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "accessibility",
         "wcag",
@@ -821,6 +835,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "evals",
         "regression",
@@ -904,8 +919,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -941,6 +956,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ai-operators",
         "growth",
@@ -1053,6 +1069,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "agent-skills",
         "procedural-knowledge",
@@ -1106,6 +1123,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "skills",
         "agent-skills",
@@ -1162,6 +1180,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "observability",
         "incident-response",
@@ -1245,8 +1264,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -1282,6 +1301,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "business",
         "validation",
@@ -1367,8 +1387,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -1404,6 +1424,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "code-review",
@@ -1457,6 +1478,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "devops",
         "automation",
@@ -1510,6 +1532,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "dashboard",
         "performance",
@@ -1575,6 +1598,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ai",
         "prompt-engineering",
@@ -1628,6 +1652,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "seo",
         "content-strategy",
@@ -1711,8 +1736,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -1747,6 +1772,7 @@
       "seoDescription": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows.",
       "author": "Aider",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "terminal-agent",
         "open-source"
@@ -1790,6 +1816,7 @@
       "seoDescription": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development.",
       "author": "domdomegg",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "airtable",
@@ -1860,6 +1887,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api",
         "rest",
@@ -1913,6 +1941,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api",
         "rest",
@@ -1967,6 +1996,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api",
         "backend",
@@ -2050,6 +2080,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api",
         "documentation",
@@ -2107,6 +2138,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api-design",
         "openapi",
@@ -2163,6 +2195,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "api-latency",
         "performance",
@@ -2225,6 +2258,7 @@
       "seoDescription": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows.",
       "author": "Apify",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "web-automation",
         "data-extraction"
@@ -2268,6 +2302,7 @@
       "seoDescription": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents.",
       "author": "Arcade",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "tool-calling",
         "agents"
@@ -2311,6 +2346,7 @@
       "seoDescription": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
       "author": "Arize AI",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "observability",
         "evaluation"
@@ -2354,6 +2390,7 @@
       "seoDescription": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development.",
       "author": "Asana",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "asana",
         "project-management",
@@ -2424,6 +2461,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "audio",
         "transcription",
@@ -2509,8 +2547,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -2546,6 +2584,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "formatting",
         "prettier",
@@ -2603,6 +2642,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "backup",
         "safety",
@@ -2658,6 +2698,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "autogen",
         "microsoft",
@@ -2710,6 +2751,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "autogen",
         "multi-agent",
@@ -2765,6 +2807,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "aws",
         "cloud",
@@ -2818,6 +2861,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "aws",
         "cloudformation",
@@ -2875,6 +2919,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "aws",
         "cloud",
@@ -2963,6 +3008,7 @@
       "seoDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring Discover tools for AI development.",
       "author": "AWS Labs",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "aws",
         "cloud",
@@ -3033,6 +3079,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "backend",
         "architecture",
@@ -3086,6 +3133,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "backend",
         "architecture",
@@ -3170,6 +3218,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "base",
         "layer2",
@@ -3253,8 +3302,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -3290,6 +3339,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "biome",
         "linting",
@@ -3345,6 +3395,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "timer",
         "session-block",
@@ -3408,6 +3459,7 @@
       "seoDescription": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
       "author": "StackBlitz",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "app-builder",
         "prototyping"
@@ -3451,6 +3503,7 @@
       "seoDescription": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development.",
       "author": "Box",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "storage",
         "box",
@@ -3520,6 +3573,7 @@
       "seoDescription": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications.",
       "author": "Braintrust",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "evaluation",
         "prompt-testing"
@@ -3564,6 +3618,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "browser-automation",
         "ai-agents",
@@ -3647,8 +3702,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -3683,6 +3738,7 @@
       "seoDescription": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites.",
       "author": "Browser Use",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "browser-automation",
         "open-source"
@@ -3726,6 +3782,7 @@
       "seoDescription": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction.",
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "browser-automation",
         "agent-infrastructure"
@@ -3770,6 +3827,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp-development",
         "claude-desktop",
@@ -3822,6 +3880,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "bun",
         "runtime",
@@ -3908,8 +3967,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -3945,6 +4004,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "burn-rate",
         "cost-tracking",
@@ -4008,6 +4068,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "prompt-caching",
         "cache-efficiency",
@@ -4070,6 +4131,7 @@
       "seoDescription": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development.",
       "author": "Canva",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "design",
         "canva",
@@ -4140,6 +4202,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "catppuccin",
         "mocha",
@@ -4204,6 +4267,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "intermediate",
@@ -4254,6 +4318,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "checkpoints",
         "rewind",
@@ -4310,6 +4375,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "advanced",
@@ -4360,6 +4426,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "advanced",
@@ -4409,6 +4476,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "healthcare",
         "enterprise",
@@ -4459,6 +4527,7 @@
       "seoDescription": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows.",
       "author": "Anthropic",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "claude-code",
         "terminal-agent"
@@ -4500,6 +4569,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "statusline",
@@ -4566,6 +4636,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "workflow",
         "enterprise development",
@@ -4616,6 +4687,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "comparison",
         "AI coding assistants",
@@ -4666,6 +4738,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "intermediate",
@@ -4716,6 +4789,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "intermediate",
@@ -4784,6 +4858,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "use-case",
         "financial-services",
@@ -4834,6 +4909,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "haiku-4.5",
         "speed",
@@ -4888,6 +4964,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp-servers",
         "configuration",
@@ -4939,6 +5016,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "skills",
@@ -4993,6 +5071,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "use-case",
         "enterprise",
@@ -5043,6 +5122,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "advanced",
@@ -5093,6 +5173,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "comparison",
         "cloud-development",
@@ -5143,6 +5224,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "comparison",
         "python-development",
@@ -5193,6 +5275,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "claude-md",
         "project-context",
@@ -5250,6 +5333,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "claude-md",
         "project-instructions",
@@ -5305,6 +5389,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "visualization",
         "charts",
@@ -5390,8 +5475,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -5426,6 +5511,7 @@
       "seoDescription": "Task management and project tracking with ClickUp integration Discover tools for AI development.",
       "author": "hauptsacheNet",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "project-management",
         "clickup",
@@ -5495,6 +5581,7 @@
       "seoDescription": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools.",
       "author": "Cline",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "vs-code",
         "coding-agent"
@@ -5539,6 +5626,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "backup",
         "cloud",
@@ -5595,6 +5683,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cloud",
         "aws",
@@ -5648,6 +5737,7 @@
       "seoDescription": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives.",
       "author": "Cloudflare",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "agent-framework",
         "cloudflare"
@@ -5691,6 +5781,7 @@
       "seoDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development.",
       "author": "Cloudflare",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cloudflare",
         "cdn",
@@ -5761,6 +5852,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cloudflare",
         "edge-computing",
@@ -5847,8 +5939,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -5884,6 +5976,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "cloudflare",
         "workers",
@@ -5970,8 +6063,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -6006,6 +6099,7 @@
       "seoDescription": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development.",
       "author": "Cloudinary",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "media",
         "cloudinary",
@@ -6076,6 +6170,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "complexity",
         "code-quality",
@@ -6132,6 +6227,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-quality",
         "review",
@@ -6209,6 +6305,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-review",
         "pull-requests",
@@ -6294,8 +6391,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -6331,6 +6428,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-review",
         "best-practices",
@@ -6383,6 +6481,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-review",
         "quality",
@@ -6436,6 +6535,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "automation",
@@ -6493,6 +6593,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "migration",
         "refactoring",
@@ -6549,6 +6650,7 @@
       "seoDescription": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops.",
       "author": "CodeRabbit",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "code-review",
         "pull-requests"
@@ -6593,6 +6695,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "codex",
         "automation",
@@ -6678,8 +6781,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -6715,6 +6818,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "codex",
         "plugins",
@@ -6800,8 +6904,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -6837,6 +6941,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "workflow",
         "migration",
@@ -6886,6 +6991,7 @@
       "seoDescription": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations.",
       "author": "Composio",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "tool-integrations",
         "agents"
@@ -6929,6 +7035,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "content",
         "marketing",
@@ -7017,6 +7124,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "context-analysis",
         "codebase-understanding",
@@ -7073,6 +7181,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "context-management",
         "optimization",
@@ -7126,6 +7235,7 @@
       "seoDescription": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows.",
       "author": "Continue",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-coding",
         "open-source"
@@ -7169,6 +7279,7 @@
       "seoDescription": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
       "author": "UPinar",
       "dateAdded": "2026-04-20",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "cve",
@@ -7220,6 +7331,7 @@
       "seoDescription": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems.",
       "author": "CrewAI",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "agent-framework",
         "multi-agent"
@@ -7264,6 +7376,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "css",
         "optimization",
@@ -7320,6 +7433,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "csv",
         "xlsx",
@@ -7406,8 +7520,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -7442,6 +7556,7 @@
       "seoDescription": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows.",
       "author": "Cursor",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-coding",
         "code-editor"
@@ -7486,6 +7601,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cursor",
         "windsurf",
@@ -7572,8 +7688,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -7609,6 +7725,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "daily-limit",
         "quota-tracking",
@@ -7671,6 +7788,7 @@
       "seoDescription": "Access high-quality fundamental financial data from SEC filings and investor presentations Discover tools for AI development.",
       "author": "Daloopa",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "finance",
         "daloopa",
@@ -7741,6 +7859,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "data",
         "database",
@@ -7834,6 +7953,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "data-engineering",
         "etl",
@@ -7888,6 +8008,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "cleanup",
@@ -7944,6 +8065,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "sql",
@@ -7999,6 +8121,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "migration",
@@ -8056,6 +8179,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "performance",
@@ -8113,6 +8237,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "database",
         "sql",
@@ -8166,6 +8291,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "code-quality",
         "cleanup",
@@ -8223,6 +8349,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "debugging",
         "troubleshooting",
@@ -8300,6 +8427,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "debugging",
         "troubleshooting",
@@ -8352,6 +8480,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "dependencies",
@@ -8408,6 +8537,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "dependencies",
@@ -8465,6 +8595,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "dependencies",
         "security",
@@ -8521,6 +8652,7 @@
       "seoDescription": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks.",
       "author": "Cognition",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "coding-agent",
         "autonomous-agent"
@@ -8565,6 +8697,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "devops",
         "sre",
@@ -8619,6 +8752,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "discord",
         "notification",
@@ -8675,6 +8809,7 @@
       "seoDescription": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development.",
       "author": "saseq",
       "dateAdded": "2025-09-20",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "discord",
         "bot",
@@ -8745,6 +8880,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "stop-hook",
@@ -8801,6 +8937,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "docker-compose",
@@ -8884,8 +9021,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -8921,6 +9058,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "containers",
@@ -8977,6 +9115,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "security",
@@ -9034,6 +9173,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docker",
         "containers",
@@ -9104,6 +9244,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "code-quality",
@@ -9161,6 +9302,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "automation",
@@ -9218,6 +9360,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "docx",
         "reports",
@@ -9303,8 +9446,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -9340,6 +9483,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "healthcare",
         "legal",
@@ -9392,6 +9536,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cleanup",
         "stop-hook",
@@ -9448,6 +9593,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "environment",
         "configuration",
@@ -9505,6 +9651,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "errors",
         "monitoring",
@@ -9561,6 +9708,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "ethereum",
         "base",
@@ -9647,8 +9795,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9684,6 +9832,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ethereum",
         "solidity",
@@ -9767,8 +9916,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -9803,6 +9952,7 @@
       "seoDescription": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery.",
       "author": "Exa",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "search",
         "retrieval"
@@ -9847,6 +9997,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "extended-thinking",
         "deep-reasoning",
@@ -9900,6 +10051,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "fastapi",
         "python",
@@ -9986,8 +10138,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -10022,6 +10174,7 @@
       "seoDescription": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development.",
       "author": "Figma",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "design",
         "figma",
@@ -10092,6 +10245,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "file-size",
         "performance",
@@ -10147,6 +10301,7 @@
       "seoDescription": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "filesystem",
         "files",
@@ -10217,6 +10372,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "bundle-size",
         "performance",
@@ -10272,6 +10428,7 @@
       "seoDescription": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications.",
       "author": "Firecrawl",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "web-crawling",
         "data-extraction"
@@ -10315,6 +10472,7 @@
       "seoDescription": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development.",
       "author": "Fireflies",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "meetings",
         "fireflies",
@@ -10385,6 +10543,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "5-hour-window",
         "session-tracking",
@@ -10448,6 +10607,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "environment-variables",
         "configuration",
@@ -10500,6 +10660,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tutorial",
         "beginner",
@@ -10550,6 +10711,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "claude-code",
         "performance",
@@ -10602,6 +10764,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "troubleshooting",
         "mcp-servers",
@@ -10652,6 +10815,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "frontend",
         "react",
@@ -10706,6 +10870,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "full-stack",
         "ai",
@@ -10759,6 +10924,7 @@
       "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks.",
       "author": "NVIDIA",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "security",
         "red-teaming"
@@ -10803,6 +10969,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "automation",
@@ -10857,6 +11024,7 @@
       "seoDescription": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality.",
       "author": "Giskard",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "evaluation",
         "security"
@@ -10901,6 +11069,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "version-control",
@@ -10957,6 +11126,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "branch-protection",
@@ -11011,6 +11181,7 @@
       "seoDescription": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "version-control",
@@ -11081,6 +11252,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "validation",
@@ -11138,6 +11310,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "commit",
@@ -11197,6 +11370,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git",
         "version-control",
@@ -11261,6 +11435,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "git-cliff",
         "changelog",
@@ -11346,8 +11521,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -11383,6 +11558,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "github-actions",
         "ci-cd",
@@ -11469,8 +11645,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -11506,6 +11682,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "github-actions",
         "cicd",
@@ -11591,8 +11768,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -11628,6 +11805,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "github-actions",
         "ci-cd",
@@ -11684,6 +11862,7 @@
       "seoDescription": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors.",
       "author": "GitHub",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-coding",
         "code-review"
@@ -11727,6 +11906,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "github-copilot",
         "cross-platform",
@@ -11779,6 +11959,7 @@
       "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
       "author": "GitHub",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "github",
         "git",
@@ -11849,6 +12030,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "golang",
         "go",
@@ -11902,6 +12084,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "golang",
         "go",
@@ -11957,6 +12140,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "go",
         "golang",
@@ -12013,6 +12197,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "google-workspace",
         "gemini",
@@ -12096,8 +12281,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -12132,6 +12317,7 @@
       "seoDescription": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows.",
       "author": "Graphite",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "code-review",
         "pull-requests"
@@ -12175,6 +12361,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "graphql",
         "federation",
@@ -12228,6 +12415,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "graphql",
         "api",
@@ -12283,6 +12471,7 @@
       "seoDescription": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications.",
       "author": "Helicone",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "observability",
         "cost-tracking"
@@ -12327,6 +12516,7 @@
       "author": "HeyClaude Team",
       "authorProfileUrl": "https://heyclau.de",
       "dateAdded": "2025-11-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "directory",
@@ -12401,6 +12591,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "heyclaude",
         "skill-authoring",
@@ -12489,8 +12680,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-27"
         },
         {
@@ -12526,6 +12717,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "hooks",
         "automation",
@@ -12581,6 +12773,7 @@
       "seoDescription": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development.",
       "author": "HubSpot",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "crm",
         "hubspot",
@@ -12650,6 +12843,7 @@
       "seoDescription": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development.",
       "author": "Hugging Face",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ai",
         "hugging-face",
@@ -12720,6 +12914,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "husky",
         "git-hooks",
@@ -12805,8 +13000,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -12841,6 +13036,7 @@
       "seoDescription": "Hyperbrowser provides browser automation infrastructure for AI agents, web scraping, browser sessions, and web workflows.",
       "author": "Hyperbrowser",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "browser-automation",
         "agent-infrastructure"
@@ -12885,6 +13081,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "i18n",
         "internationalization",
@@ -12941,6 +13138,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ocr",
         "image",
@@ -13027,8 +13225,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -13064,6 +13262,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "indexnow",
         "seo",
@@ -13147,8 +13346,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -13183,6 +13382,7 @@
       "seoDescription": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development.",
       "author": "Intercom",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "customer-support",
         "intercom",
@@ -13252,6 +13452,7 @@
       "seoDescription": "Build video creation capabilities into your applications Discover tools for AI development.",
       "author": "invideo",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "video",
         "invideo",
@@ -13321,6 +13522,7 @@
       "seoDescription": "Debug faster with AI agents that access video recordings, console logs, and network requests Discover tools for AI development.",
       "author": "Jam",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "debugging",
         "jam",
@@ -13391,6 +13593,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "jest",
         "testing",
@@ -13446,6 +13649,7 @@
       "seoDescription": "Manage Jira tickets and Confluence documentation Discover tools for AI development.",
       "author": "Atlassian",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "jira",
         "confluence",
@@ -13516,6 +13720,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "json",
         "schema",
@@ -13602,8 +13807,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -13639,6 +13844,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "json",
         "schema",
@@ -13695,6 +13901,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "kubernetes",
         "devsecops",
@@ -13748,6 +13955,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "kubernetes",
         "k8s",
@@ -13803,6 +14011,7 @@
       "seoDescription": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development.",
       "author": "feiskyer",
       "dateAdded": "2025-09-20",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "kubernetes",
         "k8s",
@@ -13872,6 +14081,7 @@
       "seoDescription": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications.",
       "author": "Lakera",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "security",
         "guardrails"
@@ -13915,6 +14125,7 @@
       "seoDescription": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation.",
       "author": "Langfuse",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "observability",
         "open-source"
@@ -13958,6 +14169,7 @@
       "seoDescription": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration.",
       "author": "LangChain",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "agent-framework",
         "orchestration"
@@ -14001,6 +14213,7 @@
       "seoDescription": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents.",
       "author": "LangChain",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "observability",
         "evaluation"
@@ -14045,6 +14258,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "life-sciences",
         "research-automation",
@@ -14096,6 +14310,7 @@
       "seoDescription": "Integrate with Linear's issue tracking and project management system Discover tools for AI development.",
       "author": "Linear",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "project-management",
         "linear",
@@ -14166,6 +14381,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "productivity",
         "velocity",
@@ -14229,6 +14445,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "logs",
         "observability",
@@ -14314,8 +14531,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -14350,6 +14567,7 @@
       "seoDescription": "Lovable helps teams generate and iterate on web applications from natural language product and design requests.",
       "author": "Lovable",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "app-builder",
         "prototyping"
@@ -14393,6 +14611,7 @@
       "seoDescription": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes.",
       "author": "Make",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -14437,6 +14656,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "markdown",
         "docs",
@@ -14522,8 +14742,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -14559,6 +14779,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "markdown",
         "documentation",
@@ -14614,6 +14835,7 @@
       "seoDescription": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
       "author": "Mastra",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "agent-framework",
         "typescript"
@@ -14658,6 +14880,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "mcp",
         "security",
@@ -14743,8 +14966,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -14780,6 +15003,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "security",
@@ -14863,8 +15087,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -14900,6 +15124,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "integration",
@@ -14955,6 +15180,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "monitoring",
@@ -15017,6 +15243,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "testing",
@@ -15100,8 +15327,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -15137,6 +15364,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "memory",
         "performance",
@@ -15192,6 +15420,7 @@
       "seoDescription": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems.",
       "author": "Microsoft",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "agent-framework",
         "multi-agent"
@@ -15236,6 +15465,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "powerline",
         "minimal",
@@ -15298,6 +15528,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mintlify",
         "documentation",
@@ -15383,8 +15614,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -15420,6 +15651,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mintlify",
         "documentation",
@@ -15476,6 +15708,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mobile",
         "ios",
@@ -15531,6 +15764,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "mobile",
         "ios",
@@ -15586,6 +15820,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "model-routing",
         "cost-optimization",
@@ -15669,8 +15904,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -15706,6 +15941,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "model-switching",
         "opus-sonnet-haiku",
@@ -15768,6 +16004,7 @@
       "seoDescription": "Manage monday.com boards, items, and CRM activities Discover tools for AI development.",
       "author": "Monday.com",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "monday",
         "project-management",
@@ -15838,6 +16075,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "monorepo",
         "turborepo",
@@ -15892,6 +16130,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "langgraph",
         "crewai",
@@ -15944,6 +16183,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "multi-line",
         "comprehensive",
@@ -16007,6 +16247,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tokens",
         "multi-provider",
@@ -16070,6 +16311,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "multi-session",
         "parallel-sessions",
@@ -16132,6 +16374,7 @@
       "seoDescription": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines.",
       "author": "n8n",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "self-hosted"
@@ -16176,6 +16419,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "n8n",
         "ai-automation",
@@ -16259,8 +16503,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -16296,6 +16540,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "n8n",
         "operations",
@@ -16381,8 +16626,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -16418,6 +16663,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "n8n",
         "security",
@@ -16503,8 +16749,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -16539,6 +16785,7 @@
       "seoDescription": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development.",
       "author": "Netlify",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "deployment",
         "netlify",
@@ -16609,6 +16856,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "next-js",
         "performance",
@@ -16663,6 +16911,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "nextjs",
         "routing",
@@ -16718,6 +16967,7 @@
       "seoDescription": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development.",
       "author": "Notion",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "notion",
@@ -16788,6 +17038,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "oh-my-zsh",
         "robbyrussell",
@@ -16852,6 +17103,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "openclaw",
         "ai-agents",
@@ -16935,8 +17187,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -16972,6 +17224,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "openclaw",
         "ai-agents",
@@ -17057,8 +17310,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -17094,6 +17347,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "openclaw",
         "skill-authoring",
@@ -17179,8 +17433,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -17215,6 +17469,7 @@
       "seoDescription": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation.",
       "author": "SST",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "terminal-agent",
         "ai-coding"
@@ -17259,6 +17514,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "opennext",
         "cloudflare",
@@ -17344,8 +17600,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -17381,6 +17637,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "vulnerabilities",
@@ -17437,6 +17694,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "pagespeed",
         "lighthouse",
@@ -17521,8 +17779,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -17558,6 +17816,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "parallel-processing",
         "concurrent-subagents",
@@ -17610,6 +17869,7 @@
       "seoDescription": "Integrate PayPal commerce capabilities, payment processing, and transaction management Discover tools for AI development.",
       "author": "PayPal",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "payments",
         "paypal",
@@ -17680,6 +17940,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "performance",
         "benchmarking",
@@ -17736,6 +17997,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "performance",
         "monitoring",
@@ -17792,6 +18054,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "performance",
         "monitoring",
@@ -17849,6 +18112,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "performance",
         "optimization",
@@ -17901,6 +18165,7 @@
       "seoDescription": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations.",
       "author": "Pipedream",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -17944,6 +18209,7 @@
       "seoDescription": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking Discover tools for AI development.",
       "author": "Plaid",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "banking",
         "plaid",
@@ -18014,6 +18280,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "plan-mode",
         "extended-thinking",
@@ -18070,6 +18337,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "playwright",
@@ -18155,8 +18423,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -18192,6 +18460,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "playwright",
         "mcp",
@@ -18275,8 +18544,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -18312,6 +18581,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "playwright",
         "e2e",
@@ -18369,6 +18639,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "plugins",
         "marketplace",
@@ -18420,6 +18691,7 @@
       "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "postgresql",
         "database",
@@ -18490,6 +18762,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "postgresql",
         "database",
@@ -18576,8 +18849,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -18613,6 +18886,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "prisma",
         "database",
@@ -18670,6 +18944,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "product-management",
         "analytics",
@@ -18722,6 +18997,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-26",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "zod",
         "validation",
@@ -18779,6 +19055,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "production",
         "reliability",
@@ -18832,6 +19109,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "production",
         "code-quality",
@@ -18926,6 +19204,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-02",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "productivity",
         "automation",
@@ -19018,6 +19297,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "prompt-injection",
         "guardrails",
@@ -19101,8 +19381,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -19138,6 +19418,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "prompt-engineering",
         "system-prompts",
@@ -19189,6 +19470,7 @@
       "seoDescription": "Generate app icons, favicons, OG images, logos, and wordmarks from Claude with the Prompt-to-asset MCP server and 30+ image models.",
       "author": "MohamedAbdallah-14",
       "dateAdded": "2026-04-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "mcp",
         "image-generation",
@@ -19240,6 +19522,7 @@
       "seoDescription": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks.",
       "author": "Promptfoo",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "prompt-testing",
         "security"
@@ -19282,6 +19565,7 @@
       "seoDescription": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure.",
       "author": "Protect AI",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "security",
         "ai-supply-chain"
@@ -19326,6 +19610,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "proxmox",
         "virtualization",
@@ -19411,8 +19696,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -19448,6 +19733,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "proxmox",
         "virtualization",
@@ -19531,8 +19817,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -19568,6 +19854,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "data-science",
@@ -19622,6 +19909,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "python",
         "data-science",
@@ -19676,6 +19964,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "imports",
@@ -19732,6 +20021,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "linting",
@@ -19787,6 +20077,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "python",
         "rich",
@@ -19850,6 +20141,7 @@
       "seoDescription": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations.",
       "author": "Raycast",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "launcher",
         "extensions"
@@ -19894,6 +20186,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "raycast",
         "extensions",
@@ -19979,8 +20272,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -20016,6 +20309,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react-19",
         "concurrent",
@@ -20070,6 +20364,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react",
         "nextjs",
@@ -20123,6 +20418,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "react",
         "nextjs",
@@ -20176,6 +20472,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react",
         "rsc",
@@ -20230,6 +20527,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "react",
         "testing",
@@ -20286,6 +20584,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "monitoring",
         "logging",
@@ -20342,6 +20641,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "cost",
         "pricing",
@@ -20404,6 +20704,7 @@
       "author": "karanb192",
       "authorProfileUrl": "https://github.com/karanb192",
       "dateAdded": "2025-09-27",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "reddit",
         "social-media",
@@ -20474,6 +20775,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "redis",
         "cache",
@@ -20530,6 +20832,7 @@
       "author": "Redis",
       "authorProfileUrl": "https://redis.io/",
       "dateAdded": "2025-09-20",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "redis",
         "cache",
@@ -20599,6 +20902,7 @@
       "seoDescription": "Replit Agent helps build, edit, deploy, and iterate on applications through Replit's browser-based development platform.",
       "author": "Replit",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "app-builder",
         "ai-coding"
@@ -20643,6 +20947,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "rest",
         "http",
@@ -20729,8 +21034,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -20765,6 +21070,7 @@
       "seoDescription": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation.",
       "author": "Roo Code",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "vs-code",
         "coding-agent"
@@ -20809,6 +21115,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "rust",
         "cargo",
@@ -20865,6 +21172,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "saas",
         "pricing",
@@ -20948,8 +21256,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -20985,6 +21293,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "scss",
         "sass",
@@ -21041,6 +21350,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "penetration-testing",
@@ -21094,6 +21404,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "security",
         "penetration-testing",
@@ -21147,6 +21458,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "vulnerability",
@@ -21204,6 +21516,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "react",
@@ -21258,6 +21571,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "semantic-kernel",
         "microsoft",
@@ -21311,6 +21625,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "sensitive-data",
@@ -21367,6 +21682,7 @@
       "author": "Sentry",
       "authorProfileUrl": "https://sentry.io/",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "monitoring",
         "sentry",
@@ -21437,6 +21753,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "health-score",
         "session-grade",
@@ -21500,6 +21817,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "metrics",
         "analytics",
@@ -21556,6 +21874,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "timer",
         "productivity",
@@ -21619,6 +21938,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-01",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "simple",
         "plain-text",
@@ -21682,6 +22002,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "slack",
         "notifications",
@@ -21738,6 +22059,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "slash-commands",
         "custom-commands",
@@ -21794,6 +22116,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "slash-commands",
         "automation",
@@ -21847,6 +22170,7 @@
       "seoDescription": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows.",
       "author": "Smithery",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "mcp",
         "tool-discovery"
@@ -21890,6 +22214,7 @@
       "seoDescription": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development.",
       "author": "Socket",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "security",
         "dependencies",
@@ -21959,6 +22284,7 @@
       "seoDescription": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search.",
       "author": "Sourcegraph",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-coding",
         "code-search"
@@ -22001,6 +22327,7 @@
       "seoDescription": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development.",
       "author": "Square",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "payments",
         "square",
@@ -22070,6 +22397,7 @@
       "seoDescription": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions.",
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "browser-automation",
         "open-source"
@@ -22114,6 +22442,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "starship",
         "powerline",
@@ -22174,6 +22503,7 @@
       "seoDescription": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development.",
       "author": "Stripe",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "payments",
         "stripe",
@@ -22243,6 +22573,7 @@
       "seoDescription": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development.",
       "author": "Stytch",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "authentication",
         "stytch",
@@ -22313,6 +22644,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "subagents",
         "orchestration",
@@ -22369,6 +22701,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "subagents",
         "delegation",
@@ -22423,6 +22756,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "supabase",
         "postgres",
@@ -22509,8 +22843,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -22546,6 +22880,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "svelte",
         "components",
@@ -22602,6 +22937,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "svelte",
         "sveltekit",
@@ -22688,8 +23024,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -22725,6 +23061,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tdd",
         "testing",
@@ -22781,6 +23118,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "email",
         "team",
@@ -22837,6 +23175,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "documentation",
         "api",
@@ -22888,6 +23227,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "terraform",
         "iac",
@@ -22941,6 +23281,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "terraform",
         "infrastructure",
@@ -22997,6 +23338,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "automation",
@@ -23051,6 +23393,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "coverage",
@@ -23107,6 +23450,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "testing",
         "automation",
@@ -23164,6 +23508,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "tdd",
         "testing",
@@ -23219,6 +23564,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "token-cost",
         "budget-optimization",
@@ -23271,6 +23617,7 @@
       "seoDescription": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
       "author": "Trigger.dev",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "typescript"
@@ -23315,6 +23662,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "trpc",
         "typescript",
@@ -23401,8 +23749,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -23438,6 +23786,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "typescript",
         "strict-mode",
@@ -23491,6 +23840,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "typescript",
         "validation",
@@ -23545,6 +23895,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "ui",
         "ux",
@@ -23597,6 +23948,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "unraid",
         "homelab",
@@ -23680,8 +24032,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -23717,6 +24069,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-10",
+      "contentUpdatedAt": "2026-04-27T01:30:00-06:00",
       "tags": [
         "unraid",
         "api",
@@ -23802,8 +24155,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-10"
         },
         {
@@ -23839,6 +24192,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "unraid",
         "community-apps",
@@ -23924,8 +24278,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -23960,6 +24314,7 @@
       "seoDescription": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
       "author": "Vercel",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ui-generation",
         "react"
@@ -24004,6 +24359,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "v0",
         "ui-generation",
@@ -24060,6 +24416,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "v0",
         "prototyping",
@@ -24146,8 +24503,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -24182,6 +24539,7 @@
       "seoDescription": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters.",
       "author": "Vercel",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-sdk",
         "typescript"
@@ -24224,6 +24582,7 @@
       "seoDescription": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development.",
       "author": "Vercel",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "deployment",
         "vercel",
@@ -24294,6 +24653,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-23",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "vite",
         "build-tools",
@@ -24380,8 +24740,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-23"
         },
         {
@@ -24417,6 +24777,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "vue",
         "vue3",
@@ -24473,6 +24834,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "accessibility",
         "wcag",
@@ -24525,6 +24887,7 @@
       "seoDescription": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling.",
       "author": "Weights and Biases",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "evaluation",
         "observability"
@@ -24569,6 +24932,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "web-interface",
         "asynchronous",
@@ -24622,6 +24986,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "webassembly",
         "wasm",
@@ -24708,8 +25073,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -24745,6 +25110,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "webpack",
         "bundle",
@@ -24801,6 +25167,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-15",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "crawler",
         "scraping",
@@ -24886,8 +25253,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-15"
         },
         {
@@ -24922,6 +25289,7 @@
       "seoDescription": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows.",
       "author": "Windsurf",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "ai-coding",
         "agentic-editor"
@@ -24965,6 +25333,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "windsurf",
         "collaboration",
@@ -25051,8 +25420,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {
@@ -25088,6 +25457,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "windsurf",
         "ai-ide",
@@ -25141,6 +25511,7 @@
       "seoDescription": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation.",
       "author": "Workato",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "enterprise"
@@ -25184,6 +25555,7 @@
       "seoDescription": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development.",
       "author": "Workato",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "automation",
         "workato",
@@ -25254,6 +25626,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-19",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "reporting",
         "workflow",
@@ -25310,6 +25683,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-25",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "workspace-depth",
         "monorepo-navigation",
@@ -25372,6 +25746,7 @@
       "seoDescription": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation.",
       "author": "Zapier",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -25415,6 +25790,7 @@
       "seoDescription": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development.",
       "author": "Zapier",
       "dateAdded": "2025-09-18",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "automation",
         "zapier",
@@ -25484,6 +25860,7 @@
       "seoDescription": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows.",
       "author": "Zed Industries",
       "dateAdded": "2026-04-27",
+      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
       "tags": [
         "code-editor",
         "collaboration"
@@ -25528,6 +25905,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2026-04-11",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "saas",
         "bootstrap",
@@ -25613,8 +25991,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2026-04-11"
         },
         {
@@ -25650,6 +26028,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-16",
+      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
       "tags": [
         "zod",
         "validation",
@@ -25736,8 +26115,8 @@
         },
         {
           "platform": "Gemini",
-          "supportLevel": "adapter",
-          "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
           "verifiedAt": "2025-10-16"
         },
         {

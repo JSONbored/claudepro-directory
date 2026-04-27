@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://developer.monday.com/apps/docs/mondaycom-mcp-integration
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx
 Download: /downloads/mcp/monday-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/monday-mcp-server
+- Source URLs: https://developer.monday.com/apps/docs/mondaycom-mcp-integration, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx
+- Package URL: /downloads/mcp/monday-mcp-server.mcpb
+- Package SHA256: 188b737c7620ced286f4fcc8ba38e46bb49f98a62729dfe8af6ce3cfe9b13ec4
+- Author: Monday.com
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Manage monday.com boards, items, and CRM activities
 ## Tags

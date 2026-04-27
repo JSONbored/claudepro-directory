@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://invideo.io/ai/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx
 Download: /downloads/mcp/invideo-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/invideo-mcp-server
+- Source URLs: https://invideo.io/ai/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx
+- Package URL: /downloads/mcp/invideo-mcp-server.mcpb
+- Package SHA256: ab826be403e238e55b55783ad32320578f6fa1f1010d07493d9a2469588b355e
+- Author: invideo
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Build video creation capabilities into your applications
 ## Tags

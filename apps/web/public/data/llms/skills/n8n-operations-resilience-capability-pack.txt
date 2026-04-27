@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://docs.n8n.io/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx
 Download: /downloads/skills/n8n-operations-resilience-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/n8n-operations-resilience-capability-pack
+- Source URLs: https://docs.n8n.io/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx
+- Package URL: /downloads/skills/n8n-operations-resilience-capability-pack.zip
+- Package SHA256: 39e4ad81bf6055fbe1832b8e0344f3e41dd23ae88b6b8e677102b6a0d97aedcc
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.
 ## Tags
@@ -48,7 +57,9 @@ This skill gives agents an operational blueprint for running n8n safely in envir
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Require idempotency strategy for side-effecting workflows.

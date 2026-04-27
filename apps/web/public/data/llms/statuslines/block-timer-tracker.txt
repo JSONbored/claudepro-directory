@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-23
 Documentation: https://docs.claude.com/en/docs/claude-code/statusline
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/block-timer-tracker
+- Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Claude 5-hour conversation block tracker with visual countdown, expiration warnings, and color-coded indicators to prevent unexpected session terminations.
 ## Tags

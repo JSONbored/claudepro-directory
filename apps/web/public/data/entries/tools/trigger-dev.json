@@ -10,6 +10,7 @@
     "seoDescription": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications.",
     "author": "Trigger.dev",
     "dateAdded": "2026-04-27",
+    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
     "tags": [
       "workflow-automation",
       "typescript"

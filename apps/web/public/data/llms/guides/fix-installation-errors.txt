@@ -4,6 +4,12 @@ Category: guides
 Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-installation-errors.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/fix-installation-errors
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-installation-errors.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Install Claude Code correctly in 15-25 minutes. Fix npm permission errors, configure PATH, and resolve 'command not found' issues with proven solutions.
 ## Tags

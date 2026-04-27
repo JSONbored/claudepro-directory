@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://www.indexnow.org/documentation
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/indexnow-search-indexing-accelerator.mdx
 Download: /downloads/skills/indexnow-search-indexing-accelerator.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/indexnow-search-indexing-accelerator
+- Source URLs: https://www.indexnow.org/documentation, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/indexnow-search-indexing-accelerator.mdx
+- Package URL: /downloads/skills/indexnow-search-indexing-accelerator.zip
+- Package SHA256: 50f1cfd7cb8c10daafd7e7d88904e1afcf852a63e55cefd52aa673a83c2969b2
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Accelerate search discovery and indexing updates with IndexNow-aware publishing workflows and crawl-efficient update signaling.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents implement fast, reliable indexing workflows. It coord
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Canonical URL policy

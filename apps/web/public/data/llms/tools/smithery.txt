@@ -5,6 +5,12 @@ Author: Smithery
 Date added: 2026-04-27
 Documentation: https://smithery.ai/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/smithery.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/smithery
+- Source URLs: https://smithery.ai/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/smithery.mdx, https://smithery.ai
+- Author: Smithery
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 MCP server discovery and deployment platform for finding, installing, and running model context protocol tools.
 ## Tags

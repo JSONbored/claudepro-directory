@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://forums.unraid.net/forum/64-docker-engine/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx
 Download: /downloads/skills/unraid-ca-template-authoring-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack
+- Source URLs: https://forums.unraid.net/forum/64-docker-engine/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx
+- Package URL: /downloads/skills/unraid-ca-template-authoring-capability-pack.zip
+- Package SHA256: e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.
 ## Tags
@@ -48,7 +57,9 @@ This skill helps agents produce community-ready Unraid templates that are practi
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Maintain accurate CA metadata and reachable support links.

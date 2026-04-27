@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://www.atlassian.com/platform/remote-mcp-server
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jira-mcp-server.mdx
 Download: /downloads/mcp/jira-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/jira-mcp-server
+- Source URLs: https://www.atlassian.com/platform/remote-mcp-server, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jira-mcp-server.mdx
+- Package URL: /downloads/mcp/jira-mcp-server.mcpb
+- Package SHA256: a12b0119f2e3f98912c5f5121fd64ae779b3da1488d2a6862bd0069e2f8fa3ed
+- Author: Atlassian
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Manage Jira tickets and Confluence documentation
 ## Tags

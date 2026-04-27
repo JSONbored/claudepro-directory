@@ -10,6 +10,7 @@
     "seoDescription": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
     "author": "UPinar",
     "dateAdded": "2026-04-20",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "security",
       "cve",

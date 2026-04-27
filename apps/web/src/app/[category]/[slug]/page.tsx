@@ -639,6 +639,42 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         </div>
 
+        {entry.category === "skills" && entry.platformCompatibility?.length ? (
+          <div className="surface-panel p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+              Platforms
+            </p>
+            <div className="mt-3 space-y-2.5">
+              {entry.platformCompatibility.map((item) => (
+                <div
+                  key={`${item.platform}:${item.supportLevel}`}
+                  className="rounded-xl border border-border bg-background px-3 py-3 text-sm"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium text-foreground">
+                      {item.platform}
+                    </p>
+                    <span className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                      {item.supportLevel}
+                    </span>
+                  </div>
+                  <code className="mt-2 block break-all rounded-lg border border-border/80 bg-card/80 p-2 text-[10px] text-muted-foreground">
+                    {item.installPath}
+                  </code>
+                  {item.adapterPath ? (
+                    <a
+                      href={item.adapterPath}
+                      className="mt-2 inline-flex text-xs font-medium text-primary underline underline-offset-4"
+                    >
+                      Open adapter
+                    </a>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {sourceSignals.length ? (
           <div className="surface-panel p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">

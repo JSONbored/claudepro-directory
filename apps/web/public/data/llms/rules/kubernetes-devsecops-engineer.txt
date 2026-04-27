@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://kubernetes.io/docs/concepts/security/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/kubernetes-devsecops-engineer
+- Source URLs: https://kubernetes.io/docs/concepts/security/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Expert in Kubernetes DevSecOps with GitOps workflows, pod security standards, RBAC, secret management, and automated security scanning for production clusters
 ## Tags

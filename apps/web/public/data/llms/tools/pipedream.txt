@@ -5,6 +5,12 @@ Author: Pipedream
 Date added: 2026-04-27
 Documentation: https://pipedream.com/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/pipedream
+- Source URLs: https://pipedream.com/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/pipedream.mdx, https://pipedream.com
+- Author: Pipedream
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Workflow automation platform for connecting APIs, building event-driven automations, and integrating developer tools.
 ## Tags

@@ -6,6 +6,14 @@ Date added: 2025-11-25
 Documentation: https://heyclau.de/mcp/heyclaude-mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
 Download: /downloads/mcp/heyclaude-mcp.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/heyclaude-mcp
+- Source URLs: https://heyclau.de/mcp/heyclaude-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
+- Package URL: /downloads/mcp/heyclaude-mcp.mcpb
+- Package SHA256: 35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa
+- Author: HeyClaude Team
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.
 ## Tags

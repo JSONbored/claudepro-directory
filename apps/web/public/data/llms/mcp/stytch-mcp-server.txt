@@ -6,6 +6,14 @@ Date added: 2025-09-18
 Documentation: https://stytch.com/docs/workspace-management/stytch-mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx
 Download: /downloads/mcp/stytch-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/stytch-mcp-server
+- Source URLs: https://stytch.com/docs/workspace-management/stytch-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx
+- Package URL: /downloads/mcp/stytch-mcp-server.mcpb
+- Package SHA256: 2669e215154068770a95ecb53f4b64a50fe86a076d8d0a6244e2f762153f949c
+- Author: Stytch
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Configure and manage Stytch authentication services and workspace settings
 ## Tags

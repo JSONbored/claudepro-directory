@@ -4,6 +4,12 @@ Category: hooks
 Author: JSONbored
 Date added: 2025-09-19
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-cleanup-handler.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/environment-cleanup-handler
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-cleanup-handler.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Cleans up temporary files, caches, and resources when Claude session ends. This Stop hook provides comprehensive environment cleanup for development projects, automatically removing temporary files, build artifacts, cache directories, and system-specific files across multiple platforms.
 ## Tags

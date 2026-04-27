@@ -5,6 +5,12 @@ Author: LangChain
 Date added: 2026-04-27
 Documentation: https://docs.smith.langchain.com
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/langsmith
+- Source URLs: https://docs.smith.langchain.com, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/langsmith.mdx, https://www.langchain.com/langsmith
+- Author: LangChain
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Observability, evaluation, tracing, and testing platform for LLM applications and agent workflows.
 ## Tags

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://vitest.dev/guide/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/rules/test-driven-development-enforcer
+- Source URLs: https://vitest.dev/guide/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Test-driven development expert enforcing red-green-refactor cycles, Vitest/Jest configuration, test coverage requirements, mocking strategies, and test-first coding discipline for robust software development.
 ## Tags

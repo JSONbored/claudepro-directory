@@ -6,6 +6,12 @@ Date added: 2025-10-19
 Documentation: https://github.com/nadeesha/ts-prune
 Repository: https://github.com/nadeesha/ts-prune
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dead-code-eliminator.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/dead-code-eliminator
+- Source URLs: https://github.com/nadeesha/ts-prune, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dead-code-eliminator.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automatically detects and removes unused code, imports, and dependencies with safe deletion verification and rollback support using Knip 5.x, ts-prune, depcheck, autoflake, Vulture, and ESLint 9.37.0.
 ## Tags

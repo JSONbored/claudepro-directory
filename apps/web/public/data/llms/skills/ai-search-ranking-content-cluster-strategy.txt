@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://developers.google.com/search/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-search-ranking-content-cluster-strategy.mdx
 Download: /downloads/skills/ai-search-ranking-content-cluster-strategy.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy
+- Source URLs: https://developers.google.com/search/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ai-search-ranking-content-cluster-strategy.mdx
+- Package URL: /downloads/skills/ai-search-ranking-content-cluster-strategy.zip
+- Package SHA256: cc04f016dc2ee3f988e6fd411ff7406fc999b0c5f2377e7fc6e71d5f795dc2e8
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build SEO-forward content clusters that align with search intent, topical authority, and conversion pathways for AI tooling niches.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents create practical, ranking-oriented content programs. 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - ICP and audience pain points

@@ -7,6 +7,14 @@ Documentation: https://github.com/karanb192/reddit-mcp-buddy
 Repository: https://github.com/karanb192/reddit-mcp-buddy
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx
 Download: /downloads/mcp/reddit-mcp-buddy.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/reddit-mcp-buddy
+- Source URLs: https://github.com/karanb192/reddit-mcp-buddy, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx
+- Package URL: /downloads/mcp/reddit-mcp-buddy.mcpb
+- Package SHA256: 4789d95508464215c52e523a39bd41dd04909b297e06af2e37e4ce8ea6320a30
+- Author: karanb192
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required
 ## Tags

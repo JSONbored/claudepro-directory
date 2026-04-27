@@ -7,6 +7,15 @@ Documentation: https://github.com/openai/codex
 Repository: https://github.com/openai/codex
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-automations-orchestrator-capability-pack.mdx
 Download: /downloads/skills/codex-automations-orchestrator-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/codex-automations-orchestrator-capability-pack
+- Source URLs: https://github.com/openai/codex, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/codex-automations-orchestrator-capability-pack.mdx
+- Package URL: /downloads/skills/codex-automations-orchestrator-capability-pack.zip
+- Package SHA256: 7e3ee39f61507d249f0b0b5ec49c35c6fc076b5ca2d6f85174eec8664de00867
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.
 ## Tags
@@ -49,7 +58,9 @@ This skill turns ad-hoc recurring tasks into maintainable automations with clear
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Every automation must declare bounded scope and expected outputs.

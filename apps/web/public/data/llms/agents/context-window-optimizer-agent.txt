@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-23
 Documentation: https://epoch.ai/data-insights/context-windows
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/context-window-optimizer-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/context-window-optimizer-agent
+- Source URLs: https://epoch.ai/data-insights/context-windows, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/context-window-optimizer-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Context window optimization specialist managing 1M+ token conversations, preventing truncation with smart summarization and session management strategies.
 ## Tags

@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3000";
+const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://127.0.0.1:3111";
 
 export default defineConfig({
   testDir: "tests/e2e",
@@ -19,9 +19,9 @@ export default defineConfig({
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: "pnpm --filter web dev",
+        command: "pnpm --filter web dev --hostname 127.0.0.1 --port 3111",
         url: baseURL,
-        reuseExistingServer: true,
+        reuseExistingServer: false,
         timeout: 120_000,
       },
   projects: [

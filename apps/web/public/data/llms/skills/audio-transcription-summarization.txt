@@ -7,6 +7,15 @@ Documentation: https://github.com/openai/whisper
 Repository: https://github.com/openai/whisper
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx
 Download: /downloads/skills/audio-transcription-summarization.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/audio-transcription-summarization
+- Source URLs: https://github.com/openai/whisper, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/audio-transcription-summarization.mdx
+- Package URL: /downloads/skills/audio-transcription-summarization.zip
+- Package SHA256: 227f513fd69287b909f5b20d191418d4bc515aa4593508058a42e6d3bdf1ba4c
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-15
+- Robots: indexable
 ## Summary
 Transcribe audio files (MP3, WAV, M4A, etc.) using OpenAI Whisper AI and ffmpeg to produce structured, timestamped transcripts with automatic summarization and action item extraction. Supports multilingual transcription, speaker diarization, and meeting minutes generation.
 ## Tags
@@ -26,7 +35,9 @@ Claude can transcribe audio files (MP3, WAV, M4A, etc.) and generate structured 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

@@ -6,6 +6,11 @@ import { getJobs } from "@/lib/jobs";
 import { getSeoClusterDefinitions } from "@/lib/seo-clusters";
 import { getTools } from "@/lib/tools";
 import { siteConfig } from "@/lib/site";
+import {
+  isSitemapIndexableEntry,
+  safeSitemapDate,
+  sitemapEntryLastModified,
+} from "@/lib/sitemap-policy";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [entries, jobs, tools, contributors] = await Promise.all([
@@ -29,9 +34,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/claim",
     "/contributors",
     "/ecosystem",
+    "/quality",
     "/trending",
     "/llms.txt",
     "/llms-full.txt",
+    "/feed.xml",
     ...getSeoClusterDefinitions().map((cluster) => `/best/${cluster.slug}`),
     ...siteConfig.categoryOrder
       .filter((category) => category !== "tools")
@@ -40,41 +47,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticItems = staticPaths.map((pathname) => ({
     url: `${siteConfig.url}${pathname}`,
+    lastModified: new Date(),
+    changeFrequency:
+      pathname.includes(".txt") || pathname.includes(".xml")
+        ? ("daily" as const)
+        : ("weekly" as const),
+    priority: pathname === "" ? 1 : pathname === "/browse" ? 0.9 : 0.7,
   }));
 
-  const entryItems = entries
-    .filter((entry) => entry.category !== "tools")
-    .map((entry) => ({
-      url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
-      lastModified:
-        entry.dateAdded && !Number.isNaN(new Date(entry.dateAdded).getTime())
-          ? new Date(entry.dateAdded)
-          : undefined,
-    }));
+  const entryItems = entries.filter(isSitemapIndexableEntry).map((entry) => ({
+    url: `${siteConfig.url}/${entry.category}/${entry.slug}`,
+    lastModified: sitemapEntryLastModified(entry),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
   const entryLlmsItems = entries
-    .filter((entry) => entry.category !== "tools")
+    .filter(isSitemapIndexableEntry)
     .map((entry) => ({
       url: `${siteConfig.url}/${entry.category}/${entry.slug}/llms.txt`,
+      lastModified: sitemapEntryLastModified(entry),
+      changeFrequency: "monthly" as const,
+      priority: 0.5,
     }));
 
   const jobItems = jobs.map((job) => ({
     url: `${siteConfig.url}/jobs/${job.slug}`,
-    lastModified:
-      job.postedAt && !Number.isNaN(new Date(job.postedAt).getTime())
-        ? new Date(job.postedAt)
-        : undefined,
+    lastModified: safeSitemapDate(job.postedAt),
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
   }));
 
   const toolItems = tools.map((tool) => ({
     url: `${siteConfig.url}/tools/${tool.slug}`,
-    lastModified:
-      tool.dateAdded && !Number.isNaN(new Date(tool.dateAdded).getTime())
-        ? new Date(tool.dateAdded)
-        : undefined,
+    lastModified: safeSitemapDate(tool.dateAdded),
+    changeFrequency: "monthly" as const,
+    priority: 0.65,
   }));
 
   const contributorItems = contributors.map((contributor) => ({
     url: `${siteConfig.url}/contributors/${contributor.slug}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
   }));
 
   return [

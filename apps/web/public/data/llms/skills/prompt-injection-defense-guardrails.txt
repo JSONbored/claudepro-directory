@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://genai.owasp.org/llmrisk/llm01-prompt-injection/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/prompt-injection-defense-guardrails.mdx
 Download: /downloads/skills/prompt-injection-defense-guardrails.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/prompt-injection-defense-guardrails
+- Source URLs: https://genai.owasp.org/llmrisk/llm01-prompt-injection/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/prompt-injection-defense-guardrails.mdx
+- Package URL: /downloads/skills/prompt-injection-defense-guardrails.zip
+- Package SHA256: 8bf9869deb15e9db78456574e555a755fbefe6e70c4362761d1fcbd416496c03
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build layered defenses against prompt injection, data exfiltration, and unsafe tool execution in AI agent systems.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps you ship agent workflows that can safely handle hostile or mani
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Documented tool calls and data boundaries

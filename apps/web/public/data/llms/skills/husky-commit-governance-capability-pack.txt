@@ -6,6 +6,15 @@ Date added: 2026-04-11
 Documentation: https://typicode.github.io/husky/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx
 Download: /downloads/skills/husky-commit-governance-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/husky-commit-governance-capability-pack
+- Source URLs: https://typicode.github.io/husky/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/husky-commit-governance-capability-pack.mdx
+- Package URL: /downloads/skills/husky-commit-governance-capability-pack.zip
+- Package SHA256: aef3f6a1d69042ef5f12ff5dc7958397dd7c5de9bbbcf55d4b7211f0e0eef66b
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-11
+- Robots: indexable
 ## Summary
 Expert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.
 ## Tags
@@ -48,7 +57,9 @@ This skill focuses on practical local governance: catch avoidable issues early w
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Keep pre-commit checks fast enough to avoid bypass patterns.

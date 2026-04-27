@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-25
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/life-sciences-research-specialist.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/life-sciences-research-specialist
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/life-sciences-research-specialist.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Automate biomedical research workflows with Claude for Life Sciences. Reduces research validation and literature analysis from days to minutes for scientific teams.
 ## Tags

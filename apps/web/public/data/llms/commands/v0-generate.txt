@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://v0.dev/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/v0-generate
+- Source URLs: https://v0.dev/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Generate production-ready React components from natural language using V0.dev patterns with shadcn/ui, TailwindCSS, and TypeScript
 ## Tags

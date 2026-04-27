@@ -6,6 +6,15 @@ Date added: 2025-10-15
 Documentation: https://matplotlib.org/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cli-data-viz-quickstart.mdx
 Download: /downloads/skills/cli-data-viz-quickstart.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/cli-data-viz-quickstart
+- Source URLs: https://matplotlib.org/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cli-data-viz-quickstart.mdx
+- Package URL: /downloads/skills/cli-data-viz-quickstart.zip
+- Package SHA256: 442cc6c1e4836a11a8dcee585d55624556f6b79bbb2351d75630a6b4746d8ead
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-15
+- Robots: indexable
 ## Summary
 Create publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.
 ## Tags
@@ -25,7 +34,9 @@ Claude can create charts and visualizations from your data (CSV, JSON, Excel) us
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

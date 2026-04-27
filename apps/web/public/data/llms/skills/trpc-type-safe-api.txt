@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://trpc.io/docs/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx
 Download: /downloads/skills/trpc-type-safe-api.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/trpc-type-safe-api
+- Source URLs: https://trpc.io/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/trpc-type-safe-api.mdx
+- Package URL: /downloads/skills/trpc-type-safe-api.zip
+- Package SHA256: 33c0ad29db6fc2f841bd0bf3521a4ebb8111a34d702a317745ea11735d7422c0
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build end-to-end type-safe APIs with tRPC and TypeScript, eliminating code generation and runtime bloat for full-stack applications. tRPC provides end-to-end type safety without code generation, schema stitching, or serialization layers - delivering a lighter, more intuitive developer experience than REST or GraphQL.
 ## Tags
@@ -26,7 +35,9 @@ Claude can build fully type-safe APIs using tRPC (TypeScript Remote Procedure Ca
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

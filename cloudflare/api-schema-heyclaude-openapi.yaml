@@ -216,7 +216,7 @@ paths:
         "403":
           description: Forbidden origin
         "409":
-          description: Duplicate slug
+          description: Duplicate existing slug or pending submission issue
         "413":
           description: Payload too large
         "415":
@@ -227,6 +227,34 @@ paths:
           description: GitHub provider error
         "503":
           description: GitHub issue creation not configured
+  /api/og:
+    get:
+      summary: Generate a dynamic Open Graph image
+      description: Renders a cacheable 1200x630 social preview image from bounded title, description, and label query parameters.
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+            maxLength: 96
+        - in: query
+          name: description
+          schema:
+            type: string
+            maxLength: 180
+        - in: query
+          name: label
+          schema:
+            type: string
+            maxLength: 42
+      responses:
+        "200":
+          description: PNG image response
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
   /api/download:
     get:
       parameters:
@@ -328,6 +356,12 @@ paths:
             type: string
             pattern: "^[a-z0-9-]+$"
         - in: query
+          name: platform
+          schema:
+            type: string
+            maxLength: 48
+          description: Optional platform compatibility filter such as claude, codex, windsurf, gemini, cursor, or generic agents.
+        - in: query
           name: limit
           schema:
             type: integer
@@ -348,6 +382,8 @@ paths:
                     type: string
                   category:
                     type: string
+                  platform:
+                    type: string
                   count:
                     type: integer
                   results:
@@ -360,6 +396,7 @@ paths:
                   - schemaVersion
                   - query
                   - category
+                  - platform
                   - count
                   - results
         "403":

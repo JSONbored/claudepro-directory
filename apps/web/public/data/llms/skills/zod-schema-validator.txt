@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://zod.dev/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx
 Download: /downloads/skills/zod-schema-validator.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/zod-schema-validator
+- Source URLs: https://zod.dev/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/zod-schema-validator.mdx
+- Package URL: /downloads/skills/zod-schema-validator.zip
+- Package SHA256: 56133067087d163b8ff5a35aa325a55b75ce8916a75bfc7523075b5e3e76974f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.
 ## Tags
@@ -32,7 +41,9 @@ Claude can build comprehensive validation schemas using Zod, the TypeScript-firs
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-25
 Documentation: https://docs.claude.com/en/docs/claude-code/skills
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/skills-installer.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/skills-installer
+- Source URLs: https://docs.claude.com/en/docs/claude-code/skills, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/skills-installer.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Install and manage Claude Code Agent Skills - specialized knowledge packages that extend Claude's capabilities with domain expertise and progressive disclosure
 ## Tags

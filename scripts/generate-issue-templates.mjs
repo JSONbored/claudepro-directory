@@ -26,7 +26,7 @@ const fieldPlaceholders = {
   github_url: "https://github.com/owner/repo",
   docs_url: "https://example.com/docs",
   author: "GitHub handle, company, or maintainer name",
-  contact_email: "you@example.com",
+  contact_email: "@github-handle or email if you want it public",
   tags: "claude, mcp, automation",
   description: "Explain what this does, why it matters, and when to use it.",
   card_description: "Short browse-card preview text.",
@@ -67,6 +67,11 @@ function linesForField(field, category) {
   }
   if (field.id === "github_url" || field.id === "docs_url") {
     descriptionParts.push("Do not use affiliate, referral, or tracking URLs.");
+  }
+  if (field.id === "contact_email") {
+    descriptionParts.push(
+      "Optional public contact. Do not include private contact details.",
+    );
   }
   if (descriptionParts.length) {
     lines.push(`      description: ${quote(descriptionParts.join(" "))}`);

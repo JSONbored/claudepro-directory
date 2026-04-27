@@ -4,6 +4,12 @@ Category: statuslines
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/starship-powerline-theme.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/statuslines/starship-powerline-theme
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/starship-powerline-theme.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Starship-inspired powerline statusline with Nerd Font glyphs, modular segments, and Git integration for Claude Code
 ## Tags

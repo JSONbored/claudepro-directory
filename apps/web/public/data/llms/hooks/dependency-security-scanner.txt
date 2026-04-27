@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-19
 Documentation: https://docs.npmjs.com/cli/v8/commands/npm-audit
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-security-scanner.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/dependency-security-scanner
+- Source URLs: https://docs.npmjs.com/cli/v8/commands/npm-audit, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-security-scanner.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Real-time vulnerability scanning for dependencies with automated CVE detection, severity assessment, and patch recommendations. This PostToolUse hook automatically triggers security scans when dependency manifest files (package.json, requirements.txt, Cargo.toml, go.mod, Gemfile, composer.json) are modified.
 ## Tags

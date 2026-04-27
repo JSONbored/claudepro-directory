@@ -10,6 +10,7 @@
     "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
     "author": "Anthropic",
     "dateAdded": "2025-09-16",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "postgresql",
       "database",

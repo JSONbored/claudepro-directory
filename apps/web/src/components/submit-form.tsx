@@ -100,7 +100,7 @@ export function SubmitForm() {
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
   const [author, setAuthor] = useState("");
-  const [email, setEmail] = useState("");
+  const [publicContact, setPublicContact] = useState("");
   const [description, setDescription] = useState("");
   const [cardDescription, setCardDescription] = useState("");
   const [category, setCategory] = useState("");
@@ -243,7 +243,7 @@ export function SubmitForm() {
         docs_url: docsUrl,
         download_url: downloadUrl,
         author,
-        contact_email: email,
+        contact_email: publicContact,
         tags,
         description,
         card_description: cardDescription,
@@ -272,11 +272,11 @@ export function SubmitForm() {
       description,
       docsUrl,
       downloadUrl,
-      email,
       githubUrl,
       installCommand,
       items,
       normalizedSlug,
+      publicContact,
       retrievalSources,
       scriptLanguage,
       skillLevel,
@@ -492,16 +492,19 @@ export function SubmitForm() {
 
       <div className="space-y-1">
         <label htmlFor="submit-email" className="submit-label">
-          Email <span className="text-destructive">*</span>
+          Public contact
         </label>
         <input
           id="submit-email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="you@example.com"
+          value={publicContact}
+          onChange={(event) => setPublicContact(event.target.value)}
+          placeholder="@github-handle or email if public"
           className="submit-input"
         />
+        <p className="text-xs leading-6 text-muted-foreground">
+          Optional. Website submissions create public GitHub issues, so only
+          include contact details you are comfortable making public.
+        </p>
       </div>
 
       <div className="space-y-1">
@@ -849,7 +852,7 @@ export function SubmitForm() {
               id="submit-tested-platforms"
               value={testedPlatforms}
               onChange={(event) => setTestedPlatforms(event.target.value)}
-              placeholder="Claude, Codex, OpenClaw, Cursor, Windsurf, Gemini"
+              placeholder="Claude, Codex, Windsurf, Gemini, Cursor, Generic AGENTS"
               className="submit-input"
             />
           </div>

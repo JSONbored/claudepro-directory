@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: siteConfig.name,
     images: [
       {
-        url: "/og-image.png",
+        url: `/api/og?title=${encodeURIComponent(`${siteConfig.name} | Claude Directory`)}&description=${encodeURIComponent(siteConfig.description)}`,
         width: 1200,
         height: 630,
         alt: `${siteConfig.name} Claude directory`,
@@ -48,7 +48,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${siteConfig.name} | Claude Directory`,
     description: siteConfig.description,
-    images: ["/og-image.png"],
+    images: [
+      `/api/og?title=${encodeURIComponent(`${siteConfig.name} | Claude Directory`)}&description=${encodeURIComponent(siteConfig.description)}`,
+    ],
   },
   icons: {
     icon: "/icon.svg",

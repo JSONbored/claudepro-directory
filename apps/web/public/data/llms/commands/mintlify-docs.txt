@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-10-16
 Documentation: https://mintlify.com/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mintlify-docs.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/commands/mintlify-docs
+- Source URLs: https://mintlify.com/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mintlify-docs.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Generate beautiful, searchable documentation using Mintlify with AI-powered content generation, API reference automation, and MDX components
 ## Tags

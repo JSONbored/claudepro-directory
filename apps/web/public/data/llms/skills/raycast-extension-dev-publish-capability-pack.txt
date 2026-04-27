@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://developers.raycast.com/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/raycast-extension-dev-publish-capability-pack.mdx
 Download: /downloads/skills/raycast-extension-dev-publish-capability-pack.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack
+- Source URLs: https://developers.raycast.com/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/raycast-extension-dev-publish-capability-pack.mdx
+- Package URL: /downloads/skills/raycast-extension-dev-publish-capability-pack.zip
+- Package SHA256: 27bea14be236882b4fbb89528b3f0229e0f27a18441c188269d833effef5bfb8
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Expert Raycast extension capability skill for command design, extension architecture, testing, and store-ready publication workflows.
 ## Tags
@@ -51,7 +60,9 @@ This capability pack teaches agents how to design and ship Raycast extensions th
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Production Rules
 - Keep command scope explicit and focused.

@@ -106,8 +106,9 @@ function buildDefaultSkillPlatformCompatibility(data, inferred) {
     },
     {
       platform: "Gemini",
-      supportLevel: "adapter",
-      installPath: ".gemini/commands/<skill-name>.toml or GEMINI.md",
+      supportLevel: "native-skill",
+      installPath:
+        ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
       verifiedAt,
     },
     {
@@ -153,6 +154,7 @@ export function buildContentEntryFromMdx(params) {
     source,
     repoRoot,
     contentRoot,
+    contentUpdatedAt,
     getLocalDownloadSha256 = () => null,
   } = params;
   const { data, content } = matter(source);
@@ -205,6 +207,7 @@ export function buildContentEntryFromMdx(params) {
       ? String(data.authorProfileUrl)
       : undefined,
     dateAdded: normalizeDateAdded(data.dateAdded),
+    contentUpdatedAt: contentUpdatedAt ? String(contentUpdatedAt) : undefined,
     tags,
     keywords: seo.keywords,
     readingTime:

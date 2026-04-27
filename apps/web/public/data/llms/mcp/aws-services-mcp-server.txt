@@ -7,6 +7,14 @@ Documentation: https://github.com/awslabs/mcp
 Repository: https://github.com/awslabs/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx
 Download: /downloads/mcp/aws-services-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/aws-services-mcp-server
+- Source URLs: https://github.com/awslabs/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx
+- Package URL: /downloads/mcp/aws-services-mcp-server.mcpb
+- Package SHA256: 36c5b42a87926bb71ca8bf7a878e163cc8b6f8f28fe4fd6c55394f32659ae580
+- Author: AWS Labs
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring
 ## Tags

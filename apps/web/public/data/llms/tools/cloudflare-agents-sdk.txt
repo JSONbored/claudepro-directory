@@ -6,6 +6,12 @@ Date added: 2026-04-27
 Documentation: https://developers.cloudflare.com/agents/
 Repository: https://github.com/cloudflare/agents
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/cloudflare-agents-sdk
+- Source URLs: https://developers.cloudflare.com/agents/, https://github.com/cloudflare/agents, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx
+- Author: Cloudflare
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Cloudflare framework for building, deploying, and running AI agents on Workers with durable platform primitives.
 ## Tags

@@ -6,6 +6,14 @@ Date added: 2025-09-16
 Documentation: https://docs.docker.com/engine/api/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx
 Download: /downloads/mcp/docker-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/docker-mcp-server
+- Source URLs: https://docs.docker.com/engine/api/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx
+- Package URL: /downloads/mcp/docker-mcp-server.mcpb
+- Package SHA256: b426e4d04a6da772ba591f1326d26e4da80e4903e9095ef1d822178889e82b5e
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration
 ## Tags

@@ -6,6 +6,12 @@ Date added: 2026-04-27
 Documentation: https://github.com/NVIDIA/garak
 Repository: https://github.com/NVIDIA/garak
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/tools/garak
+- Source URLs: https://github.com/NVIDIA/garak, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx
+- Author: NVIDIA
+- Last verified: 2026-04-26T23:21:14-06:00
+- Robots: indexable
 ## Summary
 Open-source LLM vulnerability scanner for probing model behavior, prompt attack surfaces, and safety failures.
 ## Tags

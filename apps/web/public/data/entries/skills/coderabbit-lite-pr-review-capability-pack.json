@@ -11,6 +11,7 @@
     "author": "JSONbored",
     "authorProfileUrl": "https://github.com/JSONbored",
     "dateAdded": "2026-04-11",
+    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
     "tags": [
       "code-review",
       "pull-requests",
@@ -96,8 +97,8 @@
       },
       {
         "platform": "Gemini",
-        "supportLevel": "adapter",
-        "installPath": ".gemini/commands/<skill-name>.toml or GEMINI.md",
+        "supportLevel": "native-skill",
+        "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
         "verifiedAt": "2026-04-11"
       },
       {
@@ -116,7 +117,7 @@
     ],
     "downloadTrust": "first-party",
     "downloadSha256": "5e2a8567d4a88913443a4a9e76823180775eb767e51770c0a3c8ca5e39ffe59b",
-    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\nRefresh references before using this skill for critical production decisions.\n\n## Retrieval Sources\n\n- https://docs.github.com/en/pull-requests\n- https://owasp.org/www-project-top-ten/\n- https://cheatsheetseries.owasp.org/\n\n## Core Workflow\n\n1. Build threat model from changed files and data boundaries.\n2. Classify findings by exploitability and operational impact.\n3. Remove low-confidence noise before presenting blockers.\n4. Produce minimal, file-scoped patch plan with validation gates.\n5. Re-check changed attack surfaces after fixes land.\n\n## Overview\n\nThis skill teaches agents to perform fast, low-noise code reviews that mimic senior reviewer behavior: clear severity, concrete evidence, and fix-first recommendations.\n\n## Capability Scope\n\n- PR diff triage and risk scoring\n- Security and reliability regression detection\n- False-positive suppression rules\n- Patch-plan generation with owner mapping\n- Post-fix verification guidance\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Do not block merges on low-confidence findings.\n- Require concrete code evidence for every high-severity claim.\n- Separate exploitability from style concerns.\n- Always include rollback or quick-mitigation options.\n\n## Troubleshooting\n\n**Issue:** Too many low-signal findings  \n**Fix:** tighten rule set to changed files and critical paths first.\n\n**Issue:** Security findings lack proof  \n**Fix:** require request/response, data-flow, or control-path evidence.\n\n**Issue:** Patch plan is too broad  \n**Fix:** break by file ownership and dependency boundary.\n\n## Output Contract\n\n1. Risk-ranked findings with direct evidence.\n2. Priority fix plan with smallest safe diff.\n3. Validation commands and pass criteria.\n4. Remaining residual risks and follow-ups.\n\n## Validation Checklist\n\n- Confirm findings map to changed code.\n- Run test/lint/typecheck after patch.\n- Re-check auth, input validation, and data handling paths.\n- Verify no new critical findings introduced by fixes.",
+    "body": "## Knowledge Freshness\n\nThis capability pack is pinned to documentation verified on **2026-04-11**.\nRefresh references before using this skill for critical production decisions.\n\n## Retrieval Sources\n\n- https://docs.github.com/en/pull-requests\n- https://owasp.org/www-project-top-ten/\n- https://cheatsheetseries.owasp.org/\n\n## Core Workflow\n\n1. Build threat model from changed files and data boundaries.\n2. Classify findings by exploitability and operational impact.\n3. Remove low-confidence noise before presenting blockers.\n4. Produce minimal, file-scoped patch plan with validation gates.\n5. Re-check changed attack surfaces after fixes land.\n\n## Overview\n\nThis skill teaches agents to perform fast, low-noise code reviews that mimic senior reviewer behavior: clear severity, concrete evidence, and fix-first recommendations.\n\n## Capability Scope\n\n- PR diff triage and risk scoring\n- Security and reliability regression detection\n- False-positive suppression rules\n- Patch-plan generation with owner mapping\n- Post-fix verification guidance\n\n## Compatibility\n\n### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.\n\n## Production Rules\n\n- Do not block merges on low-confidence findings.\n- Require concrete code evidence for every high-severity claim.\n- Separate exploitability from style concerns.\n- Always include rollback or quick-mitigation options.\n\n## Troubleshooting\n\n**Issue:** Too many low-signal findings  \n**Fix:** tighten rule set to changed files and critical paths first.\n\n**Issue:** Security findings lack proof  \n**Fix:** require request/response, data-flow, or control-path evidence.\n\n**Issue:** Patch plan is too broad  \n**Fix:** break by file ownership and dependency boundary.\n\n## Output Contract\n\n1. Risk-ranked findings with direct evidence.\n2. Priority fix plan with smallest safe diff.\n3. Validation commands and pass criteria.\n4. Remaining residual risks and follow-ups.\n\n## Validation Checklist\n\n- Confirm findings map to changed code.\n- Run test/lint/typecheck after patch.\n- Re-check auth, input validation, and data handling paths.\n- Verify no new critical findings introduced by fixes.",
     "sections": [
       {
         "title": "Knowledge Freshness",
@@ -151,7 +152,7 @@
       {
         "title": "Compatibility",
         "id": "compatibility",
-        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
+        "markdown": "### Native\n\n- **Claude Code / Claude**: native skill usage via `SKILL.md`.\n- **Codex/OpenAI workflows**: compatible with Agent Skills-style `SKILL.md` content as reusable workflow instructions.\n\n### Manual Adaptation\n\n- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.\n- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.\n- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.",
         "codeBlocks": []
       },
       {

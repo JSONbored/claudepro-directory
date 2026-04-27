@@ -7,6 +7,14 @@ Documentation: https://github.com/saseq/discord-mcp
 Repository: https://github.com/saseq/discord-mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx
 Download: /downloads/mcp/discord-mcp-server.mcpb
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/discord-mcp-server
+- Source URLs: https://github.com/saseq/discord-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx
+- Package URL: /downloads/mcp/discord-mcp-server.mcpb
+- Package SHA256: c533512b60c880469d414d1eb89751df1f7d9db580d53b73f22b5cbb0b696275
+- Author: saseq
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Discord bot integration for community management, moderation, and server automation
 ## Tags

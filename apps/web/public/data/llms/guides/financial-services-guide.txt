@@ -4,6 +4,12 @@ Category: guides
 Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/financial-services-guide.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/financial-services-guide
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/financial-services-guide.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Transform financial operations with Claude. Learn implementation strategies for trading, risk, and regulatory automation with comprehensive compliance.
 ## Tags

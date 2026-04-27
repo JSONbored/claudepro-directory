@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://modelcontextprotocol.io/specification/2025-06-18/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-tool-contract-testing.mdx
 Download: /downloads/skills/mcp-tool-contract-testing.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/mcp-tool-contract-testing
+- Source URLs: https://modelcontextprotocol.io/specification/2025-06-18/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/mcp-tool-contract-testing.mdx
+- Package URL: /downloads/skills/mcp-tool-contract-testing.zip
+- Package SHA256: 7e8f76baf26241e849bdb0108bf57628864ffb91a056e3878de27247f1d7d352
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Validate MCP server tools with contract-style tests to catch schema drift, unsafe behavior, and integration regressions early.
 ## Tags
@@ -26,7 +35,9 @@ This skill helps AI agents enforce explicit behavior contracts for MCP tools. It
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Contract definitions for high-value tools

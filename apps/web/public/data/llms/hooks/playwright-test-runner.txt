@@ -5,6 +5,12 @@ Author: JSONbored
 Date added: 2025-09-19
 Documentation: https://playwright.dev
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/playwright-test-runner.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/hooks/playwright-test-runner
+- Source URLs: https://playwright.dev, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/playwright-test-runner.mdx
+- Author: JSONbored
+- Last verified: 2026-04-27T01:30:00-06:00
+- Robots: indexable
 ## Summary
 Automatically runs Playwright E2E tests when test files or page components are modified.
 ## Tags

@@ -7,6 +7,15 @@ Documentation: https://github.com/remarkjs/remark
 Repository: https://github.com/remarkjs/remark
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/markdown-knowledge-base-composer.mdx
 Download: /downloads/skills/markdown-knowledge-base-composer.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/markdown-knowledge-base-composer
+- Source URLs: https://github.com/remarkjs/remark, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/markdown-knowledge-base-composer.mdx
+- Package URL: /downloads/skills/markdown-knowledge-base-composer.zip
+- Package SHA256: 1a7c976ec10973f41970cd3328f73888927501684a89edc34ffe23e53d58567a
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-15
+- Robots: indexable
 ## Summary
 Aggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB).
 ## Tags
@@ -26,7 +35,9 @@ Claude can organize, process, and transform Markdown documentation into cohesive
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

@@ -23,6 +23,8 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - `/api/intent-events`
 - `/api/newsletter/subscribe`
 - `/api/newsletter/webhook`
+- `/api/og`
+- `/api/submissions`
 - `/api/listing-leads`
 - `/api/admin/listing-leads`
 
@@ -32,6 +34,12 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - JSON writes require content-type validation and payload size limits.
 - Admin review endpoints require bearer or admin-token headers.
 - Webhooks require provider signatures when configured.
+- Website submissions require origin checks, payload limits, schema validation,
+  honeypot discard logging, existing-content duplicate checks, pending
+  GitHub-issue duplicate checks, and GitHub issue creation only.
+- Production submissions should set `SUBMISSIONS_REQUIRE_TURNSTILE=1` and
+  `TURNSTILE_SECRET_KEY`; if the requirement is enabled without a secret, the
+  endpoint fails closed instead of accepting direct website submissions.
 - Cloudflare should enforce coarse per-IP limits for dynamic endpoints before
   requests reach the Worker; in-process limits remain a local fallback.
 - No endpoint may import content into the registry, create pull requests, or

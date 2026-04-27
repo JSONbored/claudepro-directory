@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-25
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/github-copilot-interop-bridge.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/github-copilot-interop-bridge
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/github-copilot-interop-bridge.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Bridge Claude Code and GitHub Copilot workflows with Haiku 4.5 integration. Enables cross-platform agent coordination, model switching, and hybrid enterprise workflows.
 ## Tags

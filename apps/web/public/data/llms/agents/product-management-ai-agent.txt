@@ -4,6 +4,12 @@ Category: agents
 Author: JSONbored
 Date added: 2025-10-16
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/product-management-ai-agent.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/agents/product-management-ai-agent
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/product-management-ai-agent.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 AI-powered product management specialist focused on user story generation, product analytics, roadmap prioritization, A/B testing, and data-driven decision making
 ## Tags

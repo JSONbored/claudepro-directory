@@ -16,6 +16,7 @@ const apiRoutes = [
   "/api/votes/toggle",
   "/api/newsletter/subscribe",
   "/api/newsletter/webhook",
+  "/api/og",
   "/api/submissions",
   "/api/download",
   "/api/listing-leads",
@@ -47,5 +48,11 @@ describe("OpenAPI route coverage", () => {
     expect(schema).toContain("Site DB not configured");
     expect(schema).toContain("D1 insert failed");
     expect(schema).toContain("status transition");
+  });
+
+  it("documents platform-aware search and social preview generation", () => {
+    expect(schema).toContain("name: platform");
+    expect(schema).toContain("/api/og:");
+    expect(schema).toContain("image/png");
   });
 });

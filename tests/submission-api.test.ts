@@ -58,6 +58,19 @@ function githubIssueResponse(number = 42) {
   );
 }
 
+function githubSearchResponse(items: Array<Record<string, unknown>> = []) {
+  return new Response(
+    JSON.stringify({
+      total_count: items.length,
+      items,
+    }),
+    {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    },
+  );
+}
+
 describe("website submission API", () => {
   beforeEach(() => {
     directoryEntriesMock.mockReset();
@@ -73,9 +86,17 @@ describe("website submission API", () => {
     process.env.GITHUB_SUBMISSION_REPO = "";
     process.env.GITHUB_REPOSITORY = "";
     process.env.TURNSTILE_SECRET_KEY = "";
+    process.env.SUBMISSIONS_REQUIRE_TURNSTILE = "";
+    process.env.REQUIRE_TURNSTILE = "";
     vi.stubGlobal(
       "fetch",
-      vi.fn(() => Promise.resolve(githubIssueResponse())),
+      vi.fn((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/search/issues")) {
+          return Promise.resolve(githubSearchResponse());
+        }
+        return Promise.resolve(githubIssueResponse());
+      }),
     );
   });
 
@@ -94,11 +115,11 @@ describe("website submission API", () => {
       issueNumber: 42,
     });
 
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
     const fetchMock = fetch as unknown as {
       mock: { calls: Array<[RequestInfo | URL, RequestInit]> };
     };
-    const [, init] = fetchMock.mock.calls[0];
+    const [, init] = fetchMock.mock.calls[1];
     const issuePayload = JSON.parse(String(init.body));
     expect(issuePayload.title).toBe(
       "Submit MCP Server: Direct Submit API Asset",
@@ -143,6 +164,43 @@ describe("website submission API", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("rejects pending duplicate submission issues before creating another one", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("/search/issues")) {
+          return Promise.resolve(
+            githubSearchResponse([
+              {
+                number: 77,
+                html_url:
+                  "https://github.com/JSONbored/claudepro-directory/issues/77",
+                title: "Submit MCP Server: Direct Submit API Asset",
+                body: "### Category\nmcp\n\n### Slug\ndirect-submit-api-asset",
+              },
+            ]),
+          );
+        }
+        return Promise.resolve(githubIssueResponse());
+      }),
+    );
+
+    const { POST } = await import("@/app/api/submissions/route");
+    const response = await POST(
+      request({ fields: validFields() }, "203.0.113.18"),
+    );
+
+    expect(response.status).toBe(409);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "duplicate_pending_issue",
+      category: "mcp",
+      slug: "direct-submit-api-asset",
+      issueNumber: 77,
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("silently discards honeypot submissions", async () => {
     const { POST } = await import("@/app/api/submissions/route");
     const response = await POST(
@@ -174,6 +232,25 @@ describe("website submission API", () => {
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
       error: "turnstile_failed",
+    });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when production Turnstile is required but not configured", async () => {
+    envMock.value = {
+      ...envMock.value,
+      SUBMISSIONS_REQUIRE_TURNSTILE: "1",
+    };
+    process.env.TURNSTILE_SECRET_KEY = "";
+    process.env.SUBMISSIONS_REQUIRE_TURNSTILE = "1";
+    const { POST } = await import("@/app/api/submissions/route");
+    const response = await POST(
+      request({ fields: validFields() }, "203.0.113.19"),
+    );
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "turnstile_not_configured",
     });
     expect(fetch).not.toHaveBeenCalled();
   });

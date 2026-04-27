@@ -39,7 +39,9 @@ Gate: `pnpm test:registry-artifacts`, `pnpm test`, and `pnpm build`.
 - [x] [api] Add a public API documentation page with examples for manifest, category browse, search, entry detail, and LLMS export. Evidence: `pnpm test:e2e`.
 - [x] [api] Add response hash or ETag headers for static registry API responses. Evidence: `pnpm test:e2e`.
 - [x] [api] Add a registry diff endpoint and changelog feed for downstream sync clients. Evidence: `pnpm test:registry-artifacts`.
-- [x] [api] Package an optional read-only MCP or feed surface after the registry API contract has held stable. Evidence: `pnpm test`.
+- [x] [api] Publish the read-only registry feed surface for downstream clients. Evidence: `pnpm test:registry-artifacts`.
+- [x] [api] Add platform-filtered registry search and OpenAPI coverage. Evidence: `pnpm test`.
+- [ ] [api] Build a real read-only HeyClaude MCP server for search, detail, compatibility, install guidance, and adapter lookup.
 
 ## SEO + Content Quality
 
@@ -49,8 +51,13 @@ Gate: `pnpm test:seo-jsonld`, `pnpm validate:content:strict`, and `pnpm audit:co
 - [x] [content] Keep the quality report generated and test-covered. Evidence: `pnpm test:registry-artifacts`.
 - [x] [seo] Add rendered page JSON-LD parity snapshots from built pages, not only builder-level snapshots. Evidence: `pnpm test:e2e`.
 - [x] [seo] Add sitemap/canonical parity tests for every public route class. Evidence: `pnpm test:e2e`.
+- [x] [seo] Exclude noindex registry entries from the sitemap and use content modification metadata for `lastmod`. Evidence: `pnpm test`.
+- [x] [seo] Add per-entry citation facts to LLMS exports. Evidence: `pnpm test:registry-artifacts`.
+- [x] [seo] Add truthful richer entry JSON-LD types without fabricated ratings or reviews. Evidence: `pnpm test:seo-jsonld`.
+- [x] [seo] Add dynamic OG image generation for pages and registry previews. Evidence: `pnpm test:e2e`.
 - [x] [content] Turn quality gaps into periodic content prompts for maintainers and contributors. Evidence: `pnpm test:registry-artifacts`.
 - [x] [content] Add provenance badges and quality badges to detail pages once the quality scoring contract is stable. Evidence: `pnpm type-check`.
+- [x] [content] Publish a public content quality dashboard and RSS update feed. Evidence: `pnpm test:e2e`.
 
 ## UGC Growth
 
@@ -63,6 +70,10 @@ Gate: `pnpm test:submission-intake` and `pnpm validate:content:strict`.
 - [x] [ugc] Add a public submission status page backed by the submission queue contract. Evidence: `pnpm test:e2e`.
 - [x] [ugc] Add contributor attribution pages that aggregate accepted submissions and source links. Evidence: `pnpm test:e2e`.
 - [x] [ugc] Add claim/update listing intake with maintainer review before any public profile change. Evidence: `pnpm test:e2e`.
+- [x] [ugc] Add direct website submission API that validates canonical fields and creates GitHub issues only. Evidence: `pnpm test`.
+- [x] [ugc] Keep public contact optional and support GitHub handles without requiring public email. Evidence: `pnpm test:submission-intake`.
+- [x] [ugc] Reject duplicate pending GitHub submission issues before creating a new website-submitted issue. Evidence: `pnpm test`.
+- [x] [ugc] Fail closed when production Turnstile enforcement is enabled without a configured secret. Evidence: `pnpm test`.
 
 ## Raycast
 
@@ -97,6 +108,8 @@ Gate: `pnpm validate:content:strict`, `pnpm test`, `pnpm test:e2e`, `pnpm type-c
 - [x] [content] Seed the tools/apps/services directory with curated organic editorial listings and explicit disclosure fields. Evidence: `pnpm validate:content:strict`.
 - [x] [commercial] Reject contributor affiliate/referral URLs while allowing only explicit internal affiliate disclosure contracts. Evidence: `pnpm test:submission-intake`.
 - [x] [registry] Publish hashed read-only ecosystem, MCP-compatible, plugin export, and Raycast v2 feed contracts from registry builders. Evidence: `pnpm test:registry-artifacts`.
+- [x] [registry] Treat Gemini Agent Skills as native validated skills and Cursor as generated rule adapters. Evidence: `pnpm test:registry-artifacts`.
+- [x] [registry] Add platform compatibility filters and install guidance surfaces for skill entries. Evidence: `pnpm type-check`.
 - [x] [signals] Add progressive used-this, works-for-me, and reported-broken community signals without public star ratings or review JSON-LD. Evidence: `pnpm test:e2e`.
 - [x] [seo] Add human-approved editorial cluster pages for Claude hooks, MCP servers, skills, security review, starter kits, and Claude-native tools. Evidence: `pnpm test:e2e`.
 - [x] [api] Document community signals and ecosystem feed usage in public API docs and OpenAPI. Evidence: `pnpm test`.

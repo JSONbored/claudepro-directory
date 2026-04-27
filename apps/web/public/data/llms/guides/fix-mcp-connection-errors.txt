@@ -4,6 +4,12 @@ Category: guides
 Author: JSONbored
 Date added: 2025-10-27
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-mcp-connection-errors.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/guides/fix-mcp-connection-errors
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-mcp-connection-errors.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Resolve Claude Desktop MCP server connection errors fast. Step-by-step fixes for error -32000, disconnections, and configuration issues with proven solutions.
 ## Tags

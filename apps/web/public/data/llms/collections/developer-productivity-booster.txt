@@ -4,6 +4,12 @@ Category: collections
 Author: JSONbored
 Date added: 2025-10-02
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/collections/developer-productivity-booster
+- Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx
+- Author: JSONbored
+- Last verified: 2026-04-26T18:18:28-06:00
+- Robots: indexable
 ## Summary
 Maximize your development efficiency with automated workflows, smart backups, code formatting, and enhanced visual feedback. This collection combines productivity hooks, informative statuslines, and time-saving commands for a streamlined development experience.
 ## Tags

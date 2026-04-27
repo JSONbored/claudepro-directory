@@ -6,6 +6,15 @@ Date added: 2025-10-16
 Documentation: https://v0.dev/docs
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/v0-rapid-prototyping.mdx
 Download: /downloads/skills/v0-rapid-prototyping.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/v0-rapid-prototyping
+- Source URLs: https://v0.dev/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/v0-rapid-prototyping.mdx
+- Package URL: /downloads/skills/v0-rapid-prototyping.zip
+- Package SHA256: 4d04ee6b712ac687c14c4a7d539bd4eb8182cac36364c413426c92a465602174
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2025-10-16
+- Robots: indexable
 ## Summary
 Build production-ready React components and full pages in minutes using V0.dev AI with shadcn/ui, TailwindCSS v4, and Next.js 15 integration. V0.dev is Vercel's breakthrough AI UI generator that has transformed frontend development in 2025.
 ## Tags
@@ -26,7 +35,9 @@ Claude can generate production-ready React components and complete page layouts 
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 **Required:**

@@ -6,6 +6,15 @@ Date added: 2026-04-10
 Documentation: https://ethereum.org/developers/docs/
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx
 Download: /downloads/skills/ethereum-solidity-security-foundry.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/ethereum-solidity-security-foundry
+- Source URLs: https://ethereum.org/developers/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/ethereum-solidity-security-foundry.mdx
+- Package URL: /downloads/skills/ethereum-solidity-security-foundry.zip
+- Package SHA256: 658d185c8a7a5c7981f9d4c0d5bb046f425a567016a35bbd8c8aaaf83284db5e
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-10
+- Robots: indexable
 ## Summary
 Build and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.
 ## Tags
@@ -26,7 +35,9 @@ This skill gives AI agents a security-first operating model for Ethereum smart c
 
 ### Manual Adaptation
 
-- **OpenClaw, Cursor, Windsurf, Gemini, and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
+- **Gemini CLI**: native skill usage via `.gemini/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md` where supported.
+- **Cursor**: use the generated `.cursor/rules/*.mdc` adapter for project rules.
+- **OpenClaw and similar agents**: use the same skill content as a reusable prompt/workflow file when native skill import is unavailable.
 
 ## Prerequisites
 - Contract requirements and threat boundaries
