@@ -47,7 +47,7 @@ export type JobListing = {
   isWorldwide?: boolean;
 };
 
-type JobListingRow = {
+export type JobListingRow = {
   slug: string;
   title: string;
   company_name: string;
@@ -136,7 +136,7 @@ function mapSourceKind(value: string | null | undefined): JobSourceKind {
   return "employer_submitted";
 }
 
-function toJobListing(row: JobListingRow): JobListing {
+export function mapJobListingRow(row: JobListingRow): JobListing {
   const tier = mapTier(row.tier);
   return {
     slug: row.slug,
@@ -243,7 +243,7 @@ export async function queryActiveJobs(
     .bind()
     .all<JobListingRow>();
 
-  return sortJobs(results.map((row) => toJobListing(row)));
+  return sortJobs(results.map((row) => mapJobListingRow(row)));
 }
 
 export async function getJobs(): Promise<JobListing[]> {
@@ -252,7 +252,11 @@ export async function getJobs(): Promise<JobListing[]> {
 
   try {
     return await queryActiveJobs(db);
-  } catch {
+  } catch (error) {
+    console.warn(
+      "[jobs] failed to query active D1 jobs",
+      error instanceof Error ? error.message : "unknown error",
+    );
     return [];
   }
 }

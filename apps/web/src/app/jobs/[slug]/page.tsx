@@ -54,6 +54,9 @@ export async function generateMetadata({
     description: buildJobSeoDescription(job),
     path: `/jobs/${job.slug}`,
     keywords,
+    imageLabel: "Job",
+    imageKind: "job",
+    imageBadge: job.company,
   });
 }
 

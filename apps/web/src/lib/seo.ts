@@ -9,6 +9,8 @@ type PageMetadataInput = {
   keywords?: string[];
   robots?: Metadata["robots"];
   imageLabel?: string;
+  imageKind?: "registry" | "category" | "entry" | "job" | "tool" | "platform";
+  imageBadge?: string;
 };
 
 function normalizePath(path: string) {
@@ -50,6 +52,10 @@ function socialImageUrl(input: PageMetadataInput) {
   });
   if (input.imageLabel) {
     params.set("label", truncateImageText(input.imageLabel, 42));
+  }
+  if (input.imageKind) params.set("kind", input.imageKind);
+  if (input.imageBadge) {
+    params.set("badge", truncateImageText(input.imageBadge, 42));
   }
   return absoluteUrl(`/api/og?${params.toString()}`);
 }

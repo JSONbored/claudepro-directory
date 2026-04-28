@@ -53,11 +53,32 @@ Current migrations include:
 - `0004_intent_events.sql` for privacy-light copy/open/install/download/vote intent counters
 - `0005_community_signals.sql` for used-this, works-for-me, and reported-broken listing signals
 - `0006_jobs_curation_and_claims.sql` for curated job source fields, claim leads, and stale job review states
+- `0007_jobs_admin_indexes.sql` for reviewed job admin queues, expiry checks, and paid placement windows
 
 The jobs board renders active reviewed D1 rows only. Curated, employer-submitted,
 claimed, featured, and sponsored jobs all go through the same private D1-backed
 review path. Closed, stale-review, archived, or expired roles are excluded from
 the public jobs index, sitemap, and JobPosting data.
+
+Before a release, validate the jobs schema against local, dev, and production
+D1. Remote checks require a Cloudflare API token with D1 read access:
+
+```bash
+pnpm --filter web db:migrate:local
+pnpm validate:d1-jobs -- --local
+CLOUDFLARE_API_TOKEN=... pnpm validate:d1-jobs -- --remote --env dev
+CLOUDFLARE_API_TOKEN=... pnpm validate:d1-jobs -- --remote
+```
+
+Reviewed jobs are managed through the token-protected admin API and CLI, never
+through public repository seed files:
+
+```bash
+ADMIN_API_TOKEN=... pnpm jobs:admin -- health --base-url https://dev.heyclau.de
+ADMIN_API_TOKEN=... pnpm jobs:admin -- upsert --base-url https://dev.heyclau.de --file job.json
+ADMIN_API_TOKEN=... pnpm jobs:admin -- transition --base-url https://dev.heyclau.de --slug example-role --action activate
+ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de
+```
 
 ## OpenNext build/deploy commands
 

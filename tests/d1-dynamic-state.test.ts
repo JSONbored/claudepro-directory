@@ -12,6 +12,13 @@ import {
   toggleVote,
 } from "../apps/web/src/lib/votes";
 import { queryActiveJobs } from "../apps/web/src/lib/jobs";
+import {
+  REQUIRED_JOB_COLUMNS,
+  checkJobsSchema,
+  getJobsHealth,
+  updateAdminJobState,
+  upsertAdminJob,
+} from "../apps/web/src/lib/job-admin";
 import { repoRoot } from "./helpers/registry-fixtures";
 import { nextLeadStatus } from "@heyclaude/registry/commercial";
 
@@ -21,6 +28,7 @@ class FakeD1 implements D1DatabaseLike {
   voteCounts = new Map<string, number>();
   votesByClient = new Set<string>();
   jobRows: QueryResult[] = [];
+  runCalls: Array<{ query: string; values: unknown[] }> = [];
 
   prepare(query: string) {
     return {
@@ -51,6 +59,7 @@ class FakeD1 implements D1DatabaseLike {
   }
 
   private run(query: string, values: unknown[]): D1RunResult {
+    this.runCalls.push({ query, values });
     if (query.includes("INSERT OR IGNORE INTO votes_entries")) {
       const key = String(values[0]);
       if (!this.voteCounts.has(key)) this.voteCounts.set(key, 0);
@@ -88,6 +97,17 @@ class FakeD1 implements D1DatabaseLike {
   }
 
   private all<T>(query: string, values: unknown[]) {
+    if (query.includes("PRAGMA table_info(jobs_listings)")) {
+      return REQUIRED_JOB_COLUMNS.map((name) => ({ name })) as T[];
+    }
+    if (query.includes("COUNT(*) AS count FROM jobs_listings")) {
+      const counts = new Map<string, number>();
+      for (const row of this.jobRows) {
+        const status = String(row.status || "unknown");
+        counts.set(status, (counts.get(status) ?? 0) + 1);
+      }
+      return [...counts].map(([status, count]) => ({ status, count })) as T[];
+    }
     if (query.includes("FROM jobs_listings")) {
       return this.jobRows as T[];
     }
@@ -205,6 +225,57 @@ describe("D1 dynamic state helpers", () => {
         requirements: ["TypeScript"],
       },
     ]);
+  });
+
+  it("checks jobs schema and updates private reviewed job rows through admin helpers", async () => {
+    const db = new FakeD1();
+    await expect(checkJobsSchema(db)).resolves.toMatchObject({
+      ok: true,
+      missingColumns: [],
+      requiredMigration: "0006_jobs_curation_and_claims.sql",
+    });
+    await expect(getJobsHealth(db)).resolves.toMatchObject({
+      ok: true,
+      counts: {},
+    });
+
+    await upsertAdminJob(db, {
+      slug: "reviewed-ai-engineer",
+      title: "Reviewed AI Engineer",
+      companyName: "Example Co",
+      companyUrl: "https://example.com",
+      locationText: "Remote",
+      summary:
+        "Build reviewed Claude workflow systems with source verification, external apply links, and private D1-backed publication state.",
+      applyUrl: "https://example.com/jobs/reviewed-ai-engineer",
+      tier: "featured",
+      status: "pending_review",
+      source: "manual",
+      sourceKind: "employer_submitted",
+      sourceUrl: "https://example.com/jobs/reviewed-ai-engineer",
+      responsibilities: ["Ship integrations"],
+      requirements: ["TypeScript"],
+      claimedEmployer: true,
+      isRemote: true,
+      isWorldwide: true,
+    });
+    expect(db.runCalls.at(-1)?.query).toContain("ON CONFLICT(slug)");
+    expect(db.runCalls.at(-1)?.values).toContain("reviewed-ai-engineer");
+
+    await updateAdminJobState(db, {
+      slug: "reviewed-ai-engineer",
+      action: "revalidate",
+      checkedAt: "2026-04-28T00:00:00.000Z",
+    });
+    expect(db.runCalls.at(-1)?.query).toContain("stale_check_count = 0");
+    expect(db.runCalls.at(-1)?.values).toContain("2026-04-28T00:00:00.000Z");
+
+    await updateAdminJobState(db, {
+      slug: "reviewed-ai-engineer",
+      action: "stale",
+      checkedAt: "2026-04-29T00:00:00.000Z",
+    });
+    expect(db.runCalls.at(-1)?.query).toContain("stale_pending_review");
   });
 
   it("keeps dynamic-state migrations aligned with votes, jobs, leads, intent events, and community signals", () => {

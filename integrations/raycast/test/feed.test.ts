@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  CACHE_KEY,
+  DETAIL_CACHE_PREFIX,
   absoluteDataUrl,
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
@@ -17,6 +19,12 @@ import {
   sortedCategoryOptions,
   type RaycastEntry,
 } from "../src/feed";
+import {
+  fetchFreshFeed,
+  loadCachedFeed,
+  loadEntryDetail,
+  type RaycastTextCache,
+} from "../src/runtime";
 
 const sampleEntry: RaycastEntry = {
   category: "mcp",
@@ -37,6 +45,27 @@ const sampleEntry: RaycastEntry = {
   downloadTrust: "external",
   verificationStatus: "validated",
 };
+
+class MemoryCache implements RaycastTextCache {
+  values = new Map<string, string>();
+  get(key: string) {
+    return this.values.get(key);
+  }
+  set(key: string, value: string) {
+    this.values.set(key, value);
+  }
+  remove(key: string) {
+    this.values.delete(key);
+  }
+}
+
+function response(body: unknown, init: ResponseInit = {}) {
+  return new Response(typeof body === "string" ? body : JSON.stringify(body), {
+    status: 200,
+    headers: { "content-type": "application/json" },
+    ...init,
+  });
+}
 
 describe("Raycast feed helpers", () => {
   it("parses valid envelope entries and drops malformed rows", () => {
@@ -129,5 +158,79 @@ describe("Raycast feed helpers", () => {
     assert.deepEqual(filterEntriesByCategory(entries, "mcp", favorites), [
       sampleEntry,
     ]);
+  });
+
+  it("loads and clears cached feed snapshots deterministically", () => {
+    const cache = new MemoryCache();
+    cache.set(
+      CACHE_KEY,
+      JSON.stringify({
+        generatedAt: "2026-04-28T00:00:00.000Z",
+        entries: [sampleEntry],
+      }),
+    );
+    assert.equal(loadCachedFeed(cache).entries.length, 1);
+
+    cache.set(CACHE_KEY, "{bad json");
+    assert.deepEqual(loadCachedFeed(cache), { entries: [], generatedAt: "" });
+    assert.equal(cache.get(CACHE_KEY), undefined);
+  });
+
+  it("fetches fresh feed payloads and preserves compact feed contracts", async () => {
+    const cache = new MemoryCache();
+    const feed = await fetchFreshFeed({
+      cache,
+      fetchFn: async () =>
+        response({
+          generatedAt: "2026-04-28T00:00:00.000Z",
+          entries: [sampleEntry],
+        }),
+    });
+
+    assert.equal(feed.entries.length, 1);
+    assert.match(cache.get(CACHE_KEY) || "", /context7/);
+
+    await assert.rejects(
+      fetchFreshFeed({
+        cache,
+        fetchFn: async () => response({ entries: [] }),
+      }),
+      /Feed contained no entries/,
+    );
+  });
+
+  it("loads detail payloads on demand and falls back only when no detail URL exists", async () => {
+    const cache = new MemoryCache();
+    const detail = await loadEntryDetail({
+      entry: sampleEntry,
+      cache,
+      fetchFn: async () =>
+        response({ copyText: "remote full text", detailMarkdown: "# Remote" }),
+    });
+    assert.deepEqual(detail, {
+      copyText: "remote full text",
+      detailMarkdown: "# Remote",
+    });
+    assert.match(
+      cache.get(`${DETAIL_CACHE_PREFIX}:${entryKey(sampleEntry)}`) || "",
+      /remote full text/,
+    );
+
+    await assert.rejects(
+      loadEntryDetail({
+        entry: { ...sampleEntry, slug: "broken" },
+        cache: new MemoryCache(),
+        fetchFn: async () => response({ copyText: "missing markdown" }),
+      }),
+      /Detail payload was malformed/,
+    );
+
+    assert.deepEqual(
+      await loadEntryDetail({
+        entry: { ...sampleEntry, detailUrl: "" },
+        cache: new MemoryCache(),
+      }),
+      fallbackDetail(sampleEntry),
+    );
   });
 });

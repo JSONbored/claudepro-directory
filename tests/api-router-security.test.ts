@@ -232,4 +232,48 @@ describe("central API router security", () => {
     );
     expect(routerSource).toContain("binding.limit({ key })");
   });
+
+  it("requires admin tokens for reviewed D1 jobs endpoints", async () => {
+    const { GET } = await import("@/app/api/admin/jobs/health/route");
+    const response = await GET(
+      new Request("https://heyclau.de/api/admin/jobs/health", {
+        headers: { origin: "https://heyclau.de" },
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: { code: "unauthorized" },
+    });
+  });
+
+  it("validates reviewed D1 job payloads before admin route code runs", () => {
+    expect(() =>
+      apiRouteDefinitions["adminJobs.upsert"].bodySchema?.parse({
+        slug: "reviewed-ai-engineer",
+        title: "Reviewed AI Engineer",
+        companyName: "Example Co",
+        summary:
+          "Build reviewed Claude workflow systems with source verification, external apply links, and private D1-backed publication state.",
+        applyUrl: "http://example.com/jobs/reviewed-ai-engineer",
+      }),
+    ).toThrow(/URL must be HTTPS/);
+
+    expect(
+      apiRouteDefinitions["adminJobs.upsert"].bodySchema?.parse({
+        slug: "reviewed-ai-engineer",
+        title: "Reviewed AI Engineer",
+        companyName: "Example Co",
+        summary:
+          "Build reviewed Claude workflow systems with source verification, external apply links, and private D1-backed publication state.",
+        applyUrl: "https://example.com/jobs/reviewed-ai-engineer",
+      }),
+    ).toMatchObject({
+      slug: "reviewed-ai-engineer",
+      status: "pending_review",
+      tier: "free",
+      sourceKind: "employer_submitted",
+    });
+  });
 });

@@ -12,25 +12,23 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import {
-  CACHE_KEY,
-  DETAIL_CACHE_PREFIX,
   FAVORITES_KEY,
   FEED_URL,
-  absoluteDataUrl,
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
   categoryLabel,
   entryKey,
-  fallbackDetail,
   filterEntriesByCategory,
-  isRaycastDetail,
   parseFavoriteKeys,
-  parseFeed,
   serializeFavoriteKeys,
   sortedCategoryOptions,
-  type RaycastDetail,
   type RaycastEntry,
 } from "./feed";
+import {
+  fetchFreshFeed,
+  loadCachedFeed as loadCachedFeedFromRuntime,
+  loadEntryDetail,
+} from "./runtime";
 
 const cache = new Cache();
 
@@ -48,15 +46,7 @@ const categoryIcons: Record<string, Icon> = {
 };
 
 function loadCachedFeed() {
-  const cached = cache.get(CACHE_KEY);
-  if (!cached) return { entries: [], generatedAt: "" };
-
-  try {
-    return parseFeed(cached);
-  } catch {
-    cache.remove(CACHE_KEY);
-    return { entries: [], generatedAt: "" };
-  }
+  return loadCachedFeedFromRuntime(cache);
 }
 
 async function loadFavorites() {
@@ -73,38 +63,6 @@ async function loadFavorites() {
 
 async function persistFavorites(favorites: Set<string>) {
   await LocalStorage.setItem(FAVORITES_KEY, serializeFavoriteKeys(favorites));
-}
-
-async function loadEntryDetail(entry: RaycastEntry): Promise<RaycastDetail> {
-  if (!entry.detailUrl) {
-    return fallbackDetail(entry);
-  }
-
-  const cacheKey = `${DETAIL_CACHE_PREFIX}:${entryKey(entry)}`;
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached) as unknown;
-      if (isRaycastDetail(parsed)) return parsed;
-    } catch {
-      cache.remove(cacheKey);
-    }
-  }
-
-  const response = await fetch(absoluteDataUrl(entry.detailUrl), {
-    headers: { accept: "application/json" },
-  });
-  if (!response.ok) {
-    throw new Error(`Detail responded with ${response.status}`);
-  }
-
-  const parsed = (await response.json()) as unknown;
-  if (!isRaycastDetail(parsed)) {
-    throw new Error("Detail payload was malformed");
-  }
-
-  cache.set(cacheKey, JSON.stringify(parsed));
-  return parsed;
 }
 
 function metadataAccessories(entry: RaycastEntry, isFavorite: boolean) {
@@ -143,22 +101,7 @@ export default function Command() {
   async function refreshEntries(showSuccess = false) {
     setIsLoading(true);
     try {
-      const response = await fetch(FEED_URL, {
-        headers: {
-          accept: "application/json",
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`Feed responded with ${response.status}`);
-      }
-
-      const text = await response.text();
-      const nextFeed = parseFeed(text);
-      if (nextFeed.entries.length === 0) {
-        throw new Error("Feed contained no entries");
-      }
-
-      cache.set(CACHE_KEY, text);
+      const nextFeed = await fetchFreshFeed({ cache, feedUrl: FEED_URL });
       setEntries(nextFeed.entries);
       setGeneratedAt(nextFeed.generatedAt);
       if (showSuccess) {
@@ -219,7 +162,7 @@ export default function Command() {
 
   async function copyFullAsset(entry: RaycastEntry) {
     try {
-      const detail = await loadEntryDetail(entry);
+      const detail = await loadEntryDetail({ entry, cache });
       await Clipboard.copy(detail.copyText || entry.copyText);
       await showToast({
         style: Toast.Style.Success,
@@ -237,7 +180,7 @@ export default function Command() {
 
   async function pasteFullAsset(entry: RaycastEntry) {
     try {
-      const detail = await loadEntryDetail(entry);
+      const detail = await loadEntryDetail({ entry, cache });
       await Clipboard.paste(detail.copyText || entry.copyText);
       await showToast({
         style: Toast.Style.Success,

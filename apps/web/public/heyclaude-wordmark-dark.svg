@@ -1,3 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="300" height="56" viewBox="0 0 300 56"><rect width="56" height="56" fill="#c855a0" rx="15"/><circle cx="19" cy="28" r="4" fill="#f5f7f2"/><path fill="none" stroke="#f5f7f2" stroke-linecap="round" stroke-width="3.5" d="M31 23q8 5 0 10"/><text x="70" y="39" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="30" font-weight="700" letter-spacing="-.5">
-    <tspan fill="#2d1f3d">Hey</tspan><tspan fill="#c855a0">Claude</tspan>
+    <tspan fill="#ede9f0">Hey</tspan><tspan fill="#d470b8">Claude</tspan>
   </text></svg>

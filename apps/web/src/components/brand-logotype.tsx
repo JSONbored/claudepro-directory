@@ -23,13 +23,20 @@ export function BrandLogotype({
         className="fill-foreground"
         style={{
           fontSize: "15px",
-          fontWeight: 640,
-          letterSpacing: "-0.045em",
+          fontWeight: 700,
+          letterSpacing: 0,
           fontFamily:
-            '"Manrope", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            '"Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         }}
       >
-        {label}
+        {label === "HeyClaude" ? (
+          <>
+            <tspan>Hey</tspan>
+            <tspan className="fill-primary">Claude</tspan>
+          </>
+        ) : (
+          label
+        )}
       </text>
     </svg>
   );

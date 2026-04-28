@@ -25,6 +25,7 @@
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
     "generate:openapi": "tsx scripts/generate-openapi.ts",
     "validate:openapi": "tsx scripts/generate-openapi.ts --check",
+    "validate:d1-jobs": "node scripts/validate-d1-jobs.mjs",
     "validate:tasks": "node scripts/validate-tasks.mjs",
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
     "email:render": "tsx scripts/render-email-templates.ts",
@@ -50,6 +51,8 @@
     "audit:content": "node scripts/audit-content.mjs",
     "sync:votes:d1": "node scripts/sync-votes-to-d1.mjs --mode=both",
     "verify:votes:d1": "node scripts/verify-d1-votes.mjs --mode=both",
+    "jobs:admin": "node scripts/manage-d1-jobs.mjs",
+    "jobs:check-sources": "node scripts/check-d1-job-sources.mjs",
     "commitlint": "commitlint --edit",
     "prepare": "husky"
   },

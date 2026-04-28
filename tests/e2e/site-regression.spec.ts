@@ -78,7 +78,7 @@ test.describe("site regression", () => {
     });
   }
 
-  test("serves registry and LLM text exports", async ({ page }) => {
+  test("serves registry and LLM text exports", async ({ request }) => {
     for (const route of [
       "/llms.txt",
       "/llms-full.txt",
@@ -93,8 +93,8 @@ test.describe("site regression", () => {
       "/api/registry/feed",
       "/48486ebc7ddc47af875118345161ae70.txt",
     ]) {
-      const response = await page.goto(route);
-      expect(response?.ok(), route).toBe(true);
+      const response = await request.get(route);
+      expect(response.ok(), route).toBe(true);
     }
   });
 
@@ -216,31 +216,65 @@ test.describe("site regression", () => {
   });
 
   test("serves dynamic social images for generated page metadata", async ({
+    page,
     request,
   }) => {
     const response = await request.get(
-      "/api/og?title=HeyClaude%20Test&description=Registry%20preview",
+      "/api/og?title=HeyClaude%20Test&description=Registry%20preview&kind=entry&badge=heyclau.de",
     );
     expect(response.ok()).toBe(true);
     expect(response.headers()["content-type"]).toContain("image/png");
+
+    await page.goto("/");
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute(
+      "href",
+      "/manifest.webmanifest",
+    );
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+      "href",
+      "/apple-touch-icon.png",
+    );
+    await expect(page.locator('link[rel="icon"]').first()).toHaveAttribute(
+      "href",
+      /favicon\.svg|icon\.svg/,
+    );
+
+    const manifest = await request.get("/manifest.webmanifest");
+    expect(manifest.ok()).toBe(true);
+    await expect(manifest.json()).resolves.toMatchObject({
+      name: "HeyClaude",
+      theme_color: "#c855a0",
+    });
   });
 
   test("keeps jobs D1-backed and exposes founding tier pricing", async ({
     page,
   }) => {
     await page.goto("/jobs");
-    await expect(page.getByText("No active jobs yet.")).toBeVisible();
     await expect(
       page.getByText(/only shows reviewed D1 rows with active status/i),
     ).toBeVisible();
-    await expect(page.getByText("Editorially curated")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: /Apply/i })).toHaveCount(0);
 
     const sitemapResponse = await page.request.get("/sitemap.xml");
     expect(sitemapResponse.ok()).toBe(true);
-    expect(await sitemapResponse.text()).not.toMatch(
-      /<loc>https:\/\/heyclau\.de\/jobs\/(?!post<)[^<]+<\/loc>/,
-    );
+    const sitemap = await sitemapResponse.text();
+
+    const emptyState = page.getByText("No active jobs yet.");
+    if (await emptyState.isVisible().catch(() => false)) {
+      await expect(page.getByText("Editorially curated")).toHaveCount(0);
+      await expect(page.getByRole("link", { name: /Apply/i })).toHaveCount(0);
+      expect(sitemap).not.toMatch(
+        /<loc>https:\/\/heyclau\.de\/jobs\/(?!post<)[^<]+<\/loc>/,
+      );
+    } else {
+      const detailLink = page.getByRole("link", { name: /Details/i }).first();
+      const applyLink = page.getByRole("link", { name: /Apply/i }).first();
+      await expect(detailLink).toBeVisible();
+      await expect(applyLink).toHaveAttribute("href", /^https?:\/\//);
+      const detailHref = await detailLink.getAttribute("href");
+      expect(detailHref).toMatch(/^\/jobs\/[a-z0-9-]+$/);
+      expect(sitemap).toContain(`https://heyclau.de${detailHref}`);
+    }
 
     await page.goto("/jobs/post?tier=free");
     await expect(page.getByText("Founding standard").first()).toBeVisible();

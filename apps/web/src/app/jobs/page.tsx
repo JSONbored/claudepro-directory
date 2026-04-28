@@ -19,6 +19,8 @@ export const metadata: Metadata = buildPageMetadata({
     "Browse curated and reviewed external-apply jobs for teams building with Claude, MCP infrastructure, agents, developer tools, and AI workflows.",
   path: "/jobs",
   keywords: ["claude jobs", "ai jobs", "mcp jobs", "llm engineer jobs"],
+  imageLabel: "Jobs",
+  imageKind: "job",
 });
 
 export default async function JobsPage() {

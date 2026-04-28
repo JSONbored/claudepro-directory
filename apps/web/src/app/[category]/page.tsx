@@ -48,6 +48,9 @@ export async function generateMetadata({
     description: seoDescription,
     path: `/${category}`,
     keywords: [label.toLowerCase(), "claude", "directory", "heyclaude"],
+    imageLabel: label,
+    imageKind: "category",
+    imageBadge: "Category directory",
   });
 }
 

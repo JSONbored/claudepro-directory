@@ -10,6 +10,30 @@ const platformSchema = z
   .optional()
   .default("");
 const categorySchema = safeSlugSchema.optional().default("");
+const jobTierSchema = z.enum(["free", "standard", "featured", "sponsored"]);
+const jobStatusSchema = z.enum([
+  "draft",
+  "pending_review",
+  "active",
+  "stale_pending_review",
+  "closed",
+  "archived",
+]);
+const jobSourceSchema = z.enum(["manual", "polar", "email", "curated"]);
+const jobSourceKindSchema = z.enum([
+  "official_ats",
+  "employer_careers",
+  "employer_submitted",
+]);
+const optionalHttpsUrlSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((value) => !value || /^https:\/\//i.test(value), {
+    message: "URL must be HTTPS",
+  })
+  .optional()
+  .default("");
 
 export const apiErrorEnvelopeSchema = z.object({
   ok: z.literal(false),
@@ -122,6 +146,103 @@ export const adminListingLeadsPatchBodySchema = z.object({
   action: z.string().trim().toLowerCase().min(1).max(64),
 });
 
+export const adminJobsQuerySchema = z.object({
+  status: z
+    .union([jobStatusSchema, z.literal("")])
+    .optional()
+    .default(""),
+  tier: z
+    .union([jobTierSchema, z.literal("")])
+    .optional()
+    .default(""),
+  source: z
+    .union([jobSourceSchema, z.literal("")])
+    .optional()
+    .default(""),
+  sourceKind: z
+    .union([jobSourceKindSchema, z.literal("")])
+    .optional()
+    .default(""),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(50),
+});
+
+export const adminJobsUpsertBodySchema = z
+  .object({
+    slug: safeSlugSchema,
+    title: z.string().trim().min(4).max(180),
+    companyName: z.string().trim().min(2).max(160),
+    companyUrl: optionalHttpsUrlSchema,
+    locationText: z
+      .string()
+      .trim()
+      .min(2)
+      .max(160)
+      .optional()
+      .default("Remote"),
+    summary: z.string().trim().min(80).max(900),
+    descriptionMd: z.string().trim().max(8000).optional().default(""),
+    employmentType: z.string().trim().max(80).optional().default(""),
+    compensationSummary: z.string().trim().max(160).optional().default(""),
+    responsibilities: z
+      .array(z.string().trim().min(2).max(240))
+      .max(12)
+      .optional(),
+    requirements: z.array(z.string().trim().min(2).max(240)).max(12).optional(),
+    applyUrl: optionalHttpsUrlSchema.refine((value) => Boolean(value), {
+      message: "applyUrl is required",
+    }),
+    tier: jobTierSchema.optional().default("free"),
+    status: jobStatusSchema.optional().default("pending_review"),
+    source: jobSourceSchema.optional().default("manual"),
+    sourceKind: jobSourceKindSchema.optional().default("employer_submitted"),
+    sourceUrl: optionalHttpsUrlSchema,
+    firstSeenAt: z.string().trim().max(64).optional().default(""),
+    lastCheckedAt: z.string().trim().max(64).optional().default(""),
+    sourceCheckedAt: z.string().trim().max(64).optional().default(""),
+    staleCheckCount: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .max(20)
+      .optional()
+      .default(0),
+    curationNote: z.string().trim().max(1200).optional().default(""),
+    paidPlacementExpiresAt: z.string().trim().max(64).optional().default(""),
+    claimedEmployer: z.boolean().optional().default(false),
+    postedByEmail: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email()
+      .max(320)
+      .optional()
+      .or(z.literal(""))
+      .default(""),
+    postedAt: z.string().trim().max(64).optional().default(""),
+    expiresAt: z.string().trim().max(64).optional().default(""),
+    isRemote: z.boolean().optional().default(true),
+    isWorldwide: z.boolean().optional().default(false),
+  })
+  .strict();
+
+export const adminJobsPatchBodySchema = z
+  .object({
+    slug: safeSlugSchema,
+    action: z.enum([
+      "review",
+      "activate",
+      "stale",
+      "close",
+      "archive",
+      "reactivate",
+      "expire",
+      "revalidate",
+    ]),
+    checkedAt: z.string().trim().max(64).optional().default(""),
+    expiresAt: z.string().trim().max(64).optional().default(""),
+  })
+  .strict();
+
 export const intentEventsBodySchema = z.object({
   type: z.enum(["copy", "open", "install", "download", "vote"]),
   entryKey: z
@@ -153,6 +274,11 @@ export const ogQuerySchema = z.object({
       "A Claude-native registry for agents, MCP servers, skills, commands, hooks, rules, guides, and tools.",
     ),
   label: z.string().trim().max(64).optional().default("Registry"),
+  kind: z
+    .enum(["registry", "category", "entry", "job", "tool", "platform"])
+    .optional()
+    .default("registry"),
+  badge: z.string().trim().max(64).optional().default("heyclau.de"),
 });
 
 export type ApiRouteDefinition = {
@@ -439,6 +565,79 @@ export const apiRouteDefinitions = {
     auth: "admin-token",
     rateLimit: {
       scope: "admin-listing-leads",
+      limit: 60,
+      windowMs: 60_000,
+      binding: "API_STRICT_RATE_LIMIT",
+    },
+  }),
+  "adminJobs.list": route({
+    id: "adminJobs.list",
+    method: "GET",
+    path: "/api/admin/jobs",
+    summary: "Token-protected reviewed jobs list",
+    description:
+      "Lists D1-backed job records for maintainer review. Public jobs are rendered from active rows only; this admin endpoint can inspect all statuses.",
+    tags: ["Admin"],
+    originCheck: true,
+    querySchema: adminJobsQuerySchema,
+    auth: "admin-token",
+    rateLimit: {
+      scope: "admin-jobs",
+      limit: 60,
+      windowMs: 60_000,
+      binding: "API_STRICT_RATE_LIMIT",
+    },
+  }),
+  "adminJobs.upsert": route({
+    id: "adminJobs.upsert",
+    method: "POST",
+    path: "/api/admin/jobs",
+    summary: "Create or update a reviewed D1 job",
+    description:
+      "Creates or updates a private D1 job record after maintainer review. This endpoint never writes public repository content.",
+    tags: ["Admin"],
+    originCheck: true,
+    bodySchema: adminJobsUpsertBodySchema,
+    bodyLimitBytes: 32 * 1024,
+    auth: "admin-token",
+    rateLimit: {
+      scope: "admin-jobs",
+      limit: 45,
+      windowMs: 60_000,
+      binding: "API_STRICT_RATE_LIMIT",
+    },
+  }),
+  "adminJobs.update": route({
+    id: "adminJobs.update",
+    method: "PATCH",
+    path: "/api/admin/jobs",
+    summary: "Transition reviewed D1 job state",
+    description:
+      "Transitions reviewed job rows through active, stale, closed, archived, and revalidated states without publishing repo content.",
+    tags: ["Admin"],
+    originCheck: true,
+    bodySchema: adminJobsPatchBodySchema,
+    bodyLimitBytes: 4 * 1024,
+    auth: "admin-token",
+    rateLimit: {
+      scope: "admin-jobs",
+      limit: 45,
+      windowMs: 60_000,
+      binding: "API_STRICT_RATE_LIMIT",
+    },
+  }),
+  "adminJobs.health": route({
+    id: "adminJobs.health",
+    method: "GET",
+    path: "/api/admin/jobs/health",
+    summary: "Token-protected D1 jobs health check",
+    description:
+      "Checks the jobs D1 schema, required columns, and status counts before release or operational review.",
+    tags: ["Admin"],
+    originCheck: true,
+    auth: "admin-token",
+    rateLimit: {
+      scope: "admin-jobs-health",
       limit: 60,
       windowMs: 60_000,
       binding: "API_STRICT_RATE_LIMIT",

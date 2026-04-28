@@ -63,6 +63,12 @@ jobs:
       - name: Validate cleanup policy
         run: pnpm validate:clean
 
+      - name: Apply local D1 migrations
+        run: pnpm --filter web db:migrate:local
+
+      - name: Validate local D1 jobs schema
+        run: pnpm validate:d1-jobs -- --local
+
       - name: Validate task tracker
         run: pnpm validate:tasks
 

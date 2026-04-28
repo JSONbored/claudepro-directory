@@ -238,6 +238,7 @@ if (fs.existsSync(tasksPath)) {
     "validate:category-spec",
     "validate:packages",
     "validate:raycast-feed",
+    "validate:d1-jobs",
     "validate:emails",
     "test:mcp",
     "test",
@@ -266,6 +267,7 @@ for (const scriptName of [
   "validate:category-spec",
   "validate:packages",
   "validate:raycast-feed",
+  "validate:d1-jobs",
   "validate:emails",
   "test:mcp",
   "test",
@@ -299,6 +301,8 @@ for (const route of [
   "/api/submissions:",
   "/api/listing-leads:",
   "/api/admin/listing-leads:",
+  "/api/admin/jobs:",
+  "/api/admin/jobs/health:",
 ]) {
   if (!openApiSchema.includes(route)) {
     failures.push(`OpenAPI schema is missing ${route.replace(/:$/, "")}`);

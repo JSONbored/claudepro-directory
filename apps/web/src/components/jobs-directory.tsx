@@ -77,6 +77,11 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
         {sortedJobs.length} hiring{" "}
         {sortedJobs.length === 1 ? "listing" : "listings"} found
       </div>
+      <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
+        The jobs board only shows reviewed D1 rows with active status. Roles can
+        be added, checked, expired, and archived without publishing job data to
+        the public repository.
+      </p>
 
       <div className="space-y-4">
         {sortedJobs.map((job) => (
@@ -154,7 +159,7 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
               <p className="mt-2 max-w-2xl leading-7">
                 {hasJobs
                   ? "Try another company, location, or role keyword."
-                  : "The jobs board only shows reviewed D1 rows with active status. Posting options are available while the board is empty."}
+                  : "Posting options are available while the board is empty."}
               </p>
             </div>
             {!hasJobs ? (

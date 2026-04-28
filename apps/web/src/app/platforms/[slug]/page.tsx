@@ -45,6 +45,9 @@ export async function generateMetadata({
     description: platform.seoDescription,
     path: `/platforms/${platform.slug}`,
     keywords: ["agent skills", platform.platform, "skill compatibility"],
+    imageLabel: platform.platform,
+    imageKind: "platform",
+    imageBadge: "Platform compatibility",
   });
 }
 

@@ -1,4 +1,3 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import {
   nextLeadStatus,
   normalizeCommercialStatus,
@@ -15,6 +14,7 @@ import {
   type InferApiBody,
   type InferApiQuery,
 } from "@/lib/api/router";
+import { isAdminAuthorized } from "@/lib/admin-auth";
 import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 
@@ -35,36 +35,6 @@ const CSV_COLUMNS = [
   "created_at",
   "updated_at",
 ] as const;
-
-function getAdminToken() {
-  try {
-    const { env } = getCloudflareContext();
-    const envRecord = env as unknown as Record<string, unknown>;
-    return String(
-      envRecord["LEADS_ADMIN_TOKEN"] ||
-        envRecord["ADMIN_LEADS_TOKEN"] ||
-        process.env.LEADS_ADMIN_TOKEN ||
-        process.env.ADMIN_LEADS_TOKEN ||
-        "",
-    ).trim();
-  } catch {
-    return String(
-      process.env.LEADS_ADMIN_TOKEN || process.env.ADMIN_LEADS_TOKEN || "",
-    ).trim();
-  }
-}
-
-function isAuthorized(request: Request) {
-  const token = getAdminToken();
-  if (!token) return false;
-
-  const bearer = request.headers
-    .get("authorization")
-    ?.replace(/^Bearer\s+/i, "")
-    .trim();
-  const headerToken = request.headers.get("x-admin-token")?.trim();
-  return bearer === token || headerToken === token;
-}
 
 function normalizeKind(value: string | null) {
   const normalized = String(value ?? "")
@@ -92,7 +62,7 @@ function leadsToCsv(rows: Record<string, unknown>[]) {
 export const GET = createApiHandler(
   "adminListingLeads.list",
   async ({ request, query: parsedQuery, requestId }) => {
-    if (!isAuthorized(request)) {
+    if (!isAdminAuthorized(request)) {
       logApiWarn(request, "admin.listing_leads.unauthorized");
       return apiError("unauthorized", 401, { requestId });
     }
@@ -175,7 +145,7 @@ export const GET = createApiHandler(
 export const PATCH = createApiHandler(
   "adminListingLeads.update",
   async ({ request, body, requestId }) => {
-    if (!isAuthorized(request)) {
+    if (!isAdminAuthorized(request)) {
       logApiWarn(request, "admin.listing_leads.unauthorized");
       return apiError("unauthorized", 401, { requestId });
     }

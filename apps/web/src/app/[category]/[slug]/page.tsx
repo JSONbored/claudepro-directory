@@ -115,6 +115,9 @@ export async function generateMetadata({
     description,
     path: `/${entry.category}/${entry.slug}`,
     keywords,
+    imageLabel: entry.category,
+    imageKind: entry.category === "tools" ? "tool" : "entry",
+    imageBadge: entry.platformCompatibility?.[0]?.platform ?? entry.category,
     robots:
       entry.robotsIndex !== undefined || entry.robotsFollow !== undefined
         ? {

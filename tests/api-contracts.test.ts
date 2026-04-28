@@ -31,6 +31,8 @@ const apiRoutes = [
   "/api/download",
   "/api/listing-leads",
   "/api/admin/listing-leads",
+  "/api/admin/jobs",
+  "/api/admin/jobs/health",
   "/api/intent-events",
   "/api/community-signals",
   "/api/github-stats",
@@ -91,6 +93,7 @@ describe("OpenAPI route coverage", () => {
     expect(schema).not.toContain("/api/registry/publish:");
     expect(schema).not.toContain("/api/submissions/import:");
     expect(schema).toContain("Token-protected lead review/export endpoint");
+    expect(schema).toContain("Token-protected reviewed jobs list");
   });
 
   it("documents D1-backed failure modes for dynamic-state endpoints", () => {
