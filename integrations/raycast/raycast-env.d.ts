@@ -7,22 +7,19 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** Developer Feed URL Override - Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed. */
+  "feedUrlOverride"?: string
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
   /** Preferences accessible in the `search` command */
-  export type Search = ExtensionPreferences & {
-  /** Developer Feed URL Override - Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed. */
-  "feedUrlOverride"?: string
-}
+  export type Search = ExtensionPreferences & {}
   /** Preferences accessible in the `jobs` command */
-  export type Jobs = ExtensionPreferences & {
-  /** Developer Feed URL Override - Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed. */
-  "feedUrlOverride"?: string
-}
+  export type Jobs = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {

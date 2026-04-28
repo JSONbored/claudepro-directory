@@ -13,7 +13,7 @@ distribution build pass.
 ## Dev Feed Override
 
 1. Run `npm run dev` from `integrations/raycast`.
-2. Open each command's preferences and set `Developer Feed URL Override` to
+2. Open the HeyClaude extension preferences and set `Developer Feed URL Override` to
    `https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json`.
 3. Run `Search HeyClaude`.
 4. Confirm entries, category filters, details, and copy actions use the dev
@@ -21,7 +21,8 @@ distribution build pass.
 5. Run `Browse HeyClaude Jobs`.
 6. Confirm active D1-backed jobs load from the same dev Worker host via
    `/api/jobs?limit=100`.
-7. Clear the override and confirm the production feed is used again.
+7. Clear the extension-level override and confirm the production feed is used
+   again.
 
 ## Stale Cache
 

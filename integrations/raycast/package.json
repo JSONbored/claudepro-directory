@@ -14,6 +14,16 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "feedUrlOverride",
+      "title": "Developer Feed URL Override",
+      "description": "Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json"
+    }
+  ],
   "commands": [
     {
       "name": "search",
@@ -27,16 +37,6 @@
         "skills",
         "hooks",
         "commands"
-      ],
-      "preferences": [
-        {
-          "name": "feedUrlOverride",
-          "title": "Developer Feed URL Override",
-          "description": "Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed.",
-          "type": "textfield",
-          "required": false,
-          "placeholder": "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json"
-        }
       ]
     },
     {
@@ -50,16 +50,6 @@
         "ai",
         "mcp",
         "agents"
-      ],
-      "preferences": [
-        {
-          "name": "feedUrlOverride",
-          "title": "Developer Feed URL Override",
-          "description": "Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed.",
-          "type": "textfield",
-          "required": false,
-          "placeholder": "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json"
-        }
       ]
     }
   ],

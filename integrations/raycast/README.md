@@ -39,16 +39,17 @@ npm install
 npm run dev
 ```
 
-For preview-feed QA, open each command's preferences and set `Developer Feed
-URL Override` to:
+For preview-feed QA, open the HeyClaude extension preferences and set
+`Developer Feed URL Override` to:
 
 ```text
 https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json
 ```
 
-Leave the preference blank for the production feed. Registry detail payloads and
-the jobs API host are resolved relative to the selected feed URL, so a dev feed
-also loads dev detail files and dev D1 jobs.
+Leave the preference blank for the production feed. Both commands share this
+single setting. Registry detail payloads and the jobs API host are resolved
+relative to the selected feed URL, so a dev feed also loads dev detail files and
+dev D1 jobs.
 
 ## Validation
 

@@ -377,7 +377,6 @@ function latestJobTimestamp(jobs: PublicJobListing[]) {
       job.sourceCheckedAt,
       job.lastCheckedAt,
       job.postedAt,
-      job.expiresAt,
       job.firstSeenAt,
     ])
     .filter(Boolean)
