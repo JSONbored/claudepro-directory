@@ -8,6 +8,7 @@ import {
   List,
   LocalStorage,
   Toast,
+  getPreferenceValues,
   showToast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
@@ -20,6 +21,7 @@ import {
   entryKey,
   filterEntriesByCategory,
   parseFavoriteKeys,
+  resolveFeedUrl,
   serializeFavoriteKeys,
   sortedCategoryOptions,
   type RaycastEntry,
@@ -31,6 +33,10 @@ import {
 } from "./runtime";
 
 const cache = new Cache();
+
+type SearchPreferences = {
+  feedUrlOverride?: string;
+};
 
 const categoryIcons: Record<string, Icon> = {
   agents: Icon.Person,
@@ -45,8 +51,24 @@ const categoryIcons: Record<string, Icon> = {
   statuslines: Icon.BarChart,
 };
 
-function loadCachedFeed() {
-  return loadCachedFeedFromRuntime(cache);
+function getConfiguredFeed() {
+  const preferences = getPreferenceValues<SearchPreferences>();
+  try {
+    return {
+      feedUrl: resolveFeedUrl(preferences.feedUrlOverride),
+      error: "",
+    };
+  } catch (error) {
+    return {
+      feedUrl: FEED_URL,
+      error:
+        error instanceof Error ? error.message : "Feed override was invalid",
+    };
+  }
+}
+
+function loadCachedFeed(feedUrl: string) {
+  return loadCachedFeedFromRuntime(cache, feedUrl);
 }
 
 async function loadFavorites() {
@@ -91,17 +113,34 @@ function metadataAccessories(entry: RaycastEntry, isFavorite: boolean) {
 }
 
 export default function Command() {
-  const cachedFeed = loadCachedFeed();
+  const configuredFeed = getConfiguredFeed();
+  const cachedFeed = configuredFeed.error
+    ? { entries: [], generatedAt: "" }
+    : loadCachedFeed(configuredFeed.feedUrl);
   const [entries, setEntries] = useState<RaycastEntry[]>(cachedFeed.entries);
   const [generatedAt, setGeneratedAt] = useState(cachedFeed.generatedAt);
-  const [isLoading, setIsLoading] = useState(entries.length === 0);
+  const [isLoading, setIsLoading] = useState(
+    !configuredFeed.error && entries.length === 0,
+  );
   const [category, setCategory] = useState("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   async function refreshEntries(showSuccess = false) {
+    if (configuredFeed.error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid feed override",
+        message: configuredFeed.error,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const nextFeed = await fetchFreshFeed({ cache, feedUrl: FEED_URL });
+      const nextFeed = await fetchFreshFeed({
+        cache,
+        feedUrl: configuredFeed.feedUrl,
+      });
       setEntries(nextFeed.entries);
       setGeneratedAt(nextFeed.generatedAt);
       if (showSuccess) {
@@ -162,7 +201,11 @@ export default function Command() {
 
   async function copyFullAsset(entry: RaycastEntry) {
     try {
-      const detail = await loadEntryDetail({ entry, cache });
+      const detail = await loadEntryDetail({
+        entry,
+        cache,
+        feedUrl: configuredFeed.feedUrl,
+      });
       await Clipboard.copy(detail.copyText || entry.copyText);
       await showToast({
         style: Toast.Style.Success,
@@ -180,7 +223,11 @@ export default function Command() {
 
   async function pasteFullAsset(entry: RaycastEntry) {
     try {
-      const detail = await loadEntryDetail({ entry, cache });
+      const detail = await loadEntryDetail({
+        entry,
+        cache,
+        feedUrl: configuredFeed.feedUrl,
+      });
       await Clipboard.paste(detail.copyText || entry.copyText);
       await showToast({
         style: Toast.Style.Success,
@@ -237,6 +284,22 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {configuredFeed.error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Invalid feed URL override"
+          description={configuredFeed.error}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Open Production Feed"
+                url={FEED_URL}
+                icon={Icon.Globe}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {displayedEntries.map((entry) => {
         const isFavorite = favorites.has(entryKey(entry));
         const hasInstallCommand = Boolean(entry.installCommand.trim());

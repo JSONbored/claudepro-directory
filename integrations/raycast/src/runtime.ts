@@ -1,12 +1,13 @@
 import {
   CACHE_KEY,
-  DETAIL_CACHE_PREFIX,
   FEED_URL,
   absoluteDataUrl,
-  entryKey,
+  detailCacheKey,
   fallbackDetail,
+  feedCacheKey,
   isRaycastDetail,
   parseFeed,
+  resolveFeedUrl,
   type ParsedFeed,
   type RaycastDetail,
   type RaycastEntry,
@@ -23,14 +24,18 @@ export type FetchLike = (
   init?: RequestInit,
 ) => Promise<Response>;
 
-export function loadCachedFeed(cache: RaycastTextCache): ParsedFeed {
-  const cached = cache.get(CACHE_KEY);
+export function loadCachedFeed(
+  cache: RaycastTextCache,
+  feedUrl = FEED_URL,
+): ParsedFeed {
+  const cacheKey = feedCacheKey(feedUrl);
+  const cached = cache.get(cacheKey);
   if (!cached) return { entries: [], generatedAt: "" };
 
   try {
     return parseFeed(cached);
   } catch {
-    cache.remove(CACHE_KEY);
+    cache.remove(cacheKey);
     return { entries: [], generatedAt: "" };
   }
 }
@@ -41,7 +46,7 @@ export async function fetchFreshFeed(options: {
   feedUrl?: string;
 }) {
   const fetchFn = options.fetchFn ?? fetch;
-  const feedUrl = options.feedUrl ?? FEED_URL;
+  const feedUrl = resolveFeedUrl(options.feedUrl);
   const response = await fetchFn(feedUrl, {
     headers: { accept: "application/json" },
   });
@@ -55,7 +60,7 @@ export async function fetchFreshFeed(options: {
     throw new Error("Feed contained no entries");
   }
 
-  options.cache.set(CACHE_KEY, text);
+  options.cache.set(feedCacheKey(feedUrl), text);
   return nextFeed;
 }
 
@@ -68,7 +73,8 @@ export async function loadEntryDetail(options: {
   const { entry, cache } = options;
   if (!entry.detailUrl) return fallbackDetail(entry);
 
-  const cacheKey = `${DETAIL_CACHE_PREFIX}:${entryKey(entry)}`;
+  const feedUrl = resolveFeedUrl(options.feedUrl);
+  const cacheKey = detailCacheKey(entry, feedUrl);
   const cached = cache.get(cacheKey);
   if (cached) {
     try {
@@ -80,10 +86,9 @@ export async function loadEntryDetail(options: {
   }
 
   const fetchFn = options.fetchFn ?? fetch;
-  const response = await fetchFn(
-    absoluteDataUrl(entry.detailUrl, options.feedUrl ?? FEED_URL),
-    { headers: { accept: "application/json" } },
-  );
+  const response = await fetchFn(absoluteDataUrl(entry.detailUrl, feedUrl), {
+    headers: { accept: "application/json" },
+  });
   if (!response.ok) {
     throw new Error(`Detail responded with ${response.status}`);
   }

@@ -5,6 +5,7 @@ export const GITHUB_NEW_ISSUE_URL =
 export const CACHE_KEY = "heyclaude-raycast-index";
 export const DETAIL_CACHE_PREFIX = "heyclaude-raycast-detail";
 export const FAVORITES_KEY = "favorite-entry-keys";
+const RAYCAST_FEED_PATH = "/data/raycast-index.json";
 
 export type DownloadTrust = "first-party" | "external" | null;
 
@@ -43,7 +44,7 @@ export type CategoryOption = {
   title: string;
 };
 
-const categoryLabels: Record<string, string> = {
+export const categoryLabels: Record<string, string> = {
   agents: "Agents",
   mcp: "MCP Servers",
   tools: "Tools",
@@ -56,9 +57,10 @@ const categoryLabels: Record<string, string> = {
   statuslines: "Statuslines",
 };
 
-const issueTemplateByCategory: Record<string, string> = {
+export const issueTemplateByCategory: Record<string, string> = {
   agents: "submit-agent.yml",
   mcp: "submit-mcp.yml",
+  tools: "submit-entry.md",
   skills: "submit-skill.yml",
   rules: "submit-rule.yml",
   commands: "submit-command.yml",
@@ -70,6 +72,45 @@ const issueTemplateByCategory: Record<string, string> = {
 
 export function entryKey(entry: Pick<RaycastEntry, "category" | "slug">) {
   return `${entry.category}:${entry.slug}`;
+}
+
+export function resolveFeedUrl(value?: string | null) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return FEED_URL;
+
+  let url: URL;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    throw new Error("Feed override must be a valid URL");
+  }
+
+  if (url.protocol !== "https:") {
+    throw new Error("Feed override must use HTTPS");
+  }
+  if (!url.pathname.endsWith(RAYCAST_FEED_PATH)) {
+    throw new Error(`Feed override must end with ${RAYCAST_FEED_PATH}`);
+  }
+
+  url.hash = "";
+  return url.toString();
+}
+
+export function scopedCacheKey(baseKey: string, feedUrl = FEED_URL) {
+  const normalizedFeedUrl = resolveFeedUrl(feedUrl);
+  if (normalizedFeedUrl === FEED_URL) return baseKey;
+  return `${baseKey}:${encodeURIComponent(normalizedFeedUrl)}`;
+}
+
+export function feedCacheKey(feedUrl = FEED_URL) {
+  return scopedCacheKey(CACHE_KEY, feedUrl);
+}
+
+export function detailCacheKey(
+  entry: Pick<RaycastEntry, "category" | "slug">,
+  feedUrl = FEED_URL,
+) {
+  return scopedCacheKey(`${DETAIL_CACHE_PREFIX}:${entryKey(entry)}`, feedUrl);
 }
 
 export function categoryLabel(category: string) {
