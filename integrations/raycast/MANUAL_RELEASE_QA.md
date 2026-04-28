@@ -10,6 +10,16 @@ distribution build pass.
 3. Confirm entries load from `https://heyclau.de/data/raycast-index.json`.
 4. Open a detail view and confirm title, description, links, and actions render.
 
+## Dev Feed Override
+
+1. Run `npm run dev` from `integrations/raycast`.
+2. Open command preferences and set `Developer Feed URL Override` to
+   `https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json`.
+3. Run `Search HeyClaude`.
+4. Confirm entries, category filters, details, and copy actions use the dev
+   Worker feed and `/data/raycast/...` detail payloads.
+5. Clear the override and confirm the production feed is used again.
+
 ## Stale Cache
 
 1. Load the extension successfully once.
@@ -48,3 +58,20 @@ distribution build pass.
 3. Run `Suggest Change`.
 4. Confirm Raycast opens a GitHub issue URL with the category issue template and existing entry fields prefilled.
 5. Confirm no GitHub token, OAuth flow, fork, branch, PR, or local project file write is requested.
+
+## Dated Evidence
+
+### 2026-04-28 Dev Feed Readiness
+
+- Helper tests: `npm run test:junit` passed with 13 tests and wrote
+  `reports/junit/raycast.xml`.
+- Feed coverage: `pnpm validate:raycast-feed` passed with 379 entries, zero
+  missing directory keys, and zero missing detail payloads.
+- Distribution build: `npm run build` passed from `integrations/raycast`.
+- Dev startup: `npm run dev` compiled the extension and entered development
+  mode cleanly.
+- Raycast app QA target:
+  `https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json`.
+- In-app Raycast dev QA: pending manual run in Raycast with the dev feed
+  override set.
+- Scope: registry assets only; D1 jobs stay out of v1.

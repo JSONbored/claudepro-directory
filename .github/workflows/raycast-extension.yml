@@ -20,6 +20,9 @@ permissions:
 jobs:
   validate-raycast:
     runs-on: ubuntu-latest
+    env:
+      TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN || secrets.TRUNK_TOKEN }}
+      TRUNK_ORG_URL_SLUG: ${{ secrets.TRUNK_ORG_URL_SLUG || secrets.TRUNK_ORG_SLUG }}
     concurrency:
       group: raycast-extension-${{ github.ref }}
       cancel-in-progress: true
@@ -43,6 +46,9 @@ jobs:
       - name: Build feed artifacts
         run: pnpm --filter web run prebuild
 
+      - name: Clean test reports
+        run: rm -rf reports/junit && mkdir -p reports/junit
+
       - name: Validate Raycast feed
         run: pnpm validate:raycast-feed
 
@@ -55,7 +61,16 @@ jobs:
 
       - name: Test Raycast helpers
         working-directory: integrations/raycast
-        run: npm test
+        run: npm run test:junit
+
+      - name: Upload Raycast test results to Trunk
+        if: ${{ always() && env.TRUNK_API_TOKEN != '' && env.TRUNK_ORG_URL_SLUG != '' }}
+        continue-on-error: true
+        uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa
+        with:
+          junit-paths: reports/junit/raycast.xml
+          org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
+          token: ${{ env.TRUNK_API_TOKEN }}
 
       - name: Lint Raycast extension
         working-directory: integrations/raycast

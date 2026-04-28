@@ -16,6 +16,7 @@ Run from `integrations/raycast`:
 
 ```bash
 npm ci
+npm run test:junit
 npm run lint
 npm run build
 ```

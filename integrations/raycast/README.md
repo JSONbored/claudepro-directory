@@ -36,9 +36,20 @@ npm install
 npm run dev
 ```
 
+For preview-feed QA, open the command preferences and set `Developer Feed URL
+Override` to:
+
+```text
+https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json
+```
+
+Leave the preference blank for the production feed. Detail payloads are resolved
+relative to the selected feed URL, so a dev feed also loads dev detail files.
+
 ## Validation
 
 ```bash
+npm run test:junit
 npm run lint
 npm run build
 ```

@@ -14,7 +14,10 @@ declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
   /** Preferences accessible in the `search` command */
-  export type Search = ExtensionPreferences & {}
+  export type Search = ExtensionPreferences & {
+  /** Developer Feed URL Override - Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed. */
+  "feedUrlOverride"?: string
+}
 }
 
 declare namespace Arguments {

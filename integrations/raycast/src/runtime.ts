@@ -1,5 +1,4 @@
 import {
-  CACHE_KEY,
   FEED_URL,
   absoluteDataUrl,
   detailCacheKey,

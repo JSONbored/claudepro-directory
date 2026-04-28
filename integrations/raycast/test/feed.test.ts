@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it } from "node:test";
 
 import {
@@ -8,13 +10,16 @@ import {
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
   categoryLabel,
+  detailCacheKey,
   entryKey,
   fallbackDetail,
+  feedCacheKey,
   filterEntriesByCategory,
   isRaycastDetail,
   parseDetail,
   parseFavoriteKeys,
   parseFeed,
+  resolveFeedUrl,
   serializeFavoriteKeys,
   sortedCategoryOptions,
   type RaycastEntry,
@@ -67,6 +72,15 @@ function response(body: unknown, init: ResponseInit = {}) {
   });
 }
 
+function readSourceFiles(dir: string): string[] {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) return readSourceFiles(entryPath);
+    if (!/\.(ts|tsx)$/.test(entry.name)) return [];
+    return fs.readFileSync(entryPath, "utf8");
+  });
+}
+
 describe("Raycast feed helpers", () => {
   it("parses valid envelope entries and drops malformed rows", () => {
     const parsed = parseFeed(
@@ -98,6 +112,47 @@ describe("Raycast feed helpers", () => {
     assert.equal(
       absoluteDataUrl("/data/raycast/mcp/context7.json"),
       "https://heyclau.de/data/raycast/mcp/context7.json",
+    );
+  });
+
+  it("validates feed overrides and scopes cache keys by feed URL", () => {
+    const devFeed = resolveFeedUrl(
+      " https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json#ignored ",
+    );
+
+    assert.equal(
+      devFeed,
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+    );
+    assert.equal(
+      resolveFeedUrl(""),
+      "https://heyclau.de/data/raycast-index.json",
+    );
+    assert.throws(
+      () =>
+        resolveFeedUrl(
+          "http://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+        ),
+      /HTTPS/,
+    );
+    assert.throws(
+      () =>
+        resolveFeedUrl(
+          "https://heyclaude-dev.zeronode.workers.dev/data/search-index.json",
+        ),
+      /\/data\/raycast-index\.json/,
+    );
+
+    assert.equal(feedCacheKey(), CACHE_KEY);
+    assert.notEqual(feedCacheKey(devFeed), CACHE_KEY);
+    assert.match(feedCacheKey(devFeed), /^heyclaude-raycast-index:/);
+    assert.equal(
+      detailCacheKey(sampleEntry),
+      `${DETAIL_CACHE_PREFIX}:${entryKey(sampleEntry)}`,
+    );
+    assert.notEqual(
+      detailCacheKey(sampleEntry, devFeed),
+      `${DETAIL_CACHE_PREFIX}:${entryKey(sampleEntry)}`,
     );
   });
 
@@ -160,6 +215,32 @@ describe("Raycast feed helpers", () => {
     ]);
   });
 
+  it("keeps the v1 extension read-only and registry-only", () => {
+    const source = readSourceFiles(path.join(process.cwd(), "src")).join("\n");
+    const forbiddenPatterns = [
+      /\bfrom\s+["'](?:node:)?fs(?:\/promises)?["']/,
+      /\brequire\(["'](?:node:)?fs(?:\/promises)?["']\)/,
+      /\bfrom\s+["'](?:node:)?child_process["']/,
+      /\brequire\(["'](?:node:)?child_process["']\)/,
+      /\bwriteFile(?:Sync)?\b/,
+      /\bappendFile(?:Sync)?\b/,
+      /\bmkdir(?:Sync)?\b/,
+      /\bcreateWriteStream\b/,
+      /\bOAuth\b/,
+      /\bgetOAuthToken\b/,
+      /\bwithAccessToken\b/,
+      /\.cursor\//,
+      /\.claude\//,
+      /\.windsurf\//,
+      /\bAGENTS\.md\b/,
+      /\bGEMINI\.md\b/,
+    ];
+
+    for (const pattern of forbiddenPatterns) {
+      assert.doesNotMatch(source, pattern);
+    }
+  });
+
   it("loads and clears cached feed snapshots deterministically", () => {
     const cache = new MemoryCache();
     cache.set(
@@ -178,7 +259,28 @@ describe("Raycast feed helpers", () => {
 
   it("fetches fresh feed payloads and preserves compact feed contracts", async () => {
     const cache = new MemoryCache();
+    let requestedUrl = "";
+    const devFeed =
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
     const feed = await fetchFreshFeed({
+      cache,
+      feedUrl: devFeed,
+      fetchFn: async (input) => {
+        requestedUrl = String(input);
+        return response({
+          generatedAt: "2026-04-28T00:00:00.000Z",
+          entries: [sampleEntry],
+        });
+      },
+    });
+
+    assert.equal(requestedUrl, devFeed);
+    assert.equal(feed.entries.length, 1);
+    assert.match(cache.get(feedCacheKey(devFeed)) || "", /context7/);
+    assert.equal(cache.get(CACHE_KEY), undefined);
+    assert.equal(loadCachedFeed(cache, devFeed).entries.length, 1);
+
+    const productionFeed = await fetchFreshFeed({
       cache,
       fetchFn: async () =>
         response({
@@ -187,7 +289,7 @@ describe("Raycast feed helpers", () => {
         }),
     });
 
-    assert.equal(feed.entries.length, 1);
+    assert.equal(productionFeed.entries.length, 1);
     assert.match(cache.get(CACHE_KEY) || "", /context7/);
 
     await assert.rejects(
@@ -201,19 +303,36 @@ describe("Raycast feed helpers", () => {
 
   it("loads detail payloads on demand and falls back only when no detail URL exists", async () => {
     const cache = new MemoryCache();
+    let requestedUrl = "";
+    const devFeed =
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
     const detail = await loadEntryDetail({
       entry: sampleEntry,
       cache,
-      fetchFn: async () =>
-        response({ copyText: "remote full text", detailMarkdown: "# Remote" }),
+      feedUrl: devFeed,
+      fetchFn: async (input) => {
+        requestedUrl = String(input);
+        return response({
+          copyText: "remote full text",
+          detailMarkdown: "# Remote",
+        });
+      },
     });
     assert.deepEqual(detail, {
       copyText: "remote full text",
       detailMarkdown: "# Remote",
     });
+    assert.equal(
+      requestedUrl,
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast/mcp/context7.json",
+    );
     assert.match(
-      cache.get(`${DETAIL_CACHE_PREFIX}:${entryKey(sampleEntry)}`) || "",
+      cache.get(detailCacheKey(sampleEntry, devFeed)) || "",
       /remote full text/,
+    );
+    assert.equal(
+      cache.get(`${DETAIL_CACHE_PREFIX}:${entryKey(sampleEntry)}`),
+      undefined,
     );
 
     await assert.rejects(
