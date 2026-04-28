@@ -20,6 +20,8 @@ export type RaycastEntry = {
   brandIconUrl?: string;
   brandLogoUrl?: string;
   brandAssetSource?: string;
+  brandVerifiedAt?: string;
+  platformCompatibility?: string[];
   installCommand: string;
   configSnippet: string;
   copyText: string;
@@ -33,6 +35,17 @@ export type RaycastEntry = {
   downloadTrust: DownloadTrust;
   verificationStatus: string;
 };
+
+export function buildEntrySummary(entry: RaycastEntry) {
+  return [
+    `${entry.title} — ${categoryLabel(entry.category)}`,
+    entry.brandName ? `Brand: ${entry.brandName}` : "",
+    entry.description,
+    `URL: ${entry.webUrl}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 export type RaycastDetail = {
   copyText: string;

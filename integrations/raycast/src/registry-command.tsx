@@ -7,15 +7,19 @@ import {
   Icon,
   List,
   LocalStorage,
+  PopToRootType,
   Toast,
   getPreferenceValues,
+  showHUD,
   showToast,
 } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
   FAVORITES_KEY,
   FEED_URL,
   absoluteDataUrl,
+  buildEntrySummary,
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
   categoryLabel,
@@ -32,6 +36,8 @@ import {
   loadCachedFeed as loadCachedFeedFromRuntime,
   loadEntryDetail,
 } from "./runtime";
+import { markdownLink, withRaycastUtm } from "./links";
+import { entryDetailMetadata, entrySnippetKeyword } from "./raycast-ui";
 
 const cache = new Cache();
 
@@ -238,6 +244,14 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
         ),
       [filter, entries, favorites],
     );
+    const {
+      data: rankedEntries,
+      visitItem,
+      resetRanking,
+    } = useFrecencySorting(displayedEntries, {
+      namespace: `registry:${options.fixedCategory || "all"}`,
+      key: entryKey,
+    });
 
     async function copyFullAsset(entry: RaycastEntry) {
       try {
@@ -247,10 +261,9 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
           feedUrl: configuredFeed.feedUrl,
         });
         await Clipboard.copy(detail.copyText || entry.copyText);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Copied full asset",
-          message: entry.title,
+        await visitItem(entry);
+        await showHUD(`Copied ${entry.title}`, {
+          popToRootType: PopToRootType.Immediate,
         });
       } catch (error) {
         await showToast({
@@ -269,10 +282,9 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
           feedUrl: configuredFeed.feedUrl,
         });
         await Clipboard.paste(detail.copyText || entry.copyText);
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Pasted full asset",
-          message: entry.title,
+        await visitItem(entry);
+        await showHUD(`Pasted ${entry.title}`, {
+          popToRootType: PopToRootType.Immediate,
         });
       } catch (error) {
         await showToast({
@@ -296,6 +308,7 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
 
       setFavorites(next);
       await persistFavorites(next);
+      await visitItem(entry);
       await showToast({
         style: Toast.Style.Success,
         title: isFavorite ? "Removed favorite" : "Added favorite",
@@ -354,14 +367,12 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
             }
           />
         ) : null}
-        {displayedEntries.map((entry) => {
+        {rankedEntries.map((entry) => {
           const isFavorite = favorites.has(entryKey(entry));
           const hasInstallCommand = Boolean(entry.installCommand.trim());
           const hasConfig = Boolean(entry.configSnippet.trim());
           const sourceUrl = entry.repoUrl || entry.documentationUrl;
-          const detailMarkdown = generatedAt
-            ? `${entry.detailMarkdown}\n\n---\nFeed updated: ${generatedAt.slice(0, 10)}`
-            : entry.detailMarkdown;
+          const webUrl = withRaycastUtm(entry.webUrl, "registry-entry");
 
           return (
             <List.Item
@@ -377,66 +388,171 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
               ].filter(Boolean)}
               icon={raycastEntryIcon(entry, configuredFeed.feedUrl)}
               accessories={metadataAccessories(entry, isFavorite)}
-              detail={<List.Item.Detail markdown={detailMarkdown} />}
+              detail={
+                <List.Item.Detail
+                  markdown={entry.detailMarkdown}
+                  metadata={entryDetailMetadata(entry, generatedAt)}
+                />
+              }
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Copy Full Asset"
-                    icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
-                    onAction={() => void copyFullAsset(entry)}
-                  />
-                  <Action
-                    title="Paste Full Asset"
-                    icon={Icon.TextCursor}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                    onAction={() => void pasteFullAsset(entry)}
-                  />
-                  {hasInstallCommand ? (
-                    <Action.CopyToClipboard
-                      title="Copy Install Command"
-                      content={entry.installCommand}
-                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  <ActionPanel.Section title="Use">
+                    <Action
+                      title="Copy Full Asset"
+                      icon={Icon.Clipboard}
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      onAction={() => void copyFullAsset(entry)}
                     />
-                  ) : null}
-                  {hasConfig ? (
-                    <Action.CopyToClipboard
-                      title="Copy Config"
-                      content={entry.configSnippet}
-                      shortcut={{ modifiers: ["cmd"], key: "." }}
+                    <Action
+                      title="Paste Full Asset"
+                      icon={Icon.TextCursor}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                      onAction={() => void pasteFullAsset(entry)}
                     />
-                  ) : null}
-                  <Action.OpenInBrowser
-                    title="Open on HeyClaude"
-                    url={entry.webUrl}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
-                  {entry.documentationUrl ? (
+                    {hasInstallCommand ? (
+                      <Action.CopyToClipboard
+                        title="Copy Install Command"
+                        content={entry.installCommand}
+                        shortcut={{ modifiers: ["cmd"], key: "i" }}
+                        onCopy={() => void visitItem(entry)}
+                      />
+                    ) : null}
+                    {hasConfig ? (
+                      <Action.CopyToClipboard
+                        title="Copy Config"
+                        content={entry.configSnippet}
+                        shortcut={{ modifiers: ["cmd"], key: "." }}
+                        onCopy={() => void visitItem(entry)}
+                      />
+                    ) : null}
                     <Action.OpenInBrowser
-                      title="Open Documentation"
-                      url={entry.documentationUrl}
+                      title="Open on HeyClaude"
+                      url={webUrl}
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      onOpen={() => void visitItem(entry)}
                     />
-                  ) : null}
-                  {sourceUrl ? (
-                    <Action.OpenInBrowser title="Open Source" url={sourceUrl} />
-                  ) : null}
-                  <Action.OpenInBrowser
-                    title="Contribute Entry"
-                    url={buildContributeEntryUrl(entry)}
-                    icon={Icon.Plus}
-                  />
-                  <Action.OpenInBrowser
-                    title="Suggest Change"
-                    url={buildSuggestChangeUrl(entry)}
-                    icon={Icon.Pencil}
-                  />
-                  <Action
-                    title={isFavorite ? "Remove Favorite" : "Add Favorite"}
-                    icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
-                    onAction={() => void toggleFavorite(entry)}
-                  />
-                  <ActionPanel.Section>
+                    {entry.documentationUrl ? (
+                      <Action.OpenInBrowser
+                        title="Open Documentation"
+                        url={entry.documentationUrl}
+                        onOpen={() => void visitItem(entry)}
+                      />
+                    ) : null}
+                    {sourceUrl ? (
+                      <Action.OpenInBrowser
+                        title="Open Source"
+                        url={sourceUrl}
+                        onOpen={() => void visitItem(entry)}
+                      />
+                    ) : null}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Share">
+                    <Action.CopyToClipboard
+                      title="Copy Canonical URL"
+                      content={entry.webUrl}
+                      onCopy={() => void visitItem(entry)}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Markdown Link"
+                      content={markdownLink(entry.title, entry.webUrl)}
+                      onCopy={() => void visitItem(entry)}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy Summary"
+                      content={buildEntrySummary(entry)}
+                      onCopy={() => void visitItem(entry)}
+                    />
+                    {entry.brandDomain ? (
+                      <Action.CopyToClipboard
+                        title="Copy Brand Domain"
+                        content={entry.brandDomain}
+                        onCopy={() => void visitItem(entry)}
+                      />
+                    ) : null}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Create">
+                    <Action.CreateQuicklink
+                      title="Create Entry Quicklink"
+                      quicklink={{
+                        name: `HeyClaude: ${entry.title}`,
+                        link: webUrl,
+                        icon: Icon.Link,
+                      }}
+                    />
+                    <Action.CreateQuicklink
+                      title="Create Category Quicklink"
+                      quicklink={{
+                        name: `HeyClaude ${categoryLabel(entry.category)}`,
+                        link: withRaycastUtm(
+                          `https://heyclau.de/${entry.category}`,
+                          "category-quicklink",
+                        ),
+                        icon: categoryIcons[entry.category] ?? Icon.Link,
+                      }}
+                    />
+                    {hasInstallCommand ? (
+                      <Action.CreateSnippet
+                        title="Create Install Snippet"
+                        snippet={{
+                          name: `${entry.title} install`,
+                          text: entry.installCommand,
+                          keyword: entrySnippetKeyword(entry),
+                        }}
+                      />
+                    ) : null}
+                    {hasConfig ? (
+                      <Action.CreateSnippet
+                        title="Create Config Snippet"
+                        snippet={{
+                          name: `${entry.title} config`,
+                          text: entry.configSnippet,
+                          keyword: `${entrySnippetKeyword(entry)}-config`.slice(
+                            0,
+                            40,
+                          ),
+                        }}
+                      />
+                    ) : null}
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Save">
+                    <Action
+                      title={isFavorite ? "Remove Favorite" : "Add Favorite"}
+                      icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+                      shortcut={{ modifiers: ["cmd"], key: "f" }}
+                      onAction={() => void toggleFavorite(entry)}
+                    />
+                    <Action
+                      title="Reset Ranking"
+                      icon={Icon.ArrowCounterClockwise}
+                      onAction={() => void resetRanking(entry)}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Contribute">
+                    <Action.OpenInBrowser
+                      title="Submit Similar Entry"
+                      url={buildContributeEntryUrl({
+                        category: entry.category,
+                        brandName: entry.brandName,
+                        brandDomain: entry.brandDomain,
+                        tags: entry.tags,
+                      })}
+                      icon={Icon.Plus}
+                    />
+                    <Action.OpenInBrowser
+                      title="Suggest Change"
+                      url={buildSuggestChangeUrl(entry)}
+                      icon={Icon.Pencil}
+                    />
+                    <Action.OpenInBrowser
+                      title="Claim or Update Listing"
+                      url={withRaycastUtm(
+                        `https://heyclau.de/claim?category=${encodeURIComponent(entry.category)}&slug=${encodeURIComponent(entry.slug)}`,
+                        "entry-claim",
+                      )}
+                      icon={Icon.Person}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section title="Refresh">
                     <Action
                       title="Refresh Feed"
                       icon={Icon.ArrowClockwise}
