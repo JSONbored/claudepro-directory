@@ -233,6 +233,11 @@ export type CommercialPlacement = {
 };
 
 export declare const BRAND_ASSET_SOURCES: BrandAssetSource[];
+export declare const KNOWN_BRANDS: Array<{
+  name: string;
+  domain: string;
+  aliases: string[];
+}>;
 export declare function normalizeBrandDomain(value?: unknown): string;
 export declare function domainFromUrl(value?: unknown): string;
 export declare function isHostingOrRegistryDomain(domain?: string): boolean;
@@ -251,10 +256,27 @@ export declare function brandfetchLogoUrl(
     theme?: "light" | "dark" | string;
   },
 ): string;
+export declare function brandAssetProxyUrl(
+  domain: string,
+  params?: {
+    kind?: "icon" | "logo" | string;
+    siteUrl?: string;
+    baseUrl?: string;
+  },
+): string;
+export declare function detectKnownBrand(data?: Record<string, unknown>): {
+  name?: string;
+  domain: string;
+  source: "explicit" | "known-brand";
+  alias?: string;
+} | null;
 export declare function buildBrandAssetMetadata(
   data?: Record<string, unknown>,
   options?: {
     allowWebsiteFallback?: boolean;
+    allowAliasFallback?: boolean;
+    assetBaseUrl?: string;
+    siteUrl?: string;
     clientId?: string;
   },
 ): {

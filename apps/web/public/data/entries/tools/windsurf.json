@@ -28,6 +28,7 @@
     "websiteUrl": "https://windsurf.com",
     "brandName": "Windsurf",
     "brandDomain": "windsurf.com",
+    "brandIconUrl": "/api/brand-assets/icon/windsurf.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

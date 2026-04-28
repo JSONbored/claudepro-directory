@@ -9,6 +9,9 @@ Download: /downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack
 - Source URLs: https://developers.cloudflare.com/workers/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/cloudflare-workers-d1-kv-r2-capability-pack.mdx
+- Brand: Cloudflare
+- Brand domain: cloudflare.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip
 - Package SHA256: 2b0c31db74f9b42751e2c14d8dab16fa3ded453bd4397a1347ac782ce5bc792a
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

@@ -28,6 +28,7 @@
     "websiteUrl": "https://composio.dev",
     "brandName": "Composio",
     "brandDomain": "composio.dev",
+    "brandIconUrl": "/api/brand-assets/icon/composio.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

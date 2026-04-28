@@ -6,9 +6,10 @@
   "title": "Composio",
   "brandName": "Composio",
   "brandDomain": "composio.dev",
+  "brandIconUrl": "/api/brand-assets/icon/composio.dev",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nComposio is relevant when agent products need durable integrations, auth flows, and action execution across third-party tools.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Composio\nIntegration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.\n**Category:** tools\n**Author:** Composio\n**Brand:** Composio / composio.dev\n**Tags:** `tool-integrations` `agents`\n\n## Links\n- https://heyclau.de/tools/composio\n- https://docs.composio.dev\n- https://github.com/ComposioHQ/composio",
+  "detailMarkdown": "# Composio\n\nIntegration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.\n\n- **Category:** tools\n- **Author:** Composio\n- **Brand:** Composio / composio.dev\n- **Tags:** `tool-integrations` `agents`\n\n## Links\n- https://heyclau.de/tools/composio\n- https://docs.composio.dev\n- https://github.com/ComposioHQ/composio",
   "webUrl": "https://heyclau.de/tools/composio",
   "repoUrl": "https://github.com/ComposioHQ/composio",
   "documentationUrl": "https://docs.composio.dev"

@@ -9,6 +9,9 @@ Download: /downloads/skills/google-workspace-gemini-automation.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/google-workspace-gemini-automation
 - Source URLs: https://ai.google.dev/gemini-api/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/google-workspace-gemini-automation.mdx
+- Brand: Google
+- Brand domain: google.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/google-workspace-gemini-automation.zip
 - Package SHA256: 2795143f0a54328d4335b4119fa51310480f6785dc02234b54d7738e85540db2
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

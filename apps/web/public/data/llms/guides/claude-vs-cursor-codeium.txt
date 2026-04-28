@@ -7,6 +7,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/guides/claude-vs-cursor-codeium
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-cursor-codeium.mdx
+- Brand: Cursor
+- Brand domain: cursor.com
+- Brand asset source: brandfetch
 - Author: JSONbored
 - Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable

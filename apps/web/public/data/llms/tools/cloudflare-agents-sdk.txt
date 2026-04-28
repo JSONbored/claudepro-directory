@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/cloudflare-agents-sdk
 - Source URLs: https://developers.cloudflare.com/agents/, https://github.com/cloudflare/agents, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx
-- Brand: Cloudflare Agents SDK
+- Brand: Cloudflare
 - Brand domain: developers.cloudflare.com
 - Brand asset source: brandfetch
 - Author: Cloudflare

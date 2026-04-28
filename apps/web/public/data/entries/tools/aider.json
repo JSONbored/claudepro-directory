@@ -29,6 +29,7 @@
     "websiteUrl": "https://aider.chat",
     "brandName": "Aider",
     "brandDomain": "aider.chat",
+    "brandIconUrl": "/api/brand-assets/icon/aider.chat",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.raycast.com",
     "brandName": "Raycast",
     "brandDomain": "raycast.com",
+    "brandIconUrl": "/api/brand-assets/icon/raycast.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

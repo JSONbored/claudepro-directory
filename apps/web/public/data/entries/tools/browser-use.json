@@ -29,6 +29,7 @@
     "websiteUrl": "https://browser-use.com",
     "brandName": "Browser Use",
     "brandDomain": "browser-use.com",
+    "brandIconUrl": "/api/brand-assets/icon/browser-use.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

@@ -9,6 +9,9 @@ Download: /downloads/mcp/git-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/git-mcp-server
 - Source URLs: https://modelcontextprotocol.io/examples, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx
+- Brand: Anthropic
+- Brand domain: anthropic.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/git-mcp-server.mcpb
 - Package SHA256: f7f4ab253a6a32a2cb2d8b024239dd024523ebd49047d08b8693df98cf83d0eb
 - Author: Anthropic

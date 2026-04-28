@@ -9,6 +9,9 @@ Download: /downloads/mcp/postgresql-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/postgresql-mcp-server
 - Source URLs: https://modelcontextprotocol.io/examples, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx
+- Brand: Anthropic
+- Brand domain: anthropic.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/postgresql-mcp-server.mcpb
 - Package SHA256: 2935644e5353e573faf8b78d11f376a7f99e6662b4687ae8f40d2ad39d1fde83
 - Author: Anthropic

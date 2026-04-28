@@ -6,9 +6,10 @@
   "title": "Graphite Diamond",
   "brandName": "Graphite Diamond",
   "brandDomain": "graphite.dev",
+  "brandIconUrl": "/api/brand-assets/icon/graphite.dev",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nGraphite Diamond is relevant for teams already adopting stacked pull request workflows and looking for AI review acceleration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Graphite Diamond\nAI code review assistant for pull requests, engineering feedback, and review workflow acceleration inside Graphite.\n**Category:** tools\n**Author:** Graphite\n**Brand:** Graphite Diamond / graphite.dev\n**Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/graphite-diamond\n- https://graphite.dev",
+  "detailMarkdown": "# Graphite Diamond\n\nAI code review assistant for pull requests, engineering feedback, and review workflow acceleration inside Graphite.\n\n- **Category:** tools\n- **Author:** Graphite\n- **Brand:** Graphite Diamond / graphite.dev\n- **Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/graphite-diamond\n- https://graphite.dev",
   "webUrl": "https://heyclau.de/tools/graphite-diamond",
   "repoUrl": "",
   "documentationUrl": "https://graphite.dev"

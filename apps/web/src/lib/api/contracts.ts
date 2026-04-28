@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { normalizeBrandDomain } from "@heyclaude/registry";
 import { validateJobPublicationQuality } from "@heyclaude/registry/commercial";
 
 const entryKeySchema = z.string().regex(/^[a-z0-9-]+:[a-z0-9-]+$/);
@@ -346,6 +347,17 @@ export const ogQuerySchema = z.object({
   badge: z.string().trim().max(64).optional().default("heyclau.de"),
 });
 
+export const brandAssetParamsSchema = z.object({
+  kind: z.literal("icon"),
+  domain: z
+    .string()
+    .trim()
+    .max(255)
+    .refine((value) => Boolean(normalizeBrandDomain(value)), {
+      message: "domain must be a canonical brand domain",
+    }),
+});
+
 export type ApiRouteDefinition = {
   id: string;
   method: "GET" | "POST" | "PATCH";
@@ -487,6 +499,23 @@ export const apiRouteDefinitions = {
       limit: 180,
       windowMs: 60_000,
       binding: "API_REGISTRY_RATE_LIMIT",
+    },
+  }),
+  "brandAsset.read": route({
+    id: "brandAsset.read",
+    method: "GET",
+    path: "/api/brand-assets/{kind}/{domain}",
+    summary: "Resolve a cached brand icon or logo",
+    description:
+      "Returns a cacheable HeyClaude-hosted brand asset backed by Brandfetch when a registry entry has a validated brand domain.",
+    tags: ["Distribution"],
+    paramsSchema: brandAssetParamsSchema,
+    responseContentType: "image/png",
+    rateLimit: {
+      scope: "brand-assets",
+      limit: 300,
+      windowMs: 60_000,
+      binding: "API_DYNAMIC_RATE_LIMIT",
     },
   }),
   "votes.query": route({

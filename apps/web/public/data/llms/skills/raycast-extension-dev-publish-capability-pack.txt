@@ -9,6 +9,9 @@ Download: /downloads/skills/raycast-extension-dev-publish-capability-pack.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack
 - Source URLs: https://developers.raycast.com/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/raycast-extension-dev-publish-capability-pack.mdx
+- Brand: Raycast
+- Brand domain: raycast.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/raycast-extension-dev-publish-capability-pack.zip
 - Package SHA256: 27bea14be236882b4fbb89528b3f0229e0f27a18441c188269d833effef5bfb8
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

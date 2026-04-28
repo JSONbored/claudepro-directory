@@ -9,6 +9,9 @@ Download: /downloads/skills/opennext-cloudflare-capability-pack.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/opennext-cloudflare-capability-pack
 - Source URLs: https://opennext.js.org/cloudflare/get-started, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/opennext-cloudflare-capability-pack.mdx
+- Brand: Cloudflare
+- Brand domain: cloudflare.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/opennext-cloudflare-capability-pack.zip
 - Package SHA256: 0254c5d9edfe925907cfca3f06a24c866ecd42e1e7ef51ad64b2a5518199360c
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

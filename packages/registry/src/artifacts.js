@@ -50,24 +50,30 @@ function buildEntryBrandFields(entry) {
 }
 
 export function buildRaycastDetailMarkdown(entry) {
+  const facts = [
+    ["Category", entry.category],
+    ["Author", entry.author],
+    ["Verification", entry.verificationStatus],
+    [
+      "Brand",
+      entry.brandName || entry.brandDomain
+        ? [entry.brandName, entry.brandDomain].filter(Boolean).join(" / ")
+        : "",
+    ],
+    ["Download trust", entry.downloadTrust],
+    [
+      "Tags",
+      entry.tags?.length ? entry.tags.map((tag) => `\`${tag}\``).join(" ") : "",
+    ],
+  ].filter(([, value]) => Boolean(value));
+
   const lines = [
     `# ${entry.title}`,
     "",
     entry.description,
     "",
-    `**Category:** ${entry.category}`,
-    entry.author ? `**Author:** ${entry.author}` : "",
-    entry.verificationStatus
-      ? `**Verification:** ${entry.verificationStatus}`
-      : "",
-    entry.brandName || entry.brandDomain
-      ? `**Brand:** ${[entry.brandName, entry.brandDomain].filter(Boolean).join(" / ")}`
-      : "",
-    entry.downloadTrust ? `**Download trust:** ${entry.downloadTrust}` : "",
-    entry.tags?.length
-      ? `**Tags:** ${entry.tags.map((tag) => `\`${tag}\``).join(" ")}`
-      : "",
-  ].filter(Boolean);
+    ...facts.map(([label, value]) => `- **${label}:** ${value}`),
+  ];
 
   if (entry.installCommand || entry.commandSyntax) {
     lines.push(

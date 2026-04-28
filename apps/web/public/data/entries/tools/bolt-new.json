@@ -29,6 +29,7 @@
     "websiteUrl": "https://bolt.new",
     "brandName": "Bolt",
     "brandDomain": "bolt.new",
+    "brandIconUrl": "/api/brand-assets/icon/bolt.new",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

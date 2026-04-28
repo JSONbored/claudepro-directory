@@ -6,9 +6,10 @@
   "title": "Browserbase",
   "brandName": "Browserbase",
   "brandDomain": "browserbase.com",
+  "brandIconUrl": "/api/brand-assets/icon/browserbase.com",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nBrowserbase is useful when AI agents need reliable hosted browser sessions, debugging, and web automation infrastructure.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Browserbase\nCloud browser infrastructure for browser automation, AI agents, scraping workflows, and web interaction at scale.\n**Category:** tools\n**Author:** Browserbase\n**Brand:** Browserbase / browserbase.com\n**Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/browserbase\n- https://docs.browserbase.com",
+  "detailMarkdown": "# Browserbase\n\nCloud browser infrastructure for browser automation, AI agents, scraping workflows, and web interaction at scale.\n\n- **Category:** tools\n- **Author:** Browserbase\n- **Brand:** Browserbase / browserbase.com\n- **Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/browserbase\n- https://docs.browserbase.com",
   "webUrl": "https://heyclau.de/tools/browserbase",
   "repoUrl": "",
   "documentationUrl": "https://docs.browserbase.com"

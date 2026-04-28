@@ -9,6 +9,9 @@ Download: /downloads/skills/n8n-ai-agent-workflow-architect.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/n8n-ai-agent-workflow-architect
 - Source URLs: https://docs.n8n.io/advanced-ai/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-ai-agent-workflow-architect.mdx
+- Brand: n8n
+- Brand domain: n8n.io
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/n8n-ai-agent-workflow-architect.zip
 - Package SHA256: 7b9351535e62d89cea292da665d32ba45eb6e32d4a178b478e054cf8f69b493b
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

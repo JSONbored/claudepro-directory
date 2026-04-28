@@ -9,6 +9,9 @@ Download: /downloads/mcp/figma-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/figma-mcp-server
 - Source URLs: https://help.figma.com/hc/en-us/articles/32132100833559, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx
+- Brand: Figma
+- Brand domain: figma.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/figma-mcp-server.mcpb
 - Package SHA256: 0ff339ff6bb2328f6058233db30fe13eac93fd2805270f6817df9cf5ff1c2eee
 - Author: Figma

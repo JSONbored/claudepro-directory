@@ -29,6 +29,7 @@
     "websiteUrl": "https://pipedream.com",
     "brandName": "Pipedream",
     "brandDomain": "pipedream.com",
+    "brandIconUrl": "/api/brand-assets/icon/pipedream.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

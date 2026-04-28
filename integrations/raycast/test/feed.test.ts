@@ -167,6 +167,13 @@ describe("Raycast feed helpers", () => {
       absoluteDataUrl("/data/raycast/mcp/context7.json"),
       "https://heyclau.de/data/raycast/mcp/context7.json",
     );
+    assert.equal(
+      absoluteDataUrl(
+        "/api/brand-assets/icon/discord.com",
+        "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+      ),
+      "https://heyclaude-dev.zeronode.workers.dev/api/brand-assets/icon/discord.com",
+    );
   });
 
   it("validates feed overrides and scopes cache keys by feed URL", () => {

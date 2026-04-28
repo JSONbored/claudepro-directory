@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.stagehand.dev",
     "brandName": "Stagehand",
     "brandDomain": "stagehand.dev",
+    "brandIconUrl": "/api/brand-assets/icon/stagehand.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

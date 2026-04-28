@@ -8,6 +8,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/hooks/aws-cloudformation-validator
 - Source URLs: https://aws.amazon.com/cloudformation/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/aws-cloudformation-validator.mdx
+- Brand: AWS
+- Brand domain: aws.amazon.com
+- Brand asset source: brandfetch
 - Author: JSONbored
 - Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable

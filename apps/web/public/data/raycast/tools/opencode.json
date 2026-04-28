@@ -6,9 +6,10 @@
   "title": "OpenCode",
   "brandName": "OpenCode",
   "brandDomain": "opencode.ai",
+  "brandIconUrl": "/api/brand-assets/icon/opencode.ai",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nOpenCode fits developers who want local terminal workflows and flexible model usage for coding tasks.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# OpenCode\nTerminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.\n**Category:** tools\n**Author:** SST\n**Brand:** OpenCode / opencode.ai\n**Tags:** `terminal-agent` `ai-coding`\n\n## Links\n- https://heyclau.de/tools/opencode\n- https://opencode.ai\n- https://github.com/sst/opencode",
+  "detailMarkdown": "# OpenCode\n\nTerminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.\n\n- **Category:** tools\n- **Author:** SST\n- **Brand:** OpenCode / opencode.ai\n- **Tags:** `terminal-agent` `ai-coding`\n\n## Links\n- https://heyclau.de/tools/opencode\n- https://opencode.ai\n- https://github.com/sst/opencode",
   "webUrl": "https://heyclau.de/tools/opencode",
   "repoUrl": "https://github.com/sst/opencode",
   "documentationUrl": "https://opencode.ai"

@@ -29,6 +29,7 @@
     "websiteUrl": "https://zed.dev",
     "brandName": "Zed",
     "brandDomain": "zed.dev",
+    "brandIconUrl": "/api/brand-assets/icon/zed.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

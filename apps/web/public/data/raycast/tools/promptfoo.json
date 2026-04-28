@@ -6,9 +6,10 @@
   "title": "Promptfoo",
   "brandName": "Promptfoo",
   "brandDomain": "promptfoo.dev",
+  "brandIconUrl": "/api/brand-assets/icon/promptfoo.dev",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nPromptfoo is a practical fit for teams that want repeatable prompt tests, security checks, and evaluation gates in CI.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Promptfoo\nOpen-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.\n**Category:** tools\n**Author:** Promptfoo\n**Brand:** Promptfoo / promptfoo.dev\n**Tags:** `prompt-testing` `security`\n\n## Links\n- https://heyclau.de/tools/promptfoo\n- https://www.promptfoo.dev/docs\n- https://github.com/promptfoo/promptfoo",
+  "detailMarkdown": "# Promptfoo\n\nOpen-source prompt testing and red-teaming framework for LLM outputs, regressions, evaluations, and security checks.\n\n- **Category:** tools\n- **Author:** Promptfoo\n- **Brand:** Promptfoo / promptfoo.dev\n- **Tags:** `prompt-testing` `security`\n\n## Links\n- https://heyclau.de/tools/promptfoo\n- https://www.promptfoo.dev/docs\n- https://github.com/promptfoo/promptfoo",
   "webUrl": "https://heyclau.de/tools/promptfoo",
   "repoUrl": "https://github.com/promptfoo/promptfoo",
   "documentationUrl": "https://www.promptfoo.dev/docs"

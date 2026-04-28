@@ -9,6 +9,9 @@ Download: /downloads/mcp/cloudflare-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/cloudflare-mcp-server
 - Source URLs: https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx
+- Brand: Cloudflare
+- Brand domain: cloudflare.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/cloudflare-mcp-server.mcpb
 - Package SHA256: 06a4d88be66de572abcbfe34634a8ce927597249e591ec5717ef6b9c6a520212
 - Author: Cloudflare

@@ -9,6 +9,9 @@ Download: /downloads/mcp/netlify-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/netlify-mcp-server
 - Source URLs: https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/netlify-mcp-server.mdx
+- Brand: Netlify
+- Brand domain: netlify.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/netlify-mcp-server.mcpb
 - Package SHA256: 33ce412d63829a6e891ae2a245fc84bb83eab8af8c1f4f01e80b1489fd9da641
 - Author: Netlify

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/microsoft-autogen
 - Source URLs: https://microsoft.github.io/autogen/, https://github.com/microsoft/autogen, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx
-- Brand: Microsoft AutoGen
+- Brand: Microsoft
 - Brand domain: microsoft.github.io
 - Brand asset source: brandfetch
 - Author: Microsoft

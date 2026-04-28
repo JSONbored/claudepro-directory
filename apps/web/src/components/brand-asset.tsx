@@ -2,8 +2,6 @@
 
 import { useMemo, useState } from "react";
 
-import { brandfetchLogoUrl } from "@heyclaude/registry/brand-assets";
-
 import { cn } from "@/lib";
 
 type BrandAssetEntry = {
@@ -40,18 +38,8 @@ export function BrandAsset({
     if (failed) return "";
     if (logo && entry.brandLogoUrl) return entry.brandLogoUrl;
     if (entry.brandIconUrl) return entry.brandIconUrl;
-    const clientId = process.env.NEXT_PUBLIC_BRANDFETCH_CLIENT_ID;
-    if (entry.brandDomain && clientId) {
-      return brandfetchLogoUrl(entry.brandDomain, {
-        clientId,
-        width: logo ? 192 : 128,
-        height: logo ? 64 : 128,
-        type: logo ? "logo" : "icon",
-        theme: "dark",
-      });
-    }
     return "";
-  }, [entry.brandDomain, entry.brandIconUrl, entry.brandLogoUrl, failed, logo]);
+  }, [entry.brandIconUrl, entry.brandLogoUrl, failed, logo]);
   const label = entry.brandName || entry.title || "Brand";
 
   return (

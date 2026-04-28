@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.firecrawl.dev",
     "brandName": "Firecrawl",
     "brandDomain": "firecrawl.dev",
+    "brandIconUrl": "/api/brand-assets/icon/firecrawl.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

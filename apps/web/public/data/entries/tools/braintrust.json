@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.braintrust.dev",
     "brandName": "Braintrust",
     "brandDomain": "braintrust.dev",
+    "brandIconUrl": "/api/brand-assets/icon/braintrust.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

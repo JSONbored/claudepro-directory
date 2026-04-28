@@ -8,6 +8,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/hooks/discord-activity-notifier
 - Source URLs: https://discord.com/developers/docs/resources/webhook, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/discord-activity-notifier.mdx
+- Brand: Discord
+- Brand domain: discord.com
+- Brand asset source: brandfetch
 - Author: JSONbored
 - Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable

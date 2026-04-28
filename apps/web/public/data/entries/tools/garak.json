@@ -29,6 +29,7 @@
     "websiteUrl": "https://github.com/NVIDIA/garak",
     "brandName": "Garak",
     "brandDomain": "github.com",
+    "brandIconUrl": "/api/brand-assets/icon/github.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

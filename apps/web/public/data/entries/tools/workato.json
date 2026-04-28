@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.workato.com",
     "brandName": "Workato",
     "brandDomain": "workato.com",
+    "brandIconUrl": "/api/brand-assets/icon/workato.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

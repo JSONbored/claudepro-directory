@@ -9,6 +9,9 @@ Download: /downloads/mcp/sentry-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/sentry-mcp-server
 - Source URLs: https://docs.sentry.io/product/sentry-mcp/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx
+- Brand: Sentry
+- Brand domain: sentry.io
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/sentry-mcp-server.mcpb
 - Package SHA256: fcacfb50943f8657a34ddad5696e4bfa8298d55d9a7b33bb469903188fdea3a5
 - Author: Sentry

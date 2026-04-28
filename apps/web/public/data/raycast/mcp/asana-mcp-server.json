@@ -6,9 +6,10 @@
   "title": "Asana MCP Server for Claude",
   "brandName": "Asana",
   "brandDomain": "asana.com",
+  "brandIconUrl": "/api/brand-assets/icon/asana.com",
   "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status asana\n\nConfig:\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
-  "detailMarkdown": "# Asana MCP Server for Claude\nInteract with Asana workspaces to manage projects and tasks\n**Category:** mcp\n**Author:** Asana\n**Brand:** Asana / asana.com\n**Download trust:** first-party\n**Tags:** `asana` `project-management` `tasks` `team-collaboration` `workflow`\n\n## Install\n```bash\nclaude mcp list && claude mcp status asana\n```\n\n## Config\n```json\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status asana\n\n## Links\n- https://heyclau.de/mcp/asana-mcp-server\n- https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+  "detailMarkdown": "# Asana MCP Server for Claude\n\nInteract with Asana workspaces to manage projects and tasks\n\n- **Category:** mcp\n- **Author:** Asana\n- **Brand:** Asana / asana.com\n- **Download trust:** first-party\n- **Tags:** `asana` `project-management` `tasks` `team-collaboration` `workflow`\n\n## Install\n```bash\nclaude mcp list && claude mcp status asana\n```\n\n## Config\n```json\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status asana\n\n## Links\n- https://heyclau.de/mcp/asana-mcp-server\n- https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
   "webUrl": "https://heyclau.de/mcp/asana-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server"

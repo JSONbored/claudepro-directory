@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.make.com",
     "brandName": "Make",
     "brandDomain": "make.com",
+    "brandIconUrl": "/api/brand-assets/icon/make.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

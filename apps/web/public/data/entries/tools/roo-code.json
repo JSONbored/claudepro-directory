@@ -29,6 +29,7 @@
     "websiteUrl": "https://roocode.com",
     "brandName": "Roo Code",
     "brandDomain": "roocode.com",
+    "brandIconUrl": "/api/brand-assets/icon/roocode.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

@@ -29,6 +29,7 @@
     "websiteUrl": "https://smithery.ai",
     "brandName": "Smithery",
     "brandDomain": "smithery.ai",
+    "brandIconUrl": "/api/brand-assets/icon/smithery.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

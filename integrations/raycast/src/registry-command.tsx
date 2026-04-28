@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   FAVORITES_KEY,
   FEED_URL,
+  absoluteDataUrl,
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
   categoryLabel,
@@ -56,9 +57,10 @@ const categoryIcons: Record<string, Icon> = {
   statuslines: Icon.BarChart,
 };
 
-function raycastEntryIcon(entry: RaycastEntry) {
-  return entry.brandIconUrl
-    ? { source: entry.brandIconUrl }
+function raycastEntryIcon(entry: RaycastEntry, feedUrl: string) {
+  const brandIconUrl = String(entry.brandIconUrl || "").trim();
+  return brandIconUrl
+    ? { source: absoluteDataUrl(brandIconUrl, feedUrl) }
     : (categoryIcons[entry.category] ?? Icon.Document);
 }
 
@@ -381,7 +383,7 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
                 entry.brandDomain || "",
                 ...entry.tags,
               ].filter(Boolean)}
-              icon={raycastEntryIcon(entry)}
+              icon={raycastEntryIcon(entry, configuredFeed.feedUrl)}
               accessories={metadataAccessories(entry, isFavorite)}
               detail={<List.Item.Detail markdown={detailMarkdown} />}
               actions={

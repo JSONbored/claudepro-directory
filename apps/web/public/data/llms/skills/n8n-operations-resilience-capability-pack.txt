@@ -9,6 +9,9 @@ Download: /downloads/skills/n8n-operations-resilience-capability-pack.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/n8n-operations-resilience-capability-pack
 - Source URLs: https://docs.n8n.io/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/n8n-operations-resilience-capability-pack.mdx
+- Brand: n8n
+- Brand domain: n8n.io
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/n8n-operations-resilience-capability-pack.zip
 - Package SHA256: 39e4ad81bf6055fbe1832b8e0344f3e41dd23ae88b6b8e677102b6a0d97aedcc
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

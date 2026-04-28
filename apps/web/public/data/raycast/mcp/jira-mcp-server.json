@@ -4,8 +4,12 @@
   "category": "mcp",
   "slug": "jira-mcp-server",
   "title": "Jira MCP Server for Claude",
+  "brandName": "Jira",
+  "brandDomain": "atlassian.com",
+  "brandIconUrl": "/api/brand-assets/icon/atlassian.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status jira\n\nConfig:\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}",
-  "detailMarkdown": "# Jira MCP Server for Claude\nManage Jira tickets and Confluence documentation\n**Category:** mcp\n**Author:** Atlassian\n**Download trust:** first-party\n**Tags:** `jira` `confluence` `atlassian` `project-management` `documentation`\n\n## Install\n```bash\nclaude mcp list && claude mcp status jira\n```\n\n## Config\n```json\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status jira\n\n## Links\n- https://heyclau.de/mcp/jira-mcp-server\n- https://www.atlassian.com/platform/remote-mcp-server",
+  "detailMarkdown": "# Jira MCP Server for Claude\n\nManage Jira tickets and Confluence documentation\n\n- **Category:** mcp\n- **Author:** Atlassian\n- **Brand:** Jira / atlassian.com\n- **Download trust:** first-party\n- **Tags:** `jira` `confluence` `atlassian` `project-management` `documentation`\n\n## Install\n```bash\nclaude mcp list && claude mcp status jira\n```\n\n## Config\n```json\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status jira\n\n## Links\n- https://heyclau.de/mcp/jira-mcp-server\n- https://www.atlassian.com/platform/remote-mcp-server",
   "webUrl": "https://heyclau.de/mcp/jira-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server"

@@ -12,7 +12,7 @@
       "title": "Aider",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/aider",
-      "artifactHash": "b476a73a9e58d3e116fd8982e53dac96f288ee751efa12250dd80db19c7ad8a7"
+      "artifactHash": "3b100fcf6baf16784f3e65b2beeecf562ab2488b20044c81bd175d41a8b34d4b"
     },
     {
       "key": "tools:apify",
@@ -22,7 +22,7 @@
       "title": "Apify",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/apify",
-      "artifactHash": "2c3997315fa4ee09ddc98029aa30cde50e982d709dae095325fc3cc65e6bc09b"
+      "artifactHash": "70567e6f42dd00a25362cd8c416c446b0a22c3ca016a788b6ea026987aad8b90"
     },
     {
       "key": "tools:arcade-ai",
@@ -32,7 +32,7 @@
       "title": "Arcade",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/arcade-ai",
-      "artifactHash": "04e3bb2ab344063ff0e78ba7d39b479480369f5e5a37ec3ad191f570086792a6"
+      "artifactHash": "3a6032067cfe26d98801a2929aa4c61d322e9178bd049dc64ef7d639ff2f51bb"
     },
     {
       "key": "tools:arize-phoenix",
@@ -42,7 +42,7 @@
       "title": "Arize Phoenix",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/arize-phoenix",
-      "artifactHash": "cf9902cf0b8608cbfd949e1a5fc121bbd718e697a5472a4ad7a12725318b14d9"
+      "artifactHash": "02cf6d8c1e28ff7910982ca81bb282faa9b2ee95fe6a5281b94bf61427e9fbf1"
     },
     {
       "key": "tools:bolt-new",
@@ -52,7 +52,7 @@
       "title": "Bolt",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/bolt-new",
-      "artifactHash": "8df29ec9eccf89d73d98829e0c648faace413df79acfca9cd47c92b6b9efae44"
+      "artifactHash": "f8e253160ecadb4de1088c5a16d5908367f9d8f55818cf68bab5c622798e5b51"
     },
     {
       "key": "tools:braintrust",
@@ -62,7 +62,7 @@
       "title": "Braintrust",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/braintrust",
-      "artifactHash": "0f823d7005fb238f1ae4fb43fb7366e081b2008e1c3e0742c4e9faaa6077fe97"
+      "artifactHash": "e708daa3f997804f9367f479a416f9328cdef5667cd49c6876268cbf413455ae"
     },
     {
       "key": "tools:browser-use",
@@ -72,7 +72,7 @@
       "title": "Browser Use",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/browser-use",
-      "artifactHash": "9f5507ca85e8ff31d673e40a8155c1ad30589bb03e5d3eb544e9ab5ce98f61a8"
+      "artifactHash": "443d3f4cb8ac71e90d387aa95948f55ac73100fa300dc5ed5064ef7cdae8e837"
     },
     {
       "key": "tools:browserbase",
@@ -82,7 +82,7 @@
       "title": "Browserbase",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/browserbase",
-      "artifactHash": "f800d59cb13b083e5a8988e56f05c95d683d0c967a20dc61da796d6cf3fb8122"
+      "artifactHash": "adb0ebd9b1166fa4c400de1abc2475f40b0a864b6c07c9d70b789e36a2fbcc7d"
     },
     {
       "key": "tools:claude-code",
@@ -92,7 +92,7 @@
       "title": "Claude Code",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/claude-code",
-      "artifactHash": "6fef5d4ecb3a7b5e839c0add2c5d623e144572a24ead9a6ff12834f6d4da5428"
+      "artifactHash": "398834b634a2058afedee40f5bd6c9b2ce5ebbec36ee28bdb29b3bb34276daaf"
     },
     {
       "key": "tools:cline",
@@ -102,7 +102,7 @@
       "title": "Cline",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cline",
-      "artifactHash": "65c24466e3394b288e830ffe445e74cf805d542303a5d208366b1e997c099560"
+      "artifactHash": "d8b5dd93e069e28885ec6f9ff924bd5b379e378e5dadc35919af59821c83e6a3"
     },
     {
       "key": "tools:cloudflare-agents-sdk",
@@ -112,7 +112,7 @@
       "title": "Cloudflare Agents SDK",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cloudflare-agents-sdk",
-      "artifactHash": "4b74e7bd94d0881c8e7c9c8dd387c537feaef84ede64fbe40b3c7533ee00b226"
+      "artifactHash": "173d96110e64bfd952f681b48a6e4770cda928b2a07afdc5dc78ec4bc892fb65"
     },
     {
       "key": "tools:coderabbit",
@@ -122,7 +122,7 @@
       "title": "CodeRabbit",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/coderabbit",
-      "artifactHash": "ffb3b9ef5b9db37d13d78b5a5e67af287ace26d827c8b88dbf6cee7cfa9a4d72"
+      "artifactHash": "aaa421ba315477c3fb5d5dac11ff5e05b9658b094aaf49cd60b064bb30075652"
     },
     {
       "key": "tools:composio",
@@ -132,7 +132,7 @@
       "title": "Composio",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/composio",
-      "artifactHash": "e4d506257759b01c9d4c5c13b4c460a24d61e3fa13527c267f98686b1de53536"
+      "artifactHash": "7b9959cc19f0d674dad0e8e561d9c946d352303339c7dbdaf44bc1b944245d2b"
     },
     {
       "key": "tools:continue",
@@ -142,7 +142,7 @@
       "title": "Continue",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/continue",
-      "artifactHash": "0113286d5c0ae2c3a6a2b9a50f8afad309cdfb688dc1d7dd0442a0aab22e8981"
+      "artifactHash": "5007125104493e6abe7a92fd28698862f154da1a62fa063488138fc4a8bae325"
     },
     {
       "key": "tools:crewai",
@@ -152,7 +152,7 @@
       "title": "CrewAI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/crewai",
-      "artifactHash": "8c8b1c67446ee521b4e1c6f57faa444fe7c5afc77ff683980d3bb74ba09d969e"
+      "artifactHash": "7a4cea8e49f370db1f16d40d935490668a00cf97814accec3a506f2869316cd7"
     },
     {
       "key": "tools:cursor",
@@ -162,7 +162,7 @@
       "title": "Cursor",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cursor",
-      "artifactHash": "350e2f5144fabe7d0ce9c3ed91583865d5eaa20ca8cd0b38381d693c2b81978a"
+      "artifactHash": "fcc89c4bd526a7aa67297a07ad3251c59f779c0230044ee40270427e31f5ba08"
     },
     {
       "key": "tools:devin",
@@ -172,7 +172,7 @@
       "title": "Devin",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/devin",
-      "artifactHash": "6584fcf185b30d2121556e077ff861abbe529395a6c81cd059344eeb69556369"
+      "artifactHash": "26e64939b9bf7a79d749fae0bacf460952947814c653f64df5cb06a1d9f70a7b"
     },
     {
       "key": "tools:exa",
@@ -182,7 +182,7 @@
       "title": "Exa",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/exa",
-      "artifactHash": "24c81a74a30fdc1b04450f869e56d4c68c0f2d5456a4a33323a32c91664ec5ce"
+      "artifactHash": "2e5c5f4f3d1a6bc3f1d9735f0248265e1a86467c597459bf6ea947c92ef396db"
     },
     {
       "key": "tools:firecrawl",
@@ -192,7 +192,7 @@
       "title": "Firecrawl",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/firecrawl",
-      "artifactHash": "be41ba4d7c1b48acf6a95f1a59d1fc415fa5852df0a30307a81829b589521880"
+      "artifactHash": "266a3c5fa75e32296679abf5fddcea6dd73598b9648d3a02a3656347df2efc7f"
     },
     {
       "key": "tools:garak",
@@ -202,7 +202,7 @@
       "title": "Garak",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/garak",
-      "artifactHash": "57ee58f64478fcf49a18c49840ba4ff09f55e643c5b9d077aaa332c1d062a306"
+      "artifactHash": "b4e06acfac7a81f5f44be0102584c80b6776a505b314ba48198c4c8a2af16533"
     },
     {
       "key": "tools:giskard",
@@ -212,7 +212,7 @@
       "title": "Giskard",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/giskard",
-      "artifactHash": "41b982f12f5ad8b2fa98371be89a6e1132f57a7301d0cacdc092869b4cb46e26"
+      "artifactHash": "6cadcc79c61b2200a4b38edcb7d95e2e1e65ca23a5505b587ff50d824acca686"
     },
     {
       "key": "tools:github-copilot",
@@ -222,7 +222,7 @@
       "title": "GitHub Copilot",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/github-copilot",
-      "artifactHash": "88570af7c9ad9578312d38242c289ea7b9abe362754cc9fee63284c427e6f53e"
+      "artifactHash": "57b146afe586c13018524b0eb320734e683bb43cd187f2bccfa445af8be18b22"
     },
     {
       "key": "tools:graphite-diamond",
@@ -232,7 +232,7 @@
       "title": "Graphite Diamond",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/graphite-diamond",
-      "artifactHash": "3a4932d1293e8584e7ef024c7f37e12cbe29e0981fae70f3eab3dbac86ff8aa3"
+      "artifactHash": "24c1a8ce29f94293bb2a149274b52be7ff58ee1479198e29f8ee3d7b6b68c74c"
     },
     {
       "key": "tools:helicone",
@@ -242,7 +242,7 @@
       "title": "Helicone",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/helicone",
-      "artifactHash": "f9664e26fb466bb8bd0efdb585999cbd0f0208aaf4ea430c6ec3ea5d09a643ab"
+      "artifactHash": "88228c154c792ae5464958dcbfd1db7c72bc6206ca0af742b6343ab21b123c66"
     },
     {
       "key": "skills:heyclaude-skill-submission-factory",
@@ -262,7 +262,7 @@
       "title": "Hyperbrowser",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/hyperbrowser",
-      "artifactHash": "ff8720c7b7dbe4ff957615127355dce2e8f252709d2829410c93be4a068baef1"
+      "artifactHash": "a1e8ef39756d3cafa5c92f99df9de9376a3bdd157f243bd4b2f1225f390f5f15"
     },
     {
       "key": "tools:lakera-guard",
@@ -272,7 +272,7 @@
       "title": "Lakera Guard",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/lakera-guard",
-      "artifactHash": "263e8d9df05dbb6f8cb3f389af4f9a74d0781b427c6d8ebf632b1597c8174d02"
+      "artifactHash": "c38dc9a5feff7db557acc775b2e2fb2888ab22b0ce73b20004ecb18652a98c22"
     },
     {
       "key": "tools:langfuse",
@@ -282,7 +282,7 @@
       "title": "Langfuse",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langfuse",
-      "artifactHash": "9ee6bf122437221569f8865e0a0c96e446377303bc0ab0b986f84b9bd966814c"
+      "artifactHash": "d0901dfb8f693729f22cd0e54cffe330b7c42df049a3f64d5a0087d2dce98593"
     },
     {
       "key": "tools:langgraph",
@@ -292,7 +292,7 @@
       "title": "LangGraph",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langgraph",
-      "artifactHash": "8bb045ec0cd03b57e317cd12d14c345c6e19a0278e50b31ae4d39c99125282f5"
+      "artifactHash": "900fb4e62015fd239e3a9e83b2b6160063fb20bd7ed5ad1d8e537376e970b3b3"
     },
     {
       "key": "tools:langsmith",
@@ -302,7 +302,7 @@
       "title": "LangSmith",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langsmith",
-      "artifactHash": "cee3c56a12b897eb82bda7a46bc1d4f9bd5687fba391a25bb46d74452a78751f"
+      "artifactHash": "fb3a820db5745258453f178d4ae5cb468fb68f4c0fae6abea0a14212e465cead"
     },
     {
       "key": "tools:lovable",
@@ -312,7 +312,7 @@
       "title": "Lovable",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/lovable",
-      "artifactHash": "614cfd37359cd5db0cfda2512c3083d34ed4ba024abb91f657ceabc11df80a4d"
+      "artifactHash": "a8b87febe540841f01d1761d4b3968311cb978cfd3cbe1a301970abec00e3d68"
     },
     {
       "key": "tools:make",
@@ -322,7 +322,7 @@
       "title": "Make",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/make",
-      "artifactHash": "14ff0d39258598846d6a85ce71bb849f61d689a7a4f196b02d79016b8cdb6891"
+      "artifactHash": "265595aba8013b232795fdc988ec4c6eab33afa26c5a32bc4a32429480143b16"
     },
     {
       "key": "tools:mastra",
@@ -332,7 +332,7 @@
       "title": "Mastra",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/mastra",
-      "artifactHash": "463508c85a608c0c6c93a163a028445002fa75940ebb6c72c54f4e1e8c578376"
+      "artifactHash": "02a0b854dbc56bd0635b60f6f07a373f8ccc22a7efc1552f1c570c860320e965"
     },
     {
       "key": "tools:microsoft-autogen",
@@ -342,7 +342,7 @@
       "title": "Microsoft AutoGen",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen",
-      "artifactHash": "d6b6263b574df92ff5d59ad7413220ca9fee2f478de1446db3fa3074e74bb4a6"
+      "artifactHash": "94d3abe5901e26b0c394d6f8fb588253d80240305d8c12387cf34979601f8b7a"
     },
     {
       "key": "tools:n8n",
@@ -352,7 +352,7 @@
       "title": "n8n",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/n8n",
-      "artifactHash": "5d5c1d53be56b459ac58262a9704b2756b761c82dd9f2a491a91729725e9f2af"
+      "artifactHash": "819bbb4da7f3bf86fe7ba4433aff30f2417c01c97095cef105da416fec9a8501"
     },
     {
       "key": "tools:opencode",
@@ -362,7 +362,7 @@
       "title": "OpenCode",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/opencode",
-      "artifactHash": "e35943d43ca14e3e1e0e2e53021bf25560f538ccb05ac1910d26610352c76958"
+      "artifactHash": "d9d5ce283a0c7c5a6d03f0986d52da808f9de510c4e0a1dced5074adfda1788d"
     },
     {
       "key": "tools:pipedream",
@@ -372,7 +372,7 @@
       "title": "Pipedream",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/pipedream",
-      "artifactHash": "fb0bbc0e41ac7298d1ea0cd13cb93af6bac637bc22e8511def27e31de5c5e074"
+      "artifactHash": "9222b316457f533c8fd2f94249fb79ffc708a02dfc72dcc5f783e5220c01656f"
     },
     {
       "key": "tools:promptfoo",
@@ -382,7 +382,7 @@
       "title": "Promptfoo",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/promptfoo",
-      "artifactHash": "f26899f15cd29bca76430c2e4d645065e337c2864bb08dbfa43acb3b9e73c88e"
+      "artifactHash": "ef6ba85354180d2cf407a71d7d8c60fd040f886fee3672fe3dc34b285401eeb2"
     },
     {
       "key": "tools:protect-ai",
@@ -392,7 +392,7 @@
       "title": "Protect AI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/protect-ai",
-      "artifactHash": "f307495cfbdb0facf1b0b02755b001c2215ee31567847b4068ff577c5cefa5a0"
+      "artifactHash": "60007608cb0a5726f1f7448dc1961b3ec32e80787121d5970dd52553c066f192"
     },
     {
       "key": "tools:raycast",
@@ -402,7 +402,7 @@
       "title": "Raycast",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/raycast",
-      "artifactHash": "dae50ec461d8bb2c38252a4f149479a0ccfb351cc6cc359b772512a4d7551fc7"
+      "artifactHash": "6b2b51e6b6db01cf0c5ad844eb36726726efcf4a6a388ff28f78e6f3b5b05c5b"
     },
     {
       "key": "tools:replit-agent",
@@ -412,7 +412,7 @@
       "title": "Replit Agent",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/replit-agent",
-      "artifactHash": "948b52b5e85823e0016c6ce94e3862ef3c71eebaf1b9659e810f0e75a7f30cc4"
+      "artifactHash": "31d624fe17ce5bfe99cf5ce764dffe511df6a9997d1aac7e865945c8a8627f42"
     },
     {
       "key": "tools:roo-code",
@@ -422,7 +422,7 @@
       "title": "Roo Code",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/roo-code",
-      "artifactHash": "470007842698d951542966f5633ccd8f3023045899f46dabda95bb69b21d0bb0"
+      "artifactHash": "5d788188de794ce1b826c1735b1667c10940e95c50698ffd79571de0150e3ebf"
     },
     {
       "key": "tools:smithery",
@@ -432,7 +432,7 @@
       "title": "Smithery",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/smithery",
-      "artifactHash": "19f86b888a16f33c19212993e7b261276f076da7bfb2bf3b944174281d037754"
+      "artifactHash": "576302569526b7b196c1f315aefbd9973344d3bcfe0093b97303a969c6db1a55"
     },
     {
       "key": "tools:sourcegraph-cody",
@@ -442,7 +442,7 @@
       "title": "Sourcegraph Cody",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/sourcegraph-cody",
-      "artifactHash": "c972e8c1689b184aa5f9a5e4dc4c7a9b66a80b02576d570bdb9a8fbe60a7f468"
+      "artifactHash": "bce7923d3e8632ef94f9f8b896d1d9066f01d9d241bef58ab1cbe1f2422bf670"
     },
     {
       "key": "tools:stagehand",
@@ -452,7 +452,7 @@
       "title": "Stagehand",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/stagehand",
-      "artifactHash": "18de82e8850efaaabf2c03550ca0b1cf44dc60714bcd00fdc0c2456a0b5417f3"
+      "artifactHash": "ad5ea03bf89f14771997d895acf45dc6f0083866cad0ead371568acb54ac47a2"
     },
     {
       "key": "tools:trigger-dev",
@@ -462,7 +462,7 @@
       "title": "Trigger.dev",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/trigger-dev",
-      "artifactHash": "12f0ed0159ead0388f4294351a44416b4b1095f85f8ad2c88e72a8259f6d2e19"
+      "artifactHash": "019328f263666135bfc94341b741c7e621eb4de08993fc23a293c897dcae8cd9"
     },
     {
       "key": "tools:vercel-v0",
@@ -472,7 +472,7 @@
       "title": "v0",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/vercel-v0",
-      "artifactHash": "365a03593210d0c22ceb40ffa7b64c41bc0aacf159b42edab2655b9dff6a7828"
+      "artifactHash": "5204454023ace91ddac32f76a2d79c9369e704e4f42ff7348ae76db36a85bbf7"
     },
     {
       "key": "tools:vercel-ai-sdk",
@@ -482,7 +482,7 @@
       "title": "Vercel AI SDK",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/vercel-ai-sdk",
-      "artifactHash": "27d1ddb7a916dbc974cd88bf8054a18f88252de14b14ed33b28edc513b39d585"
+      "artifactHash": "0df80fe1310dd6dc1ce4a18b58b17bb285b46124d5fd557f183f4a04c38b1517"
     },
     {
       "key": "tools:weave",
@@ -492,7 +492,7 @@
       "title": "Weave",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/weave",
-      "artifactHash": "ab54e510a2890dbb91aeee6cbba1708e3fc0d9d2852dc7fea54ecdc11d502d1a"
+      "artifactHash": "1d5876bb6b83e40454297da31a5ecc68e050b58f9d712cfda134395716836a48"
     },
     {
       "key": "tools:windsurf",
@@ -502,7 +502,7 @@
       "title": "Windsurf",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/windsurf",
-      "artifactHash": "ce8b05456b2d16649ea595077c69e1b794fbf4279aa6f629311ac71d7064d8b0"
+      "artifactHash": "16b44e4169fbf85d0094ffc9fa0260905be34d1e63df041d2c7b96645e1fd193"
     },
     {
       "key": "tools:workato",
@@ -512,7 +512,7 @@
       "title": "Workato",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/workato",
-      "artifactHash": "17515189ac77acf459e9286d1c9b5d75ad36bbe37f19570da370006052e50ef0"
+      "artifactHash": "d2e2ffd770aa66148c6ee5cbc2e026e9b0f04907121b4550fe8c63b3cf77056c"
     },
     {
       "key": "tools:zapier-ai",
@@ -522,7 +522,7 @@
       "title": "Zapier AI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/zapier-ai",
-      "artifactHash": "ccc900cfc7e23bf7305452bde98aeb8b209432bcfc2a4cb3c211b10dcca8e369"
+      "artifactHash": "260b66be2003287591be087cddb71e207637413d1c4547a796db1a783eaf63bd"
     },
     {
       "key": "tools:zed",
@@ -532,7 +532,7 @@
       "title": "Zed",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/zed",
-      "artifactHash": "997e74259e66d3bc43420b753e84354eccf8499997afc7369a506961d78439e7"
+      "artifactHash": "52d37b16ffbc4ac5efd5930cbcb61e8d952979e9b6d9acf3a8b06926c3a1f225"
     },
     {
       "key": "mcp:prompt-to-asset",
@@ -632,7 +632,7 @@
       "title": "n8n Operations Resilience Capability Pack Skill",
       "dateAdded": "2026-04-11",
       "canonicalUrl": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack",
-      "artifactHash": "39a1c3d25f6b07091077c7e9caffeae853041745962b238b1d5db85e63bdd714"
+      "artifactHash": "c29ca6272991b42eb962ee9022d8097356fc226238cca8a6a3da401f53486ab8"
     },
     {
       "key": "skills:openclaw-skill-authoring-factory-capability-pack",
@@ -652,7 +652,7 @@
       "title": "Unraid CA Template Authoring Capability Pack Skill",
       "dateAdded": "2026-04-11",
       "canonicalUrl": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack",
-      "artifactHash": "07d641ad27736c520aae24bd9d8a00d4750be4f8b4e4fd3e3cd96830968a5322"
+      "artifactHash": "a6c612aa87ec89838b2d024d785646f909b770c95ff9bfb0f3412c6e6e97da41"
     },
     {
       "key": "skills:zero-budget-saas-launch-capability-pack",
@@ -722,7 +722,7 @@
       "title": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack",
-      "artifactHash": "a4c26ae721ebff0bf7438fa1f2fc13c4cf1b3899c95b5bfffed01282052537aa"
+      "artifactHash": "5d7755922d6d83104dba4ab472ec8358bf0610f0af772c2a524c82d436936308"
     },
     {
       "key": "skills:docker-compose-production-blueprints",
@@ -732,7 +732,7 @@
       "title": "Docker Compose Production Blueprints Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/docker-compose-production-blueprints",
-      "artifactHash": "683a9f54f84afa1582ec8a32c665953b2d5a25980495b9a2126c42437235c644"
+      "artifactHash": "6090a70c6ee9ca5aa8930c8b533352e17a835390ac8382540314ead3ebb940f4"
     },
     {
       "key": "skills:ethereum-base-smart-contract-security-capability-pack",
@@ -762,7 +762,7 @@
       "title": "GitHub Actions Secure CI/CD Capability Pack Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/github-actions-secure-cicd-capability-pack",
-      "artifactHash": "654baae44d98d2f6c9db1f31d695f3cfd76f82e7cebfea3de47bb8d06cf2a4e3"
+      "artifactHash": "6a6b5d489ffd7e7dccd19717d3146f2bfc1c2975b55aa49d26369fafe42ab5d5"
     },
     {
       "key": "skills:google-workspace-gemini-automation",
@@ -772,7 +772,7 @@
       "title": "Google Workspace Gemini Automation Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/google-workspace-gemini-automation",
-      "artifactHash": "6aa046d7cb5bde63874e9d9d3b982947e32c2c31284f48b11921cd63ef60d7d5"
+      "artifactHash": "e0e024dd9f14b74c74d1307af552da5cf27e0eeefa68b5b31f6cd2c116673c6d"
     },
     {
       "key": "skills:indexnow-search-indexing-accelerator",
@@ -832,7 +832,7 @@
       "title": "n8n AI Agent Workflow Architect Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect",
-      "artifactHash": "e5f811379d2b205bd5277314408b1f8986b94a63550f27cfe88bf8ca43cbc6f9"
+      "artifactHash": "f53331517f897e64fecf05ded8b0121b0f8f475cb8950febc2cedf9223d5f537"
     },
     {
       "key": "skills:n8n-production-security-capability-pack",
@@ -842,7 +842,7 @@
       "title": "n8n Production Security Capability Pack Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/n8n-production-security-capability-pack",
-      "artifactHash": "acc15b95bc2df31a059a06e34d85ba98b83126a8237b561c7e4b49b5738ea017"
+      "artifactHash": "17e02ff9b0748315df3860abb2784c41a16d56492c88658af4d0f50a37f6e006"
     },
     {
       "key": "skills:openclaw-agent-ops-hardening",
@@ -872,7 +872,7 @@
       "title": "OpenNext Cloudflare Capability Pack Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/opennext-cloudflare-capability-pack",
-      "artifactHash": "f690336d1702431944c61b42c9a6e5bc52d380ffcbbeb1d791835ccb7b306c01"
+      "artifactHash": "296886403a21be4f451f0bae3103b7416104d7a56c7d1a8359bcf9b4c816e807"
     },
     {
       "key": "skills:pagespeed-insights-optimizer",
@@ -932,7 +932,7 @@
       "title": "Raycast Extension Dev Publish Capability Pack Skill",
       "dateAdded": "2026-04-10",
       "canonicalUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack",
-      "artifactHash": "9fa403ddf01ba21ebc4b5b5b310b9238f5a1e89fe86d934fe039e42c2a6f1106"
+      "artifactHash": "dde7fd1dd5429dfdb517da8e5f8d905946391b0002c2467781c16b471edf22a0"
     },
     {
       "key": "skills:saas-pricing-experimentation-engine",
@@ -1042,7 +1042,7 @@
       "title": "Claude Code vs Cursor vs Codeium Complete Comparison 2025",
       "dateAdded": "2025-10-27",
       "canonicalUrl": "https://heyclau.de/guides/claude-vs-cursor-codeium",
-      "artifactHash": "57293a523d62ae59f7aa55ac667c573e662f58a4c4f94a5167c5e430a3e1343f"
+      "artifactHash": "b9aa6e74b454cc1cfb57cd9b012b9e958895c75542b60ca43c9a4435f68231f2"
     },
     {
       "key": "guides:wsl-setup-guide",
@@ -1112,7 +1112,7 @@
       "title": "Claude vs Amazon Q Developer vs Gemini Code AWS Guide 2025",
       "dateAdded": "2025-10-27",
       "canonicalUrl": "https://heyclau.de/guides/claude-vs-codewhisperer-gemini",
-      "artifactHash": "18998fb395a2ef273793b3a25f1920c05685b258a44d78245f0ad4f89ee4258f"
+      "artifactHash": "cde74179705665bfb4821386f72b8535e6638543b903c055e9cbd9533a0c3654"
     },
     {
       "key": "guides:claude-vs-copilot-python",
@@ -1122,7 +1122,7 @@
       "title": "Claude vs GitHub Copilot vs ChatGPT for Python Dev 2025",
       "dateAdded": "2025-10-27",
       "canonicalUrl": "https://heyclau.de/guides/claude-vs-copilot-python",
-      "artifactHash": "53dc30beb1e468aa91bd246e8a2f63a4e7bfacfbee1e3d3e78c04382ff2b816a"
+      "artifactHash": "0e5ad6105a29445799e568b940de9995b1f129071e38d4586616c01f30fd36aa"
     },
     {
       "key": "guides:migration-workflow-guide",
@@ -1132,7 +1132,7 @@
       "title": "Complete Claude Migration Playbook from ChatGPT & Copilot",
       "dateAdded": "2025-10-27",
       "canonicalUrl": "https://heyclau.de/guides/migration-workflow-guide",
-      "artifactHash": "389fa404c8e67ab4a93f2bf07fb48d205e8816be476bd94e9979837b7928572b"
+      "artifactHash": "0a35882ac1837e39585f1664ad2711498d23d070d90e878c249ef1b7759ff14f"
     },
     {
       "key": "guides:fix-environment-variables",
@@ -1312,7 +1312,7 @@
       "title": "Github Copilot Interop Bridge - Agents",
       "dateAdded": "2025-10-25",
       "canonicalUrl": "https://heyclau.de/agents/github-copilot-interop-bridge",
-      "artifactHash": "deaa6f4b0ca23b614593f029d1741345e7c2179671e2d7a1a3c05b277d8b5902"
+      "artifactHash": "8a447901e36b8d111596774d739169078f5263c67ce126a4fe14877f56bedd20"
     },
     {
       "key": "commands:hooks-generator",
@@ -1612,7 +1612,7 @@
       "title": "Cursor Windsurf AI Code Editor Skill - Claude Code Skills",
       "dateAdded": "2025-10-23",
       "canonicalUrl": "https://heyclau.de/skills/cursor-windsurf-ai-ide-setup",
-      "artifactHash": "4a710198118a66808daa17a610884f3b04b278164d23226ad401367d36396d0d"
+      "artifactHash": "d5dd0dfe823c92db3a0bbc673a84ef53b58aec28d4ba752750d392f35a511ef0"
     },
     {
       "key": "skills:fastapi-python-backend",
@@ -1692,7 +1692,7 @@
       "title": "Claude Code Docker Statusline - Container Health Monitoring",
       "dateAdded": "2025-10-19",
       "canonicalUrl": "https://heyclau.de/statuslines/docker-health-statusline",
-      "artifactHash": "fcb4993b1b9c6363de55d647ec70d56a4f9f381d72a95a2c56bd4905306d730e"
+      "artifactHash": "6a1189aa702e972b537bf231b96c264ae06c7dfafb02a6584540bcc14391fc54"
     },
     {
       "key": "agents:codebase-migration-refactoring-agent",
@@ -1742,7 +1742,7 @@
       "title": "Docker Image Security Scanner - Hooks",
       "dateAdded": "2025-10-19",
       "canonicalUrl": "https://heyclau.de/hooks/docker-image-security-scanner",
-      "artifactHash": "967da581d5598afab63c4f966ca792af11f89e820209302fec8990c488f28bbc"
+      "artifactHash": "14871bd79afcd4eb86649168fd89c89354804b86ebe6049e3a056aac9e7d6e8a"
     },
     {
       "key": "hooks:documentation-coverage-checker",
@@ -1762,7 +1762,7 @@
       "title": "/cursor-rules - Cursor Rules Generator for Claude Code",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/commands/cursor-rules",
-      "artifactHash": "7ec16c3186eb729420f2b23cfedf4eb3b30c810af3f3e3ce1ab6588a04bef511"
+      "artifactHash": "3389a6bd3bab22b6faf9eae933d9f68eb0136f77b9e1c50852389f87156cecf0"
     },
     {
       "key": "agents:ai-code-review-security-agent",
@@ -1792,7 +1792,7 @@
       "title": "AI Prompt Engineering Expert for Claude",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/rules/ai-prompt-engineering-expert",
-      "artifactHash": "bb72767d929dd3431d05dc3a9f35a171d7bb5eee40e3bb3084cb6b992b0f76c4"
+      "artifactHash": "4262bd09a132a7a4c6ce896be7ab123c27a49c308cba3400e76b3aac16e82ada"
     },
     {
       "key": "agents:autogen-conversation-agent-builder",
@@ -1802,7 +1802,7 @@
       "title": "Autogen Conversation Agent Builder - Agents",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/agents/autogen-conversation-agent-builder",
-      "artifactHash": "cc3e6978f5fec20e519943227ed171989f76bddd61612d36a3ce4cad80383bdb"
+      "artifactHash": "03f6ef84c6a1a16e7037513b6233d645354bfa099039413722cccc1245373fec"
     },
     {
       "key": "commands:autogen-workflow",
@@ -1822,7 +1822,7 @@
       "title": "Cloud Infrastructure Architect Agent - Agents",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/agents/cloud-infrastructure-architect-agent",
-      "artifactHash": "61c12df1ebbdf7a0487062caf1a2b6636b716214c63ec160268367bc293efda8"
+      "artifactHash": "5afd7c1d33ddae1fd07cb16db2bd42077f3c03c25538795ab0b3e26a61f53105"
     },
     {
       "key": "skills:cloudflare-workers-ai-edge",
@@ -1832,7 +1832,7 @@
       "title": "Cloudflare Workers AI Edge Functions Skill",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-ai-edge",
-      "artifactHash": "42d3fbeb44b6edf248d4f2cfd0d4c0685d646436d20542420d8b77a8bb882957"
+      "artifactHash": "26670a3d95f43577db923bfe2fe37cd94098b8eb95519c4943faac552214a418"
     },
     {
       "key": "agents:data-pipeline-engineering-agent",
@@ -1872,7 +1872,7 @@
       "title": "GitHub Actions AI-Powered CI/CD Automation Skill",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/skills/github-actions-ai-cicd",
-      "artifactHash": "10e5d488b09d3ac8f4e449f0f420a66abae51f52450690ab5051c4ab79a7b064"
+      "artifactHash": "778de769efc4bad22ee4de0081c8d94034f214ac3e7976b1aeef7a54a5ca37a2"
     },
     {
       "key": "rules:graphql-federation-specialist",
@@ -1892,7 +1892,7 @@
       "title": "Kubernetes DevSecOps Engineer for Claude",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/rules/kubernetes-devsecops-engineer",
-      "artifactHash": "c42470e2f5e58d17863fd98b74894b4ac77e38517dcb33396a244df667aace6e"
+      "artifactHash": "baa4a9dcc9610e6a29f23cfa016c7a55b10ff4d7d546dda1aeb7fbe773c9e402"
     },
     {
       "key": "statuslines:mcp-server-status-monitor",
@@ -1932,7 +1932,7 @@
       "title": "Multi Agent Orchestration Specialist - Agents",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/agents/multi-agent-orchestration-specialist",
-      "artifactHash": "e66ba29ace24394068d6a160a6c57ab6263c78787cc75e56216a8a842f130c66"
+      "artifactHash": "90794f25056a7e9689971087e5ba18d5ffe6aeab00062ed75f7db83596e6203a"
     },
     {
       "key": "statuslines:multi-provider-token-counter",
@@ -2032,7 +2032,7 @@
       "title": "Semantic Kernel Enterprise Agent - Agents",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/agents/semantic-kernel-enterprise-agent",
-      "artifactHash": "8f940222c040f170e0ebe21876d9fdb8d453c14479805d5d03189c88e3b8d8bb"
+      "artifactHash": "c3978a2d662e9cc6265c1c3149a6b1b61c09a18a7812be281e8a9ae3e2615869"
     },
     {
       "key": "statuslines:starship-powerline-theme",
@@ -2052,7 +2052,7 @@
       "title": "Supabase Realtime Database Builder Skill",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/skills/supabase-realtime-database",
-      "artifactHash": "2eae30e2b3a1612437e0cddbd6a2804229c9e69297e60ada745b2cb365928efb"
+      "artifactHash": "7eb3837a7c5f40ac0cf446ead95744d10d99aef685ea712d155ffc594dad04d7"
     },
     {
       "key": "rules:terraform-infrastructure-architect",
@@ -2132,7 +2132,7 @@
       "title": "Windsurf AI-Native Collaborative Development Skill",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/skills/windsurf-collaborative-development",
-      "artifactHash": "564adf9563d8eb3e5c60ab84f8b339ab9513d225c17ba1e1a06b08c253f0c8fe"
+      "artifactHash": "17c21930f9769304277cc95e502f20a0fb47709b30201fc62d1ac9ed386c29a8"
     },
     {
       "key": "rules:windsurf-ai-native-ide-patterns",
@@ -2142,7 +2142,7 @@
       "title": "Windsurf AI-Native IDE Patterns for Claude",
       "dateAdded": "2025-10-16",
       "canonicalUrl": "https://heyclau.de/rules/windsurf-ai-native-ide-patterns",
-      "artifactHash": "f6fba7c0372ff636e172d55d30f5e7e494207ddbb2f90af5e0a1afc8182c0b7c"
+      "artifactHash": "b8e26b25c7e7028d072c9536732e525231931ecc720438c6582f5ed76714e61a"
     },
     {
       "key": "skills:zod-schema-validator",
@@ -2272,7 +2272,7 @@
       "title": "AWS Infra Bundle",
       "dateAdded": "2025-10-02",
       "canonicalUrl": "https://heyclau.de/collections/aws-cloud-infrastructure-bundle",
-      "artifactHash": "197d9fd2770c34a6e6404630485b35a0b1af87e71fb011ebc36148f2fc09ecbc"
+      "artifactHash": "f721d0a8b3f61bb403376606679fdb05030acd5adcd43073e47fa0747b685943"
     },
     {
       "key": "collections:backend-development-suite",
@@ -2282,7 +2282,7 @@
       "title": "Backend Development",
       "dateAdded": "2025-10-02",
       "canonicalUrl": "https://heyclau.de/collections/backend-development-suite",
-      "artifactHash": "9a6e315a2359f57e5faf63089d1eabab4042f52534ebbe43715ab1a9b16d9069"
+      "artifactHash": "0eca647d738ec5328fdb9c8e95b0e25e5836cfad49c85067d93a70472abf504b"
     },
     {
       "key": "collections:code-quality-toolkit",
@@ -2442,7 +2442,7 @@
       "title": "Discord MCP Server for Claude",
       "dateAdded": "2025-09-20",
       "canonicalUrl": "https://heyclau.de/mcp/discord-mcp-server",
-      "artifactHash": "018106ff564b558c45ce2af07a8e0599081ecb7f61211b94c6b74f9c97dc8771"
+      "artifactHash": "8820ee6cb370689849bf11869bdea9d6367b761bc8c50b61be318bb00f079edc"
     },
     {
       "key": "mcp:kubernetes-mcp-server",
@@ -2452,7 +2452,7 @@
       "title": "Kubernetes MCP Server - MCP Servers",
       "dateAdded": "2025-09-20",
       "canonicalUrl": "https://heyclau.de/mcp/kubernetes-mcp-server",
-      "artifactHash": "f7bd543e4caa288a4b02496f11a96fed3c8e1d1a8535a4041d7af7dbe09d32f6"
+      "artifactHash": "6990cb11820c6c5c11568118fa85637e7ad1fdabeccc92844fa197a0650d58d3"
     },
     {
       "key": "mcp:redis-mcp-server",
@@ -2512,7 +2512,7 @@
       "title": "AWS CloudFormation Validator - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/aws-cloudformation-validator",
-      "artifactHash": "e8d18139283c2cf1d4cf28ac462774264829a687e5d235e555f2d5aeb7a8dd88"
+      "artifactHash": "0dc856cbefbdbd9fe3b93c4833bee6140d96b7242cbfebba11ec07ceb0f6d4f6"
     },
     {
       "key": "hooks:cloud-backup-on-session-stop",
@@ -2522,7 +2522,7 @@
       "title": "Cloud Backup On Session Stop - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/cloud-backup-on-session-stop",
-      "artifactHash": "8532359f0e3a83be7cb5599bd198166742045f744191b4241585a20fe9ede6d1"
+      "artifactHash": "0b3d7c1736c50f4288a8dbf2ef3b05989cfddc6752ecdc5ea377ba3a70f7e02e"
     },
     {
       "key": "hooks:code-complexity-alert-monitor",
@@ -2572,7 +2572,7 @@
       "title": "Discord Activity Notifier - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/discord-activity-notifier",
-      "artifactHash": "b0107e801a4042e0f9a9b3f8e6b34c827730cf83c6ce718f89c83c7305f3e16b"
+      "artifactHash": "e5521ae827ab02c89e70fa05f740be76ce4290defaf5bf033fdd0382b769f159"
     },
     {
       "key": "hooks:documentation-auto-generator-on-stop",
@@ -2592,7 +2592,7 @@
       "title": "Docker Container Auto Rebuild - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/docker-container-auto-rebuild",
-      "artifactHash": "7e85ffdc9fa4eff04e605331283d4514a0e60a84c021ec3b113b9cac9c4ce2de"
+      "artifactHash": "c22bd95f8dfc77e76eae548d6bc3502461120e7ab950f27fd311e53c3f96db7c"
     },
     {
       "key": "hooks:environment-cleanup-handler",
@@ -2662,7 +2662,7 @@
       "title": "GitHub Actions Validator",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/github-actions-workflow-validator",
-      "artifactHash": "9f959a866e5cc6af08dca7aa06e33fbd6ef45a1622bbc8971d63712104f354ad"
+      "artifactHash": "3dbbf89b86d6fe5e137eee83cd66d0b1da2ce06ed2fe3072d8c3668eec139d09"
     },
     {
       "key": "hooks:go-module-tidy",
@@ -2722,7 +2722,7 @@
       "title": "Kubernetes Manifest Validator - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/kubernetes-manifest-validator",
-      "artifactHash": "f7d5b82a519384b0160813d697277f6e2f6586302a45f98ea9dcde55b9597598"
+      "artifactHash": "3ea94b6e637c9e75307c137167f99b05db6f50dec3517f730bb8e605a81e907a"
     },
     {
       "key": "hooks:markdown-link-checker",
@@ -2902,7 +2902,7 @@
       "title": "Slack Progress Notifier - Hooks",
       "dateAdded": "2025-09-19",
       "canonicalUrl": "https://heyclau.de/hooks/slack-progress-notifier",
-      "artifactHash": "a39b2405fa6fca76bdd57718d569a185860864ce0fac1532c9dd8c902508408f"
+      "artifactHash": "7b6e50550b73fc3237c06d774a16b5af9a9af6cc7cf640500e58aad656abf823"
     },
     {
       "key": "hooks:svelte-component-compiler",
@@ -2992,7 +2992,7 @@
       "title": "Airtable MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/airtable-mcp-server",
-      "artifactHash": "931f2f701ec0fa693315fde38bcde2057903d1968a8d400b9a767dbee942793e"
+      "artifactHash": "108fb80070de6745c20ec239fb5d3bb043ab08eafb4067d825dbf320dc587d00"
     },
     {
       "key": "mcp:asana-mcp-server",
@@ -3002,7 +3002,7 @@
       "title": "Asana MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server",
-      "artifactHash": "f577368ad39bee543abc1919c035111a618eb3c0a5cac8106b8ca28d8533c8a3"
+      "artifactHash": "ca7416c4ad4a0e2df30c220f740769c184bf1f17bfa4292338bfd4a1dd16db26"
     },
     {
       "key": "mcp:box-mcp-server",
@@ -3032,7 +3032,7 @@
       "title": "Clickup MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/clickup-mcp-server",
-      "artifactHash": "2e745ed36264101acc94486800db37712c34d75bc247d03a5f30f363fcfb4ea8"
+      "artifactHash": "3815e93f3bcdd95f84c202cf56857d697e5214a61e8e8a4f2cb6370b8df83714"
     },
     {
       "key": "mcp:cloudflare-mcp-server",
@@ -3042,7 +3042,7 @@
       "title": "Cloudflare MCP Server - MCP Servers",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/cloudflare-mcp-server",
-      "artifactHash": "37e51a96af187f12d87864d8a64b82efd8a87fbf45eb6f40a6c41a50de1c6ece"
+      "artifactHash": "4b4af4b4110549fd348e15c21080b5730a7115fdc32cfbdf86950ced49836d3a"
     },
     {
       "key": "mcp:cloudinary-mcp-server",
@@ -3072,7 +3072,7 @@
       "title": "Figma MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/figma-mcp-server",
-      "artifactHash": "801827c844ff5fddc0265acbbe81d1734ca2a8d4a6c359afb00d7b5f06403495"
+      "artifactHash": "fc5742fd225bc67c56fb91132943881e8fad8526d5e81e9b3cd894c5421c2d9a"
     },
     {
       "key": "mcp:fireflies-mcp-server",
@@ -3092,7 +3092,7 @@
       "title": "GitHub MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/github-mcp-server",
-      "artifactHash": "fa99e4e6a132b96a8526dbe1bb42effde69135011a31320fe0e115f6e08fc20d"
+      "artifactHash": "21ac87aaa21d661d267347d0cc521aaee9426d811775b500631750573c64a05b"
     },
     {
       "key": "mcp:hubspot-mcp-server",
@@ -3102,7 +3102,7 @@
       "title": "Hubspot MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/hubspot-mcp-server",
-      "artifactHash": "4b2d86af52e8f43b8a6e3285c97c815066ecfc17d9828fb1787091788053e08d"
+      "artifactHash": "cd83c55febccbd8b4bddd507b604f5ac19310e5ba9a6825dbe796e5f3b626ceb"
     },
     {
       "key": "mcp:hugging-face-mcp-server",
@@ -3152,7 +3152,7 @@
       "title": "Jira MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/jira-mcp-server",
-      "artifactHash": "fe0560fc0716a05f1765e8546facdbbd8652181154ea8bc447a6de28aa0953ec"
+      "artifactHash": "7934e00dab164d7f6207196232f5650991814bac90d8403994e1d3efa0f89413"
     },
     {
       "key": "mcp:linear-mcp-server",
@@ -3162,7 +3162,7 @@
       "title": "Linear MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/linear-mcp-server",
-      "artifactHash": "2c179aac0850859af168fd7f5d549616c0a3f7891c05cd8ce58cf486e7073865"
+      "artifactHash": "d23bb1dc3c971d35ca512c42db8f3053681d13f58df8c04c7d285aa4da6487a5"
     },
     {
       "key": "mcp:monday-mcp-server",
@@ -3182,7 +3182,7 @@
       "title": "Netlify MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/netlify-mcp-server",
-      "artifactHash": "3e9c14778fb5c1fd37dab789dd181b94d706d66d0fba97cec9bef89ef97fc2ed"
+      "artifactHash": "82e75c65a600a78e9d134bac48edb9e1738646377b22ff68601863365583d555"
     },
     {
       "key": "mcp:notion-mcp-server",
@@ -3192,7 +3192,7 @@
       "title": "Notion MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/notion-mcp-server",
-      "artifactHash": "0042b62e149d1936281be1c8a22f475792b2839f766770a0daecc7a868a44b8b"
+      "artifactHash": "bbc072e22de1f36097bf7d10f2ae2e326adc26acdfd1763909e828dab9fe3e2c"
     },
     {
       "key": "mcp:paypal-mcp-server",
@@ -3222,7 +3222,7 @@
       "title": "Sentry MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/sentry-mcp-server",
-      "artifactHash": "5d71e73e5fedc4d09efafbd830e0c1dcbe6ce26160970281ab1a4a40c8945a88"
+      "artifactHash": "388d291d9cf601443beb2d7bdd7a376cbcd1d005a2c34ee6fa0e58fd7c4d9458"
     },
     {
       "key": "mcp:socket-mcp-server",
@@ -3252,7 +3252,7 @@
       "title": "Stripe MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/stripe-mcp-server",
-      "artifactHash": "7c3ca37da9f9b5dd98792e9cb967d93898634c3cd56c4f062dd457bbee680975"
+      "artifactHash": "39303c205eb9e9cf608a0f75fc909bbfb50a04731efc20759af03d29c2fda2d1"
     },
     {
       "key": "mcp:stytch-mcp-server",
@@ -3272,7 +3272,7 @@
       "title": "Vercel MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/vercel-mcp-server",
-      "artifactHash": "973530a00f6ed1e6c0e6311a81b77325729639dea8608a20d9acd7339c43a13c"
+      "artifactHash": "0cd176d4dfddc3827033068e785c4946eebce5b055f04cb581ecb17c83c02b13"
     },
     {
       "key": "mcp:workato-mcp-server",
@@ -3282,7 +3282,7 @@
       "title": "Workato MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/workato-mcp-server",
-      "artifactHash": "bd33612e0b09e3056adae8e577abc209d1e729830e9cf15790720fc4b6286846"
+      "artifactHash": "18c911cd6e943955ba6a9b4a4b5b9e30a3b7880ed5dadfcd3b1994506c1fa2f0"
     },
     {
       "key": "mcp:zapier-mcp-server",
@@ -3292,7 +3292,7 @@
       "title": "Zapier MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/zapier-mcp-server",
-      "artifactHash": "5f021c6d42129da78eb3628f23e2559307e32a1fda7d50ea10d325ba74300d7a"
+      "artifactHash": "0913101de1f9b928816ba84859e31c587bc6b54c8efd7534684b1b46d7eea4f1"
     },
     {
       "key": "commands:debug",
@@ -3412,7 +3412,7 @@
       "title": "AWS Cloud Architect - CLAUDE.md Rules for Claude Code",
       "dateAdded": "2025-09-16",
       "canonicalUrl": "https://heyclau.de/rules/aws-cloud-architect",
-      "artifactHash": "f1af7fbd402641c9652cd9f272d12becd32798b2b4c2dfed2cb2553597592b37"
+      "artifactHash": "1606ae51f27acb624e6655a1ed447877e21e22dc4ff92f62c068eef927465c79"
     },
     {
       "key": "mcp:aws-services-mcp-server",
@@ -3422,7 +3422,7 @@
       "title": "AWS Services MCP Server - MCP Servers",
       "dateAdded": "2025-09-16",
       "canonicalUrl": "https://heyclau.de/mcp/aws-services-mcp-server",
-      "artifactHash": "c06060aef3b3bab0016d0d412390ba131423cbfa1f4a48995a6d0661e2bed1cc"
+      "artifactHash": "cd8902f3d1c05d6510c049e54a1fcf78635c46233248c1b4672353771bbca931"
     },
     {
       "key": "agents:backend-architect-agent",
@@ -3512,7 +3512,7 @@
       "title": "Docker MCP Server for Claude",
       "dateAdded": "2025-09-16",
       "canonicalUrl": "https://heyclau.de/mcp/docker-mcp-server",
-      "artifactHash": "816d1fa22beb1bbbc487bae3b5a58403aa083a03f0031b51cc6c2a689b575a6a"
+      "artifactHash": "0bcbc4c5b0a78695f17752f0730df50d2c60b6e25ab5d9eb2818b0bff6fe11c1"
     },
     {
       "key": "hooks:documentation-generator",
@@ -3562,7 +3562,7 @@
       "title": "Git MCP Server for Claude",
       "dateAdded": "2025-09-16",
       "canonicalUrl": "https://heyclau.de/mcp/git-mcp-server",
-      "artifactHash": "c10530b61cb15ab6dd25b7d385c2c0e4aaf17b357d290bb02685ef22f35c8c40"
+      "artifactHash": "ec3bdd6a1a07958fe0885290ffdf43a3ab98cfe79010ecc5f39895c34df5fa9d"
     },
     {
       "key": "hooks:git-pre-commit-validator",
@@ -3642,7 +3642,7 @@
       "title": "Postgresql MCP Server - MCP Servers",
       "dateAdded": "2025-09-16",
       "canonicalUrl": "https://heyclau.de/mcp/postgresql-mcp-server",
-      "artifactHash": "8ad115bb8b041e260e7248cff4daf2832b32c2760614e18a18cdaac6cf8bea4f"
+      "artifactHash": "9a0560dbe56ae198560627902043f2fe43aa4bf0405bbbcf41a8c99267ebc5e7"
     },
     {
       "key": "hooks:security-scanner-hook",
@@ -3692,7 +3692,7 @@
       "title": "Devops SRE Expert for Claude",
       "dateAdded": "2025-09-15",
       "canonicalUrl": "https://heyclau.de/agents/devops-sre-expert",
-      "artifactHash": "b8b3aab80f3417525587bda48153622df2e11ee34aec7ec2cd7b04c1a0e6976e"
+      "artifactHash": "a7470dec84721016d63fe73f0fa2ab920a9e4c608140a4e439aca9a5cf6b4429"
     },
     {
       "key": "mcp:filesystem-mcp-server",
@@ -3702,7 +3702,7 @@
       "title": "Filesystem MCP Server - MCP Servers",
       "dateAdded": "2025-09-15",
       "canonicalUrl": "https://heyclau.de/mcp/filesystem-mcp-server",
-      "artifactHash": "e6dccb44219ffd3231d47c0f8eb1cef44b3aa3fd8eceb0c571ff73f671d21c31"
+      "artifactHash": "e94f6156faf4f92ff72f956431583e39c5274421e55b55c4b11f53136202d7da"
     },
     {
       "key": "commands:git-smart-commit",
@@ -3796,5 +3796,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "3e48116012910326fd6191052d7a7bd6b2466be23f0dfb7e6ffa8ef4bba33a8c"
+  "signature": "515e6b02881bba3c0b253d661b54487d9476c8222ee2c8f24797402e6377ec86"
 }

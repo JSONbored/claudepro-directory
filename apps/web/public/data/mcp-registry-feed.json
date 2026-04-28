@@ -9,6 +9,10 @@
       "title": "Airtable MCP Server for Claude",
       "description": "Read and write records, manage bases and tables in Airtable directly from Claude",
       "websiteUrl": "https://github.com/domdomegg/airtable-mcp-server",
+      "brandName": "Airtable",
+      "brandDomain": "airtable.com",
+      "brandIconUrl": "/api/brand-assets/icon/airtable.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/domdomegg/airtable-mcp-server",
         "source": "github"
@@ -24,6 +28,7 @@
       "websiteUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
       "brandName": "Asana",
       "brandDomain": "asana.com",
+      "brandIconUrl": "/api/brand-assets/icon/asana.com",
       "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status asana",
       "configSnippet": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
@@ -34,6 +39,10 @@
       "title": "AWS Services MCP Server - MCP Servers",
       "description": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring",
       "websiteUrl": "https://github.com/awslabs/mcp",
+      "brandName": "AWS",
+      "brandDomain": "aws.amazon.com",
+      "brandIconUrl": "/api/brand-assets/icon/aws.amazon.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/awslabs/mcp",
         "source": "github"
@@ -74,6 +83,10 @@
       "title": "Clickup MCP Server for Claude",
       "description": "Task management and project tracking with ClickUp integration",
       "websiteUrl": "https://github.com/hauptsacheNet/clickup-mcp",
+      "brandName": "ClickUp",
+      "brandDomain": "clickup.com",
+      "brandIconUrl": "/api/brand-assets/icon/clickup.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/hauptsacheNet/clickup-mcp",
         "source": "github"
@@ -87,6 +100,10 @@
       "title": "Cloudflare MCP Server - MCP Servers",
       "description": "Build applications, analyze traffic, and manage security settings through Cloudflare",
       "websiteUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/",
+      "brandName": "Cloudflare",
+      "brandDomain": "cloudflare.com",
+      "brandIconUrl": "/api/brand-assets/icon/cloudflare.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
       "configSnippet": "{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/cloudflare-mcp-server"
@@ -127,6 +144,10 @@
       "title": "Discord MCP Server for Claude",
       "description": "Discord bot integration for community management, moderation, and server automation",
       "websiteUrl": "https://github.com/saseq/discord-mcp",
+      "brandName": "Discord",
+      "brandDomain": "discord.com",
+      "brandIconUrl": "/api/brand-assets/icon/discord.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/saseq/discord-mcp",
         "source": "github"
@@ -140,6 +161,10 @@
       "title": "Docker MCP Server for Claude",
       "description": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration",
       "websiteUrl": "https://docs.docker.com/engine/api/",
+      "brandName": "Docker",
+      "brandDomain": "docker.com",
+      "brandIconUrl": "/api/brand-assets/icon/docker.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
       "configSnippet": "{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/docker-mcp-server"
@@ -149,6 +174,10 @@
       "title": "Figma MCP Server for Claude",
       "description": "Access designs, export assets, and interact with Figma files through Claude",
       "websiteUrl": "https://help.figma.com/hc/en-us/articles/32132100833559",
+      "brandName": "Figma",
+      "brandDomain": "figma.com",
+      "brandIconUrl": "/api/brand-assets/icon/figma.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status figma",
       "configSnippet": "{\n  \"figma\": {\n    \"url\": \"http://127.0.0.1:3845/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/figma-mcp-server"
@@ -158,6 +187,10 @@
       "title": "Filesystem MCP Server - MCP Servers",
       "description": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code",
       "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "brandName": "Anthropic",
+      "brandDomain": "anthropic.com",
+      "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status filesystem",
       "configSnippet": "{\n  \"filesystem\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-filesystem\",\n      \"/path/to/allowed/directory\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/filesystem-mcp-server"
@@ -176,6 +209,10 @@
       "title": "Git MCP Server for Claude",
       "description": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories",
       "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "brandName": "Anthropic",
+      "brandDomain": "anthropic.com",
+      "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status git",
       "configSnippet": "{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/git-mcp-server"
@@ -185,6 +222,10 @@
       "title": "GitHub MCP Server for Claude",
       "description": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality",
       "websiteUrl": "https://www.npmjs.com/package/@modelcontextprotocol/server-github",
+      "brandName": "GitHub",
+      "brandDomain": "github.com",
+      "brandIconUrl": "/api/brand-assets/icon/github.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add github --env GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_TOKEN -- npx -y @modelcontextprotocol/server-github && claude mcp list",
       "configSnippet": "{\n  \"github\": {\n    \"env\": {\n      \"GITHUB_PERSONAL_ACCESS_TOKEN\": \"${GITHUB_PERSONAL_ACCESS_TOKEN}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-github\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/github-mcp-server"
@@ -203,6 +244,10 @@
       "title": "Hubspot MCP Server for Claude",
       "description": "Access and manage HubSpot CRM data including contacts, companies, and deals",
       "websiteUrl": "https://developers.hubspot.com/mcp",
+      "brandName": "HubSpot",
+      "brandDomain": "hubspot.com",
+      "brandIconUrl": "/api/brand-assets/icon/hubspot.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status hubspot",
       "configSnippet": "{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/hubspot-mcp-server"
@@ -248,6 +293,10 @@
       "title": "Jira MCP Server for Claude",
       "description": "Manage Jira tickets and Confluence documentation",
       "websiteUrl": "https://www.atlassian.com/platform/remote-mcp-server",
+      "brandName": "Jira",
+      "brandDomain": "atlassian.com",
+      "brandIconUrl": "/api/brand-assets/icon/atlassian.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status jira",
       "configSnippet": "{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/jira-mcp-server"
@@ -257,6 +306,10 @@
       "title": "Kubernetes MCP Server - MCP Servers",
       "description": "Kubernetes cluster management and container orchestration through MCP integration",
       "websiteUrl": "https://github.com/feiskyer/mcp-kubernetes-server",
+      "brandName": "Kubernetes",
+      "brandDomain": "kubernetes.io",
+      "brandIconUrl": "/api/brand-assets/icon/kubernetes.io",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/feiskyer/mcp-kubernetes-server",
         "source": "github"
@@ -270,6 +323,10 @@
       "title": "Linear MCP Server for Claude",
       "description": "Integrate with Linear's issue tracking and project management system",
       "websiteUrl": "https://linear.app/docs/mcp",
+      "brandName": "Linear",
+      "brandDomain": "linear.app",
+      "brandIconUrl": "/api/brand-assets/icon/linear.app",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status linear",
       "configSnippet": "{\n  \"linear\": {\n    \"url\": \"https://mcp.linear.app/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/linear-mcp-server"
@@ -288,6 +345,10 @@
       "title": "Netlify MCP Server for Claude",
       "description": "Create, deploy, and manage websites on Netlify platform",
       "websiteUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+      "brandName": "Netlify",
+      "brandDomain": "netlify.com",
+      "brandIconUrl": "/api/brand-assets/icon/netlify.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status netlify",
       "configSnippet": "{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/netlify-mcp-server"
@@ -297,6 +358,10 @@
       "title": "Notion MCP Server for Claude",
       "description": "Read docs, update pages, and manage tasks in Notion workspaces",
       "websiteUrl": "https://developers.notion.com/docs/mcp",
+      "brandName": "Notion",
+      "brandDomain": "notion.so",
+      "brandIconUrl": "/api/brand-assets/icon/notion.so",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status notion",
       "configSnippet": "{\n  \"notion\": {\n    \"url\": \"https://mcp.notion.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/notion-mcp-server"
@@ -324,6 +389,10 @@
       "title": "Postgresql MCP Server - MCP Servers",
       "description": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities",
       "websiteUrl": "https://modelcontextprotocol.io/examples",
+      "brandName": "Anthropic",
+      "brandDomain": "anthropic.com",
+      "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status postgres",
       "configSnippet": "{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/postgresql-mcp-server"
@@ -372,6 +441,10 @@
       "title": "Sentry MCP Server for Claude",
       "description": "Monitor errors, debug production issues, and track application health",
       "websiteUrl": "https://docs.sentry.io/product/sentry-mcp/",
+      "brandName": "Sentry",
+      "brandDomain": "sentry.io",
+      "brandIconUrl": "/api/brand-assets/icon/sentry.io",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
       "configSnippet": "{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/sentry-mcp-server"
@@ -403,6 +476,10 @@
       "title": "Stripe MCP Server for Claude",
       "description": "Payment processing, subscription management, and financial transaction handling",
       "websiteUrl": "https://docs.stripe.com/mcp",
+      "brandName": "Stripe",
+      "brandDomain": "stripe.com",
+      "brandIconUrl": "/api/brand-assets/icon/stripe.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list",
       "configSnippet": "{\n  \"stripe\": {\n    \"url\": \"https://mcp.stripe.com\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/stripe-mcp-server"
@@ -421,6 +498,10 @@
       "title": "Vercel MCP Server for Claude",
       "description": "Manage deployments, analyze logs, and control Vercel projects",
       "websiteUrl": "https://vercel.com/docs/mcp/vercel-mcp",
+      "brandName": "Vercel",
+      "brandDomain": "vercel.com",
+      "brandIconUrl": "/api/brand-assets/icon/vercel.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list",
       "configSnippet": "{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/vercel-mcp-server"
@@ -430,6 +511,10 @@
       "title": "Workato MCP Server for Claude",
       "description": "Access any application, workflows, or data via Workato's integration platform",
       "websiteUrl": "https://docs.workato.com/mcp.html",
+      "brandName": "Workato",
+      "brandDomain": "workato.com",
+      "brandIconUrl": "/api/brand-assets/icon/workato.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http workato YOUR_WORKATO_MCP_URL && claude mcp list",
       "configSnippet": "{\n  \"workato\": {\n    \"url\": \"https://your-workspace.workato.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/workato-mcp-server"
@@ -439,6 +524,10 @@
       "title": "Zapier MCP Server for Claude",
       "description": "Connect to nearly 8,000 apps through Zapier's automation platform",
       "websiteUrl": "https://help.zapier.com/hc/en-us/articles/36265392843917",
+      "brandName": "Zapier",
+      "brandDomain": "zapier.com",
+      "brandIconUrl": "/api/brand-assets/icon/zapier.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http zapier YOUR_GENERATED_URL && claude mcp list",
       "configSnippet": "{\n  \"zapier\": {\n    \"url\": \"https://mcp.zapier.com/YOUR_GENERATED_URL\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/zapier-mcp-server"

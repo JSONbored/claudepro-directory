@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.lakera.ai/guard",
     "brandName": "Lakera Guard",
     "brandDomain": "lakera.ai",
+    "brandIconUrl": "/api/brand-assets/icon/lakera.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

@@ -29,6 +29,7 @@
     "websiteUrl": "https://trigger.dev",
     "brandName": "Trigger.dev",
     "brandDomain": "trigger.dev",
+    "brandIconUrl": "/api/brand-assets/icon/trigger.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

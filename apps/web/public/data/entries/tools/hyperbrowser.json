@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.hyperbrowser.ai",
     "brandName": "Hyperbrowser",
     "brandDomain": "hyperbrowser.ai",
+    "brandIconUrl": "/api/brand-assets/icon/hyperbrowser.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

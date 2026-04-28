@@ -4,8 +4,12 @@
   "category": "mcp",
   "slug": "git-mcp-server",
   "title": "Git MCP Server for Claude",
+  "brandName": "Anthropic",
+  "brandDomain": "anthropic.com",
+  "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status git\n\nConfig:\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
-  "detailMarkdown": "# Git MCP Server for Claude\nOfficial MCP server providing Git repository tools for reading, searching, and manipulating Git repositories\n**Category:** mcp\n**Author:** Anthropic\n**Download trust:** first-party\n**Tags:** `git` `version-control` `repositories` `official` `anthropic`\n\n## Install\n```bash\nclaude mcp list && claude mcp status git\n```\n\n## Config\n```json\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status git\n\n## Links\n- https://heyclau.de/mcp/git-mcp-server\n- https://modelcontextprotocol.io/examples",
+  "detailMarkdown": "# Git MCP Server for Claude\n\nOfficial MCP server providing Git repository tools for reading, searching, and manipulating Git repositories\n\n- **Category:** mcp\n- **Author:** Anthropic\n- **Brand:** Anthropic / anthropic.com\n- **Download trust:** first-party\n- **Tags:** `git` `version-control` `repositories` `official` `anthropic`\n\n## Install\n```bash\nclaude mcp list && claude mcp status git\n```\n\n## Config\n```json\n{\n  \"git\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-git\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status git\n\n## Links\n- https://heyclau.de/mcp/git-mcp-server\n- https://modelcontextprotocol.io/examples",
   "webUrl": "https://heyclau.de/mcp/git-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://modelcontextprotocol.io/examples"

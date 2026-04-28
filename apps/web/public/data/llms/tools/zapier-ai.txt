@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/zapier-ai
 - Source URLs: https://help.zapier.com, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/zapier-ai.mdx, https://zapier.com/ai
-- Brand: Zapier AI
+- Brand: Zapier
 - Brand domain: zapier.com
 - Brand asset source: brandfetch
 - Author: Zapier

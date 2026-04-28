@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.browserbase.com",
     "brandName": "Browserbase",
     "brandDomain": "browserbase.com",
+    "brandIconUrl": "/api/brand-assets/icon/browserbase.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

@@ -9,6 +9,9 @@ Download: /downloads/skills/unraid-ca-template-authoring-capability-pack.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack
 - Source URLs: https://forums.unraid.net/forum/64-docker-engine/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/unraid-ca-template-authoring-capability-pack.mdx
+- Brand: Docker
+- Brand domain: docker.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/unraid-ca-template-authoring-capability-pack.zip
 - Package SHA256: e03f7ff071424a820999e7fb23065cac28e9689d159593aaf999e32a6d119ed7
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

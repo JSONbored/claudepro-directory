@@ -9,6 +9,9 @@ Download: /downloads/mcp/vercel-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/vercel-mcp-server
 - Source URLs: https://vercel.com/docs/mcp/vercel-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx
+- Brand: Vercel
+- Brand domain: vercel.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/vercel-mcp-server.mcpb
 - Package SHA256: 8e7de38d9166a354c4cae17e0384a395f88a8851cb8ff1e92dfc5a6c4fcb0bcf
 - Author: Vercel

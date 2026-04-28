@@ -4,8 +4,12 @@
   "category": "mcp",
   "slug": "netlify-mcp-server",
   "title": "Netlify MCP Server for Claude",
+  "brandName": "Netlify",
+  "brandDomain": "netlify.com",
+  "brandIconUrl": "/api/brand-assets/icon/netlify.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status netlify\n\nConfig:\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}",
-  "detailMarkdown": "# Netlify MCP Server for Claude\nCreate, deploy, and manage websites on Netlify platform\n**Category:** mcp\n**Author:** Netlify\n**Download trust:** first-party\n**Tags:** `deployment` `netlify` `hosting` `static-sites` `serverless`\n\n## Install\n```bash\nclaude mcp list && claude mcp status netlify\n```\n\n## Config\n```json\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status netlify\n\n## Links\n- https://heyclau.de/mcp/netlify-mcp-server\n- https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
+  "detailMarkdown": "# Netlify MCP Server for Claude\n\nCreate, deploy, and manage websites on Netlify platform\n\n- **Category:** mcp\n- **Author:** Netlify\n- **Brand:** Netlify / netlify.com\n- **Download trust:** first-party\n- **Tags:** `deployment` `netlify` `hosting` `static-sites` `serverless`\n\n## Install\n```bash\nclaude mcp list && claude mcp status netlify\n```\n\n## Config\n```json\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status netlify\n\n## Links\n- https://heyclau.de/mcp/netlify-mcp-server\n- https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/",
   "webUrl": "https://heyclau.de/mcp/netlify-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/"

@@ -28,6 +28,7 @@
     "websiteUrl": "https://graphite.dev/diamond",
     "brandName": "Graphite Diamond",
     "brandDomain": "graphite.dev",
+    "brandIconUrl": "/api/brand-assets/icon/graphite.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

@@ -9,6 +9,9 @@ Download: /downloads/mcp/notion-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/notion-mcp-server
 - Source URLs: https://developers.notion.com/docs/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx
+- Brand: Notion
+- Brand domain: notion.so
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/notion-mcp-server.mcpb
 - Package SHA256: 5be293afa3eadf51565061c1b49445b1f1f14610e7d3a275ded73155086d3d79
 - Author: Notion

@@ -29,6 +29,7 @@
     "websiteUrl": "https://devin.ai",
     "brandName": "Devin",
     "brandDomain": "devin.ai",
+    "brandIconUrl": "/api/brand-assets/icon/devin.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

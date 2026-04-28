@@ -28,6 +28,7 @@
     "websiteUrl": "https://github.com/features/copilot",
     "brandName": "GitHub Copilot",
     "brandDomain": "github.com",
+    "brandIconUrl": "/api/brand-assets/icon/github.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

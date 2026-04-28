@@ -29,6 +29,7 @@
     "websiteUrl": "https://continue.dev",
     "brandName": "Continue",
     "brandDomain": "continue.dev",
+    "brandIconUrl": "/api/brand-assets/icon/continue.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

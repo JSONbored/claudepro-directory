@@ -10,7 +10,7 @@
     "seoDescription": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
     "author": "Asana",
     "dateAdded": "2025-09-18",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-28T13:43:35-06:00",
     "tags": [
       "asana",
       "project-management",
@@ -37,6 +37,7 @@
     "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
     "brandName": "Asana",
     "brandDomain": "asana.com",
+    "brandIconUrl": "/api/brand-assets/icon/asana.com",
     "brandAssetSource": "brandfetch",
     "cardDescription": "Interact with Asana workspaces to manage projects and tasks",
     "installable": true,
@@ -350,7 +351,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "lastVerifiedAt": "2026-04-28T13:43:35-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

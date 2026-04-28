@@ -6,9 +6,10 @@
   "title": "Cursor",
   "brandName": "Cursor",
   "brandDomain": "cursor.com",
+  "brandIconUrl": "/api/brand-assets/icon/cursor.com",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nCursor is a strong fit for teams that want codebase-aware AI workflows inside an editor rather than a separate chat surface.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Cursor\nAI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.\n**Category:** tools\n**Author:** Cursor\n**Brand:** Cursor / cursor.com\n**Tags:** `ai-coding` `code-editor`\n\n## Links\n- https://heyclau.de/tools/cursor\n- https://docs.cursor.com",
+  "detailMarkdown": "# Cursor\n\nAI-native code editor for codebase-aware chat, agent-assisted edits, and software development workflows.\n\n- **Category:** tools\n- **Author:** Cursor\n- **Brand:** Cursor / cursor.com\n- **Tags:** `ai-coding` `code-editor`\n\n## Links\n- https://heyclau.de/tools/cursor\n- https://docs.cursor.com",
   "webUrl": "https://heyclau.de/tools/cursor",
   "repoUrl": "",
   "documentationUrl": "https://docs.cursor.com"

@@ -26,6 +26,7 @@
     "websiteUrl": "https://www.anthropic.com/claude-code",
     "brandName": "Claude Code",
     "brandDomain": "anthropic.com",
+    "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "heyclaude_pick",

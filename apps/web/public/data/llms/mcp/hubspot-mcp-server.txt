@@ -9,6 +9,9 @@ Download: /downloads/mcp/hubspot-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/hubspot-mcp-server
 - Source URLs: https://developers.hubspot.com/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx
+- Brand: HubSpot
+- Brand domain: hubspot.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/hubspot-mcp-server.mcpb
 - Package SHA256: a3d5e18765768e67f645b91f89c67d7163ebb763932652f693d85d1a260949c8
 - Author: HubSpot

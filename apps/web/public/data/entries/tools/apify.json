@@ -29,6 +29,7 @@
     "websiteUrl": "https://apify.com",
     "brandName": "Apify",
     "brandDomain": "apify.com",
+    "brandIconUrl": "/api/brand-assets/icon/apify.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

@@ -9,6 +9,9 @@ Download: /downloads/skills/docker-compose-production-blueprints.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/docker-compose-production-blueprints
 - Source URLs: https://docs.docker.com/compose/, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/docker-compose-production-blueprints.mdx
+- Brand: Docker
+- Brand domain: docker.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/docker-compose-production-blueprints.zip
 - Package SHA256: f755fc12857dee8d1ee1264decb4e2ff342d9ba8ed36f32a7fa723ca0335d59b
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

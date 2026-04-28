@@ -9,6 +9,9 @@ Download: /downloads/mcp/stripe-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/stripe-mcp-server
 - Source URLs: https://docs.stripe.com/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx
+- Brand: Stripe
+- Brand domain: stripe.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/stripe-mcp-server.mcpb
 - Package SHA256: c9da8acb0af76bc240e21f66deab75e26380909a1d2dfb27e7d9965c679b8d9c
 - Author: Stripe

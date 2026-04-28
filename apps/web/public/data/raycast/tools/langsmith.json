@@ -6,9 +6,10 @@
   "title": "LangSmith",
   "brandName": "LangSmith",
   "brandDomain": "langchain.com",
+  "brandIconUrl": "/api/brand-assets/icon/langchain.com",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nLangSmith is useful for teams that need traceability, regression testing, and evaluation around LLM and agent systems.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# LangSmith\nObservability, evaluation, tracing, and testing platform for LLM applications and agent workflows.\n**Category:** tools\n**Author:** LangChain\n**Brand:** LangSmith / langchain.com\n**Tags:** `observability` `evaluation`\n\n## Links\n- https://heyclau.de/tools/langsmith\n- https://docs.smith.langchain.com",
+  "detailMarkdown": "# LangSmith\n\nObservability, evaluation, tracing, and testing platform for LLM applications and agent workflows.\n\n- **Category:** tools\n- **Author:** LangChain\n- **Brand:** LangSmith / langchain.com\n- **Tags:** `observability` `evaluation`\n\n## Links\n- https://heyclau.de/tools/langsmith\n- https://docs.smith.langchain.com",
   "webUrl": "https://heyclau.de/tools/langsmith",
   "repoUrl": "",
   "documentationUrl": "https://docs.smith.langchain.com"

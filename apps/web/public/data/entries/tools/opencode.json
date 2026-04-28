@@ -29,6 +29,7 @@
     "websiteUrl": "https://opencode.ai",
     "brandName": "OpenCode",
     "brandDomain": "opencode.ai",
+    "brandIconUrl": "/api/brand-assets/icon/opencode.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

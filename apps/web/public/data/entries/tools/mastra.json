@@ -29,6 +29,7 @@
     "websiteUrl": "https://mastra.ai",
     "brandName": "Mastra",
     "brandDomain": "mastra.ai",
+    "brandIconUrl": "/api/brand-assets/icon/mastra.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

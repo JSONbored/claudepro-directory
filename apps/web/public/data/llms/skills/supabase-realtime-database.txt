@@ -9,6 +9,9 @@ Download: /downloads/skills/supabase-realtime-database.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/supabase-realtime-database
 - Source URLs: https://supabase.com/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/supabase-realtime-database.mdx
+- Brand: Supabase
+- Brand domain: supabase.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/supabase-realtime-database.zip
 - Package SHA256: e4070e1dd49d8c0871cf79e4cf9db65964522b9f8b42579f124530c5c7d858c1
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

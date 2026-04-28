@@ -29,6 +29,7 @@
     "websiteUrl": "https://n8n.io",
     "brandName": "n8n",
     "brandDomain": "n8n.io",
+    "brandIconUrl": "/api/brand-assets/icon/n8n.io",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "heyclaude_pick",

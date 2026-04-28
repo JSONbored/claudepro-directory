@@ -19,7 +19,9 @@ import {
   buildRaycastEnvelope,
   RAYCAST_COPY_PREVIEW_LIMIT,
   buildSearchEntries,
+  brandAssetProxyUrl,
   brandfetchLogoUrl,
+  detectKnownBrand,
   getCopyText,
   isAllowedBrandAssetUrl,
 } from "@heyclaude/registry";
@@ -135,11 +137,13 @@ describe("registry artifacts", () => {
     expect(raycastEntry).toMatchObject({
       brandName: "Asana",
       brandDomain: "asana.com",
+      brandIconUrl: "/api/brand-assets/icon/asana.com",
       brandAssetSource: "brandfetch",
     });
     expect(raycastDetail).toMatchObject({
       brandName: "Asana",
       brandDomain: "asana.com",
+      brandIconUrl: "/api/brand-assets/icon/asana.com",
       brandAssetSource: "brandfetch",
     });
     expect(llmsText).toContain("- Brand: Asana");
@@ -152,7 +156,53 @@ describe("registry artifacts", () => {
       "https://cdn.brandfetch.io/domain/asana.com/",
     );
     expect(isAllowedBrandAssetUrl(brandfetchUrl)).toBe(true);
+    expect(brandAssetProxyUrl("asana.com")).toBe(
+      "/api/brand-assets/icon/asana.com",
+    );
+    expect(isAllowedBrandAssetUrl(brandAssetProxyUrl("asana.com"))).toBe(true);
     expect(isAllowedBrandAssetUrl("https://example.com/logo.png")).toBe(false);
+  });
+
+  it("derives known first-party brand icons without unsafe generic fallbacks", () => {
+    expect(
+      detectKnownBrand({
+        title: "Discord MCP Server for Claude",
+        tags: ["discord", "bot"],
+      }),
+    ).toMatchObject({
+      name: "Discord",
+      domain: "discord.com",
+    });
+
+    const key = "mcp:discord-mcp-server";
+    const directoryEntry = directoryEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastEntry = raycastPayload.entries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastDetail = readDataJson<Record<string, unknown>>(
+      "raycast/mcp/discord-mcp-server.json",
+    );
+
+    expect(directoryEntry).toMatchObject({
+      brandName: "Discord",
+      brandDomain: "discord.com",
+      brandIconUrl: "/api/brand-assets/icon/discord.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(raycastEntry).toMatchObject({
+      brandName: "Discord",
+      brandDomain: "discord.com",
+      brandIconUrl: "/api/brand-assets/icon/discord.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(raycastDetail.detailMarkdown).toContain(
+      "- **Brand:** Discord / discord.com",
+    );
+    expect(String(raycastDetail.detailMarkdown)).not.toContain(
+      "Category: mcp\n**Author",
+    );
   });
 
   it("publishes factual trust signals across compact and detail artifacts", () => {

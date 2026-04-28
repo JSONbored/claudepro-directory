@@ -29,6 +29,7 @@
     "websiteUrl": "https://protectai.com",
     "brandName": "Protect AI",
     "brandDomain": "protectai.com",
+    "brandIconUrl": "/api/brand-assets/icon/protectai.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "paid",
     "disclosure": "editorial",

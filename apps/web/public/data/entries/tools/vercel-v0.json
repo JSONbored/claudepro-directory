@@ -29,6 +29,7 @@
     "websiteUrl": "https://v0.dev",
     "brandName": "v0",
     "brandDomain": "v0.dev",
+    "brandIconUrl": "/api/brand-assets/icon/v0.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

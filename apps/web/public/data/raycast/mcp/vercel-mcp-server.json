@@ -4,8 +4,12 @@
   "category": "mcp",
   "slug": "vercel-mcp-server",
   "title": "Vercel MCP Server for Claude",
+  "brandName": "Vercel",
+  "brandDomain": "vercel.com",
+  "brandIconUrl": "/api/brand-assets/icon/vercel.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n\nConfig:\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}",
-  "detailMarkdown": "# Vercel MCP Server for Claude\nManage deployments, analyze logs, and control Vercel projects\n**Category:** mcp\n**Author:** Vercel\n**Download trust:** first-party\n**Tags:** `deployment` `vercel` `hosting` `devops` `infrastructure`\n\n## Install\n```bash\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n```\n\n## Config\n```json\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/vercel-mcp-server\n- https://vercel.com/docs/mcp/vercel-mcp",
+  "detailMarkdown": "# Vercel MCP Server for Claude\n\nManage deployments, analyze logs, and control Vercel projects\n\n- **Category:** mcp\n- **Author:** Vercel\n- **Brand:** Vercel / vercel.com\n- **Download trust:** first-party\n- **Tags:** `deployment` `vercel` `hosting` `devops` `infrastructure`\n\n## Install\n```bash\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n```\n\n## Config\n```json\n{\n  \"vercel\": {\n    \"url\": \"https://mcp.vercel.com\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http vercel https://mcp.vercel.com && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/vercel-mcp-server\n- https://vercel.com/docs/mcp/vercel-mcp",
   "webUrl": "https://heyclau.de/mcp/vercel-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://vercel.com/docs/mcp/vercel-mcp"

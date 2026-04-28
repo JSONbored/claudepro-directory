@@ -29,6 +29,7 @@
     "websiteUrl": "https://langfuse.com",
     "brandName": "Langfuse",
     "brandDomain": "langfuse.com",
+    "brandIconUrl": "/api/brand-assets/icon/langfuse.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

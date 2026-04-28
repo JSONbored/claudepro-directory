@@ -29,6 +29,7 @@
     "websiteUrl": "https://wandb.ai/site/weave",
     "brandName": "Weave",
     "brandDomain": "wandb.ai",
+    "brandIconUrl": "/api/brand-assets/icon/wandb.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

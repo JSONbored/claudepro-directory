@@ -29,6 +29,7 @@
     "websiteUrl": "https://phoenix.arize.com",
     "brandName": "Arize Phoenix",
     "brandDomain": "phoenix.arize.com",
+    "brandIconUrl": "/api/brand-assets/icon/phoenix.arize.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

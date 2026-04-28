@@ -6,9 +6,10 @@
   "title": "Lakera Guard",
   "brandName": "Lakera Guard",
   "brandDomain": "lakera.ai",
+  "brandIconUrl": "/api/brand-assets/icon/lakera.ai",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nLakera Guard is relevant for teams that need runtime protection and policy checks around LLM application inputs and outputs.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Lakera Guard\nAI security platform for detecting prompt injection, unsafe content, data leakage, and LLM application abuse.\n**Category:** tools\n**Author:** Lakera\n**Brand:** Lakera Guard / lakera.ai\n**Tags:** `security` `guardrails`\n\n## Links\n- https://heyclau.de/tools/lakera-guard\n- https://docs.lakera.ai",
+  "detailMarkdown": "# Lakera Guard\n\nAI security platform for detecting prompt injection, unsafe content, data leakage, and LLM application abuse.\n\n- **Category:** tools\n- **Author:** Lakera\n- **Brand:** Lakera Guard / lakera.ai\n- **Tags:** `security` `guardrails`\n\n## Links\n- https://heyclau.de/tools/lakera-guard\n- https://docs.lakera.ai",
   "webUrl": "https://heyclau.de/tools/lakera-guard",
   "repoUrl": "",
   "documentationUrl": "https://docs.lakera.ai"

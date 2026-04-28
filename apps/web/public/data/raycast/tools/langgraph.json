@@ -6,9 +6,10 @@
   "title": "LangGraph",
   "brandName": "LangGraph",
   "brandDomain": "langchain.com",
+  "brandIconUrl": "/api/brand-assets/icon/langchain.com",
   "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nLangGraph is a strong fit for teams building non-trivial agent workflows that need state, branching, and controllable execution.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# LangGraph\nAgent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.\n**Category:** tools\n**Author:** LangChain\n**Brand:** LangGraph / langchain.com\n**Tags:** `agent-framework` `orchestration`\n\n## Links\n- https://heyclau.de/tools/langgraph\n- https://langchain-ai.github.io/langgraph/\n- https://github.com/langchain-ai/langgraph",
+  "detailMarkdown": "# LangGraph\n\nAgent orchestration framework for building stateful, controllable, multi-step LLM and agent workflows.\n\n- **Category:** tools\n- **Author:** LangChain\n- **Brand:** LangGraph / langchain.com\n- **Tags:** `agent-framework` `orchestration`\n\n## Links\n- https://heyclau.de/tools/langgraph\n- https://langchain-ai.github.io/langgraph/\n- https://github.com/langchain-ai/langgraph",
   "webUrl": "https://heyclau.de/tools/langgraph",
   "repoUrl": "https://github.com/langchain-ai/langgraph",
   "documentationUrl": "https://langchain-ai.github.io/langgraph/"

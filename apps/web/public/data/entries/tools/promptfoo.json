@@ -28,6 +28,7 @@
     "websiteUrl": "https://www.promptfoo.dev",
     "brandName": "Promptfoo",
     "brandDomain": "promptfoo.dev",
+    "brandIconUrl": "/api/brand-assets/icon/promptfoo.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

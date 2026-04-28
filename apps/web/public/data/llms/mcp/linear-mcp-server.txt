@@ -9,6 +9,9 @@ Download: /downloads/mcp/linear-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/linear-mcp-server
 - Source URLs: https://linear.app/docs/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx
+- Brand: Linear
+- Brand domain: linear.app
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/linear-mcp-server.mcpb
 - Package SHA256: a9f6c46cfbe25cd19a67129ccf249c2f16e590b68f75597008c5192fbf9cfe20
 - Author: Linear

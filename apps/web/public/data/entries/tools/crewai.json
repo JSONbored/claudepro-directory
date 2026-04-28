@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.crewai.com",
     "brandName": "CrewAI",
     "brandDomain": "crewai.com",
+    "brandIconUrl": "/api/brand-assets/icon/crewai.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

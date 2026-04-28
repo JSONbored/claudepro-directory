@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.coderabbit.ai",
     "brandName": "CodeRabbit",
     "brandDomain": "coderabbit.ai",
+    "brandIconUrl": "/api/brand-assets/icon/coderabbit.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "heyclaude_pick",

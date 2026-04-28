@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.langchain.com/langgraph",
     "brandName": "LangGraph",
     "brandDomain": "langchain.com",
+    "brandIconUrl": "/api/brand-assets/icon/langchain.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

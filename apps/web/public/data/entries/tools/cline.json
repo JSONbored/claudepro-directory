@@ -29,6 +29,7 @@
     "websiteUrl": "https://cline.bot",
     "brandName": "Cline",
     "brandDomain": "cline.bot",
+    "brandIconUrl": "/api/brand-assets/icon/cline.bot",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "heyclaude_pick",

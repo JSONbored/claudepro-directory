@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.helicone.ai",
     "brandName": "Helicone",
     "brandDomain": "helicone.ai",
+    "brandIconUrl": "/api/brand-assets/icon/helicone.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "open-source",
     "disclosure": "editorial",

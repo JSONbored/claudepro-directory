@@ -29,6 +29,7 @@
     "websiteUrl": "https://exa.ai",
     "brandName": "Exa",
     "brandDomain": "exa.ai",
+    "brandIconUrl": "/api/brand-assets/icon/exa.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

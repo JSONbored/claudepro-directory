@@ -203,6 +203,7 @@ export function buildContentEntryFromMdx(params) {
     },
     {
       allowWebsiteFallback: category === "tools",
+      allowAliasFallback: true,
     },
   );
 

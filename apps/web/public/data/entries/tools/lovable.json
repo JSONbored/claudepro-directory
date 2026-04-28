@@ -29,6 +29,7 @@
     "websiteUrl": "https://lovable.dev",
     "brandName": "Lovable",
     "brandDomain": "lovable.dev",
+    "brandIconUrl": "/api/brand-assets/icon/lovable.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

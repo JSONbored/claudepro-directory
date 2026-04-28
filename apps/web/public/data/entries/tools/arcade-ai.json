@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.arcade.dev",
     "brandName": "Arcade",
     "brandDomain": "arcade.dev",
+    "brandIconUrl": "/api/brand-assets/icon/arcade.dev",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",

@@ -9,6 +9,9 @@ Download: /downloads/skills/github-actions-ai-cicd.zip
 ## Citation Facts
 - Canonical URL: https://heyclau.de/skills/github-actions-ai-cicd
 - Source URLs: https://docs.github.com/en/actions, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/github-actions-ai-cicd.mdx
+- Brand: GitHub
+- Brand domain: github.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/skills/github-actions-ai-cicd.zip
 - Package SHA256: 8276d46f6ba2637b3be4efad277356648c49279ba4179cdd00ba5df2396daa06
 - Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)

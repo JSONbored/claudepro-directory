@@ -9,6 +9,9 @@ Download: /downloads/mcp/zapier-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/zapier-mcp-server
 - Source URLs: https://help.zapier.com/hc/en-us/articles/36265392843917, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx
+- Brand: Zapier
+- Brand domain: zapier.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/zapier-mcp-server.mcpb
 - Package SHA256: e43a859d567995a464e662a9b3726830434085c31bea4240635bf4ec61d66abd
 - Author: Zapier

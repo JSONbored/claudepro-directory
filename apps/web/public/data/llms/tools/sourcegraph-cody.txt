@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/sourcegraph-cody
 - Source URLs: https://sourcegraph.com/docs/cody, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/sourcegraph-cody.mdx, https://sourcegraph.com/cody
-- Brand: Sourcegraph Cody
+- Brand: Sourcegraph
 - Brand domain: sourcegraph.com
 - Brand asset source: brandfetch
 - Author: Sourcegraph

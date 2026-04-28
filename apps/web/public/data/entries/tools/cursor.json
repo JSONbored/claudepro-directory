@@ -29,6 +29,7 @@
     "websiteUrl": "https://cursor.com",
     "brandName": "Cursor",
     "brandDomain": "cursor.com",
+    "brandIconUrl": "/api/brand-assets/icon/cursor.com",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "heyclaude_pick",

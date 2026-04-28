@@ -29,6 +29,7 @@
     "websiteUrl": "https://www.giskard.ai",
     "brandName": "Giskard",
     "brandDomain": "giskard.ai",
+    "brandIconUrl": "/api/brand-assets/icon/giskard.ai",
     "brandAssetSource": "brandfetch",
     "pricingModel": "freemium",
     "disclosure": "editorial",
