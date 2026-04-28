@@ -31,6 +31,8 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - `/api/submissions`
 - `/api/listing-leads`
 - `/api/admin/listing-leads`
+- `/api/admin/jobs`
+- `/api/admin/jobs/health`
 
 ## Controls
 
@@ -64,6 +66,9 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
   `Referrer-Policy`, `Permissions-Policy`, and `Cross-Origin-Opener-Policy`.
 - No endpoint may import content into the registry, create pull requests, or
   publish submissions without maintainer review.
+- Job lead intake is intentionally shallow. Paid job publication remains gated
+  by the token-protected D1 admin flow, which requires enriched reviewed listing
+  content before active paid rows can publish.
 
 ## Registry Trust Fields
 

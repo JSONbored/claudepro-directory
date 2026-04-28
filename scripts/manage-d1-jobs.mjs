@@ -37,6 +37,8 @@ function getToken() {
 function getBaseUrl(args) {
   const baseUrl = String(
     args["base-url"] ||
+      process.env.HEYCLAUDE_ADMIN_BASE_URL ||
+      process.env.HEYCLAUDE_BASE_URL ||
       process.env.HEYCLOUD_ADMIN_BASE_URL ||
       process.env.HEYCLOUD_BASE_URL ||
       "",

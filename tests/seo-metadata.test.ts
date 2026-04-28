@@ -30,6 +30,7 @@ const staticMetadataPages = [
   "ecosystem",
   "quality",
   "trending",
+  "jobs/post",
   "about",
 ];
 
@@ -38,8 +39,18 @@ function pageMetadataDescription(pagePath: string) {
     path.join(repoRoot, `apps/web/src/app/${pagePath}/page.tsx`),
     "utf8",
   );
-  return source.match(
+  const inlineDescription = source.match(
     /export const metadata[\s\S]*?description:\s*(?:\n\s*)?["`]([^"`]+)["`]/,
+  )?.[1];
+  if (inlineDescription) return inlineDescription;
+
+  const descriptionIdentifier = source.match(
+    /export const metadata[\s\S]*?description:\s*(?:\n\s*)?([a-zA-Z_$][\w$]*)\s*[,}]/,
+  )?.[1];
+  if (!descriptionIdentifier) return undefined;
+
+  return source.match(
+    new RegExp(`const\\s+${descriptionIdentifier}\\s*=\\s*["\`]([^"\`]+)["\`]`),
   )?.[1];
 }
 

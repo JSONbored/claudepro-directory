@@ -32,11 +32,13 @@ const labels = {
     websitePlaceholder: "https://company.com",
     applyLabel: "Apply URL",
     applyPlaceholder: "https://company.com/careers/role",
-    messageLabel: "Role details",
+    messageLabel: "Anything else we should know? (optional)",
     messagePlaceholder:
-      "Location, employment type, compensation, responsibilities, requirements, preferred launch date.",
+      "Launch timing, preferred tier, compensation notes, or anything that is not obvious from the apply link.",
     submit: "Send job lead",
     subject: "HeyClaude job listing lead",
+    intro:
+      "Paste the canonical employer or ATS apply link. We verify, enrich, and prepare the listing before payment or publication.",
   },
   tool: {
     eyebrow: "Tool listing lead",
@@ -51,6 +53,8 @@ const labels = {
       "What it does, who it is for, pricing model, affiliate/referral details, and preferred placement.",
     submit: "Send listing lead",
     subject: "HeyClaude tool/app listing lead",
+    intro:
+      "Send the canonical product link and any placement context. We review fit before publishing or payment.",
   },
   claim: {
     eyebrow: "Claim/update lead",
@@ -65,6 +69,8 @@ const labels = {
       "Which listing you own, what should change, and what source proves the change.",
     submit: "Send claim/update lead",
     subject: "HeyClaude claim/update listing lead",
+    intro:
+      "Send the listing URL and source proof. We review claims before changing public content.",
   },
 } as const;
 
@@ -144,9 +150,11 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
         <p className="text-xs uppercase tracking-[0.18em] text-primary">
           {copy.eyebrow}
         </p>
+        <p className="text-sm leading-7 text-muted-foreground">{copy.intro}</p>
         <p className="text-sm leading-7 text-muted-foreground">
-          This creates a maintainer-review lead. Payment, sponsorship, and
-          launch timing are handled after review.
+          This creates a maintainer-review lead. Tier selection is interest, not
+          checkout. Payment, sponsorship, and launch timing are handled after
+          review.
         </p>
       </div>
 

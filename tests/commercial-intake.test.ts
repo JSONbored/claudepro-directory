@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
 
 import {
   buildPlacementRenewalReminder,
@@ -14,7 +16,7 @@ import {
   validateJobPublicationQuality,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
-import { loadContentEntries } from "./helpers/registry-fixtures";
+import { loadContentEntries, repoRoot } from "./helpers/registry-fixtures";
 
 describe("commercial intake contracts", () => {
   it("normalizes commercial listing fields", () => {
@@ -181,6 +183,20 @@ describe("commercial intake contracts", () => {
         sourceCheckedAt: "2026-04-28",
       }),
     ).toMatchObject({ ok: true, required: true, errors: [] });
+  });
+
+  it("documents the lead-first jobs workflow and maintainer follow-ups", () => {
+    const runbook = fs.readFileSync(
+      path.join(repoRoot, "docs/jobs-revenue-ops.md"),
+      "utf8",
+    );
+    expect(runbook).toContain("Public required fields");
+    expect(runbook).toContain("Request Missing Role Details");
+    expect(runbook).toContain("Approved And Checkout Ready");
+    expect(runbook).toContain("Listing Published");
+    expect(runbook).toContain("Renewal Reminder");
+    expect(runbook).toContain("Stale Or Closed Source");
+    expect(runbook).toContain("Payment does not auto-publish");
   });
 
   it("transitions curated job sources through verified, stale, and closed states", () => {

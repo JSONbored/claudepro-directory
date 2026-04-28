@@ -62,6 +62,9 @@ review path. Closed, stale-review, archived, or expired roles are excluded from
 the public jobs index, sitemap, and JobPosting data. Compensation metadata is
 split into salary, equity, bonus, and benefits/perks fields so salary ranges can
 feed `JobPosting.baseSalary` truthfully without mixing in equity or bonus copy.
+Public job intake stays shallow and lead-first. The strict content-quality gate
+only applies when private reviewed rows are activated as paid `standard`,
+`featured`, or `sponsored` listings.
 
 Before a release, validate the jobs schema against local, dev, and production
 D1. Remote checks require a Cloudflare API token with D1 read access:
@@ -81,7 +84,13 @@ ADMIN_API_TOKEN=... pnpm jobs:admin -- health --base-url https://dev.heyclau.de
 ADMIN_API_TOKEN=... pnpm jobs:admin -- upsert --base-url https://dev.heyclau.de --file job.json
 ADMIN_API_TOKEN=... pnpm jobs:admin -- transition --base-url https://dev.heyclau.de --slug example-role --action activate
 ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de
+ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de --apply
 ```
+
+The source checker reads active and stale-review jobs. Healthy source pages are
+revalidated, first failed checks move to `stale_pending_review`, and repeated
+failures are closed. See `docs/jobs-revenue-ops.md` for the lead review,
+enrichment, Polar handoff, and follow-up templates.
 
 ## OpenNext build/deploy commands
 

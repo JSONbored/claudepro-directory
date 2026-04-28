@@ -279,7 +279,50 @@ test.describe("site regression", () => {
     await page.goto("/jobs/post?tier=free");
     await expect(page.getByText("Founding standard").first()).toBeVisible();
     await expect(page.getByText(/Free while we seed/i)).toBeVisible();
+    await expect(
+      page.getByText(/Tier selection only records intent/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Paste the canonical employer or ATS apply link/i),
+    ).toBeVisible();
     await expect(page.getByLabel("Apply URL")).toHaveAttribute("required", "");
+    await expect(
+      page.getByLabel(/Anything else we should know/i),
+    ).not.toHaveAttribute("required", "");
+  });
+
+  test("keeps job lead intake shallow and conversion oriented", async ({
+    page,
+  }) => {
+    await page.route("**/api/listing-leads", async (route) => {
+      const payload = route.request().postDataJSON();
+      expect(payload).toMatchObject({
+        kind: "job",
+        tierInterest: "sponsored",
+        contactName: "Jane Hiring",
+        contactEmail: "jane@example.com",
+        companyName: "Example AI",
+        listingTitle: "Claude Infrastructure Engineer",
+        applyUrl: "https://example.com/careers/claude-infra",
+        message: "",
+      });
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+
+    await page.goto("/jobs/post?tier=sponsored");
+    await page.getByLabel("Contact name").fill("Jane Hiring");
+    await page.getByLabel("Contact email").fill("jane@example.com");
+    await page.getByLabel("Company or maker").fill("Example AI");
+    await page.getByLabel("Role title").fill("Claude Infrastructure Engineer");
+    await page
+      .getByLabel("Apply URL")
+      .fill("https://example.com/careers/claude-infra");
+    await page.getByRole("button", { name: /Send job lead/i }).click();
+    await expect(page.getByText(/Lead received/i)).toBeVisible();
   });
 
   test("keeps browse HTML payload below the full-directory serialization budget", async ({

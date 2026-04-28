@@ -191,6 +191,24 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   const sourceHost = formatUrlHost(job.sourceUrl);
   const detailBlocks = parseJobDetails(job.descriptionMd);
   const salaryLabel = job.compensation || "Not published by employer";
+  const trustItems = [
+    {
+      label: "Source",
+      value: sourceHost || getSourceKindLabel(job),
+    },
+    {
+      label: "Verified",
+      value: verifiedAt ? formatDate(verifiedAt) : "Pending recheck",
+    },
+    {
+      label: "Compensation",
+      value: job.compensation ? "Published" : "Not published",
+    },
+    {
+      label: "Apply path",
+      value: "External employer site",
+    },
+  ];
   const jsonLd = [
     buildBreadcrumbJsonLd([
       { name: "Home", url: siteConfig.url },
@@ -351,6 +369,25 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             ) : null}
           </div>
         </aside>
+      </section>
+
+      <section
+        aria-label="Listing trust summary"
+        className="grid gap-3 rounded-2xl border border-border bg-card/70 p-3 md:grid-cols-4"
+      >
+        {trustItems.map((item) => (
+          <div
+            key={item.label}
+            className="rounded-xl border border-border/80 bg-background/70 px-4 py-3"
+          >
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+              {item.label}
+            </p>
+            <p className="mt-1 text-sm font-medium text-foreground">
+              {item.value}
+            </p>
+          </div>
+        ))}
       </section>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_21rem] lg:items-start">

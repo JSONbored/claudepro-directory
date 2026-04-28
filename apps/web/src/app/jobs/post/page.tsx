@@ -40,10 +40,12 @@ const tierMap = {
 
 type TierKey = keyof typeof tierMap;
 
+const pageDescription =
+  "Submit a real Claude, MCP, or AI workflow hiring role for review. HeyClaude verifies the source, enriches the listing, and keeps applications external.";
+
 export const metadata: Metadata = buildPageMetadata({
   title: "Post a job on HeyClaude",
-  description:
-    "Submit a real Claude or AI workflow hiring role for maintainer review before publication.",
+  description: pageDescription,
   path: "/jobs/post",
   keywords: ["post ai job", "post claude job", "heyclaude jobs listing"],
 });
@@ -78,7 +80,7 @@ export default async function JobPostPage({
       siteUrl: siteConfig.url,
       path: "/jobs/post",
       name: "Post a job on HeyClaude",
-      description: "Lead intake for real Claude and AI workflow hiring roles.",
+      description: pageDescription,
       breadcrumbId: `${siteConfig.url}/jobs/post#breadcrumb`,
     }),
   ];
@@ -129,9 +131,9 @@ export default async function JobPostPage({
           </div>
           <p className="text-sm text-muted-foreground">{selected.priceHint}</p>
           <p className="text-sm text-muted-foreground">
-            90-day Featured and Sponsored placements are available after review
-            with discounted renewal windows. Checkout links are sent only after
-            role fit is approved.
+            Tier selection only records intent. 90-day Featured and Sponsored
+            placements are available after review with discounted renewal
+            windows. Checkout links are sent only after role fit is approved.
           </p>
         </section>
 
@@ -139,9 +141,13 @@ export default async function JobPostPage({
           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
             How it works
           </p>
-          <p>1. Send the role details for maintainer review.</p>
           <p>
-            2. We confirm fit, timing, and any placement tier before payment.
+            1. Send the canonical employer or ATS apply link for maintainer
+            review.
+          </p>
+          <p>
+            2. We verify the source, enrich the listing, and confirm fit,
+            timing, and any placement tier before payment.
           </p>
           <p>
             3. Approved roles are published as external-apply jobs with a detail
