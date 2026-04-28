@@ -2,7 +2,8 @@ openapi: 3.1.0
 info:
   title: HeyClaude API
   version: 1.0.0
-  description: Read-only registry, distribution feeds, and tightly scoped dynamic endpoints. Public
+  description:
+    Read-only registry, distribution feeds, and tightly scoped dynamic endpoints. Public
     registry publishing is not exposed through the API.
 servers:
   - url: https://heyclau.de
@@ -885,7 +886,8 @@ paths:
       tags:
         - Registry
       summary: Registry feed discovery
-      description: Discovers API, RSS, changelog, category feeds, platform feeds, category and platform
+      description:
+        Discovers API, RSS, changelog, category feeds, platform feeds, category and platform
         shards, and artifact URLs.
       responses:
         "200":
@@ -1415,7 +1417,8 @@ paths:
       tags:
         - Registry
       summary: Registry entry detail
-      description: Returns entry metadata, body content, package facts, platform compatibility, and
+      description:
+        Returns entry metadata, body content, package facts, platform compatibility, and
         factual trustSignals when available.
       parameters:
         - schema:
@@ -3030,7 +3033,8 @@ paths:
       tags:
         - Submissions
       summary: Create a reviewable content submission issue
-      description: Validates schema-aligned UGC fields, applies anti-abuse controls, and creates a GitHub
+      description:
+        Validates schema-aligned UGC fields, applies anti-abuse controls, and creates a GitHub
         issue for maintainer review. This endpoint never writes content files or publishes registry
         entries directly.
       requestBody:
@@ -4416,7 +4420,8 @@ paths:
                 - type
       responses:
         "200":
-          description: Request accepted. D1 insert failed or unavailable states return a documented fail-open
+          description:
+            Request accepted. D1 insert failed or unavailable states return a documented fail-open
             response.
           content:
             application/json:
@@ -5517,7 +5522,8 @@ paths:
         - schema:
             type: string
             maxLength: 220
-            default: A Claude-native registry for agents, MCP servers, skills, commands, hooks, rules, guides,
+            default:
+              A Claude-native registry for agents, MCP servers, skills, commands, hooks, rules, guides,
               and tools.
           required: false
           name: description
@@ -5858,4 +5864,3 @@ paths:
                 type: object
                 additionalProperties: {}
 webhooks: {}
-

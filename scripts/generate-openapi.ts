@@ -7,6 +7,7 @@ import {
   OpenApiGeneratorV31,
   extendZodWithOpenApi,
 } from "@asteasolutions/zod-to-openapi";
+import { format as formatWithPrettier } from "prettier";
 import { stringify } from "yaml";
 import { z } from "zod";
 
@@ -217,23 +218,31 @@ function buildOpenApiDocument() {
   });
 }
 
-const generated = `${stringify(buildOpenApiDocument(), {
-  lineWidth: 100,
-  singleQuote: false,
-})}\n`;
+async function main() {
+  const rawGenerated = `${stringify(buildOpenApiDocument(), {
+    lineWidth: 100,
+    singleQuote: false,
+  })}\n`;
+  const generated = await formatWithPrettier(rawGenerated, { parser: "yaml" });
 
-if (process.argv.includes("--check")) {
-  const current = fs.existsSync(outputPath)
-    ? fs.readFileSync(outputPath, "utf8")
-    : "";
-  if (current !== generated) {
-    console.error(
-      "OpenAPI schema is stale. Run `pnpm generate:openapi` and commit the result.",
-    );
-    process.exit(1);
+  if (process.argv.includes("--check")) {
+    const current = fs.existsSync(outputPath)
+      ? fs.readFileSync(outputPath, "utf8")
+      : "";
+    if (current !== generated) {
+      console.error(
+        "OpenAPI schema is stale. Run `pnpm generate:openapi` and commit the result.",
+      );
+      process.exit(1);
+    }
+    process.exit(0);
   }
-  process.exit(0);
+
+  fs.writeFileSync(outputPath, generated);
+  console.log(`Wrote ${path.relative(repoRoot, outputPath)}`);
 }
 
-fs.writeFileSync(outputPath, generated);
-console.log(`Wrote ${path.relative(repoRoot, outputPath)}`);
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
