@@ -14,6 +14,7 @@
     "dev": "next dev",
     "build": "next build",
     "type-check": "tsc --noEmit",
+    "posttype-check": "node ../../scripts/normalize-next-env.mjs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv worker-configuration.d.ts",
     "db:migrate:local": "wrangler d1 migrations apply SITE_DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply SITE_DB --remote",

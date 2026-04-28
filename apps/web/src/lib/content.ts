@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { setTimeout as sleep } from "node:timers/promises";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type {
   ArtifactManifestV2,
@@ -21,11 +22,42 @@ const DATA_ORIGIN = "https://heyclau.de";
 let directoryIndexPromise: Promise<DirectoryEntry[]> | null = null;
 const entryDetailPromises = new Map<string, Promise<ContentEntry | null>>();
 
+function localDataFilePaths(fileName: string) {
+  return [
+    path.join(process.cwd(), "public", "data", fileName),
+    path.join(process.cwd(), "apps", "web", "public", "data", fileName),
+  ].filter((filePath, index, paths) => paths.indexOf(filePath) === index);
+}
+
+async function readLocalDataFile(fileName: string) {
+  let lastError: unknown = null;
+  for (const filePath of localDataFilePaths(fileName)) {
+    try {
+      return await readFile(filePath, "utf8");
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`Local data artifact not found: ${fileName}`);
+}
+
+async function readLocalJsonDataFile<T>(fileName: string): Promise<T> {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const raw = await readLocalDataFile(fileName);
+      return JSON.parse(raw) as T;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) await sleep(25);
+    }
+  }
+  throw lastError || new Error(`Invalid local data artifact: ${fileName}`);
+}
+
 export async function loadJsonDataFile<T>(fileName: string): Promise<T> {
   try {
-    const filePath = path.join(process.cwd(), "public", "data", fileName);
-    const raw = await readFile(filePath, "utf8");
-    return JSON.parse(raw) as T;
+    return await readLocalJsonDataFile<T>(fileName);
   } catch {
     // In the Cloudflare Worker runtime, read from the static ASSETS binding.
     const { env } = getCloudflareContext();
@@ -49,8 +81,7 @@ export async function loadJsonDataFile<T>(fileName: string): Promise<T> {
 
 export async function loadTextDataFile(fileName: string): Promise<string> {
   try {
-    const filePath = path.join(process.cwd(), "public", "data", fileName);
-    return await readFile(filePath, "utf8");
+    return await readLocalDataFile(fileName);
   } catch {
     const { env } = getCloudflareContext();
     const envRecord = env as unknown as {

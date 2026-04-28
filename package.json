@@ -34,7 +34,7 @@
     "test:mcp": "vitest run tests/mcp-server.test.ts",
     "submission:queue": "node scripts/build-submission-queue.mjs",
     "test": "vitest run",
-    "test:e2e": "env -u NO_COLOR playwright test",
+    "test:e2e": "node scripts/run-playwright.mjs",
     "test:seo-jsonld": "vitest run tests/seo-jsonld.test.ts",
     "test:commercial-intake": "vitest run tests/commercial-intake.test.ts",
     "test:registry-artifacts": "vitest run tests/registry-artifacts.test.ts",
