@@ -80,9 +80,9 @@ Reviewed jobs are managed through the token-protected admin API and CLI, never
 through public repository seed files:
 
 ```bash
-ADMIN_API_TOKEN=... pnpm jobs:admin -- health --base-url https://dev.heyclau.de
-ADMIN_API_TOKEN=... pnpm jobs:admin -- upsert --base-url https://dev.heyclau.de --file job.json
-ADMIN_API_TOKEN=... pnpm jobs:admin -- transition --base-url https://dev.heyclau.de --slug example-role --action activate
+ADMIN_API_TOKEN=... pnpm jobs:admin health --base-url https://dev.heyclau.de
+ADMIN_API_TOKEN=... pnpm jobs:admin upsert --base-url https://dev.heyclau.de --file job.json
+ADMIN_API_TOKEN=... pnpm jobs:admin transition --base-url https://dev.heyclau.de --slug example-role --action activate
 ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de
 ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de --apply
 ```

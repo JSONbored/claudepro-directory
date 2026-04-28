@@ -3,10 +3,10 @@ import fs from "node:fs";
 
 function usage() {
   console.log(`Usage:
-  pnpm jobs:admin -- health --base-url https://dev.example.com
-  pnpm jobs:admin -- list --base-url https://dev.example.com [--status active]
-  pnpm jobs:admin -- upsert --base-url https://dev.example.com --file job.json
-  pnpm jobs:admin -- transition --base-url https://dev.example.com --slug job-slug --action activate
+  pnpm jobs:admin health --base-url https://dev.example.com
+  pnpm jobs:admin list --base-url https://dev.example.com [--status active]
+  pnpm jobs:admin upsert --base-url https://dev.example.com --file job.json
+  pnpm jobs:admin transition --base-url https://dev.example.com --slug job-slug --action activate
 
 Requires ADMIN_API_TOKEN, LEADS_ADMIN_TOKEN, or ADMIN_LEADS_TOKEN.`);
 }

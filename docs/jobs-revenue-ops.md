@@ -36,10 +36,10 @@ passes the paid job content-quality gate.
 ## Operator Commands
 
 ```bash
-ADMIN_API_TOKEN=... pnpm jobs:admin -- health --base-url https://heyclaude-dev.zeronode.workers.dev
-ADMIN_API_TOKEN=... pnpm jobs:admin -- list --base-url https://heyclaude-dev.zeronode.workers.dev --status pending_review
-ADMIN_API_TOKEN=... pnpm jobs:admin -- upsert --base-url https://heyclaude-dev.zeronode.workers.dev --file job.json
-ADMIN_API_TOKEN=... pnpm jobs:admin -- transition --base-url https://heyclaude-dev.zeronode.workers.dev --slug role-slug --action activate
+ADMIN_API_TOKEN=... pnpm jobs:admin health --base-url https://heyclaude-dev.zeronode.workers.dev
+ADMIN_API_TOKEN=... pnpm jobs:admin list --base-url https://heyclaude-dev.zeronode.workers.dev --status pending_review
+ADMIN_API_TOKEN=... pnpm jobs:admin upsert --base-url https://heyclaude-dev.zeronode.workers.dev --file job.json
+ADMIN_API_TOKEN=... pnpm jobs:admin transition --base-url https://heyclaude-dev.zeronode.workers.dev --slug role-slug --action activate
 ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://heyclaude-dev.zeronode.workers.dev --apply
 ```
 
