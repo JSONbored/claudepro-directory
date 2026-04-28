@@ -12,17 +12,29 @@ import {
 } from "@heyclaude/registry/seo";
 
 const tierMap = {
-  sponsored: {
-    label: "Sponsored",
-    priceHint: "Top placement + premium styling",
-  },
-  featured: {
-    label: "Featured",
-    priceHint: "Priority placement + highlighted card",
+  free: {
+    label: "Founding standard",
+    priceHint:
+      "Free while we seed the first 25 approved employer-submitted roles or for the first 60 launch days.",
+    shortPrice: "Launch free",
   },
   standard: {
     label: "Standard",
-    priceHint: "Main feed listing with full detail page",
+    priceHint:
+      "Main feed listing with full detail page. Regular price: $49 / 30 days after launch.",
+    shortPrice: "$49 / 30 days",
+  },
+  sponsored: {
+    label: "Sponsored",
+    priceHint:
+      "Top placement and premium styling. Launch price: $149 / 30 days. Regular price: $249 / 30 days.",
+    shortPrice: "$149 launch",
+  },
+  featured: {
+    label: "Featured",
+    priceHint:
+      "Priority placement and highlighted card. Launch price: $49 / 30 days. Regular price: $99 / 30 days.",
+    shortPrice: "$49 launch",
   },
 } as const;
 
@@ -37,7 +49,14 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 function getTier(value?: string): TierKey {
-  if (value === "sponsored" || value === "featured") return value;
+  if (
+    value === "free" ||
+    value === "standard" ||
+    value === "sponsored" ||
+    value === "featured"
+  ) {
+    return value;
+  }
   return "standard";
 }
 
@@ -89,21 +108,31 @@ export default async function JobPostPage({
             Selected hiring tier
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            {(["sponsored", "featured", "standard"] as const).map((key) => (
-              <Link
-                key={key}
-                href={`/jobs/post?tier=${key}`}
-                className={
-                  key === tier
-                    ? "inline-flex rounded-full border border-primary/45 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                    : "inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
-                }
-              >
-                {tierMap[key].label}
-              </Link>
-            ))}
+            {(["free", "standard", "featured", "sponsored"] as const).map(
+              (key) => (
+                <Link
+                  key={key}
+                  href={`/jobs/post?tier=${key}`}
+                  className={
+                    key === tier
+                      ? "inline-flex rounded-full border border-primary/45 bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                      : "inline-flex rounded-full border border-border bg-background px-4 py-2 text-sm text-muted-foreground transition hover:border-primary/35 hover:text-foreground"
+                  }
+                >
+                  {tierMap[key].label}
+                  <span className="ml-2 text-xs opacity-80">
+                    {tierMap[key].shortPrice}
+                  </span>
+                </Link>
+              ),
+            )}
           </div>
           <p className="text-sm text-muted-foreground">{selected.priceHint}</p>
+          <p className="text-sm text-muted-foreground">
+            90-day Featured and Sponsored placements are available after review
+            with discounted renewal windows. Checkout links are sent only after
+            role fit is approved.
+          </p>
         </section>
 
         <section className="surface-panel space-y-3 p-6 text-sm leading-7 text-muted-foreground">
@@ -115,7 +144,9 @@ export default async function JobPostPage({
             2. We confirm fit, timing, and any placement tier before payment.
           </p>
           <p>
-            3. Approved roles are published as real jobs with a detail page.
+            3. Approved roles are published as external-apply jobs with a detail
+            page. Candidates always apply on the employer's canonical
+            application page.
           </p>
           <p>
             Promoting a product instead? Use{" "}

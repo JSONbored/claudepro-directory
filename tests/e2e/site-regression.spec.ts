@@ -38,6 +38,7 @@ const htmlRoutes = [
   { path: "/advertise", heading: /Promote|Advertise/i },
   { path: "/jobs", heading: /Hiring roles/i },
   { path: "/jobs/post", heading: /Post/i },
+  { path: "/jobs/post?tier=free", heading: /Post/i },
   { path: "/tools", heading: /Tools/i },
   { path: "/tools/skill-validator", heading: /Agent Skill package validator/i },
   { path: "/tools/submit", heading: /Submit|Promote/i },
@@ -222,6 +223,29 @@ test.describe("site regression", () => {
     );
     expect(response.ok()).toBe(true);
     expect(response.headers()["content-type"]).toContain("image/png");
+  });
+
+  test("keeps jobs D1-backed and exposes founding tier pricing", async ({
+    page,
+  }) => {
+    await page.goto("/jobs");
+    await expect(page.getByText("No active jobs yet.")).toBeVisible();
+    await expect(
+      page.getByText(/only shows reviewed D1 rows with active status/i),
+    ).toBeVisible();
+    await expect(page.getByText("Editorially curated")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /Apply/i })).toHaveCount(0);
+
+    const sitemapResponse = await page.request.get("/sitemap.xml");
+    expect(sitemapResponse.ok()).toBe(true);
+    expect(await sitemapResponse.text()).not.toMatch(
+      /<loc>https:\/\/heyclau\.de\/jobs\/(?!post<)[^<]+<\/loc>/,
+    );
+
+    await page.goto("/jobs/post?tier=free");
+    await expect(page.getByText("Founding standard").first()).toBeVisible();
+    await expect(page.getByText(/Free while we seed/i)).toBeVisible();
+    await expect(page.getByLabel("Apply URL")).toHaveAttribute("required", "");
   });
 
   test("keeps browse HTML payload below the full-directory serialization budget", async ({

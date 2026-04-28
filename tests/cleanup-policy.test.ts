@@ -6,6 +6,7 @@ import { repoRoot } from "./helpers/registry-fixtures";
 
 const forbiddenPaths = [
   "apps/web/public/data/content-index.json",
+  "apps/web/src/data/curated-jobs.json",
   "apps/web/src/generated/content-category-spec.json",
   "apps/web/src/lib/entry-presentation.ts",
   "apps/web/src/lib/llms-export.ts",

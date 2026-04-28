@@ -93,7 +93,22 @@ export const githubStatsResponseSchema = z.object({
   updatedAt: z.string().nullable(),
 });
 
-export const listingLeadBodySchema = z.record(z.string(), z.unknown());
+export const listingLeadBodySchema = z
+  .object({
+    kind: z.enum(["job", "tool", "claim"]),
+    tierInterest: z
+      .enum(["free", "standard", "featured", "sponsored"])
+      .optional()
+      .default("free"),
+    contactName: z.string().trim().min(1).max(120),
+    contactEmail: z.string().trim().toLowerCase().email().max(320),
+    companyName: z.string().trim().min(1).max(160),
+    listingTitle: z.string().trim().min(1).max(180),
+    websiteUrl: z.string().trim().max(2048).optional().default(""),
+    applyUrl: z.string().trim().max(2048).optional().default(""),
+    message: z.string().trim().max(4000).optional().default(""),
+  })
+  .strict();
 
 export const adminListingLeadsQuerySchema = z.object({
   kind: z.string().trim().toLowerCase().optional().default(""),

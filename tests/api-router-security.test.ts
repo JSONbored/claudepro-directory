@@ -125,6 +125,90 @@ describe("central API router security", () => {
     });
   });
 
+  it("rejects unknown listing lead fields before route code runs", async () => {
+    const { createApiHandler, apiJson } = await import("@/lib/api/router");
+    const POST = createApiHandler("listingLeads.create", async () =>
+      apiJson({ ok: true }),
+    );
+
+    const response = await POST(
+      new Request("https://heyclau.de/api/listing-leads", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "https://heyclau.de",
+          "cf-connecting-ip": "198.51.100.101",
+        },
+        body: JSON.stringify({
+          kind: "claim",
+          tierInterest: "free",
+          contactName: "Jane",
+          contactEmail: "jane@example.com",
+          companyName: "Example Co",
+          listingTitle: "Example Listing",
+          websiteUrl: "https://example.com/proof",
+          message: "Claiming a listing.",
+          unexpectedWriteFlag: true,
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      ok: false,
+      error: { code: "invalid_payload" },
+    });
+  });
+
+  it("accepts claim listing leads in the central contract", async () => {
+    const parsed = apiRouteDefinitions["listingLeads.create"].bodySchema?.parse(
+      {
+        kind: "claim",
+        tierInterest: "free",
+        contactName: "Jane",
+        contactEmail: "jane@example.com",
+        companyName: "Example Co",
+        listingTitle: "Example Listing",
+        websiteUrl: "https://example.com/proof",
+        message: "Claiming a listing.",
+      },
+    );
+
+    expect(parsed).toMatchObject({
+      kind: "claim",
+      tierInterest: "free",
+      websiteUrl: "https://example.com/proof",
+    });
+  });
+
+  it("requires HTTPS apply URLs for job listing leads", async () => {
+    expect(() =>
+      apiRouteDefinitions["listingLeads.create"].bodySchema?.parse({
+        kind: "job",
+        tierInterest: "free",
+        contactName: "Jane",
+        contactEmail: "jane@example.com",
+        companyName: "Example Co",
+        listingTitle: "AI Engineer",
+        applyUrl: "http://example.com/jobs/ai-engineer",
+      }),
+    ).not.toThrow();
+
+    const { validateListingLeadPayload } =
+      await import("@heyclaude/registry/commercial");
+    const report = validateListingLeadPayload({
+      kind: "job",
+      tierInterest: "free",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "AI Engineer",
+      applyUrl: "http://example.com/jobs/ai-engineer",
+    });
+    expect(report.ok).toBe(false);
+    expect(report.errors).toContain("job leads require an https applyUrl");
+  });
+
   it("configures Cloudflare-native rate-limit bindings for protected routes", () => {
     const wranglerConfig = fs.readFileSync(
       path.join(repoRoot, "apps/web/wrangler.jsonc"),

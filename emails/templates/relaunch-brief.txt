@@ -1,0 +1,14 @@
+HeyClaude relaunch brief
+
+{{INTRO}}
+
+{{RELAUNCH_POINTS}}
+
+Jobs board:
+{{JOBS_NOTE}}
+{{JOBS_URL}}
+
+{{COMMUNITY_CTA}}
+
+You are receiving this because you subscribed to HeyClaude.
+{{RESEND_UNSUBSCRIBE}}

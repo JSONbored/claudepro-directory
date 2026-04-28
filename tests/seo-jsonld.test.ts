@@ -203,6 +203,7 @@ describe("SEO JSON-LD policy", () => {
         company: "Example",
         description: "Build Claude workflows.",
         postedAt: "2026-04-26",
+        expiresAt: "2026-05-26",
         applyUrl: "https://example.com/jobs/ai-engineer",
         isRemote: true,
       },
@@ -210,5 +211,18 @@ describe("SEO JSON-LD policy", () => {
     );
     expect(realJobJsonLd?.["@type"]).toBe("JobPosting");
     expect(realJobJsonLd?.url).toBe("https://heyclau.de/jobs/real-job");
+    expect(realJobJsonLd?.directApply).toBe(false);
+    expect(
+      buildJobPostingJsonLd(
+        {
+          slug: "missing-date",
+          title: "AI Engineer",
+          company: "Example",
+          description: "Build Claude workflows.",
+          applyUrl: "https://example.com/jobs/ai-engineer",
+        },
+        { siteUrl: "https://heyclau.de" },
+      ),
+    ).toBeNull();
   });
 });

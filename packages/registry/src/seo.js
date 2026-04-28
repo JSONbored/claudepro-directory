@@ -248,9 +248,20 @@ export function buildToolSoftwareApplicationJsonLd(tool, params = {}) {
 }
 
 export function buildJobPostingJsonLd(job, params = {}) {
+  if (
+    !job?.slug ||
+    !job?.title ||
+    !job?.company ||
+    !job?.description ||
+    !job?.postedAt ||
+    !job?.expiresAt ||
+    !job?.applyUrl
+  ) {
+    return null;
+  }
+
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const url = absoluteSiteUrl(siteUrl, `/jobs/${job.slug}`);
-  const datePosted = job.postedAt || new Date().toISOString();
 
   return {
     "@context": "https://schema.org",
@@ -258,7 +269,7 @@ export function buildJobPostingJsonLd(job, params = {}) {
     "@id": `${url}#job`,
     title: job.title,
     description: job.description,
-    datePosted,
+    datePosted: job.postedAt,
     validThrough: job.expiresAt,
     employmentType: job.type,
     hiringOrganization: {
@@ -283,7 +294,7 @@ export function buildJobPostingJsonLd(job, params = {}) {
           },
         },
     url,
-    directApply: Boolean(job.applyUrl),
+    directApply: false,
   };
 }
 

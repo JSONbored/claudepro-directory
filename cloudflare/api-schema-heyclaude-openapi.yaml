@@ -3579,7 +3579,56 @@ paths:
           application/json:
             schema:
               type: object
-              additionalProperties: {}
+              properties:
+                kind:
+                  type: string
+                  enum:
+                    - job
+                    - tool
+                    - claim
+                tierInterest:
+                  type: string
+                  enum:
+                    - free
+                    - standard
+                    - featured
+                    - sponsored
+                  default: free
+                contactName:
+                  type: string
+                  minLength: 1
+                  maxLength: 120
+                contactEmail:
+                  type: string
+                  maxLength: 320
+                  format: email
+                companyName:
+                  type: string
+                  minLength: 1
+                  maxLength: 160
+                listingTitle:
+                  type: string
+                  minLength: 1
+                  maxLength: 180
+                websiteUrl:
+                  type: string
+                  maxLength: 2048
+                  default: ""
+                applyUrl:
+                  type: string
+                  maxLength: 2048
+                  default: ""
+                message:
+                  type: string
+                  maxLength: 4000
+                  default: ""
+              required:
+                - kind
+                - contactName
+                - contactEmail
+                - companyName
+                - listingTitle
+              additionalProperties: false
       responses:
         "200":
           description: Request accepted.

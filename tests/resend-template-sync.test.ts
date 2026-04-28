@@ -22,6 +22,12 @@ const renderedTemplates: RenderedEmailTemplate[] = [
     text: "{{SUMMARY}}\n{{CHANGELOG_URL}}\n",
   },
   {
+    name: "relaunch-brief",
+    subject: "{{HEADLINE}}",
+    html: "<p>{{INTRO}}</p>{{JOBS_URL}}{{RESEND_UNSUBSCRIBE}}",
+    text: "{{INTRO}}\n{{JOBS_URL}}\n{{RESEND_UNSUBSCRIBE}}\n",
+  },
+  {
     name: "maintainer-call",
     subject: "Help review new HeyClaude submissions",
     html: "<p>{{QUEUE_THEME}}</p>{{QUEUE_URL}}",
@@ -49,6 +55,12 @@ describe("Resend template sync", () => {
       }),
       expect.objectContaining({
         templateName: "release-notes",
+        action: "create",
+        endpoint: "/templates",
+        status: "dry-run",
+      }),
+      expect.objectContaining({
+        templateName: "relaunch-brief",
         action: "create",
         endpoint: "/templates",
         status: "dry-run",
@@ -131,8 +143,8 @@ describe("Resend template sync", () => {
     });
 
     expect(summary.dryRun).toBe(false);
-    expect(summary.results).toHaveLength(3);
-    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(summary.results).toHaveLength(4);
+    expect(fetchImpl).toHaveBeenCalledTimes(4);
     for (const [url, init] of fetchImpl.mock.calls) {
       expect(String(url)).toMatch(/^https:\/\/api\.resend\.com\/templates/);
       expect(String(url)).not.toContain("/emails");

@@ -51,7 +51,7 @@ export async function generateMetadata({
 
   return buildPageMetadata({
     title: `${job.title} at ${job.company}`,
-    description: job.description,
+    description: buildJobSeoDescription(job),
     path: `/jobs/${job.slug}`,
     keywords,
   });
@@ -66,6 +66,30 @@ function formatDate(value?: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function getJobLabels(job: Awaited<ReturnType<typeof getJobBySlug>>) {
+  if (!job) return [];
+  const labels = [];
+  if (job.sponsored) labels.push("Sponsored");
+  else if (job.featured) labels.push("Featured");
+  if (job.claimedEmployer) labels.push("Claimed employer");
+  labels.push(
+    job.source === "curated" || job.sourceKind === "official_ats"
+      ? "Editorially curated"
+      : "Employer submitted",
+  );
+  return labels;
+}
+
+function buildJobSeoDescription(job: Awaited<ReturnType<typeof getJobBySlug>>) {
+  if (!job) return "The requested job listing could not be found.";
+  const suffix =
+    "HeyClaude lists external-apply AI, Claude, MCP, and agent workflow roles with source verification.";
+  const description = `${job.description} ${suffix}`;
+  return description.length > 165
+    ? `${description.slice(0, 162).trimEnd()}...`
+    : description;
 }
 
 export default async function JobDetailPage({ params }: JobDetailPageProps) {
@@ -85,7 +109,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       siteUrl: siteConfig.url,
       path: `/jobs/${job.slug}`,
       name: `${job.title} at ${job.company}`,
-      description: job.description,
+      description: buildJobSeoDescription(job),
       breadcrumbId: `${siteConfig.url}/jobs/${job.slug}#breadcrumb`,
     }),
     buildJobPostingJsonLd(job, { siteUrl: siteConfig.url }),
@@ -107,6 +131,18 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         </Link>
         <h1 className="section-title text-balance">{job.title}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          {getJobLabels(job).map((label) => (
+            <span
+              key={label}
+              className={
+                label === "Sponsored"
+                  ? "inline-flex items-center gap-1.5 rounded-full border border-primary/45 bg-primary/12 px-3 py-1 text-primary"
+                  : "inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1"
+              }
+            >
+              {label}
+            </span>
+          ))}
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1">
             <Building2 className="size-3.5" />
             {job.company}
@@ -134,6 +170,51 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
         <p className="text-sm leading-7 text-muted-foreground">
           {job.description}
         </p>
+
+        <section className="grid gap-3 text-sm md:grid-cols-3">
+          {job.companyUrl ? (
+            <a
+              href={job.companyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-xl border border-border bg-background/80 px-3 py-2 text-foreground transition hover:border-primary/35"
+            >
+              Company site
+              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                {job.companyUrl}
+              </span>
+            </a>
+          ) : null}
+          {job.sourceUrl ? (
+            <a
+              href={job.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-xl border border-border bg-background/80 px-3 py-2 text-foreground transition hover:border-primary/35"
+            >
+              Source listing
+              <span className="mt-1 block truncate text-xs text-muted-foreground">
+                {job.sourceKind === "official_ats"
+                  ? "Official ATS page"
+                  : "Employer source"}
+              </span>
+            </a>
+          ) : null}
+          {job.sourceCheckedAt || job.lastCheckedAt ? (
+            <div className="rounded-xl border border-border bg-background/80 px-3 py-2 text-foreground">
+              Last verified
+              <span className="mt-1 block text-xs text-muted-foreground">
+                {formatDate(job.sourceCheckedAt || job.lastCheckedAt)}
+              </span>
+            </div>
+          ) : null}
+        </section>
+
+        {job.curationNote ? (
+          <p className="rounded-xl border border-border bg-background/80 px-3 py-2 text-sm leading-7 text-muted-foreground">
+            {job.curationNote}
+          </p>
+        ) : null}
 
         {job.responsibilities?.length ? (
           <section className="space-y-3">
@@ -183,7 +264,7 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           Apply now
         </a>
         <Link
-          href="/jobs/post"
+          href={`/jobs/post?tier=${job.tier || "standard"}`}
           className="inline-flex items-center rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition hover:border-primary/35"
         >
           Post a job

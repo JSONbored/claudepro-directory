@@ -145,8 +145,8 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
           {copy.eyebrow}
         </p>
         <p className="text-sm leading-7 text-muted-foreground">
-          This creates a private maintainer-review lead. Payment or sponsorship
-          details are handled after review.
+          This creates a maintainer-review lead. Payment, sponsorship, and
+          launch timing are handled after review.
         </p>
       </div>
 
@@ -212,6 +212,7 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
             value={form.applyUrl}
             onChange={(event) => updateField("applyUrl", event.target.value)}
             placeholder={copy.applyPlaceholder}
+            required={kind === "job"}
           />
         </label>
       </div>

@@ -229,6 +229,59 @@ function ReleaseNotesEmail() {
   );
 }
 
+function RelaunchBriefEmail() {
+  return (
+    <Shell
+      preview="HeyClaude has new registry categories, feeds, jobs, and submission paths."
+      eyebrowText="HeyClaude relaunch brief"
+    >
+      <Heading as="h1" style={heading}>
+        {"{{HEADLINE}}"}
+      </Heading>
+      <Text style={bodyText}>{"{{INTRO}}"}</Text>
+      <Section style={insetFirst}>
+        <Text style={label}>What changed</Text>
+        <Text
+          style={{
+            margin: "0",
+            fontSize: "14px",
+            lineHeight: "1.8",
+            color: colors.text,
+          }}
+        >
+          {"{{RELAUNCH_POINTS}}"}
+        </Text>
+      </Section>
+      <Section style={inset}>
+        <Text style={label}>Jobs board</Text>
+        <Text
+          style={{
+            margin: "0",
+            fontSize: "14px",
+            lineHeight: "1.7",
+            color: colors.body,
+          }}
+        >
+          {"{{JOBS_NOTE}}"}
+        </Text>
+        <Button href="{{JOBS_URL}}" style={button}>
+          Open jobs board
+        </Button>
+      </Section>
+      <Text
+        style={{
+          margin: "24px 0 0",
+          fontSize: "14px",
+          lineHeight: "1.7",
+          color: colors.body,
+        }}
+      >
+        {"{{COMMUNITY_CTA}}"}
+      </Text>
+    </Shell>
+  );
+}
+
 function MaintainerCallEmail() {
   return (
     <Shell
@@ -309,6 +362,26 @@ You are receiving this because you subscribed to HeyClaude.
 
 {{API_FEED_NOTE}}
 {{CHANGELOG_URL}}
+
+You are receiving this because you subscribed to HeyClaude.
+{{RESEND_UNSUBSCRIBE}}
+`,
+  },
+  {
+    name: "relaunch-brief",
+    subject: "{{HEADLINE}}",
+    component: RelaunchBriefEmail,
+    text: `HeyClaude relaunch brief
+
+{{INTRO}}
+
+{{RELAUNCH_POINTS}}
+
+Jobs board:
+{{JOBS_NOTE}}
+{{JOBS_URL}}
+
+{{COMMUNITY_CTA}}
 
 You are receiving this because you subscribed to HeyClaude.
 {{RESEND_UNSUBSCRIBE}}

@@ -10,6 +10,7 @@ const sourceDir = path.join(repoRoot, "emails/src");
 const templateNames = [
   "curated-drop-digest",
   "release-notes",
+  "relaunch-brief",
   "maintainer-call",
 ];
 

@@ -11,6 +11,21 @@ type JobsDirectoryProps = {
   jobs: JobListing[];
 };
 
+function getJobLabels(job: JobListing) {
+  const labels = [];
+  if (job.sponsored) labels.push("Sponsored");
+  else if (job.featured) labels.push("Featured");
+
+  if (job.claimedEmployer) labels.push("Claimed employer");
+  if (job.source === "curated" || job.sourceKind === "official_ats") {
+    labels.push("Editorially curated");
+  } else {
+    labels.push("Employer submitted");
+  }
+
+  return labels;
+}
+
 export function JobsDirectory({ jobs }: JobsDirectoryProps) {
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query);
@@ -76,24 +91,18 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span
-                    className={
-                      job.sponsored
-                        ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
-                        : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
-                    }
-                  >
-                    {job.sponsored
-                      ? "Sponsored"
-                      : job.featured
-                        ? "Featured"
-                        : "Role"}
-                  </span>
-                  {job.featured && !job.sponsored ? (
-                    <span className="inline-flex rounded-full border border-border bg-background px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                      Highlighted
+                  {getJobLabels(job).map((label) => (
+                    <span
+                      key={label}
+                      className={
+                        label === "Sponsored"
+                          ? "inline-flex rounded-full border border-primary/45 bg-primary/12 px-2.5 py-0.5 text-[11px] font-medium text-primary"
+                          : "inline-flex rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground"
+                      }
+                    >
+                      {label}
                     </span>
-                  ) : null}
+                  ))}
                   <span>{job.company}</span>
                   {job.type ? <span>· {job.type}</span> : null}
                   <span>· {job.location}</span>
@@ -150,6 +159,12 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
             </div>
             {!hasJobs ? (
               <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/jobs/post?tier=free"
+                  className="directory-link-chip"
+                >
+                  Free founding role
+                </Link>
                 <Link
                   href="/jobs/post?tier=sponsored"
                   className="directory-link-chip"

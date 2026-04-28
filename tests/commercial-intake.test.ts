@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPlacementRenewalReminder,
   compareToolListings,
+  evaluateJobSourceLifecycle,
   isPlacementActive,
   linkRelForDisclosure,
   nextLeadStatus,
@@ -110,6 +111,91 @@ describe("commercial intake contracts", () => {
     });
     expect(claim.ok).toBe(true);
     expect(claim.data.kind).toBe("claim");
+
+    const missingApplyUrl = validateListingLeadPayload({
+      kind: "job",
+      contactName: "Jane",
+      contactEmail: "jane@example.com",
+      companyName: "Example Co",
+      listingTitle: "AI Engineer",
+    });
+    expect(missingApplyUrl.ok).toBe(false);
+    expect(missingApplyUrl.errors).toContain(
+      "job leads require an https applyUrl",
+    );
+  });
+
+  it("transitions curated job sources through verified, stale, and closed states", () => {
+    expect(
+      evaluateJobSourceLifecycle({
+        currentStatus: "active",
+        staleCheckCount: 1,
+        expiresAt: "2026-05-28T00:00:00Z",
+        sourceOk: true,
+        titleMatched: true,
+        companyMatched: true,
+        closureDetected: false,
+        applyDetected: true,
+      }),
+    ).toMatchObject({
+      status: "active",
+      staleCheckCount: 0,
+      indexable: true,
+      reason: "source_verified",
+    });
+
+    expect(
+      evaluateJobSourceLifecycle({
+        currentStatus: "active",
+        staleCheckCount: 0,
+        sourceOk: false,
+        titleMatched: false,
+        companyMatched: true,
+        closureDetected: false,
+        applyDetected: false,
+      }),
+    ).toMatchObject({
+      status: "stale_pending_review",
+      staleCheckCount: 1,
+      indexable: false,
+    });
+
+    expect(
+      evaluateJobSourceLifecycle({
+        currentStatus: "active",
+        staleCheckCount: 1,
+        sourceOk: false,
+        titleMatched: false,
+        companyMatched: false,
+        closureDetected: true,
+        applyDetected: false,
+      }),
+    ).toMatchObject({
+      status: "closed",
+      staleCheckCount: 2,
+      indexable: false,
+    });
+
+    expect(
+      evaluateJobSourceLifecycle(
+        {
+          currentStatus: "active",
+          staleCheckCount: 0,
+          expiresAt: "2026-04-01T00:00:00Z",
+          sourceOk: true,
+          titleMatched: true,
+          companyMatched: true,
+          closureDetected: false,
+          applyDetected: true,
+          paidPlacementExpiresAt: "2026-12-01T00:00:00Z",
+        } as any,
+        new Date("2026-04-28T00:00:00Z"),
+      ),
+    ).toMatchObject({
+      status: "closed",
+      reason: "expired",
+      indexable: false,
+    });
   });
 
   it("summarizes placement expiry and renewal reminders", () => {

@@ -15,6 +15,12 @@ export const resendTemplateConfig = {
     aliasEnvName: "RESEND_TEMPLATE_RELEASE_NOTES_ALIAS",
     defaultAlias: "heyclaude-release-notes",
   },
+  "relaunch-brief": {
+    displayName: "HeyClaude Relaunch Brief",
+    idEnvName: "RESEND_TEMPLATE_RELAUNCH_BRIEF_ID",
+    aliasEnvName: "RESEND_TEMPLATE_RELAUNCH_BRIEF_ALIAS",
+    defaultAlias: "heyclaude-relaunch-brief",
+  },
   "maintainer-call": {
     displayName: "HeyClaude Maintainer Call",
     idEnvName: "RESEND_TEMPLATE_MAINTAINER_CALL_ID",

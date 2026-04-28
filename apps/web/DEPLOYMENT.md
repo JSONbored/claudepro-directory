@@ -52,10 +52,12 @@ Current migrations include:
 - `0003_commercial_leads.sql` for job/tool listing leads and commercial placement windows
 - `0004_intent_events.sql` for privacy-light copy/open/install/download/vote intent counters
 - `0005_community_signals.sql` for used-this, works-for-me, and reported-broken listing signals
+- `0006_jobs_curation_and_claims.sql` for curated job source fields, claim leads, and stale job review states
 
-The jobs board only renders active rows from `jobs_listings`. A missing,
-unmigrated, or empty `SITE_DB` produces an explicit empty state instead of fake
-listing rows.
+The jobs board renders active reviewed D1 rows only. Curated, employer-submitted,
+claimed, featured, and sponsored jobs all go through the same private D1-backed
+review path. Closed, stale-review, archived, or expired roles are excluded from
+the public jobs index, sitemap, and JobPosting data.
 
 ## OpenNext build/deploy commands
 

@@ -194,6 +194,22 @@ export type ListingLead = {
   applyUrl?: string;
   message?: string;
 };
+export type JobSourceLifecycleInput = {
+  currentStatus?: string;
+  staleCheckCount?: number;
+  expiresAt?: string;
+  sourceOk?: boolean;
+  titleMatched?: boolean;
+  companyMatched?: boolean;
+  closureDetected?: boolean;
+  applyDetected?: boolean;
+};
+export type JobSourceLifecycleResult = {
+  status: "active" | "stale_pending_review" | "closed";
+  staleCheckCount: number;
+  indexable: boolean;
+  reason: string;
+};
 export type CommercialPlacement = {
   targetKind: "job" | "tool" | "entry";
   targetKey: string;
@@ -505,6 +521,10 @@ export function validateListingLeadPayload(payload: Record<string, unknown>): {
   errors: string[];
   data: ListingLead;
 };
+export function evaluateJobSourceLifecycle(
+  input?: JobSourceLifecycleInput,
+  now?: Date,
+): JobSourceLifecycleResult;
 export function normalizeCommercialStatus(value: unknown): string;
 export function isPlacementActive(
   placement?: Record<string, unknown>,
@@ -552,7 +572,7 @@ export function buildToolSoftwareApplicationJsonLd(
 export function buildJobPostingJsonLd(
   job: Record<string, unknown>,
   params?: Record<string, unknown>,
-): JsonLdDocument;
+): JsonLdDocument | null;
 export function buildEntryJsonLdSnapshot(
   entry: Partial<ContentEntry>,
   params?: Record<string, unknown>,

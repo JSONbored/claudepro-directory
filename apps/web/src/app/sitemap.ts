@@ -30,7 +30,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
   const siteLastModified = latestDate(
     ...entries.map(sitemapEntryLastModified),
-    ...jobs.map((job) => safeSitemapDate(job.postedAt)),
+    ...jobs.map((job) =>
+      safeSitemapDate(job.sourceCheckedAt || job.lastCheckedAt || job.postedAt),
+    ),
     ...tools.map((tool) => safeSitemapDate(tool.dateAdded)),
   );
   const staticPaths = [
@@ -92,7 +94,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const jobItems = jobs.map((job) => ({
     url: `${siteConfig.url}/jobs/${job.slug}`,
-    lastModified: safeSitemapDate(job.postedAt),
+    lastModified: safeSitemapDate(
+      job.sourceCheckedAt || job.lastCheckedAt || job.postedAt,
+    ),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));

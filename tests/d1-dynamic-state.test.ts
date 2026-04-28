@@ -161,6 +161,7 @@ describe("D1 dynamic state helpers", () => {
         slug: "ai-systems-engineer",
         title: "AI Systems Engineer",
         company_name: "Example Co",
+        company_url: "https://example.com",
         location_text: "Remote",
         summary: "Build Claude-native workflow systems.",
         description_md: null,
@@ -173,6 +174,15 @@ describe("D1 dynamic state helpers", () => {
         tier: "featured",
         status: "active",
         source: "manual",
+        source_kind: "employer_submitted",
+        source_url: "https://example.com/jobs/ai-systems-engineer",
+        first_seen_at: "2026-04-26T00:00:00Z",
+        last_checked_at: "2026-04-27T00:00:00Z",
+        source_checked_at: "2026-04-27T00:00:00Z",
+        stale_check_count: 0,
+        curation_note: null,
+        paid_placement_expires_at: "2026-05-26T00:00:00Z",
+        claimed_employer: 1,
         posted_by_email: "jobs@example.com",
         expires_at: null,
         is_remote: 1,
@@ -185,8 +195,12 @@ describe("D1 dynamic state helpers", () => {
         slug: "ai-systems-engineer",
         title: "AI Systems Engineer",
         company: "Example Co",
+        companyUrl: "https://example.com",
         featured: true,
         sponsored: false,
+        sourceKind: "employer_submitted",
+        claimedEmployer: true,
+        paidPlacementExpiresAt: "2026-05-26T00:00:00Z",
         responsibilities: ["Ship integrations"],
         requirements: ["TypeScript"],
       },
@@ -201,6 +215,10 @@ describe("D1 dynamic state helpers", () => {
     );
     const jobs = fs.readFileSync(
       path.join(migrationsDir, "0002_jobs.sql"),
+      "utf8",
+    );
+    const jobsCuration = fs.readFileSync(
+      path.join(migrationsDir, "0006_jobs_curation_and_claims.sql"),
       "utf8",
     );
     const leads = fs.readFileSync(
@@ -219,8 +237,12 @@ describe("D1 dynamic state helpers", () => {
     expect(votes).toContain("votes_entries");
     expect(jobs).toContain("jobs_listings");
     expect(jobs).toContain("pending_review");
+    expect(jobsCuration).toContain("stale_pending_review");
+    expect(jobsCuration).toContain("official_ats");
+    expect(jobsCuration).toContain("paid_placement_expires_at");
     expect(jobs).toContain("is_worldwide");
     expect(leads).toContain("listing_leads");
+    expect(jobsCuration).toContain("'claim'");
     expect(leads).toContain("commercial_placements");
     expect(intents).toContain("intent_events");
     expect(intents).toContain("copy");

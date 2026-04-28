@@ -17,6 +17,7 @@ export const COMMERCIAL_STATUSES = [
   "expired",
   "archived",
 ];
+export const JOB_SOURCE_STATUSES = ["active", "stale_pending_review", "closed"];
 
 export function normalizeCommercialTier(value) {
   const normalized = String(value || "")
@@ -91,8 +92,8 @@ export function validateListingLeadPayload(payload = {}) {
   ) {
     errors.push(`${kind} leads require an https websiteUrl`);
   }
-  if (kind === "job" && applyUrl && !/^https:\/\//i.test(applyUrl)) {
-    errors.push("job applyUrl must use https when provided");
+  if (kind === "job" && !/^https:\/\//i.test(applyUrl)) {
+    errors.push("job leads require an https applyUrl");
   }
 
   return {
@@ -109,6 +110,63 @@ export function validateListingLeadPayload(payload = {}) {
       applyUrl,
       message,
     },
+  };
+}
+
+export function evaluateJobSourceLifecycle(input = {}, now = new Date()) {
+  const currentStatus = String(input.currentStatus || "active")
+    .trim()
+    .toLowerCase();
+  const staleCheckCount = Math.max(
+    0,
+    Number.isFinite(Number(input.staleCheckCount))
+      ? Math.trunc(Number(input.staleCheckCount))
+      : 0,
+  );
+  const expiresAt = input.expiresAt || "";
+  const nowTime = now instanceof Date ? now.getTime() : new Date(now).getTime();
+  const expiryTime = expiresAt ? new Date(expiresAt).getTime() : null;
+  const expired =
+    expiryTime !== null && Number.isFinite(expiryTime) && expiryTime < nowTime;
+  const sourceHealthy =
+    input.sourceOk === true &&
+    input.titleMatched !== false &&
+    input.companyMatched !== false &&
+    input.closureDetected !== true &&
+    input.applyDetected === true;
+
+  if (currentStatus === "closed" || currentStatus === "archived" || expired) {
+    return {
+      status: "closed",
+      staleCheckCount,
+      indexable: false,
+      reason: expired ? "expired" : currentStatus,
+    };
+  }
+
+  if (sourceHealthy) {
+    return {
+      status: "active",
+      staleCheckCount: 0,
+      indexable: true,
+      reason: "source_verified",
+    };
+  }
+
+  if (staleCheckCount <= 0) {
+    return {
+      status: "stale_pending_review",
+      staleCheckCount: 1,
+      indexable: false,
+      reason: "first_failed_source_check",
+    };
+  }
+
+  return {
+    status: "closed",
+    staleCheckCount: staleCheckCount + 1,
+    indexable: false,
+    reason: "repeated_failed_source_check",
   };
 }
 

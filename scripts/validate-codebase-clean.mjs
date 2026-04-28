@@ -5,6 +5,7 @@ const repoRoot = process.cwd();
 
 const forbiddenPaths = [
   "apps/web/public/data/content-index.json",
+  "apps/web/src/data/curated-jobs.json",
   "apps/web/src/generated/content-category-spec.json",
   "apps/web/src/generated/legacy-vote-seed.json",
   "apps/web/src/lib/entry-presentation.ts",
@@ -35,6 +36,7 @@ const ignoredDirs = new Set([
   "node_modules",
   "apps/web/public/data",
   "integrations/raycast/node_modules",
+  "reports",
 ]);
 
 const ignoredFiles = new Set([
@@ -78,6 +80,10 @@ const forbiddenPatterns = [
   {
     pattern: /if\s*\(\s*Array\.isArray\(payload\)\s*\)\s*return\s+payload/,
     label: "legacy array registry artifact reader",
+  },
+  {
+    pattern: /\bjobs\.ashbyhq\.com\b/i,
+    label: "public job listing source URL",
   },
 ];
 
