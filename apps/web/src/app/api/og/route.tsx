@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { ogQuerySchema } from "@/lib/api/contracts";
+import { createApiHandler, type InferApiQuery } from "@/lib/api/router";
 
 function clean(value: string | null, fallback: string, maxLength: number) {
   const normalized = String(value || "")
@@ -10,15 +12,11 @@ function clean(value: string | null, fallback: string, maxLength: number) {
     : `${text.slice(0, maxLength - 3).trimEnd()}...`;
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const title = clean(url.searchParams.get("title"), "HeyClaude", 96);
-  const description = clean(
-    url.searchParams.get("description"),
-    "A Claude-native registry for agents, MCP servers, skills, commands, hooks, rules, guides, and tools.",
-    180,
-  );
-  const label = clean(url.searchParams.get("label"), "Registry", 42);
+export const GET = createApiHandler("og.render", async ({ query }) => {
+  const payload = query as InferApiQuery<typeof ogQuerySchema>;
+  const title = clean(payload.title, "HeyClaude", 96);
+  const description = clean(payload.description, "", 180);
+  const label = clean(payload.label, "Registry", 42);
 
   return new ImageResponse(
     <div
@@ -100,4 +98,4 @@ export async function GET(request: Request) {
       },
     },
   );
-}
+});

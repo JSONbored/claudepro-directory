@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-
+import { intentEventsBodySchema } from "@/lib/api/contracts";
 import {
-  hasBodyWithinLimit,
-  hasJsonContentType,
-  isAllowedOrigin,
-  isRateLimited,
-} from "@/lib/api-security";
+  apiError,
+  apiJson,
+  createApiHandler,
+  type InferApiBody,
+} from "@/lib/api/router";
 import { logApiWarn } from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 
@@ -30,82 +29,48 @@ function normalizeSessionId(value: unknown) {
   return normalized.length <= 128 ? normalized : "";
 }
 
-export async function POST(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "intent_events.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
+export const POST = createApiHandler(
+  "intentEvents.create",
+  async ({ request, body, requestId }) => {
+    const payload = body as InferApiBody<typeof intentEventsBodySchema>;
+    const eventType = normalizeEventType(payload.type);
+    const entryKey = normalizeEntryKey(payload.entryKey);
+    const sessionId = normalizeSessionId(payload.sessionId);
+    if (!eventType) {
+      return apiError("invalid_payload", 400, { requestId });
+    }
 
-  if (!hasBodyWithinLimit(request, 4 * 1024)) {
-    logApiWarn(request, "intent_events.payload_too_large");
-    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
-  }
+    const db = getSiteDb();
+    if (!db) {
+      return apiJson(
+        { ok: false, stored: false, reason: "site_db_not_configured" },
+        { status: 200, headers: { "cache-control": "no-store" } },
+      );
+    }
 
-  if (!hasJsonContentType(request)) {
-    logApiWarn(request, "intent_events.invalid_content_type");
-    return NextResponse.json(
-      { error: "invalid_content_type" },
-      { status: 415 },
-    );
-  }
-
-  if (
-    isRateLimited({
-      request,
-      scope: "intent-events",
-      limit: 60,
-      windowMs: 60_000,
-    })
-  ) {
-    logApiWarn(request, "intent_events.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  let payload: Record<string, unknown>;
-  try {
-    payload = (await request.json()) as Record<string, unknown>;
-  } catch {
-    logApiWarn(request, "intent_events.invalid_json");
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
-  }
-
-  const eventType = normalizeEventType(payload.type);
-  const entryKey = normalizeEntryKey(payload.entryKey);
-  const sessionId = normalizeSessionId(payload.sessionId);
-  if (!eventType) {
-    return NextResponse.json({ error: "invalid_payload" }, { status: 400 });
-  }
-
-  const db = getSiteDb();
-  if (!db) {
-    return NextResponse.json(
-      { ok: false, stored: false, reason: "site_db_not_configured" },
-      { status: 200, headers: { "cache-control": "no-store" } },
-    );
-  }
-
-  try {
-    await db
-      .prepare(
-        `INSERT INTO intent_events (
+    try {
+      await db
+        .prepare(
+          `INSERT INTO intent_events (
           event_type,
           entry_key,
           source,
           session_id,
           created_at
         ) VALUES (?, ?, 'web', ?, CURRENT_TIMESTAMP)`,
-      )
-      .bind(eventType, entryKey || null, sessionId || null)
-      .run();
-    return NextResponse.json(
-      { ok: true, stored: true },
-      { headers: { "cache-control": "no-store" } },
-    );
-  } catch {
-    logApiWarn(request, "intent_events.insert_failed", { eventType });
-    return NextResponse.json(
-      { ok: false, stored: false, reason: "insert_failed" },
-      { status: 200, headers: { "cache-control": "no-store" } },
-    );
-  }
-}
+        )
+        .bind(eventType, entryKey || null, sessionId || null)
+        .run();
+      return apiJson(
+        { ok: true, stored: true },
+        { headers: { "cache-control": "no-store" } },
+      );
+    } catch {
+      logApiWarn(request, "intent_events.insert_failed", { eventType });
+      return apiJson(
+        { ok: false, stored: false, reason: "insert_failed" },
+        { status: 200, headers: { "cache-control": "no-store" } },
+      );
+    }
+  },
+);

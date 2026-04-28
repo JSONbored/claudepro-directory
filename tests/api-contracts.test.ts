@@ -1,8 +1,18 @@
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 
+import { listApiRouteDefinitions } from "../apps/web/src/lib/api/contracts";
 import { repoRoot } from "./helpers/registry-fixtures";
+
+function findRouteFiles(directory: string): string[] {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) return findRouteFiles(entryPath);
+    return /route\.tsx?$/.test(entry.name) ? [entryPath] : [];
+  });
+}
 
 const apiRoutes = [
   "/api/registry/manifest",
@@ -36,10 +46,44 @@ describe("OpenAPI route coverage", () => {
     path.join(repoRoot, "cloudflare/api-schema-heyclaude-openapi.yaml"),
     "utf8",
   );
+  const parsedSchema = parse(schema) as {
+    paths: Record<
+      string,
+      {
+        get?: {
+          description?: string;
+          parameters?: Array<{ name?: string; in?: string }>;
+          responses?: Record<string, { content?: Record<string, unknown> }>;
+        };
+        post?: unknown;
+        patch?: unknown;
+      }
+    >;
+  };
 
   it("documents every public and limited dynamic API route", () => {
     for (const route of apiRoutes) {
       expect(schema, route).toContain(`${route}:`);
+    }
+
+    expect(
+      [...new Set(listApiRouteDefinitions().map((route) => route.path))].sort(),
+    ).toEqual(apiRoutes.toSorted());
+  });
+
+  it("keeps route handlers as central-router adapters", () => {
+    const routeFiles = findRouteFiles(
+      path.join(repoRoot, "apps/web/src/app/api"),
+    );
+
+    expect(routeFiles.length).toBeGreaterThan(0);
+    for (const filePath of routeFiles) {
+      const source = fs.readFileSync(filePath, "utf8");
+      expect(source, filePath).toContain("createApiHandler");
+      expect(source, filePath).not.toContain("NextResponse");
+      expect(source, filePath).not.toContain("isAllowedOrigin");
+      expect(source, filePath).not.toContain("hasBodyWithinLimit");
+      expect(source, filePath).not.toContain("isRateLimited");
     }
   });
 
@@ -56,10 +100,23 @@ describe("OpenAPI route coverage", () => {
   });
 
   it("documents platform-aware search and social preview generation", () => {
-    expect(schema).toContain("name: platform");
-    expect(schema).toContain("/api/og:");
-    expect(schema).toContain("image/png");
-    expect(schema).toContain("category and platform shards");
+    expect(parsedSchema.paths["/api/registry/search"]?.get?.parameters).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "platform", in: "query" }),
+      ]),
+    );
+    expect(
+      parsedSchema.paths["/api/registry/feed"]?.get?.description,
+    ).toContain("category and platform shards");
+    expect(
+      parsedSchema.paths["/api/og"]?.get?.responses?.["200"]?.content,
+    ).toHaveProperty("image/png");
+    expect(
+      parsedSchema.paths["/feed.xml"]?.get?.responses?.["200"]?.content,
+    ).toHaveProperty("application/rss+xml");
+    expect(
+      parsedSchema.paths["/atom.xml"]?.get?.responses?.["200"]?.content,
+    ).toHaveProperty("application/atom+xml");
   });
 
   it("documents error envelopes, cacheable feeds, and registry trust signals", () => {

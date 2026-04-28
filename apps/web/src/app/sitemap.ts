@@ -13,6 +13,14 @@ import {
   sitemapEntryLastModified,
 } from "@/lib/sitemap-policy";
 
+function latestDate(...dates: Array<Date | undefined>) {
+  const timestamps = dates
+    .map((date) => date?.getTime())
+    .filter((value): value is number => Number.isFinite(value));
+  if (!timestamps.length) return undefined;
+  return new Date(Math.max(...timestamps));
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [entries, jobs, tools, contributors] = await Promise.all([
     getDirectoryEntries(),
@@ -20,6 +28,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getTools(),
     getContributors(),
   ]);
+  const siteLastModified = latestDate(
+    ...entries.map(sitemapEntryLastModified),
+    ...jobs.map((job) => safeSitemapDate(job.postedAt)),
+    ...tools.map((tool) => safeSitemapDate(tool.dateAdded)),
+  );
   const staticPaths = [
     "",
     "/browse",
@@ -54,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticItems = staticPaths.map((pathname) => ({
     url: `${siteConfig.url}${pathname}`,
-    lastModified: new Date(),
+    lastModified: siteLastModified,
     changeFrequency:
       pathname.includes(".txt") || pathname.includes(".xml")
         ? ("daily" as const)

@@ -1,29 +1,9 @@
-import { NextResponse } from "next/server";
-
-import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
-import { logApiWarn } from "@/lib/api-logs";
+import { createApiHandler } from "@/lib/api/router";
 import { getCategorySummaries, getRegistryManifest } from "@/lib/content";
 import { cachedJsonResponse } from "@/lib/http-cache";
 import { siteConfig } from "@/lib/site";
 
-export async function GET(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "registry.feed.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
-
-  if (
-    isRateLimited({
-      request,
-      scope: "registry-feed",
-      limit: 120,
-      windowMs: 60_000,
-    })
-  ) {
-    logApiWarn(request, "registry.feed.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
+export const GET = createApiHandler("registry.feed", async ({ request }) => {
   const [manifest, categories] = await Promise.all([
     getRegistryManifest(),
     getCategorySummaries(),
@@ -69,4 +49,4 @@ export async function GET(request: Request) {
     qualitySummary: manifest.qualitySummary,
     categories,
   });
-}
+});

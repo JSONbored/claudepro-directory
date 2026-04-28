@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Advertise or submit to HeyClaude",
   description:
-    "Choose the right HeyClaude intake path for tool sponsorships, hiring roles, or free Claude resources.",
+    "Choose the right HeyClaude intake path for tool sponsorships, hiring roles, claim requests, or free Claude and AI workflow resources.",
   path: "/advertise",
   keywords: [
     "advertise claude tools",

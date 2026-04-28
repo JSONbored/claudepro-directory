@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Agent Skill platform compatibility",
   description:
-    "Browse HeyClaude Agent Skills by Claude, Codex, Windsurf, Gemini, Cursor rule adapter, and AGENTS.md compatibility.",
+    "Browse HeyClaude Agent Skills by Claude, Codex, Windsurf, Gemini, Cursor rule adapter, AGENTS.md, package validation, and install compatibility.",
   path: "/platforms",
   keywords: ["agent skills", "claude skills", "codex skills", "cursor rules"],
 });

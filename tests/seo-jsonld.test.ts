@@ -126,6 +126,41 @@ describe("SEO JSON-LD policy", () => {
     expect(facts).not.toContain("review:");
   });
 
+  it("includes optional citation facts only when registry metadata supports them", () => {
+    const facts = buildEntryCitationFacts(
+      {
+        category: "skills",
+        slug: "portable-agent-skill",
+        title: "Portable Agent Skill",
+        description: "Example skill.",
+        documentationUrl: "https://example.com/docs",
+        repoUrl: "https://github.com/example/portable-agent-skill",
+        downloadUrl:
+          "https://heyclau.de/downloads/skills/portable-agent-skill.zip",
+        downloadSha256: "a".repeat(64),
+        platformCompatibility: [
+          { platform: "Claude", supportLevel: "native-skill" },
+          { platform: "Cursor", supportLevel: "adapter" },
+        ],
+        author: "Example Maintainer",
+        license: "MIT",
+        verifiedAt: "2026-04-27",
+      } as any,
+      { siteUrl: "https://heyclau.de" },
+    );
+
+    expect(facts).toContain(
+      "Source URLs: https://example.com/docs, https://github.com/example/portable-agent-skill",
+    );
+    expect(facts).toContain(`Package SHA256: ${"a".repeat(64)}`);
+    expect(facts).toContain(
+      "Platform compatibility: Claude (native-skill), Cursor (adapter)",
+    );
+    expect(facts).toContain("Author: Example Maintainer");
+    expect(facts).toContain("License: MIT");
+    expect(facts).toContain("Last verified: 2026-04-27");
+  });
+
   it("does not emit SoftwareApplication until visible required fields exist", () => {
     expect(
       buildToolSoftwareApplicationJsonLd(

@@ -3,8 +3,11 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@heyclaude/registry": "workspace:*",
-    "gray-matter": "4.0.3"
+    "gray-matter": "4.0.3",
+    "yaml": "^2.8.3",
+    "zod": "^4.3.6"
   },
   "scripts": {
     "dev": "pnpm --filter web dev",
@@ -20,6 +23,8 @@
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
     "validate:deployment-artifacts": "node scripts/validate-deployment-artifacts.mjs",
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
+    "generate:openapi": "tsx scripts/generate-openapi.ts",
+    "validate:openapi": "tsx scripts/generate-openapi.ts --check",
     "validate:tasks": "node scripts/validate-tasks.mjs",
     "indexnow:submit": "node scripts/submit-indexnow.mjs",
     "email:render": "tsx scripts/render-email-templates.ts",

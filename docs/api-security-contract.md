@@ -34,6 +34,15 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 
 ## Controls
 
+- API route contracts live in `apps/web/src/lib/api/contracts.ts`. Route files
+  under `apps/web/src/app/api/**` are thin adapters that delegate to the central
+  router in `apps/web/src/lib/api/router.ts`.
+- Request params, queries, and JSON bodies are validated with Zod. The generated
+  OpenAPI document in `cloudflare/api-schema-heyclaude-openapi.yaml` is derived
+  from those Zod contracts with `pnpm generate:openapi` and checked with
+  `pnpm validate:openapi`.
+- API errors use one normalized envelope:
+  `{ ok: false, error: { code, message, details? }, requestId? }`.
 - Public browser-facing endpoints keep origin checks and route-level rate limits.
 - JSON writes require content-type validation and payload size limits.
 - Admin review endpoints require bearer or admin-token headers.
@@ -47,8 +56,12 @@ dynamic endpoints. Registry publishing is not exposed over the public API.
 - Production submissions should set `SUBMISSIONS_REQUIRE_TURNSTILE=1` and
   `TURNSTILE_SECRET_KEY`; if the requirement is enabled without a secret, the
   endpoint fails closed instead of accepting direct website submissions.
-- Cloudflare should enforce coarse per-IP limits for dynamic endpoints before
-  requests reach the Worker; in-process limits remain a local fallback.
+- Cloudflare rate-limit bindings are configured for registry, dynamic, and
+  strict routes. In-process limits remain a local/dev fallback when the Worker
+  binding is unavailable.
+- Next and Worker responses attach security headers in code as well as static
+  asset headers: CSP, HSTS, `X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Permissions-Policy`, and `Cross-Origin-Opener-Policy`.
 - No endpoint may import content into the registry, create pull requests, or
   publish submissions without maintainer review.
 

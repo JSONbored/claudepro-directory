@@ -54,7 +54,7 @@ export const seoClusterDefinitions: SeoClusterDefinition[] = [
       "Useful MCP servers for files, browsers, APIs, repositories, databases, and developer automation.",
     seoTitle: "MCP servers for Claude developer workflows",
     seoDescription:
-      "Browse MCP servers for files, browsers, APIs, repositories, databases, and developer automation.",
+      "Browse MCP servers for Claude developer workflows, including files, browsers, APIs, repositories, databases, and automation tools.",
     categories: ["mcp"],
     tags: ["development", "automation", "browser", "database"],
     itemLimit: 16,

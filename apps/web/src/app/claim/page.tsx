@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Claim or update a HeyClaude listing",
   description:
-    "Request a maintainer-reviewed update to an existing HeyClaude listing or attribution profile.",
+    "Request maintainer-reviewed updates to existing HeyClaude listings, attribution profiles, source links, install notes, and claim metadata.",
   path: "/claim",
   keywords: ["claim claude listing", "update claude directory listing"],
 });

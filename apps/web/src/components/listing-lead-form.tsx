@@ -12,6 +12,17 @@ type ListingLeadFormProps = {
   tier?: "free" | "standard" | "featured" | "sponsored";
 };
 
+function getApiErrorMessage(payload: {
+  error?: string | { code?: string; message?: string; details?: unknown };
+  errors?: string[];
+}) {
+  if (payload.errors?.length) return payload.errors.join(", ");
+  if (typeof payload.error === "string") return payload.error;
+  if (payload.error?.message) return payload.error.message;
+  if (payload.error?.code) return payload.error.code;
+  return "";
+}
+
 const labels = {
   job: {
     eyebrow: "Hiring lead",
@@ -109,15 +120,11 @@ export function ListingLeadForm({ kind, tier = "free" }: ListingLeadFormProps) {
         body: JSON.stringify({ kind, tierInterest: tier, ...form }),
       });
       const payload = (await response.json().catch(() => ({}))) as {
-        error?: string;
+        error?: string | { code?: string; message?: string; details?: unknown };
         errors?: string[];
       };
       if (!response.ok) {
-        throw new Error(
-          payload.errors?.join(", ") ||
-            payload.error ||
-            "Could not submit lead",
-        );
+        throw new Error(getApiErrorMessage(payload) || "Could not submit lead");
       }
       setState("success");
     } catch (caught) {

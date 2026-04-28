@@ -246,6 +246,30 @@ test.describe("site regression", () => {
     expect(second.status()).toBe(304);
   });
 
+  test("attaches security headers to HTML, API, static data, and OG responses", async ({
+    request,
+  }) => {
+    for (const route of [
+      "/browse",
+      "/api/registry/feed",
+      "/data/directory-index.json",
+      "/api/og?title=HeyClaude%20Test&description=Registry%20preview",
+    ]) {
+      const response = await request.get(route);
+      expect(response.ok(), route).toBe(true);
+      const headers = response.headers();
+      expect(headers["content-security-policy"], route).toContain(
+        "frame-ancestors 'none'",
+      );
+      expect(headers["x-frame-options"], route).toBe("DENY");
+      expect(headers["x-content-type-options"], route).toBe("nosniff");
+      expect(headers["referrer-policy"], route).toBe(
+        "strict-origin-when-cross-origin",
+      );
+      expect(headers["permissions-policy"], route).toContain("geolocation=()");
+    }
+  });
+
   test("intent metrics accept route events with D1 storage or fail-open fallback", async ({
     request,
   }) => {

@@ -1,3 +1,5 @@
+import { applySecurityHeaders } from "@/lib/security-headers";
+
 const CACHE_HEADERS = {
   "cache-control": "public, max-age=300, stale-while-revalidate=3600",
 } as const;
@@ -35,6 +37,7 @@ export async function cachedJsonResponse(
   const body = `${JSON.stringify(payload)}\n`;
   const etag = await buildEtag(body);
   const headers = new Headers(init.headers);
+  applySecurityHeaders(headers);
   headers.set("content-type", "application/json; charset=utf-8");
   headers.set("etag", etag);
   for (const [name, value] of Object.entries(CACHE_HEADERS)) {
@@ -56,6 +59,7 @@ export async function cachedTextResponse(
   const body = text.endsWith("\n") ? text : `${text}\n`;
   const etag = await buildEtag(body);
   const headers = new Headers(init.headers);
+  applySecurityHeaders(headers);
   headers.set("content-type", "text/plain; charset=utf-8");
   headers.set("etag", etag);
   for (const [name, value] of Object.entries(CACHE_HEADERS)) {

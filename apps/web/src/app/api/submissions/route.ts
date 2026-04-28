@@ -1,31 +1,22 @@
-import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import {
   buildSubmissionIssueDraft,
   validateSubmission,
 } from "@heyclaude/registry/submission";
 
+import { submissionBodySchema } from "@/lib/api/contracts";
+import { getClientIp } from "@/lib/api-security";
 import {
-  getClientIp,
-  hasBodyWithinLimit,
-  hasJsonContentType,
-  isAllowedOrigin,
-  isRateLimited,
-} from "@/lib/api-security";
+  apiError,
+  apiJson,
+  createApiHandler,
+  type InferApiBody,
+} from "@/lib/api/router";
 import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
 import { getDirectoryEntries } from "@/lib/content";
 
 const GITHUB_API_VERSION = "2022-11-28";
 const DEFAULT_REPO = "JSONbored/claudepro-directory";
-const SUBMISSION_RATE_LIMIT = 8;
-const SUBMISSION_WINDOW_MS = 60_000;
-
-type SubmissionPayload = {
-  fields?: Record<string, unknown>;
-  turnstileToken?: string;
-  honeypot?: string;
-};
-
 function envValue(env: Record<string, unknown>, names: string[]) {
   for (const name of names) {
     const value = String(env[name] ?? process.env[name] ?? "").trim();
@@ -200,200 +191,165 @@ function requiresTurnstile(env: Record<string, unknown>) {
   return value === "1" || value === "true" || value === "yes";
 }
 
-export async function POST(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "submissions.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
+export const POST = createApiHandler(
+  "submissions.create",
+  async ({ request, body, requestId }) => {
+    const payload = body as InferApiBody<typeof submissionBodySchema>;
+    if (String(payload.honeypot ?? "").trim()) {
+      logApiInfo(request, "submissions.honeypot_discarded");
+      return apiJson(
+        { ok: true, queued: false },
+        { headers: { "cache-control": "no-store" } },
+      );
+    }
 
-  if (!hasBodyWithinLimit(request, 64 * 1024)) {
-    logApiWarn(request, "submissions.payload_too_large");
-    return NextResponse.json({ error: "payload_too_large" }, { status: 413 });
-  }
-
-  if (!hasJsonContentType(request)) {
-    logApiWarn(request, "submissions.invalid_content_type");
-    return NextResponse.json(
-      { error: "invalid_content_type" },
-      { status: 415 },
-    );
-  }
-
-  if (
-    isRateLimited({
-      request,
-      scope: "submissions",
-      limit: SUBMISSION_RATE_LIMIT,
-      windowMs: SUBMISSION_WINDOW_MS,
-    })
-  ) {
-    logApiWarn(request, "submissions.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  let payload: SubmissionPayload = {};
-  try {
-    payload = (await request.json()) as SubmissionPayload;
-  } catch {
-    logApiWarn(request, "submissions.invalid_json");
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
-  }
-
-  if (String(payload.honeypot ?? "").trim()) {
-    logApiInfo(request, "submissions.honeypot_discarded");
-    return NextResponse.json(
-      { ok: true, queued: false },
-      { headers: { "cache-control": "no-store" } },
-    );
-  }
-
-  const fields =
-    payload.fields && typeof payload.fields === "object" ? payload.fields : {};
-  const issue = buildSubmissionIssueDraft(fields);
-  const report = validateSubmission({
-    title: issue.title,
-    body: issue.body,
-    labels: issue.labels,
-  });
-  const fallbackUrl = githubIssueFallbackUrl(issue);
-
-  if (report.skipped || !report.ok) {
-    logApiWarn(request, "submissions.invalid_payload", {
-      category: report.category,
-      errors: report.errors,
+    const fields =
+      payload.fields && typeof payload.fields === "object"
+        ? payload.fields
+        : {};
+    const issue = buildSubmissionIssueDraft(fields);
+    const report = validateSubmission({
+      title: issue.title,
+      body: issue.body,
+      labels: issue.labels,
     });
-    return NextResponse.json(
-      {
-        error: "invalid_submission",
+    const fallbackUrl = githubIssueFallbackUrl(issue);
+
+    if (report.skipped || !report.ok) {
+      logApiWarn(request, "submissions.invalid_payload", {
+        category: report.category,
         errors: report.errors,
-        warnings: report.warnings,
-        fallbackUrl,
-      },
-      { status: 400 },
-    );
-  }
+      });
+      return apiError("invalid_submission", 400, {
+        requestId,
+        details: {
+          errors: report.errors,
+          warnings: report.warnings,
+          fallbackUrl,
+        },
+      });
+    }
 
-  const category = report.category;
-  const slug = String(report.fields.slug || "");
-  if (await hasDuplicateEntry(category, slug)) {
-    logApiWarn(request, "submissions.duplicate_slug", { category, slug });
-    return NextResponse.json(
-      { error: "duplicate_slug", category, slug, fallbackUrl },
-      { status: 409 },
-    );
-  }
+    const category = report.category;
+    const slug = String(report.fields.slug || "");
+    if (await hasDuplicateEntry(category, slug)) {
+      logApiWarn(request, "submissions.duplicate_slug", { category, slug });
+      return apiError("duplicate_slug", 409, {
+        requestId,
+        details: { category, slug, fallbackUrl },
+      });
+    }
 
-  const env = getEnvRecord();
-  const turnstileSecret = envValue(env, ["TURNSTILE_SECRET_KEY"]);
-  if (!turnstileSecret && requiresTurnstile(env)) {
-    logApiError(request, "submissions.turnstile_not_configured", {
-      category,
-      slug,
-    });
-    return NextResponse.json(
-      { error: "turnstile_not_configured", fallbackUrl },
-      { status: 503 },
-    );
-  }
-
-  const turnstile = await verifyTurnstile({
-    request,
-    token: String(payload.turnstileToken || ""),
-    secret: turnstileSecret,
-  });
-  if (!turnstile.ok) {
-    logApiWarn(request, "submissions.turnstile_failed", { category, slug });
-    return NextResponse.json(
-      { error: "turnstile_failed", fallbackUrl },
-      { status: 400 },
-    );
-  }
-
-  const token = envValue(env, [
-    "GITHUB_SUBMISSIONS_TOKEN",
-    "GITHUB_SUBMISSION_TOKEN",
-    "GITHUB_TOKEN",
-  ]);
-  const repo =
-    envValue(env, [
-      "GITHUB_SUBMISSIONS_REPO",
-      "GITHUB_SUBMISSION_REPO",
-      "GITHUB_REPOSITORY",
-    ]) || DEFAULT_REPO;
-
-  if (!token) {
-    logApiError(request, "submissions.github_not_configured", {
-      category,
-      slug,
-    });
-    return NextResponse.json(
-      { error: "submissions_not_configured", fallbackUrl },
-      { status: 503 },
-    );
-  }
-
-  const pendingDuplicate = await findPendingSubmissionIssue({
-    repo,
-    token,
-    category,
-    slug,
-  });
-  if (pendingDuplicate) {
-    logApiWarn(request, "submissions.duplicate_pending_issue", {
-      category,
-      slug,
-      issueNumber: pendingDuplicate.issueNumber,
-    });
-    return NextResponse.json(
-      {
-        error: "duplicate_pending_issue",
+    const env = getEnvRecord();
+    const turnstileSecret = envValue(env, ["TURNSTILE_SECRET_KEY"]);
+    if (!turnstileSecret && requiresTurnstile(env)) {
+      logApiError(request, "submissions.turnstile_not_configured", {
         category,
         slug,
-        issueUrl: pendingDuplicate.issueUrl,
-        issueNumber: pendingDuplicate.issueNumber,
-        fallbackUrl,
-      },
-      { status: 409 },
-    );
-  }
+      });
+      return apiError("turnstile_not_configured", 503, {
+        requestId,
+        details: { fallbackUrl },
+      });
+    }
 
-  const created = await createGitHubIssue({
-    repo,
-    token,
-    title: issue.title,
-    body: issue.body,
-    labels: issue.labels,
-  });
-
-  if (!created.ok) {
-    logApiError(request, "submissions.github_provider_error", {
-      category,
-      slug,
-      status: created.status,
+    const turnstile = await verifyTurnstile({
+      request,
+      token: String(payload.turnstileToken || ""),
+      secret: turnstileSecret,
     });
-    return NextResponse.json(
-      {
-        error: "provider_error",
-        status: created.status,
-        fallbackUrl,
-      },
-      { status: 502 },
-    );
-  }
+    if (!turnstile.ok) {
+      logApiWarn(request, "submissions.turnstile_failed", { category, slug });
+      return apiError("turnstile_failed", 400, {
+        requestId,
+        details: { fallbackUrl },
+      });
+    }
 
-  logApiInfo(request, "submissions.issue_created", {
-    category,
-    slug,
-    issueNumber: created.issueNumber,
-  });
-  return NextResponse.json(
-    {
-      ok: true,
+    const token = envValue(env, [
+      "GITHUB_SUBMISSIONS_TOKEN",
+      "GITHUB_SUBMISSION_TOKEN",
+      "GITHUB_TOKEN",
+    ]);
+    const repo =
+      envValue(env, [
+        "GITHUB_SUBMISSIONS_REPO",
+        "GITHUB_SUBMISSION_REPO",
+        "GITHUB_REPOSITORY",
+      ]) || DEFAULT_REPO;
+
+    if (!token) {
+      logApiError(request, "submissions.github_not_configured", {
+        category,
+        slug,
+      });
+      return apiError("submissions_not_configured", 503, {
+        requestId,
+        details: { fallbackUrl },
+      });
+    }
+
+    const pendingDuplicate = await findPendingSubmissionIssue({
+      repo,
+      token,
       category,
       slug,
-      issueUrl: created.issueUrl,
+    });
+    if (pendingDuplicate) {
+      logApiWarn(request, "submissions.duplicate_pending_issue", {
+        category,
+        slug,
+        issueNumber: pendingDuplicate.issueNumber,
+      });
+      return apiError("duplicate_pending_issue", 409, {
+        requestId,
+        details: {
+          category,
+          slug,
+          issueUrl: pendingDuplicate.issueUrl,
+          issueNumber: pendingDuplicate.issueNumber,
+          fallbackUrl,
+        },
+      });
+    }
+
+    const created = await createGitHubIssue({
+      repo,
+      token,
+      title: issue.title,
+      body: issue.body,
+      labels: issue.labels,
+    });
+
+    if (!created.ok) {
+      logApiError(request, "submissions.github_provider_error", {
+        category,
+        slug,
+        status: created.status,
+      });
+      return apiError("provider_error", 502, {
+        requestId,
+        details: {
+          status: created.status,
+          fallbackUrl,
+        },
+      });
+    }
+
+    logApiInfo(request, "submissions.issue_created", {
+      category,
+      slug,
       issueNumber: created.issueNumber,
-    },
-    { headers: { "cache-control": "no-store" } },
-  );
-}
+    });
+    return apiJson(
+      {
+        ok: true,
+        category,
+        slug,
+        issueUrl: created.issueUrl,
+        issueNumber: created.issueNumber,
+      },
+      { headers: { "cache-control": "no-store" } },
+    );
+  },
+);

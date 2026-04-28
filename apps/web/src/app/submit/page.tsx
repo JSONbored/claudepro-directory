@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Submit a new directory entry",
   description:
-    "Submit agents, MCP servers, skills, rules, hooks, commands, and statuslines through schema-aligned review issues.",
+    "Submit agents, MCP servers, skills, rules, hooks, commands, and statuslines through schema-aligned GitHub review issues for HeyClaude.",
   path: "/submit",
   keywords: [
     "submit claude skill",

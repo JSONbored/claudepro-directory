@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "HeyClaude contributors",
   description:
-    "Browse accepted HeyClaude contributors and the Claude resources attributed to them.",
+    "Browse accepted HeyClaude contributors, attributed Claude resources, review history, and GitHub-backed listings across the registry.",
   path: "/contributors",
 });
 

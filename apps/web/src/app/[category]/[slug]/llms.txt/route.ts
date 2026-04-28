@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { loadTextDataFile } from "@/lib/content";
+import { applySecurityHeaders } from "@/lib/security-headers";
 
 type EntryLlmsRouteProps = {
   params: Promise<{ category: string; slug: string }>;
@@ -19,9 +20,11 @@ export async function GET(_request: Request, { params }: EntryLlmsRouteProps) {
   if (!body) notFound();
 
   return new Response(body, {
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
-    },
+    headers: applySecurityHeaders(
+      new Headers({
+        "content-type": "text/plain; charset=utf-8",
+        "cache-control": "public, max-age=3600, stale-while-revalidate=86400",
+      }),
+    ),
   });
 }

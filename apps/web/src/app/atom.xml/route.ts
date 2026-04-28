@@ -1,4 +1,5 @@
 import { getRegistryChangelog } from "@/lib/content";
+import { applySecurityHeaders } from "@/lib/security-headers";
 import { siteConfig } from "@/lib/site";
 
 function escapeXml(value: string) {
@@ -48,9 +49,11 @@ export async function GET() {
   ].join("");
 
   return new Response(xml, {
-    headers: {
-      "content-type": "application/atom+xml; charset=utf-8",
-      "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-    },
+    headers: applySecurityHeaders(
+      new Headers({
+        "content-type": "application/atom+xml; charset=utf-8",
+        "cache-control": "public, max-age=300, stale-while-revalidate=3600",
+      }),
+    ),
   });
 }

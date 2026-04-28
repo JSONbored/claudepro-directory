@@ -67,6 +67,29 @@ type SubmitStatus =
   | { state: "success"; issueUrl: string }
   | { state: "error"; message: string; fallbackUrl: string };
 
+function getApiErrorPayloadMessage(result: {
+  error?: string | { code?: string; message?: string; details?: unknown };
+  errors?: string[];
+}) {
+  if (result.errors?.length) return result.errors.join(", ");
+  if (typeof result.error === "string") return result.error;
+  if (result.error?.message) return result.error.message;
+  if (result.error?.code) return result.error.code;
+  return "";
+}
+
+function getApiErrorFallbackUrl(result: {
+  fallbackUrl?: string;
+  error?: string | { details?: unknown };
+}) {
+  if (result.fallbackUrl) return result.fallbackUrl;
+  if (typeof result.error === "object" && result.error?.details) {
+    const details = result.error.details as { fallbackUrl?: unknown };
+    if (typeof details.fallbackUrl === "string") return details.fallbackUrl;
+  }
+  return "";
+}
+
 declare global {
   interface Window {
     turnstile?: {
@@ -394,7 +417,7 @@ export function SubmitForm() {
       const result = (await response.json().catch(() => ({}))) as {
         issueUrl?: string;
         fallbackUrl?: string;
-        error?: string;
+        error?: string | { code?: string; message?: string; details?: unknown };
         errors?: string[];
       };
 
@@ -405,13 +428,12 @@ export function SubmitForm() {
       }
 
       const message =
-        result.errors?.join(", ") ||
-        result.error ||
+        getApiErrorPayloadMessage(result) ||
         `Submission failed with status ${response.status}`;
       setSubmitStatus({
         state: "error",
         message,
-        fallbackUrl: result.fallbackUrl || issueUrl,
+        fallbackUrl: getApiErrorFallbackUrl(result) || issueUrl,
       });
       resetTurnstile();
     } catch {

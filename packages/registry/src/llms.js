@@ -76,6 +76,7 @@ export function buildEntryCitationFacts(entry, params = {}) {
       ),
     ],
     ["Author", clean(entry.author)],
+    ["License", clean(entry.license)],
     ["Last verified", entryLastVerified(entry)],
     ["Robots", entry.robotsIndex === false ? "noindex" : "indexable"],
   ];

@@ -48,5 +48,7 @@ describe("sitemap policy", () => {
     expect(source).toContain('"/llms-full.txt"');
     expect(source).toContain('"/feed.xml"');
     expect(source).toContain('"/atom.xml"');
+    expect(source).not.toContain("lastModified: new Date()");
+    expect(source).toContain("siteLastModified");
   });
 });

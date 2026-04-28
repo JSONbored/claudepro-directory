@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-import { isRateLimited } from "@/lib/api-security";
+import { apiError, apiJson, createApiHandler } from "@/lib/api/router";
 import { logApiError, logApiInfo, logApiWarn, sample } from "@/lib/api-logs";
 import { siteConfig } from "@/lib/site";
 
@@ -101,60 +100,48 @@ async function fetchShieldsFallback(
   }
 }
 
-export async function GET(request: Request) {
-  if (
-    isRateLimited({
-      request,
-      scope: "github-stats",
-      limit: 120,
-      windowMs: 60_000,
-    })
-  ) {
-    logApiWarn(request, "github.stats.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  const repo = parseRepo(siteConfig.githubUrl);
-  if (!repo) {
-    logApiError(request, "github.stats.invalid_repo_url");
-    return NextResponse.json({ error: "invalid_repo_url" }, { status: 500 });
-  }
-
-  try {
-    let payload = await fetchGitHubStats(repo.owner, repo.repo).catch(
-      async () => {
-        const fallback = await fetchShieldsFallback(repo.owner, repo.repo);
-        if (!fallback) throw new Error("github_and_shields_failed");
-        return fallback;
-      },
-    );
-
-    if (sample(0.05)) {
-      logApiInfo(request, "github.stats.sample", {
-        stars: payload.stars,
-        forks: payload.forks,
-      });
+export const GET = createApiHandler(
+  "githubStats.read",
+  async ({ request, requestId }) => {
+    const repo = parseRepo(siteConfig.githubUrl);
+    if (!repo) {
+      logApiError(request, "github.stats.invalid_repo_url");
+      return apiError("invalid_repo_url", 500, { requestId });
     }
 
-    return NextResponse.json(
-      {
-        repo: `${repo.owner}/${repo.repo}`,
-        ...payload,
-      },
-      {
-        headers: {
-          "cache-control":
-            "public, max-age=300, s-maxage=21600, stale-while-revalidate=86400",
+    try {
+      let payload = await fetchGitHubStats(repo.owner, repo.repo).catch(
+        async () => {
+          const fallback = await fetchShieldsFallback(repo.owner, repo.repo);
+          if (!fallback) throw new Error("github_and_shields_failed");
+          return fallback;
         },
-      },
-    );
-  } catch (error) {
-    logApiError(request, "github.stats.fetch_failed", {
-      error: error instanceof Error ? error.message : "unknown",
-    });
-    return NextResponse.json(
-      { error: "upstream_unavailable" },
-      { status: 502 },
-    );
-  }
-}
+      );
+
+      if (sample(0.05)) {
+        logApiInfo(request, "github.stats.sample", {
+          stars: payload.stars,
+          forks: payload.forks,
+        });
+      }
+
+      return apiJson(
+        {
+          repo: `${repo.owner}/${repo.repo}`,
+          ...payload,
+        },
+        {
+          headers: {
+            "cache-control":
+              "public, max-age=300, s-maxage=21600, stale-while-revalidate=86400",
+          },
+        },
+      );
+    } catch (error) {
+      logApiError(request, "github.stats.fetch_failed", {
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      return apiError("upstream_unavailable", 502, { requestId });
+    }
+  },
+);

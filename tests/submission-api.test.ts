@@ -141,7 +141,7 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
-      error: "invalid_submission",
+      error: { code: "invalid_submission" },
     });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -157,9 +157,13 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      error: "duplicate_slug",
-      category: "mcp",
-      slug: "direct-submit-api-asset",
+      error: {
+        code: "duplicate_slug",
+        details: {
+          category: "mcp",
+          slug: "direct-submit-api-asset",
+        },
+      },
     });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -193,10 +197,14 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(409);
     await expect(response.json()).resolves.toMatchObject({
-      error: "duplicate_pending_issue",
-      category: "mcp",
-      slug: "direct-submit-api-asset",
-      issueNumber: 77,
+      error: {
+        code: "duplicate_pending_issue",
+        details: {
+          category: "mcp",
+          slug: "direct-submit-api-asset",
+          issueNumber: 77,
+        },
+      },
     });
     expect(fetch).toHaveBeenCalledTimes(1);
   });
@@ -231,7 +239,7 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(400);
     await expect(response.json()).resolves.toMatchObject({
-      error: "turnstile_failed",
+      error: { code: "turnstile_failed" },
     });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -250,7 +258,7 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(503);
     await expect(response.json()).resolves.toMatchObject({
-      error: "turnstile_not_configured",
+      error: { code: "turnstile_not_configured" },
     });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -267,8 +275,10 @@ describe("website submission API", () => {
 
     expect(response.status).toBe(503);
     const body = await response.json();
-    expect(body).toMatchObject({ error: "submissions_not_configured" });
-    expect(String(body.fallbackUrl)).toContain(
+    expect(body).toMatchObject({
+      error: { code: "submissions_not_configured" },
+    });
+    expect(String(body.error.details.fallbackUrl)).toContain(
       "https://github.com/JSONbored/claudepro-directory/issues/new",
     );
     expect(fetch).not.toHaveBeenCalled();
@@ -301,6 +311,8 @@ describe("website submission API", () => {
       ),
     );
     expect(limited.status).toBe(429);
-    await expect(limited.json()).resolves.toEqual({ error: "rate_limited" });
+    await expect(limited.json()).resolves.toMatchObject({
+      error: { code: "rate_limited" },
+    });
   });
 });

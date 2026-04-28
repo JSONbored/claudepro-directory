@@ -13,7 +13,7 @@ import { buildItemListJsonLd } from "@heyclaude/registry/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Discover Claude tools, skills, MCP servers, and workflows",
   description:
-    "Explore a GitHub-native directory of Claude agents, MCP servers, skills, commands, hooks, rules, and practical guides.",
+    "Explore a GitHub-native directory of Claude agents, MCP servers, skills, commands, hooks, rules, guides, and AI workflow tools.",
   path: "/",
   keywords: [
     "claude",

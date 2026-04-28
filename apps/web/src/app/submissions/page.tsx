@@ -30,7 +30,7 @@ export const revalidate = 300;
 export const metadata: Metadata = buildPageMetadata({
   title: "Submission queue",
   description:
-    "Track open HeyClaude content submissions that are import-ready or need changes.",
+    "Track open HeyClaude content submissions, review status, import readiness, and maintainer feedback before entries become public.",
   path: "/submissions",
   keywords: ["heyclaude submissions", "claude resource submission queue"],
 });

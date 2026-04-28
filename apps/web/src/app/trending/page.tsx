@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Popular, trending, and new Claude resources",
   description:
-    "Browse HeyClaude resources grouped by source-backed popularity, freshness, and copy-ready utility.",
+    "Browse popular, fresh, and copy-ready HeyClaude resources grouped by source-backed signals, registry updates, and practical AI utility.",
   path: "/trending",
 });
 

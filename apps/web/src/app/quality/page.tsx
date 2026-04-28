@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "HeyClaude registry quality",
   description:
-    "Content quality, provenance, SEO, and maintenance signals for the HeyClaude registry.",
+    "Review HeyClaude registry quality, provenance, package validation, SEO coverage, source signals, and maintenance readiness across content.",
   path: "/quality",
   keywords: [
     "heyclaude quality",

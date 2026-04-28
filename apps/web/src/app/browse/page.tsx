@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Browse the HeyClaude directory",
   description:
-    "Search and filter across Claude agents, MCP servers, skills, commands, hooks, rules, guides, and collections.",
+    "Search and filter HeyClaude entries for Claude agents, MCP servers, skills, commands, hooks, rules, guides, and curated collections.",
   path: "/browse",
   keywords: [
     "browse claude tools",

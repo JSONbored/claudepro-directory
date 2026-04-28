@@ -1,12 +1,14 @@
-import { NextResponse } from "next/server";
-
 import {
-  hasBodyWithinLimit,
-  hasJsonContentType,
-  isAllowedOrigin,
-  isRateLimited,
-} from "@/lib/api-security";
-import { logApiWarn } from "@/lib/api-logs";
+  communitySignalsBodySchema,
+  communitySignalsQuerySchema,
+} from "@/lib/api/contracts";
+import {
+  apiError,
+  apiJson,
+  createApiHandler,
+  type InferApiBody,
+  type InferApiQuery,
+} from "@/lib/api/router";
 import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
 
 const SIGNAL_TYPES = ["used", "works", "broken"] as const;
@@ -21,28 +23,6 @@ type SignalRow = {
   signal_type: SignalType;
   count: number;
 };
-
-type SignalPayload = {
-  targetKind?: string;
-  targetKey?: string;
-  signalType?: string;
-  clientId?: string;
-  active?: boolean;
-};
-
-function jsonResponse(
-  payload: unknown,
-  status = 200,
-  headers?: HeadersInit,
-): NextResponse {
-  return NextResponse.json(payload, {
-    status,
-    headers: {
-      "cache-control": "no-store",
-      ...headers,
-    },
-  });
-}
 
 function normalizeTargetKind(
   value: string | null | undefined,
@@ -125,119 +105,76 @@ async function safeCounts(targetKind: TargetKind, targetKey: string) {
   }
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const targetKind = normalizeTargetKind(url.searchParams.get("targetKind"));
-  const targetKey = normalizeTargetKey(url.searchParams.get("targetKey"));
+export const GET = createApiHandler(
+  "communitySignals.read",
+  async ({ query, requestId }) => {
+    const payload = query as InferApiQuery<typeof communitySignalsQuerySchema>;
+    const targetKind = normalizeTargetKind(payload.targetKind);
+    const targetKey = normalizeTargetKey(payload.targetKey);
 
-  if (!targetKind || !targetKey) {
-    return jsonResponse(
-      {
-        ok: false,
-        error:
+    if (!targetKind || !targetKey) {
+      return apiError("invalid_payload", 400, {
+        requestId,
+        message:
           "Provide targetKind as entry/tool and targetKey as entry:<category>/<slug> or tool:<slug>.",
-      },
-      400,
-    );
-  }
-
-  const { available, counts } = await safeCounts(targetKind, targetKey);
-  return jsonResponse({
-    ok: true,
-    available,
-    targetKind,
-    targetKey,
-    counts,
-  });
-}
-
-export async function POST(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "community_signals.forbidden_origin");
-    return jsonResponse({ ok: false, error: "Invalid request origin." }, 403);
-  }
-
-  if (!hasBodyWithinLimit(request, 4 * 1024)) {
-    return jsonResponse(
-      { ok: false, error: "Request body is too large." },
-      413,
-    );
-  }
-
-  if (!hasJsonContentType(request)) {
-    return jsonResponse(
-      { ok: false, error: "Expected application/json request body." },
-      415,
-    );
-  }
-
-  if (
-    isRateLimited({
-      request,
-      scope: "community-signals",
-      limit: 30,
-      windowMs: 60_000,
-    })
-  ) {
-    return jsonResponse(
-      { ok: false, error: "Too many signal updates. Try again shortly." },
-      429,
-    );
-  }
-
-  let payload: SignalPayload;
-  try {
-    payload = (await request.json()) as SignalPayload;
-  } catch {
-    return jsonResponse(
-      { ok: false, error: "Invalid JSON request body." },
-      400,
-    );
-  }
-
-  const targetKind = normalizeTargetKind(payload.targetKind);
-  const targetKey = normalizeTargetKey(payload.targetKey);
-  const signalType = normalizeSignalType(payload.signalType);
-  const clientId = normalizeClientId(payload.clientId);
-
-  if (!targetKind || !targetKey || !signalType || !clientId) {
-    return jsonResponse(
-      {
-        ok: false,
-        error: "Provide targetKind, targetKey, signalType, and clientId.",
-      },
-      400,
-    );
-  }
-
-  try {
-    const db = await getSiteDb();
-    if (!db) {
-      return jsonResponse(
-        {
-          ok: true,
-          stored: false,
-          available: false,
-          targetKind,
-          targetKey,
-          counts: { ...ZERO_COUNTS },
-        },
-        200,
-      );
+      });
     }
 
-    if (payload.active === false) {
-      await db
-        .prepare(
-          `DELETE FROM community_signals
+    const { available, counts } = await safeCounts(targetKind, targetKey);
+    return apiJson({
+      ok: true,
+      available,
+      targetKind,
+      targetKey,
+      counts,
+    });
+  },
+);
+
+export const POST = createApiHandler(
+  "communitySignals.write",
+  async ({ body, requestId }) => {
+    const payload = body as InferApiBody<typeof communitySignalsBodySchema>;
+    const targetKind = normalizeTargetKind(payload.targetKind);
+    const targetKey = normalizeTargetKey(payload.targetKey);
+    const signalType = normalizeSignalType(payload.signalType);
+    const clientId = normalizeClientId(payload.clientId);
+
+    if (!targetKind || !targetKey || !signalType || !clientId) {
+      return apiError("invalid_payload", 400, {
+        requestId,
+        message: "Provide targetKind, targetKey, signalType, and clientId.",
+      });
+    }
+
+    try {
+      const db = await getSiteDb();
+      if (!db) {
+        return apiJson(
+          {
+            ok: true,
+            stored: false,
+            available: false,
+            targetKind,
+            targetKey,
+            counts: { ...ZERO_COUNTS },
+          },
+          { status: 200 },
+        );
+      }
+
+      if (payload.active === false) {
+        await db
+          .prepare(
+            `DELETE FROM community_signals
            WHERE target_kind = ? AND target_key = ? AND signal_type = ? AND client_id = ?`,
-        )
-        .bind(targetKind, targetKey, signalType, clientId)
-        .run();
-    } else {
-      await db
-        .prepare(
-          `INSERT INTO community_signals (
+          )
+          .bind(targetKind, targetKey, signalType, clientId)
+          .run();
+      } else {
+        await db
+          .prepare(
+            `INSERT INTO community_signals (
              target_kind,
              target_key,
              signal_type,
@@ -248,38 +185,39 @@ export async function POST(request: Request) {
            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
            ON CONFLICT(target_kind, target_key, signal_type, client_id)
            DO UPDATE SET updated_at = CURRENT_TIMESTAMP`,
-        )
-        .bind(targetKind, targetKey, signalType, clientId)
-        .run();
-    }
+          )
+          .bind(targetKind, targetKey, signalType, clientId)
+          .run();
+      }
 
-    return jsonResponse(
-      {
-        ok: true,
-        stored: true,
-        available: true,
-        targetKind,
-        targetKey,
-        counts: await readCounts(db, targetKind, targetKey),
-      },
-      200,
-    );
-  } catch (error) {
-    if (!isExpectedUnavailableD1Error(error)) {
-      console.warn("[community-signals] failed to store signal", error);
-    }
+      return apiJson(
+        {
+          ok: true,
+          stored: true,
+          available: true,
+          targetKind,
+          targetKey,
+          counts: await readCounts(db, targetKind, targetKey),
+        },
+        { status: 200 },
+      );
+    } catch (error) {
+      if (!isExpectedUnavailableD1Error(error)) {
+        console.warn("[community-signals] failed to store signal", error);
+      }
 
-    const { counts } = await safeCounts(targetKind, targetKey);
-    return jsonResponse(
-      {
-        ok: true,
-        stored: false,
-        available: false,
-        targetKind,
-        targetKey,
-        counts,
-      },
-      200,
-    );
-  }
-}
+      const { counts } = await safeCounts(targetKind, targetKey);
+      return apiJson(
+        {
+          ok: true,
+          stored: false,
+          available: false,
+          targetKind,
+          targetKey,
+          counts,
+        },
+        { status: 200 },
+      );
+    }
+  },
+);

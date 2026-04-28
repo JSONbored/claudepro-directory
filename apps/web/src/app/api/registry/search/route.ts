@@ -1,30 +1,9 @@
-import { NextResponse } from "next/server";
 import type { SearchDocument } from "@heyclaude/registry";
 
-import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
-import { logApiWarn } from "@/lib/api-logs";
+import { registrySearchQuerySchema } from "@/lib/api/contracts";
+import { createApiHandler, type InferApiQuery } from "@/lib/api/router";
 import { getSearchIndex } from "@/lib/content";
 import { cachedJsonResponse } from "@/lib/http-cache";
-
-function normalizeLimit(value: string | null) {
-  const parsed = Number(value ?? 20);
-  if (!Number.isFinite(parsed)) return 20;
-  return Math.max(1, Math.min(50, Math.trunc(parsed)));
-}
-
-function normalizeCategory(value: string | null) {
-  const normalized = String(value ?? "")
-    .trim()
-    .toLowerCase();
-  return /^[a-z0-9-]+$/.test(normalized) ? normalized : "";
-}
-
-function normalizePlatform(value: string | null) {
-  const normalized = String(value ?? "")
-    .trim()
-    .toLowerCase();
-  return /^[a-z0-9][a-z0-9 -]{0,48}$/.test(normalized) ? normalized : "";
-}
 
 function matchesQuery(entry: SearchDocument, query: string) {
   if (!query) return true;
@@ -51,54 +30,38 @@ function matchesPlatform(entry: SearchDocument, platform: string) {
   );
 }
 
-export async function GET(request: Request) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "registry.search.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
+export const GET = createApiHandler(
+  "registry.search",
+  async ({ request, query: parsedQuery }) => {
+    const {
+      q: query,
+      category,
+      platform,
+      limit,
+    } = parsedQuery as InferApiQuery<typeof registrySearchQuerySchema>;
 
-  if (
-    isRateLimited({
+    const entries = await getSearchIndex();
+    const results = entries
+      .filter((entry) => !category || entry.category === category)
+      .filter((entry) => matchesPlatform(entry, platform))
+      .filter((entry) => matchesQuery(entry, query))
+      .slice(0, limit);
+
+    return cachedJsonResponse(
       request,
-      scope: "registry-search",
-      limit: 120,
-      windowMs: 60_000,
-    })
-  ) {
-    logApiWarn(request, "registry.search.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  const url = new URL(request.url);
-  const query = String(url.searchParams.get("q") ?? "")
-    .trim()
-    .toLowerCase()
-    .slice(0, 120);
-  const category = normalizeCategory(url.searchParams.get("category"));
-  const platform = normalizePlatform(url.searchParams.get("platform"));
-  const limit = normalizeLimit(url.searchParams.get("limit"));
-
-  const entries = await getSearchIndex();
-  const results = entries
-    .filter((entry) => !category || entry.category === category)
-    .filter((entry) => matchesPlatform(entry, platform))
-    .filter((entry) => matchesQuery(entry, query))
-    .slice(0, limit);
-
-  return cachedJsonResponse(
-    request,
-    {
-      schemaVersion: 1,
-      query,
-      category: category || "all",
-      platform: platform || "all",
-      count: results.length,
-      results,
-    },
-    {
-      headers: {
-        "cache-control": "public, max-age=60, stale-while-revalidate=600",
+      {
+        schemaVersion: 1,
+        query,
+        category: category || "all",
+        platform: platform || "all",
+        count: results.length,
+        results,
       },
-    },
-  );
-}
+      {
+        headers: {
+          "cache-control": "public, max-age=60, stale-while-revalidate=600",
+        },
+      },
+    );
+  },
+);

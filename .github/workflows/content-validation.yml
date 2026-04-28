@@ -101,6 +101,9 @@ jobs:
       - name: Validate issue templates
         run: pnpm validate:issue-templates
 
+      - name: Validate generated OpenAPI schema
+        run: pnpm validate:openapi
+
       - name: Validate downloadable packages
         run: pnpm validate:packages
 

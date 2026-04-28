@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "HeyClaude Registry API",
   description:
-    "Use the read-only HeyClaude Registry API for manifest, categories, search, entry detail, and per-entry LLM exports.",
+    "Use the read-only HeyClaude Registry API for manifests, categories, search, entry details, feeds, OpenAPI docs, and per-entry LLM exports.",
   path: "/api-docs",
   keywords: ["heyclaude api", "claude directory api", "registry api"],
 });

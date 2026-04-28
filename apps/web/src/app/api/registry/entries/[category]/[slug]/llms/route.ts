@@ -1,44 +1,27 @@
-import { NextResponse } from "next/server";
-
-import { isAllowedOrigin, isRateLimited } from "@/lib/api-security";
-import { logApiWarn } from "@/lib/api-logs";
+import { entryParamsSchema } from "@/lib/api/contracts";
+import {
+  apiError,
+  createApiHandler,
+  type InferApiParams,
+} from "@/lib/api/router";
 import { getEntryLlmsText, isSafeContentPathPart } from "@/lib/content";
 import { cachedTextResponse } from "@/lib/http-cache";
 
-type EntryLlmsApiRouteProps = {
-  params: Promise<{ category: string; slug: string }>;
-};
+export const GET = createApiHandler(
+  "registry.entryLlms",
+  async ({ request, params, requestId }) => {
+    const { category, slug } = params as InferApiParams<
+      typeof entryParamsSchema
+    >;
+    if (!isSafeContentPathPart(category) || !isSafeContentPathPart(slug)) {
+      return apiError("not_found", 404, { requestId });
+    }
 
-export async function GET(
-  request: Request,
-  { params }: EntryLlmsApiRouteProps,
-) {
-  if (!isAllowedOrigin(request)) {
-    logApiWarn(request, "registry.entry_llms.forbidden_origin");
-    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
-  }
+    const text = await getEntryLlmsText(category, slug);
+    if (!text) {
+      return apiError("not_found", 404, { requestId });
+    }
 
-  if (
-    isRateLimited({
-      request,
-      scope: "registry-entry-llms",
-      limit: 180,
-      windowMs: 60_000,
-    })
-  ) {
-    logApiWarn(request, "registry.entry_llms.rate_limited");
-    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
-  }
-
-  const { category, slug } = await params;
-  if (!isSafeContentPathPart(category) || !isSafeContentPathPart(slug)) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-
-  const text = await getEntryLlmsText(category, slug);
-  if (!text) {
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
-  }
-
-  return cachedTextResponse(request, text);
-}
+    return cachedTextResponse(request, text);
+  },
+);

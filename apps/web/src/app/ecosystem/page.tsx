@@ -13,7 +13,7 @@ import {
 export const metadata: Metadata = buildPageMetadata({
   title: "Claude ecosystem board",
   description:
-    "A HeyClaude planning surface for ecosystem news, releases, events, and community updates.",
+    "Track Claude ecosystem releases, package updates, events, community notes, and HeyClaude registry signals in one planning surface.",
   path: "/ecosystem",
 });
 
