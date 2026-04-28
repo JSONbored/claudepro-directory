@@ -38,6 +38,29 @@
           "placeholder": "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json"
         }
       ]
+    },
+    {
+      "name": "jobs",
+      "title": "Browse HeyClaude Jobs",
+      "description": "Browse active HeyClaude jobs, review role details, and open external apply links.",
+      "mode": "view",
+      "keywords": [
+        "jobs",
+        "claude",
+        "ai",
+        "mcp",
+        "agents"
+      ],
+      "preferences": [
+        {
+          "name": "feedUrlOverride",
+          "title": "Developer Feed URL Override",
+          "description": "Optional maintainer-only override for testing preview feeds. Leave blank for the production HeyClaude feed.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json"
+        }
+      ]
     }
   ],
   "scripts": {

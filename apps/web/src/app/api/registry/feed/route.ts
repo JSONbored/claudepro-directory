@@ -26,6 +26,7 @@ export const GET = createApiHandler("registry.feed", async ({ request }) => {
       diff: "/api/registry/diff?since={hash-or-date}&limit=100",
       entry: "/api/registry/entries/{category}/{slug}",
       entryLlms: "/api/registry/entries/{category}/{slug}/llms",
+      jobs: "/api/jobs?limit=100",
       ecosystemFeed: "/data/ecosystem-feed.json",
       mcpRegistryFeed: "/data/mcp-registry-feed.json",
       pluginExportFeed: "/data/plugin-export-feed.json",

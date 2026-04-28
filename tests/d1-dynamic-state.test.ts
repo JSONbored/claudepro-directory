@@ -12,6 +12,7 @@ import {
   toggleVote,
 } from "../apps/web/src/lib/votes";
 import {
+  buildPublicJobsIndex,
   normalizeJobLocation,
   queryActiveJobs,
 } from "../apps/web/src/lib/jobs";
@@ -246,6 +247,33 @@ describe("D1 dynamic state helpers", () => {
         requirements: ["TypeScript"],
       },
     ]);
+
+    const publicIndex = buildPublicJobsIndex(
+      await queryActiveJobs(db),
+      "https://heyclau.de",
+    );
+    expect(publicIndex).toMatchObject({
+      schemaVersion: 1,
+      kind: "jobs-index",
+      count: 1,
+      entries: [
+        {
+          slug: "ai-systems-engineer",
+          webUrl: "https://heyclau.de/jobs/ai-systems-engineer",
+          sourceLabel: "Employer submitted",
+          applySourceLabel: "External apply",
+          lastVerifiedAt: "2026-04-27T00:00:00Z",
+          labels: expect.arrayContaining([
+            "Featured",
+            "Claimed employer",
+            "Remote",
+            "Compensation listed",
+          ]),
+        },
+      ],
+    });
+    expect(publicIndex.entries[0]).not.toHaveProperty("postedByEmail");
+    expect(publicIndex.entries[0]).not.toHaveProperty("paidPlacementExpiresAt");
   });
 
   it("normalizes job locations without re-wrapping abbreviations", () => {

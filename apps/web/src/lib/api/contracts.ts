@@ -36,6 +36,16 @@ const optionalHttpsUrlSchema = z
   .optional()
   .default("");
 
+export const publicJobsQuerySchema = z.object({
+  q: z.string().trim().toLowerCase().max(120).optional().default(""),
+  tier: z
+    .union([jobTierSchema, z.literal("all"), z.literal("")])
+    .optional()
+    .default("all"),
+  remote: z.enum(["all", "true", "false", ""]).optional().default("all"),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(100),
+});
+
 export const apiErrorEnvelopeSchema = z.object({
   ok: z.literal(false),
   error: z.object({
@@ -549,6 +559,23 @@ export const apiRouteDefinitions = {
       limit: 12,
       windowMs: 60_000,
       binding: "API_STRICT_RATE_LIMIT",
+    },
+  }),
+  "jobs.list": route({
+    id: "jobs.list",
+    method: "GET",
+    path: "/api/jobs",
+    summary: "List active reviewed jobs",
+    description:
+      "Returns active D1-backed job listings for public distribution surfaces such as the jobs board and Raycast. Only reviewed active jobs are returned; private lead, review, payment, and contact fields are excluded.",
+    tags: ["Jobs"],
+    originCheck: true,
+    querySchema: publicJobsQuerySchema,
+    rateLimit: {
+      scope: "jobs-list",
+      limit: 120,
+      windowMs: 60_000,
+      binding: "API_DYNAMIC_RATE_LIMIT",
     },
   }),
   "adminListingLeads.list": route({

@@ -51,6 +51,17 @@ export type JobListing = {
   isWorldwide?: boolean;
 };
 
+export type PublicJobListing = Omit<
+  JobListing,
+  "postedByEmail" | "paidPlacementExpiresAt" | "staleCheckCount"
+> & {
+  webUrl: string;
+  labels: string[];
+  sourceLabel: string;
+  applySourceLabel: string;
+  lastVerifiedAt?: string;
+};
+
 export type JobListingRow = {
   slug: string;
   title: string;
@@ -331,4 +342,84 @@ export async function getJobs(): Promise<JobListing[]> {
 export async function getJobBySlug(slug: string): Promise<JobListing | null> {
   const jobs = await getJobs();
   return jobs.find((item) => item.slug === slug) ?? null;
+}
+
+export function jobSourceLabel(job: Pick<JobListing, "source" | "sourceKind">) {
+  if (job.source === "curated") return "Editorially curated";
+  if (job.sourceKind === "official_ats") return "Official ATS page";
+  if (job.sourceKind === "employer_careers") return "Employer careers page";
+  return "Employer submitted";
+}
+
+function jobApplySourceLabel(job: Pick<JobListing, "sourceKind">) {
+  if (job.sourceKind === "official_ats") return "External apply via ATS";
+  if (job.sourceKind === "employer_careers") {
+    return "External apply via employer site";
+  }
+  return "External apply";
+}
+
+function jobLabels(job: JobListing) {
+  const labels = new Set<string>();
+  if (job.sponsored) labels.add("Sponsored");
+  else if (job.featured) labels.add("Featured");
+  if (job.source === "curated") labels.add("Editorially curated");
+  if (job.claimedEmployer) labels.add("Claimed employer");
+  if (job.isRemote) labels.add("Remote");
+  if (job.compensation) labels.add("Compensation listed");
+  return [...labels];
+}
+
+function latestJobTimestamp(jobs: PublicJobListing[]) {
+  const timestamps = jobs
+    .flatMap((job) => [
+      job.lastVerifiedAt,
+      job.sourceCheckedAt,
+      job.lastCheckedAt,
+      job.postedAt,
+      job.expiresAt,
+      job.firstSeenAt,
+    ])
+    .filter(Boolean)
+    .map((value) => Date.parse(String(value)))
+    .filter(Number.isFinite);
+
+  if (timestamps.length === 0) return "";
+  return new Date(Math.max(...timestamps)).toISOString();
+}
+
+export function toPublicJobListing(
+  job: JobListing,
+  siteUrl = "https://heyclau.de",
+): PublicJobListing {
+  const {
+    paidPlacementExpiresAt: _paidPlacementExpiresAt,
+    postedByEmail: _postedByEmail,
+    staleCheckCount: _staleCheckCount,
+    ...publicJob
+  } = job;
+  const lastVerifiedAt = job.sourceCheckedAt || job.lastCheckedAt;
+
+  return {
+    ...publicJob,
+    webUrl: new URL(`/jobs/${job.slug}`, siteUrl).toString(),
+    labels: jobLabels(job),
+    sourceLabel: jobSourceLabel(job),
+    applySourceLabel: jobApplySourceLabel(job),
+    ...(lastVerifiedAt ? { lastVerifiedAt } : {}),
+  };
+}
+
+export function buildPublicJobsIndex(
+  jobs: JobListing[],
+  siteUrl = "https://heyclau.de",
+) {
+  const entries = jobs.map((job) => toPublicJobListing(job, siteUrl));
+  return {
+    schemaVersion: 1,
+    kind: "jobs-index",
+    generatedAt: latestJobTimestamp(entries),
+    count: entries.length,
+    entries,
+  };
 }

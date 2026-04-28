@@ -30,6 +30,24 @@ import {
   loadEntryDetail,
   type RaycastTextCache,
 } from "../src/runtime";
+import {
+  buildJobMarkdown,
+  buildJobSummary,
+  buildPostJobUrl,
+  FAVORITE_JOBS_KEY,
+  filterJobs,
+  isRaycastJob,
+  jobKey,
+  jobsCacheKey,
+  JOBS_CACHE_KEY,
+  parseFavoriteJobKeys,
+  parseJobsFeed,
+  resolveJobsUrl,
+  serializeFavoriteJobKeys,
+  sortedJobFilterOptions,
+  type RaycastJob,
+} from "../src/jobs-feed";
+import { fetchFreshJobs, loadCachedJobs } from "../src/jobs-runtime";
 
 const sampleEntry: RaycastEntry = {
   category: "mcp",
@@ -49,6 +67,36 @@ const sampleEntry: RaycastEntry = {
   documentationUrl: "https://context7.com",
   downloadTrust: "external",
   verificationStatus: "validated",
+};
+
+const sampleJob: RaycastJob = {
+  slug: "ai-systems-engineer",
+  title: "AI Systems Engineer",
+  company: "Example Co",
+  companyUrl: "https://example.com",
+  location: "Remote",
+  description: "Build Claude-native workflow systems.",
+  type: "Full-time",
+  postedAt: "2026-04-28",
+  compensation: "$150K-$190K",
+  equity: "Offered",
+  benefits: ["Health benefits", "Remote work"],
+  responsibilities: ["Ship integrations"],
+  requirements: ["TypeScript"],
+  featured: true,
+  sponsored: false,
+  applyUrl: "https://example.com/jobs/ai-systems-engineer",
+  tier: "featured",
+  source: "curated",
+  sourceKind: "official_ats",
+  sourceUrl: "https://example.com/jobs/ai-systems-engineer",
+  sourceLabel: "Editorially curated",
+  applySourceLabel: "External apply via ATS",
+  lastVerifiedAt: "2026-04-28",
+  isRemote: true,
+  isWorldwide: true,
+  webUrl: "https://heyclau.de/jobs/ai-systems-engineer",
+  labels: ["Featured", "Editorially curated", "Remote", "Compensation listed"],
 };
 
 class MemoryCache implements RaycastTextCache {
@@ -156,6 +204,24 @@ describe("Raycast feed helpers", () => {
     );
   });
 
+  it("resolves jobs feeds from the selected HeyClaude host", () => {
+    const devJobs = resolveJobsUrl(
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+    );
+
+    assert.equal(resolveJobsUrl(""), "https://heyclau.de/api/jobs?limit=100");
+    assert.equal(
+      devJobs,
+      "https://heyclaude-dev.zeronode.workers.dev/api/jobs?limit=100",
+    );
+    assert.equal(jobsCacheKey(), JOBS_CACHE_KEY);
+    assert.match(jobsCacheKey(devJobs), /^heyclaude-jobs-index:/);
+    assert.equal(
+      buildPostJobUrl(devJobs),
+      "https://heyclaude-dev.zeronode.workers.dev/jobs/post",
+    );
+  });
+
   it("builds issue-first contribution URLs without local write targets", () => {
     const contributeUrl = new URL(buildContributeEntryUrl(sampleEntry));
     assert.equal(contributeUrl.origin, "https://heyclau.de");
@@ -187,12 +253,57 @@ describe("Raycast feed helpers", () => {
     });
   });
 
+  it("parses, filters, and summarizes Raycast jobs", () => {
+    const parsed = parseJobsFeed(
+      JSON.stringify({
+        generatedAt: "2026-04-28T00:00:00.000Z",
+        count: 2,
+        entries: [sampleJob, { slug: "broken" }],
+      }),
+    );
+
+    assert.equal(isRaycastJob(sampleJob), true);
+    assert.equal(parsed.generatedAt, "2026-04-28T00:00:00.000Z");
+    assert.deepEqual(parsed.entries, [sampleJob]);
+    assert.equal(jobKey(sampleJob), "ai-systems-engineer");
+    assert.deepEqual(
+      sortedJobFilterOptions().map((item) => item.value),
+      [
+        "all",
+        "favorites",
+        "featured",
+        "sponsored",
+        "remote",
+        "compensation",
+        "curated",
+        "claimed",
+      ],
+    );
+    assert.deepEqual(filterJobs([sampleJob], "featured", new Set()), [
+      sampleJob,
+    ]);
+    assert.deepEqual(filterJobs([sampleJob], "compensation", new Set()), [
+      sampleJob,
+    ]);
+    assert.deepEqual(
+      filterJobs([sampleJob], "favorites", new Set([sampleJob.slug])),
+      [sampleJob],
+    );
+    assert.match(buildJobMarkdown(sampleJob), /Apply on employer site/);
+    assert.match(buildJobSummary(sampleJob), /Compensation: \$150K-\$190K/);
+  });
+
   it("serializes favorites deterministically", () => {
     assert.deepEqual(parseFavoriteKeys(JSON.stringify(["b", "a", "a"])), [
       "a",
       "b",
     ]);
     assert.equal(serializeFavoriteKeys(new Set(["b", "a"])), '["a","b"]');
+    assert.deepEqual(parseFavoriteJobKeys(JSON.stringify(["b", "a", "a"])), [
+      "a",
+      "b",
+    ]);
+    assert.equal(serializeFavoriteJobKeys(new Set(["b", "a"])), '["a","b"]');
   });
 
   it("builds category filters and favorites without mutating ranking", () => {
@@ -215,7 +326,7 @@ describe("Raycast feed helpers", () => {
     ]);
   });
 
-  it("keeps the v1 extension read-only and registry-only", () => {
+  it("keeps the v1 extension read-only and non-mutating", () => {
     const source = readSourceFiles(path.join(process.cwd(), "src")).join("\n");
     const forbiddenPatterns = [
       /\bfrom\s+["'](?:node:)?fs(?:\/promises)?["']/,
@@ -234,11 +345,47 @@ describe("Raycast feed helpers", () => {
       /\.windsurf\//,
       /\bAGENTS\.md\b/,
       /\bGEMINI\.md\b/,
+      /\bADMIN_API_TOKEN\b/,
     ];
 
     for (const pattern of forbiddenPatterns) {
       assert.doesNotMatch(source, pattern);
     }
+  });
+
+  it("loads and refreshes cached jobs without polluting registry cache", async () => {
+    const cache = new MemoryCache();
+    const devFeed =
+      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
+    const devJobs = resolveJobsUrl(devFeed);
+
+    cache.set(
+      jobsCacheKey(devJobs),
+      JSON.stringify({
+        generatedAt: "2026-04-28T00:00:00.000Z",
+        entries: [sampleJob],
+      }),
+    );
+    assert.equal(loadCachedJobs(cache, devJobs).entries.length, 1);
+
+    let requestedUrl = "";
+    const feed = await fetchFreshJobs({
+      cache,
+      feedUrlOverride: devFeed,
+      fetchFn: async (input) => {
+        requestedUrl = String(input);
+        return response({
+          generatedAt: "2026-04-28T00:00:00.000Z",
+          count: 1,
+          entries: [sampleJob],
+        });
+      },
+    });
+
+    assert.equal(requestedUrl, devJobs);
+    assert.equal(feed.entries.length, 1);
+    assert.match(cache.get(jobsCacheKey(devJobs)) || "", /ai-systems-engineer/);
+    assert.equal(cache.get(CACHE_KEY), undefined);
   });
 
   it("loads and clears cached feed snapshots deterministically", () => {
