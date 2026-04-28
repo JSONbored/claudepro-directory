@@ -11,6 +11,9 @@ const REQUIRED_COLUMNS = [
   "description_md",
   "employment_type",
   "compensation_summary",
+  "equity_summary",
+  "bonus_summary",
+  "benefits_json",
   "responsibilities_json",
   "requirements_json",
   "apply_url",
@@ -42,6 +45,7 @@ const REQUIRED_INDEXES = [
   "idx_jobs_listings_review_queue",
   "idx_jobs_listings_source",
   "idx_jobs_listings_source_freshness",
+  "idx_jobs_listings_compensation_metadata",
 ];
 
 function parseArgs(argv) {

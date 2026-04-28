@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateJobPublicationQuality } from "@heyclaude/registry/commercial";
 
 const entryKeySchema = z.string().regex(/^[a-z0-9-]+:[a-z0-9-]+$/);
 const safeSlugSchema = z.string().regex(/^[a-z0-9-]+$/);
@@ -183,6 +184,9 @@ export const adminJobsUpsertBodySchema = z
     descriptionMd: z.string().trim().max(8000).optional().default(""),
     employmentType: z.string().trim().max(80).optional().default(""),
     compensationSummary: z.string().trim().max(160).optional().default(""),
+    equitySummary: z.string().trim().max(160).optional().default(""),
+    bonusSummary: z.string().trim().max(160).optional().default(""),
+    benefits: z.array(z.string().trim().min(2).max(180)).max(16).optional(),
     responsibilities: z
       .array(z.string().trim().min(2).max(240))
       .max(12)
@@ -223,7 +227,17 @@ export const adminJobsUpsertBodySchema = z
     isRemote: z.boolean().optional().default(true),
     isWorldwide: z.boolean().optional().default(false),
   })
-  .strict();
+  .strict()
+  .superRefine((job, ctx) => {
+    const report = validateJobPublicationQuality(job);
+    if (report.ok) return;
+    for (const message of report.errors) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message,
+      });
+    }
+  });
 
 export const adminJobsPatchBodySchema = z
   .object({

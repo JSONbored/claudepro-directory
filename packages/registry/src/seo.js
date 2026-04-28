@@ -262,13 +262,18 @@ export function buildJobPostingJsonLd(job, params = {}) {
 
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const url = absoluteSiteUrl(siteUrl, `/jobs/${job.slug}`);
+  const baseSalary = parseJobCompensation(job.compensation);
+  const jobBenefits = Array.isArray(job.benefits)
+    ? job.benefits.filter(Boolean).join("; ")
+    : undefined;
+  const description = buildJobPostingDescription(job);
 
   return {
     "@context": "https://schema.org",
     "@type": "JobPosting",
     "@id": `${url}#job`,
     title: job.title,
-    description: job.description,
+    description,
     datePosted: job.postedAt,
     validThrough: job.expiresAt,
     employmentType: job.type,
@@ -293,8 +298,100 @@ export function buildJobPostingJsonLd(job, params = {}) {
             addressLocality: job.location,
           },
         },
+    baseSalary,
+    jobBenefits: jobBenefits || undefined,
     url,
     directApply: false,
+  };
+}
+
+function buildJobPostingDescription(job) {
+  const parts = [];
+  const summary = cleanJobDescriptionText(job.description);
+  const details = cleanJobDescriptionText(job.descriptionMd);
+
+  if (summary) parts.push(summary);
+  if (details && details !== summary) parts.push(details);
+  if (Array.isArray(job.responsibilities) && job.responsibilities.length) {
+    parts.push(
+      `Responsibilities: ${job.responsibilities
+        .map(cleanJobDescriptionText)
+        .filter(Boolean)
+        .join(" ")}`,
+    );
+  }
+  if (Array.isArray(job.requirements) && job.requirements.length) {
+    parts.push(
+      `Requirements: ${job.requirements
+        .map(cleanJobDescriptionText)
+        .filter(Boolean)
+        .join(" ")}`,
+    );
+  }
+  if (job.compensation)
+    parts.push(`Salary: ${cleanJobDescriptionText(job.compensation)}.`);
+  if (job.equity) parts.push(`Equity: ${cleanJobDescriptionText(job.equity)}.`);
+  if (job.bonus) parts.push(`Bonus: ${cleanJobDescriptionText(job.bonus)}.`);
+  if (jobBenefitsFromJob(job)) {
+    parts.push(`Benefits: ${jobBenefitsFromJob(job)}.`);
+  }
+
+  return parts.filter(Boolean).join("\n\n").trim();
+}
+
+function cleanJobDescriptionText(value) {
+  return String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    .replace(/^\s*[-*]\s+/gm, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function jobBenefitsFromJob(job) {
+  return Array.isArray(job.benefits)
+    ? job.benefits.map(cleanJobDescriptionText).filter(Boolean).join("; ")
+    : "";
+}
+
+function parseJobCompensation(value) {
+  const text = String(value || "").trim();
+  if (!text) return undefined;
+  const match = text.match(
+    /([$€£])\s*([\d,.]+)\s*([kK])?\s*[–-]\s*(?:[$€£]\s*)?([\d,.]+)\s*([kK])?/,
+  );
+  if (!match) return undefined;
+
+  const currencyBySymbol = {
+    $: "USD",
+    "€": "EUR",
+    "£": "GBP",
+  };
+  const currency = currencyBySymbol[match[1]];
+  if (!currency) return undefined;
+
+  const parseAmount = (amount, suffix) => {
+    const numeric = Number(String(amount).replace(/,/g, ""));
+    if (!Number.isFinite(numeric)) return null;
+    return Math.round(numeric * (suffix?.toLowerCase() === "k" ? 1000 : 1));
+  };
+
+  const minValue = parseAmount(match[2], match[3]);
+  const maxValue = parseAmount(match[4], match[5] || match[3]);
+  if (!minValue || !maxValue) return undefined;
+
+  return {
+    "@type": "MonetaryAmount",
+    currency,
+    value: {
+      "@type": "QuantitativeValue",
+      minValue,
+      maxValue,
+      unitText: "YEAR",
+    },
   };
 }
 

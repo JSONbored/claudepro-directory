@@ -54,11 +54,14 @@ Current migrations include:
 - `0005_community_signals.sql` for used-this, works-for-me, and reported-broken listing signals
 - `0006_jobs_curation_and_claims.sql` for curated job source fields, claim leads, and stale job review states
 - `0007_jobs_admin_indexes.sql` for reviewed job admin queues, expiry checks, and paid placement windows
+- `0008_jobs_compensation_metadata.sql` for dedicated salary, equity, bonus, and benefits/perks job metadata
 
 The jobs board renders active reviewed D1 rows only. Curated, employer-submitted,
 claimed, featured, and sponsored jobs all go through the same private D1-backed
 review path. Closed, stale-review, archived, or expired roles are excluded from
-the public jobs index, sitemap, and JobPosting data.
+the public jobs index, sitemap, and JobPosting data. Compensation metadata is
+split into salary, equity, bonus, and benefits/perks fields so salary ranges can
+feed `JobPosting.baseSalary` truthfully without mixing in equity or bonus copy.
 
 Before a release, validate the jobs schema against local, dev, and production
 D1. Remote checks require a Cloudflare API token with D1 read access:

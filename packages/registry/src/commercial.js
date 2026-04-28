@@ -1,5 +1,13 @@
 export const LISTING_LEAD_KINDS = ["job", "tool", "claim"];
 export const COMMERCIAL_TIERS = ["free", "standard", "featured", "sponsored"];
+export const PAID_JOB_TIERS = ["standard", "featured", "sponsored"];
+export const JOB_PUBLICATION_QUALITY_RULES = {
+  summaryMinLength: 120,
+  descriptionMinLength: 300,
+  minimumResponsibilities: 3,
+  minimumRequirements: 3,
+  minimumBenefits: 2,
+};
 export const COMMERCIAL_PLACEMENT_TARGETS = ["job", "tool", "entry"];
 export const DISCLOSURE_STATES = [
   "editorial",
@@ -110,6 +118,130 @@ export function validateListingLeadPayload(payload = {}) {
       applyUrl,
       message,
     },
+  };
+}
+
+function textValue(value) {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function listValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(textValue).filter(Boolean);
+  }
+  if (typeof value === "string" && value.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(value);
+      return listValue(parsed);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function firstValue(...values) {
+  for (const value of values) {
+    const normalized = textValue(value);
+    if (normalized) return normalized;
+  }
+  return "";
+}
+
+function hasHttpsUrl(value) {
+  return /^https:\/\//i.test(textValue(value));
+}
+
+export function validateJobPublicationQuality(job = {}) {
+  const tier = normalizeCommercialTier(job.tier);
+  const status = textValue(job.status).toLowerCase();
+  const requiresGate = status === "active" && PAID_JOB_TIERS.includes(tier);
+  const errors = [];
+
+  if (!requiresGate) {
+    return { ok: true, required: false, errors };
+  }
+
+  const summary = firstValue(job.summary, job.description);
+  const details = firstValue(job.descriptionMd, job.description_md);
+  const responsibilities = listValue(
+    job.responsibilities ?? job.responsibilities_json,
+  );
+  const requirements = listValue(job.requirements ?? job.requirements_json);
+  const benefits = listValue(job.benefits ?? job.benefits_json);
+  const compensation = firstValue(
+    job.compensationSummary,
+    job.compensation_summary,
+    job.compensation,
+  );
+  const employmentType = firstValue(
+    job.employmentType,
+    job.employment_type,
+    job.type,
+  );
+  const sourceUrl = firstValue(job.sourceUrl, job.source_url, job.applyUrl);
+  const postedAt = firstValue(job.postedAt, job.posted_at);
+  const expiresAt = firstValue(job.expiresAt, job.expires_at);
+  const checkedAt = firstValue(
+    job.sourceCheckedAt,
+    job.source_checked_at,
+    job.lastCheckedAt,
+    job.last_checked_at,
+  );
+
+  if (summary.length < JOB_PUBLICATION_QUALITY_RULES.summaryMinLength) {
+    errors.push(
+      `paid active jobs require a ${JOB_PUBLICATION_QUALITY_RULES.summaryMinLength}+ character original summary`,
+    );
+  }
+  if (details.length < JOB_PUBLICATION_QUALITY_RULES.descriptionMinLength) {
+    errors.push(
+      `paid active jobs require ${JOB_PUBLICATION_QUALITY_RULES.descriptionMinLength}+ characters of original role detail`,
+    );
+  }
+  if (
+    responsibilities.length <
+    JOB_PUBLICATION_QUALITY_RULES.minimumResponsibilities
+  ) {
+    errors.push(
+      `paid active jobs require at least ${JOB_PUBLICATION_QUALITY_RULES.minimumResponsibilities} responsibilities`,
+    );
+  }
+  if (requirements.length < JOB_PUBLICATION_QUALITY_RULES.minimumRequirements) {
+    errors.push(
+      `paid active jobs require at least ${JOB_PUBLICATION_QUALITY_RULES.minimumRequirements} requirements`,
+    );
+  }
+  if (benefits.length < JOB_PUBLICATION_QUALITY_RULES.minimumBenefits) {
+    errors.push(
+      `paid active jobs require at least ${JOB_PUBLICATION_QUALITY_RULES.minimumBenefits} benefits or perks`,
+    );
+  }
+  if (!compensation) {
+    errors.push("paid active jobs require a salary or compensation range");
+  }
+  if (!employmentType) {
+    errors.push("paid active jobs require an employment type");
+  }
+  if (!hasHttpsUrl(sourceUrl)) {
+    errors.push("paid active jobs require an HTTPS source or apply URL");
+  }
+  if (!postedAt) {
+    errors.push("paid active jobs require a postedAt date");
+  }
+  if (!expiresAt) {
+    errors.push("paid active jobs require an expiresAt/validThrough date");
+  }
+  if (!checkedAt) {
+    errors.push("paid active jobs require a last source verification date");
+  }
+
+  return {
+    ok: errors.length === 0,
+    required: true,
+    errors,
   };
 }
 

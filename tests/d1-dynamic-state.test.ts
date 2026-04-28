@@ -11,7 +11,10 @@ import {
   queryVotesByClient,
   toggleVote,
 } from "../apps/web/src/lib/votes";
-import { queryActiveJobs } from "../apps/web/src/lib/jobs";
+import {
+  normalizeJobLocation,
+  queryActiveJobs,
+} from "../apps/web/src/lib/jobs";
 import {
   REQUIRED_JOB_COLUMNS,
   checkJobsSchema,
@@ -54,6 +57,13 @@ class FakeD1 implements D1DatabaseLike {
       return this.votesByClient.has(`${key}:${clientId}`)
         ? ({ voted: 1 } as T)
         : null;
+    }
+    if (
+      query.includes("FROM jobs_listings") &&
+      query.includes("WHERE slug = ?")
+    ) {
+      const slug = String(values[0]);
+      return (this.jobRows.find((row) => row.slug === slug) ?? null) as T;
     }
     return null;
   }
@@ -182,12 +192,16 @@ describe("D1 dynamic state helpers", () => {
         title: "AI Systems Engineer",
         company_name: "Example Co",
         company_url: "https://example.com",
-        location_text: "Remote",
+        location_text: "European Union",
         summary: "Build Claude-native workflow systems.",
-        description_md: null,
+        description_md:
+          "## Role details\n\nOwn AI systems across product integrations and workflow automation.",
         employment_type: "Full-time",
         posted_at: "2026-04-26T00:00:00Z",
         compensation_summary: "$150k-$190k",
+        equity_summary: "Offered",
+        bonus_summary: "Performance bonus eligible",
+        benefits_json: JSON.stringify(["Health benefits", "Remote work"]),
         responsibilities_json: JSON.stringify(["Ship integrations"]),
         requirements_json: JSON.stringify(["TypeScript"]),
         apply_url: "https://example.com/jobs/ai-systems-engineer",
@@ -216,15 +230,36 @@ describe("D1 dynamic state helpers", () => {
         title: "AI Systems Engineer",
         company: "Example Co",
         companyUrl: "https://example.com",
+        location: "EU (European Union)",
         featured: true,
         sponsored: false,
         sourceKind: "employer_submitted",
         claimedEmployer: true,
         paidPlacementExpiresAt: "2026-05-26T00:00:00Z",
+        descriptionMd:
+          "## Role details\n\nOwn AI systems across product integrations and workflow automation.",
+        compensation: "$150k-$190k",
+        equity: "Offered",
+        bonus: "Performance bonus eligible",
+        benefits: ["Health benefits", "Remote work"],
         responsibilities: ["Ship integrations"],
         requirements: ["TypeScript"],
       },
     ]);
+  });
+
+  it("normalizes job locations without re-wrapping abbreviations", () => {
+    expect(normalizeJobLocation("European Union")).toBe("EU (European Union)");
+    expect(normalizeJobLocation("EU (European Union)")).toBe(
+      "EU (European Union)",
+    );
+    expect(normalizeJobLocation("EU (EU (European Union))")).toBe(
+      "EU (European Union)",
+    );
+    expect(
+      normalizeJobLocation("San Francisco, California, United States"),
+    ).toBe("San Francisco, CA, US");
+    expect(normalizeJobLocation("Remote (EU)")).toBe("Remote (EU)");
   });
 
   it("checks jobs schema and updates private reviewed job rows through admin helpers", async () => {
@@ -232,7 +267,7 @@ describe("D1 dynamic state helpers", () => {
     await expect(checkJobsSchema(db)).resolves.toMatchObject({
       ok: true,
       missingColumns: [],
-      requiredMigration: "0006_jobs_curation_and_claims.sql",
+      requiredMigration: "0008_jobs_compensation_metadata.sql",
     });
     await expect(getJobsHealth(db)).resolves.toMatchObject({
       ok: true,
@@ -247,6 +282,10 @@ describe("D1 dynamic state helpers", () => {
       locationText: "Remote",
       summary:
         "Build reviewed Claude workflow systems with source verification, external apply links, and private D1-backed publication state.",
+      compensationSummary: "$150k-$190k",
+      equitySummary: "Offered",
+      bonusSummary: "Performance bonus eligible",
+      benefits: ["Health benefits", "Remote work"],
       applyUrl: "https://example.com/jobs/reviewed-ai-engineer",
       tier: "featured",
       status: "pending_review",
@@ -278,6 +317,92 @@ describe("D1 dynamic state helpers", () => {
     expect(db.runCalls.at(-1)?.query).toContain("stale_pending_review");
   });
 
+  it("blocks paid job activation until reviewed rows meet publication quality", async () => {
+    const db = new FakeD1();
+    db.jobRows = [
+      {
+        slug: "thin-sponsored-role",
+        title: "Thin Sponsored Role",
+        company_name: "Example Co",
+        company_url: "https://example.com",
+        location_text: "Remote",
+        summary: "Too short.",
+        description_md: null,
+        employment_type: null,
+        posted_at: null,
+        compensation_summary: null,
+        equity_summary: null,
+        bonus_summary: null,
+        benefits_json: null,
+        responsibilities_json: null,
+        requirements_json: null,
+        apply_url: "https://example.com/jobs/thin-sponsored-role",
+        tier: "sponsored",
+        status: "pending_review",
+        source: "manual",
+        source_kind: "employer_submitted",
+        source_url: "https://example.com/jobs/thin-sponsored-role",
+        first_seen_at: null,
+        last_checked_at: null,
+        source_checked_at: null,
+        stale_check_count: 0,
+        curation_note: null,
+        paid_placement_expires_at: null,
+        claimed_employer: 0,
+        posted_by_email: "jobs@example.com",
+        expires_at: null,
+        is_remote: 1,
+        is_worldwide: 0,
+      },
+    ];
+
+    await expect(
+      updateAdminJobState(db, {
+        slug: "thin-sponsored-role",
+        action: "activate",
+      }),
+    ).rejects.toMatchObject({
+      errors: expect.arrayContaining([
+        expect.stringContaining("300+ characters of original role detail"),
+      ]),
+    });
+
+    db.jobRows = [
+      {
+        ...db.jobRows[0],
+        summary:
+          "Build Claude-native developer workflow infrastructure for teams shipping production AI systems, with strong ownership over integrations and product quality.",
+        description_md:
+          "Own the public-facing role detail for a paid HeyClaude listing. This description explains the team context, product surface, AI workflow responsibilities, developer tooling expectations, source verification, and why the role matters to the Claude and MCP ecosystem. It is intentionally long enough to support useful search snippets and truthful JobPosting structured data.",
+        employment_type: "Full-time",
+        posted_at: "2026-04-28",
+        compensation_summary: "$150K – $190K",
+        benefits_json: JSON.stringify(["Health benefits", "Remote work"]),
+        responsibilities_json: JSON.stringify([
+          "Build production integrations for Claude and MCP developer workflows.",
+          "Partner with product and customer teams to prioritize high-signal automation work.",
+          "Maintain source-verified listing details as the role evolves.",
+        ]),
+        requirements_json: JSON.stringify([
+          "Professional TypeScript or backend engineering experience.",
+          "Comfort working with LLM applications and developer tooling.",
+          "Strong written communication for technical product surfaces.",
+        ]),
+        last_checked_at: "2026-04-28",
+        source_checked_at: "2026-04-28",
+        expires_at: "2026-05-28",
+      },
+    ];
+
+    await updateAdminJobState(db, {
+      slug: "thin-sponsored-role",
+      action: "activate",
+      checkedAt: "2026-04-28T00:00:00.000Z",
+    });
+    expect(db.runCalls.at(-1)?.query).toContain("status = ?");
+    expect(db.runCalls.at(-1)?.values).toContain("active");
+  });
+
   it("keeps dynamic-state migrations aligned with votes, jobs, leads, intent events, and community signals", () => {
     const migrationsDir = path.join(repoRoot, "apps/web/migrations");
     const votes = fs.readFileSync(
@@ -290,6 +415,10 @@ describe("D1 dynamic state helpers", () => {
     );
     const jobsCuration = fs.readFileSync(
       path.join(migrationsDir, "0006_jobs_curation_and_claims.sql"),
+      "utf8",
+    );
+    const jobsCompensation = fs.readFileSync(
+      path.join(migrationsDir, "0008_jobs_compensation_metadata.sql"),
       "utf8",
     );
     const leads = fs.readFileSync(
@@ -311,6 +440,8 @@ describe("D1 dynamic state helpers", () => {
     expect(jobsCuration).toContain("stale_pending_review");
     expect(jobsCuration).toContain("official_ats");
     expect(jobsCuration).toContain("paid_placement_expires_at");
+    expect(jobsCompensation).toContain("equity_summary");
+    expect(jobsCompensation).toContain("benefits_json");
     expect(jobs).toContain("is_worldwide");
     expect(leads).toContain("listing_leads");
     expect(jobsCuration).toContain("'claim'");

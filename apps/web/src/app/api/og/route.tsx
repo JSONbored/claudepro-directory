@@ -34,8 +34,8 @@ export const GET = createApiHandler("og.render", async ({ query }) => {
         width: "100%",
         height: "100%",
         display: "flex",
-        background: "#19131f",
-        color: "#f5f7f2",
+        background: "#151813",
+        color: "#EDE9F0",
         fontFamily:
           "Plus Jakarta Sans, Inter, ui-sans-serif, system-ui, sans-serif",
         position: "relative",
@@ -50,7 +50,7 @@ export const GET = createApiHandler("og.render", async ({ query }) => {
           width: 1200,
           height: 630,
           backgroundImage:
-            "radial-gradient(circle at 24px 24px, rgba(245,247,242,0.10) 1px, transparent 1px)",
+            "radial-gradient(circle at 24px 24px, rgba(237,233,240,0.10) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
           opacity: 0.36,
         }}
@@ -65,8 +65,8 @@ export const GET = createApiHandler("og.render", async ({ query }) => {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          border: "1px solid rgba(245,247,242,0.12)",
-          background: "rgba(11, 9, 15, 0.72)",
+          border: "1px solid rgba(61,66,55,0.88)",
+          background: "rgba(36, 39, 31, 0.76)",
           borderRadius: 40,
           padding: 52,
         }}
@@ -151,7 +151,7 @@ export const GET = createApiHandler("og.render", async ({ query }) => {
               maxWidth: 620,
               fontSize: 27,
               lineHeight: 1.35,
-              color: "#D7CEDB",
+              color: "#B9ABB9",
               letterSpacing: 0,
               textAlign: "center",
             }}
@@ -167,7 +167,7 @@ export const GET = createApiHandler("og.render", async ({ query }) => {
             alignItems: "center",
             gap: 24,
             fontSize: 23,
-            color: "#AFA4B6",
+            color: "#B9ABB9",
           }}
         >
           <span>{badge}</span>

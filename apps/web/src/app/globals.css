@@ -3,39 +3,39 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.9264 0.0041 121.5646);
-  --foreground: oklch(0.2718 0.057 311.6502);
-  --card: oklch(0.9691 0.0017 145.562);
-  --card-foreground: oklch(0.2718 0.057 311.6502);
-  --popover: oklch(0.9691 0.0017 145.562);
-  --popover-foreground: oklch(0.2718 0.057 311.6502);
-  --primary: oklch(0.7243 0.235 326.8277);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.8731 0.0071 124.4617);
-  --secondary-foreground: oklch(0.4362 0.0425 310.9389);
-  --muted: oklch(0.9264 0.0041 121.5646);
-  --muted-foreground: oklch(0.5482 0.0362 314.5072);
-  --accent: oklch(0.9352 0.0176 8.7814);
-  --accent-foreground: oklch(0.365 0.0483 312.0204);
+  --background: #f5f7f2;
+  --foreground: #2d1f3d;
+  --card: #fbfcf8;
+  --card-foreground: #2d1f3d;
+  --popover: #fbfcf8;
+  --popover-foreground: #2d1f3d;
+  --primary: #c855a0;
+  --primary-foreground: #f5f7f2;
+  --secondary: #e8ebe0;
+  --secondary-foreground: #2d1f3d;
+  --muted: #eef1ea;
+  --muted-foreground: #7a6e82;
+  --accent: #f4ddec;
+  --accent-foreground: #2d1f3d;
   --destructive: oklch(0.9237 0.1811 109.477);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.8731 0.0071 124.4617);
-  --input: oklch(0.8731 0.0071 124.4617);
-  --ring: oklch(0.7243 0.235 326.8277);
-  --chart-1: oklch(0.7243 0.235 326.8277);
-  --chart-2: oklch(0.6728 0.25 330.373);
-  --chart-3: oklch(0.6068 0.2304 331.3107);
-  --chart-4: oklch(0.5227 0.1927 330.5384);
-  --chart-5: oklch(0.4528 0.1513 329.1894);
-  --sidebar: oklch(0.8731 0.0071 124.4617);
-  --sidebar-foreground: oklch(0.2718 0.057 311.6502);
-  --sidebar-primary: oklch(0.7243 0.235 326.8277);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.9352 0.0176 8.7814);
-  --sidebar-accent-foreground: oklch(0.365 0.0483 312.0204);
-  --sidebar-border: oklch(0.8731 0.0071 124.4617);
-  --sidebar-ring: oklch(0.7243 0.235 326.8277);
-  --font-sans: Plus Jakarta Sans, sans-serif;
+  --destructive-foreground: #2d1f3d;
+  --border: #ddd8df;
+  --input: #ddd8df;
+  --ring: #c855a0;
+  --chart-1: #c855a0;
+  --chart-2: #d470b8;
+  --chart-3: #2d1f3d;
+  --chart-4: #7a6e82;
+  --chart-5: #e8ebe0;
+  --sidebar: #e8ebe0;
+  --sidebar-foreground: #2d1f3d;
+  --sidebar-primary: #c855a0;
+  --sidebar-primary-foreground: #f5f7f2;
+  --sidebar-accent: #f4ddec;
+  --sidebar-accent-foreground: #2d1f3d;
+  --sidebar-border: #ddd8df;
+  --sidebar-ring: #c855a0;
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
   --font-serif: Lora, serif;
   --font-mono: Roboto Mono, monospace;
   --radius: 1.25rem;
@@ -69,39 +69,39 @@
 }
 
 .dark {
-  --background: oklch(0.2296 0.0121 129.0654);
-  --foreground: oklch(0.9232 0.0206 311.0782);
-  --card: oklch(0.2876 0.0132 126.1691);
-  --card-foreground: oklch(0.9232 0.0206 311.0782);
-  --popover: oklch(0.2876 0.0132 126.1691);
-  --popover-foreground: oklch(0.9232 0.0206 311.0782);
-  --primary: oklch(0.7639 0.1963 323.7672);
-  --primary-foreground: oklch(0.2296 0.0121 129.0654);
-  --secondary: oklch(0.3431 0.0126 126.0436);
-  --secondary-foreground: oklch(0.8684 0.0151 312.2291);
-  --muted: oklch(0.2339 0.0121 129.0513);
-  --muted-foreground: oklch(0.7091 0.0304 313.275);
-  --accent: oklch(0.3965 0.0122 125.9599);
-  --accent-foreground: oklch(0.8684 0.0151 312.2291);
+  --background: #151813;
+  --foreground: #ede9f0;
+  --card: #24271f;
+  --card-foreground: #ede9f0;
+  --popover: #24271f;
+  --popover-foreground: #ede9f0;
+  --primary: #d470b8;
+  --primary-foreground: #151813;
+  --secondary: #2f3329;
+  --secondary-foreground: #ede9f0;
+  --muted: #1c2019;
+  --muted-foreground: #b9abb9;
+  --accent: #3d4237;
+  --accent-foreground: #ede9f0;
   --destructive: oklch(0.9237 0.1811 109.477);
-  --destructive-foreground: oklch(0.2296 0.0121 129.0654);
-  --border: oklch(0.3431 0.0126 126.0436);
-  --input: oklch(0.3431 0.0126 126.0436);
-  --ring: oklch(0.7639 0.1963 323.7672);
-  --chart-1: oklch(0.7639 0.1963 323.7672);
-  --chart-2: oklch(0.7243 0.235 326.8277);
-  --chart-3: oklch(0.6728 0.25 330.373);
-  --chart-4: oklch(0.6068 0.2304 331.3107);
-  --chart-5: oklch(0.5227 0.1927 330.5384);
-  --sidebar: oklch(0.3431 0.0126 126.0436);
-  --sidebar-foreground: oklch(0.9232 0.0206 311.0782);
-  --sidebar-primary: oklch(0.7639 0.1963 323.7672);
-  --sidebar-primary-foreground: oklch(0.2296 0.0121 129.0654);
-  --sidebar-accent: oklch(0.3965 0.0122 125.9599);
-  --sidebar-accent-foreground: oklch(0.8684 0.0151 312.2291);
-  --sidebar-border: oklch(0.3431 0.0126 126.0436);
-  --sidebar-ring: oklch(0.7639 0.1963 323.7672);
-  --font-sans: Plus Jakarta Sans, sans-serif;
+  --destructive-foreground: #151813;
+  --border: #3d4237;
+  --input: #3d4237;
+  --ring: #d470b8;
+  --chart-1: #d470b8;
+  --chart-2: #c855a0;
+  --chart-3: #ede9f0;
+  --chart-4: #b9abb9;
+  --chart-5: #3d4237;
+  --sidebar: #2f3329;
+  --sidebar-foreground: #ede9f0;
+  --sidebar-primary: #d470b8;
+  --sidebar-primary-foreground: #151813;
+  --sidebar-accent: #3d4237;
+  --sidebar-accent-foreground: #ede9f0;
+  --sidebar-border: #3d4237;
+  --sidebar-ring: #d470b8;
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
   --font-serif: Lora, serif;
   --font-mono: Roboto Mono, monospace;
   --shadow-2xs: 2px 2px 10px 4px hsl(0 0% 10.1961% / 0.09);
@@ -166,7 +166,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans: Plus Jakarta Sans, sans-serif;
+  --font-sans: var(--font-plus-jakarta), "Plus Jakarta Sans", sans-serif;
   --font-mono: Roboto Mono, monospace;
   --font-serif: Lora, serif;
   --radius-sm: calc(var(--radius) - 4px);
@@ -208,11 +208,14 @@
   }
 
   html {
+    background-color: var(--background);
     scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground;
+    display: flex;
+    flex-direction: column;
     margin: 0;
     min-height: 100vh;
     background:
@@ -232,8 +235,13 @@
         color-mix(in oklab, var(--background) 94%, black 6%) 100%
       );
     background-attachment: fixed, fixed, fixed;
+    background-color: var(--background);
     font-family: var(--font-sans);
     letter-spacing: var(--tracking-normal);
+  }
+
+  body > main {
+    flex: 1;
   }
 
   a {

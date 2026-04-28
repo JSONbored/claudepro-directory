@@ -275,5 +275,53 @@ describe("central API router security", () => {
       tier: "free",
       sourceKind: "employer_submitted",
     });
+
+    expect(() =>
+      apiRouteDefinitions["adminJobs.upsert"].bodySchema?.parse({
+        slug: "thin-sponsored-role",
+        title: "Thin Sponsored Role",
+        companyName: "Example Co",
+        summary: "Too short.",
+        applyUrl: "https://example.com/jobs/thin-sponsored-role",
+        tier: "sponsored",
+        status: "active",
+      }),
+    ).toThrow(/paid active jobs require/);
+
+    expect(
+      apiRouteDefinitions["adminJobs.upsert"].bodySchema?.parse({
+        slug: "reviewed-sponsored-role",
+        title: "Reviewed Sponsored Role",
+        companyName: "Example Co",
+        summary:
+          "Build Claude-native developer workflow infrastructure for teams shipping production AI systems, with strong ownership over integrations and product quality.",
+        descriptionMd:
+          "Own the public-facing role detail for a paid HeyClaude listing. This description explains the team context, product surface, AI workflow responsibilities, developer tooling expectations, source verification, and why the role matters to the Claude and MCP ecosystem. It is intentionally long enough to support useful search snippets and truthful JobPosting structured data.",
+        employmentType: "Full-time",
+        compensationSummary: "$150K – $190K",
+        benefits: ["Health benefits", "Remote work"],
+        responsibilities: [
+          "Build production integrations for Claude and MCP developer workflows.",
+          "Partner with product and customer teams to prioritize high-signal automation work.",
+          "Maintain source-verified listing details as the role evolves.",
+        ],
+        requirements: [
+          "Professional TypeScript or backend engineering experience.",
+          "Comfort working with LLM applications and developer tooling.",
+          "Strong written communication for technical product surfaces.",
+        ],
+        applyUrl: "https://example.com/jobs/reviewed-sponsored-role",
+        sourceUrl: "https://example.com/jobs/reviewed-sponsored-role",
+        postedAt: "2026-04-28",
+        expiresAt: "2026-05-28",
+        sourceCheckedAt: "2026-04-28",
+        tier: "sponsored",
+        status: "active",
+      }),
+    ).toMatchObject({
+      slug: "reviewed-sponsored-role",
+      status: "active",
+      tier: "sponsored",
+    });
   });
 });

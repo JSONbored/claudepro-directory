@@ -21,9 +21,13 @@ export type JobListing = {
   companyUrl?: string;
   location: string;
   description: string;
+  descriptionMd?: string;
   type?: string;
   postedAt?: string;
   compensation?: string;
+  equity?: string;
+  bonus?: string;
+  benefits?: string[];
   responsibilities?: string[];
   requirements?: string[];
   featured: boolean;
@@ -58,6 +62,9 @@ export type JobListingRow = {
   employment_type: string | null;
   posted_at: string | null;
   compensation_summary: string | null;
+  equity_summary: string | null;
+  bonus_summary: string | null;
+  benefits_json: string | null;
   responsibilities_json: string | null;
   requirements_json: string | null;
   apply_url: string | null;
@@ -86,11 +93,64 @@ function parseList(value: string | null | undefined) {
     if (!Array.isArray(parsed)) return undefined;
     const cleaned = parsed
       .map((item) => String(item ?? "").trim())
-      .filter(Boolean);
+      .filter(Boolean)
+      .filter((item) => !isGenericSeededJobBullet(item));
     return cleaned.length ? cleaned : undefined;
   } catch {
     return undefined;
   }
+}
+
+const GENERIC_SEEDED_JOB_BULLETS = new Set([
+  "build and maintain production-quality systems aligned with the role and company product surface.",
+  "collaborate across product, engineering, and customer workflows where ai-native tools and automation matter.",
+  "relevant engineering experience for the listed role and product domain.",
+  "comfort working with fast-moving ai, developer tooling, infrastructure, or product teams.",
+]);
+
+function isGenericSeededJobBullet(value: string) {
+  return GENERIC_SEEDED_JOB_BULLETS.has(value.trim().toLowerCase());
+}
+
+export function normalizeJobLocation(value: string | null | undefined) {
+  const location = String(value || "Remote")
+    .replace(/\s+,/g, ",")
+    .replace(/,\s+/g, ", ")
+    .replace(/\bEU \(EU \(European Union\)\)/g, "EU (European Union)")
+    .replace(/\bUS \(US \(United States\)\)/g, "US (United States)")
+    .trim();
+
+  if (
+    location.includes("EU (European Union)") ||
+    location.includes("US (United States)")
+  ) {
+    return location;
+  }
+
+  const exactReplacements: Record<string, string> = {
+    "European Union": "EU (European Union)",
+    "United States": "US (United States)",
+    "San Francisco Bay Area, California, United States": "SF Bay Area, CA, US",
+    "SF/San Francisco Bay Area": "SF Bay Area, CA, US",
+    "San Francisco, California, United States": "San Francisco, CA, US",
+    "San Francisco, CA, United States": "San Francisco, CA, US",
+    "Oakland, California, United States": "Oakland, CA, US",
+    "Chicago, Illinois, United States": "Chicago, IL, US",
+    "Austin, Texas, United States": "Austin, TX, US",
+    "New York City, New York, United States": "New York City, NY, US",
+    "London, Moorgate, United Kingdom": "London, UK",
+    "UK, UK, United Kingdom": "UK",
+    "Paris, Paris, France": "Paris, France",
+    "India, India": "India",
+    "London, Europe, France": "Remote (EU)",
+    "EMEA - Remote": "Remote (EMEA)",
+  };
+
+  if (exactReplacements[location]) return exactReplacements[location];
+  return location
+    .replace(/\bEuropean Union\b/g, "EU (European Union)")
+    .replace(/\bUnited States\b/g, "US")
+    .replace(/\bUnited Kingdom\b/g, "UK");
 }
 
 function mapTier(tier: string | null | undefined): JobTier {
@@ -143,11 +203,15 @@ export function mapJobListingRow(row: JobListingRow): JobListing {
     title: row.title,
     company: row.company_name,
     companyUrl: row.company_url || undefined,
-    location: row.location_text || "Remote",
+    location: normalizeJobLocation(row.location_text),
     description: row.summary || row.description_md || "",
+    descriptionMd: row.description_md || undefined,
     type: row.employment_type || undefined,
     postedAt: row.posted_at || undefined,
     compensation: row.compensation_summary || undefined,
+    equity: row.equity_summary || undefined,
+    bonus: row.bonus_summary || undefined,
+    benefits: parseList(row.benefits_json),
     responsibilities: parseList(row.responsibilities_json),
     requirements: parseList(row.requirements_json),
     featured: tier === "featured" || tier === "sponsored",
@@ -209,6 +273,9 @@ export async function queryActiveJobs(
         employment_type,
         posted_at,
         compensation_summary,
+        equity_summary,
+        bonus_summary,
+        benefits_json,
         responsibilities_json,
         requirements_json,
         apply_url,

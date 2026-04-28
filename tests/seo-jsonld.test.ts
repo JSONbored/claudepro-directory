@@ -202,9 +202,17 @@ describe("SEO JSON-LD policy", () => {
         title: "AI Engineer",
         company: "Example",
         description: "Build Claude workflows.",
+        descriptionMd:
+          "## Role brief\n\nOwn integrations across Claude workflow systems and developer-facing AI infrastructure.",
         postedAt: "2026-04-26",
         expiresAt: "2026-05-26",
         applyUrl: "https://example.com/jobs/ai-engineer",
+        compensation: "$150K – $190K",
+        equity: "Offered",
+        bonus: "Performance bonus eligible",
+        benefits: ["Health benefits", "Remote work"],
+        responsibilities: ["Ship Claude integrations"],
+        requirements: ["TypeScript experience"],
         isRemote: true,
       },
       { siteUrl: "https://heyclau.de" },
@@ -212,6 +220,29 @@ describe("SEO JSON-LD policy", () => {
     expect(realJobJsonLd?.["@type"]).toBe("JobPosting");
     expect(realJobJsonLd?.url).toBe("https://heyclau.de/jobs/real-job");
     expect(realJobJsonLd?.directApply).toBe(false);
+    expect(realJobJsonLd?.baseSalary).toMatchObject({
+      "@type": "MonetaryAmount",
+      currency: "USD",
+      value: {
+        "@type": "QuantitativeValue",
+        minValue: 150000,
+        maxValue: 190000,
+        unitText: "YEAR",
+      },
+    });
+    expect(realJobJsonLd?.jobBenefits).toBe("Health benefits; Remote work");
+    expect(realJobJsonLd?.description).toContain("Build Claude workflows.");
+    expect(realJobJsonLd?.description).toContain("Role brief");
+    expect(realJobJsonLd?.description).toContain(
+      "Responsibilities: Ship Claude integrations",
+    );
+    expect(realJobJsonLd?.description).toContain(
+      "Requirements: TypeScript experience",
+    );
+    expect(realJobJsonLd?.description).toContain("Equity: Offered.");
+    expect(realJobJsonLd?.description).toContain(
+      "Benefits: Health benefits; Remote work.",
+    );
     expect(
       buildJobPostingJsonLd(
         {

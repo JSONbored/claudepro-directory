@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { GeistMono, GeistSans } from "geist/font";
+import { GeistMono } from "geist/font";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactNode } from "react";
 import Script from "next/script";
 
@@ -17,6 +18,13 @@ import {
 } from "@heyclaude/registry/seo";
 
 import "./globals.css";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+  variable: "--font-plus-jakarta",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -83,7 +91,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`dark ${GeistSans.variable} ${GeistMono.variable}`}
+      className={`dark ${plusJakartaSans.variable} ${GeistMono.variable}`}
     >
       <body className="antialiased">
         <JsonLd data={siteJsonLd} />

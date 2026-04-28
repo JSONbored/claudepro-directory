@@ -16,7 +16,7 @@ export function BrandWordmark({
   href = "/",
   className,
   mode = "lockup",
-  variant = "soft",
+  variant = "solid",
   label = "HeyClaude",
 }: BrandWordmarkProps) {
   const mark =
@@ -25,10 +25,7 @@ export function BrandWordmark({
     ) : mode === "text" ? (
       <BrandLogotype label={label} className={cn("h-6", className)} />
     ) : (
-      <span className={cn("inline-flex items-center gap-2.5", className)}>
-        <BrandMark variant={variant} className="h-7 w-7" />
-        <BrandLogotype label={label} className="h-6" />
-      </span>
+      <BrandLogotype label={label} className={className} />
     );
 
   return (

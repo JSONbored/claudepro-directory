@@ -252,7 +252,7 @@ test.describe("site regression", () => {
   }) => {
     await page.goto("/jobs");
     await expect(
-      page.getByText(/only shows reviewed D1 rows with active status/i),
+      page.getByText(/Every listing is reviewed before it appears here/i),
     ).toBeVisible();
 
     const sitemapResponse = await page.request.get("/sitemap.xml");

@@ -36,7 +36,18 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
     if (!normalizedQuery) return jobs;
 
     return jobs.filter((job) =>
-      [job.title, job.company, job.location, job.description]
+      [
+        job.title,
+        job.company,
+        job.location,
+        job.description,
+        job.compensation,
+        job.equity,
+        job.bonus,
+        ...(job.benefits || []),
+        ...(job.responsibilities || []),
+        ...(job.requirements || []),
+      ]
         .join(" ")
         .toLowerCase()
         .includes(normalizedQuery),
@@ -78,9 +89,8 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
         {sortedJobs.length === 1 ? "listing" : "listings"} found
       </div>
       <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
-        The jobs board only shows reviewed D1 rows with active status. Roles can
-        be added, checked, expired, and archived without publishing job data to
-        the public repository.
+        Every listing is reviewed before it appears here, checked against the
+        employer source, and routed to the canonical external application page.
       </p>
 
       <div className="space-y-4">
@@ -111,7 +121,6 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                   <span>{job.company}</span>
                   {job.type ? <span>· {job.type}</span> : null}
                   <span>· {job.location}</span>
-                  {job.compensation ? <span>· {job.compensation}</span> : null}
                   {job.postedAt ? (
                     <span>· {formatPosted(job.postedAt)}</span>
                   ) : null}
@@ -122,6 +131,21 @@ export function JobsDirectory({ jobs }: JobsDirectoryProps) {
                 <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
                   {job.description}
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
+                    Salary: {job.compensation || "not published"}
+                  </span>
+                  {job.equity ? (
+                    <span className="inline-flex rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
+                      Equity: {job.equity}
+                    </span>
+                  ) : null}
+                  {job.bonus ? (
+                    <span className="inline-flex rounded-full border border-border bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
+                      Bonus: {job.bonus}
+                    </span>
+                  ) : null}
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <Link

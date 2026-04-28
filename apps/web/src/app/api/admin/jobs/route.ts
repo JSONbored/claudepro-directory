@@ -15,6 +15,7 @@ import { logApiError, logApiInfo, logApiWarn } from "@/lib/api-logs";
 import { getSiteDb } from "@/lib/db";
 import {
   checkJobsSchema,
+  JobPublicationQualityError,
   queryAdminJobs,
   updateAdminJobState,
   upsertAdminJob,
@@ -83,7 +84,21 @@ export const POST = createApiHandler(
     if (ready.response) return ready.response;
 
     const payload = body as InferApiBody<typeof adminJobsUpsertBodySchema>;
-    await upsertAdminJob(ready.db, payload);
+    try {
+      await upsertAdminJob(ready.db, payload);
+    } catch (caught) {
+      if (caught instanceof JobPublicationQualityError) {
+        logApiWarn(request, "admin.jobs.quality_gate_failed", {
+          slug: payload.slug,
+          errors: caught.errors,
+        });
+        return apiError("job_quality_gate_failed", 400, {
+          requestId,
+          details: caught.errors,
+        });
+      }
+      throw caught;
+    }
     logApiInfo(request, "admin.jobs.upserted", {
       slug: payload.slug,
       status: payload.status,
@@ -114,7 +129,22 @@ export const PATCH = createApiHandler(
     if (ready.response) return ready.response;
 
     const payload = body as InferApiBody<typeof adminJobsPatchBodySchema>;
-    await updateAdminJobState(ready.db, payload);
+    try {
+      await updateAdminJobState(ready.db, payload);
+    } catch (caught) {
+      if (caught instanceof JobPublicationQualityError) {
+        logApiWarn(request, "admin.jobs.quality_gate_failed", {
+          slug: payload.slug,
+          action: payload.action,
+          errors: caught.errors,
+        });
+        return apiError("job_quality_gate_failed", 400, {
+          requestId,
+          details: caught.errors,
+        });
+      }
+      throw caught;
+    }
     logApiInfo(request, "admin.jobs.updated", {
       slug: payload.slug,
       action: payload.action,

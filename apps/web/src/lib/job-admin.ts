@@ -8,8 +8,9 @@ import {
   mapJobListingRow,
   sortJobs,
 } from "@/lib/jobs";
+import { validateJobPublicationQuality } from "@heyclaude/registry/commercial";
 
-export const REQUIRED_JOBS_MIGRATION = "0006_jobs_curation_and_claims.sql";
+export const REQUIRED_JOBS_MIGRATION = "0008_jobs_compensation_metadata.sql";
 
 export const REQUIRED_JOB_COLUMNS = [
   "slug",
@@ -21,6 +22,9 @@ export const REQUIRED_JOB_COLUMNS = [
   "description_md",
   "employment_type",
   "compensation_summary",
+  "equity_summary",
+  "bonus_summary",
+  "benefits_json",
   "responsibilities_json",
   "requirements_json",
   "apply_url",
@@ -56,6 +60,39 @@ type JobStatusCountRow = {
 
 type JobAdminRow = Parameters<typeof mapJobListingRow>[0];
 
+const JOB_ADMIN_SELECT_FIELDS = `slug,
+        title,
+        company_name,
+        company_url,
+        location_text,
+        summary,
+        description_md,
+        employment_type,
+        posted_at,
+        compensation_summary,
+        equity_summary,
+        bonus_summary,
+        benefits_json,
+        responsibilities_json,
+        requirements_json,
+        apply_url,
+        tier,
+        status,
+        source,
+        source_kind,
+        source_url,
+        first_seen_at,
+        last_checked_at,
+        source_checked_at,
+        stale_check_count,
+        curation_note,
+        paid_placement_expires_at,
+        claimed_employer,
+        posted_by_email,
+        expires_at,
+        is_remote,
+        is_worldwide`;
+
 export type JobAdminListFilters = {
   status?: JobStatus | "";
   tier?: JobTier | "";
@@ -74,6 +111,9 @@ export type JobAdminUpsertInput = {
   descriptionMd?: string;
   employmentType?: string;
   compensationSummary?: string;
+  equitySummary?: string;
+  bonusSummary?: string;
+  benefits?: string[];
   responsibilities?: string[];
   requirements?: string[];
   applyUrl: string;
@@ -105,6 +145,23 @@ export type JobAdminAction =
   | "reactivate"
   | "expire"
   | "revalidate";
+
+export class JobPublicationQualityError extends Error {
+  errors: string[];
+
+  constructor(errors: string[]) {
+    super("Job listing does not meet publication quality requirements");
+    this.name = "JobPublicationQualityError";
+    this.errors = errors;
+  }
+}
+
+function assertJobPublicationQuality(job: Record<string, unknown>) {
+  const report = validateJobPublicationQuality(job);
+  if (!report.ok) {
+    throw new JobPublicationQualityError(report.errors);
+  }
+}
 
 function optionalText(value: string | undefined) {
   const normalized = String(value ?? "").trim();
@@ -193,35 +250,7 @@ export async function queryAdminJobs(
   const { results } = await db
     .prepare(
       `SELECT
-        slug,
-        title,
-        company_name,
-        company_url,
-        location_text,
-        summary,
-        description_md,
-        employment_type,
-        posted_at,
-        compensation_summary,
-        responsibilities_json,
-        requirements_json,
-        apply_url,
-        tier,
-        status,
-        source,
-        source_kind,
-        source_url,
-        first_seen_at,
-        last_checked_at,
-        source_checked_at,
-        stale_check_count,
-        curation_note,
-        paid_placement_expires_at,
-        claimed_employer,
-        posted_by_email,
-        expires_at,
-        is_remote,
-        is_worldwide
+        ${JOB_ADMIN_SELECT_FIELDS}
       FROM jobs_listings
       ${whereSql}
       ORDER BY
@@ -240,10 +269,30 @@ export async function queryAdminJobs(
   return sortJobs(results.map((row) => mapJobListingRow(row)));
 }
 
+export async function queryAdminJobBySlug(
+  db: D1DatabaseLike,
+  slug: string,
+): Promise<JobListing | null> {
+  const row = await db
+    .prepare(
+      `SELECT
+        ${JOB_ADMIN_SELECT_FIELDS}
+      FROM jobs_listings
+      WHERE slug = ?
+      LIMIT 1`,
+    )
+    .bind(slug)
+    .first<JobAdminRow>();
+
+  return row ? mapJobListingRow(row) : null;
+}
+
 export async function upsertAdminJob(
   db: D1DatabaseLike,
   input: JobAdminUpsertInput,
 ) {
+  assertJobPublicationQuality(input as Record<string, unknown>);
+
   await db
     .prepare(
       `INSERT INTO jobs_listings (
@@ -256,6 +305,9 @@ export async function upsertAdminJob(
         description_md,
         employment_type,
         compensation_summary,
+        equity_summary,
+        bonus_summary,
+        benefits_json,
         responsibilities_json,
         requirements_json,
         apply_url,
@@ -278,7 +330,7 @@ export async function upsertAdminJob(
         is_worldwide,
         created_at,
         updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
       ON CONFLICT(slug) DO UPDATE SET
         title = excluded.title,
         company_name = excluded.company_name,
@@ -288,6 +340,9 @@ export async function upsertAdminJob(
         description_md = excluded.description_md,
         employment_type = excluded.employment_type,
         compensation_summary = excluded.compensation_summary,
+        equity_summary = excluded.equity_summary,
+        bonus_summary = excluded.bonus_summary,
+        benefits_json = excluded.benefits_json,
         responsibilities_json = excluded.responsibilities_json,
         requirements_json = excluded.requirements_json,
         apply_url = excluded.apply_url,
@@ -320,6 +375,9 @@ export async function upsertAdminJob(
       optionalText(input.descriptionMd),
       optionalText(input.employmentType),
       optionalText(input.compensationSummary),
+      optionalText(input.equitySummary),
+      optionalText(input.bonusSummary),
+      optionalJsonList(input.benefits),
       optionalJsonList(input.responsibilities),
       optionalJsonList(input.requirements),
       input.applyUrl,
@@ -355,6 +413,16 @@ export async function updateAdminJobState(
 ) {
   const checkedAt = optionalText(input.checkedAt) ?? new Date().toISOString();
   const expiresAt = optionalText(input.expiresAt);
+
+  if (input.action === "activate" || input.action === "reactivate") {
+    const existing = await queryAdminJobBySlug(db, input.slug);
+    if (existing) {
+      assertJobPublicationQuality({
+        ...existing,
+        status: "active",
+      } as Record<string, unknown>);
+    }
+  }
 
   if (input.action === "revalidate") {
     await db

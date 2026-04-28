@@ -11,6 +11,7 @@ import {
   normalizeDisclosure,
   normalizeLeadKind,
   summarizePlacementExpiry,
+  validateJobPublicationQuality,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
 import { loadContentEntries } from "./helpers/registry-fixtures";
@@ -123,6 +124,63 @@ describe("commercial intake contracts", () => {
     expect(missingApplyUrl.errors).toContain(
       "job leads require an https applyUrl",
     );
+  });
+
+  it("enforces a higher content bar before paid jobs can publish", () => {
+    expect(
+      validateJobPublicationQuality({
+        tier: "free",
+        status: "pending_review",
+        summary: "A short draft can still enter maintainer review.",
+      }),
+    ).toMatchObject({ ok: true, required: false });
+
+    const shallowPaidJob = validateJobPublicationQuality({
+      tier: "sponsored",
+      status: "active",
+      summary: "Too short.",
+      applyUrl: "https://example.com/jobs/ai-engineer",
+    });
+    expect(shallowPaidJob.ok).toBe(false);
+    expect(shallowPaidJob.required).toBe(true);
+    expect(shallowPaidJob.errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("120+ character original summary"),
+        expect.stringContaining("300+ characters of original role detail"),
+        expect.stringContaining("at least 3 responsibilities"),
+        expect.stringContaining("at least 3 requirements"),
+        expect.stringContaining("salary or compensation range"),
+      ]),
+    );
+
+    expect(
+      validateJobPublicationQuality({
+        tier: "featured",
+        status: "active",
+        summary:
+          "Build Claude-native developer workflow infrastructure for teams shipping production AI systems, with strong ownership over integrations and customer-facing product quality.",
+        descriptionMd:
+          "Own the public-facing role detail for a paid HeyClaude listing. This description explains the team context, product surface, AI workflow responsibilities, developer tooling expectations, source verification, and why the role matters to the Claude and MCP ecosystem. It is intentionally long enough to support useful search snippets and truthful JobPosting structured data.",
+        employmentType: "Full-time",
+        compensationSummary: "$150K – $190K",
+        benefits: ["Health benefits", "Remote work"],
+        responsibilities: [
+          "Build production integrations for Claude and MCP developer workflows.",
+          "Partner with product and customer teams to prioritize high-signal automation work.",
+          "Maintain source-verified listing details as the role evolves.",
+        ],
+        requirements: [
+          "Professional TypeScript or backend engineering experience.",
+          "Comfort working with LLM applications and developer tooling.",
+          "Strong written communication for technical product surfaces.",
+        ],
+        applyUrl: "https://example.com/jobs/ai-engineer",
+        sourceUrl: "https://example.com/jobs/ai-engineer",
+        postedAt: "2026-04-28",
+        expiresAt: "2026-05-28",
+        sourceCheckedAt: "2026-04-28",
+      }),
+    ).toMatchObject({ ok: true, required: true, errors: [] });
   });
 
   it("transitions curated job sources through verified, stale, and closed states", () => {

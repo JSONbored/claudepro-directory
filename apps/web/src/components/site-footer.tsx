@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/site";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/80 py-14">
+    <footer className="border-t border-border/80 bg-background/95 py-14">
       <div className="container-shell grid gap-10 md:grid-cols-[1.6fr_1fr_1fr_1.35fr]">
         <div className="space-y-4">
           <BrandWordmark />

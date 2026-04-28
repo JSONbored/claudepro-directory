@@ -508,6 +508,14 @@ export function buildPlacementRenewalReminder(summary: {
 }): string;
 export const LISTING_LEAD_KINDS: string[];
 export const COMMERCIAL_TIERS: string[];
+export const PAID_JOB_TIERS: string[];
+export const JOB_PUBLICATION_QUALITY_RULES: {
+  summaryMinLength: number;
+  descriptionMinLength: number;
+  minimumResponsibilities: number;
+  minimumRequirements: number;
+  minimumBenefits: number;
+};
 export const COMMERCIAL_PLACEMENT_TARGETS: string[];
 export const DISCLOSURE_STATES: string[];
 export const COMMERCIAL_STATUSES: string[];
@@ -520,6 +528,13 @@ export function validateListingLeadPayload(payload: Record<string, unknown>): {
   ok: boolean;
   errors: string[];
   data: ListingLead;
+};
+export function validateJobPublicationQuality(
+  payload: Record<string, unknown>,
+): {
+  ok: boolean;
+  required: boolean;
+  errors: string[];
 };
 export function evaluateJobSourceLifecycle(
   input?: JobSourceLifecycleInput,
