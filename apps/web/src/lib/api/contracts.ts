@@ -71,6 +71,47 @@ export const registryTrustSignalsSchema = z.object({
   supportLevels: z.array(z.string()).max(12).optional(),
 });
 
+export const registryBrandAssetSchema = z.object({
+  brandName: z.string().optional(),
+  brandDomain: z.string().optional(),
+  brandIconUrl: z.string().optional(),
+  brandLogoUrl: z.string().optional(),
+  brandAssetSource: z.string().optional(),
+  brandVerifiedAt: z.string().optional(),
+  brandColors: z.array(z.string()).max(6).optional(),
+});
+
+export const registrySearchResultSchema = registryBrandAssetSchema
+  .extend({
+    category: z.string(),
+    slug: z.string(),
+    title: z.string(),
+    description: z.string(),
+    tags: z.array(z.string()),
+    keywords: z.array(z.string()),
+    author: z.string(),
+    dateAdded: z.string(),
+    installable: z.boolean(),
+    downloadTrust: z.string().nullable().optional(),
+    verificationStatus: z.string(),
+    platforms: z.array(z.string()).optional(),
+    supportLevels: z.array(z.string()).optional(),
+    documentationUrl: z.string(),
+    repoUrl: z.string(),
+    url: z.string(),
+    trustSignals: registryTrustSignalsSchema,
+  })
+  .passthrough();
+
+export const registrySearchResponseSchema = z.object({
+  schemaVersion: z.number(),
+  query: z.string(),
+  category: z.string(),
+  platform: z.string(),
+  count: z.number().int().nonnegative(),
+  results: z.array(registrySearchResultSchema),
+});
+
 export const registrySearchQuerySchema = z.object({
   q: z.string().trim().toLowerCase().max(120).optional().default(""),
   category: categorySchema,
@@ -376,6 +417,7 @@ export const apiRouteDefinitions = {
     tags: ["Registry"],
     originCheck: true,
     querySchema: registrySearchQuerySchema,
+    responseSchema: registrySearchResponseSchema,
     rateLimit: {
       scope: "registry-search",
       limit: 120,

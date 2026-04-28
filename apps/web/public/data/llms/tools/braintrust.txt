@@ -8,6 +8,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/braintrust
 - Source URLs: https://www.braintrust.dev/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/braintrust.mdx, https://www.braintrust.dev
+- Brand: Braintrust
+- Brand domain: braintrust.dev
+- Brand asset source: brandfetch
 - Author: Braintrust
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

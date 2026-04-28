@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/vercel-ai-sdk
 - Source URLs: https://ai-sdk.dev/docs, https://github.com/vercel/ai, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-ai-sdk.mdx, https://ai-sdk.dev
+- Brand: Vercel AI SDK
+- Brand domain: ai-sdk.dev
+- Brand asset source: brandfetch
 - Author: Vercel
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

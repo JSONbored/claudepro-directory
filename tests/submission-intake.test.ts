@@ -55,6 +55,11 @@ describe("submission intake", () => {
           !field.required,
       ),
     ).toBe(true);
+    expect(
+      model?.fields.some(
+        (field) => field.id === "brand_domain" && !field.required,
+      ),
+    ).toBe(true);
 
     const issueTemplate = buildIssueTemplateSpec("mcp");
     expect(issueTemplate).toBeTruthy();
@@ -74,6 +79,8 @@ describe("submission intake", () => {
       category: "mcp",
       contact_email: "@maintainer",
       docs_url: "https://example.com/docs",
+      brand_name: "Example",
+      brand_domain: "example.com",
       description:
         "MCP server submitted directly through the website intake API.",
       card_description: "Website intake API coverage.",
@@ -85,12 +92,77 @@ describe("submission intake", () => {
     expect(draft.title).toBe("Submit MCP Server: Website Intake MCP");
     expect(draft.body).toContain("### Name");
     expect(draft.body).toContain("Website Intake MCP");
+    expect(draft.body).toContain("### Brand domain");
+    expect(draft.body).toContain("example.com");
     expect(draft.labels).toEqual([
       "content-submission",
       "needs-review",
       "community-mcp",
     ]);
     expect(validateSubmission(draft).ok).toBe(true);
+  });
+
+  it("normalizes brand domains and rejects unsafe brand values", () => {
+    const shapedIssue = issue(`### Name
+Brand Intake MCP
+
+### Slug
+brand-intake-mcp
+
+### Category
+mcp
+
+### Description
+MCP server submitted with optional brand metadata.
+
+### Card description
+Brand metadata coverage.
+
+### Brand name
+Asana
+
+### Brand domain
+https://www.asana.com/docs
+
+### Install command
+npx -y brand-intake-mcp
+
+### Usage snippet
+claude mcp add brand-intake-mcp -- npx -y brand-intake-mcp`);
+
+    const report = validateSubmission(shapedIssue);
+    expect(report.ok).toBe(true);
+    expect(report.fields.brand_domain).toBe("asana.com");
+
+    const invalid = validateSubmission(
+      issue(`### Name
+Broken Brand MCP
+
+### Slug
+broken-brand-mcp
+
+### Category
+mcp
+
+### Description
+MCP server submitted with invalid brand metadata.
+
+### Card description
+Invalid brand metadata coverage.
+
+### Brand domain
+not a domain
+
+### Install command
+npx -y broken-brand-mcp
+
+### Usage snippet
+claude mcp add broken-brand-mcp -- npx -y broken-brand-mcp`),
+    );
+    expect(invalid.ok).toBe(false);
+    expect(invalid.errors).toContain(
+      "brand_domain must be a canonical domain such as asana.com",
+    );
   });
 
   it("keeps checked-in GitHub issue templates aligned with registry specs", () => {

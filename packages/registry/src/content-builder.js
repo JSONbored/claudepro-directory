@@ -11,6 +11,7 @@ import {
   inferStructuredFields,
   normalizeBody,
 } from "./content-schema.js";
+import { buildBrandAssetMetadata } from "./brand-assets.js";
 
 export const DEFAULT_DIRECTORY_REPO_URL =
   "https://github.com/JSONbored/claudepro-directory";
@@ -194,6 +195,16 @@ export function buildContentEntryFromMdx(params) {
   const downloadSha256 = localDownloadPath
     ? getLocalDownloadSha256(localDownloadPath)
     : null;
+  const brandAssets = buildBrandAssetMetadata(
+    {
+      ...data,
+      title,
+      websiteUrl: data.websiteUrl ? String(data.websiteUrl) : undefined,
+    },
+    {
+      allowWebsiteFallback: category === "tools",
+    },
+  );
 
   return {
     category,
@@ -220,6 +231,7 @@ export function buildContentEntryFromMdx(params) {
       ? String(data.documentationUrl)
       : undefined,
     websiteUrl: data.websiteUrl ? String(data.websiteUrl) : undefined,
+    ...brandAssets,
     affiliateUrl: data.affiliateUrl ? String(data.affiliateUrl) : undefined,
     pricingModel: data.pricingModel ? String(data.pricingModel) : undefined,
     disclosure: data.disclosure ? String(data.disclosure) : undefined,

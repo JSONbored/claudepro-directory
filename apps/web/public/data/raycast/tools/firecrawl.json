@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "firecrawl",
   "title": "Firecrawl",
+  "brandName": "Firecrawl",
+  "brandDomain": "firecrawl.dev",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nFirecrawl is useful when agent and RAG workflows need cleaner web ingestion than raw scraping or ad hoc parsing.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Firecrawl\nWeb scraping and crawling API for turning websites into clean markdown, structured data, and LLM-ready content.\n**Category:** tools\n**Author:** Firecrawl\n**Tags:** `web-crawling` `data-extraction`\n\n## Links\n- https://heyclau.de/tools/firecrawl\n- https://docs.firecrawl.dev\n- https://github.com/mendableai/firecrawl",
+  "detailMarkdown": "# Firecrawl\nWeb scraping and crawling API for turning websites into clean markdown, structured data, and LLM-ready content.\n**Category:** tools\n**Author:** Firecrawl\n**Brand:** Firecrawl / firecrawl.dev\n**Tags:** `web-crawling` `data-extraction`\n\n## Links\n- https://heyclau.de/tools/firecrawl\n- https://docs.firecrawl.dev\n- https://github.com/mendableai/firecrawl",
   "webUrl": "https://heyclau.de/tools/firecrawl",
   "repoUrl": "https://github.com/mendableai/firecrawl",
   "documentationUrl": "https://docs.firecrawl.dev"

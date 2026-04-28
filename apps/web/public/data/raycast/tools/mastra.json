@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "mastra",
   "title": "Mastra",
+  "brandName": "Mastra",
+  "brandDomain": "mastra.ai",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nMastra is useful for JavaScript and TypeScript teams building agent products with workflow, memory, and tool abstractions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Mastra\nTypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.\n**Category:** tools\n**Author:** Mastra\n**Tags:** `agent-framework` `typescript`\n\n## Links\n- https://heyclau.de/tools/mastra\n- https://mastra.ai/docs\n- https://github.com/mastra-ai/mastra",
+  "detailMarkdown": "# Mastra\nTypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.\n**Category:** tools\n**Author:** Mastra\n**Brand:** Mastra / mastra.ai\n**Tags:** `agent-framework` `typescript`\n\n## Links\n- https://heyclau.de/tools/mastra\n- https://mastra.ai/docs\n- https://github.com/mastra-ai/mastra",
   "webUrl": "https://heyclau.de/tools/mastra",
   "repoUrl": "https://github.com/mastra-ai/mastra",
   "documentationUrl": "https://mastra.ai/docs"

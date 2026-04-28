@@ -321,6 +321,8 @@ export function BrowseDirectory({
         entry.title,
         entry.description,
         entry.author,
+        entry.brandName,
+        entry.brandDomain,
         entry.trigger,
         entry.skillType,
         entry.skillLevel,

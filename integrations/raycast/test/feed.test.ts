@@ -56,6 +56,11 @@ const sampleEntry: RaycastEntry = {
   title: "Context7",
   description: "Fetch up-to-date docs.",
   tags: ["docs", "mcp"],
+  brandName: "Upstash",
+  brandDomain: "upstash.com",
+  brandIconUrl:
+    "https://cdn.brandfetch.io/domain/upstash.com/w/128/h/128/icon.png?c=test-client",
+  brandAssetSource: "brandfetch",
   installCommand: "claude mcp add context7",
   configSnippet: "",
   copyText: "complete asset",
@@ -229,6 +234,9 @@ describe("Raycast feed helpers", () => {
     assert.equal(contributeUrl.pathname, "/submit");
     assert.equal(contributeUrl.searchParams.get("category"), "mcp");
     assert.equal(contributeUrl.searchParams.get("slug"), "context7");
+    assert.equal(contributeUrl.searchParams.get("brand_name"), "Upstash");
+    assert.equal(contributeUrl.searchParams.get("brand_domain"), "upstash.com");
+    assert.equal(contributeUrl.searchParams.get("tags"), "docs, mcp");
 
     const suggestUrl = new URL(buildSuggestChangeUrl(sampleEntry));
     assert.equal(suggestUrl.origin, "https://github.com");
@@ -239,6 +247,8 @@ describe("Raycast feed helpers", () => {
     assert.equal(suggestUrl.searchParams.get("template"), "submit-mcp.yml");
     assert.equal(suggestUrl.searchParams.get("category"), "mcp");
     assert.equal(suggestUrl.searchParams.get("slug"), "context7");
+    assert.equal(suggestUrl.searchParams.get("brand_name"), "Upstash");
+    assert.equal(suggestUrl.searchParams.get("brand_domain"), "upstash.com");
     assert.match(suggestUrl.toString(), /^https:\/\//);
     assert.equal(suggestUrl.toString().includes("file:"), false);
 
@@ -246,6 +256,27 @@ describe("Raycast feed helpers", () => {
     assert.equal(newSkillUrl.origin, "https://github.com");
     assert.equal(newSkillUrl.searchParams.get("template"), "submit-skill.yml");
     assert.equal(newSkillUrl.searchParams.get("category"), "skills");
+
+    const draftUrl = new URL(
+      buildSubmitIssueUrl({
+        category: "mcp",
+        title: "Asana MCP Server",
+        slug: "asana-mcp-server",
+        sourceUrl:
+          "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+        brandName: "Asana",
+        brandDomain: "asana.com",
+        description: "Use Asana project tasks from Claude.",
+        tags: ["asana", "project-management"],
+      }),
+    );
+    assert.equal(draftUrl.searchParams.get("template"), "submit-mcp.yml");
+    assert.equal(draftUrl.searchParams.get("name"), "Asana MCP Server");
+    assert.equal(draftUrl.searchParams.get("brand_domain"), "asana.com");
+    assert.equal(
+      draftUrl.searchParams.get("docs_url")?.includes("asana.com"),
+      true,
+    );
   });
 
   it("validates and parses full detail payloads", () => {

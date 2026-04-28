@@ -8,6 +8,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/weave
 - Source URLs: https://weave-docs.wandb.ai, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/weave.mdx, https://wandb.ai/site/weave
+- Brand: Weave
+- Brand domain: wandb.ai
+- Brand asset source: brandfetch
 - Author: Weights and Biases
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

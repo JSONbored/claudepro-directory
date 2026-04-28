@@ -8,6 +8,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/vercel-v0
 - Source URLs: https://v0.dev/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/vercel-v0.mdx, https://v0.dev
+- Brand: v0
+- Brand domain: v0.dev
+- Brand asset source: brandfetch
 - Author: Vercel
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

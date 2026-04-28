@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/composio
 - Source URLs: https://docs.composio.dev, https://github.com/ComposioHQ/composio, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/composio.mdx, https://composio.dev
+- Brand: Composio
+- Brand domain: composio.dev
+- Brand asset source: brandfetch
 - Author: Composio
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

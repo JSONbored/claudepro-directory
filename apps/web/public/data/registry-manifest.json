@@ -2366,37 +2366,37 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "cb5e4eec222160d6611c814a4b04753bb61fe75679c5ccf7ebf9a6bf0726043f"
+      "sha256": "94a77ac8a4e8b5f16930ac3f8a1713148245f3612011bc0890eef9ab3c564cce"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "34e02218c347550c554f316ea30b59be1032afa33c0ff6cbe7d5f8adeb85cabb"
+      "sha256": "ed11f052bd1ead27bcd6d5d3cbfb54b91a7b5a78601cf58fecd355e2cfc77f5d"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "dabac57f90743e126480531d16cb8ce2bee10a1b04ecc01eca07841c24763878"
+      "sha256": "537e08f141700903ed2e836ed25b7e3565690885cdf98f1bc032decaa80e9f19"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "2001aefcf543c20088c87ed6f1041344100da8d55a3739175075be9342232565"
+      "sha256": "ff4c96d18aab7b921224ba06ece5094b184b808d12b0870de341efa3ae5a5e89"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
       "type": "json",
-      "sha256": "6f636c437bbf01186d97aeae01a2b67e575b80d836356193d6eaa43bb347a388"
+      "sha256": "3379629b969bde55980381999bfdfb8ce8082c6a2c91603de3b0ba2871b8b414"
     },
     "plugin-export-feed.json": {
       "path": "/data/plugin-export-feed.json",
       "type": "json",
-      "sha256": "a0e1e02bbcdd0ba1e93c856ae8fb86beb77d95b9508de4c070781ff308322b42"
+      "sha256": "e3a54c5b6bb2d4cdbabb2e94f415e27981c5c0542fe059b8962d74d858031cd5"
     },
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "06f27b35572e11c33c26d70a57bf2882539ad005d35c6c91a6939b2349eb67d9"
+      "sha256": "ebd9600ee744663069f72034c5213f5440038b102179a65a488bbca1eeafba07"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -2421,7 +2421,7 @@
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "90eb709dbfeab245d2ca58d3ba31806fa1b219dfbd50bfa919505094d4b597c6"
+      "sha256": "305189a671229a1932102508b38732fffdea26d17bccf26d4addb1bc7b94fe15"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -2821,17 +2821,17 @@
     "entries/tools/aider.json": {
       "path": "/data/entries%2Ftools%2Faider.json",
       "type": "json",
-      "sha256": "ebed7b3a5fcafcab33ed889a7c7da7981ceeb720de347a2f15c5792b65e559ec"
+      "sha256": "b476a73a9e58d3e116fd8982e53dac96f288ee751efa12250dd80db19c7ad8a7"
     },
     "llms/tools/aider.txt": {
       "path": "/data/llms%2Ftools%2Faider.txt",
       "type": "text",
-      "sha256": "4500ca69ea32539eb8ecea78ee400d5cf84ec357b583262b87111af3c244a3d6"
+      "sha256": "619d440622cb4b3ef7193f14050ba01b7511437e05a549afc3f0bee61990abf6"
     },
     "raycast/tools/aider.json": {
       "path": "/data/raycast%2Ftools%2Faider.json",
       "type": "json",
-      "sha256": "07ffa54427cabd1a8c5fb07a98195be4699fdca00ccb0117b2a65c4972c378ae"
+      "sha256": "db463faaddf02fa207bb6eb6831d1bac926dd47108d6db8226584e03e27457e3"
     },
     "entries/mcp/airtable-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fairtable-mcp-server.json",
@@ -2941,62 +2941,62 @@
     "entries/tools/apify.json": {
       "path": "/data/entries%2Ftools%2Fapify.json",
       "type": "json",
-      "sha256": "10bf03526f79b13029d3149b6f3e8b67b8439a33ba13daa8e7e242063f4356cc"
+      "sha256": "2c3997315fa4ee09ddc98029aa30cde50e982d709dae095325fc3cc65e6bc09b"
     },
     "llms/tools/apify.txt": {
       "path": "/data/llms%2Ftools%2Fapify.txt",
       "type": "text",
-      "sha256": "9f5361f2bcd4e8782fc9e58ae9b89109f1e7b318933cf6f0fce49b03c6ebceb8"
+      "sha256": "2ce84201c16b0a406d2d1f0b11f5bb827fbcd94fc8fb20b79f0f6a90166e3c7a"
     },
     "raycast/tools/apify.json": {
       "path": "/data/raycast%2Ftools%2Fapify.json",
       "type": "json",
-      "sha256": "5286f5fd81c909e13df86df6486716cf3400cf5b89c7571dfa0628a84c7be924"
+      "sha256": "bb8ef734fce0fa5407dbe5aec66bdc393499e1f535cb6140037dc5dece1a7ce8"
     },
     "entries/tools/arcade-ai.json": {
       "path": "/data/entries%2Ftools%2Farcade-ai.json",
       "type": "json",
-      "sha256": "271a89b18e0d3265358a02a43abf0a88b3eebe507ffe2c72a82219b4ab10b8d5"
+      "sha256": "04e3bb2ab344063ff0e78ba7d39b479480369f5e5a37ec3ad191f570086792a6"
     },
     "llms/tools/arcade-ai.txt": {
       "path": "/data/llms%2Ftools%2Farcade-ai.txt",
       "type": "text",
-      "sha256": "0071fddaceeee078a64aeb6ded021fb6db40ba517e11131fc7b2fd81d7b22378"
+      "sha256": "4129503b7b4f2fb09458bb524c86c7880a26820db3ef64b8c018ab5d7a182e15"
     },
     "raycast/tools/arcade-ai.json": {
       "path": "/data/raycast%2Ftools%2Farcade-ai.json",
       "type": "json",
-      "sha256": "a03580a34bd3a245bf5b6eba1b1655a397629a8d63e21e8fe45750e4df4809d8"
+      "sha256": "7cec1e86cb7c86c66378fdc8191d05cc43d509573cb87cb2796e0ddf6cd92c94"
     },
     "entries/tools/arize-phoenix.json": {
       "path": "/data/entries%2Ftools%2Farize-phoenix.json",
       "type": "json",
-      "sha256": "46774638842c26eb1ff272cb53612e9ca18d98638677476c0b0a16b355ff0f3c"
+      "sha256": "cf9902cf0b8608cbfd949e1a5fc121bbd718e697a5472a4ad7a12725318b14d9"
     },
     "llms/tools/arize-phoenix.txt": {
       "path": "/data/llms%2Ftools%2Farize-phoenix.txt",
       "type": "text",
-      "sha256": "6ff5acfdca1e3520bad4d6c3701a2d6ded5b10390c3a32c3c32a3fb5504f82dc"
+      "sha256": "5838c264d659de7c82482b09403d9c034691a81efbed8ede087068b66d5491e6"
     },
     "raycast/tools/arize-phoenix.json": {
       "path": "/data/raycast%2Ftools%2Farize-phoenix.json",
       "type": "json",
-      "sha256": "9131162e6df1500607afbd9424d1b28946079dd8d29ebea8522609d34afc475a"
+      "sha256": "27ba7fdc45e3b088ba83e21af0b59bdb0debada80f001c29db8818870ee8d280"
     },
     "entries/mcp/asana-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fasana-mcp-server.json",
       "type": "json",
-      "sha256": "507dc0f625e1574f1e0da7002c504be0f40b31107c920285b81cb775bb2a4919"
+      "sha256": "f577368ad39bee543abc1919c035111a618eb3c0a5cac8106b8ca28d8533c8a3"
     },
     "llms/mcp/asana-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fasana-mcp-server.txt",
       "type": "text",
-      "sha256": "d50df763b092495b12c963ee8bef6ab8b578449c99fbd628dbcc551322c3c07f"
+      "sha256": "9d956187082c2d2f871935ec50c2d047c19eaf648e6daacd8127a6c3b2135a04"
     },
     "raycast/mcp/asana-mcp-server.json": {
       "path": "/data/raycast%2Fmcp%2Fasana-mcp-server.json",
       "type": "json",
-      "sha256": "c685f72e7aaa17aa089370ce31f8cef8e795097c4d4b186b9c7e9d91100d36d9"
+      "sha256": "0c86f1c6d4682bfc043898aa6a59d1d864261a9364127ae8cf77fe7c5aae8305"
     },
     "entries/skills/audio-transcription-summarization.json": {
       "path": "/data/entries%2Fskills%2Faudio-transcription-summarization.json",
@@ -3221,17 +3221,17 @@
     "entries/tools/bolt-new.json": {
       "path": "/data/entries%2Ftools%2Fbolt-new.json",
       "type": "json",
-      "sha256": "1c405b36d333524f990fcd35b77a2304afe3e4310b33be2867a9bfb6acd044c5"
+      "sha256": "8df29ec9eccf89d73d98829e0c648faace413df79acfca9cd47c92b6b9efae44"
     },
     "llms/tools/bolt-new.txt": {
       "path": "/data/llms%2Ftools%2Fbolt-new.txt",
       "type": "text",
-      "sha256": "cf1c4a18a513b956c4507889e63fe8b012609937e360698309d253feaec5340d"
+      "sha256": "4c96975df137f8659d9044d22b8626738f58eaa8cc9438c34e2b9b52bf3776b4"
     },
     "raycast/tools/bolt-new.json": {
       "path": "/data/raycast%2Ftools%2Fbolt-new.json",
       "type": "json",
-      "sha256": "7a85fe5ac347667746db088005bab719aba099ad75586528e25a16478e230ecf"
+      "sha256": "7b78dce3b4637b8f195bbd83a1242b9dcc7c6fcd5dc2a2d8cbbd5cef8acebf1a"
     },
     "entries/mcp/box-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fbox-mcp-server.json",
@@ -3251,17 +3251,17 @@
     "entries/tools/braintrust.json": {
       "path": "/data/entries%2Ftools%2Fbraintrust.json",
       "type": "json",
-      "sha256": "e91e291ad6ed2d2ab7c7c788a7d16f389573848112179511c6e8154251324878"
+      "sha256": "0f823d7005fb238f1ae4fb43fb7366e081b2008e1c3e0742c4e9faaa6077fe97"
     },
     "llms/tools/braintrust.txt": {
       "path": "/data/llms%2Ftools%2Fbraintrust.txt",
       "type": "text",
-      "sha256": "74854da8adcb621b7df7d26b8d69458e1a21fc78120c036e680efb3cad2eef84"
+      "sha256": "06d467d9c30af9bf725c6da206165dd5330d93251ee954da72db1bcf5dd87687"
     },
     "raycast/tools/braintrust.json": {
       "path": "/data/raycast%2Ftools%2Fbraintrust.json",
       "type": "json",
-      "sha256": "f80e1b1f358cfa20373bd3c518a02e879996d84327777570c6e2df32abb926da"
+      "sha256": "9128f676fe1a4db8b2f8bf72fea8f2b132df68ed153cb838ad0ac0ead9a0e814"
     },
     "entries/skills/browser-agent-workflow-automation.json": {
       "path": "/data/entries%2Fskills%2Fbrowser-agent-workflow-automation.json",
@@ -3286,32 +3286,32 @@
     "entries/tools/browser-use.json": {
       "path": "/data/entries%2Ftools%2Fbrowser-use.json",
       "type": "json",
-      "sha256": "4227ac560b5f11505dda41c3a37f694154d7c02496ba00036ae455b770923fdc"
+      "sha256": "9f5507ca85e8ff31d673e40a8155c1ad30589bb03e5d3eb544e9ab5ce98f61a8"
     },
     "llms/tools/browser-use.txt": {
       "path": "/data/llms%2Ftools%2Fbrowser-use.txt",
       "type": "text",
-      "sha256": "453569efd5f2acfd9d8641f14fefad1d029b2669521d5eea1b3ce4d66cbf25d0"
+      "sha256": "f6bf58daba1aa3b25aabaf7d76c7e380e27308351e248048737c1e22ed1c4235"
     },
     "raycast/tools/browser-use.json": {
       "path": "/data/raycast%2Ftools%2Fbrowser-use.json",
       "type": "json",
-      "sha256": "0b5f200bf61a09e91892847e5d2caa6e15164a021299ecf1f23648784f0739fd"
+      "sha256": "f3b04e07916fdc3ad1ebdc233287f0d6e391b3c47d89e9ca888d74b78f74de74"
     },
     "entries/tools/browserbase.json": {
       "path": "/data/entries%2Ftools%2Fbrowserbase.json",
       "type": "json",
-      "sha256": "9c276c957551924267ebfa11fb3f778208c338b40b1ac947256c655680227c3e"
+      "sha256": "f800d59cb13b083e5a8988e56f05c95d683d0c967a20dc61da796d6cf3fb8122"
     },
     "llms/tools/browserbase.txt": {
       "path": "/data/llms%2Ftools%2Fbrowserbase.txt",
       "type": "text",
-      "sha256": "a72f90dfb0e8121da7a60209233ce2262303e59dd8cb61fcf4f5c6c8ade14e9b"
+      "sha256": "951918588ff31869086b101df7e58ae1a36832bd4fa099ae0b8761134fea6d62"
     },
     "raycast/tools/browserbase.json": {
       "path": "/data/raycast%2Ftools%2Fbrowserbase.json",
       "type": "json",
-      "sha256": "5beb62d2713cd0626e7fdf2ecc079cac4d3d273aa537e8dd43d8859aa3d930aa"
+      "sha256": "2b6d4d9e1797c53b380b553dba2d84856db3471e424c02486c695520fb48fe32"
     },
     "entries/guides/build-mcp-server.json": {
       "path": "/data/entries%2Fguides%2Fbuild-mcp-server.json",
@@ -3486,17 +3486,17 @@
     "entries/tools/claude-code.json": {
       "path": "/data/entries%2Ftools%2Fclaude-code.json",
       "type": "json",
-      "sha256": "3ca9c3d61565c56a1b69eb650b2097a2624ba8c2ce655667106fc63dbecf7597"
+      "sha256": "6fef5d4ecb3a7b5e839c0add2c5d623e144572a24ead9a6ff12834f6d4da5428"
     },
     "llms/tools/claude-code.txt": {
       "path": "/data/llms%2Ftools%2Fclaude-code.txt",
       "type": "text",
-      "sha256": "97890204ca339d04da3326711db61695119c729bddd6be443ac22bc4edf9d4da"
+      "sha256": "ec84186ae5f750a43fb06bdbb8176a050c710d550b77e747dd020e24cedd1e61"
     },
     "raycast/tools/claude-code.json": {
       "path": "/data/raycast%2Ftools%2Fclaude-code.json",
       "type": "json",
-      "sha256": "8794f0c288a0ebd91cdcadc0f5fe289b1162d25397dccc09a6e62d27bb3acab3"
+      "sha256": "4d9d30a6820594e59b17e3640208a5ffd1136d1cad48cdb4b31a43562bdda63e"
     },
     "entries/statuslines/docker-health-statusline.json": {
       "path": "/data/entries%2Fstatuslines%2Fdocker-health-statusline.json",
@@ -3761,17 +3761,17 @@
     "entries/tools/cline.json": {
       "path": "/data/entries%2Ftools%2Fcline.json",
       "type": "json",
-      "sha256": "0ed65b31af904255b0d27ebec497d8e834054e91131071ef11c792adc92b8816"
+      "sha256": "65c24466e3394b288e830ffe445e74cf805d542303a5d208366b1e997c099560"
     },
     "llms/tools/cline.txt": {
       "path": "/data/llms%2Ftools%2Fcline.txt",
       "type": "text",
-      "sha256": "b1bf0a62a5da3ba4b1ef0d1c4cf79203e53edbac014f2e3f0904d2ef88d35153"
+      "sha256": "2bdc6943af62f8c4a130c77d13351b9f1e38f5d68b53e5b057787e32e38ebda4"
     },
     "raycast/tools/cline.json": {
       "path": "/data/raycast%2Ftools%2Fcline.json",
       "type": "json",
-      "sha256": "5c4b04b968fdf9790c586e0a6abedd56fd9bd017183b7e97da47bf6ecc52b538"
+      "sha256": "bce165d70a226fc205dd91ab1fbefd0b2517095ee9bb298b9dea808688fb3aa5"
     },
     "entries/hooks/cloud-backup-on-session-stop.json": {
       "path": "/data/entries%2Fhooks%2Fcloud-backup-on-session-stop.json",
@@ -3806,17 +3806,17 @@
     "entries/tools/cloudflare-agents-sdk.json": {
       "path": "/data/entries%2Ftools%2Fcloudflare-agents-sdk.json",
       "type": "json",
-      "sha256": "db76a66393903f09d65dba98ce3544e1d97c6af25bc4e59e69ffb9f42f62e476"
+      "sha256": "4b74e7bd94d0881c8e7c9c8dd387c537feaef84ede64fbe40b3c7533ee00b226"
     },
     "llms/tools/cloudflare-agents-sdk.txt": {
       "path": "/data/llms%2Ftools%2Fcloudflare-agents-sdk.txt",
       "type": "text",
-      "sha256": "6c4ba6f2e84e5584bed531d62b559a4fc812b6b60b98a496e0af34bc33a52b8c"
+      "sha256": "aa316a693ed8f79841d08db7094d2602bea5395acb804cbf27c69a4a60665477"
     },
     "raycast/tools/cloudflare-agents-sdk.json": {
       "path": "/data/raycast%2Ftools%2Fcloudflare-agents-sdk.json",
       "type": "json",
-      "sha256": "9daaedab1a09d09328465b0635a13a20d70b14e29eddd0f3e36462147926bb57"
+      "sha256": "b9728481f50d57f794bef50cfff8a35279e552a2d4f4a3efe83a6b2ede6a6d81"
     },
     "entries/mcp/cloudflare-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcloudflare-mcp-server.json",
@@ -4001,17 +4001,17 @@
     "entries/tools/coderabbit.json": {
       "path": "/data/entries%2Ftools%2Fcoderabbit.json",
       "type": "json",
-      "sha256": "4a4d82638d14faf4f0d30233c33c5984fddeb7ebd2f52ba15ae0cf683913440f"
+      "sha256": "ffb3b9ef5b9db37d13d78b5a5e67af287ace26d827c8b88dbf6cee7cfa9a4d72"
     },
     "llms/tools/coderabbit.txt": {
       "path": "/data/llms%2Ftools%2Fcoderabbit.txt",
       "type": "text",
-      "sha256": "41330adb3c08a99bc22497130903540e77d8e383e1d424ba5f2a13b68b5fb28c"
+      "sha256": "db605875e5e0c067e91c1d834c963e0c9347b7fbd505eb399c08d277f395f6a0"
     },
     "raycast/tools/coderabbit.json": {
       "path": "/data/raycast%2Ftools%2Fcoderabbit.json",
       "type": "json",
-      "sha256": "995d31f359a3b4082ce925c5b9c2072d06bc113afe6afaa1a774e38e1f49f57f"
+      "sha256": "cec2a16fc5005f85c132c42b4fa93042a597e09aba5aeee7d1470d460420f046"
     },
     "entries/skills/codex-automations-orchestrator-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fcodex-automations-orchestrator-capability-pack.json",
@@ -4071,17 +4071,17 @@
     "entries/tools/composio.json": {
       "path": "/data/entries%2Ftools%2Fcomposio.json",
       "type": "json",
-      "sha256": "2feaec555aebaf353076db34c035310e5622f925e4654fdeba5426b84bb1d3d4"
+      "sha256": "e4d506257759b01c9d4c5c13b4c460a24d61e3fa13527c267f98686b1de53536"
     },
     "llms/tools/composio.txt": {
       "path": "/data/llms%2Ftools%2Fcomposio.txt",
       "type": "text",
-      "sha256": "d4d92b2e18b87b913e97937d345d6a977d592cbf497ce64324e2ad9ce22e9292"
+      "sha256": "ac5b8fe3f26f9d6a523e330fbc3900c523e6af2e515bf68ee30f88e2e89d2867"
     },
     "raycast/tools/composio.json": {
       "path": "/data/raycast%2Ftools%2Fcomposio.json",
       "type": "json",
-      "sha256": "18bba6fff6a6fd095a1f2b51f043e518731533bda906cb1d1eb53f108852407d"
+      "sha256": "590a240854d42327c4b33f8ee5a5abafee2dac9a9dfcb8cfb0ecd8614e6fafe5"
     },
     "entries/collections/content-creation-workflow.json": {
       "path": "/data/entries%2Fcollections%2Fcontent-creation-workflow.json",
@@ -4131,17 +4131,17 @@
     "entries/tools/continue.json": {
       "path": "/data/entries%2Ftools%2Fcontinue.json",
       "type": "json",
-      "sha256": "a1c754d9d4c99c1b31554469a8647991b3293a23bef75898f265ce59e36426cd"
+      "sha256": "0113286d5c0ae2c3a6a2b9a50f8afad309cdfb688dc1d7dd0442a0aab22e8981"
     },
     "llms/tools/continue.txt": {
       "path": "/data/llms%2Ftools%2Fcontinue.txt",
       "type": "text",
-      "sha256": "c5fcb92b4f2c5d6102210e1dbd1437e1f76468cd29278181c931fc28cc36d1a6"
+      "sha256": "9763044da5d0af3bd2c1bf642a1590ab5585933385fa84915e8fe914f4b39e03"
     },
     "raycast/tools/continue.json": {
       "path": "/data/raycast%2Ftools%2Fcontinue.json",
       "type": "json",
-      "sha256": "fbea2399ea6409115a2b2f5a5d108b243f8ac18188252115d748b14e16cc7488"
+      "sha256": "b6a008aa21697e4b3bd07803a437d9fc6f7d5d18b06af43ef40303bdbd453073"
     },
     "entries/mcp/contrastapi-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcontrastapi-mcp-server.json",
@@ -4161,17 +4161,17 @@
     "entries/tools/crewai.json": {
       "path": "/data/entries%2Ftools%2Fcrewai.json",
       "type": "json",
-      "sha256": "26d1d22026fe5f36c0c745025628b8440089bfa053e446c110dd8f38de2b4e9a"
+      "sha256": "8c8b1c67446ee521b4e1c6f57faa444fe7c5afc77ff683980d3bb74ba09d969e"
     },
     "llms/tools/crewai.txt": {
       "path": "/data/llms%2Ftools%2Fcrewai.txt",
       "type": "text",
-      "sha256": "55a8975a46fabe5494e0ad4e36e8c81156165ed26d09f4dc08974c921b49b44a"
+      "sha256": "a10d1ede32c84093edd44cac9f15a2852581c4a7eab5778e599dded220617ed2"
     },
     "raycast/tools/crewai.json": {
       "path": "/data/raycast%2Ftools%2Fcrewai.json",
       "type": "json",
-      "sha256": "55b62f7813440795a85a7bf218b76878621b7ceba46947b0a643819c4dfba71b"
+      "sha256": "9e5f50529ca35199324c91161b6010edf1dea60d1968f5d670c153179a0a8c39"
     },
     "entries/hooks/css-unused-selector-detector.json": {
       "path": "/data/entries%2Fhooks%2Fcss-unused-selector-detector.json",
@@ -4211,17 +4211,17 @@
     "entries/tools/cursor.json": {
       "path": "/data/entries%2Ftools%2Fcursor.json",
       "type": "json",
-      "sha256": "4aedcd3b8df6c21d3e7a2fb7f4ff88d6c36954739e516fc70c10deb4b2e436ce"
+      "sha256": "350e2f5144fabe7d0ce9c3ed91583865d5eaa20ca8cd0b38381d693c2b81978a"
     },
     "llms/tools/cursor.txt": {
       "path": "/data/llms%2Ftools%2Fcursor.txt",
       "type": "text",
-      "sha256": "28205f1cb514dd9dd9dfa92235080d2c15ed4b8f966c95ca60cc25cd7355fdce"
+      "sha256": "f36b2b4cf19018d069dc39b54a9e65593cf71ae1e1623e854aca3e8b2c637afb"
     },
     "raycast/tools/cursor.json": {
       "path": "/data/raycast%2Ftools%2Fcursor.json",
       "type": "json",
-      "sha256": "9b1b29f8d05dbaffaeb09c064287e605eaa8ad5a55ea59447494dc9aff091c4b"
+      "sha256": "dd1ed0f3e96659597c0af4923ea229437c5dc0b0ad4b92e091a923a3fdf636f8"
     },
     "entries/skills/cursor-windsurf-ai-ide-setup.json": {
       "path": "/data/entries%2Fskills%2Fcursor-windsurf-ai-ide-setup.json",
@@ -4471,17 +4471,17 @@
     "entries/tools/devin.json": {
       "path": "/data/entries%2Ftools%2Fdevin.json",
       "type": "json",
-      "sha256": "e2e071142f7bd7e5b7b5a4265c2c06cefc733a37e3ebf9b48d587127fc9fa8c9"
+      "sha256": "6584fcf185b30d2121556e077ff861abbe529395a6c81cd059344eeb69556369"
     },
     "llms/tools/devin.txt": {
       "path": "/data/llms%2Ftools%2Fdevin.txt",
       "type": "text",
-      "sha256": "fd02d8b9e82428d8438f6e7d2bb064e39272ed57e10b8dc762601b95b53cfc0f"
+      "sha256": "8258e82e7615847e685b2b18e7afb19b71b40db979ee8a83b60bd3f5ba84a0ba"
     },
     "raycast/tools/devin.json": {
       "path": "/data/raycast%2Ftools%2Fdevin.json",
       "type": "json",
-      "sha256": "d9f2a6e726cd313abb0e8061a320acb1979f6ee330958d991f596f65bd6dc9b2"
+      "sha256": "e6bd723bc351b283ff881e165563de8e1812385e0bb113a7c01151e019613c12"
     },
     "entries/agents/devops-sre-expert.json": {
       "path": "/data/entries%2Fagents%2Fdevops-sre-expert.json",
@@ -4761,17 +4761,17 @@
     "entries/tools/exa.json": {
       "path": "/data/entries%2Ftools%2Fexa.json",
       "type": "json",
-      "sha256": "e4a31cba0d7005618ea63718aa584c0b38ba631be7ba03a814f4e7f37b7713e1"
+      "sha256": "24c81a74a30fdc1b04450f869e56d4c68c0f2d5456a4a33323a32c91664ec5ce"
     },
     "llms/tools/exa.txt": {
       "path": "/data/llms%2Ftools%2Fexa.txt",
       "type": "text",
-      "sha256": "dd656f07c79ec6f17d4c8f4f8629cfac9b53b4f20707d42d969942ac17594f75"
+      "sha256": "a63f959e4eb4214447b545b58bbbf2dbb56f53ca06a8e0de14fff781f69f4142"
     },
     "raycast/tools/exa.json": {
       "path": "/data/raycast%2Ftools%2Fexa.json",
       "type": "json",
-      "sha256": "0a64ee39bd9679cf584cb01e01ca360ce92124a1625946a77a5a835455a6359e"
+      "sha256": "a8749f8f32050d70b7f5a48cd776d4314925a91e9a3a180141e446776dc5abad"
     },
     "entries/agents/extended-thinking-orchestrator.json": {
       "path": "/data/entries%2Fagents%2Fextended-thinking-orchestrator.json",
@@ -4871,17 +4871,17 @@
     "entries/tools/firecrawl.json": {
       "path": "/data/entries%2Ftools%2Ffirecrawl.json",
       "type": "json",
-      "sha256": "54d860d537369eeae06525748f712b0f8cb088e2bd07b025bc3e1490dbc9000f"
+      "sha256": "be41ba4d7c1b48acf6a95f1a59d1fc415fa5852df0a30307a81829b589521880"
     },
     "llms/tools/firecrawl.txt": {
       "path": "/data/llms%2Ftools%2Ffirecrawl.txt",
       "type": "text",
-      "sha256": "efadf8ed7e5f75ee4eed1e73770a249d5d834a347caf12d29d47c37d75820b12"
+      "sha256": "ea553ad13aff2fa241b5b3775cb5b878c63f4173a21ba24423d6589e73ced963"
     },
     "raycast/tools/firecrawl.json": {
       "path": "/data/raycast%2Ftools%2Ffirecrawl.json",
       "type": "json",
-      "sha256": "12a3cdab87045c9862e0e8eb6b094e25bd536af87ee43da33183c38d5610e895"
+      "sha256": "b2cd6f587a0fdbc6d7fa501b8961547da7707fcc754b2d4abddbf192209a7cfd"
     },
     "entries/mcp/fireflies-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Ffireflies-mcp-server.json",
@@ -5006,17 +5006,17 @@
     "entries/tools/garak.json": {
       "path": "/data/entries%2Ftools%2Fgarak.json",
       "type": "json",
-      "sha256": "13e9fe20a63cac3967dc18d14ec8548ade1f4f65a363bb779d3d8ac9f3eba86d"
+      "sha256": "57ee58f64478fcf49a18c49840ba4ff09f55e643c5b9d077aaa332c1d062a306"
     },
     "llms/tools/garak.txt": {
       "path": "/data/llms%2Ftools%2Fgarak.txt",
       "type": "text",
-      "sha256": "cbf36927c755febf843bdb3700916ebee0fd0db3afd618e51eed00ab5c00b43f"
+      "sha256": "d3b0263f4bf1cb89002e256e88a49b3d9232e0e75b816f2a2b0dbd5a5b92da0a"
     },
     "raycast/tools/garak.json": {
       "path": "/data/raycast%2Ftools%2Fgarak.json",
       "type": "json",
-      "sha256": "2ca3996ff876fbac8f1df46f5e26d96af63c9f0d89dccad026a53005cfd286d5"
+      "sha256": "12b660bdac6c399538d138a492dc2b2b2882db83af04c6a5052a2a3dc0d6a29a"
     },
     "entries/commands/generate-tests.json": {
       "path": "/data/entries%2Fcommands%2Fgenerate-tests.json",
@@ -5036,17 +5036,17 @@
     "entries/tools/giskard.json": {
       "path": "/data/entries%2Ftools%2Fgiskard.json",
       "type": "json",
-      "sha256": "946185eec4d192b53b3395b2c875febe29424a89cd8526e11a542284e10d063b"
+      "sha256": "41b982f12f5ad8b2fa98371be89a6e1132f57a7301d0cacdc092869b4cb46e26"
     },
     "llms/tools/giskard.txt": {
       "path": "/data/llms%2Ftools%2Fgiskard.txt",
       "type": "text",
-      "sha256": "6da9af0a691c86df30601c1f4c2230cfbc62504a8a838a94eb04ae10338b15f2"
+      "sha256": "860d50793a58e8715ed2e7dc69044921f7dc0ecb634c98f1bc8ec99dc3e2c16f"
     },
     "raycast/tools/giskard.json": {
       "path": "/data/raycast%2Ftools%2Fgiskard.json",
       "type": "json",
-      "sha256": "e662daa9b19607c52823f5ff80ef68177543e53faf753255909b22b45cf47803"
+      "sha256": "585ab783dbee748f0ea5185bc5b7658c716307d0fda4687d91f395e3037e365f"
     },
     "entries/hooks/git-auto-commit-on-stop.json": {
       "path": "/data/entries%2Fhooks%2Fgit-auto-commit-on-stop.json",
@@ -5216,17 +5216,17 @@
     "entries/tools/github-copilot.json": {
       "path": "/data/entries%2Ftools%2Fgithub-copilot.json",
       "type": "json",
-      "sha256": "29d83af767cc2201037c1dfc2b75e04c15ade57cccc381a64f783baed37fc8cd"
+      "sha256": "88570af7c9ad9578312d38242c289ea7b9abe362754cc9fee63284c427e6f53e"
     },
     "llms/tools/github-copilot.txt": {
       "path": "/data/llms%2Ftools%2Fgithub-copilot.txt",
       "type": "text",
-      "sha256": "abe9dfc4d9811fd4e3cb8e52a03a014035412ef678dafa62001cabf383ee6cea"
+      "sha256": "224281962956e8534babecb9a137a83c685ecb1ab34bb21b8b107bc1ab937859"
     },
     "raycast/tools/github-copilot.json": {
       "path": "/data/raycast%2Ftools%2Fgithub-copilot.json",
       "type": "json",
-      "sha256": "b3de6abf5a58c7690cdaf783a878043283da850bf598b080bc743e46849e8b36"
+      "sha256": "15c97f55d6f317def0508a9e2077bab1dd5baf8d9cb85c322438f845173ea708"
     },
     "entries/agents/github-copilot-interop-bridge.json": {
       "path": "/data/entries%2Fagents%2Fgithub-copilot-interop-bridge.json",
@@ -5326,17 +5326,17 @@
     "entries/tools/graphite-diamond.json": {
       "path": "/data/entries%2Ftools%2Fgraphite-diamond.json",
       "type": "json",
-      "sha256": "fe42f51f12b0c8a86fa624bf38aceaa406cd8c6cd0e3ad88138e615518b9e2fe"
+      "sha256": "3a4932d1293e8584e7ef024c7f37e12cbe29e0981fae70f3eab3dbac86ff8aa3"
     },
     "llms/tools/graphite-diamond.txt": {
       "path": "/data/llms%2Ftools%2Fgraphite-diamond.txt",
       "type": "text",
-      "sha256": "a9d4191e552900caf8f1305090596a25bf20f5eb35e65b8813a2c56ac08fdcd4"
+      "sha256": "2c22d53344f047c26fbd27b5f303a648674d0e8fb2069d8cf6fad993940afef2"
     },
     "raycast/tools/graphite-diamond.json": {
       "path": "/data/raycast%2Ftools%2Fgraphite-diamond.json",
       "type": "json",
-      "sha256": "7d0062b3bc4f49ed574c5a73869e09407102fea546b36b9b49547f010ebda169"
+      "sha256": "58f850c3eb66e015550ea4fdb8dee61db58bf3b1993af2ef925119edbfb9f42c"
     },
     "entries/rules/graphql-federation-specialist.json": {
       "path": "/data/entries%2Frules%2Fgraphql-federation-specialist.json",
@@ -5371,17 +5371,17 @@
     "entries/tools/helicone.json": {
       "path": "/data/entries%2Ftools%2Fhelicone.json",
       "type": "json",
-      "sha256": "842eef0e02651c44d738909cd036626a55e39555ed231672222a4d56cb1821b2"
+      "sha256": "f9664e26fb466bb8bd0efdb585999cbd0f0208aaf4ea430c6ec3ea5d09a643ab"
     },
     "llms/tools/helicone.txt": {
       "path": "/data/llms%2Ftools%2Fhelicone.txt",
       "type": "text",
-      "sha256": "4057a5578948e0f307a2e31a34c7600dd0cddca61168b9a4dcb8530ef7a407ad"
+      "sha256": "5e8638d92279471d300fbcf055423102e4e1a72bfdc30ba2d312ed0306144e34"
     },
     "raycast/tools/helicone.json": {
       "path": "/data/raycast%2Ftools%2Fhelicone.json",
       "type": "json",
-      "sha256": "63a149a8ed78dda2e4f9c4c03816faf6877d7605fa88ed4e5ce67116ca17fa7d"
+      "sha256": "2c5e3d4f950e944718952031dba1d8f1c83c35cd23a13f3ff5a2a6a5d404e01f"
     },
     "entries/mcp/heyclaude-mcp.json": {
       "path": "/data/entries%2Fmcp%2Fheyclaude-mcp.json",
@@ -5486,17 +5486,17 @@
     "entries/tools/hyperbrowser.json": {
       "path": "/data/entries%2Ftools%2Fhyperbrowser.json",
       "type": "json",
-      "sha256": "ca411b697f20c6139d4114d0c2e25afcf3d2bd3f0deb5aee30bc7dc71bf850a4"
+      "sha256": "ff8720c7b7dbe4ff957615127355dce2e8f252709d2829410c93be4a068baef1"
     },
     "llms/tools/hyperbrowser.txt": {
       "path": "/data/llms%2Ftools%2Fhyperbrowser.txt",
       "type": "text",
-      "sha256": "748723de4768100f532bb262905b8beddac2c95541f2aa1db07d5c918bf153e7"
+      "sha256": "f437c89bc5dddc5806e5e8a11af543a976fb742875c8a2d316f80504441507bd"
     },
     "raycast/tools/hyperbrowser.json": {
       "path": "/data/raycast%2Ftools%2Fhyperbrowser.json",
       "type": "json",
-      "sha256": "807ea20ded7cda7bc240635f370fe90edd616eaed6b4c83cf5f02c8acf18c215"
+      "sha256": "e57b4bf6b1a2cb7324c532c9e0bcc73ceab50a5f8acdc2a8f01753380d433f76"
     },
     "entries/hooks/i18n-translation-validator.json": {
       "path": "/data/entries%2Fhooks%2Fi18n-translation-validator.json",
@@ -5711,62 +5711,62 @@
     "entries/tools/lakera-guard.json": {
       "path": "/data/entries%2Ftools%2Flakera-guard.json",
       "type": "json",
-      "sha256": "68cd80226983b943508b3c0e8f4219175286b893976cba3e7ef159e1de03f48f"
+      "sha256": "263e8d9df05dbb6f8cb3f389af4f9a74d0781b427c6d8ebf632b1597c8174d02"
     },
     "llms/tools/lakera-guard.txt": {
       "path": "/data/llms%2Ftools%2Flakera-guard.txt",
       "type": "text",
-      "sha256": "052413cde620af1d691ba87a8838880369995844b59b18a580a25a759a9f752f"
+      "sha256": "11e291fa3d8d9602f38a91a2daa0f4cb4cef13176a82de746cc241435d677005"
     },
     "raycast/tools/lakera-guard.json": {
       "path": "/data/raycast%2Ftools%2Flakera-guard.json",
       "type": "json",
-      "sha256": "65bee6143bb95df788ecb58d346d54582f2ab225c73291b0b3a96cc1818a807f"
+      "sha256": "b19d6088018a46aa331c8a5dd1c4c3f3b310633b0c20bed7004aa6b71c3c4475"
     },
     "entries/tools/langfuse.json": {
       "path": "/data/entries%2Ftools%2Flangfuse.json",
       "type": "json",
-      "sha256": "0823f97be27f977c1587ea5581f838bb722a6609e172f3636120544114f3b73d"
+      "sha256": "9ee6bf122437221569f8865e0a0c96e446377303bc0ab0b986f84b9bd966814c"
     },
     "llms/tools/langfuse.txt": {
       "path": "/data/llms%2Ftools%2Flangfuse.txt",
       "type": "text",
-      "sha256": "82f9bda080d70128ba1cf7d660a5c883452fee3ea9be7f0dea42ae389559513d"
+      "sha256": "9d56389c09753fb9ed50fec9b09ecc4bce9e7a6d1b067c75b7b151ad38f22b73"
     },
     "raycast/tools/langfuse.json": {
       "path": "/data/raycast%2Ftools%2Flangfuse.json",
       "type": "json",
-      "sha256": "786a6e64f05a4a6ee22b1ed6c0b6a62562bb07e77e96eb0fbc7fe478ccebbd57"
+      "sha256": "815fdfe8eaa4f1ceaafaf45b538de3c23aca6c6f636b8c798923eaf7b7223e8d"
     },
     "entries/tools/langgraph.json": {
       "path": "/data/entries%2Ftools%2Flanggraph.json",
       "type": "json",
-      "sha256": "9ef3a4a2f410ccb9775acb5ef9aadfff432fb4bc4c047160106738060e465f06"
+      "sha256": "8bb045ec0cd03b57e317cd12d14c345c6e19a0278e50b31ae4d39c99125282f5"
     },
     "llms/tools/langgraph.txt": {
       "path": "/data/llms%2Ftools%2Flanggraph.txt",
       "type": "text",
-      "sha256": "afd7c792df635301c7fd2aa9fefe58d7b10a70d604d99faa45ce36fcfce2b4ab"
+      "sha256": "7eb209c1c32fc170704add31646a339a1ab2dea177e914d57c32414566ae7b55"
     },
     "raycast/tools/langgraph.json": {
       "path": "/data/raycast%2Ftools%2Flanggraph.json",
       "type": "json",
-      "sha256": "ef2a2d9a9048696f20e3e5b184bc6af5f5ec6a010b5e1c8d9232aa76acf41415"
+      "sha256": "9f62fa0aa004bbfdec1f2e35242786de6a752914d6f4c31de3e5285ba3f3ad6f"
     },
     "entries/tools/langsmith.json": {
       "path": "/data/entries%2Ftools%2Flangsmith.json",
       "type": "json",
-      "sha256": "b36971e261b4daa555232f614507654985d1fa2a06912f5ef1328dffa36b6635"
+      "sha256": "cee3c56a12b897eb82bda7a46bc1d4f9bd5687fba391a25bb46d74452a78751f"
     },
     "llms/tools/langsmith.txt": {
       "path": "/data/llms%2Ftools%2Flangsmith.txt",
       "type": "text",
-      "sha256": "f8c4b7aadde4c0417375694ba209f23437e04dbdc0a18dd9ae21e8d156282ce4"
+      "sha256": "40bcad97089852bfc81d80239cdc4848a11d351cf0f0a39df57039cb6c305464"
     },
     "raycast/tools/langsmith.json": {
       "path": "/data/raycast%2Ftools%2Flangsmith.json",
       "type": "json",
-      "sha256": "5c0a8002094760f7def5a2974995b3cb091f7d68b575b09012080fdd0932987a"
+      "sha256": "e5bf5980cc844d7ec02cb219c5095005fd6388476926425493458ef1c9344c1e"
     },
     "entries/agents/life-sciences-research-specialist.json": {
       "path": "/data/entries%2Fagents%2Flife-sciences-research-specialist.json",
@@ -5836,32 +5836,32 @@
     "entries/tools/lovable.json": {
       "path": "/data/entries%2Ftools%2Flovable.json",
       "type": "json",
-      "sha256": "1c6b95cc61458c291d161a98cc6ac7e10104f7884ab52e8030f97a9dc6d8a8fa"
+      "sha256": "614cfd37359cd5db0cfda2512c3083d34ed4ba024abb91f657ceabc11df80a4d"
     },
     "llms/tools/lovable.txt": {
       "path": "/data/llms%2Ftools%2Flovable.txt",
       "type": "text",
-      "sha256": "a3a3515f490f9c7cd6c00290d4c7100989fb06dfc47c84888faf476f22dbc7aa"
+      "sha256": "407d4a999cd9ec3570a942eef545d1f028b10c75fb6c6bfefd031c0bfaca1454"
     },
     "raycast/tools/lovable.json": {
       "path": "/data/raycast%2Ftools%2Flovable.json",
       "type": "json",
-      "sha256": "e0f1dff5b68e3d83e6e3443c254f0a16a3c9f0b94705acab708b796f6ba41b18"
+      "sha256": "7ddc23dcc268d80e5cf82cbc86c1a1a2feabd66a4332abb19f6415bc34d849cf"
     },
     "entries/tools/make.json": {
       "path": "/data/entries%2Ftools%2Fmake.json",
       "type": "json",
-      "sha256": "cf05b1e3e028c2bdfd2f2f8389801f51dab8bba3b49c1285c7f77e581994ad80"
+      "sha256": "14ff0d39258598846d6a85ce71bb849f61d689a7a4f196b02d79016b8cdb6891"
     },
     "llms/tools/make.txt": {
       "path": "/data/llms%2Ftools%2Fmake.txt",
       "type": "text",
-      "sha256": "98dff5947c7000f22bcedbe9cdaccdb45d6fb76511657f100255d66f3c2b5feb"
+      "sha256": "38d05a0708da076767bb7b2984993dac248ff9c0cdbfd77d782d6ccd804f433e"
     },
     "raycast/tools/make.json": {
       "path": "/data/raycast%2Ftools%2Fmake.json",
       "type": "json",
-      "sha256": "20251573287ed4112e44ad189ca9acf38964b328bcbde6b15995a527d7d04c53"
+      "sha256": "916266d4285a102db8a89e5c227978df408a9830ba5a01413f6a64ead31fdd4f"
     },
     "entries/skills/markdown-knowledge-base-composer.json": {
       "path": "/data/entries%2Fskills%2Fmarkdown-knowledge-base-composer.json",
@@ -5901,17 +5901,17 @@
     "entries/tools/mastra.json": {
       "path": "/data/entries%2Ftools%2Fmastra.json",
       "type": "json",
-      "sha256": "86244b1130f1a4317545a667239aadcad73b220d944bd03e584ea35cc6e3e6c3"
+      "sha256": "463508c85a608c0c6c93a163a028445002fa75940ebb6c72c54f4e1e8c578376"
     },
     "llms/tools/mastra.txt": {
       "path": "/data/llms%2Ftools%2Fmastra.txt",
       "type": "text",
-      "sha256": "f8d0bb5f2ba3d149082d3916e3ff7ac828343560960ca6ffef731d4907b22125"
+      "sha256": "3ad81e1a39b5f8ad11ba2adec27f5d6972960074cb2f26f371e42d7d9f63146d"
     },
     "raycast/tools/mastra.json": {
       "path": "/data/raycast%2Ftools%2Fmastra.json",
       "type": "json",
-      "sha256": "a2beb8215596250ef87b5f254b7af9afe47f2e17a8154724e2678357d92bd177"
+      "sha256": "5c00e2323f6e8c2d41bc11e4c4532338b9ce214c813d3afa77087c1f21b73d62"
     },
     "entries/skills/mcp-server-authoring-security-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fmcp-server-authoring-security-capability-pack.json",
@@ -6021,17 +6021,17 @@
     "entries/tools/microsoft-autogen.json": {
       "path": "/data/entries%2Ftools%2Fmicrosoft-autogen.json",
       "type": "json",
-      "sha256": "199945981420442af4f3ac295d1c934e12790a1f24bde537b4a2122d672e892c"
+      "sha256": "d6b6263b574df92ff5d59ad7413220ca9fee2f478de1446db3fa3074e74bb4a6"
     },
     "llms/tools/microsoft-autogen.txt": {
       "path": "/data/llms%2Ftools%2Fmicrosoft-autogen.txt",
       "type": "text",
-      "sha256": "645f08b913d4096caa10775dcc4cafb7eac7fc71bcec1d78f7952f01bbb1cddb"
+      "sha256": "049361ac721e9c6cfc71b6f07480eb004587ee898ea2d60a53abd510704d99d1"
     },
     "raycast/tools/microsoft-autogen.json": {
       "path": "/data/raycast%2Ftools%2Fmicrosoft-autogen.json",
       "type": "json",
-      "sha256": "97b52ca7596a05b678960ebb2d6be63807093067d9a6289cb78d622971f80986"
+      "sha256": "a65789c5c17f92ef0313ac80847163449a4de33e940fe0688bba91545ce4560f"
     },
     "entries/statuslines/minimal-powerline.json": {
       "path": "/data/entries%2Fstatuslines%2Fminimal-powerline.json",
@@ -6241,17 +6241,17 @@
     "entries/tools/n8n.json": {
       "path": "/data/entries%2Ftools%2Fn8n.json",
       "type": "json",
-      "sha256": "7c01b3f4c48fc717bb9478f5261ff0cddaf3406e08dffd9396f6b3808de0a06b"
+      "sha256": "5d5c1d53be56b459ac58262a9704b2756b761c82dd9f2a491a91729725e9f2af"
     },
     "llms/tools/n8n.txt": {
       "path": "/data/llms%2Ftools%2Fn8n.txt",
       "type": "text",
-      "sha256": "f670bc3b1a8c573b58a64070b951eea3dbd2c7ddf5a36139ea44d19a71882098"
+      "sha256": "3a375ff30c76f647cea8191249c5dbde07563abad2dddc1182a8e2fefecb2724"
     },
     "raycast/tools/n8n.json": {
       "path": "/data/raycast%2Ftools%2Fn8n.json",
       "type": "json",
-      "sha256": "fef0fa0e2b59e8622a3a7a043ea28a9b91c0b73c8adee78fefb47f2f39d85da4"
+      "sha256": "75709540200c3440175bbfd8245e29413effdc73c69acc30e0954f8c82185156"
     },
     "entries/skills/n8n-ai-agent-workflow-architect.json": {
       "path": "/data/entries%2Fskills%2Fn8n-ai-agent-workflow-architect.json",
@@ -6451,17 +6451,17 @@
     "entries/tools/opencode.json": {
       "path": "/data/entries%2Ftools%2Fopencode.json",
       "type": "json",
-      "sha256": "94f1b2b1d07c16b2f125d091623550f999ba71951c78eabffe6cee47715de6af"
+      "sha256": "e35943d43ca14e3e1e0e2e53021bf25560f538ccb05ac1910d26610352c76958"
     },
     "llms/tools/opencode.txt": {
       "path": "/data/llms%2Ftools%2Fopencode.txt",
       "type": "text",
-      "sha256": "3e78603d37b7901c264dcf3d3461312a454369ab6816df6098e54b6d229a652c"
+      "sha256": "6ecfdd344bbad8346d1222bf125e752629151d9781baa9104c76a7feef81c301"
     },
     "raycast/tools/opencode.json": {
       "path": "/data/raycast%2Ftools%2Fopencode.json",
       "type": "json",
-      "sha256": "019e66b75b8ea1e9f47bbfabd252913723d825d657e48ad458f44a7fa3c37700"
+      "sha256": "457b107ce141e21d2ae12c1ad1284f6ffaeea81285a612122b489c215f031762"
     },
     "entries/skills/opennext-cloudflare-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fopennext-cloudflare-capability-pack.json",
@@ -6611,17 +6611,17 @@
     "entries/tools/pipedream.json": {
       "path": "/data/entries%2Ftools%2Fpipedream.json",
       "type": "json",
-      "sha256": "61ba0aab644c064850a326405a0e2c06cd0a17fce063d6fc11562ecbca8678d3"
+      "sha256": "fb0bbc0e41ac7298d1ea0cd13cb93af6bac637bc22e8511def27e31de5c5e074"
     },
     "llms/tools/pipedream.txt": {
       "path": "/data/llms%2Ftools%2Fpipedream.txt",
       "type": "text",
-      "sha256": "716392ce3deed0c3f96365cf2132132b78206efac178192e477012383abdc50b"
+      "sha256": "9adb4f8345095626a1d67ebec6b208ea8bf77f0b8434c3ab55e6e4cc28fb78f1"
     },
     "raycast/tools/pipedream.json": {
       "path": "/data/raycast%2Ftools%2Fpipedream.json",
       "type": "json",
-      "sha256": "bcdd3466b85c22787d23ec4c3f1da096d3c3285fbba043b320ad384b6e091ba6"
+      "sha256": "d0e18fef4724cccb6d9e2025585d42aada27a44f6905e033519179e36458e966"
     },
     "entries/mcp/plaid-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fplaid-mcp-server.json",
@@ -6901,32 +6901,32 @@
     "entries/tools/promptfoo.json": {
       "path": "/data/entries%2Ftools%2Fpromptfoo.json",
       "type": "json",
-      "sha256": "853c6bf888068f7ac09641632ba827e8f5a7f3e4d6c5a0e8375c4116e18c0cff"
+      "sha256": "f26899f15cd29bca76430c2e4d645065e337c2864bb08dbfa43acb3b9e73c88e"
     },
     "llms/tools/promptfoo.txt": {
       "path": "/data/llms%2Ftools%2Fpromptfoo.txt",
       "type": "text",
-      "sha256": "59ab5c89bc35283c3769d359469283021bbca00f54c40fa4542852d12952c6bc"
+      "sha256": "92f37a946c9e3affaa6efca4cd99d029b9aceeafe2b87d7ec769169d51937c71"
     },
     "raycast/tools/promptfoo.json": {
       "path": "/data/raycast%2Ftools%2Fpromptfoo.json",
       "type": "json",
-      "sha256": "5c8c79275b113aa3b4cf4b5024b95fa433265165406be50cca513ecd67eeba99"
+      "sha256": "ff9960d44430c4fff6666a6ba8bde95e73a3ca23d491ad41f70e8368ca54364c"
     },
     "entries/tools/protect-ai.json": {
       "path": "/data/entries%2Ftools%2Fprotect-ai.json",
       "type": "json",
-      "sha256": "1dc6a63b9f373aabe14d01c325a430ef59e50f0173e25c59dd9b69494e4a4e5c"
+      "sha256": "f307495cfbdb0facf1b0b02755b001c2215ee31567847b4068ff577c5cefa5a0"
     },
     "llms/tools/protect-ai.txt": {
       "path": "/data/llms%2Ftools%2Fprotect-ai.txt",
       "type": "text",
-      "sha256": "f203beb6b9a3caa7c1bde35c094b2349ee51b572eaa2372dd6a6ee837a42bfd6"
+      "sha256": "00bb8b10a3c9e6aa3fe84a3339a0a6e39a2e61159fa656bcdf78fedf8653a62d"
     },
     "raycast/tools/protect-ai.json": {
       "path": "/data/raycast%2Ftools%2Fprotect-ai.json",
       "type": "json",
-      "sha256": "38276a20c3456122957c73147b96dd95439ff67befe356cc97edfb9af906b21b"
+      "sha256": "f53344fc82ce1d6663b834197d614e24fafbf0323857aa806c2903531a784fe7"
     },
     "entries/skills/proxmox-ve-api-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fproxmox-ve-api-capability-pack.json",
@@ -7046,17 +7046,17 @@
     "entries/tools/raycast.json": {
       "path": "/data/entries%2Ftools%2Fraycast.json",
       "type": "json",
-      "sha256": "60601586439430481ac3022db9759ab0b15f96715b789c1845314cf2184df60d"
+      "sha256": "dae50ec461d8bb2c38252a4f149479a0ccfb351cc6cc359b772512a4d7551fc7"
     },
     "llms/tools/raycast.txt": {
       "path": "/data/llms%2Ftools%2Fraycast.txt",
       "type": "text",
-      "sha256": "c51cc096d82205919866710ad7dac7fff559392a98ccc47a4e6629332cb0a389"
+      "sha256": "20fdc7814b5251dbc15f6d8789ed90a8a61dcddff6bbea02dbc800da0fbd0d9d"
     },
     "raycast/tools/raycast.json": {
       "path": "/data/raycast%2Ftools%2Fraycast.json",
       "type": "json",
-      "sha256": "4b2e8a7c5e4a3da47dcfbe1ab807bef4db19252f2cf6546eb4e5d5fbde0829f8"
+      "sha256": "4f736465aee66be0a4a5f8973260a21fcebb25f36c385991e32ca8ae887e1703"
     },
     "entries/skills/raycast-extension-dev-publish-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fraycast-extension-dev-publish-capability-pack.json",
@@ -7231,17 +7231,17 @@
     "entries/tools/replit-agent.json": {
       "path": "/data/entries%2Ftools%2Freplit-agent.json",
       "type": "json",
-      "sha256": "c900c8875903421bb19a189a5f83e4267eefca24293dd6103e05dff959bb915f"
+      "sha256": "948b52b5e85823e0016c6ce94e3862ef3c71eebaf1b9659e810f0e75a7f30cc4"
     },
     "llms/tools/replit-agent.txt": {
       "path": "/data/llms%2Ftools%2Freplit-agent.txt",
       "type": "text",
-      "sha256": "54fc2674c68d086b992fad20cc0c760d1be0d49efb4a3afba4aeadd405c7e7ae"
+      "sha256": "f5a3d63d2b000af4d9857f2793a0998c220b744fd8b56edc45f5b5a1905b2241"
     },
     "raycast/tools/replit-agent.json": {
       "path": "/data/raycast%2Ftools%2Freplit-agent.json",
       "type": "json",
-      "sha256": "b4c0abdfe7c323f970959d93b7cd9dcf216b92e376d0ab64b3884ded1b8395a4"
+      "sha256": "432291591f31bb41f500d81b8cf4d3df887410cfd8ad49caafd4adc9a3a4bbc2"
     },
     "entries/skills/rest-api-client-harness.json": {
       "path": "/data/entries%2Fskills%2Frest-api-client-harness.json",
@@ -7266,17 +7266,17 @@
     "entries/tools/roo-code.json": {
       "path": "/data/entries%2Ftools%2Froo-code.json",
       "type": "json",
-      "sha256": "1a8e51900914be92eeabcfc92fc888c0f13f1dae3c97b59fa3912401018add13"
+      "sha256": "470007842698d951542966f5633ccd8f3023045899f46dabda95bb69b21d0bb0"
     },
     "llms/tools/roo-code.txt": {
       "path": "/data/llms%2Ftools%2Froo-code.txt",
       "type": "text",
-      "sha256": "6b5796e11c9e9099659a5c35996b4929523e2d9671aaf0ae4c0f3421dad69536"
+      "sha256": "9714802e178b962a60bb89619e4af486aafaa57942520fb25ed7f5ee57a1f5ad"
     },
     "raycast/tools/roo-code.json": {
       "path": "/data/raycast%2Ftools%2Froo-code.json",
       "type": "json",
-      "sha256": "4505174069fb92848cfd9bb6823e1ab7d703f8f3f7fd87b677b8f45d0a9b03ba"
+      "sha256": "de27802646125c4a22196c639f4ad017fbf356156845fa781016393f30e5af47"
     },
     "entries/hooks/rust-cargo-check.json": {
       "path": "/data/entries%2Fhooks%2Frust-cargo-check.json",
@@ -7541,17 +7541,17 @@
     "entries/tools/smithery.json": {
       "path": "/data/entries%2Ftools%2Fsmithery.json",
       "type": "json",
-      "sha256": "d1b5318b7090a673587f4771d968711dd6a4df1c59ac6fcc94aad8589e4b17d1"
+      "sha256": "19f86b888a16f33c19212993e7b261276f076da7bfb2bf3b944174281d037754"
     },
     "llms/tools/smithery.txt": {
       "path": "/data/llms%2Ftools%2Fsmithery.txt",
       "type": "text",
-      "sha256": "1bcd48b1ce6d998ba7be1b988d687fe5e30f2313bffdc90613dc34d91b0bc601"
+      "sha256": "a7c13e408b4acf9880d502823c7c8baaf3ca9f1bd2c5c1b07b24209b685685fe"
     },
     "raycast/tools/smithery.json": {
       "path": "/data/raycast%2Ftools%2Fsmithery.json",
       "type": "json",
-      "sha256": "1a546f814a8f7551b82ea786e7c8f9910c7538b602769af9debe11119ea9582c"
+      "sha256": "52bf6824bd3230facd9bc8109174a1627c6b04b88b8d4f4c06208d79a38dd7f8"
     },
     "entries/mcp/socket-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fsocket-mcp-server.json",
@@ -7571,17 +7571,17 @@
     "entries/tools/sourcegraph-cody.json": {
       "path": "/data/entries%2Ftools%2Fsourcegraph-cody.json",
       "type": "json",
-      "sha256": "0569c5557eb5050c2a6684429758a931307be34d362b84cd70e1d97edf5a65ff"
+      "sha256": "c972e8c1689b184aa5f9a5e4dc4c7a9b66a80b02576d570bdb9a8fbe60a7f468"
     },
     "llms/tools/sourcegraph-cody.txt": {
       "path": "/data/llms%2Ftools%2Fsourcegraph-cody.txt",
       "type": "text",
-      "sha256": "d6934157e2ecb5fd56044d3c19b15c1b490866feb7359999de9c4dace2b8cc6e"
+      "sha256": "077b660b6f015525c4469ef36892463fa83e4b1445fb4d92c95e43c624c258df"
     },
     "raycast/tools/sourcegraph-cody.json": {
       "path": "/data/raycast%2Ftools%2Fsourcegraph-cody.json",
       "type": "json",
-      "sha256": "11928f909491df6900f7e1f1d6e2d489642ffc2de6c5f4ae838e6f6975d8b95e"
+      "sha256": "e9a183d64d7ec62661576cddc27a0e0d0807cd01416249c3b208b3f36f125b4d"
     },
     "entries/mcp/square-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fsquare-mcp-server.json",
@@ -7601,17 +7601,17 @@
     "entries/tools/stagehand.json": {
       "path": "/data/entries%2Ftools%2Fstagehand.json",
       "type": "json",
-      "sha256": "e6bbbab1b33fc4197d678b6b3be321831cbdb6ebf9869365ae3bcf1a85818e26"
+      "sha256": "18de82e8850efaaabf2c03550ca0b1cf44dc60714bcd00fdc0c2456a0b5417f3"
     },
     "llms/tools/stagehand.txt": {
       "path": "/data/llms%2Ftools%2Fstagehand.txt",
       "type": "text",
-      "sha256": "7e3c2b3a0f3eb0a519cecf941aa12270fd8450140b6b135b81992aeec171fb36"
+      "sha256": "47620654c898fcf0de9d36460730abfd59967925258306c0ef5b16a128e2b498"
     },
     "raycast/tools/stagehand.json": {
       "path": "/data/raycast%2Ftools%2Fstagehand.json",
       "type": "json",
-      "sha256": "e71518468acecefb81cd372627cfd1e867f1a4df0f187cf7722bb6ad40b06afa"
+      "sha256": "dcf28c436958fde3391850dedd92a21d9d48ac996d7c4063586d1a6be6938a43"
     },
     "entries/statuslines/starship-powerline-theme.json": {
       "path": "/data/entries%2Fstatuslines%2Fstarship-powerline-theme.json",
@@ -7896,17 +7896,17 @@
     "entries/tools/trigger-dev.json": {
       "path": "/data/entries%2Ftools%2Ftrigger-dev.json",
       "type": "json",
-      "sha256": "cd7af5300cc618a314a1968e82670721ccc04c804254b7e95c1ad87710b61045"
+      "sha256": "12f0ed0159ead0388f4294351a44416b4b1095f85f8ad2c88e72a8259f6d2e19"
     },
     "llms/tools/trigger-dev.txt": {
       "path": "/data/llms%2Ftools%2Ftrigger-dev.txt",
       "type": "text",
-      "sha256": "b0a925c209e8a5db29ea8ce3211fe7f3000765a487c15a5fb348dec1b2f2892d"
+      "sha256": "3547d6a4f947c3f6328faed65aa4d20e35204107607f4bfab59bcf1f96919a8f"
     },
     "raycast/tools/trigger-dev.json": {
       "path": "/data/raycast%2Ftools%2Ftrigger-dev.json",
       "type": "json",
-      "sha256": "a599b01ab04e5d3fdc9972b85ed309746a0b2837ad785062c552e6623ece6d85"
+      "sha256": "2dec4771aaf814829f34a41b22807e8f5321ef617c19e389a1224778ad7e3608"
     },
     "entries/skills/trpc-type-safe-api.json": {
       "path": "/data/entries%2Fskills%2Ftrpc-type-safe-api.json",
@@ -8036,17 +8036,17 @@
     "entries/tools/vercel-v0.json": {
       "path": "/data/entries%2Ftools%2Fvercel-v0.json",
       "type": "json",
-      "sha256": "627223f5495f53ed1457eaf902bf60a7ed1a17df06b8a373bf742f2385191ebb"
+      "sha256": "365a03593210d0c22ceb40ffa7b64c41bc0aacf159b42edab2655b9dff6a7828"
     },
     "llms/tools/vercel-v0.txt": {
       "path": "/data/llms%2Ftools%2Fvercel-v0.txt",
       "type": "text",
-      "sha256": "91c8b23fc0d0fa29deb1cdcd4f866eb1fb15cd0ece26929394f6296e97ffe17a"
+      "sha256": "915e8417183c33d7c27c20cc54b5cdddc3668bebcc49493a1a19b3ba09c05aa2"
     },
     "raycast/tools/vercel-v0.json": {
       "path": "/data/raycast%2Ftools%2Fvercel-v0.json",
       "type": "json",
-      "sha256": "7c146606db8a0f3bf8978a82f1cbfb6f2ad2ccaf8f451a4f2cc5381be65a7b70"
+      "sha256": "ce88fc51e21ce2867986d45364784330dfc4d98f604075ad5cd022908c14c301"
     },
     "entries/commands/v0-generate.json": {
       "path": "/data/entries%2Fcommands%2Fv0-generate.json",
@@ -8086,17 +8086,17 @@
     "entries/tools/vercel-ai-sdk.json": {
       "path": "/data/entries%2Ftools%2Fvercel-ai-sdk.json",
       "type": "json",
-      "sha256": "821c43ea3caa2bce606a3febb21bf17d22da88e449d105ffc59227fdf9a85109"
+      "sha256": "27d1ddb7a916dbc974cd88bf8054a18f88252de14b14ed33b28edc513b39d585"
     },
     "llms/tools/vercel-ai-sdk.txt": {
       "path": "/data/llms%2Ftools%2Fvercel-ai-sdk.txt",
       "type": "text",
-      "sha256": "99eabc50911543ed8ee4e4d0272ddd331e8cbad9562d23590d4f5a7e4a914f53"
+      "sha256": "127c666e5c42f12110b9009c6d76bdbbabe0e51e6c30f1fb38cb0b0c531275b5"
     },
     "raycast/tools/vercel-ai-sdk.json": {
       "path": "/data/raycast%2Ftools%2Fvercel-ai-sdk.json",
       "type": "json",
-      "sha256": "b3326a826b2ebc18ea528bb520fac163207fe32fefc88aad8c7ed51525dba4b4"
+      "sha256": "6993c1a428093dac34cc62e9c76d8000010c6e3353e9695bbd14cdca0c3d3c1c"
     },
     "entries/mcp/vercel-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fvercel-mcp-server.json",
@@ -8166,17 +8166,17 @@
     "entries/tools/weave.json": {
       "path": "/data/entries%2Ftools%2Fweave.json",
       "type": "json",
-      "sha256": "884868d68248e4186b890a3b8a302798f413caf9cfc7368bf7c7f0ae43ecd05f"
+      "sha256": "ab54e510a2890dbb91aeee6cbba1708e3fc0d9d2852dc7fea54ecdc11d502d1a"
     },
     "llms/tools/weave.txt": {
       "path": "/data/llms%2Ftools%2Fweave.txt",
       "type": "text",
-      "sha256": "4d393595538187a7fdf91784ea3415897b695cb114e09202701750d0141eb4a1"
+      "sha256": "12790c44400f05df2f3f8092a34b704f938042b2227ba10c96c18866e6686a03"
     },
     "raycast/tools/weave.json": {
       "path": "/data/raycast%2Ftools%2Fweave.json",
       "type": "json",
-      "sha256": "41d7cc04797708db0af0f6862df14c01ac8a15989cbc568ce0adda0bb13f0c20"
+      "sha256": "add2598462024a4f1cc63b3ae586779727aa8bbc1cc3b98683067fea7e794b89"
     },
     "entries/agents/web-async-agent-coordinator.json": {
       "path": "/data/entries%2Fagents%2Fweb-async-agent-coordinator.json",
@@ -8251,17 +8251,17 @@
     "entries/tools/windsurf.json": {
       "path": "/data/entries%2Ftools%2Fwindsurf.json",
       "type": "json",
-      "sha256": "7088e7912f48c7b46884891c937cf278bb5c5faaea40dc02b5473bb895fbd67f"
+      "sha256": "ce8b05456b2d16649ea595077c69e1b794fbf4279aa6f629311ac71d7064d8b0"
     },
     "llms/tools/windsurf.txt": {
       "path": "/data/llms%2Ftools%2Fwindsurf.txt",
       "type": "text",
-      "sha256": "1cf8b852a2f5c5ed05b57eee3bbef133f2e91502d3be54c36b21ee442a2cb6e3"
+      "sha256": "83c013fb4839104a76a577d3fc0d3a8e59246f29d801d24825ce20f270c2d589"
     },
     "raycast/tools/windsurf.json": {
       "path": "/data/raycast%2Ftools%2Fwindsurf.json",
       "type": "json",
-      "sha256": "9363440cdd5cd6f5550055dc34cdddaa87a4bb9584521eed6597687febf68a34"
+      "sha256": "f9124f1eb8c2ebe751e58b967839cc78ca6de1a5812a1497adb880095f6ab10f"
     },
     "entries/skills/windsurf-collaborative-development.json": {
       "path": "/data/entries%2Fskills%2Fwindsurf-collaborative-development.json",
@@ -8301,17 +8301,17 @@
     "entries/tools/workato.json": {
       "path": "/data/entries%2Ftools%2Fworkato.json",
       "type": "json",
-      "sha256": "acb2d82223adb35351529c4eeea7dde1115e065a90fdf5669e058fe406712b85"
+      "sha256": "17515189ac77acf459e9286d1c9b5d75ad36bbe37f19570da370006052e50ef0"
     },
     "llms/tools/workato.txt": {
       "path": "/data/llms%2Ftools%2Fworkato.txt",
       "type": "text",
-      "sha256": "430b84a3461eeb9a6b573f194d0e2f86073e10cdf2e914166647d96b01b4372e"
+      "sha256": "d1bb7d347f817edd8d9f025bcf3d76530a521a952e2627247c2ca282e17673ae"
     },
     "raycast/tools/workato.json": {
       "path": "/data/raycast%2Ftools%2Fworkato.json",
       "type": "json",
-      "sha256": "4e18ff625795207c0cc337869c90d3580350009ee4f70b78c90925c19926c652"
+      "sha256": "5cb3712b57446654fe19c833aab34934791131bf0db3a0dfb9796111673331af"
     },
     "entries/mcp/workato-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fworkato-mcp-server.json",
@@ -8361,17 +8361,17 @@
     "entries/tools/zapier-ai.json": {
       "path": "/data/entries%2Ftools%2Fzapier-ai.json",
       "type": "json",
-      "sha256": "ae3c9a53025cc940a6431b6f5feb4465bd68c8a27c09ef49375e2ab0b40c24dd"
+      "sha256": "ccc900cfc7e23bf7305452bde98aeb8b209432bcfc2a4cb3c211b10dcca8e369"
     },
     "llms/tools/zapier-ai.txt": {
       "path": "/data/llms%2Ftools%2Fzapier-ai.txt",
       "type": "text",
-      "sha256": "343e34ea79b07531fdb432e9dbbc9fbdb9c510d1a0b9f124cb140e5136d2a78f"
+      "sha256": "d250cb6a26cd70c32093faa84a35272bf5166394119828e19274891085186c83"
     },
     "raycast/tools/zapier-ai.json": {
       "path": "/data/raycast%2Ftools%2Fzapier-ai.json",
       "type": "json",
-      "sha256": "4031853f481fa5a4b4bd012ec1add515ff9aa4f71dea2ca5249ba43063533894"
+      "sha256": "7732be3ede4754fdf94dc66edd90ababaac06b53f851106d622967416f46b58d"
     },
     "entries/mcp/zapier-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fzapier-mcp-server.json",
@@ -8391,17 +8391,17 @@
     "entries/tools/zed.json": {
       "path": "/data/entries%2Ftools%2Fzed.json",
       "type": "json",
-      "sha256": "24316759c566e41777717fe41f6d8103ed83133e0adbf6c738cb112ac960b212"
+      "sha256": "997e74259e66d3bc43420b753e84354eccf8499997afc7369a506961d78439e7"
     },
     "llms/tools/zed.txt": {
       "path": "/data/llms%2Ftools%2Fzed.txt",
       "type": "text",
-      "sha256": "54fd2a9a23b6096612859c0d35991ae5293683ca44f44ca38f6c48ee3514f86b"
+      "sha256": "42fe3fef94ad95e67ca19791402deee006c25247a152b15ad1c4dd764e63b4e8"
     },
     "raycast/tools/zed.json": {
       "path": "/data/raycast%2Ftools%2Fzed.json",
       "type": "json",
-      "sha256": "b5a88645bc4f405174434f253274b30e6d8ebed427b709065640b3eecb15fa59"
+      "sha256": "cce797767d4bafccbf2bf3d04d5b2a07ca99acc5199168edc1762dcb05700743"
     },
     "entries/skills/zero-budget-saas-launch-capability-pack.json": {
       "path": "/data/entries%2Fskills%2Fzero-budget-saas-launch-capability-pack.json",
@@ -8451,12 +8451,12 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "dbbb919cce4c790b016bfa628f7b46b6ef439ae4210704efb22534cc9b3fde90"
+      "sha256": "9b4f238bc780874153f2a86637ee5ee0b1a242dcb1b47f24d0ac3f10c8ed362a"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",
       "type": "json",
-      "sha256": "cfb090ca35cb2e07bf69fbdc32c1bb88d2cc5404c26eee1fdec763ce5058c1ab"
+      "sha256": "1e0a1327c25f68f5aec28a5727e29e6d7913d545af9bb46e8f68b803df9a36a4"
     },
     "feeds/categories/skills.json": {
       "path": "/data/feeds%2Fcategories%2Fskills.json",

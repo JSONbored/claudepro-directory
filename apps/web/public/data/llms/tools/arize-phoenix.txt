@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/arize-phoenix
 - Source URLs: https://arize.com/docs/phoenix, https://github.com/Arize-ai/phoenix, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/arize-phoenix.mdx, https://phoenix.arize.com
+- Brand: Arize Phoenix
+- Brand domain: phoenix.arize.com
+- Brand asset source: brandfetch
 - Author: Arize AI
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

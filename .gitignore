@@ -11,6 +11,8 @@ TASKS.md
 .internal/
 .dev.vars
 .dev.vars.*
+.env.local
+.env.*.local
 AGENTS.md
 docs/jobs-listings-private-flow.md
 integrations/raycast/package.json.dev-backup

@@ -1496,6 +1496,9 @@
         "aider"
       ],
       "author": "Aider",
+      "brandName": "Aider",
+      "brandDomain": "aider.chat",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -1926,6 +1929,9 @@
         "apify"
       ],
       "author": "Apify",
+      "brandName": "Apify",
+      "brandDomain": "apify.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -1974,6 +1980,9 @@
         "arcade"
       ],
       "author": "Arcade",
+      "brandName": "Arcade",
+      "brandDomain": "arcade.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -2022,6 +2031,9 @@
         "arize phoenix"
       ],
       "author": "Arize AI",
+      "brandName": "Arize Phoenix",
+      "brandDomain": "phoenix.arize.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -2078,6 +2090,9 @@
         "heyclaude"
       ],
       "author": "Asana",
+      "brandName": "Asana",
+      "brandDomain": "asana.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2025-09-18",
       "installable": true,
       "downloadTrust": "first-party",
@@ -2934,6 +2949,9 @@
         "bolt"
       ],
       "author": "StackBlitz",
+      "brandName": "Bolt",
+      "brandDomain": "bolt.new",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -3036,6 +3054,9 @@
         "braintrust"
       ],
       "author": "Braintrust",
+      "brandName": "Braintrust",
+      "brandDomain": "braintrust.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -3166,6 +3187,9 @@
         "browser use"
       ],
       "author": "Browser Use",
+      "brandName": "Browser Use",
+      "brandDomain": "browser-use.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -3215,6 +3239,9 @@
         "browserbase"
       ],
       "author": "Browserbase",
+      "brandName": "Browserbase",
+      "brandDomain": "browserbase.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -3876,6 +3903,9 @@
         "heyclaude"
       ],
       "author": "Anthropic",
+      "brandName": "Claude Code",
+      "brandDomain": "anthropic.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -4857,6 +4887,9 @@
         "cline"
       ],
       "author": "Cline",
+      "brandName": "Cline",
+      "brandDomain": "cline.bot",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -5013,6 +5046,9 @@
         "cloudflare agents sdk"
       ],
       "author": "Cloudflare",
+      "brandName": "Cloudflare Agents SDK",
+      "brandDomain": "developers.cloudflare.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -5739,6 +5775,9 @@
         "coderabbit"
       ],
       "author": "CodeRabbit",
+      "brandName": "CodeRabbit",
+      "brandDomain": "coderabbit.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -6002,6 +6041,9 @@
         "composio"
       ],
       "author": "Composio",
+      "brandName": "Composio",
+      "brandDomain": "composio.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -6215,6 +6257,9 @@
         "continue"
       ],
       "author": "Continue",
+      "brandName": "Continue",
+      "brandDomain": "continue.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -6321,6 +6366,9 @@
         "crewai"
       ],
       "author": "CrewAI",
+      "brandName": "CrewAI",
+      "brandDomain": "crewai.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -6505,6 +6553,9 @@
         "cursor"
       ],
       "author": "Cursor",
+      "brandName": "Cursor",
+      "brandDomain": "cursor.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -7443,6 +7494,9 @@
         "devin"
       ],
       "author": "Cognition",
+      "brandName": "Devin",
+      "brandDomain": "devin.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -8516,6 +8570,9 @@
         "exa"
       ],
       "author": "Exa",
+      "brandName": "Exa",
+      "brandDomain": "exa.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -8913,6 +8970,9 @@
         "firecrawl"
       ],
       "author": "Firecrawl",
+      "brandName": "Firecrawl",
+      "brandDomain": "firecrawl.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -9390,6 +9450,9 @@
         "garak"
       ],
       "author": "NVIDIA",
+      "brandName": "Garak",
+      "brandDomain": "github.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -9491,6 +9554,9 @@
         "giskard"
       ],
       "author": "Giskard",
+      "brandName": "Giskard",
+      "brandDomain": "giskard.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -10159,6 +10225,9 @@
         "heyclaude"
       ],
       "author": "GitHub",
+      "brandName": "GitHub Copilot",
+      "brandDomain": "github.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -10558,6 +10627,9 @@
         "heyclaude"
       ],
       "author": "Graphite",
+      "brandName": "Graphite Diamond",
+      "brandDomain": "graphite.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -10713,6 +10785,9 @@
         "helicone"
       ],
       "author": "Helicone",
+      "brandName": "Helicone",
+      "brandDomain": "helicone.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -11147,6 +11222,9 @@
         "hyperbrowser"
       ],
       "author": "Hyperbrowser",
+      "brandName": "Hyperbrowser",
+      "brandDomain": "hyperbrowser.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -11977,6 +12055,9 @@
         "lakera guard"
       ],
       "author": "Lakera",
+      "brandName": "Lakera Guard",
+      "brandDomain": "lakera.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12025,6 +12106,9 @@
         "langfuse"
       ],
       "author": "Langfuse",
+      "brandName": "Langfuse",
+      "brandDomain": "langfuse.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12074,6 +12158,9 @@
         "langgraph"
       ],
       "author": "LangChain",
+      "brandName": "LangGraph",
+      "brandDomain": "langchain.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12123,6 +12210,9 @@
         "langsmith"
       ],
       "author": "LangChain",
+      "brandName": "LangSmith",
+      "brandDomain": "langchain.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12413,6 +12503,9 @@
         "lovable"
       ],
       "author": "Lovable",
+      "brandName": "Lovable",
+      "brandDomain": "lovable.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12461,6 +12554,9 @@
         "make"
       ],
       "author": "Make",
+      "brandName": "Make",
+      "brandDomain": "make.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -12643,6 +12739,9 @@
         "mastra"
       ],
       "author": "Mastra",
+      "brandName": "Mastra",
+      "brandDomain": "mastra.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -13098,6 +13197,9 @@
         "microsoft autogen"
       ],
       "author": "Microsoft",
+      "brandName": "Microsoft AutoGen",
+      "brandDomain": "microsoft.github.io",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -13906,6 +14008,9 @@
         "n8n"
       ],
       "author": "n8n",
+      "brandName": "n8n",
+      "brandDomain": "n8n.io",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -14717,6 +14822,9 @@
         "opencode"
       ],
       "author": "SST",
+      "brandName": "OpenCode",
+      "brandDomain": "opencode.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -15304,6 +15412,9 @@
         "pipedream"
       ],
       "author": "Pipedream",
+      "brandName": "Pipedream",
+      "brandDomain": "pipedream.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -16384,6 +16495,9 @@
         "promptfoo"
       ],
       "author": "Promptfoo",
+      "brandName": "Promptfoo",
+      "brandDomain": "promptfoo.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -16433,6 +16547,9 @@
         "protect ai"
       ],
       "author": "Protect AI",
+      "brandName": "Protect AI",
+      "brandDomain": "protectai.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -16915,6 +17032,9 @@
         "raycast"
       ],
       "author": "Raycast",
+      "brandName": "Raycast",
+      "brandDomain": "raycast.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -17581,6 +17701,9 @@
         "replit agent"
       ],
       "author": "Replit",
+      "brandName": "Replit Agent",
+      "brandDomain": "replit.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -17711,6 +17834,9 @@
         "roo code"
       ],
       "author": "Roo Code",
+      "brandName": "Roo Code",
+      "brandDomain": "roocode.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -18703,6 +18829,9 @@
         "smithery"
       ],
       "author": "Smithery",
+      "brandName": "Smithery",
+      "brandDomain": "smithery.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -18804,6 +18933,9 @@
         "heyclaude"
       ],
       "author": "Sourcegraph",
+      "brandName": "Sourcegraph Cody",
+      "brandDomain": "sourcegraph.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -18906,6 +19038,9 @@
         "stagehand"
       ],
       "author": "Browserbase",
+      "brandName": "Stagehand",
+      "brandDomain": "stagehand.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -19978,6 +20113,9 @@
         "trigger dev"
       ],
       "author": "Trigger.dev",
+      "brandName": "Trigger.dev",
+      "brandDomain": "trigger.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -20513,6 +20651,9 @@
         "v0"
       ],
       "author": "Vercel",
+      "brandName": "v0",
+      "brandDomain": "v0.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -20696,6 +20837,9 @@
         "vercel ai sdk"
       ],
       "author": "Vercel",
+      "brandName": "Vercel AI SDK",
+      "brandDomain": "ai-sdk.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -20988,6 +21132,9 @@
         "weave"
       ],
       "author": "Weights and Biases",
+      "brandName": "Weave",
+      "brandDomain": "wandb.ai",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -21305,6 +21452,9 @@
         "windsurf"
       ],
       "author": "Windsurf",
+      "brandName": "Windsurf",
+      "brandDomain": "windsurf.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -21489,6 +21639,9 @@
         "workato"
       ],
       "author": "Workato",
+      "brandName": "Workato",
+      "brandDomain": "workato.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -21698,6 +21851,9 @@
         "zapier ai"
       ],
       "author": "Zapier",
+      "brandName": "Zapier AI",
+      "brandDomain": "zapier.com",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,
@@ -21800,6 +21956,9 @@
         "zed"
       ],
       "author": "Zed Industries",
+      "brandName": "Zed",
+      "brandDomain": "zed.dev",
+      "brandAssetSource": "brandfetch",
       "dateAdded": "2026-04-27",
       "installable": false,
       "downloadTrust": null,

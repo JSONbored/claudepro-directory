@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/n8n
 - Source URLs: https://docs.n8n.io, https://github.com/n8n-io/n8n, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/n8n.mdx, https://n8n.io
+- Brand: n8n
+- Brand domain: n8n.io
+- Brand asset source: brandfetch
 - Author: n8n
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

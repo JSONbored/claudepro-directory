@@ -15,6 +15,11 @@ export type RaycastEntry = {
   title: string;
   description: string;
   tags: string[];
+  brandName?: string;
+  brandDomain?: string;
+  brandIconUrl?: string;
+  brandLogoUrl?: string;
+  brandAssetSource?: string;
   installCommand: string;
   configSnippet: string;
   copyText: string;
@@ -42,6 +47,19 @@ export type ParsedFeed = {
 export type CategoryOption = {
   value: string;
   title: string;
+};
+
+export type SubmissionDraft = {
+  category?: string;
+  title?: string;
+  slug?: string;
+  sourceUrl?: string;
+  repoUrl?: string;
+  documentationUrl?: string;
+  brandName?: string;
+  brandDomain?: string;
+  description?: string;
+  tags?: string[] | string;
 };
 
 export const categoryLabels: Record<string, string> = {
@@ -121,21 +139,66 @@ export function absoluteDataUrl(value: string, baseUrl = FEED_URL) {
   return new URL(value, baseUrl).toString();
 }
 
-export function buildContributeEntryUrl(entry?: Partial<RaycastEntry>) {
+function setOptionalParam(
+  params: URLSearchParams,
+  key: string,
+  value?: string | string[],
+) {
+  const normalized = Array.isArray(value)
+    ? value.map(String).filter(Boolean).join(", ")
+    : String(value || "").trim();
+  if (normalized) params.set(key, normalized);
+}
+
+export function buildContributeEntryUrl(
+  entry?: Partial<RaycastEntry> | SubmissionDraft,
+) {
   const url = new URL(SUBMIT_URL);
   if (entry?.category) url.searchParams.set("category", entry.category);
   if (entry?.title) url.searchParams.set("name", entry.title);
   if (entry?.slug) url.searchParams.set("slug", entry.slug);
+  setOptionalParam(url.searchParams, "description", entry?.description);
+  setOptionalParam(url.searchParams, "card_description", entry?.description);
+  setOptionalParam(url.searchParams, "brand_name", entry?.brandName);
+  setOptionalParam(url.searchParams, "brand_domain", entry?.brandDomain);
+  setOptionalParam(url.searchParams, "tags", entry?.tags);
+  const draft = entry as SubmissionDraft | undefined;
+  const repoUrl = entry?.repoUrl || draft?.repoUrl || "";
+  const docsUrl = entry?.documentationUrl || draft?.documentationUrl || "";
+  const sourceUrl = draft?.sourceUrl || "";
+  setOptionalParam(url.searchParams, "github_url", repoUrl);
+  setOptionalParam(url.searchParams, "docs_url", docsUrl || sourceUrl);
   return url.toString();
 }
 
-export function buildSubmitIssueUrl(category?: string) {
+export function buildSubmitIssueUrl(
+  categoryOrDraft?: string | SubmissionDraft,
+) {
+  const draft: SubmissionDraft | undefined =
+    typeof categoryOrDraft === "string"
+      ? { category: categoryOrDraft }
+      : categoryOrDraft;
+  const category = draft?.category;
   const template = category
     ? (issueTemplateByCategory[category] ?? "submit-entry.md")
     : "submit-entry.md";
   const url = new URL(GITHUB_NEW_ISSUE_URL);
   url.searchParams.set("template", template);
   if (category) url.searchParams.set("category", category);
+  setOptionalParam(url.searchParams, "title", draft?.title);
+  setOptionalParam(url.searchParams, "name", draft?.title);
+  setOptionalParam(url.searchParams, "slug", draft?.slug);
+  setOptionalParam(url.searchParams, "description", draft?.description);
+  setOptionalParam(url.searchParams, "card_description", draft?.description);
+  setOptionalParam(url.searchParams, "brand_name", draft?.brandName);
+  setOptionalParam(url.searchParams, "brand_domain", draft?.brandDomain);
+  setOptionalParam(url.searchParams, "tags", draft?.tags);
+  setOptionalParam(url.searchParams, "github_url", draft?.repoUrl);
+  setOptionalParam(
+    url.searchParams,
+    "docs_url",
+    draft?.documentationUrl || draft?.sourceUrl,
+  );
   return url.toString();
 }
 
@@ -152,6 +215,11 @@ export function buildSuggestChangeUrl(entry: RaycastEntry) {
   url.searchParams.set("category", entry.category);
   url.searchParams.set("description", entry.description);
   url.searchParams.set("card_description", entry.description);
+  if (entry.brandName) url.searchParams.set("brand_name", entry.brandName);
+  if (entry.brandDomain) {
+    url.searchParams.set("brand_domain", entry.brandDomain);
+  }
+  if (entry.tags?.length) url.searchParams.set("tags", entry.tags.join(", "));
   if (entry.repoUrl) url.searchParams.set("github_url", entry.repoUrl);
   if (entry.documentationUrl) {
     url.searchParams.set("docs_url", entry.documentationUrl);

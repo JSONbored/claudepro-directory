@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 
+import { BrandAsset } from "@/components/brand-asset";
 import { GitHubMark } from "@/components/icons/github-mark";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast-provider";
@@ -224,38 +225,47 @@ export function DirectoryEntryCard({
 
       <div className="flex min-w-0 flex-1 flex-col gap-3.5">
         <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/${entry.category}/${entry.slug}`}
-                className="directory-title block font-semibold tracking-tight text-foreground transition group-hover:text-primary"
-                onClick={() =>
-                  window.dispatchEvent(
-                    new CustomEvent("heyclaude:intent", {
-                      detail: {
-                        type: "open",
-                        entryKey: `${entry.category}:${entry.slug}`,
-                      },
-                    }),
-                  )
-                }
-              >
-                {entry.title}
-              </Link>
-              <Check className="size-4 shrink-0 text-primary/90" />
-            </div>
+          <div className="flex min-w-0 items-start gap-3">
+            <BrandAsset
+              entry={entry}
+              fallback={getMonogram(entry)}
+              size="sm"
+              className="mt-0.5"
+            />
+            <div className="min-w-0 space-y-2">
+              <div className="flex items-center gap-2">
+                <Link
+                  href={`/${entry.category}/${entry.slug}`}
+                  className="directory-title block font-semibold tracking-tight text-foreground transition group-hover:text-primary"
+                  onClick={() =>
+                    window.dispatchEvent(
+                      new CustomEvent("heyclaude:intent", {
+                        detail: {
+                          type: "open",
+                          entryKey: `${entry.category}:${entry.slug}`,
+                        },
+                      }),
+                    )
+                  }
+                >
+                  {entry.title}
+                </Link>
+                <Check className="size-4 shrink-0 text-primary/90" />
+              </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span
-                className={cn(
-                  "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
-                  categoryAccentClasses[entry.category],
-                )}
-              >
-                {categoryLabels[entry.category] ?? entry.category}
-              </span>
-              {entry.author ? <span>by {entry.author}</span> : null}
-              {relativeDate ? <span>· {relativeDate}</span> : null}
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <span
+                  className={cn(
+                    "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-medium",
+                    categoryAccentClasses[entry.category],
+                  )}
+                >
+                  {categoryLabels[entry.category] ?? entry.category}
+                </span>
+                {entry.author ? <span>by {entry.author}</span> : null}
+                {entry.brandName ? <span>· {entry.brandName}</span> : null}
+                {relativeDate ? <span>· {relativeDate}</span> : null}
+              </div>
             </div>
           </div>
 

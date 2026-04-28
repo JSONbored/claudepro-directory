@@ -28,6 +28,27 @@ function codeBlock(language, value) {
   return `\`\`\`${language}\n${normalized}\n\`\`\``;
 }
 
+function buildEntryBrandFields(entry) {
+  const fields = {};
+  for (const field of [
+    "brandName",
+    "brandDomain",
+    "brandIconUrl",
+    "brandLogoUrl",
+    "brandAssetSource",
+    "brandVerifiedAt",
+    "brandColors",
+  ]) {
+    const value = entry[field];
+    if (Array.isArray(value) && value.length) {
+      fields[field] = value;
+    } else if (value !== undefined && value !== null && value !== "") {
+      fields[field] = value;
+    }
+  }
+  return fields;
+}
+
 export function buildRaycastDetailMarkdown(entry) {
   const lines = [
     `# ${entry.title}`,
@@ -38,6 +59,9 @@ export function buildRaycastDetailMarkdown(entry) {
     entry.author ? `**Author:** ${entry.author}` : "",
     entry.verificationStatus
       ? `**Verification:** ${entry.verificationStatus}`
+      : "",
+    entry.brandName || entry.brandDomain
+      ? `**Brand:** ${[entry.brandName, entry.brandDomain].filter(Boolean).join(" / ")}`
       : "",
     entry.downloadTrust ? `**Download trust:** ${entry.downloadTrust}` : "",
     entry.tags?.length
@@ -116,6 +140,7 @@ export function buildSearchEntries(entries) {
     tags: entry.tags ?? [],
     keywords: entry.keywords ?? [],
     author: entry.author || "",
+    ...buildEntryBrandFields(entry),
     dateAdded: entry.dateAdded || "",
     installable: Boolean(
       entry.installable || entry.installCommand || entry.downloadUrl,
@@ -285,6 +310,7 @@ export function buildRaycastEntries(entries) {
       title: entry.title,
       description: entry.cardDescription || entry.description,
       tags: entry.tags,
+      ...buildEntryBrandFields(entry),
       installCommand: entry.installCommand || "",
       configSnippet: entry.configSnippet || "",
       copyText: truncateText(copyText, RAYCAST_COPY_PREVIEW_LIMIT),
@@ -318,6 +344,7 @@ export function buildRaycastDetail(entry) {
     category: entry.category,
     slug: entry.slug,
     title: entry.title,
+    ...buildEntryBrandFields(entry),
     copyText: getCopyText(entry),
     detailMarkdown: buildRaycastDetailMarkdown(entry),
     webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
@@ -372,6 +399,7 @@ export function buildReadOnlyEcosystemFeed(entries, params = {}) {
         title: entry.title,
         description: entry.cardDescription || entry.description,
         url: `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`,
+        ...buildEntryBrandFields(entry),
         websiteUrl: entry.websiteUrl || "",
         documentationUrl: entry.documentationUrl || "",
         repoUrl: entry.repoUrl || "",
@@ -422,6 +450,7 @@ export function buildMcpRegistryFeed(entries) {
       title: entry.title,
       description: entry.description,
       websiteUrl: entry.websiteUrl || entry.documentationUrl || "",
+      ...buildEntryBrandFields(entry),
       repository: entry.repoUrl
         ? {
             url: entry.repoUrl,
@@ -444,6 +473,7 @@ export function buildPluginExportFeed(entries) {
     title: entry.title,
     description: entry.cardDescription || entry.description,
     category: entry.category,
+    ...buildEntryBrandFields(entry),
     sourceUrl: entry.repoUrl || entry.documentationUrl || entry.githubUrl,
     installCommand: entry.installCommand || entry.commandSyntax || "",
     platformCompatibility:

@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "microsoft-autogen",
   "title": "Microsoft AutoGen",
+  "brandName": "Microsoft AutoGen",
+  "brandDomain": "microsoft.github.io",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nAutoGen is a useful reference for multi-agent application patterns, especially where conversation loops and coordination matter.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Microsoft AutoGen\nOpen-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.\n**Category:** tools\n**Author:** Microsoft\n**Tags:** `agent-framework` `multi-agent`\n\n## Links\n- https://heyclau.de/tools/microsoft-autogen\n- https://microsoft.github.io/autogen/\n- https://github.com/microsoft/autogen",
+  "detailMarkdown": "# Microsoft AutoGen\nOpen-source framework for building multi-agent AI applications, conversations, workflows, and autonomous systems.\n**Category:** tools\n**Author:** Microsoft\n**Brand:** Microsoft AutoGen / microsoft.github.io\n**Tags:** `agent-framework` `multi-agent`\n\n## Links\n- https://heyclau.de/tools/microsoft-autogen\n- https://microsoft.github.io/autogen/\n- https://github.com/microsoft/autogen",
   "webUrl": "https://heyclau.de/tools/microsoft-autogen",
   "repoUrl": "https://github.com/microsoft/autogen",
   "documentationUrl": "https://microsoft.github.io/autogen/"

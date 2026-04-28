@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "coderabbit",
   "title": "CodeRabbit",
+  "brandName": "CodeRabbit",
+  "brandDomain": "coderabbit.ai",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nCodeRabbit fits teams that want AI review support directly in the pull request loop rather than only inside an editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# CodeRabbit\nAI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.\n**Category:** tools\n**Author:** CodeRabbit\n**Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/coderabbit\n- https://docs.coderabbit.ai",
+  "detailMarkdown": "# CodeRabbit\nAI code review platform for pull request summaries, review comments, repository context, and engineering feedback loops.\n**Category:** tools\n**Author:** CodeRabbit\n**Brand:** CodeRabbit / coderabbit.ai\n**Tags:** `code-review` `pull-requests`\n\n## Links\n- https://heyclau.de/tools/coderabbit\n- https://docs.coderabbit.ai",
   "webUrl": "https://heyclau.de/tools/coderabbit",
   "repoUrl": "",
   "documentationUrl": "https://docs.coderabbit.ai"

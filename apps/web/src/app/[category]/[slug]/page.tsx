@@ -17,6 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { BrandAsset } from "@/components/brand-asset";
 import { ContentSections } from "@/components/content-sections";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { DetailToc } from "@/components/detail-toc";
@@ -68,6 +69,8 @@ function getSuggestChangeUrl(entry: {
   category: string;
   slug: string;
   title: string;
+  brandName?: string;
+  brandDomain?: string;
 }) {
   const url = new URL(`${siteConfig.githubUrl}/issues/new`);
   url.searchParams.set("title", `Suggest change: ${entry.title}`);
@@ -81,10 +84,30 @@ function getSuggestChangeUrl(entry: {
       "",
       "### Source or context",
       "",
+      entry.brandName || entry.brandDomain
+        ? [
+            "### Brand metadata",
+            entry.brandName ? `Brand: ${entry.brandName}` : "",
+            entry.brandDomain ? `Domain: ${entry.brandDomain}` : "",
+            "",
+          ]
+            .filter(Boolean)
+            .join("\n")
+        : "",
     ].join("\n"),
   );
   url.searchParams.set("labels", "needs-review,content-update");
   return url.toString();
+}
+
+function getEntryMonogram(entry: { category: string; title: string }) {
+  const label = categoryLabels[entry.category] ?? entry.title;
+  return label
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 export async function generateMetadata({
@@ -249,10 +272,31 @@ export default async function DetailPage({ params }: DetailPageProps) {
             </Link>
             {entry.dateAdded ? <span>{entry.dateAdded}</span> : null}
           </div>
-          <h1 className="section-title">{entry.title}</h1>
-          <p className="max-w-3xl text-base leading-8 text-muted-foreground">
-            {entry.description}
-          </p>
+          <div className="flex items-start gap-4">
+            <BrandAsset
+              entry={entry}
+              fallback={getEntryMonogram(entry)}
+              size="lg"
+              className="mt-1"
+            />
+            <div className="min-w-0">
+              {entry.brandName ? (
+                <p className="text-sm font-medium text-primary">
+                  {entry.brandName}
+                  {entry.brandDomain ? (
+                    <span className="text-muted-foreground">
+                      {" "}
+                      / {entry.brandDomain}
+                    </span>
+                  ) : null}
+                </p>
+              ) : null}
+              <h1 className="section-title">{entry.title}</h1>
+              <p className="mt-3 max-w-3xl text-base leading-8 text-muted-foreground">
+                {entry.description}
+              </p>
+            </div>
+          </div>
           <div className="flex flex-wrap gap-2">
             {entry.tags.map((tag) => (
               <span
@@ -623,6 +667,24 @@ export default async function DetailPage({ params }: DetailPageProps) {
 
             <div className="rounded-xl border border-border bg-background px-3 py-3 text-sm text-muted-foreground">
               <div className="space-y-1.5">
+                {entry.brandName || entry.brandDomain ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Provider
+                    </span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <BrandAsset
+                        entry={entry}
+                        fallback={getEntryMonogram(entry)}
+                        size="sm"
+                        className="size-6 rounded-md text-[9px]"
+                      />
+                      <span className="truncate">
+                        {entry.brandName || entry.brandDomain}
+                      </span>
+                    </span>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                     Author
@@ -779,12 +841,24 @@ export default async function DetailPage({ params }: DetailPageProps) {
           </div>
         ) : null}
 
-        {sourceSignals.length ? (
+        {sourceSignals.length || entry.brandDomain ? (
           <div className="surface-panel p-4">
             <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
               Trust & source
             </p>
             <div className="mt-3 space-y-2.5">
+              {entry.brandDomain ? (
+                <div className="rounded-xl border border-border bg-background px-3 py-3 text-sm">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Brand asset
+                  </p>
+                  <p className="mt-1 text-foreground">
+                    {entry.brandAssetSource === "brandfetch"
+                      ? "Brand icon via Brandfetch"
+                      : entry.brandAssetSource || "Brand metadata"}
+                  </p>
+                </div>
+              ) : null}
               {sourceSignals.map((signal) => {
                 const isUrl = /^https?:\/\//i.test(signal.value);
                 return (
@@ -825,12 +899,22 @@ export default async function DetailPage({ params }: DetailPageProps) {
                 href={`/${item.category}/${item.slug}`}
                 className="detail-related-card"
               >
-                <span className="detail-related-badge">
-                  {categoryLabels[item.category] ?? item.category}
-                </span>
-                <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">
-                  {item.title}
-                </p>
+                <div className="flex items-start gap-2">
+                  <BrandAsset
+                    entry={item}
+                    fallback={getEntryMonogram(item)}
+                    size="sm"
+                    className="size-7 rounded-md text-[9px]"
+                  />
+                  <div className="min-w-0">
+                    <span className="detail-related-badge">
+                      {categoryLabels[item.category] ?? item.category}
+                    </span>
+                    <p className="detail-related-title mt-2 text-sm font-medium tracking-tight">
+                      {item.title}
+                    </p>
+                  </div>
+                </div>
                 <p className="mt-1 overflow-hidden text-xs text-muted-foreground [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:1]">
                   {item.cardDescription || item.description}
                 </p>

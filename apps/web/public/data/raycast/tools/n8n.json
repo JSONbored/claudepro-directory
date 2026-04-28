@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "n8n",
   "title": "n8n",
+  "brandName": "n8n",
+  "brandDomain": "n8n.io",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nn8n is valuable for teams that want workflow automation with self-hosting options and AI integration steps.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# n8n\nSource-available workflow automation platform for self-hosted integrations, AI workflows, triggers, and data pipelines.\n**Category:** tools\n**Author:** n8n\n**Tags:** `workflow-automation` `self-hosted`\n\n## Links\n- https://heyclau.de/tools/n8n\n- https://docs.n8n.io\n- https://github.com/n8n-io/n8n",
+  "detailMarkdown": "# n8n\nSource-available workflow automation platform for self-hosted integrations, AI workflows, triggers, and data pipelines.\n**Category:** tools\n**Author:** n8n\n**Brand:** n8n / n8n.io\n**Tags:** `workflow-automation` `self-hosted`\n\n## Links\n- https://heyclau.de/tools/n8n\n- https://docs.n8n.io\n- https://github.com/n8n-io/n8n",
   "webUrl": "https://heyclau.de/tools/n8n",
   "repoUrl": "https://github.com/n8n-io/n8n",
   "documentationUrl": "https://docs.n8n.io"

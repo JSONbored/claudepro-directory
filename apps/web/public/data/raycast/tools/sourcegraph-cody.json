@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "sourcegraph-cody",
   "title": "Sourcegraph Cody",
+  "brandName": "Sourcegraph Cody",
+  "brandDomain": "sourcegraph.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nCody is strongest when repository-scale context and search quality matter more than one-off prompt completion.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Sourcegraph Cody\nAI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.\n**Category:** tools\n**Author:** Sourcegraph\n**Tags:** `ai-coding` `code-search`\n\n## Links\n- https://heyclau.de/tools/sourcegraph-cody\n- https://sourcegraph.com/docs/cody",
+  "detailMarkdown": "# Sourcegraph Cody\nAI coding assistant built around large codebase search, context retrieval, chat, and editor integrations.\n**Category:** tools\n**Author:** Sourcegraph\n**Brand:** Sourcegraph Cody / sourcegraph.com\n**Tags:** `ai-coding` `code-search`\n\n## Links\n- https://heyclau.de/tools/sourcegraph-cody\n- https://sourcegraph.com/docs/cody",
   "webUrl": "https://heyclau.de/tools/sourcegraph-cody",
   "repoUrl": "",
   "documentationUrl": "https://sourcegraph.com/docs/cody"

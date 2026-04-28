@@ -56,6 +56,12 @@ const categoryIcons: Record<string, Icon> = {
   statuslines: Icon.BarChart,
 };
 
+function raycastEntryIcon(entry: RaycastEntry) {
+  return entry.brandIconUrl
+    ? { source: entry.brandIconUrl }
+    : (categoryIcons[entry.category] ?? Icon.Document);
+}
+
 function getConfiguredFeed() {
   const preferences = getPreferenceValues<RegistryPreferences>();
   try {
@@ -371,9 +377,11 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
               keywords={[
                 entry.category,
                 categoryLabel(entry.category),
+                entry.brandName || "",
+                entry.brandDomain || "",
                 ...entry.tags,
-              ]}
-              icon={categoryIcons[entry.category] ?? Icon.Document}
+              ].filter(Boolean)}
+              icon={raycastEntryIcon(entry)}
               accessories={metadataAccessories(entry, isFavorite)}
               detail={<List.Item.Detail markdown={detailMarkdown} />}
               actions={

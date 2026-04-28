@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "windsurf",
   "title": "Windsurf",
+  "brandName": "Windsurf",
+  "brandDomain": "windsurf.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nWindsurf belongs in Claude-native tool stacks where the priority is editor-native agent flow and coordinated edits.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Windsurf\nAgentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.\n**Category:** tools\n**Author:** Windsurf\n**Tags:** `ai-coding` `agentic-editor`\n\n## Links\n- https://heyclau.de/tools/windsurf\n- https://docs.windsurf.com",
+  "detailMarkdown": "# Windsurf\nAgentic coding environment focused on codebase context, multi-file edits, and AI-assisted development flow.\n**Category:** tools\n**Author:** Windsurf\n**Brand:** Windsurf / windsurf.com\n**Tags:** `ai-coding` `agentic-editor`\n\n## Links\n- https://heyclau.de/tools/windsurf\n- https://docs.windsurf.com",
   "webUrl": "https://heyclau.de/tools/windsurf",
   "repoUrl": "",
   "documentationUrl": "https://docs.windsurf.com"

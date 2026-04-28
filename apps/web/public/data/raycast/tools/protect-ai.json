@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "protect-ai",
   "title": "Protect AI",
+  "brandName": "Protect AI",
+  "brandDomain": "protectai.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nProtect AI is relevant for organizations that treat AI systems as a security and supply-chain surface, not only a product feature.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Protect AI\nAI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.\n**Category:** tools\n**Author:** Protect AI\n**Tags:** `security` `ai-supply-chain`\n\n## Links\n- https://heyclau.de/tools/protect-ai\n- https://docs.protectai.com",
+  "detailMarkdown": "# Protect AI\nAI security platform for securing machine learning and LLM supply chains, models, applications, and infrastructure.\n**Category:** tools\n**Author:** Protect AI\n**Brand:** Protect AI / protectai.com\n**Tags:** `security` `ai-supply-chain`\n\n## Links\n- https://heyclau.de/tools/protect-ai\n- https://docs.protectai.com",
   "webUrl": "https://heyclau.de/tools/protect-ai",
   "repoUrl": "",
   "documentationUrl": "https://docs.protectai.com"

@@ -21,6 +21,7 @@
     "validate:category-spec": "node scripts/validate-category-spec.mjs",
     "validate:packages": "node scripts/validate-download-packages.mjs",
     "validate:raycast-feed": "node scripts/validate-raycast-feed.mjs",
+    "brand:enrich": "node scripts/enrich-brand-assets.mjs",
     "validate:deployment-artifacts": "node scripts/validate-deployment-artifacts.mjs",
     "validate:clean": "node scripts/validate-codebase-clean.mjs",
     "generate:openapi": "tsx scripts/generate-openapi.ts",

@@ -25,6 +25,25 @@ Important:
 - `repoUrl` is optional. Use it when there is a real upstream repository.
 - Do not use the directory repo as a placeholder `repoUrl` for unrelated assets.
 
+## Brand fields
+
+Use these when a resource has a clear provider, product, or service brand:
+
+- `brandName`
+- `brandDomain`
+- `brandAssetSource`
+- `brandIconUrl`
+- `brandLogoUrl`
+- `brandVerifiedAt`
+- `brandColors`
+
+Important:
+
+- `brandDomain` is the canonical enrichment key. Use the provider domain such as `asana.com`, not GitHub, docs hosting, package registry, or redirect domains.
+- `brandAssetSource` should be `brandfetch` for Brandfetch CDN assets, `manual` for reviewed local/manual assets, or omitted when no brand asset is known.
+- `brandIconUrl` and `brandLogoUrl` must be HTTPS Brandfetch URLs, HeyClaude/local asset URLs, or omitted. Do not hotlink arbitrary favicons.
+- Brand fields are optional for submissions. Maintainers can add or correct them during review.
+
 ## Shared install/usage fields
 
 Use these when applicable:

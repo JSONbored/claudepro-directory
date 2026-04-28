@@ -8,6 +8,8 @@ type SubmitPreviewCardProps = {
   tags: string;
   githubUrl: string;
   docsUrl: string;
+  brandName: string;
+  brandDomain: string;
   installCommand: string;
   assetContent: string;
   readinessScore: number;
@@ -38,6 +40,12 @@ function buildMdxPreview(props: SubmitPreviewCardProps) {
     lines.push(`repoUrl: ${frontmatterValue(props.githubUrl)}`);
   if (props.docsUrl.trim())
     lines.push(`documentationUrl: ${frontmatterValue(props.docsUrl)}`);
+  if (props.brandName.trim())
+    lines.push(`brandName: ${frontmatterValue(props.brandName)}`);
+  if (props.brandDomain.trim()) {
+    lines.push(`brandDomain: ${frontmatterValue(props.brandDomain)}`);
+    lines.push(`brandAssetSource: "brandfetch"`);
+  }
   if (props.installCommand.trim()) {
     lines.push(`installCommand: ${frontmatterValue(props.installCommand)}`);
   }

@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "exa",
   "title": "Exa",
+  "brandName": "Exa",
+  "brandDomain": "exa.ai",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nExa is relevant for agents and research workflows that need search results shaped for AI consumption rather than generic SERPs.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Exa\nSearch and web retrieval API designed for AI applications, agents, research workflows, and semantic web discovery.\n**Category:** tools\n**Author:** Exa\n**Tags:** `search` `retrieval`\n\n## Links\n- https://heyclau.de/tools/exa\n- https://docs.exa.ai",
+  "detailMarkdown": "# Exa\nSearch and web retrieval API designed for AI applications, agents, research workflows, and semantic web discovery.\n**Category:** tools\n**Author:** Exa\n**Brand:** Exa / exa.ai\n**Tags:** `search` `retrieval`\n\n## Links\n- https://heyclau.de/tools/exa\n- https://docs.exa.ai",
   "webUrl": "https://heyclau.de/tools/exa",
   "repoUrl": "",
   "documentationUrl": "https://docs.exa.ai"

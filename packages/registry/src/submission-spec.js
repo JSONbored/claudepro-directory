@@ -40,6 +40,24 @@ const BASE_FIELDS = [
     placeholder: "https://...",
   },
   {
+    id: "brand_name",
+    label: "Brand name",
+    type: "text",
+    required: false,
+    placeholder: "Asana, Anthropic, Linear",
+    helpText:
+      "Optional provider name for logo matching and contributor review.",
+  },
+  {
+    id: "brand_domain",
+    label: "Brand domain",
+    type: "text",
+    required: false,
+    placeholder: "asana.com",
+    helpText:
+      "Optional canonical provider domain. Do not use GitHub or docs hosting domains unless that is the brand.",
+  },
+  {
     id: "author",
     label: "Author",
     type: "text",

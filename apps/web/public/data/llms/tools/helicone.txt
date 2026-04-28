@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/helicone
 - Source URLs: https://docs.helicone.ai, https://github.com/Helicone/helicone, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/helicone.mdx, https://www.helicone.ai
+- Brand: Helicone
+- Brand domain: helicone.ai
+- Brand asset source: brandfetch
 - Author: Helicone
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

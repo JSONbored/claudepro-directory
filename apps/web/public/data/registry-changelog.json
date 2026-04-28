@@ -12,7 +12,7 @@
       "title": "Aider",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/aider",
-      "artifactHash": "ebed7b3a5fcafcab33ed889a7c7da7981ceeb720de347a2f15c5792b65e559ec"
+      "artifactHash": "b476a73a9e58d3e116fd8982e53dac96f288ee751efa12250dd80db19c7ad8a7"
     },
     {
       "key": "tools:apify",
@@ -22,7 +22,7 @@
       "title": "Apify",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/apify",
-      "artifactHash": "10bf03526f79b13029d3149b6f3e8b67b8439a33ba13daa8e7e242063f4356cc"
+      "artifactHash": "2c3997315fa4ee09ddc98029aa30cde50e982d709dae095325fc3cc65e6bc09b"
     },
     {
       "key": "tools:arcade-ai",
@@ -32,7 +32,7 @@
       "title": "Arcade",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/arcade-ai",
-      "artifactHash": "271a89b18e0d3265358a02a43abf0a88b3eebe507ffe2c72a82219b4ab10b8d5"
+      "artifactHash": "04e3bb2ab344063ff0e78ba7d39b479480369f5e5a37ec3ad191f570086792a6"
     },
     {
       "key": "tools:arize-phoenix",
@@ -42,7 +42,7 @@
       "title": "Arize Phoenix",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/arize-phoenix",
-      "artifactHash": "46774638842c26eb1ff272cb53612e9ca18d98638677476c0b0a16b355ff0f3c"
+      "artifactHash": "cf9902cf0b8608cbfd949e1a5fc121bbd718e697a5472a4ad7a12725318b14d9"
     },
     {
       "key": "tools:bolt-new",
@@ -52,7 +52,7 @@
       "title": "Bolt",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/bolt-new",
-      "artifactHash": "1c405b36d333524f990fcd35b77a2304afe3e4310b33be2867a9bfb6acd044c5"
+      "artifactHash": "8df29ec9eccf89d73d98829e0c648faace413df79acfca9cd47c92b6b9efae44"
     },
     {
       "key": "tools:braintrust",
@@ -62,7 +62,7 @@
       "title": "Braintrust",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/braintrust",
-      "artifactHash": "e91e291ad6ed2d2ab7c7c788a7d16f389573848112179511c6e8154251324878"
+      "artifactHash": "0f823d7005fb238f1ae4fb43fb7366e081b2008e1c3e0742c4e9faaa6077fe97"
     },
     {
       "key": "tools:browser-use",
@@ -72,7 +72,7 @@
       "title": "Browser Use",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/browser-use",
-      "artifactHash": "4227ac560b5f11505dda41c3a37f694154d7c02496ba00036ae455b770923fdc"
+      "artifactHash": "9f5507ca85e8ff31d673e40a8155c1ad30589bb03e5d3eb544e9ab5ce98f61a8"
     },
     {
       "key": "tools:browserbase",
@@ -82,7 +82,7 @@
       "title": "Browserbase",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/browserbase",
-      "artifactHash": "9c276c957551924267ebfa11fb3f778208c338b40b1ac947256c655680227c3e"
+      "artifactHash": "f800d59cb13b083e5a8988e56f05c95d683d0c967a20dc61da796d6cf3fb8122"
     },
     {
       "key": "tools:claude-code",
@@ -92,7 +92,7 @@
       "title": "Claude Code",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/claude-code",
-      "artifactHash": "3ca9c3d61565c56a1b69eb650b2097a2624ba8c2ce655667106fc63dbecf7597"
+      "artifactHash": "6fef5d4ecb3a7b5e839c0add2c5d623e144572a24ead9a6ff12834f6d4da5428"
     },
     {
       "key": "tools:cline",
@@ -102,7 +102,7 @@
       "title": "Cline",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cline",
-      "artifactHash": "0ed65b31af904255b0d27ebec497d8e834054e91131071ef11c792adc92b8816"
+      "artifactHash": "65c24466e3394b288e830ffe445e74cf805d542303a5d208366b1e997c099560"
     },
     {
       "key": "tools:cloudflare-agents-sdk",
@@ -112,7 +112,7 @@
       "title": "Cloudflare Agents SDK",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cloudflare-agents-sdk",
-      "artifactHash": "db76a66393903f09d65dba98ce3544e1d97c6af25bc4e59e69ffb9f42f62e476"
+      "artifactHash": "4b74e7bd94d0881c8e7c9c8dd387c537feaef84ede64fbe40b3c7533ee00b226"
     },
     {
       "key": "tools:coderabbit",
@@ -122,7 +122,7 @@
       "title": "CodeRabbit",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/coderabbit",
-      "artifactHash": "4a4d82638d14faf4f0d30233c33c5984fddeb7ebd2f52ba15ae0cf683913440f"
+      "artifactHash": "ffb3b9ef5b9db37d13d78b5a5e67af287ace26d827c8b88dbf6cee7cfa9a4d72"
     },
     {
       "key": "tools:composio",
@@ -132,7 +132,7 @@
       "title": "Composio",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/composio",
-      "artifactHash": "2feaec555aebaf353076db34c035310e5622f925e4654fdeba5426b84bb1d3d4"
+      "artifactHash": "e4d506257759b01c9d4c5c13b4c460a24d61e3fa13527c267f98686b1de53536"
     },
     {
       "key": "tools:continue",
@@ -142,7 +142,7 @@
       "title": "Continue",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/continue",
-      "artifactHash": "a1c754d9d4c99c1b31554469a8647991b3293a23bef75898f265ce59e36426cd"
+      "artifactHash": "0113286d5c0ae2c3a6a2b9a50f8afad309cdfb688dc1d7dd0442a0aab22e8981"
     },
     {
       "key": "tools:crewai",
@@ -152,7 +152,7 @@
       "title": "CrewAI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/crewai",
-      "artifactHash": "26d1d22026fe5f36c0c745025628b8440089bfa053e446c110dd8f38de2b4e9a"
+      "artifactHash": "8c8b1c67446ee521b4e1c6f57faa444fe7c5afc77ff683980d3bb74ba09d969e"
     },
     {
       "key": "tools:cursor",
@@ -162,7 +162,7 @@
       "title": "Cursor",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/cursor",
-      "artifactHash": "4aedcd3b8df6c21d3e7a2fb7f4ff88d6c36954739e516fc70c10deb4b2e436ce"
+      "artifactHash": "350e2f5144fabe7d0ce9c3ed91583865d5eaa20ca8cd0b38381d693c2b81978a"
     },
     {
       "key": "tools:devin",
@@ -172,7 +172,7 @@
       "title": "Devin",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/devin",
-      "artifactHash": "e2e071142f7bd7e5b7b5a4265c2c06cefc733a37e3ebf9b48d587127fc9fa8c9"
+      "artifactHash": "6584fcf185b30d2121556e077ff861abbe529395a6c81cd059344eeb69556369"
     },
     {
       "key": "tools:exa",
@@ -182,7 +182,7 @@
       "title": "Exa",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/exa",
-      "artifactHash": "e4a31cba0d7005618ea63718aa584c0b38ba631be7ba03a814f4e7f37b7713e1"
+      "artifactHash": "24c81a74a30fdc1b04450f869e56d4c68c0f2d5456a4a33323a32c91664ec5ce"
     },
     {
       "key": "tools:firecrawl",
@@ -192,7 +192,7 @@
       "title": "Firecrawl",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/firecrawl",
-      "artifactHash": "54d860d537369eeae06525748f712b0f8cb088e2bd07b025bc3e1490dbc9000f"
+      "artifactHash": "be41ba4d7c1b48acf6a95f1a59d1fc415fa5852df0a30307a81829b589521880"
     },
     {
       "key": "tools:garak",
@@ -202,7 +202,7 @@
       "title": "Garak",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/garak",
-      "artifactHash": "13e9fe20a63cac3967dc18d14ec8548ade1f4f65a363bb779d3d8ac9f3eba86d"
+      "artifactHash": "57ee58f64478fcf49a18c49840ba4ff09f55e643c5b9d077aaa332c1d062a306"
     },
     {
       "key": "tools:giskard",
@@ -212,7 +212,7 @@
       "title": "Giskard",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/giskard",
-      "artifactHash": "946185eec4d192b53b3395b2c875febe29424a89cd8526e11a542284e10d063b"
+      "artifactHash": "41b982f12f5ad8b2fa98371be89a6e1132f57a7301d0cacdc092869b4cb46e26"
     },
     {
       "key": "tools:github-copilot",
@@ -222,7 +222,7 @@
       "title": "GitHub Copilot",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/github-copilot",
-      "artifactHash": "29d83af767cc2201037c1dfc2b75e04c15ade57cccc381a64f783baed37fc8cd"
+      "artifactHash": "88570af7c9ad9578312d38242c289ea7b9abe362754cc9fee63284c427e6f53e"
     },
     {
       "key": "tools:graphite-diamond",
@@ -232,7 +232,7 @@
       "title": "Graphite Diamond",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/graphite-diamond",
-      "artifactHash": "fe42f51f12b0c8a86fa624bf38aceaa406cd8c6cd0e3ad88138e615518b9e2fe"
+      "artifactHash": "3a4932d1293e8584e7ef024c7f37e12cbe29e0981fae70f3eab3dbac86ff8aa3"
     },
     {
       "key": "tools:helicone",
@@ -242,7 +242,7 @@
       "title": "Helicone",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/helicone",
-      "artifactHash": "842eef0e02651c44d738909cd036626a55e39555ed231672222a4d56cb1821b2"
+      "artifactHash": "f9664e26fb466bb8bd0efdb585999cbd0f0208aaf4ea430c6ec3ea5d09a643ab"
     },
     {
       "key": "skills:heyclaude-skill-submission-factory",
@@ -262,7 +262,7 @@
       "title": "Hyperbrowser",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/hyperbrowser",
-      "artifactHash": "ca411b697f20c6139d4114d0c2e25afcf3d2bd3f0deb5aee30bc7dc71bf850a4"
+      "artifactHash": "ff8720c7b7dbe4ff957615127355dce2e8f252709d2829410c93be4a068baef1"
     },
     {
       "key": "tools:lakera-guard",
@@ -272,7 +272,7 @@
       "title": "Lakera Guard",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/lakera-guard",
-      "artifactHash": "68cd80226983b943508b3c0e8f4219175286b893976cba3e7ef159e1de03f48f"
+      "artifactHash": "263e8d9df05dbb6f8cb3f389af4f9a74d0781b427c6d8ebf632b1597c8174d02"
     },
     {
       "key": "tools:langfuse",
@@ -282,7 +282,7 @@
       "title": "Langfuse",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langfuse",
-      "artifactHash": "0823f97be27f977c1587ea5581f838bb722a6609e172f3636120544114f3b73d"
+      "artifactHash": "9ee6bf122437221569f8865e0a0c96e446377303bc0ab0b986f84b9bd966814c"
     },
     {
       "key": "tools:langgraph",
@@ -292,7 +292,7 @@
       "title": "LangGraph",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langgraph",
-      "artifactHash": "9ef3a4a2f410ccb9775acb5ef9aadfff432fb4bc4c047160106738060e465f06"
+      "artifactHash": "8bb045ec0cd03b57e317cd12d14c345c6e19a0278e50b31ae4d39c99125282f5"
     },
     {
       "key": "tools:langsmith",
@@ -302,7 +302,7 @@
       "title": "LangSmith",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/langsmith",
-      "artifactHash": "b36971e261b4daa555232f614507654985d1fa2a06912f5ef1328dffa36b6635"
+      "artifactHash": "cee3c56a12b897eb82bda7a46bc1d4f9bd5687fba391a25bb46d74452a78751f"
     },
     {
       "key": "tools:lovable",
@@ -312,7 +312,7 @@
       "title": "Lovable",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/lovable",
-      "artifactHash": "1c6b95cc61458c291d161a98cc6ac7e10104f7884ab52e8030f97a9dc6d8a8fa"
+      "artifactHash": "614cfd37359cd5db0cfda2512c3083d34ed4ba024abb91f657ceabc11df80a4d"
     },
     {
       "key": "tools:make",
@@ -322,7 +322,7 @@
       "title": "Make",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/make",
-      "artifactHash": "cf05b1e3e028c2bdfd2f2f8389801f51dab8bba3b49c1285c7f77e581994ad80"
+      "artifactHash": "14ff0d39258598846d6a85ce71bb849f61d689a7a4f196b02d79016b8cdb6891"
     },
     {
       "key": "tools:mastra",
@@ -332,7 +332,7 @@
       "title": "Mastra",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/mastra",
-      "artifactHash": "86244b1130f1a4317545a667239aadcad73b220d944bd03e584ea35cc6e3e6c3"
+      "artifactHash": "463508c85a608c0c6c93a163a028445002fa75940ebb6c72c54f4e1e8c578376"
     },
     {
       "key": "tools:microsoft-autogen",
@@ -342,7 +342,7 @@
       "title": "Microsoft AutoGen",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen",
-      "artifactHash": "199945981420442af4f3ac295d1c934e12790a1f24bde537b4a2122d672e892c"
+      "artifactHash": "d6b6263b574df92ff5d59ad7413220ca9fee2f478de1446db3fa3074e74bb4a6"
     },
     {
       "key": "tools:n8n",
@@ -352,7 +352,7 @@
       "title": "n8n",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/n8n",
-      "artifactHash": "7c01b3f4c48fc717bb9478f5261ff0cddaf3406e08dffd9396f6b3808de0a06b"
+      "artifactHash": "5d5c1d53be56b459ac58262a9704b2756b761c82dd9f2a491a91729725e9f2af"
     },
     {
       "key": "tools:opencode",
@@ -362,7 +362,7 @@
       "title": "OpenCode",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/opencode",
-      "artifactHash": "94f1b2b1d07c16b2f125d091623550f999ba71951c78eabffe6cee47715de6af"
+      "artifactHash": "e35943d43ca14e3e1e0e2e53021bf25560f538ccb05ac1910d26610352c76958"
     },
     {
       "key": "tools:pipedream",
@@ -372,7 +372,7 @@
       "title": "Pipedream",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/pipedream",
-      "artifactHash": "61ba0aab644c064850a326405a0e2c06cd0a17fce063d6fc11562ecbca8678d3"
+      "artifactHash": "fb0bbc0e41ac7298d1ea0cd13cb93af6bac637bc22e8511def27e31de5c5e074"
     },
     {
       "key": "tools:promptfoo",
@@ -382,7 +382,7 @@
       "title": "Promptfoo",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/promptfoo",
-      "artifactHash": "853c6bf888068f7ac09641632ba827e8f5a7f3e4d6c5a0e8375c4116e18c0cff"
+      "artifactHash": "f26899f15cd29bca76430c2e4d645065e337c2864bb08dbfa43acb3b9e73c88e"
     },
     {
       "key": "tools:protect-ai",
@@ -392,7 +392,7 @@
       "title": "Protect AI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/protect-ai",
-      "artifactHash": "1dc6a63b9f373aabe14d01c325a430ef59e50f0173e25c59dd9b69494e4a4e5c"
+      "artifactHash": "f307495cfbdb0facf1b0b02755b001c2215ee31567847b4068ff577c5cefa5a0"
     },
     {
       "key": "tools:raycast",
@@ -402,7 +402,7 @@
       "title": "Raycast",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/raycast",
-      "artifactHash": "60601586439430481ac3022db9759ab0b15f96715b789c1845314cf2184df60d"
+      "artifactHash": "dae50ec461d8bb2c38252a4f149479a0ccfb351cc6cc359b772512a4d7551fc7"
     },
     {
       "key": "tools:replit-agent",
@@ -412,7 +412,7 @@
       "title": "Replit Agent",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/replit-agent",
-      "artifactHash": "c900c8875903421bb19a189a5f83e4267eefca24293dd6103e05dff959bb915f"
+      "artifactHash": "948b52b5e85823e0016c6ce94e3862ef3c71eebaf1b9659e810f0e75a7f30cc4"
     },
     {
       "key": "tools:roo-code",
@@ -422,7 +422,7 @@
       "title": "Roo Code",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/roo-code",
-      "artifactHash": "1a8e51900914be92eeabcfc92fc888c0f13f1dae3c97b59fa3912401018add13"
+      "artifactHash": "470007842698d951542966f5633ccd8f3023045899f46dabda95bb69b21d0bb0"
     },
     {
       "key": "tools:smithery",
@@ -432,7 +432,7 @@
       "title": "Smithery",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/smithery",
-      "artifactHash": "d1b5318b7090a673587f4771d968711dd6a4df1c59ac6fcc94aad8589e4b17d1"
+      "artifactHash": "19f86b888a16f33c19212993e7b261276f076da7bfb2bf3b944174281d037754"
     },
     {
       "key": "tools:sourcegraph-cody",
@@ -442,7 +442,7 @@
       "title": "Sourcegraph Cody",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/sourcegraph-cody",
-      "artifactHash": "0569c5557eb5050c2a6684429758a931307be34d362b84cd70e1d97edf5a65ff"
+      "artifactHash": "c972e8c1689b184aa5f9a5e4dc4c7a9b66a80b02576d570bdb9a8fbe60a7f468"
     },
     {
       "key": "tools:stagehand",
@@ -452,7 +452,7 @@
       "title": "Stagehand",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/stagehand",
-      "artifactHash": "e6bbbab1b33fc4197d678b6b3be321831cbdb6ebf9869365ae3bcf1a85818e26"
+      "artifactHash": "18de82e8850efaaabf2c03550ca0b1cf44dc60714bcd00fdc0c2456a0b5417f3"
     },
     {
       "key": "tools:trigger-dev",
@@ -462,7 +462,7 @@
       "title": "Trigger.dev",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/trigger-dev",
-      "artifactHash": "cd7af5300cc618a314a1968e82670721ccc04c804254b7e95c1ad87710b61045"
+      "artifactHash": "12f0ed0159ead0388f4294351a44416b4b1095f85f8ad2c88e72a8259f6d2e19"
     },
     {
       "key": "tools:vercel-v0",
@@ -472,7 +472,7 @@
       "title": "v0",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/vercel-v0",
-      "artifactHash": "627223f5495f53ed1457eaf902bf60a7ed1a17df06b8a373bf742f2385191ebb"
+      "artifactHash": "365a03593210d0c22ceb40ffa7b64c41bc0aacf159b42edab2655b9dff6a7828"
     },
     {
       "key": "tools:vercel-ai-sdk",
@@ -482,7 +482,7 @@
       "title": "Vercel AI SDK",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/vercel-ai-sdk",
-      "artifactHash": "821c43ea3caa2bce606a3febb21bf17d22da88e449d105ffc59227fdf9a85109"
+      "artifactHash": "27d1ddb7a916dbc974cd88bf8054a18f88252de14b14ed33b28edc513b39d585"
     },
     {
       "key": "tools:weave",
@@ -492,7 +492,7 @@
       "title": "Weave",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/weave",
-      "artifactHash": "884868d68248e4186b890a3b8a302798f413caf9cfc7368bf7c7f0ae43ecd05f"
+      "artifactHash": "ab54e510a2890dbb91aeee6cbba1708e3fc0d9d2852dc7fea54ecdc11d502d1a"
     },
     {
       "key": "tools:windsurf",
@@ -502,7 +502,7 @@
       "title": "Windsurf",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/windsurf",
-      "artifactHash": "7088e7912f48c7b46884891c937cf278bb5c5faaea40dc02b5473bb895fbd67f"
+      "artifactHash": "ce8b05456b2d16649ea595077c69e1b794fbf4279aa6f629311ac71d7064d8b0"
     },
     {
       "key": "tools:workato",
@@ -512,7 +512,7 @@
       "title": "Workato",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/workato",
-      "artifactHash": "acb2d82223adb35351529c4eeea7dde1115e065a90fdf5669e058fe406712b85"
+      "artifactHash": "17515189ac77acf459e9286d1c9b5d75ad36bbe37f19570da370006052e50ef0"
     },
     {
       "key": "tools:zapier-ai",
@@ -522,7 +522,7 @@
       "title": "Zapier AI",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/zapier-ai",
-      "artifactHash": "ae3c9a53025cc940a6431b6f5feb4465bd68c8a27c09ef49375e2ab0b40c24dd"
+      "artifactHash": "ccc900cfc7e23bf7305452bde98aeb8b209432bcfc2a4cb3c211b10dcca8e369"
     },
     {
       "key": "tools:zed",
@@ -532,7 +532,7 @@
       "title": "Zed",
       "dateAdded": "2026-04-27",
       "canonicalUrl": "https://heyclau.de/tools/zed",
-      "artifactHash": "24316759c566e41777717fe41f6d8103ed83133e0adbf6c738cb112ac960b212"
+      "artifactHash": "997e74259e66d3bc43420b753e84354eccf8499997afc7369a506961d78439e7"
     },
     {
       "key": "mcp:prompt-to-asset",
@@ -3002,7 +3002,7 @@
       "title": "Asana MCP Server for Claude",
       "dateAdded": "2025-09-18",
       "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server",
-      "artifactHash": "507dc0f625e1574f1e0da7002c504be0f40b31107c920285b81cb775bb2a4919"
+      "artifactHash": "f577368ad39bee543abc1919c035111a618eb3c0a5cac8106b8ca28d8533c8a3"
     },
     {
       "key": "mcp:box-mcp-server",
@@ -3796,5 +3796,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "d895db20e202b069481f78e59bf69ba0c507f17f79e3f234bef4c99e15e89621"
+  "signature": "3e48116012910326fd6191052d7a7bd6b2466be23f0dfb7e6ffa8ef4bba33a8c"
 }

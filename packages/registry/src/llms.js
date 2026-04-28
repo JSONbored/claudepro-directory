@@ -65,6 +65,9 @@ export function buildEntryCitationFacts(entry, params = {}) {
   const facts = [
     ["Canonical URL", permalink],
     ["Source URLs", listValue(entrySourceUrls(entry))],
+    ["Brand", clean(entry.brandName)],
+    ["Brand domain", clean(entry.brandDomain)],
+    ["Brand asset source", clean(entry.brandAssetSource)],
     ["Package URL", clean(entry.downloadUrl)],
     ["Package SHA256", clean(entry.downloadSha256)],
     [

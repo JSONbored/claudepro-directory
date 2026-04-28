@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "roo-code",
   "title": "Roo Code",
+  "brandName": "Roo Code",
+  "brandDomain": "roocode.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nRoo Code is a good fit when users want mode-specific agent behavior for planning, code edits, debugging, and routine project work.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Roo Code\nOpen-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.\n**Category:** tools\n**Author:** Roo Code\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/roo-code\n- https://docs.roocode.com\n- https://github.com/RooCodeInc/Roo-Code",
+  "detailMarkdown": "# Roo Code\nOpen-source AI coding agent for VS Code with modes for planning, editing, debugging, and workflow automation.\n**Category:** tools\n**Author:** Roo Code\n**Brand:** Roo Code / roocode.com\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/roo-code\n- https://docs.roocode.com\n- https://github.com/RooCodeInc/Roo-Code",
   "webUrl": "https://heyclau.de/tools/roo-code",
   "repoUrl": "https://github.com/RooCodeInc/Roo-Code",
   "documentationUrl": "https://docs.roocode.com"

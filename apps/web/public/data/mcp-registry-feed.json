@@ -22,6 +22,9 @@
       "title": "Asana MCP Server for Claude",
       "description": "Interact with Asana workspaces to manage projects and tasks",
       "websiteUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server",
+      "brandName": "Asana",
+      "brandDomain": "asana.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status asana",
       "configSnippet": "{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/asana-mcp-server"

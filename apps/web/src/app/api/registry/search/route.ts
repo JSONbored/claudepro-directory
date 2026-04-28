@@ -12,6 +12,8 @@ function matchesQuery(entry: SearchDocument, query: string) {
     entry.title,
     entry.description,
     entry.author,
+    entry.brandName,
+    entry.brandDomain,
     entry.verificationStatus,
     entry.downloadTrust,
     ...(entry.tags ?? []),

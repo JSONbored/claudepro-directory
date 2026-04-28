@@ -1,4 +1,10 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
+import {
+  BRAND_ASSET_SOURCES,
+  isAllowedBrandAssetUrl,
+  normalizeBrandColors,
+  normalizeBrandDomain,
+} from "./brand-assets.js";
 
 const DEFAULT_DIRECTORY_REPO_URL =
   "https://github.com/JSONbored/claudepro-directory";
@@ -626,6 +632,49 @@ export function validateEntry(category, data, inferred = {}) {
     }
   }
 
+  const brandDomain = String(merged.brandDomain || "").trim();
+  const brandAssetSource = String(merged.brandAssetSource || "")
+    .trim()
+    .toLowerCase();
+  const brandIconUrl = String(merged.brandIconUrl || "").trim();
+  const brandLogoUrl = String(merged.brandLogoUrl || "").trim();
+  const brandVerifiedAt = String(merged.brandVerifiedAt || "").trim();
+
+  if (brandDomain && !normalizeBrandDomain(brandDomain)) {
+    semanticErrors.push(
+      "brandDomain must be a canonical domain such as asana.com",
+    );
+  }
+  if (brandAssetSource && !BRAND_ASSET_SOURCES.includes(brandAssetSource)) {
+    semanticErrors.push(
+      `brandAssetSource must be one of ${BRAND_ASSET_SOURCES.join(", ")}`,
+    );
+  }
+  if (brandIconUrl && !isAllowedBrandAssetUrl(brandIconUrl)) {
+    semanticErrors.push(
+      "brandIconUrl must be HTTPS and served by Brandfetch, HeyClaude, or a local asset path",
+    );
+  }
+  if (brandLogoUrl && !isAllowedBrandAssetUrl(brandLogoUrl)) {
+    semanticErrors.push(
+      "brandLogoUrl must be HTTPS and served by Brandfetch, HeyClaude, or a local asset path",
+    );
+  }
+  if (brandVerifiedAt && !/^\d{4}-\d{2}-\d{2}$/.test(brandVerifiedAt)) {
+    semanticErrors.push("brandVerifiedAt must be ISO date format YYYY-MM-DD");
+  }
+  if (
+    merged.brandColors !== undefined &&
+    normalizeBrandColors(merged.brandColors).length !==
+      (Array.isArray(merged.brandColors)
+        ? merged.brandColors.length
+        : String(merged.brandColors || "")
+            .split(",")
+            .filter((value) => value.trim()).length)
+  ) {
+    semanticErrors.push("brandColors must be hex colors such as #796eff");
+  }
+
   if (category === "tools") {
     const websiteUrl = String(merged.websiteUrl || "").trim();
     const affiliateUrl = String(merged.affiliateUrl || "").trim();
@@ -690,6 +739,13 @@ export function orderFrontmatter(data) {
     "author",
     "authorProfileUrl",
     "dateAdded",
+    "brandName",
+    "brandDomain",
+    "brandAssetSource",
+    "brandVerifiedAt",
+    "brandIconUrl",
+    "brandLogoUrl",
+    "brandColors",
     "websiteUrl",
     "affiliateUrl",
     "repoUrl",

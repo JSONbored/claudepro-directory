@@ -1,4 +1,5 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
+import { normalizeBrandDomain } from "./brand-assets.js";
 import { recommendedLabelsForCategory } from "./submission-labels.js";
 import { buildSubmissionFieldModel } from "./submission-spec.js";
 
@@ -27,6 +28,11 @@ export const HEADING_KEY_MAP = {
   "docs-url": "docs_url",
   documentation: "docs_url",
   "documentation-url": "docs_url",
+  "brand-name": "brand_name",
+  brand: "brand_name",
+  provider: "brand_name",
+  "brand-domain": "brand_domain",
+  "provider-domain": "brand_domain",
   author: "author",
   "contact-email": "contact_email",
   email: "contact_email",
@@ -152,6 +158,8 @@ function mapJsonData(data) {
     docs: "docs_url",
     docsUrl: "docs_url",
     documentationUrl: "docs_url",
+    brandName: "brand_name",
+    brandDomain: "brand_domain",
     npm: "download_url",
     install: "install_command",
     installCommand: "install_command",
@@ -231,6 +239,11 @@ export function normalizeParsedFields(fields) {
 
   if (!normalized.install_command && normalized.install_or_usage) {
     normalized.install_command = normalized.install_or_usage;
+  }
+
+  if (normalized.brand_domain) {
+    normalized.brand_domain =
+      normalizeBrandDomain(normalized.brand_domain) || normalized.brand_domain;
   }
 
   return normalized;
@@ -568,6 +581,10 @@ export function validateSubmission(issue) {
         `Contributor submissions cannot include affiliate/referral URLs: ${field}`,
       );
     }
+  }
+
+  if (fields.brand_domain && !normalizeBrandDomain(fields.brand_domain)) {
+    errors.push("brand_domain must be a canonical domain such as asana.com");
   }
 
   if (

@@ -50,6 +50,10 @@
       "types": "./src/index.d.ts",
       "default": "./src/artifacts.js"
     },
+    "./brand-assets": {
+      "types": "./src/index.d.ts",
+      "default": "./src/brand-assets.js"
+    },
     "./commercial": {
       "types": "./src/index.d.ts",
       "default": "./src/commercial.js"

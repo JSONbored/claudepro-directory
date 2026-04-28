@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "langfuse",
   "title": "Langfuse",
+  "brandName": "Langfuse",
+  "brandDomain": "langfuse.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nLangfuse is a strong option when teams want open-source LLM observability with self-hosting and prompt lifecycle support.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Langfuse\nOpen-source LLM engineering platform for tracing, prompt management, evaluation, metrics, and observability.\n**Category:** tools\n**Author:** Langfuse\n**Tags:** `observability` `open-source`\n\n## Links\n- https://heyclau.de/tools/langfuse\n- https://langfuse.com/docs\n- https://github.com/langfuse/langfuse",
+  "detailMarkdown": "# Langfuse\nOpen-source LLM engineering platform for tracing, prompt management, evaluation, metrics, and observability.\n**Category:** tools\n**Author:** Langfuse\n**Brand:** Langfuse / langfuse.com\n**Tags:** `observability` `open-source`\n\n## Links\n- https://heyclau.de/tools/langfuse\n- https://langfuse.com/docs\n- https://github.com/langfuse/langfuse",
   "webUrl": "https://heyclau.de/tools/langfuse",
   "repoUrl": "https://github.com/langfuse/langfuse",
   "documentationUrl": "https://langfuse.com/docs"

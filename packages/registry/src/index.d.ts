@@ -27,6 +27,12 @@ export type SkillType = "general" | "capability-pack";
 export type SkillLevel = "foundational" | "advanced" | "expert";
 export type VerificationStatus = "draft" | "validated" | "production";
 export type SkillSupportLevel = "native-skill" | "adapter" | "manual-context";
+export type BrandAssetSource =
+  | "brandfetch"
+  | "manual"
+  | "website"
+  | "github"
+  | "none";
 
 export type SkillPlatformCompatibility = {
   platform: string;
@@ -75,6 +81,13 @@ export type ContentEntry = {
   difficultyScore?: number;
   documentationUrl?: string;
   websiteUrl?: string;
+  brandName?: string;
+  brandDomain?: string;
+  brandIconUrl?: string;
+  brandLogoUrl?: string;
+  brandAssetSource?: BrandAssetSource | string;
+  brandVerifiedAt?: string;
+  brandColors?: string[];
   affiliateUrl?: string;
   pricingModel?: string;
   disclosure?: Disclosure;
@@ -217,6 +230,41 @@ export type CommercialPlacement = {
   disclosure: Disclosure;
   startsAt?: string;
   expiresAt?: string;
+};
+
+export declare const BRAND_ASSET_SOURCES: BrandAssetSource[];
+export declare function normalizeBrandDomain(value?: unknown): string;
+export declare function domainFromUrl(value?: unknown): string;
+export declare function isHostingOrRegistryDomain(domain?: string): boolean;
+export declare function normalizeBrandColors(value?: unknown): string[];
+export declare function isAllowedBrandAssetUrl(value?: unknown): boolean;
+export declare function brandfetchClientId(params?: {
+  clientId?: string;
+}): string;
+export declare function brandfetchLogoUrl(
+  domain: string,
+  params?: {
+    clientId?: string;
+    width?: number;
+    height?: number;
+    type?: "icon" | "logo" | string;
+    theme?: "light" | "dark" | string;
+  },
+): string;
+export declare function buildBrandAssetMetadata(
+  data?: Record<string, unknown>,
+  options?: {
+    allowWebsiteFallback?: boolean;
+    clientId?: string;
+  },
+): {
+  brandName?: string;
+  brandDomain?: string;
+  brandIconUrl?: string;
+  brandLogoUrl?: string;
+  brandAssetSource?: BrandAssetSource | string;
+  brandVerifiedAt?: string;
+  brandColors?: string[];
 };
 export type ToolListing = DirectoryEntry & {
   websiteUrl?: string;
@@ -394,6 +442,11 @@ export type SearchDocument = {
   tags: string[];
   keywords: string[];
   author: string;
+  brandName?: string;
+  brandDomain?: string;
+  brandIconUrl?: string;
+  brandLogoUrl?: string;
+  brandAssetSource?: string;
   dateAdded: string;
   installable: boolean;
   downloadTrust: DownloadTrust;

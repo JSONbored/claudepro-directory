@@ -129,6 +129,8 @@ export function SubmitForm() {
   const [category, setCategory] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
   const [docsUrl, setDocsUrl] = useState("");
+  const [brandName, setBrandName] = useState("");
+  const [brandDomain, setBrandDomain] = useState("");
   const [downloadUrl, setDownloadUrl] = useState("");
   const [installCommand, setInstallCommand] = useState("");
   const [usageSnippet, setUsageSnippet] = useState("");
@@ -161,6 +163,13 @@ export function SubmitForm() {
     const nameParam = params.get("name") ?? "";
     const categoryParam = params.get("category") ?? "";
     const slugParam = params.get("slug") ?? "";
+    const githubParam = params.get("github_url") ?? "";
+    const docsParam = params.get("docs_url") ?? "";
+    const brandNameParam = params.get("brand_name") ?? "";
+    const brandDomainParam = params.get("brand_domain") ?? "";
+    const descriptionParam = params.get("description") ?? "";
+    const cardDescriptionParam = params.get("card_description") ?? "";
+    const tagsParam = params.get("tags") ?? "";
 
     if (nameParam) setToolName(nameParam);
     if (siteConfig.categoryOrder.includes(categoryParam)) {
@@ -170,6 +179,13 @@ export function SubmitForm() {
       setSlug(slugifySubmission(slugParam));
       setSlugEdited(true);
     }
+    if (githubParam) setGithubUrl(githubParam);
+    if (docsParam) setDocsUrl(docsParam);
+    if (brandNameParam) setBrandName(brandNameParam);
+    if (brandDomainParam) setBrandDomain(brandDomainParam);
+    if (descriptionParam) setDescription(descriptionParam);
+    if (cardDescriptionParam) setCardDescription(cardDescriptionParam);
+    if (tagsParam) setTags(tagsParam);
   }, []);
 
   useEffect(() => {
@@ -264,6 +280,8 @@ export function SubmitForm() {
         category,
         github_url: githubUrl,
         docs_url: docsUrl,
+        brand_name: brandName,
+        brand_domain: brandDomain,
         download_url: downloadUrl,
         author,
         contact_email: publicContact,
@@ -289,6 +307,8 @@ export function SubmitForm() {
     [
       assetContent,
       author,
+      brandDomain,
+      brandName,
       cardDescription,
       category,
       commandSyntax,
@@ -594,6 +614,38 @@ export function SubmitForm() {
           placeholder="https://..."
           className="submit-input"
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label htmlFor="submit-brand-name" className="submit-label">
+            Brand name
+          </label>
+          <input
+            id="submit-brand-name"
+            value={brandName}
+            onChange={(event) => setBrandName(event.target.value)}
+            placeholder="e.g. Asana"
+            className="submit-input"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="submit-brand-domain" className="submit-label">
+            Brand domain
+          </label>
+          <input
+            id="submit-brand-domain"
+            value={brandDomain}
+            onChange={(event) => setBrandDomain(event.target.value)}
+            placeholder="e.g. asana.com"
+            className="submit-input"
+          />
+          <p className="text-xs leading-6 text-muted-foreground">
+            Optional. Use the provider's canonical domain so maintainers can
+            verify the right logo.
+          </p>
+        </div>
       </div>
 
       {selectedFieldIds.has("download_url") ||
@@ -910,6 +962,8 @@ export function SubmitForm() {
         tags={tags}
         githubUrl={githubUrl}
         docsUrl={docsUrl}
+        brandName={brandName}
+        brandDomain={brandDomain}
         installCommand={installCommand}
         assetContent={assetContent || usageSnippet || installCommand}
         readinessScore={readinessScore}

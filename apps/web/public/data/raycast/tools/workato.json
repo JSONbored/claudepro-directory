@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "workato",
   "title": "Workato",
+  "brandName": "Workato",
+  "brandDomain": "workato.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nWorkato belongs in the directory for enterprise teams evaluating AI-connected automation across business systems.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Workato\nEnterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.\n**Category:** tools\n**Author:** Workato\n**Tags:** `workflow-automation` `enterprise`\n\n## Links\n- https://heyclau.de/tools/workato\n- https://docs.workato.com",
+  "detailMarkdown": "# Workato\nEnterprise automation platform for business integrations, workflows, data processes, and AI-assisted automation.\n**Category:** tools\n**Author:** Workato\n**Brand:** Workato / workato.com\n**Tags:** `workflow-automation` `enterprise`\n\n## Links\n- https://heyclau.de/tools/workato\n- https://docs.workato.com",
   "webUrl": "https://heyclau.de/tools/workato",
   "repoUrl": "",
   "documentationUrl": "https://docs.workato.com"

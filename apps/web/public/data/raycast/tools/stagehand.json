@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "stagehand",
   "title": "Stagehand",
+  "brandName": "Stagehand",
+  "brandDomain": "stagehand.dev",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nStagehand is a strong fit for agent workflows that need deterministic browser automation with optional AI assistance.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Stagehand\nOpen-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.\n**Category:** tools\n**Author:** Browserbase\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/stagehand\n- https://docs.stagehand.dev\n- https://github.com/browserbase/stagehand",
+  "detailMarkdown": "# Stagehand\nOpen-source browser automation framework for combining code, Playwright-style control, and AI-assisted web actions.\n**Category:** tools\n**Author:** Browserbase\n**Brand:** Stagehand / stagehand.dev\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/stagehand\n- https://docs.stagehand.dev\n- https://github.com/browserbase/stagehand",
   "webUrl": "https://heyclau.de/tools/stagehand",
   "repoUrl": "https://github.com/browserbase/stagehand",
   "documentationUrl": "https://docs.stagehand.dev"

@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "continue",
   "title": "Continue",
+  "brandName": "Continue",
+  "brandDomain": "continue.dev",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nContinue is useful when teams need self-directed model choices, local configuration, and open-source control over AI coding workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Continue\nOpen-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.\n**Category:** tools\n**Author:** Continue\n**Tags:** `ai-coding` `open-source`\n\n## Links\n- https://heyclau.de/tools/continue\n- https://docs.continue.dev\n- https://github.com/continuedev/continue",
+  "detailMarkdown": "# Continue\nOpen-source AI coding assistant for custom model routing, editor chat, autocomplete, and development workflows.\n**Category:** tools\n**Author:** Continue\n**Brand:** Continue / continue.dev\n**Tags:** `ai-coding` `open-source`\n\n## Links\n- https://heyclau.de/tools/continue\n- https://docs.continue.dev\n- https://github.com/continuedev/continue",
   "webUrl": "https://heyclau.de/tools/continue",
   "repoUrl": "https://github.com/continuedev/continue",
   "documentationUrl": "https://docs.continue.dev"

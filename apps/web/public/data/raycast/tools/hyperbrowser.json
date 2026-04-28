@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "hyperbrowser",
   "title": "Hyperbrowser",
+  "brandName": "Hyperbrowser",
+  "brandDomain": "hyperbrowser.ai",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nHyperbrowser belongs in the agent infrastructure category for teams running browser automation beyond local developer machines.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Hyperbrowser\nBrowser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.\n**Category:** tools\n**Author:** Hyperbrowser\n**Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/hyperbrowser\n- https://docs.hyperbrowser.ai",
+  "detailMarkdown": "# Hyperbrowser\nBrowser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.\n**Category:** tools\n**Author:** Hyperbrowser\n**Brand:** Hyperbrowser / hyperbrowser.ai\n**Tags:** `browser-automation` `agent-infrastructure`\n\n## Links\n- https://heyclau.de/tools/hyperbrowser\n- https://docs.hyperbrowser.ai",
   "webUrl": "https://heyclau.de/tools/hyperbrowser",
   "repoUrl": "",
   "documentationUrl": "https://docs.hyperbrowser.ai"

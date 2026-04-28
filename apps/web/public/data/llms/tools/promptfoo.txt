@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/promptfoo
 - Source URLs: https://www.promptfoo.dev/docs, https://github.com/promptfoo/promptfoo, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/promptfoo.mdx, https://www.promptfoo.dev
+- Brand: Promptfoo
+- Brand domain: promptfoo.dev
+- Brand asset source: brandfetch
 - Author: Promptfoo
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

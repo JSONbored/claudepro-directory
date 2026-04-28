@@ -35,6 +35,149 @@ components:
       required:
         - ok
         - error
+    RegistryBrandAsset:
+      type: object
+      properties:
+        brandName:
+          type: string
+        brandDomain:
+          type: string
+        brandIconUrl:
+          type: string
+        brandLogoUrl:
+          type: string
+        brandAssetSource:
+          type: string
+        brandVerifiedAt:
+          type: string
+        brandColors:
+          type: array
+          items:
+            type: string
+          maxItems: 6
+    RegistrySearchResult:
+      type: object
+      properties:
+        brandName:
+          type: string
+        brandDomain:
+          type: string
+        brandIconUrl:
+          type: string
+        brandLogoUrl:
+          type: string
+        brandAssetSource:
+          type: string
+        brandVerifiedAt:
+          type: string
+        brandColors:
+          type: array
+          items:
+            type: string
+          maxItems: 6
+        category:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        author:
+          type: string
+        dateAdded:
+          type: string
+        installable:
+          type: boolean
+        downloadTrust:
+          type:
+            - string
+            - "null"
+        verificationStatus:
+          type: string
+        platforms:
+          type: array
+          items:
+            type: string
+        supportLevels:
+          type: array
+          items:
+            type: string
+        documentationUrl:
+          type: string
+        repoUrl:
+          type: string
+        url:
+          type: string
+        trustSignals:
+          type: object
+          properties:
+            firstPartyEditorial:
+              type: boolean
+            packageVerified:
+              type: boolean
+            packageTrust:
+              type:
+                - string
+                - "null"
+            packageChecksum:
+              type: string
+            checksumPresent:
+              type: boolean
+            sourceUrlCount:
+              type: integer
+              minimum: 0
+            sourceUrls:
+              type: array
+              items:
+                type: string
+                format: uri
+              maxItems: 8
+            sourceStatus:
+              anyOf:
+                - type: string
+                  enum:
+                    - available
+                    - missing
+                - type: string
+            lastVerifiedAt:
+              type: string
+            adapterGenerated:
+              type: boolean
+            platforms:
+              type: array
+              items:
+                type: string
+              maxItems: 12
+            supportLevels:
+              type: array
+              items:
+                type: string
+              maxItems: 12
+      required:
+        - category
+        - slug
+        - title
+        - description
+        - tags
+        - keywords
+        - author
+        - dateAdded
+        - installable
+        - verificationStatus
+        - documentationUrl
+        - repoUrl
+        - url
+        - trustSignals
+      additionalProperties: {}
     RegistryTrustSignals:
       type: object
       properties:
@@ -637,7 +780,150 @@ paths:
             application/json:
               schema:
                 type: object
-                additionalProperties: {}
+                properties:
+                  schemaVersion:
+                    type: number
+                  query:
+                    type: string
+                  category:
+                    type: string
+                  platform:
+                    type: string
+                  count:
+                    type: integer
+                    minimum: 0
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        brandName:
+                          type: string
+                        brandDomain:
+                          type: string
+                        brandIconUrl:
+                          type: string
+                        brandLogoUrl:
+                          type: string
+                        brandAssetSource:
+                          type: string
+                        brandVerifiedAt:
+                          type: string
+                        brandColors:
+                          type: array
+                          items:
+                            type: string
+                          maxItems: 6
+                        category:
+                          type: string
+                        slug:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        keywords:
+                          type: array
+                          items:
+                            type: string
+                        author:
+                          type: string
+                        dateAdded:
+                          type: string
+                        installable:
+                          type: boolean
+                        downloadTrust:
+                          type:
+                            - string
+                            - "null"
+                        verificationStatus:
+                          type: string
+                        platforms:
+                          type: array
+                          items:
+                            type: string
+                        supportLevels:
+                          type: array
+                          items:
+                            type: string
+                        documentationUrl:
+                          type: string
+                        repoUrl:
+                          type: string
+                        url:
+                          type: string
+                        trustSignals:
+                          type: object
+                          properties:
+                            firstPartyEditorial:
+                              type: boolean
+                            packageVerified:
+                              type: boolean
+                            packageTrust:
+                              type:
+                                - string
+                                - "null"
+                            packageChecksum:
+                              type: string
+                            checksumPresent:
+                              type: boolean
+                            sourceUrlCount:
+                              type: integer
+                              minimum: 0
+                            sourceUrls:
+                              type: array
+                              items:
+                                type: string
+                                format: uri
+                              maxItems: 8
+                            sourceStatus:
+                              anyOf:
+                                - type: string
+                                  enum:
+                                    - available
+                                    - missing
+                                - type: string
+                            lastVerifiedAt:
+                              type: string
+                            adapterGenerated:
+                              type: boolean
+                            platforms:
+                              type: array
+                              items:
+                                type: string
+                              maxItems: 12
+                            supportLevels:
+                              type: array
+                              items:
+                                type: string
+                              maxItems: 12
+                      required:
+                        - category
+                        - slug
+                        - title
+                        - description
+                        - tags
+                        - keywords
+                        - author
+                        - dateAdded
+                        - installable
+                        - verificationStatus
+                        - documentationUrl
+                        - repoUrl
+                        - url
+                        - trustSignals
+                      additionalProperties: {}
+                required:
+                  - schemaVersion
+                  - query
+                  - category
+                  - platform
+                  - count
+                  - results
         "400":
           description: Invalid JSON, invalid query, invalid payload, or invalid status transition.
           content:

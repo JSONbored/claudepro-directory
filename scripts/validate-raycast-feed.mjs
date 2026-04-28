@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { RAYCAST_COPY_PREVIEW_LIMIT } from "@heyclaude/registry";
+import { isAllowedBrandAssetUrl } from "@heyclaude/registry/brand-assets";
 
 const repoRoot = process.cwd();
 const feedPath = path.join(repoRoot, "apps/web/public/data/raycast-index.json");
@@ -163,6 +164,12 @@ for (const entry of payload.entries) {
       fail(`${key}: forbidden Raycast field ${field}`);
   }
   if (!Array.isArray(entry.tags)) fail(`${key}: tags must be an array`);
+  if (entry.brandIconUrl && !isAllowedBrandAssetUrl(entry.brandIconUrl)) {
+    fail(`${key}: invalid brandIconUrl`);
+  }
+  if (entry.brandLogoUrl && !isAllowedBrandAssetUrl(entry.brandLogoUrl)) {
+    fail(`${key}: invalid brandLogoUrl`);
+  }
   if (String(entry.copyText ?? "").length > RAYCAST_COPY_PREVIEW_LIMIT + 3) {
     fail(`${key}: feed copyText exceeds preview cap`);
   }
@@ -192,6 +199,17 @@ for (const entry of payload.entries) {
     detail.copyText.length <= String(entry.copyText ?? "").length
   ) {
     fail(`${key}: truncated feed entry must have longer detail copyText`);
+  }
+  for (const field of [
+    "brandName",
+    "brandDomain",
+    "brandIconUrl",
+    "brandLogoUrl",
+    "brandAssetSource",
+  ]) {
+    if (entry[field] && entry[field] !== detail[field]) {
+      fail(`${key}: detail ${field} must match feed ${field}`);
+    }
   }
 }
 

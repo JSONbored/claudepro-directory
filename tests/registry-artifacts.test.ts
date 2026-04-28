@@ -19,7 +19,9 @@ import {
   buildRaycastEnvelope,
   RAYCAST_COPY_PREVIEW_LIMIT,
   buildSearchEntries,
+  brandfetchLogoUrl,
   getCopyText,
+  isAllowedBrandAssetUrl,
 } from "@heyclaude/registry";
 
 import {
@@ -99,6 +101,58 @@ describe("registry artifacts", () => {
     });
     expect(directoryEntries.length).toBe(contentEntries.length);
     expect(searchEntries.length).toBe(contentEntries.length);
+  });
+
+  it("preserves verified brand metadata across registry surfaces", () => {
+    const key = "mcp:asana-mcp-server";
+    const directoryEntry = directoryEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const searchEntry = searchEntries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastEntry = raycastPayload.entries.find(
+      (entry) => `${entry.category}:${entry.slug}` === key,
+    );
+    const raycastDetail = readDataJson<Record<string, unknown>>(
+      "raycast/mcp/asana-mcp-server.json",
+    );
+    const llmsText = fs.readFileSync(
+      path.join(dataRoot, "llms", "mcp", "asana-mcp-server.txt"),
+      "utf8",
+    );
+
+    expect(directoryEntry).toMatchObject({
+      brandName: "Asana",
+      brandDomain: "asana.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(searchEntry).toMatchObject({
+      brandName: "Asana",
+      brandDomain: "asana.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(raycastEntry).toMatchObject({
+      brandName: "Asana",
+      brandDomain: "asana.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(raycastDetail).toMatchObject({
+      brandName: "Asana",
+      brandDomain: "asana.com",
+      brandAssetSource: "brandfetch",
+    });
+    expect(llmsText).toContain("- Brand: Asana");
+    expect(llmsText).toContain("- Brand domain: asana.com");
+
+    const brandfetchUrl = brandfetchLogoUrl("asana.com", {
+      clientId: "test-client",
+    });
+    expect(brandfetchUrl).toContain(
+      "https://cdn.brandfetch.io/domain/asana.com/",
+    );
+    expect(isAllowedBrandAssetUrl(brandfetchUrl)).toBe(true);
+    expect(isAllowedBrandAssetUrl("https://example.com/logo.png")).toBe(false);
   });
 
   it("publishes factual trust signals across compact and detail artifacts", () => {

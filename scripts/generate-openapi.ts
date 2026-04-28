@@ -16,6 +16,8 @@ extendZodWithOpenApi(z);
 const require = createRequire(import.meta.url);
 const {
   apiErrorEnvelopeSchema,
+  registryBrandAssetSchema,
+  registrySearchResultSchema,
   listApiRouteDefinitions,
   registryTrustSignalsSchema,
 } =
@@ -157,6 +159,8 @@ function buildOpenApiDocument() {
   const registry = new OpenAPIRegistry();
 
   registry.register("ErrorEnvelope", apiErrorEnvelopeSchema);
+  registry.register("RegistryBrandAsset", registryBrandAssetSchema);
+  registry.register("RegistrySearchResult", registrySearchResultSchema);
   registry.register("RegistryTrustSignals", registryTrustSignalsSchema);
 
   for (const definition of listApiRouteDefinitions()) {

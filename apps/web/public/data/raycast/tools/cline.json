@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "cline",
   "title": "Cline",
+  "brandName": "Cline",
+  "brandDomain": "cline.bot",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nCline is useful for users who want a visible agent loop inside VS Code with command execution and file-editing control.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Cline\nOpen-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.\n**Category:** tools\n**Author:** Cline\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/cline\n- https://docs.cline.bot\n- https://github.com/cline/cline",
+  "detailMarkdown": "# Cline\nOpen-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.\n**Category:** tools\n**Author:** Cline\n**Brand:** Cline / cline.bot\n**Tags:** `vs-code` `coding-agent`\n\n## Links\n- https://heyclau.de/tools/cline\n- https://docs.cline.bot\n- https://github.com/cline/cline",
   "webUrl": "https://heyclau.de/tools/cline",
   "repoUrl": "https://github.com/cline/cline",
   "documentationUrl": "https://docs.cline.bot"

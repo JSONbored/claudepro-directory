@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/tools/opencode
 - Source URLs: https://opencode.ai, https://github.com/sst/opencode, https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx
+- Brand: OpenCode
+- Brand domain: opencode.ai
+- Brand asset source: brandfetch
 - Author: SST
 - Last verified: 2026-04-26T23:21:14-06:00
 - Robots: indexable

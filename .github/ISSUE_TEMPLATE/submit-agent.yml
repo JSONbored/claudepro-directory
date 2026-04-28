@@ -52,6 +52,18 @@ body:
     validations:
       required: false
   - type: input
+    id: brand_name
+    attributes:
+      label: "Brand name"
+    validations:
+      required: false
+  - type: input
+    id: brand_domain
+    attributes:
+      label: "Brand domain"
+    validations:
+      required: false
+  - type: input
     id: author
     attributes:
       label: "Author"

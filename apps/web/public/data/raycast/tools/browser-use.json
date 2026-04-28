@@ -4,8 +4,11 @@
   "category": "tools",
   "slug": "browser-use",
   "title": "Browser Use",
+  "brandName": "Browser Use",
+  "brandDomain": "browser-use.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "## Editorial notes\n\nBrowser Use is relevant for builders who need programmatic browser interaction as part of AI agent workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
-  "detailMarkdown": "# Browser Use\nOpen-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.\n**Category:** tools\n**Author:** Browser Use\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/browser-use\n- https://docs.browser-use.com\n- https://github.com/browser-use/browser-use",
+  "detailMarkdown": "# Browser Use\nOpen-source browser automation library for building AI agents that can navigate, click, type, and inspect websites.\n**Category:** tools\n**Author:** Browser Use\n**Brand:** Browser Use / browser-use.com\n**Tags:** `browser-automation` `open-source`\n\n## Links\n- https://heyclau.de/tools/browser-use\n- https://docs.browser-use.com\n- https://github.com/browser-use/browser-use",
   "webUrl": "https://heyclau.de/tools/browser-use",
   "repoUrl": "https://github.com/browser-use/browser-use",
   "documentationUrl": "https://docs.browser-use.com"
