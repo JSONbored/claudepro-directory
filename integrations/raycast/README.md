@@ -7,18 +7,22 @@ Search HeyClaude from Raycast and copy practical Claude assets without opening a
 ## What You Can Do
 
 - Search agents, MCP servers, skills, rules, commands, hooks, guides, collections, and statuslines.
+- Open dedicated category commands such as `Search Agents`, `Search Skills`,
+  and `Search MCP Servers` when you want a narrower list immediately.
 - Filter by category or local favorites.
 - Inspect the native Raycast detail view before using an entry.
 - Copy or paste the full usable asset.
 - Copy install commands and Claude config snippets separately.
 - Open the HeyClaude page, documentation, or source repository.
 - Open issue-first contribution and change-request URLs in the browser.
+- Open the `Contribute to HeyClaude` command for submit, claim/update,
+  category-specific issue-template, and job-posting paths.
 - Browse active HeyClaude jobs, inspect role details, favorite roles, and open
   external employer apply links.
 
 ## Read-Only by Design
 
-This first release does not write to project files, `.claude/settings.json`, `.cursor/rules`, hooks, commands, local skill folders, or HeyClaude job data. It only fetches the public HeyClaude feeds, stores local caches, stores local favorites, copies/pastes text, and opens links.
+This first release does not write to project files, `.claude/settings.json`, `.cursor/rules`, hooks, commands, local skill folders, GitHub, or HeyClaude job data. It only fetches the public HeyClaude feeds, stores local caches, stores local favorites, copies/pastes text, and opens links.
 
 Contribution actions are also read-only in Raycast. They open HeyClaude submit or GitHub issue URLs in the browser and do not request GitHub OAuth, tokens, forks, branches, pull requests, or local project-file access.
 
@@ -39,17 +43,21 @@ npm install
 npm run dev
 ```
 
-For preview-feed QA, open the HeyClaude extension preferences and set
-`Developer Feed URL Override` to:
+Production builds have no endpoint or feed override preference. `npm run dev`
+temporarily injects a maintainer-only development preference, then restores the
+production manifest when Raycast development mode exits.
+
+For preview-feed QA during `npm run dev`, open the HeyClaude extension
+preferences and set `Developer Feed URL Override` to:
 
 ```text
 https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json
 ```
 
-Leave the preference blank for the production feed. Both commands share this
-single setting. Registry detail payloads and the jobs API host are resolved
-relative to the selected feed URL, so a dev feed also loads dev detail files and
-dev D1 jobs.
+Leave the preference blank to exercise production endpoints from the development
+extension. All commands share this single dev-only setting. Registry detail
+payloads and the jobs API host are resolved relative to the selected feed URL,
+so a dev feed also loads dev detail files and dev D1 jobs.
 
 ## Validation
 

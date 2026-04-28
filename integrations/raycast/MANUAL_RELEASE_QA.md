@@ -9,20 +9,35 @@ distribution build pass.
 2. Run `Search HeyClaude`.
 3. Confirm entries load from `https://heyclau.de/data/raycast-index.json`.
 4. Open a detail view and confirm title, description, links, and actions render.
+5. Confirm the production extension manifest does not expose endpoint or feed
+   override preferences.
 
 ## Dev Feed Override
 
 1. Run `npm run dev` from `integrations/raycast`.
-2. Open the HeyClaude extension preferences and set `Developer Feed URL Override` to
+2. Confirm development mode exposes the temporary HeyClaude extension-level
+   `Developer Feed URL Override` preference.
+3. Set it to
    `https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json`.
-3. Run `Search HeyClaude`.
-4. Confirm entries, category filters, details, and copy actions use the dev
+4. Run `Search HeyClaude`.
+5. Confirm entries, category filters, details, and copy actions use the dev
    Worker feed and `/data/raycast/...` detail payloads.
-5. Run `Browse HeyClaude Jobs`.
-6. Confirm active D1-backed jobs load from the same dev Worker host via
+6. Run `Browse HeyClaude Jobs`.
+7. Confirm active D1-backed jobs load from the same dev Worker host via
    `/api/jobs?limit=100`.
-7. Clear the extension-level override and confirm the production feed is used
+8. Clear the extension-level override and confirm the production feed is used
    again.
+9. Stop development mode and confirm `package.json` is restored without
+   production override preferences.
+
+## Category Commands
+
+1. Run `Search Agents`, `Search MCP Servers`, `Search Skills`, and one other
+   category command.
+2. Confirm each command opens directly to that category's entries with its own
+   category/favorites filter.
+3. Confirm copy, paste, install/config copy, open source/docs, favorite, and
+   refresh actions still match the unified `Search HeyClaude` command.
 
 ## Stale Cache
 
@@ -62,6 +77,9 @@ distribution build pass.
 3. Run `Suggest Change`.
 4. Confirm Raycast opens a GitHub issue URL with the category issue template and existing entry fields prefilled.
 5. Confirm no GitHub token, OAuth flow, fork, branch, PR, or local project file write is requested.
+6. Run `Contribute to HeyClaude`.
+7. Confirm submit, claim/update, job-posting, submissions, GitHub issue chooser,
+   and category-specific GitHub issue-template actions open in the browser only.
 
 ## Jobs Command
 
@@ -80,7 +98,7 @@ distribution build pass.
 
 ### 2026-04-28 Dev Feed Readiness
 
-- Helper tests: `npm run test:junit` passed with 16 tests and wrote
+- Helper tests: `npm run test:junit` passed with 17 tests and wrote
   `reports/junit/raycast.xml`.
 - Feed coverage: `pnpm validate:raycast-feed` passed with 379 entries, zero
   missing directory keys, and zero missing detail payloads.

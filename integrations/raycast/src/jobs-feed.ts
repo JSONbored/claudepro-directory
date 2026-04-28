@@ -190,7 +190,7 @@ export function buildJobMarkdown(job: RaycastJob, generatedAt = "") {
   ].filter(Boolean);
 
   return [
-    `# ${job.title}`,
+    `# ${job.company} — ${job.title}`,
     "",
     job.description,
     "",
@@ -213,7 +213,7 @@ export function buildJobMarkdown(job: RaycastJob, generatedAt = "") {
 
 export function buildJobSummary(job: RaycastJob) {
   return [
-    `${job.title} at ${job.company}`,
+    `${job.company} — ${job.title}`,
     job.location,
     job.type,
     job.compensation ? `Compensation: ${job.compensation}` : "",

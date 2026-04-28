@@ -246,8 +246,8 @@ export default function Command() {
         return (
           <List.Item
             key={jobKey(job)}
-            title={job.title}
-            subtitle={job.company}
+            title={job.company}
+            subtitle={job.title}
             keywords={[
               job.company,
               job.location,

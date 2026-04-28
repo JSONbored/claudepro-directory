@@ -129,6 +129,16 @@ export function buildContributeEntryUrl(entry?: Partial<RaycastEntry>) {
   return url.toString();
 }
 
+export function buildSubmitIssueUrl(category?: string) {
+  const template = category
+    ? (issueTemplateByCategory[category] ?? "submit-entry.md")
+    : "submit-entry.md";
+  const url = new URL(GITHUB_NEW_ISSUE_URL);
+  url.searchParams.set("template", template);
+  if (category) url.searchParams.set("category", category);
+  return url.toString();
+}
+
 export function buildSuggestChangeUrl(entry: RaycastEntry) {
   const template = issueTemplateByCategory[entry.category] ?? "submit-entry.md";
   const url = new URL(GITHUB_NEW_ISSUE_URL);

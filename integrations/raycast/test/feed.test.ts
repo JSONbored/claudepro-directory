@@ -9,6 +9,7 @@ import {
   absoluteDataUrl,
   buildContributeEntryUrl,
   buildSuggestChangeUrl,
+  buildSubmitIssueUrl,
   categoryLabel,
   detailCacheKey,
   entryKey,
@@ -240,6 +241,11 @@ describe("Raycast feed helpers", () => {
     assert.equal(suggestUrl.searchParams.get("slug"), "context7");
     assert.match(suggestUrl.toString(), /^https:\/\//);
     assert.equal(suggestUrl.toString().includes("file:"), false);
+
+    const newSkillUrl = new URL(buildSubmitIssueUrl("skills"));
+    assert.equal(newSkillUrl.origin, "https://github.com");
+    assert.equal(newSkillUrl.searchParams.get("template"), "submit-skill.yml");
+    assert.equal(newSkillUrl.searchParams.get("category"), "skills");
   });
 
   it("validates and parses full detail payloads", () => {
@@ -351,6 +357,32 @@ describe("Raycast feed helpers", () => {
     for (const pattern of forbiddenPatterns) {
       assert.doesNotMatch(source, pattern);
     }
+  });
+
+  it("keeps the production Raycast manifest fixed to HeyClaude endpoints", () => {
+    const manifest = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),
+    ) as { preferences?: unknown; commands?: { name?: string }[] };
+
+    assert.equal(manifest.preferences, undefined);
+    assert.deepEqual(
+      (manifest.commands || []).map((command) => command.name),
+      [
+        "search",
+        "search-agents",
+        "search-mcp",
+        "search-tools",
+        "search-skills",
+        "search-rules",
+        "search-commands",
+        "search-hooks",
+        "search-guides",
+        "search-collections",
+        "search-statuslines",
+        "jobs",
+        "contribute",
+      ],
+    );
   });
 
   it("loads and refreshes cached jobs without polluting registry cache", async () => {

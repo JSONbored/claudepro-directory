@@ -13,9 +13,9 @@ const raycastFeedSourcePath = path.join(
   repoRoot,
   "integrations/raycast/src/feed.ts",
 );
-const raycastSearchSourcePath = path.join(
+const raycastRegistryCommandSourcePath = path.join(
   repoRoot,
-  "integrations/raycast/src/search.tsx",
+  "integrations/raycast/src/registry-command.tsx",
 );
 const requiredEntryFields = [
   "category",
@@ -83,10 +83,10 @@ if (!fs.existsSync(feedPath)) {
 const payload = readJson(feedPath);
 const directoryPayload = readJson(directoryPath);
 const feedSource = readSource(raycastFeedSourcePath);
-const searchSource = readSource(raycastSearchSourcePath);
+const registryCommandSource = readSource(raycastRegistryCommandSourcePath);
 const categoryLabelsBlock = objectBlock(feedSource, "categoryLabels");
 const issueTemplateBlock = objectBlock(feedSource, "issueTemplateByCategory");
-const categoryIconsBlock = objectBlock(searchSource, "categoryIcons");
+const categoryIconsBlock = objectBlock(registryCommandSource, "categoryIcons");
 
 if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
   fail("Raycast feed must be a versioned object envelope");
