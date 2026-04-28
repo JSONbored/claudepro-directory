@@ -101,25 +101,17 @@ async function persistFavorites(favorites: Set<string>) {
 }
 
 function metadataAccessories(entry: RaycastEntry, isFavorite: boolean) {
-  const accessories: List.Item.Accessory[] = [
-    { text: categoryLabel(entry.category) },
-  ];
+  const accessories: List.Item.Accessory[] = [];
 
   if (isFavorite) {
-    accessories.unshift({
+    accessories.push({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
     });
-  }
-  if (entry.verificationStatus) {
-    accessories.push({ text: entry.verificationStatus });
   }
   if (entry.downloadTrust === "first-party") {
     accessories.push({
       icon: { source: Icon.CheckCircle, tintColor: Color.Green },
     });
-  }
-  if (entry.copyTextTruncated) {
-    accessories.push({ text: "Full on demand" });
   }
 
   return accessories;
@@ -375,7 +367,7 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
             <List.Item
               key={entryKey(entry)}
               title={entry.title}
-              subtitle={entry.description}
+              subtitle={categoryLabel(entry.category)}
               keywords={[
                 entry.category,
                 categoryLabel(entry.category),

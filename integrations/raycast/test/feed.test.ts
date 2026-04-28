@@ -397,6 +397,34 @@ describe("Raycast feed helpers", () => {
     }
   });
 
+  it("keeps Raycast list rows compact enough for split-pane scanning", () => {
+    const registrySource = fs.readFileSync(
+      path.join(process.cwd(), "src", "registry-command.tsx"),
+      "utf8",
+    );
+    const jobsSource = fs.readFileSync(
+      path.join(process.cwd(), "src", "jobs.tsx"),
+      "utf8",
+    );
+
+    assert.doesNotMatch(registrySource, /\n\s+subtitle=\{entry\.description\}/);
+    assert.match(
+      registrySource,
+      /\n\s+subtitle=\{categoryLabel\(entry\.category\)\}/,
+    );
+    assert.doesNotMatch(registrySource, /\{ text: categoryLabel/);
+    assert.doesNotMatch(
+      registrySource,
+      /\{ text: entry\.verificationStatus \}/,
+    );
+    assert.doesNotMatch(registrySource, /\{ text: "Full on demand" \}/);
+
+    assert.doesNotMatch(jobsSource, /\n\s+title=\{job\.company\}/);
+    assert.match(jobsSource, /\n\s+title=\{job\.title\}/);
+    assert.match(jobsSource, /\n\s+subtitle=\{job\.company\}/);
+    assert.doesNotMatch(jobsSource, /\{ text: job\.location \}/);
+  });
+
   it("keeps the production Raycast manifest fixed to HeyClaude endpoints", () => {
     const manifest = JSON.parse(
       fs.readFileSync(path.join(process.cwd(), "package.json"), "utf8"),

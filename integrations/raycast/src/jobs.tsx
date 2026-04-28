@@ -84,20 +84,17 @@ function jobIcon(job: RaycastJob) {
 }
 
 function jobAccessories(job: RaycastJob, isFavorite: boolean) {
-  const accessories: List.Item.Accessory[] = [
-    { text: job.location },
-    { text: job.compensation ? "Comp listed" : job.type || "Role" },
-  ];
+  const accessories: List.Item.Accessory[] = [];
 
   if (isFavorite) {
-    accessories.unshift({
+    accessories.push({
       icon: { source: Icon.Star, tintColor: Color.Yellow },
     });
   }
   if (job.sponsored) {
-    accessories.push({ text: "Sponsored" });
+    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow } });
   } else if (job.featured) {
-    accessories.push({ text: "Featured" });
+    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue } });
   }
   if (job.claimedEmployer) {
     accessories.push({
@@ -246,8 +243,8 @@ export default function Command() {
         return (
           <List.Item
             key={jobKey(job)}
-            title={job.company}
-            subtitle={job.title}
+            title={job.title}
+            subtitle={job.company}
             keywords={[
               job.company,
               job.location,
