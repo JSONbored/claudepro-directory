@@ -4,8 +4,9 @@
   "category": "mcp",
   "slug": "reddit-mcp-buddy",
   "title": "Reddit MCP Buddy for Claude",
+  "author": "karanb192",
   "copyText": "Install:\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n\nConfig:\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
-  "detailMarkdown": "# Reddit MCP Buddy for Claude\n\nBrowse Reddit, search posts, and analyze user activity directly from Claude - no API keys required\n\n- **Category:** mcp\n- **Author:** karanb192\n- **Download trust:** first-party\n- **Tags:** `reddit` `social-media` `search` `analytics` `community`\n\n## Install\n```bash\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n```\n\n## Config\n```json\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/reddit-mcp-buddy\n- https://github.com/karanb192/reddit-mcp-buddy\n- https://github.com/karanb192/reddit-mcp-buddy",
+  "detailMarkdown": "# Reddit MCP Buddy for Claude\n\nBrowse Reddit, search posts, and analyze user activity directly from Claude - no API keys required\n\n## Install\n```bash\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list\n```\n\n## Config\n```json\n{\n  \"reddit\": {\n    \"args\": [\n      \"reddit-mcp-buddy\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/reddit-mcp-buddy",
   "repoUrl": "https://github.com/karanb192/reddit-mcp-buddy",
   "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy"

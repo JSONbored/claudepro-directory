@@ -168,44 +168,15 @@ function section(title: string, body?: string) {
   return trimmed ? `\n## ${title}\n\n${trimmed}\n` : "";
 }
 
-function formatDate(value?: string) {
-  if (!value) return "";
-  const timestamp = Date.parse(value);
-  if (!Number.isFinite(timestamp)) return value;
-  return new Date(timestamp).toISOString().slice(0, 10);
-}
-
-export function buildJobMarkdown(job: RaycastJob, generatedAt = "") {
-  const facts = [
-    `**Company:** ${job.company}`,
-    `**Location:** ${job.location}`,
-    job.type ? `**Type:** ${job.type}` : "",
-    job.compensation ? `**Compensation:** ${job.compensation}` : "",
-    job.equity ? `**Equity:** ${job.equity}` : "",
-    job.bonus ? `**Bonus:** ${job.bonus}` : "",
-    job.lastVerifiedAt
-      ? `**Last verified:** ${formatDate(job.lastVerifiedAt)}`
-      : "",
-    `**Source:** ${job.sourceLabel}`,
-  ].filter(Boolean);
-
+export function buildJobMarkdown(job: RaycastJob) {
   return [
     `# ${job.company} — ${job.title}`,
     "",
     job.description,
-    "",
-    facts.join("\n\n"),
     section("Responsibilities", bulletList(job.responsibilities)),
     section("Requirements", bulletList(job.requirements)),
     section("Benefits", bulletList(job.benefits)),
     section("Curation Note", job.curationNote),
-    "## Links",
-    "",
-    `- [Apply on employer site](${job.applyUrl})`,
-    `- [View on HeyClaude](${job.webUrl})`,
-    job.companyUrl ? `- [Company site](${job.companyUrl})` : "",
-    job.sourceUrl ? `- [Source listing](${job.sourceUrl})` : "",
-    generatedAt ? `\n---\nJobs updated: ${formatDate(generatedAt)}` : "",
   ]
     .filter(Boolean)
     .join("\n");

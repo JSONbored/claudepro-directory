@@ -50,30 +50,7 @@ function buildEntryBrandFields(entry) {
 }
 
 export function buildRaycastDetailMarkdown(entry) {
-  const facts = [
-    ["Category", entry.category],
-    ["Author", entry.author],
-    ["Verification", entry.verificationStatus],
-    [
-      "Brand",
-      entry.brandName || entry.brandDomain
-        ? [entry.brandName, entry.brandDomain].filter(Boolean).join(" / ")
-        : "",
-    ],
-    ["Download trust", entry.downloadTrust],
-    [
-      "Tags",
-      entry.tags?.length ? entry.tags.map((tag) => `\`${tag}\``).join(" ") : "",
-    ],
-  ].filter(([, value]) => Boolean(value));
-
-  const lines = [
-    `# ${entry.title}`,
-    "",
-    entry.description,
-    "",
-    ...facts.map(([label, value]) => `- **${label}:** ${value}`),
-  ];
+  const lines = [`# ${entry.title}`, "", entry.description];
 
   if (entry.installCommand || entry.commandSyntax) {
     lines.push(
@@ -89,16 +66,6 @@ export function buildRaycastDetailMarkdown(entry) {
 
   if (entry.usageSnippet) {
     lines.push("", "## Usage", entry.usageSnippet);
-  }
-
-  const links = [
-    `${SITE_URL}/${entry.category}/${entry.slug}`,
-    entry.documentationUrl,
-    entry.repoUrl,
-  ].filter(Boolean);
-
-  if (links.length) {
-    lines.push("", "## Links", ...links.map((link) => `- ${link}`));
   }
 
   return truncateText(lines.join("\n"), 6000);
@@ -316,6 +283,7 @@ export function buildRaycastEntries(entries) {
       title: entry.title,
       description: entry.cardDescription || entry.description,
       tags: entry.tags,
+      author: entry.author || "",
       ...buildEntryBrandFields(entry),
       installCommand: entry.installCommand || "",
       configSnippet: entry.configSnippet || "",
@@ -350,6 +318,7 @@ export function buildRaycastDetail(entry) {
     category: entry.category,
     slug: entry.slug,
     title: entry.title,
+    author: entry.author || "",
     ...buildEntryBrandFields(entry),
     copyText: getCopyText(entry),
     detailMarkdown: buildRaycastDetailMarkdown(entry),

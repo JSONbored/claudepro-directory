@@ -153,16 +153,29 @@
       ]
     },
     {
-      "name": "contribute",
-      "title": "Contribute to HeyClaude",
-      "description": "Open reviewed HeyClaude submission, update, claim, and job-posting paths.",
+      "name": "submit-content",
+      "title": "Submit New Content",
+      "description": "Create a reviewed HeyClaude content submission with fields that map to the website and GitHub issue forms.",
       "mode": "view",
       "keywords": [
         "submit",
-        "contribute",
+        "content",
         "issue",
         "github",
-        "jobs"
+        "registry"
+      ]
+    },
+    {
+      "name": "get-involved",
+      "title": "Get Involved with HeyClaude",
+      "description": "Open HeyClaude contribution, newsletter, GitHub, jobs, API, and community links.",
+      "mode": "view",
+      "keywords": [
+        "contribute",
+        "newsletter",
+        "github",
+        "jobs",
+        "support"
       ]
     }
   ],

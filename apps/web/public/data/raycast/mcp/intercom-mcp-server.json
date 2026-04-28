@@ -4,8 +4,9 @@
   "category": "mcp",
   "slug": "intercom-mcp-server",
   "title": "Intercom MCP Server for Claude",
+  "author": "Intercom",
   "copyText": "Install:\nclaude mcp list && claude mcp status intercom\n\nConfig:\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
-  "detailMarkdown": "# Intercom MCP Server for Claude\n\nAccess customer conversations, tickets, and user data in real-time\n\n- **Category:** mcp\n- **Author:** Intercom\n- **Download trust:** first-party\n- **Tags:** `customer-support` `intercom` `chat` `helpdesk` `crm`\n\n## Install\n```bash\nclaude mcp list && claude mcp status intercom\n```\n\n## Config\n```json\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status intercom\n\n## Links\n- https://heyclau.de/mcp/intercom-mcp-server\n- https://developers.intercom.com/docs/guides/mcp",
+  "detailMarkdown": "# Intercom MCP Server for Claude\n\nAccess customer conversations, tickets, and user data in real-time\n\n## Install\n```bash\nclaude mcp list && claude mcp status intercom\n```\n\n## Config\n```json\n{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status intercom",
   "webUrl": "https://heyclau.de/mcp/intercom-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://developers.intercom.com/docs/guides/mcp"

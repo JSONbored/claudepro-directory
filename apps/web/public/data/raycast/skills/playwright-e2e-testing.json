@@ -4,8 +4,9 @@
   "category": "skills",
   "slug": "playwright-e2e-testing",
   "title": "Playwright E2E Testing Automation Skill",
+  "author": "JSONbored",
   "copyText": "Install:\nnpx playwright install --with-deps\n\nUsage:\nnpx playwright install --with-deps\n\nAsset:\nimport { test, expect } from '@playwright/test';\n\ntest.describe('Dashboard Tests', () => {\n  test.beforeEach(async ({ page }) => {\n    // Login before each test\n    await page.goto('http://localhost:3000/login');\n    await page.getByLabel('Email').fill('user@example.com');\n    await page.getByLabel('Password').fill('password123');\n    await page.getByRole('button', { name: 'Sign In' }).click();\n    await page.waitForURL('**/dashboard');\n  });\n\n  test('displays welcome message', async ({ page }) => {\n    const heading = page.getByRole('heading', { name: /welcome/i });\n    await expect(heading).toBeVisible();\n  });\n\n  test('loads user profile data', async ({ page }) => {\n    await page.getByRole('link', { name: 'Profile' }).click();\n    await expect(page.getByText('user@example.com')).toBeVisible();\n  });\n});",
-  "detailMarkdown": "# Playwright E2E Testing Automation Skill\n\nAutomate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a single API.\n\n- **Category:** skills\n- **Author:** JSONbored\n- **Verification:** draft\n- **Download trust:** first-party\n- **Tags:** `testing` `playwright` `e2e` `automation` `ai`\n\n## Install\n```bash\nnpx playwright install --with-deps\n```\n\n## Usage\nnpx playwright install --with-deps\n\n## Links\n- https://heyclau.de/skills/playwright-e2e-testing\n- https://playwright.dev/",
+  "detailMarkdown": "# Playwright E2E Testing Automation Skill\n\nAutomate end-to-end testing with Playwright - the modern browser automation framework that supports Chromium, Firefox, and WebKit with a single API.\n\n## Install\n```bash\nnpx playwright install --with-deps\n```\n\n## Usage\nnpx playwright install --with-deps",
   "webUrl": "https://heyclau.de/skills/playwright-e2e-testing",
   "repoUrl": "",
   "documentationUrl": "https://playwright.dev/"

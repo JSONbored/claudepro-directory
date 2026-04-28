@@ -4,8 +4,9 @@
   "category": "skills",
   "slug": "cli-data-viz-quickstart",
   "title": "CLI Data Visualization Quickstart Skill",
+  "author": "JSONbored",
   "copyText": "Install:\nnpm i vega vega-lite\n\nUsage:\nnpm i vega vega-lite\n\nAsset:\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndf = pd.read_csv('data.csv')\ndf.groupby('category')['value'].sum().plot(kind='bar')\nplt.tight_layout(); plt.savefig('chart.png', dpi=200)",
-  "detailMarkdown": "# CLI Data Visualization Quickstart Skill\n\nCreate publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.\n\n- **Category:** skills\n- **Author:** JSONbored\n- **Verification:** draft\n- **Download trust:** first-party\n- **Tags:** `visualization` `charts` `python` `vega`\n\n## Install\n```bash\nnpm i vega vega-lite\n```\n\n## Usage\nnpm i vega vega-lite\n\n## Links\n- https://heyclau.de/skills/cli-data-viz-quickstart\n- https://matplotlib.org/",
+  "detailMarkdown": "# CLI Data Visualization Quickstart Skill\n\nCreate publication-ready charts and visualizations from CSV, JSON, and Excel data using Python (matplotlib/seaborn) or Node.js (vega/vega-lite). Generate bar charts, line plots, scatter plots, heatmaps, and statistical visualizations with custom styling.\n\n## Install\n```bash\nnpm i vega vega-lite\n```\n\n## Usage\nnpm i vega vega-lite",
   "webUrl": "https://heyclau.de/skills/cli-data-viz-quickstart",
   "repoUrl": "",
   "documentationUrl": "https://matplotlib.org/"

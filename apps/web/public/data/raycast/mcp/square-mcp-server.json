@@ -4,8 +4,9 @@
   "category": "mcp",
   "slug": "square-mcp-server",
   "title": "Square MCP Server for Claude",
+  "author": "Square",
   "copyText": "Install:\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n\nConfig:\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
-  "detailMarkdown": "# Square MCP Server for Claude\n\nBuild on Square APIs for payments, inventory, and order management\n\n- **Category:** mcp\n- **Author:** Square\n- **Download trust:** first-party\n- **Tags:** `payments` `square` `pos` `inventory` `commerce`\n\n## Install\n```bash\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n```\n\n## Config\n```json\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/square-mcp-server\n- https://developer.squareup.com/docs/mcp",
+  "detailMarkdown": "# Square MCP Server for Claude\n\nBuild on Square APIs for payments, inventory, and order management\n\n## Install\n```bash\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list\n```\n\n## Config\n```json\n{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/square-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://developer.squareup.com/docs/mcp"

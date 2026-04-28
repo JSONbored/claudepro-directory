@@ -8,6 +8,7 @@ import {
   DETAIL_CACHE_PREFIX,
   absoluteDataUrl,
   buildContributeEntryUrl,
+  buildEntrySummary,
   buildSuggestChangeUrl,
   buildSubmitIssueUrl,
   categoryLabel,
@@ -49,6 +50,15 @@ import {
   type RaycastJob,
 } from "../src/jobs-feed";
 import { fetchFreshJobs, loadCachedJobs } from "../src/jobs-runtime";
+import { markdownLink, withRaycastUtm } from "../src/links";
+import {
+  buildSubmissionDraftText,
+  isValidDomain,
+  isValidHttpsUrl,
+  normalizeDomain,
+  normalizeSubmissionDraft,
+  slugify,
+} from "../src/submission";
 
 const sampleEntry: RaycastEntry = {
   category: "mcp",
@@ -286,6 +296,43 @@ describe("Raycast feed helpers", () => {
     );
   });
 
+  it("normalizes Raycast submission drafts and growth links", () => {
+    const draft = normalizeSubmissionDraft({
+      category: "mcp",
+      title: "Asana MCP Server",
+      sourceUrl: "https://developers.asana.com/docs/mcp",
+      brandName: "Asana",
+      brandDomain: "https://www.asana.com/docs",
+      description: "Use Asana projects and tasks from Claude.",
+      tags: ["asana", "mcp", "asana"],
+    });
+
+    assert.equal(slugify("Asana MCP Server!"), "asana-mcp-server");
+    assert.equal(normalizeDomain("https://www.asana.com/docs"), "asana.com");
+    assert.equal(isValidDomain("asana.com"), true);
+    assert.equal(isValidDomain("www.asana.com"), true);
+    assert.equal(isValidDomain("not a domain"), false);
+    assert.equal(isValidHttpsUrl("https://example.com"), true);
+    assert.equal(isValidHttpsUrl("http://example.com"), false);
+    assert.equal(draft.slug, "asana-mcp-server");
+    assert.deepEqual(draft.tags, ["asana", "mcp"]);
+    assert.match(buildSubmissionDraftText(draft), /Brand domain: asana.com/);
+
+    assert.equal(
+      withRaycastUtm("https://heyclau.de/submit", "submit-content"),
+      "https://heyclau.de/submit?utm_source=raycast&utm_medium=extension&utm_content=submit-content",
+    );
+    assert.equal(
+      withRaycastUtm("https://github.com/JSONbored/claudepro-directory"),
+      "https://github.com/JSONbored/claudepro-directory",
+    );
+    assert.equal(
+      markdownLink("Context7", "https://heyclau.de/mcp/context7"),
+      "[Context7](https://heyclau.de/mcp/context7)",
+    );
+    assert.match(buildEntrySummary(sampleEntry), /Fetch up-to-date docs/);
+  });
+
   it("validates and parses full detail payloads", () => {
     const detail = { copyText: "full text", detailMarkdown: "# Detail" };
     assert.equal(isRaycastDetail(detail), true);
@@ -333,7 +380,12 @@ describe("Raycast feed helpers", () => {
       filterJobs([sampleJob], "favorites", new Set([sampleJob.slug])),
       [sampleJob],
     );
-    assert.match(buildJobMarkdown(sampleJob), /Apply on employer site/);
+    const jobMarkdown = buildJobMarkdown(sampleJob);
+    assert.match(jobMarkdown, /## Responsibilities/);
+    assert.doesNotMatch(jobMarkdown, /\*\*Company:\*\*/);
+    assert.doesNotMatch(jobMarkdown, /\*\*Location:\*\*/);
+    assert.doesNotMatch(jobMarkdown, /\*\*Type:\*\*/);
+    assert.doesNotMatch(jobMarkdown, /Apply on employer site/);
     assert.match(buildJobSummary(sampleJob), /Compensation: \$150K-\$190K/);
   });
 
@@ -418,11 +470,16 @@ describe("Raycast feed helpers", () => {
       /\{ text: entry\.verificationStatus \}/,
     );
     assert.doesNotMatch(registrySource, /\{ text: "Full on demand" \}/);
+    assert.match(registrySource, /metadata=\{entryDetailMetadata/);
+    assert.match(registrySource, /Action\.CreateQuicklink/);
+    assert.match(registrySource, /Action\.CreateSnippet/);
 
     assert.doesNotMatch(jobsSource, /\n\s+title=\{job\.company\}/);
     assert.match(jobsSource, /\n\s+title=\{job\.title\}/);
     assert.match(jobsSource, /\n\s+subtitle=\{job\.company\}/);
     assert.doesNotMatch(jobsSource, /\{ text: job\.location \}/);
+    assert.match(jobsSource, /metadata=\{jobDetailMetadata/);
+    assert.match(jobsSource, /Action\.CreateQuicklink/);
   });
 
   it("keeps the production Raycast manifest fixed to HeyClaude endpoints", () => {
@@ -446,7 +503,8 @@ describe("Raycast feed helpers", () => {
         "search-collections",
         "search-statuslines",
         "jobs",
-        "contribute",
+        "submit-content",
+        "get-involved",
       ],
     );
   });

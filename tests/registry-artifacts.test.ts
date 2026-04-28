@@ -146,6 +146,7 @@ describe("registry artifacts", () => {
       brandIconUrl: "/api/brand-assets/icon/asana.com",
       brandAssetSource: "brandfetch",
     });
+    expect(raycastDetail).toHaveProperty("author");
     expect(llmsText).toContain("- Brand: Asana");
     expect(llmsText).toContain("- Brand domain: asana.com");
 
@@ -197,12 +198,9 @@ describe("registry artifacts", () => {
       brandIconUrl: "/api/brand-assets/icon/discord.com",
       brandAssetSource: "brandfetch",
     });
-    expect(raycastDetail.detailMarkdown).toContain(
-      "- **Brand:** Discord / discord.com",
-    );
-    expect(String(raycastDetail.detailMarkdown)).not.toContain(
-      "Category: mcp\n**Author",
-    );
+    expect(String(raycastDetail.detailMarkdown)).not.toContain("**Brand:**");
+    expect(String(raycastDetail.detailMarkdown)).not.toContain("**Category:**");
+    expect(String(raycastDetail.detailMarkdown)).not.toContain("## Links");
   });
 
   it("publishes factual trust signals across compact and detail artifacts", () => {

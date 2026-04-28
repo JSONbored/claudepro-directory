@@ -15,6 +15,7 @@ export type RaycastEntry = {
   title: string;
   description: string;
   tags: string[];
+  author?: string;
   brandName?: string;
   brandDomain?: string;
   brandIconUrl?: string;

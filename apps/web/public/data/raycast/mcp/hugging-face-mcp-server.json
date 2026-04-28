@@ -4,8 +4,9 @@
   "category": "mcp",
   "slug": "hugging-face-mcp-server",
   "title": "Hugging Face MCP Server - MCP Servers",
+  "author": "Hugging Face",
   "copyText": "Install:\nclaude mcp list && claude mcp status hugging-face\n\nConfig:\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}",
-  "detailMarkdown": "# Hugging Face MCP Server - MCP Servers\n\nAccess Hugging Face Hub and Gradio AI applications\n\n- **Category:** mcp\n- **Author:** Hugging Face\n- **Download trust:** first-party\n- **Tags:** `ai` `hugging-face` `machine-learning` `models` `datasets`\n\n## Install\n```bash\nclaude mcp list && claude mcp status hugging-face\n```\n\n## Config\n```json\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status hugging-face\n\n## Links\n- https://heyclau.de/mcp/hugging-face-mcp-server\n- https://huggingface.co/settings/mcp",
+  "detailMarkdown": "# Hugging Face MCP Server - MCP Servers\n\nAccess Hugging Face Hub and Gradio AI applications\n\n## Install\n```bash\nclaude mcp list && claude mcp status hugging-face\n```\n\n## Config\n```json\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status hugging-face",
   "webUrl": "https://heyclau.de/mcp/hugging-face-mcp-server",
   "repoUrl": "",
   "documentationUrl": "https://huggingface.co/settings/mcp"

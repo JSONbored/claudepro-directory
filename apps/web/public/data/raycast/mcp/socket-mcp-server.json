@@ -4,8 +4,9 @@
   "category": "mcp",
   "slug": "socket-mcp-server",
   "title": "Socket MCP Server for Claude",
+  "author": "Socket",
   "copyText": "Install:\nclaude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list\n\nConfig:\n{\n  \"socket\": {\n    \"url\": \"https://mcp.socket.dev/\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"socket\": {\n    \"url\": \"https://mcp.socket.dev/\",\n    \"transport\": \"http\"\n  }\n}",
-  "detailMarkdown": "# Socket MCP Server for Claude\n\nSecurity analysis and vulnerability scanning for dependencies\n\n- **Category:** mcp\n- **Author:** Socket\n- **Download trust:** first-party\n- **Tags:** `security` `dependencies` `vulnerability-scanning` `npm` `supply-chain`\n\n## Install\n```bash\nclaude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list\n```\n\n## Config\n```json\n{\n  \"socket\": {\n    \"url\": \"https://mcp.socket.dev/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list\n\n## Links\n- https://heyclau.de/mcp/socket-mcp-server\n- https://github.com/SocketDev/socket-mcp\n- https://github.com/SocketDev/socket-mcp",
+  "detailMarkdown": "# Socket MCP Server for Claude\n\nSecurity analysis and vulnerability scanning for dependencies\n\n## Install\n```bash\nclaude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list\n```\n\n## Config\n```json\n{\n  \"socket\": {\n    \"url\": \"https://mcp.socket.dev/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/socket-mcp-server",
   "repoUrl": "https://github.com/SocketDev/socket-mcp",
   "documentationUrl": "https://github.com/SocketDev/socket-mcp"

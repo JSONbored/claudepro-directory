@@ -7,10 +7,13 @@ import {
   Icon,
   List,
   LocalStorage,
+  PopToRootType,
   Toast,
   getPreferenceValues,
+  showHUD,
   showToast,
 } from "@raycast/api";
+import { useFrecencySorting } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import {
   FAVORITE_JOBS_KEY,
@@ -29,6 +32,8 @@ import {
   fetchFreshJobs,
   loadCachedJobs as loadCachedJobsFromRuntime,
 } from "./jobs-runtime";
+import { markdownLink, withRaycastUtm } from "./links";
+import { jobDetailMetadata } from "./raycast-ui";
 
 const cache = new Cache();
 
@@ -181,13 +186,20 @@ export default function Command() {
     () => filterJobs(jobs, filter, favorites),
     [filter, jobs, favorites],
   );
+  const {
+    data: rankedJobs,
+    visitItem,
+    resetRanking,
+  } = useFrecencySorting(displayedJobs, {
+    namespace: "jobs",
+    key: jobKey,
+  });
 
   async function copyRoleSummary(job: RaycastJob) {
     await Clipboard.copy(buildJobSummary(job));
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied role summary",
-      message: job.title,
+    await visitItem(job);
+    await showHUD(`Copied ${job.title}`, {
+      popToRootType: PopToRootType.Immediate,
     });
   }
 
@@ -201,6 +213,7 @@ export default function Command() {
 
     setFavorites(next);
     await persistFavoriteJobs(next);
+    await visitItem(job);
     await showToast({
       style: Toast.Style.Success,
       title: isFavorite ? "Removed favorite" : "Added favorite",
@@ -236,9 +249,14 @@ export default function Command() {
           description={configuredJobs.error}
         />
       ) : null}
-      {displayedJobs.map((job) => {
+      {rankedJobs.map((job) => {
         const isFavorite = favorites.has(jobKey(job));
-        const detailMarkdown = buildJobMarkdown(job, generatedAt);
+        const detailMarkdown = buildJobMarkdown(job);
+        const webUrl = withRaycastUtm(job.webUrl, "job-detail");
+        const postJobUrl = withRaycastUtm(
+          buildPostJobUrl(configuredJobs.jobsUrl),
+          "jobs-post",
+        );
 
         return (
           <List.Item
@@ -255,56 +273,126 @@ export default function Command() {
             ].filter(Boolean)}
             icon={jobIcon(job)}
             accessories={jobAccessories(job, isFavorite)}
-            detail={<List.Item.Detail markdown={detailMarkdown} />}
+            detail={
+              <List.Item.Detail
+                markdown={detailMarkdown}
+                metadata={jobDetailMetadata(job, generatedAt)}
+              />
+            }
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Apply on Employer Site"
-                  url={job.applyUrl}
-                  icon={Icon.ArrowRight}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                />
-                <Action.OpenInBrowser
-                  title="Open on HeyClaude"
-                  url={job.webUrl}
-                  icon={Icon.Globe}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
-                />
-                <Action
-                  title="Copy Role Summary"
-                  icon={Icon.Clipboard}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  onAction={() => void copyRoleSummary(job)}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Apply URL"
-                  content={job.applyUrl}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                {job.companyUrl ? (
+                <ActionPanel.Section title="Use">
                   <Action.OpenInBrowser
-                    title="Open Company Site"
-                    url={job.companyUrl}
+                    title="Apply on Employer Site"
+                    url={job.applyUrl}
+                    icon={Icon.ArrowRight}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                    onOpen={() => void visitItem(job)}
                   />
-                ) : null}
-                {job.sourceUrl ? (
                   <Action.OpenInBrowser
-                    title="Open Source Listing"
-                    url={job.sourceUrl}
+                    title="Open on HeyClaude"
+                    url={webUrl}
+                    icon={Icon.Globe}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onOpen={() => void visitItem(job)}
                   />
-                ) : null}
-                <Action.OpenInBrowser
-                  title="Post a Job"
-                  url={buildPostJobUrl(configuredJobs.jobsUrl)}
-                  icon={Icon.Plus}
-                />
-                <Action
-                  title={isFavorite ? "Remove Favorite" : "Add Favorite"}
-                  icon={isFavorite ? Icon.StarDisabled : Icon.Star}
-                  shortcut={{ modifiers: ["cmd"], key: "f" }}
-                  onAction={() => void toggleFavorite(job)}
-                />
-                <ActionPanel.Section>
+                  <Action
+                    title="Copy Role Summary"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    onAction={() => void copyRoleSummary(job)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Apply URL"
+                    content={job.applyUrl}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onCopy={() => void visitItem(job)}
+                  />
+                  {job.companyUrl ? (
+                    <Action.OpenInBrowser
+                      title="Open Company Site"
+                      url={job.companyUrl}
+                      onOpen={() => void visitItem(job)}
+                    />
+                  ) : null}
+                  {job.sourceUrl ? (
+                    <Action.OpenInBrowser
+                      title="Open Source Listing"
+                      url={job.sourceUrl}
+                      onOpen={() => void visitItem(job)}
+                    />
+                  ) : null}
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Share">
+                  <Action.CopyToClipboard
+                    title="Copy Job URL"
+                    content={job.webUrl}
+                    onCopy={() => void visitItem(job)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Markdown Link"
+                    content={markdownLink(
+                      `${job.company} — ${job.title}`,
+                      job.webUrl,
+                    )}
+                    onCopy={() => void visitItem(job)}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Company"
+                    content={job.company}
+                    onCopy={() => void visitItem(job)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Create">
+                  <Action.CreateQuicklink
+                    title="Create Job Quicklink"
+                    quicklink={{
+                      name: `HeyClaude Job: ${job.company} — ${job.title}`,
+                      link: webUrl,
+                      icon: Icon.Document,
+                    }}
+                  />
+                  <Action.CreateQuicklink
+                    title="Create Jobs Quicklink"
+                    quicklink={{
+                      name: "HeyClaude Jobs",
+                      link: withRaycastUtm(
+                        "https://heyclau.de/jobs",
+                        "jobs-quicklink",
+                      ),
+                      icon: Icon.Document,
+                    }}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Save">
+                  <Action
+                    title={isFavorite ? "Remove Favorite" : "Add Favorite"}
+                    icon={isFavorite ? Icon.StarDisabled : Icon.Star}
+                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                    onAction={() => void toggleFavorite(job)}
+                  />
+                  <Action
+                    title="Reset Ranking"
+                    icon={Icon.ArrowCounterClockwise}
+                    onAction={() => void resetRanking(job)}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Contribute">
+                  <Action.OpenInBrowser
+                    title="Post a Job"
+                    url={postJobUrl}
+                    icon={Icon.Plus}
+                  />
+                  <Action.OpenInBrowser
+                    title="Claim or Update Listing"
+                    url={withRaycastUtm(
+                      `https://heyclau.de/claim?type=job&slug=${encodeURIComponent(job.slug)}`,
+                      "job-claim",
+                    )}
+                    icon={Icon.Person}
+                  />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Refresh">
                   <Action
                     title="Refresh Jobs"
                     icon={Icon.ArrowClockwise}

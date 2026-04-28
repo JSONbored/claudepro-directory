@@ -4,8 +4,9 @@
   "category": "skills",
   "slug": "markdown-knowledge-base-composer",
   "title": "Markdown Knowledge Base Composer Skill",
+  "author": "JSONbored",
   "copyText": "Install:\nnpm i remark unified\n\nUsage:\nnpm i remark unified\n\nAsset:\nimport { readFileSync, readdirSync } from 'node:fs';\nimport { join } from 'node:path';\nimport { unified } from 'unified';\nimport remarkParse from 'remark-parse';\nimport remarkStringify from 'remark-stringify';\nimport remarkToc from 'remark-toc';\nimport remarkSlug from 'remark-slug';\n\nconst dir = './notes';\nconst files = readdirSync(dir).filter(f => f.endsWith('.md'));\n\nfor (const file of files) {\n  const input = readFileSync(join(dir, file), 'utf8');\n  const tree = unified()\n    .use(remarkParse)\n    .use(remarkSlug)\n    .use(remarkToc, { tight: true })\n    .use(remarkStringify)\n    .processSync(input);\n  console.log(String(tree));\n}",
-  "detailMarkdown": "# Markdown Knowledge Base Composer Skill\n\nAggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB).\n\n- **Category:** skills\n- **Author:** JSONbored\n- **Verification:** draft\n- **Download trust:** first-party\n- **Tags:** `markdown` `docs` `remark` `node`\n\n## Install\n```bash\nnpm i remark unified\n```\n\n## Usage\nnpm i remark unified\n\n## Links\n- https://heyclau.de/skills/markdown-knowledge-base-composer\n- https://github.com/remarkjs/remark\n- https://github.com/remarkjs/remark",
+  "detailMarkdown": "# Markdown Knowledge Base Composer Skill\n\nAggregate Markdown folders into cohesive knowledge bases with automated table of contents generation, cross-link validation and rewriting, heading normalization, and multi-format export (HTML, PDF, DOCX, EPUB).\n\n## Install\n```bash\nnpm i remark unified\n```\n\n## Usage\nnpm i remark unified",
   "webUrl": "https://heyclau.de/skills/markdown-knowledge-base-composer",
   "repoUrl": "https://github.com/remarkjs/remark",
   "documentationUrl": "https://github.com/remarkjs/remark"

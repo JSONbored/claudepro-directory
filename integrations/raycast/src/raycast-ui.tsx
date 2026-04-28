@@ -64,6 +64,13 @@ export function entryDetailMetadata(entry: RaycastEntry, generatedAt = "") {
           icon={Icon.CheckCircle}
         />
       ) : null}
+      {entry.author ? (
+        <List.Item.Detail.Metadata.Label
+          title="Author"
+          text={entry.author}
+          icon={Icon.Person}
+        />
+      ) : null}
       <List.Item.Detail.Metadata.Separator />
       {trustLabel(entry.downloadTrust) ? (
         <List.Item.Detail.Metadata.Label
@@ -119,22 +126,22 @@ export function entryDetailMetadata(entry: RaycastEntry, generatedAt = "") {
       ) : null}
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Link
-        title="HeyClaude"
+        title="HeyClaude listing"
         target={entry.webUrl}
-        text={entry.webUrl}
+        text="Open canonical page"
       />
       {entry.documentationUrl ? (
         <List.Item.Detail.Metadata.Link
-          title="Docs"
+          title="Documentation"
           target={entry.documentationUrl}
-          text={entry.documentationUrl}
+          text="Open docs"
         />
       ) : null}
       {sourceUrl ? (
         <List.Item.Detail.Metadata.Link
           title="Source"
           target={sourceUrl}
-          text={sourceUrl}
+          text={entry.repoUrl ? "Open repository" : "Open source"}
         />
       ) : null}
     </List.Item.Detail.Metadata>
@@ -229,27 +236,27 @@ export function jobDetailMetadata(job: RaycastJob, generatedAt = "") {
       ) : null}
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Link
-        title="Apply"
+        title="Employer apply"
         target={job.applyUrl}
-        text={job.applyUrl}
+        text="Open application"
       />
       <List.Item.Detail.Metadata.Link
-        title="HeyClaude"
+        title="HeyClaude listing"
         target={job.webUrl}
-        text={job.webUrl}
+        text="Open job page"
       />
       {cleanText(job.companyUrl) ? (
         <List.Item.Detail.Metadata.Link
-          title="Company"
+          title="Company site"
           target={job.companyUrl || ""}
-          text={job.companyUrl || ""}
+          text="Open company"
         />
       ) : null}
       {cleanText(job.sourceUrl) ? (
         <List.Item.Detail.Metadata.Link
-          title="Source"
+          title="Source listing"
           target={job.sourceUrl || ""}
-          text={job.sourceUrl || ""}
+          text="Open original listing"
         />
       ) : null}
     </List.Item.Detail.Metadata>

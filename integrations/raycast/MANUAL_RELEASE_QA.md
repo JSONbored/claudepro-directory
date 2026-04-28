@@ -68,7 +68,12 @@ distribution build pass.
 
 1. Open the HeyClaude page for an entry.
 2. Open docs or source when available.
-3. Confirm no action writes to local project files.
+3. Copy canonical URL, Markdown link, summary, and brand domain when available.
+4. Create an entry or category Quicklink and confirm Raycast asks for explicit
+   user approval.
+5. Create an install/config Snippet when available and confirm Raycast asks for
+   explicit user approval.
+6. Confirm no action writes to local project files.
 
 ## Contribution Actions
 
@@ -77,21 +82,29 @@ distribution build pass.
 3. Run `Suggest Change`.
 4. Confirm Raycast opens a GitHub issue URL with the category issue template and existing entry fields prefilled.
 5. Confirm no GitHub token, OAuth flow, fork, branch, PR, or local project file write is requested.
-6. Run `Contribute to HeyClaude`.
-7. Confirm submit, claim/update, job-posting, submissions, GitHub issue chooser,
-   and category-specific GitHub issue-template actions open in the browser only.
+6. Run `Submit New Content`.
+7. Confirm required-field validation blocks empty name and non-HTTPS source
+   URLs.
+8. Confirm the form can open the HeyClaude submit URL and the matching GitHub
+   issue URL with category, source, brand, description, and tags prefilled.
+9. Run `Get Involved with HeyClaude`.
+10. Confirm newsletter, GitHub, Raycast, submit, claim/update, job-posting,
+    API/feed, community, and creator links open in the browser only.
 
 ## Jobs Command
 
 1. Run `Browse HeyClaude Jobs`.
-2. Confirm active jobs render with company, location, source, compensation when
-   present, and detail markdown.
-3. Confirm filters for favorites, featured, sponsored, remote, compensation,
+2. Confirm active jobs render compact rows with role title and company.
+3. Confirm the detail pane shows structured metadata for company, location,
+   source, compensation, equity, benefits, apply URL, and last verified date
+   when available.
+4. Confirm filters for favorites, featured, sponsored, remote, compensation,
    curated, and claimed employers work.
-4. Confirm `Apply on Employer Site`, `Open on HeyClaude`, company, and source
+5. Confirm `Apply on Employer Site`, `Open on HeyClaude`, company, and source
    links open in the browser.
-5. Confirm favorites persist after restarting Raycast.
-6. Confirm the command never creates, edits, activates, expires, or writes job
+6. Confirm favorites and local frecency ranking persist after restarting
+   Raycast, and `Reset Ranking` works.
+7. Confirm the command never creates, edits, activates, expires, or writes job
    data.
 
 ## Dated Evidence

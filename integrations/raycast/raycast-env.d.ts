@@ -37,8 +37,10 @@ declare namespace Preferences {
   export type SearchStatuslines = ExtensionPreferences & {}
   /** Preferences accessible in the `jobs` command */
   export type Jobs = ExtensionPreferences & {}
-  /** Preferences accessible in the `contribute` command */
-  export type Contribute = ExtensionPreferences & {}
+  /** Preferences accessible in the `submit-content` command */
+  export type SubmitContent = ExtensionPreferences & {}
+  /** Preferences accessible in the `get-involved` command */
+  export type GetInvolved = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -66,7 +68,9 @@ declare namespace Arguments {
   export type SearchStatuslines = {}
   /** Arguments passed to the `jobs` command */
   export type Jobs = {}
-  /** Arguments passed to the `contribute` command */
-  export type Contribute = {}
+  /** Arguments passed to the `submit-content` command */
+  export type SubmitContent = {}
+  /** Arguments passed to the `get-involved` command */
+  export type GetInvolved = {}
 }
 
