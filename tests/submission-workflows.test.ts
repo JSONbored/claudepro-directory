@@ -51,10 +51,12 @@ describe("submission automation workflows", () => {
       "utf8",
     );
 
-    expect(source).toContain("Require preview artifact base URL");
+    expect(source).toContain("validate-pr-preview:");
     expect(source).toContain("github.event_name == 'pull_request'");
-    expect(source).toContain("DEPLOYMENT_ARTIFACT_BASE_URL must point");
+    expect(source).toContain("Deploy same-repo PR preview to dev Worker");
+    expect(source).toContain("Resolve PR preview URL");
     expect(source).toContain("pnpm validate:deployment-artifacts");
+    expect(source).not.toContain("vars.DEPLOYMENT_ARTIFACT_BASE_URL");
     expect(source).toContain("Dry-run Resend template sync");
     expect(source).toContain("pnpm resend:sync-templates -- --dry-run");
   });

@@ -3,7 +3,9 @@
 HeyClaude jobs are lead-first and review-gated. The public form is intentionally
 short so employers can express interest quickly. Publication remains private
 D1-backed review work, and paid jobs cannot be activated until the reviewed row
-passes the paid job content-quality gate.
+passes the paid job content-quality gate. Any active job that does not clear the
+public source/depth gate is kept out of the jobs index, sitemap, and
+`JobPosting` JSON-LD.
 
 ## Intake Policy
 
@@ -31,7 +33,8 @@ passes the paid job content-quality gate.
    - employment type, source URL, posted date, expiration, and verification date
 5. If the role is paid/featured/sponsored, send the approved Polar checkout link.
 6. Activate only after review, enrichment, and payment state are correct.
-7. Run the source checker every 24-48 hours while listings are active.
+7. Let the scheduled source checker run daily while listings are active. Use a
+   manual dry run before applying risky bulk changes.
 
 ## Operator Commands
 
@@ -40,11 +43,37 @@ ADMIN_API_TOKEN=... pnpm jobs:admin health --base-url https://heyclaude-dev.zero
 ADMIN_API_TOKEN=... pnpm jobs:admin list --base-url https://heyclaude-dev.zeronode.workers.dev --status pending_review
 ADMIN_API_TOKEN=... pnpm jobs:admin upsert --base-url https://heyclaude-dev.zeronode.workers.dev --file job.json
 ADMIN_API_TOKEN=... pnpm jobs:admin transition --base-url https://heyclaude-dev.zeronode.workers.dev --slug role-slug --action activate
+ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://heyclaude-dev.zeronode.workers.dev --dry-run
 ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://heyclaude-dev.zeronode.workers.dev --apply
 ```
 
-`HEYCLAUDE_ADMIN_BASE_URL` may be used instead of `--base-url`. The older
-`HEYCLOUD_*` aliases are still accepted for local operator compatibility.
+`HEYCLAUDE_ADMIN_BASE_URL` may be used instead of `--base-url`.
+
+## Scheduled Source Revalidation
+
+`.github/workflows/jobs-source-revalidation.yml` runs the source checker through
+the Worker admin API. It does not read or write D1 directly from GitHub.
+
+- Scheduled runs default to `apply` mode against
+  `JOBS_SOURCE_CHECK_BASE_URL`, or `https://heyclau.de` when that repository
+  variable is unset.
+- Manual `workflow_dispatch` runs default to `dry-run` and can override the
+  base URL for dev-worker checks.
+- `dry-run` prints planned transitions and fails when any source is unhealthy.
+- `apply` writes lifecycle transitions and uses `--allow-unhealthy`, so a
+  closed or shallow job becomes operator-visible in the job summary without
+  failing the workflow after the transition is applied.
+- The workflow writes a Markdown table to `GITHUB_STEP_SUMMARY` showing each
+  slug, previous state, action, next state, source result, and reason.
+
+Required GitHub secret:
+
+- `JOBS_ADMIN_API_TOKEN` preferred, or `ADMIN_API_TOKEN` / `LEADS_ADMIN_TOKEN`
+  if already configured.
+
+The checker compares reviewed D1 content against live source facts. A role must
+still expose title/company/apply signals, avoid closed-role copy, and meet the
+public source/depth gate before an active or stale-review row remains public.
 
 ## Follow-Up Templates
 

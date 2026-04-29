@@ -14,6 +14,7 @@ on:
       - ".trunk/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/workflows/content-validation.yml"
+      - ".github/workflows/jobs-source-revalidation.yml"
       - "cloudflare/api-schema-heyclaude-openapi.yaml"
       - "package.json"
       - "pnpm-lock.yaml"

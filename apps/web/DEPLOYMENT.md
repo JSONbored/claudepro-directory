@@ -89,7 +89,11 @@ ADMIN_API_TOKEN=... pnpm jobs:check-sources -- --base-url https://dev.heyclau.de
 
 The source checker reads active and stale-review jobs. Healthy source pages are
 revalidated, first failed checks move to `stale_pending_review`, and repeated
-failures are closed. See `docs/jobs-revenue-ops.md` for the lead review,
+failures are closed. Healthy stale-review jobs reactivate only when the live
+source check and public exposure gate both pass. Shallow active rows, source
+mismatches, closed source pages, or missing apply signals are kept out of public
+jobs, sitemap coverage, and `JobPosting` JSON-LD. See
+`docs/jobs-revenue-ops.md` for the lead review, scheduled source revalidation,
 enrichment, Polar handoff, and follow-up templates.
 
 ## OpenNext build/deploy commands
@@ -123,11 +127,18 @@ The public key file is committed under `apps/web/public/` and served from the
 site root. See [`docs/indexnow.md`](../../docs/indexnow.md) for dry-run and CI
 guard details.
 
-Preview deployments must pass artifact validation before merge:
+PR previews must pass artifact validation before merge:
 
 ```bash
 pnpm validate:deployment-artifacts -- --base-url https://<preview-host>
 ```
+
+CI resolves the preview URL automatically. For same-repo PRs with Cloudflare
+credentials, `.github/workflows/content-validation.yml` deploys the PR SHA to
+the shared `heyclaude-dev` Worker and validates that URL. If Cloudflare branch
+or PR previews publish GitHub Deployment statuses, CI validates the deployment
+`environment_url` instead. `DEPLOYMENT_ARTIFACT_BASE_URL` is only a local
+escape hatch for the validation script, not the pull-request merge gate.
 
 ## Newsletter (Resend)
 
