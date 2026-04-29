@@ -1,4 +1,10 @@
 import { resolveFeedUrl } from "./feed";
+import {
+  isRecord,
+  normalizeStringArray,
+  optionalBoolean,
+  optionalString,
+} from "./utils";
 
 export const JOBS_URL = "https://heyclau.de/api/jobs?limit=100";
 export const JOBS_CACHE_KEY = "heyclaude-jobs-index";
@@ -52,32 +58,6 @@ export type JobFilterOption = {
   value: string;
   title: string;
 };
-
-type UnknownRecord = Record<string, unknown>;
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === "object" && value !== null;
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function optionalBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function normalizeStringArray(value: unknown) {
-  if (!Array.isArray(value)) return [];
-  return [
-    ...new Set(
-      value
-        .filter((item): item is string => typeof item === "string")
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  ];
-}
 
 function normalizeTier(value: unknown): RaycastJob["tier"] | undefined {
   return value === "free" ||

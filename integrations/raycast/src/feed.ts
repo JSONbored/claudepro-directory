@@ -1,3 +1,13 @@
+import {
+  isRecord,
+  normalizeStringArray,
+  optionalBoolean,
+  optionalNumber,
+  optionalRawString,
+  optionalString,
+  uniqueStrings,
+} from "./utils";
+
 export const FEED_URL = "https://heyclau.de/data/raycast-index.json";
 export const SUBMIT_URL = "https://heyclau.de/submit";
 export const GITHUB_NEW_ISSUE_URL =
@@ -41,41 +51,6 @@ export type RaycastEntry = {
   downloadTrust: DownloadTrust;
   verificationStatus: string;
 };
-
-type UnknownRecord = Record<string, unknown>;
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === "object" && value !== null;
-}
-
-function optionalString(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function optionalRawString(value: unknown) {
-  return typeof value === "string" ? value : "";
-}
-
-function optionalBoolean(value: unknown) {
-  return typeof value === "boolean" ? value : undefined;
-}
-
-function optionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value)
-    ? value
-    : undefined;
-}
-
-function uniqueStrings(values: string[]) {
-  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
-}
-
-function normalizeStringArray(value: unknown) {
-  if (!Array.isArray(value)) return [];
-  return uniqueStrings(
-    value.filter((item): item is string => typeof item === "string"),
-  );
-}
 
 function normalizeDownloadTrust(value: unknown): DownloadTrust {
   return value === "first-party" || value === "external" ? value : null;

@@ -14,7 +14,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FAVORITES_KEY,
   FEED_URL,
@@ -167,6 +167,11 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
     );
     const [filter, setFilter] = useState("all");
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
+    const entriesCountRef = useRef(entries.length);
+
+    useEffect(() => {
+      entriesCountRef.current = entries.length;
+    }, [entries.length]);
 
     async function refreshEntries(showSuccess = false) {
       if (configuredFeed.error) {
@@ -184,6 +189,7 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
           cache,
           feedUrl: configuredFeed.feedUrl,
         });
+        entriesCountRef.current = nextFeed.entries.length;
         setEntries(nextFeed.entries);
         setGeneratedAt(nextFeed.generatedAt);
         if (showSuccess) {
@@ -194,7 +200,7 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
           });
         }
       } catch (error) {
-        if (entries.length === 0) {
+        if (entriesCountRef.current === 0) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Could not load HeyClaude",
