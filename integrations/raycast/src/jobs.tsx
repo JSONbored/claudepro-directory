@@ -76,9 +76,9 @@ function jobAccessories(job: RaycastJob, isFavorite: boolean) {
       icon: { source: Icon.Star, tintColor: Color.Yellow },
     });
   }
-  if (job.sponsored) {
+  if (!isFavorite && job.sponsored) {
     accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow } });
-  } else if (job.featured) {
+  } else if (!isFavorite && job.featured) {
     accessories.push({ icon: { source: Icon.Star, tintColor: Color.Blue } });
   }
   if (job.claimedEmployer) {
