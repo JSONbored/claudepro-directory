@@ -1166,7 +1166,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/heyclaude-mcp.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/heyclaude-mcp",
-      "artifactHash": "c91b5e7b75a173abeed00bab8b9fc26fb8c5e6275812abbeb1634d9d7a8b8340"
+      "artifactHash": "0b1b5c9c4f3dea8dc9949ead7188bf69a5545a262f2f2ad7e5d9cdccb7d76743"
     },
     {
       "key": "guides:build-mcp-server",
@@ -1274,7 +1274,7 @@
       "canonicalUrl": "https://heyclau.de/mcp/desktop-mcp-setup",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/desktop-mcp-setup.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/desktop-mcp-setup",
-      "artifactHash": "92f4f623d44c0e45ad92dd02c6ca51f46938f13e3b03459325792887d6dd21a3"
+      "artifactHash": "0b0382cb768c1f3cd349aed6fa30d98ce76c405106952ad4c76e5c4645712c20"
     },
     {
       "key": "guides:financial-services-guide",
@@ -4554,5 +4554,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "615e1d65441f40ceeb1524f51f8b6fd25f52587ac6ac563c9a89eca771e591d9"
+  "signature": "35064d7152430bbd869db46f9cc53ffe2865d7c43dc69f4e2675004722040466"
 }

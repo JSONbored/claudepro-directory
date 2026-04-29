@@ -14,7 +14,7 @@ Download: /downloads/mcp/desktop-mcp-setup.mcpb
 - Package URL: /downloads/mcp/desktop-mcp-setup.mcpb
 - Package SHA256: 57690091c83e5827fb0e82a2a6193d2da2171c6637fae598edb894029828d1b5
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-28T23:02:39-06:00
 - Robots: indexable
 ## Summary
 Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.
