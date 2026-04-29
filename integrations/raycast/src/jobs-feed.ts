@@ -1,4 +1,4 @@
-import { resolveFeedUrl } from "./feed";
+import { FEED_URL } from "./feed";
 import {
   isRecord,
   normalizeStringArray,
@@ -87,9 +87,8 @@ function normalizeSourceKind(
     : undefined;
 }
 
-export function resolveJobsUrl(feedUrlOverride?: string | null) {
-  const feedUrl = resolveFeedUrl(feedUrlOverride);
-  const url = new URL("/api/jobs", feedUrl);
+export function resolveJobsUrl() {
+  const url = new URL("/api/jobs", FEED_URL);
   url.searchParams.set("limit", "100");
   return url.toString();
 }

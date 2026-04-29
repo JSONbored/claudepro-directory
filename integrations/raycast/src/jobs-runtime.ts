@@ -25,11 +25,10 @@ export function loadCachedJobs(
 
 export async function fetchFreshJobs(options: {
   cache: RaycastTextCache;
-  feedUrlOverride?: string;
   fetchFn?: FetchLike;
 }) {
   const fetchFn = options.fetchFn ?? fetch;
-  const jobsUrl = resolveJobsUrl(options.feedUrlOverride);
+  const jobsUrl = resolveJobsUrl();
   const response = await fetchFn(jobsUrl, {
     headers: { accept: "application/json" },
   });

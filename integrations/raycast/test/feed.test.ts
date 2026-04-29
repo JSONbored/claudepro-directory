@@ -284,19 +284,13 @@ describe("Raycast feed helpers", () => {
     );
   });
 
-  it("resolves jobs feeds from the selected HeyClaude host", () => {
-    const devJobs = resolveJobsUrl(
-      "https://preview.example.com/data/raycast-index.json",
-    );
+  it("resolves jobs feeds from the production HeyClaude host", () => {
+    const jobsUrl = resolveJobsUrl();
 
-    assert.equal(resolveJobsUrl(""), "https://heyclau.de/api/jobs?limit=100");
-    assert.equal(devJobs, "https://preview.example.com/api/jobs?limit=100");
+    assert.equal(jobsUrl, "https://heyclau.de/api/jobs?limit=100");
     assert.equal(jobsCacheKey(), JOBS_CACHE_KEY);
-    assert.match(jobsCacheKey(devJobs), /^heyclaude-jobs-index:/);
-    assert.equal(
-      buildPostJobUrl(devJobs),
-      "https://preview.example.com/jobs/post",
-    );
+    assert.equal(jobsCacheKey(jobsUrl), JOBS_CACHE_KEY);
+    assert.equal(buildPostJobUrl(jobsUrl), "https://heyclau.de/jobs/post");
   });
 
   it("builds issue-first contribution URLs without local write targets", () => {
@@ -574,22 +568,20 @@ describe("Raycast feed helpers", () => {
 
   it("loads and refreshes cached jobs without polluting registry cache", async () => {
     const cache = new MemoryCache();
-    const devFeed = "https://preview.example.com/data/raycast-index.json";
-    const devJobs = resolveJobsUrl(devFeed);
+    const jobsUrl = resolveJobsUrl();
 
     cache.set(
-      jobsCacheKey(devJobs),
+      jobsCacheKey(jobsUrl),
       JSON.stringify({
         generatedAt: "2026-04-28T00:00:00.000Z",
         entries: [sampleJob],
       }),
     );
-    assert.equal(loadCachedJobs(cache, devJobs).entries.length, 1);
+    assert.equal(loadCachedJobs(cache, jobsUrl).entries.length, 1);
 
     let requestedUrl = "";
     const feed = await fetchFreshJobs({
       cache,
-      feedUrlOverride: devFeed,
       fetchFn: async (input) => {
         requestedUrl = String(input);
         return response({
@@ -600,9 +592,9 @@ describe("Raycast feed helpers", () => {
       },
     });
 
-    assert.equal(requestedUrl, devJobs);
+    assert.equal(requestedUrl, jobsUrl);
     assert.equal(feed.entries.length, 1);
-    assert.match(cache.get(jobsCacheKey(devJobs)) || "", /ai-systems-engineer/);
+    assert.match(cache.get(jobsCacheKey(jobsUrl)) || "", /ai-systems-engineer/);
     assert.equal(cache.get(CACHE_KEY), undefined);
   });
 
