@@ -37,6 +37,61 @@ export type RaycastEntry = {
   verificationStatus: string;
 };
 
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === "object" && value !== null;
+}
+
+function optionalString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function optionalRawString(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function optionalBoolean(value: unknown) {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function optionalNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+function uniqueStrings(values: string[]) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function normalizeStringArray(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return uniqueStrings(
+    value.filter((item): item is string => typeof item === "string"),
+  );
+}
+
+function normalizeDownloadTrust(value: unknown): DownloadTrust {
+  return value === "first-party" || value === "external" ? value : null;
+}
+
+function normalizePlatformCompatibility(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return uniqueStrings(
+    value.flatMap((item) => {
+      if (typeof item === "string") return item;
+      if (!isRecord(item)) return [];
+
+      const platform = optionalString(item.platform);
+      const supportLevel = optionalString(item.supportLevel);
+      if (!platform) return [];
+      return supportLevel ? `${platform}: ${supportLevel}` : platform;
+    }),
+  );
+}
+
 export function buildEntrySummary(entry: RaycastEntry) {
   return [
     `${entry.title} — ${categoryLabel(entry.category)}`,
@@ -241,19 +296,62 @@ export function buildSuggestChangeUrl(entry: RaycastEntry) {
   return url.toString();
 }
 
-export function isRaycastEntry(value: unknown): value is RaycastEntry {
-  const entry = value as Partial<RaycastEntry>;
-  return (
-    Boolean(entry) &&
-    typeof entry.category === "string" &&
-    typeof entry.slug === "string" &&
-    typeof entry.title === "string" &&
-    typeof entry.description === "string" &&
-    Array.isArray(entry.tags) &&
-    typeof entry.copyText === "string" &&
-    typeof entry.detailMarkdown === "string" &&
-    typeof entry.webUrl === "string"
-  );
+export function normalizeRaycastEntry(value: unknown): RaycastEntry | null {
+  if (!isRecord(value)) return null;
+
+  const category = optionalString(value.category);
+  const slug = optionalString(value.slug);
+  const title = optionalString(value.title);
+  const description = optionalString(value.description);
+  const copyText = optionalRawString(value.copyText);
+  const detailMarkdown = optionalRawString(value.detailMarkdown);
+  const webUrl = optionalString(value.webUrl);
+
+  if (
+    !category ||
+    !slug ||
+    !title ||
+    !description ||
+    !copyText.trim() ||
+    !detailMarkdown.trim() ||
+    !webUrl
+  ) {
+    return null;
+  }
+
+  return {
+    category,
+    slug,
+    title,
+    description,
+    tags: normalizeStringArray(value.tags),
+    author: optionalString(value.author) || undefined,
+    brandName: optionalString(value.brandName) || undefined,
+    brandDomain: optionalString(value.brandDomain) || undefined,
+    brandIconUrl: optionalString(value.brandIconUrl) || undefined,
+    brandLogoUrl: optionalString(value.brandLogoUrl) || undefined,
+    brandAssetSource: optionalString(value.brandAssetSource) || undefined,
+    brandVerifiedAt: optionalString(value.brandVerifiedAt) || undefined,
+    platformCompatibility: normalizePlatformCompatibility(
+      value.platformCompatibility,
+    ),
+    installCommand: optionalRawString(value.installCommand),
+    configSnippet: optionalRawString(value.configSnippet),
+    copyText,
+    copyTextLength: optionalNumber(value.copyTextLength),
+    copyTextTruncated: optionalBoolean(value.copyTextTruncated),
+    detailMarkdown,
+    detailUrl: optionalString(value.detailUrl) || undefined,
+    webUrl,
+    repoUrl: optionalString(value.repoUrl),
+    documentationUrl: optionalString(value.documentationUrl),
+    downloadTrust: normalizeDownloadTrust(value.downloadTrust),
+    verificationStatus: optionalString(value.verificationStatus),
+  };
+}
+
+export function isValidRaycastEntry(value: unknown) {
+  return normalizeRaycastEntry(value) !== null;
 }
 
 export function parseFeed(value: string): ParsedFeed {
@@ -267,8 +365,12 @@ export function parseFeed(value: string): ParsedFeed {
     return { entries: [], generatedAt: "" };
   }
 
+  const entries = envelope.entries
+    .map(normalizeRaycastEntry)
+    .filter((entry): entry is RaycastEntry => entry !== null);
+
   return {
-    entries: envelope.entries.filter(isRaycastEntry),
+    entries,
     generatedAt:
       typeof envelope.generatedAt === "string" ? envelope.generatedAt : "",
   };

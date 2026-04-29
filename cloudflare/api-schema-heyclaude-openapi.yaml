@@ -87,10 +87,12 @@ components:
           type: array
           items:
             type: string
+          maxItems: 32
         keywords:
           type: array
           items:
             type: string
+          maxItems: 64
         author:
           type: string
         dateAdded:
@@ -107,10 +109,12 @@ components:
           type: array
           items:
             type: string
+          maxItems: 12
         supportLevels:
           type: array
           items:
             type: string
+          maxItems: 12
         documentationUrl:
           type: string
         repoUrl:
@@ -826,10 +830,12 @@ paths:
                           type: array
                           items:
                             type: string
+                          maxItems: 32
                         keywords:
                           type: array
                           items:
                             type: string
+                          maxItems: 64
                         author:
                           type: string
                         dateAdded:
@@ -846,10 +852,12 @@ paths:
                           type: array
                           items:
                             type: string
+                          maxItems: 12
                         supportLevels:
                           type: array
                           items:
                             type: string
+                          maxItems: 12
                         documentationUrl:
                           type: string
                         repoUrl:
@@ -917,6 +925,7 @@ paths:
                         - url
                         - trustSignals
                       additionalProperties: {}
+                    maxItems: 50
                 required:
                   - schemaVersion
                   - query

@@ -38,7 +38,7 @@ import {
   buildPostJobUrl,
   FAVORITE_JOBS_KEY,
   filterJobs,
-  isRaycastJob,
+  isValidRaycastJob,
   jobKey,
   jobsCacheKey,
   JOBS_CACHE_KEY,
@@ -147,15 +147,76 @@ function readSourceFiles(dir: string): string[] {
 
 describe("Raycast feed helpers", () => {
   it("parses valid envelope entries and drops malformed rows", () => {
+    const richSkillEntry = {
+      ...sampleEntry,
+      category: "skills",
+      slug: "rich-skill",
+      platformCompatibility: [
+        {
+          platform: "Claude",
+          supportLevel: "native-skill",
+          installPath: ".claude/skills/<skill-name>/SKILL.md",
+        },
+        {
+          platform: "Cursor",
+          supportLevel: "adapter",
+          adapterPath: "/data/skill-adapters/cursor/rich-skill.mdc",
+        },
+        { platform: "Generic AGENTS" },
+        { supportLevel: "missing-platform" },
+      ],
+      tags: ["skills", "skills", { invalid: true }],
+    };
     const parsed = parseFeed(
       JSON.stringify({
         generatedAt: "2026-04-27T00:00:00.000Z",
-        entries: [sampleEntry, { category: "mcp" }],
+        entries: [sampleEntry, richSkillEntry, { category: "mcp" }],
       }),
     );
 
     assert.equal(parsed.generatedAt, "2026-04-27T00:00:00.000Z");
-    assert.deepEqual(parsed.entries, [sampleEntry]);
+    assert.equal(parsed.entries[0].slug, sampleEntry.slug);
+    assert.deepEqual(parsed.entries[0].tags, sampleEntry.tags);
+    assert.equal(parsed.entries[0].brandDomain, sampleEntry.brandDomain);
+    assert.deepEqual(parsed.entries[1].platformCompatibility, [
+      "Claude: native-skill",
+      "Cursor: adapter",
+      "Generic AGENTS",
+    ]);
+    assert.deepEqual(parsed.entries[1].tags, ["skills"]);
+    assert.equal(parsed.entries.length, 2);
+  });
+
+  it("keeps the generated Raycast feed safe for native UI string props", () => {
+    const feedPath = path.resolve(
+      process.cwd(),
+      "..",
+      "..",
+      "apps",
+      "web",
+      "public",
+      "data",
+      "raycast-index.json",
+    );
+    const rawFeed = JSON.parse(fs.readFileSync(feedPath, "utf8")) as {
+      entries?: unknown[];
+    };
+    const parsed = parseFeed(fs.readFileSync(feedPath, "utf8"));
+
+    assert.equal(parsed.entries.length, rawFeed.entries?.length);
+    assert.ok(parsed.entries.length > 0);
+    for (const entry of parsed.entries) {
+      assert.equal(
+        entry.tags.every((tag) => typeof tag === "string"),
+        true,
+      );
+      assert.equal(
+        (entry.platformCompatibility || []).every(
+          (platform) => typeof platform === "string",
+        ),
+        true,
+      );
+    }
   });
 
   it("rejects retired array feed payloads", () => {
@@ -349,13 +410,22 @@ describe("Raycast feed helpers", () => {
       JSON.stringify({
         generatedAt: "2026-04-28T00:00:00.000Z",
         count: 2,
-        entries: [sampleJob, { slug: "broken" }],
+        entries: [
+          {
+            ...sampleJob,
+            labels: ["Featured", "Featured", { invalid: true }],
+            benefits: ["Health benefits", "Health benefits", null],
+          },
+          { slug: "broken" },
+        ],
       }),
     );
 
-    assert.equal(isRaycastJob(sampleJob), true);
+    assert.equal(isValidRaycastJob(sampleJob), true);
     assert.equal(parsed.generatedAt, "2026-04-28T00:00:00.000Z");
-    assert.deepEqual(parsed.entries, [sampleJob]);
+    assert.deepEqual(parsed.entries[0].labels, ["Featured"]);
+    assert.deepEqual(parsed.entries[0].benefits, ["Health benefits"]);
+    assert.equal(parsed.entries.length, 1);
     assert.equal(jobKey(sampleJob), "ai-systems-engineer");
     assert.deepEqual(
       sortedJobFilterOptions().map((item) => item.value),

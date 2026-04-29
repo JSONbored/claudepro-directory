@@ -88,15 +88,15 @@ export const registrySearchResultSchema = registryBrandAssetSchema
     slug: z.string(),
     title: z.string(),
     description: z.string(),
-    tags: z.array(z.string()),
-    keywords: z.array(z.string()),
+    tags: z.array(z.string()).max(32),
+    keywords: z.array(z.string()).max(64),
     author: z.string(),
     dateAdded: z.string(),
     installable: z.boolean(),
     downloadTrust: z.string().nullable().optional(),
     verificationStatus: z.string(),
-    platforms: z.array(z.string()).optional(),
-    supportLevels: z.array(z.string()).optional(),
+    platforms: z.array(z.string()).max(12).optional(),
+    supportLevels: z.array(z.string()).max(12).optional(),
     documentationUrl: z.string(),
     repoUrl: z.string(),
     url: z.string(),
@@ -110,7 +110,7 @@ export const registrySearchResponseSchema = z.object({
   category: z.string(),
   platform: z.string(),
   count: z.number().int().nonnegative(),
-  results: z.array(registrySearchResultSchema),
+  results: z.array(registrySearchResultSchema).max(50),
 });
 
 export const registrySearchQuerySchema = z.object({

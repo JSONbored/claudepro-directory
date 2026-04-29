@@ -53,6 +53,60 @@ export type JobFilterOption = {
   title: string;
 };
 
+type UnknownRecord = Record<string, unknown>;
+
+function isRecord(value: unknown): value is UnknownRecord {
+  return typeof value === "object" && value !== null;
+}
+
+function optionalString(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function optionalBoolean(value: unknown) {
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function normalizeStringArray(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return [
+    ...new Set(
+      value
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    ),
+  ];
+}
+
+function normalizeTier(value: unknown): RaycastJob["tier"] | undefined {
+  return value === "free" ||
+    value === "standard" ||
+    value === "featured" ||
+    value === "sponsored"
+    ? value
+    : undefined;
+}
+
+function normalizeSource(value: unknown): RaycastJob["source"] | undefined {
+  return value === "manual" ||
+    value === "polar" ||
+    value === "email" ||
+    value === "curated"
+    ? value
+    : undefined;
+}
+
+function normalizeSourceKind(
+  value: unknown,
+): RaycastJob["sourceKind"] | undefined {
+  return value === "official_ats" ||
+    value === "employer_careers" ||
+    value === "employer_submitted"
+    ? value
+    : undefined;
+}
+
 export function resolveJobsUrl(feedUrlOverride?: string | null) {
   const feedUrl = resolveFeedUrl(feedUrlOverride);
   const url = new URL("/api/jobs", feedUrl);
@@ -73,31 +127,74 @@ export function buildPostJobUrl(jobsUrl = JOBS_URL) {
   return new URL("/jobs/post", jobsUrl).toString();
 }
 
-function isStringArray(value: unknown): value is string[] {
-  return (
-    Array.isArray(value) && value.every((item) => typeof item === "string")
-  );
+export function normalizeRaycastJob(value: unknown): RaycastJob | null {
+  if (!isRecord(value)) return null;
+
+  const slug = optionalString(value.slug);
+  const title = optionalString(value.title);
+  const company = optionalString(value.company);
+  const location = optionalString(value.location);
+  const description = optionalString(value.description);
+  const applyUrl = optionalString(value.applyUrl);
+  const webUrl = optionalString(value.webUrl);
+  const sourceLabel = optionalString(value.sourceLabel);
+  const applySourceLabel = optionalString(value.applySourceLabel);
+
+  if (
+    !slug ||
+    !title ||
+    !company ||
+    !location ||
+    !description ||
+    !applyUrl ||
+    !webUrl ||
+    !sourceLabel ||
+    !applySourceLabel
+  ) {
+    return null;
+  }
+
+  return {
+    slug,
+    title,
+    company,
+    companyUrl: optionalString(value.companyUrl) || undefined,
+    location,
+    description,
+    descriptionMd: optionalString(value.descriptionMd) || undefined,
+    type: optionalString(value.type) || undefined,
+    postedAt: optionalString(value.postedAt) || undefined,
+    compensation: optionalString(value.compensation) || undefined,
+    equity: optionalString(value.equity) || undefined,
+    bonus: optionalString(value.bonus) || undefined,
+    benefits: normalizeStringArray(value.benefits),
+    responsibilities: normalizeStringArray(value.responsibilities),
+    requirements: normalizeStringArray(value.requirements),
+    featured: optionalBoolean(value.featured) ?? false,
+    sponsored: optionalBoolean(value.sponsored),
+    applyUrl,
+    tier: normalizeTier(value.tier),
+    source: normalizeSource(value.source),
+    sourceKind: normalizeSourceKind(value.sourceKind),
+    sourceUrl: optionalString(value.sourceUrl) || undefined,
+    firstSeenAt: optionalString(value.firstSeenAt) || undefined,
+    lastCheckedAt: optionalString(value.lastCheckedAt) || undefined,
+    sourceCheckedAt: optionalString(value.sourceCheckedAt) || undefined,
+    curationNote: optionalString(value.curationNote) || undefined,
+    claimedEmployer: optionalBoolean(value.claimedEmployer),
+    expiresAt: optionalString(value.expiresAt) || undefined,
+    isRemote: optionalBoolean(value.isRemote),
+    isWorldwide: optionalBoolean(value.isWorldwide),
+    webUrl,
+    labels: normalizeStringArray(value.labels),
+    sourceLabel,
+    applySourceLabel,
+    lastVerifiedAt: optionalString(value.lastVerifiedAt) || undefined,
+  };
 }
 
-export function isRaycastJob(value: unknown): value is RaycastJob {
-  const job = value as Partial<RaycastJob>;
-  return (
-    Boolean(job) &&
-    typeof job.slug === "string" &&
-    typeof job.title === "string" &&
-    typeof job.company === "string" &&
-    typeof job.location === "string" &&
-    typeof job.description === "string" &&
-    typeof job.applyUrl === "string" &&
-    typeof job.webUrl === "string" &&
-    Array.isArray(job.labels) &&
-    typeof job.sourceLabel === "string" &&
-    typeof job.applySourceLabel === "string" &&
-    (job.benefits === undefined || isStringArray(job.benefits)) &&
-    (job.responsibilities === undefined ||
-      isStringArray(job.responsibilities)) &&
-    (job.requirements === undefined || isStringArray(job.requirements))
-  );
+export function isValidRaycastJob(value: unknown) {
+  return normalizeRaycastJob(value) !== null;
 }
 
 export function parseJobsFeed(value: string): ParsedJobsFeed {
@@ -111,7 +208,9 @@ export function parseJobsFeed(value: string): ParsedJobsFeed {
     return { entries: [], generatedAt: "", count: 0 };
   }
 
-  const entries = envelope.entries.filter(isRaycastJob);
+  const entries = envelope.entries
+    .map(normalizeRaycastJob)
+    .filter((entry): entry is RaycastJob => entry !== null);
   return {
     entries,
     generatedAt:
