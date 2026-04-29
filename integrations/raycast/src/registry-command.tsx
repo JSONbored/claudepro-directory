@@ -9,7 +9,6 @@ import {
   LocalStorage,
   PopToRootType,
   Toast,
-  getPreferenceValues,
   showHUD,
   showToast,
 } from "@raycast/api";
@@ -26,7 +25,6 @@ import {
   entryKey,
   filterEntriesByCategory,
   parseFavoriteKeys,
-  resolveFeedUrl,
   serializeFavoriteKeys,
   sortedCategoryOptions,
   type RaycastEntry,
@@ -66,30 +64,8 @@ function raycastEntryIcon(entry: RaycastEntry, feedUrl: string) {
     : (categoryIcons[entry.category] ?? Icon.Document);
 }
 
-function feedUrlOverrideFromPreferences(preferences: Preferences) {
-  if (
-    "feedUrlOverride" in preferences &&
-    typeof preferences.feedUrlOverride === "string"
-  ) {
-    return preferences.feedUrlOverride;
-  }
-  return "";
-}
-
 function getConfiguredFeed() {
-  const preferences = getPreferenceValues<Preferences>();
-  try {
-    return {
-      feedUrl: resolveFeedUrl(feedUrlOverrideFromPreferences(preferences)),
-      error: "",
-    };
-  } catch (error) {
-    return {
-      feedUrl: FEED_URL,
-      error:
-        error instanceof Error ? error.message : "Feed override was invalid",
-    };
-  }
+  return { feedUrl: FEED_URL };
 }
 
 function loadCachedFeed(feedUrl: string) {
@@ -157,14 +133,10 @@ function filterRegistryEntries(
 export function createRegistryCommand(options: RegistryCommandOptions = {}) {
   return function RegistryCommand() {
     const configuredFeed = getConfiguredFeed();
-    const cachedFeed = configuredFeed.error
-      ? { entries: [], generatedAt: "" }
-      : loadCachedFeed(configuredFeed.feedUrl);
+    const cachedFeed = loadCachedFeed(configuredFeed.feedUrl);
     const [entries, setEntries] = useState<RaycastEntry[]>(cachedFeed.entries);
     const [generatedAt, setGeneratedAt] = useState(cachedFeed.generatedAt);
-    const [isLoading, setIsLoading] = useState(
-      !configuredFeed.error && entries.length === 0,
-    );
+    const [isLoading, setIsLoading] = useState(entries.length === 0);
     const [filter, setFilter] = useState("all");
     const [favorites, setFavorites] = useState<Set<string>>(new Set());
     const entriesCountRef = useRef(entries.length);
@@ -174,15 +146,6 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
     }, [entries.length]);
 
     async function refreshEntries(showSuccess = false) {
-      if (configuredFeed.error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid feed override",
-          message: configuredFeed.error,
-        });
-        return;
-      }
-
       setIsLoading(true);
       try {
         const nextFeed = await fetchFreshFeed({
@@ -363,22 +326,6 @@ export function createRegistryCommand(options: RegistryCommandOptions = {}) {
           </List.Dropdown>
         }
       >
-        {configuredFeed.error ? (
-          <List.EmptyView
-            icon={Icon.ExclamationMark}
-            title="Invalid feed URL override"
-            description={configuredFeed.error}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title="Open Production Feed"
-                  url={FEED_URL}
-                  icon={Icon.Globe}
-                />
-              </ActionPanel>
-            }
-          />
-        ) : null}
         {rankedEntries.map((entry) => {
           const isFavorite = favorites.has(entryKey(entry));
           const hasInstallCommand = Boolean(entry.installCommand.trim());

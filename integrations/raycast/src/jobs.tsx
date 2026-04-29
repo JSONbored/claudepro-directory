@@ -9,7 +9,6 @@ import {
   LocalStorage,
   PopToRootType,
   Toast,
-  getPreferenceValues,
   showHUD,
   showToast,
 } from "@raycast/api";
@@ -37,34 +36,8 @@ import { jobDetailMetadata } from "./raycast-ui";
 
 const cache = new Cache();
 
-function feedUrlOverrideFromPreferences(preferences: Preferences.Jobs) {
-  if (
-    "feedUrlOverride" in preferences &&
-    typeof preferences.feedUrlOverride === "string"
-  ) {
-    return preferences.feedUrlOverride;
-  }
-  return "";
-}
-
 function getConfiguredJobs() {
-  const preferences = getPreferenceValues<Preferences.Jobs>();
-  const feedUrlOverride = feedUrlOverrideFromPreferences(preferences);
-  try {
-    const jobsUrl = resolveJobsUrl(feedUrlOverride);
-    return {
-      jobsUrl,
-      feedUrlOverride,
-      error: "",
-    };
-  } catch (error) {
-    return {
-      jobsUrl: "",
-      feedUrlOverride,
-      error:
-        error instanceof Error ? error.message : "Feed override was invalid",
-    };
-  }
+  return { jobsUrl: resolveJobsUrl() };
 }
 
 function loadCachedJobs(jobsUrl: string) {
@@ -119,33 +92,17 @@ function jobAccessories(job: RaycastJob, isFavorite: boolean) {
 
 export default function Command() {
   const configuredJobs = getConfiguredJobs();
-  const cachedJobs = configuredJobs.error
-    ? { entries: [], generatedAt: "", count: 0 }
-    : loadCachedJobs(configuredJobs.jobsUrl);
+  const cachedJobs = loadCachedJobs(configuredJobs.jobsUrl);
   const [jobs, setJobs] = useState<RaycastJob[]>(cachedJobs.entries);
   const [generatedAt, setGeneratedAt] = useState(cachedJobs.generatedAt);
-  const [isLoading, setIsLoading] = useState(
-    !configuredJobs.error && jobs.length === 0,
-  );
+  const [isLoading, setIsLoading] = useState(jobs.length === 0);
   const [filter, setFilter] = useState("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   async function refreshJobs(showSuccess = false) {
-    if (configuredJobs.error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid feed override",
-        message: configuredJobs.error,
-      });
-      return;
-    }
-
     setIsLoading(true);
     try {
-      const nextFeed = await fetchFreshJobs({
-        cache,
-        feedUrlOverride: configuredJobs.feedUrlOverride,
-      });
+      const nextFeed = await fetchFreshJobs({ cache });
       setJobs(nextFeed.entries);
       setGeneratedAt(nextFeed.generatedAt);
       if (showSuccess) {
@@ -249,13 +206,6 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {configuredJobs.error ? (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Invalid feed URL override"
-          description={configuredJobs.error}
-        />
-      ) : null}
       {rankedJobs.map((job) => {
         const isFavorite = favorites.has(jobKey(job));
         const detailMarkdown = buildJobMarkdown(job);
