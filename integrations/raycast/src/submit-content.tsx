@@ -9,6 +9,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useRef } from "react";
 import {
   SUBMIT_URL,
   buildContributeEntryUrl,
@@ -23,6 +24,8 @@ import {
   normalizeSubmissionDraft,
   type SubmissionFormValues,
 } from "./submission";
+
+type SubmissionAction = "submit" | "issue" | "copy";
 
 const categoryItems = Object.entries(categoryLabels).map(
   ([category, label]) => ({
@@ -51,9 +54,22 @@ async function copyDraft(values: SubmissionFormValues) {
 }
 
 export default function Command() {
+  const submissionAction = useRef<SubmissionAction>("submit");
   const { handleSubmit, itemProps } = useForm<SubmissionFormValues>({
     initialValues: { category: "mcp", tags: [] },
     async onSubmit(values) {
+      const action = submissionAction.current;
+
+      if (action === "issue") {
+        await openIssue(values);
+        return;
+      }
+
+      if (action === "copy") {
+        await copyDraft(values);
+        return;
+      }
+
       await openSubmit(values);
       await showToast({
         style: Toast.Style.Success,
@@ -84,17 +100,26 @@ export default function Command() {
           <Action.SubmitForm
             title="Open HeyClaude Submit Form"
             icon={Icon.Plus}
-            onSubmit={handleSubmit}
+            onSubmit={(values: SubmissionFormValues) => {
+              submissionAction.current = "submit";
+              return handleSubmit(values);
+            }}
           />
           <Action.SubmitForm
             title="Open GitHub Issue Template"
             icon={Icon.Globe}
-            onSubmit={(values: SubmissionFormValues) => void openIssue(values)}
+            onSubmit={(values: SubmissionFormValues) => {
+              submissionAction.current = "issue";
+              return handleSubmit(values);
+            }}
           />
           <Action.SubmitForm
             title="Copy Submission Draft"
             icon={Icon.Clipboard}
-            onSubmit={(values: SubmissionFormValues) => void copyDraft(values)}
+            onSubmit={(values: SubmissionFormValues) => {
+              submissionAction.current = "copy";
+              return handleSubmit(values);
+            }}
           />
           <ActionPanel.Section title="Links">
             <Action.OpenInBrowser
