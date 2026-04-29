@@ -504,7 +504,7 @@ describe("Raycast feed helpers", () => {
       /\.windsurf\//,
       /\bAGENTS\.md\b/,
       /\bGEMINI\.md\b/,
-      /\bADMIN_API_TOKEN\b/,
+      /\b[A-Z][A-Z0-9_]*(?:TOKEN|SECRET|API_KEY)\b/,
     ];
 
     for (const pattern of forbiddenPatterns) {

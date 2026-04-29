@@ -2,19 +2,6 @@ name: Jobs Source Revalidation
 
 on:
   workflow_dispatch:
-    inputs:
-      mode:
-        description: "Run as dry-run or apply lifecycle transitions"
-        required: true
-        default: "dry-run"
-        type: choice
-        options:
-          - dry-run
-          - apply
-      base_url:
-        description: "Override the Worker base URL"
-        required: false
-        type: string
   schedule:
     - cron: "37 10 * * *"
 
@@ -27,8 +14,7 @@ jobs:
     env:
       ADMIN_API_TOKEN: ${{ secrets.JOBS_ADMIN_API_TOKEN || secrets.ADMIN_API_TOKEN || secrets.LEADS_ADMIN_TOKEN }}
       DEFAULT_BASE_URL: ${{ vars.JOBS_SOURCE_CHECK_BASE_URL || 'https://heyclau.de' }}
-      REQUESTED_BASE_URL: ${{ inputs.base_url || '' }}
-      REQUESTED_MODE: ${{ inputs.mode || '' }}
+      CONFIGURED_MODE: ${{ vars.JOBS_SOURCE_CHECK_MODE || '' }}
     concurrency:
       group: jobs-source-revalidation
       cancel-in-progress: false
@@ -52,12 +38,16 @@ jobs:
       - name: Resolve source-check mode
         id: source-check
         run: |
-          mode="${REQUESTED_MODE:-apply}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            mode="${CONFIGURED_MODE:-dry-run}"
+          else
+            mode="${CONFIGURED_MODE:-apply}"
+          fi
           if [ "$mode" != "dry-run" ] && [ "$mode" != "apply" ]; then
             echo "::error::mode must be dry-run or apply"
             exit 1
           fi
-          base_url="${REQUESTED_BASE_URL:-$DEFAULT_BASE_URL}"
+          base_url="$DEFAULT_BASE_URL"
           if [ -z "$base_url" ]; then
             echo "::error::Missing jobs source-check base URL."
             exit 1
