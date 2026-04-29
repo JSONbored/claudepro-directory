@@ -41,10 +41,6 @@ import { entryDetailMetadata, entrySnippetKeyword } from "./raycast-ui";
 
 const cache = new Cache();
 
-type RegistryPreferences = {
-  feedUrlOverride?: string;
-};
-
 type RegistryCommandOptions = {
   fixedCategory?: string;
   searchPlaceholder?: string;
@@ -70,11 +66,21 @@ function raycastEntryIcon(entry: RaycastEntry, feedUrl: string) {
     : (categoryIcons[entry.category] ?? Icon.Document);
 }
 
+function feedUrlOverrideFromPreferences(preferences: Preferences) {
+  if (
+    "feedUrlOverride" in preferences &&
+    typeof preferences.feedUrlOverride === "string"
+  ) {
+    return preferences.feedUrlOverride;
+  }
+  return "";
+}
+
 function getConfiguredFeed() {
-  const preferences = getPreferenceValues<RegistryPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   try {
     return {
-      feedUrl: resolveFeedUrl(preferences.feedUrlOverride),
+      feedUrl: resolveFeedUrl(feedUrlOverrideFromPreferences(preferences)),
       error: "",
     };
   } catch (error) {

@@ -37,23 +37,30 @@ import { jobDetailMetadata } from "./raycast-ui";
 
 const cache = new Cache();
 
-type JobsPreferences = {
-  feedUrlOverride?: string;
-};
+function feedUrlOverrideFromPreferences(preferences: Preferences.Jobs) {
+  if (
+    "feedUrlOverride" in preferences &&
+    typeof preferences.feedUrlOverride === "string"
+  ) {
+    return preferences.feedUrlOverride;
+  }
+  return "";
+}
 
 function getConfiguredJobs() {
-  const preferences = getPreferenceValues<JobsPreferences>();
+  const preferences = getPreferenceValues<Preferences.Jobs>();
+  const feedUrlOverride = feedUrlOverrideFromPreferences(preferences);
   try {
-    const jobsUrl = resolveJobsUrl(preferences.feedUrlOverride);
+    const jobsUrl = resolveJobsUrl(feedUrlOverride);
     return {
       jobsUrl,
-      feedUrlOverride: preferences.feedUrlOverride,
+      feedUrlOverride,
       error: "",
     };
   } catch (error) {
     return {
       jobsUrl: "",
-      feedUrlOverride: preferences.feedUrlOverride,
+      feedUrlOverride,
       error:
         error instanceof Error ? error.message : "Feed override was invalid",
     };
