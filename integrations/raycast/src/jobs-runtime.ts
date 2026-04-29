@@ -38,6 +38,10 @@ export async function fetchFreshJobs(options: {
 
   const text = await response.text();
   const nextFeed = parseJobsFeed(text);
+  if (nextFeed.entries.length === 0) {
+    throw new Error("Jobs feed contained no entries");
+  }
+
   options.cache.set(jobsCacheKey(jobsUrl), text);
   return nextFeed;
 }

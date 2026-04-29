@@ -596,6 +596,14 @@ describe("Raycast feed helpers", () => {
     assert.equal(feed.entries.length, 1);
     assert.match(cache.get(jobsCacheKey(jobsUrl)) || "", /ai-systems-engineer/);
     assert.equal(cache.get(CACHE_KEY), undefined);
+
+    await assert.rejects(
+      fetchFreshJobs({
+        cache,
+        fetchFn: async () => response({ entries: [] }),
+      }),
+      /Jobs feed contained no entries/,
+    );
   });
 
   it("loads and clears cached feed snapshots deterministically", () => {

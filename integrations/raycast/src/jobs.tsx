@@ -382,11 +382,7 @@ export default function Command() {
               />
               <Action.OpenInBrowser
                 title="Post a Job"
-                url={
-                  configuredJobs.jobsUrl
-                    ? buildPostJobUrl(configuredJobs.jobsUrl)
-                    : "https://heyclau.de/jobs/post"
-                }
+                url={buildPostJobUrl(configuredJobs.jobsUrl)}
                 icon={Icon.Plus}
               />
             </ActionPanel>
