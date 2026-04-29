@@ -8,6 +8,12 @@ export const JOB_PUBLICATION_QUALITY_RULES = {
   minimumRequirements: 3,
   minimumBenefits: 2,
 };
+export const JOB_PUBLIC_EXPOSURE_RULES = {
+  summaryMinLength: 120,
+  detailMinLength: 240,
+  minimumResponsibilities: 2,
+  minimumRequirements: 2,
+};
 export const COMMERCIAL_PLACEMENT_TARGETS = ["job", "tool", "entry"];
 export const DISCLOSURE_STATES = [
   "editorial",
@@ -242,6 +248,100 @@ export function validateJobPublicationQuality(job = {}) {
     ok: errors.length === 0,
     required: true,
     errors,
+  };
+}
+
+export function validateJobPublicExposure(job = {}, options = {}) {
+  const status = textValue(job.status).toLowerCase();
+  if (status && status !== "active") {
+    return { ok: true, required: false, errors: [] };
+  }
+
+  const errors = [];
+  const sourceTruth = options.sourceTruth || {};
+  const summary = firstValue(job.summary, job.description);
+  const details = firstValue(job.descriptionMd, job.description_md);
+  const responsibilities = listValue(
+    job.responsibilities ?? job.responsibilities_json,
+  );
+  const requirements = listValue(job.requirements ?? job.requirements_json);
+  const source = textValue(job.source).toLowerCase();
+  const sourceKind = textValue(job.sourceKind ?? job.source_kind).toLowerCase();
+  const applyUrl = firstValue(job.applyUrl, job.apply_url);
+  const sourceUrl = firstValue(job.sourceUrl, job.source_url, applyUrl);
+  const checkedAt = firstValue(
+    job.sourceCheckedAt,
+    job.source_checked_at,
+    job.lastCheckedAt,
+    job.last_checked_at,
+  );
+  const hasLiveSourceTruth = sourceTruth.sourceOk === true;
+
+  if (summary.length < JOB_PUBLIC_EXPOSURE_RULES.summaryMinLength) {
+    errors.push(
+      `active jobs require a ${JOB_PUBLIC_EXPOSURE_RULES.summaryMinLength}+ character reviewed summary`,
+    );
+  }
+  if (!hasHttpsUrl(applyUrl)) {
+    errors.push("active jobs require an HTTPS employer apply URL");
+  }
+  if (!hasHttpsUrl(sourceUrl)) {
+    errors.push("active jobs require an HTTPS source URL");
+  }
+  if (!checkedAt && !hasLiveSourceTruth) {
+    errors.push("active jobs require a source verification date");
+  }
+  if (
+    source === "curated" &&
+    sourceKind !== "official_ats" &&
+    sourceKind !== "employer_careers"
+  ) {
+    errors.push(
+      "curated active jobs require an official ATS or employer careers source",
+    );
+  }
+
+  const hasDetailedPage =
+    details.length >= JOB_PUBLIC_EXPOSURE_RULES.detailMinLength;
+  const hasStructuredDepth =
+    responsibilities.length >=
+      JOB_PUBLIC_EXPOSURE_RULES.minimumResponsibilities &&
+    requirements.length >= JOB_PUBLIC_EXPOSURE_RULES.minimumRequirements;
+
+  if (!hasDetailedPage && !hasStructuredDepth) {
+    errors.push(
+      `active jobs require ${JOB_PUBLIC_EXPOSURE_RULES.detailMinLength}+ characters of reviewed detail or at least ${JOB_PUBLIC_EXPOSURE_RULES.minimumResponsibilities} responsibilities and ${JOB_PUBLIC_EXPOSURE_RULES.minimumRequirements} requirements`,
+    );
+  }
+
+  if (sourceTruth.sourceOk === false) {
+    errors.push("source check must confirm the role is still available");
+  }
+  if (sourceTruth.titleMatched === false) {
+    errors.push("source page must match the reviewed job title");
+  }
+  if (sourceTruth.companyMatched === false) {
+    errors.push("source page must match the reviewed company");
+  }
+  if (sourceTruth.closureDetected === true) {
+    errors.push("source page must not show closed or filled-role copy");
+  }
+  if (sourceTruth.applyDetected === false) {
+    errors.push("source page must still expose an apply path");
+  }
+
+  const paidReport = validateJobPublicationQuality({
+    ...job,
+    status: "active",
+  });
+  if (!paidReport.ok) {
+    errors.push(...paidReport.errors);
+  }
+
+  return {
+    ok: errors.length === 0,
+    required: true,
+    errors: [...new Set(errors)],
   };
 }
 

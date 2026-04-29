@@ -13,6 +13,7 @@ import {
   normalizeDisclosure,
   normalizeLeadKind,
   summarizePlacementExpiry,
+  validateJobPublicExposure,
   validateJobPublicationQuality,
   validateListingLeadPayload,
 } from "@heyclaude/registry/commercial";
@@ -185,6 +186,84 @@ describe("commercial intake contracts", () => {
     ).toMatchObject({ ok: true, required: true, errors: [] });
   });
 
+  it("requires source-truth and page depth before active jobs are exposed", () => {
+    const baseJob = {
+      slug: "curated-role",
+      title: "Claude Infrastructure Engineer",
+      company: "Example Co",
+      summary:
+        "Own Claude-native infrastructure integrations for a product team building production AI workflows, source verification, and developer-facing automation.",
+      descriptionMd:
+        "This reviewed role detail explains the product surface, team context, infrastructure ownership, source verification expectations, and why the opening matters to teams building Claude and MCP workflow systems. The copy is original, concise, and grounded in the employer source rather than copied from another job board.",
+      responsibilities: [
+        "Build production integrations for Claude and MCP workflows.",
+        "Maintain source-verified listing details as the employer page changes.",
+      ],
+      requirements: [
+        "Professional TypeScript or infrastructure engineering experience.",
+        "Comfort working with AI-native developer tooling.",
+      ],
+      applyUrl: "https://example.com/jobs/curated-role",
+      sourceUrl: "https://example.com/jobs/curated-role",
+      source: "curated",
+      sourceKind: "official_ats",
+      sourceCheckedAt: "2026-04-29T00:00:00Z",
+      status: "active",
+    };
+
+    expect(
+      validateJobPublicExposure(baseJob, {
+        sourceTruth: {
+          sourceOk: true,
+          titleMatched: true,
+          companyMatched: true,
+          closureDetected: false,
+          applyDetected: true,
+        },
+      }),
+    ).toMatchObject({ ok: true, required: true, errors: [] });
+
+    expect(
+      validateJobPublicExposure(
+        {
+          ...baseJob,
+          descriptionMd: "Too thin.",
+          responsibilities: [],
+          requirements: [],
+        },
+        {
+          sourceTruth: {
+            sourceOk: true,
+            titleMatched: true,
+            companyMatched: true,
+            closureDetected: false,
+            applyDetected: true,
+          },
+        },
+      ).errors,
+    ).toEqual(
+      expect.arrayContaining([expect.stringContaining("reviewed detail")]),
+    );
+
+    expect(
+      validateJobPublicExposure(baseJob, {
+        sourceTruth: {
+          sourceOk: false,
+          titleMatched: false,
+          companyMatched: true,
+          closureDetected: false,
+          applyDetected: false,
+        },
+      }).errors,
+    ).toEqual(
+      expect.arrayContaining([
+        "source check must confirm the role is still available",
+        "source page must match the reviewed job title",
+        "source page must still expose an apply path",
+      ]),
+    );
+  });
+
   it("documents the lead-first jobs workflow and maintainer follow-ups", () => {
     const runbook = fs.readFileSync(
       path.join(repoRoot, "docs/jobs-revenue-ops.md"),
@@ -197,6 +276,15 @@ describe("commercial intake contracts", () => {
     expect(runbook).toContain("Renewal Reminder");
     expect(runbook).toContain("Stale Or Closed Source");
     expect(runbook).toContain("Payment does not auto-publish");
+
+    const workflow = fs.readFileSync(
+      path.join(repoRoot, ".github/workflows/jobs-source-revalidation.yml"),
+      "utf8",
+    );
+    expect(workflow).toContain("schedule:");
+    expect(workflow).toContain("--apply --allow-unhealthy");
+    expect(workflow).toContain("--dry-run --fail-on-unhealthy");
+    expect(workflow).toContain("GITHUB_STEP_SUMMARY");
   });
 
   it("transitions curated job sources through verified, stale, and closed states", () => {

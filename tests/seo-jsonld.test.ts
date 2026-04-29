@@ -201,18 +201,27 @@ describe("SEO JSON-LD policy", () => {
         slug: "real-job",
         title: "AI Engineer",
         company: "Example",
-        description: "Build Claude workflows.",
+        description:
+          "Build Claude workflow systems for a verified employer listing with production AI integrations, source-backed role details, and developer-facing infrastructure ownership.",
         descriptionMd:
-          "## Role brief\n\nOwn integrations across Claude workflow systems and developer-facing AI infrastructure.",
+          "## Role brief\n\nOwn integrations across Claude workflow systems and developer-facing AI infrastructure for a team shipping production agent and MCP surfaces. The reviewed detail gives candidates enough context about responsibilities, requirements, source verification, and the employer-owned application path before they continue.",
         postedAt: "2026-04-26",
         expiresAt: "2026-05-26",
         applyUrl: "https://example.com/jobs/ai-engineer",
+        sourceUrl: "https://example.com/jobs/ai-engineer",
+        sourceCheckedAt: "2026-04-26",
         compensation: "$150K – $190K",
         equity: "Offered",
         bonus: "Performance bonus eligible",
         benefits: ["Health benefits", "Remote work"],
-        responsibilities: ["Ship Claude integrations"],
-        requirements: ["TypeScript experience"],
+        responsibilities: [
+          "Ship Claude integrations",
+          "Maintain source-verified role detail",
+        ],
+        requirements: [
+          "TypeScript experience",
+          "Comfort with LLM developer tooling",
+        ],
         isRemote: true,
       },
       { siteUrl: "https://heyclau.de" },
@@ -231,13 +240,15 @@ describe("SEO JSON-LD policy", () => {
       },
     });
     expect(realJobJsonLd?.jobBenefits).toBe("Health benefits; Remote work");
-    expect(realJobJsonLd?.description).toContain("Build Claude workflows.");
+    expect(realJobJsonLd?.description).toContain(
+      "Build Claude workflow systems",
+    );
     expect(realJobJsonLd?.description).toContain("Role brief");
     expect(realJobJsonLd?.description).toContain(
-      "Responsibilities: Ship Claude integrations",
+      "Responsibilities: Ship Claude integrations Maintain source-verified role detail",
     );
     expect(realJobJsonLd?.description).toContain(
-      "Requirements: TypeScript experience",
+      "Requirements: TypeScript experience Comfort with LLM developer tooling",
     );
     expect(realJobJsonLd?.description).toContain("Equity: Offered.");
     expect(realJobJsonLd?.description).toContain(

@@ -1,72 +1,65 @@
 # HeyClaude
 
-Search HeyClaude from Raycast and copy practical Claude assets without opening a browser first.
+Search [HeyClaude](https://heyclau.de) from Raycast and turn Claude agents, MCP servers, skills, hooks, rules, commands, guides, collections, statuslines, and AI jobs into usable actions.
 
-![Search HeyClaude](./media/search.svg)
+HeyClaude is a curated, GitHub-native registry for Claude and AI workflow content. The extension brings the registry into Raycast so you can find useful entries, inspect the details, copy the right asset, and open canonical sources without leaving your keyboard.
 
 ## What You Can Do
 
-- Search agents, MCP servers, skills, rules, commands, hooks, guides, collections, and statuslines.
-- Open dedicated category commands such as `Search Agents`, `Search Skills`,
-  and `Search MCP Servers` when you want a narrower list immediately.
-- Filter by category or local favorites.
-- Inspect the native Raycast detail view before using an entry.
-- Review structured metadata for category, brand, trust, source, platform, and
-  verification details.
-- Copy or paste the full usable asset.
-- Copy install commands and Claude config snippets separately.
-- Copy canonical URLs, Markdown links, summaries, and brand domains.
-- Create Raycast Quicklinks for entries, categories, jobs, feeds, and common
-  HeyClaude pages.
-- Create Raycast Snippets from install commands and config snippets.
-- Open the HeyClaude page, documentation, or source repository.
-- Open issue-first contribution and change-request URLs in the browser.
-- Open `Submit New Content` for a guided category-specific submission form.
-- Open `Get Involved with HeyClaude` for newsletter, GitHub, API, jobs,
-  community, and support links.
-- Browse active HeyClaude jobs, inspect role details, favorite roles, and open
-  external employer apply links.
-- Keep frequently used entries and jobs higher in local results through
-  Raycast frecency sorting.
+- Search the full HeyClaude registry or open focused commands for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.
+- Browse active AI, Claude, MCP, and agent jobs with external employer apply links.
+- Inspect entries with structured metadata for category, brand, source, trust, platform support, verification, and canonical URLs.
+- Copy full assets, install commands, config snippets, Markdown links, summaries, and brand domains.
+- Paste full assets directly into the focused app when that is the workflow you want.
+- Create Raycast Quicklinks for registry entries, category pages, jobs, feeds, and common HeyClaude pages.
+- Create Raycast Snippets from install commands and config snippets when an entry includes them.
+- Favorite useful entries and jobs, with local frecency sorting that keeps repeated workflows easier to reach.
+- Submit new content or suggest changes through HeyClaude and GitHub issue-first review flows.
+- Open project links for the website, registry, API docs, feeds, jobs, newsletter, and GitHub repository.
+
+## Commands
+
+- `Search HeyClaude`: unified search across the registry.
+- `Search Agents`: Claude agent entries.
+- `Search MCP Servers`: MCP servers and config-oriented entries.
+- `Search Tools`: AI tools and supporting services.
+- `Search Skills`: reusable Agent Skill packages and guidance.
+- `Search Rules`: reusable AI coding rules.
+- `Search Commands`: slash-command style assets.
+- `Search Hooks`: Claude Code hook assets.
+- `Search Guides`: practical guides and reference content.
+- `Search Collections`: curated bundles and workflows.
+- `Search Statuslines`: Claude Code statusline configurations.
+- `Browse HeyClaude Jobs`: active AI, Claude, MCP, and agent roles.
+- `Submit New Content`: guided contribution form that opens reviewed submission URLs.
+- `Get Involved with HeyClaude`: newsletter, GitHub, contribution, jobs, API, feeds, and support links.
 
 ## Read-Only by Design
 
-This first release does not write to project files, `.claude/settings.json`, `.cursor/rules`, hooks, commands, local skill folders, GitHub, or HeyClaude job data. It only fetches the public HeyClaude feeds, stores local caches, stores local favorites and local ranking signals, copies/pastes text, creates user-approved Raycast Quicklinks/Snippets, and opens links.
+The extension is intentionally read-only.
 
-Contribution actions are also read-only in Raycast. They open HeyClaude submit or GitHub issue URLs in the browser and do not request GitHub OAuth, tokens, forks, branches, pull requests, or local project-file access.
+It does not request accounts, OAuth, GitHub tokens, API keys, local project-file access, or write access to your Claude/Cursor configuration. Contribution actions open browser URLs for reviewed HeyClaude or GitHub issue flows. They do not create pull requests, forks, branches, or registry entries from Raycast.
+
+The extension can create Raycast-native Quicklinks and Snippets only when you explicitly trigger those Raycast actions.
 
 ## Data and Privacy
 
-The extension reads:
+The extension reads public HeyClaude data:
 
-- `https://heyclau.de/data/raycast-index.json`
+- [Registry feed](https://heyclau.de/data/raycast-index.json)
 - Per-entry detail JSON under `https://heyclau.de/data/raycast/...`
-- `https://heyclau.de/api/jobs?limit=100`
+- [Jobs API](https://heyclau.de/api/jobs?limit=100)
 
-Raycast `Cache` stores the latest successful registry feed, entry details, and jobs feed so search still works after a network failure. Raycast `LocalStorage` stores favorite entry and job keys plus Raycast frecency ranking data. No analytics, accounts, tokens, or project-file access are used.
+Raycast `Cache` stores the latest successful registry feed, entry details, and jobs feed so the extension remains usable after a temporary network failure. Raycast `LocalStorage` stores your local favorites and local ranking signals. No analytics, accounts, tokens, or project-file data are used by the extension.
 
-## Development
+## Links
 
-```bash
-npm install
-npm run dev
-```
-
-Production builds have no endpoint or feed override preference. `npm run dev`
-temporarily injects a maintainer-only development preference, then restores the
-production manifest when Raycast development mode exits.
-
-For preview-feed QA during `npm run dev`, open the HeyClaude extension
-preferences and set `Developer Feed URL Override` to:
-
-```text
-https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json
-```
-
-Leave the preference blank to exercise production endpoints from the development
-extension. All commands share this single dev-only setting. Registry detail
-payloads and the jobs API host are resolved relative to the selected feed URL,
-so a dev feed also loads dev detail files and dev D1 jobs.
+- Website: [heyclau.de](https://heyclau.de)
+- Browse registry: [heyclau.de/browse](https://heyclau.de/browse)
+- Submit content: [heyclau.de/submit](https://heyclau.de/submit)
+- Jobs: [heyclau.de/jobs](https://heyclau.de/jobs)
+- API docs: [heyclau.de/api-docs](https://heyclau.de/api-docs)
+- GitHub: [JSONbored/claudepro-directory](https://github.com/JSONbored/claudepro-directory)
 
 ## Validation
 
@@ -74,10 +67,4 @@ so a dev feed also loads dev detail files and dev D1 jobs.
 npm run test:junit
 npm run lint
 npm run build
-```
-
-The site feed can be checked from the repository root:
-
-```bash
-pnpm validate:raycast-feed
 ```

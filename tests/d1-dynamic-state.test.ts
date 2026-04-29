@@ -194,17 +194,26 @@ describe("D1 dynamic state helpers", () => {
         company_name: "Example Co",
         company_url: "https://example.com",
         location_text: "European Union",
-        summary: "Build Claude-native workflow systems.",
+        summary:
+          "Build Claude-native workflow systems for a reviewed jobs board listing with source verification, production integrations, and developer-facing automation ownership.",
         description_md:
-          "## Role details\n\nOwn AI systems across product integrations and workflow automation.",
+          "## Role details\n\nOwn AI systems across product integrations and workflow automation for a team shipping Claude-native developer infrastructure. This reviewed detail gives candidates enough context about the product surface, source verification expectations, and collaboration model before they continue to the employer application page.",
         employment_type: "Full-time",
         posted_at: "2026-04-26T00:00:00Z",
         compensation_summary: "$150k-$190k",
         equity_summary: "Offered",
         bonus_summary: "Performance bonus eligible",
         benefits_json: JSON.stringify(["Health benefits", "Remote work"]),
-        responsibilities_json: JSON.stringify(["Ship integrations"]),
-        requirements_json: JSON.stringify(["TypeScript"]),
+        responsibilities_json: JSON.stringify([
+          "Ship Claude and MCP workflow integrations.",
+          "Maintain source-verified role details as the employer page changes.",
+          "Partner with product teams on AI-native developer automation.",
+        ]),
+        requirements_json: JSON.stringify([
+          "Professional TypeScript or backend engineering experience.",
+          "Comfort working with LLM applications and developer tooling.",
+          "Strong written communication for reviewed public role pages.",
+        ]),
         apply_url: "https://example.com/jobs/ai-systems-engineer",
         tier: "featured",
         status: "active",
@@ -219,7 +228,7 @@ describe("D1 dynamic state helpers", () => {
         paid_placement_expires_at: "2026-05-26T00:00:00Z",
         claimed_employer: 1,
         posted_by_email: "jobs@example.com",
-        expires_at: null,
+        expires_at: "2026-05-26T00:00:00Z",
         is_remote: 1,
         is_worldwide: 1,
       },
@@ -238,13 +247,21 @@ describe("D1 dynamic state helpers", () => {
         claimedEmployer: true,
         paidPlacementExpiresAt: "2026-05-26T00:00:00Z",
         descriptionMd:
-          "## Role details\n\nOwn AI systems across product integrations and workflow automation.",
+          "## Role details\n\nOwn AI systems across product integrations and workflow automation for a team shipping Claude-native developer infrastructure. This reviewed detail gives candidates enough context about the product surface, source verification expectations, and collaboration model before they continue to the employer application page.",
         compensation: "$150k-$190k",
         equity: "Offered",
         bonus: "Performance bonus eligible",
         benefits: ["Health benefits", "Remote work"],
-        responsibilities: ["Ship integrations"],
-        requirements: ["TypeScript"],
+        responsibilities: [
+          "Ship Claude and MCP workflow integrations.",
+          "Maintain source-verified role details as the employer page changes.",
+          "Partner with product teams on AI-native developer automation.",
+        ],
+        requirements: [
+          "Professional TypeScript or backend engineering experience.",
+          "Comfort working with LLM applications and developer tooling.",
+          "Strong written communication for reviewed public role pages.",
+        ],
       },
     ]);
 
@@ -288,6 +305,48 @@ describe("D1 dynamic state helpers", () => {
       normalizeJobLocation("San Francisco, California, United States"),
     ).toBe("San Francisco, CA, US");
     expect(normalizeJobLocation("Remote (EU)")).toBe("Remote (EU)");
+  });
+
+  it("keeps active D1 rows out of public jobs when depth and source truth are too weak", async () => {
+    const db = new FakeD1();
+    db.jobRows = [
+      {
+        slug: "shallow-curated-role",
+        title: "Shallow Curated Role",
+        company_name: "Example Co",
+        company_url: "https://example.com",
+        location_text: "Remote",
+        summary: "Too thin.",
+        description_md: null,
+        employment_type: "Full-time",
+        posted_at: "2026-04-28",
+        compensation_summary: null,
+        equity_summary: null,
+        bonus_summary: null,
+        benefits_json: null,
+        responsibilities_json: null,
+        requirements_json: null,
+        apply_url: "https://example.com/jobs/shallow-curated-role",
+        tier: "free",
+        status: "active",
+        source: "curated",
+        source_kind: "official_ats",
+        source_url: "https://example.com/jobs/shallow-curated-role",
+        first_seen_at: "2026-04-28",
+        last_checked_at: "2026-04-28",
+        source_checked_at: "2026-04-28",
+        stale_check_count: 0,
+        curation_note: null,
+        paid_placement_expires_at: null,
+        claimed_employer: 0,
+        posted_by_email: null,
+        expires_at: null,
+        is_remote: 1,
+        is_worldwide: 0,
+      },
+    ];
+
+    await expect(queryActiveJobs(db)).resolves.toEqual([]);
   });
 
   it("checks jobs schema and updates private reviewed job rows through admin helpers", async () => {

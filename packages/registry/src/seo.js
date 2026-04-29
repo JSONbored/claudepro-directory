@@ -1,5 +1,8 @@
 import categorySpec from "./category-spec.json" with { type: "json" };
-import { normalizeDisclosure } from "./commercial.js";
+import {
+  normalizeDisclosure,
+  validateJobPublicExposure,
+} from "./commercial.js";
 
 export function absoluteSiteUrl(siteUrl, path = "/") {
   return new URL(path || "/", siteUrl).toString();
@@ -259,6 +262,11 @@ export function buildJobPostingJsonLd(job, params = {}) {
   ) {
     return null;
   }
+  const exposureReport = validateJobPublicExposure({
+    ...job,
+    status: job.status || "active",
+  });
+  if (!exposureReport.ok) return null;
 
   const siteUrl = params.siteUrl || "https://heyclau.de";
   const url = absoluteSiteUrl(siteUrl, `/jobs/${job.slug}`);

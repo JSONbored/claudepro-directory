@@ -8,7 +8,7 @@ import {
   mapJobListingRow,
   sortJobs,
 } from "@/lib/jobs";
-import { validateJobPublicationQuality } from "@heyclaude/registry/commercial";
+import { validateJobPublicExposure } from "@heyclaude/registry/commercial";
 
 export const REQUIRED_JOBS_MIGRATION = "0008_jobs_compensation_metadata.sql";
 
@@ -157,7 +157,7 @@ export class JobPublicationQualityError extends Error {
 }
 
 function assertJobPublicationQuality(job: Record<string, unknown>) {
-  const report = validateJobPublicationQuality(job);
+  const report = validateJobPublicExposure(job);
   if (!report.ok) {
     throw new JobPublicationQualityError(report.errors);
   }

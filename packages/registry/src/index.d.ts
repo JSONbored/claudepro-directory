@@ -226,6 +226,18 @@ export type JobSourceLifecycleResult = {
   indexable: boolean;
   reason: string;
 };
+export type JobSourceTruth = {
+  sourceOk?: boolean;
+  titleMatched?: boolean;
+  companyMatched?: boolean;
+  closureDetected?: boolean;
+  applyDetected?: boolean;
+};
+export type JobPublicExposureReport = {
+  ok: boolean;
+  required: boolean;
+  errors: string[];
+};
 export type CommercialPlacement = {
   targetKind: "job" | "tool" | "entry";
   targetKey: string;
@@ -601,6 +613,12 @@ export const JOB_PUBLICATION_QUALITY_RULES: {
   minimumRequirements: number;
   minimumBenefits: number;
 };
+export const JOB_PUBLIC_EXPOSURE_RULES: {
+  summaryMinLength: number;
+  detailMinLength: number;
+  minimumResponsibilities: number;
+  minimumRequirements: number;
+};
 export const COMMERCIAL_PLACEMENT_TARGETS: string[];
 export const DISCLOSURE_STATES: string[];
 export const COMMERCIAL_STATUSES: string[];
@@ -621,6 +639,10 @@ export function validateJobPublicationQuality(
   required: boolean;
   errors: string[];
 };
+export function validateJobPublicExposure(
+  payload: Record<string, unknown>,
+  options?: { sourceTruth?: JobSourceTruth },
+): JobPublicExposureReport;
 export function evaluateJobSourceLifecycle(
   input?: JobSourceLifecycleInput,
   now?: Date,

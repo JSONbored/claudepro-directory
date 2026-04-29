@@ -241,20 +241,20 @@ describe("Raycast feed helpers", () => {
     assert.equal(
       absoluteDataUrl(
         "/api/brand-assets/icon/discord.com",
-        "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+        "https://preview.example.com/data/raycast-index.json",
       ),
-      "https://heyclaude-dev.zeronode.workers.dev/api/brand-assets/icon/discord.com",
+      "https://preview.example.com/api/brand-assets/icon/discord.com",
     );
   });
 
   it("validates feed overrides and scopes cache keys by feed URL", () => {
     const devFeed = resolveFeedUrl(
-      " https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json#ignored ",
+      " https://preview.example.com/data/raycast-index.json#ignored ",
     );
 
     assert.equal(
       devFeed,
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+      "https://preview.example.com/data/raycast-index.json",
     );
     assert.equal(
       resolveFeedUrl(""),
@@ -262,16 +262,12 @@ describe("Raycast feed helpers", () => {
     );
     assert.throws(
       () =>
-        resolveFeedUrl(
-          "http://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
-        ),
+        resolveFeedUrl("http://preview.example.com/data/raycast-index.json"),
       /HTTPS/,
     );
     assert.throws(
       () =>
-        resolveFeedUrl(
-          "https://heyclaude-dev.zeronode.workers.dev/data/search-index.json",
-        ),
+        resolveFeedUrl("https://preview.example.com/data/search-index.json"),
       /\/data\/raycast-index\.json/,
     );
 
@@ -290,19 +286,16 @@ describe("Raycast feed helpers", () => {
 
   it("resolves jobs feeds from the selected HeyClaude host", () => {
     const devJobs = resolveJobsUrl(
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json",
+      "https://preview.example.com/data/raycast-index.json",
     );
 
     assert.equal(resolveJobsUrl(""), "https://heyclau.de/api/jobs?limit=100");
-    assert.equal(
-      devJobs,
-      "https://heyclaude-dev.zeronode.workers.dev/api/jobs?limit=100",
-    );
+    assert.equal(devJobs, "https://preview.example.com/api/jobs?limit=100");
     assert.equal(jobsCacheKey(), JOBS_CACHE_KEY);
     assert.match(jobsCacheKey(devJobs), /^heyclaude-jobs-index:/);
     assert.equal(
       buildPostJobUrl(devJobs),
-      "https://heyclaude-dev.zeronode.workers.dev/jobs/post",
+      "https://preview.example.com/jobs/post",
     );
   });
 
@@ -581,8 +574,7 @@ describe("Raycast feed helpers", () => {
 
   it("loads and refreshes cached jobs without polluting registry cache", async () => {
     const cache = new MemoryCache();
-    const devFeed =
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
+    const devFeed = "https://preview.example.com/data/raycast-index.json";
     const devJobs = resolveJobsUrl(devFeed);
 
     cache.set(
@@ -633,8 +625,7 @@ describe("Raycast feed helpers", () => {
   it("fetches fresh feed payloads and preserves compact feed contracts", async () => {
     const cache = new MemoryCache();
     let requestedUrl = "";
-    const devFeed =
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
+    const devFeed = "https://preview.example.com/data/raycast-index.json";
     const feed = await fetchFreshFeed({
       cache,
       feedUrl: devFeed,
@@ -677,8 +668,7 @@ describe("Raycast feed helpers", () => {
   it("loads detail payloads on demand and falls back only when no detail URL exists", async () => {
     const cache = new MemoryCache();
     let requestedUrl = "";
-    const devFeed =
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast-index.json";
+    const devFeed = "https://preview.example.com/data/raycast-index.json";
     const detail = await loadEntryDetail({
       entry: sampleEntry,
       cache,
@@ -697,7 +687,7 @@ describe("Raycast feed helpers", () => {
     });
     assert.equal(
       requestedUrl,
-      "https://heyclaude-dev.zeronode.workers.dev/data/raycast/mcp/context7.json",
+      "https://preview.example.com/data/raycast/mcp/context7.json",
     );
     assert.match(
       cache.get(detailCacheKey(sampleEntry, devFeed)) || "",

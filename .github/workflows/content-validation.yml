@@ -26,6 +26,7 @@ on:
 permissions:
   contents: read
   checks: write
+  deployments: read
 
 jobs:
   validate-content:
@@ -33,7 +34,6 @@ jobs:
     env:
       TRUNK_API_TOKEN: ${{ secrets.TRUNK_API_TOKEN || secrets.TRUNK_TOKEN }}
       TRUNK_ORG_URL_SLUG: ${{ secrets.TRUNK_ORG_URL_SLUG || secrets.TRUNK_ORG_SLUG }}
-      DEPLOYMENT_ARTIFACT_BASE_URL: ${{ vars.DEPLOYMENT_ARTIFACT_BASE_URL }}
     concurrency:
       group: content-validation-${{ github.ref }}
       cancel-in-progress: true
@@ -122,16 +122,6 @@ jobs:
       - name: Dry-run Resend template sync
         run: pnpm resend:sync-templates -- --dry-run
 
-      - name: Require preview artifact base URL
-        if: ${{ github.event_name == 'pull_request' && env.DEPLOYMENT_ARTIFACT_BASE_URL == '' }}
-        run: |
-          echo "::error::DEPLOYMENT_ARTIFACT_BASE_URL must point at the preview deployment before a pull request can merge."
-          exit 1
-
-      - name: Validate deployed artifact contract
-        if: ${{ env.DEPLOYMENT_ARTIFACT_BASE_URL != '' }}
-        run: pnpm validate:deployment-artifacts -- --base-url "$DEPLOYMENT_ARTIFACT_BASE_URL"
-
       - name: Verify generated registry artifacts are current
         run: git diff --exit-code apps/web/public/data apps/web/src/generated
 
@@ -159,3 +149,47 @@ jobs:
         uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b
         with:
           check-mode: all
+
+  validate-pr-preview:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_DEV_WORKER_URL: ${{ vars.CLOUDFLARE_DEV_WORKER_URL || 'https://heyclaude-dev.zeronode.workers.dev' }}
+    concurrency:
+      group: deployment-artifacts-pr-preview-${{ github.repository }}
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
+
+      - name: Setup Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy same-repo PR preview to dev Worker
+        id: deploy-preview
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository && env.CLOUDFLARE_API_TOKEN != '' }}
+        run: |
+          pnpm --filter web run deploy:dev
+          echo "base-url=$CLOUDFLARE_DEV_WORKER_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve PR preview URL
+        id: preview-url
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PREVIEW_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.base-url }}
+        run: node scripts/resolve-pr-preview-url.mjs
+
+      - name: Validate deployed artifact contract
+        run: pnpm validate:deployment-artifacts -- --base-url "${{ steps.preview-url.outputs.base-url }}"

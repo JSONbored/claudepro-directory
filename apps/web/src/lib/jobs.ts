@@ -1,4 +1,5 @@
 import { getSiteDb, type D1DatabaseLike } from "@/lib/db";
+import { validateJobPublicExposure } from "@heyclaude/registry/commercial";
 
 export type JobTier = "free" | "standard" | "featured" | "sponsored";
 export type JobStatus =
@@ -321,7 +322,22 @@ export async function queryActiveJobs(
     .bind()
     .all<JobListingRow>();
 
-  return sortJobs(results.map((row) => mapJobListingRow(row)));
+  return sortJobs(
+    results
+      .map((row) => mapJobListingRow(row))
+      .filter((job) => {
+        const report = validateJobPublicExposure(
+          job as Record<string, unknown>,
+        );
+        if (!report.ok) {
+          console.warn("[jobs] active job failed public exposure gate", {
+            slug: job.slug,
+            errors: report.errors,
+          });
+        }
+        return report.ok;
+      }),
+  );
 }
 
 export async function getJobs(): Promise<JobListing[]> {

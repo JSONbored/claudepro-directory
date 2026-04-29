@@ -180,7 +180,7 @@
     }
   ],
   "scripts": {
-    "dev": "node scripts/dev-manifest.mjs",
+    "dev": "ray develop",
     "test": "node --import tsx --test test/feed.test.ts",
     "test:junit": "mkdir -p ../../reports/junit && node --import tsx --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=../../reports/junit/raycast.xml test/feed.test.ts",
     "build": "ray build -e dist",
