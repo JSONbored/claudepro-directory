@@ -5,9 +5,18 @@
   "slug": "stytch-mcp-server",
   "title": "Stytch MCP Server for Claude",
   "author": "Stytch",
+  "brandName": "Stytch",
+  "brandDomain": "stytch.com",
+  "brandIconUrl": "/api/brand-assets/icon/stytch.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list\n\nConfig:\n{\n  \"stytch\": {\n    \"url\": \"http://mcp.stytch.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"stytch\": {\n    \"url\": \"http://mcp.stytch.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Stytch MCP Server for Claude\n\nConfigure and manage Stytch authentication services and workspace settings\n\n## Install\n```bash\nclaude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list\n```\n\n## Config\n```json\n{\n  \"stytch\": {\n    \"url\": \"http://mcp.stytch.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/stytch-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/stytch-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/stytch-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/stytch-mcp-server",
+  "seoTitle": "Stytch MCP Server for Claude",
+  "seoDescription": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp"
 }

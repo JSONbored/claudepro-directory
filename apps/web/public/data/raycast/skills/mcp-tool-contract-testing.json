@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing\n\nUsage:\nUse this skill to define and enforce MCP tool behavior contracts before deploying server updates.\n\nAsset:\n# Trigger\n\"Run the MCP tool contract testing skill on this server update.\"\n\n# Required output\n1) Tool contract matrix\n2) Positive/negative test cases\n3) Schema compliance report\n4) Release go/no-go summary",
   "detailMarkdown": "# MCP Tool Contract Testing Skill\n\nValidate MCP server tools with contract-style tests to catch schema drift, unsafe behavior, and integration regressions early.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/mcp-tool-contract-testing.zip -o mcp-tool-contract-testing.zip && unzip -o mcp-tool-contract-testing.zip -d ./mcp-tool-contract-testing\n```\n\n## Usage\nUse this skill to define and enforce MCP tool behavior contracts before deploying server updates.",
   "webUrl": "https://heyclau.de/skills/mcp-tool-contract-testing",
+  "canonicalUrl": "https://heyclau.de/skills/mcp-tool-contract-testing",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/mcp-tool-contract-testing.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/mcp-tool-contract-testing",
+  "seoTitle": "MCP Tool Contract Testing Skill",
+  "seoDescription": "Reusable AI skill for testing MCP tool contracts, response schemas, and behavior guarantees across updates. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18/"
 }

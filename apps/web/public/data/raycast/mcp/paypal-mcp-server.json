@@ -5,9 +5,18 @@
   "slug": "paypal-mcp-server",
   "title": "Paypal MCP Server for Claude",
   "author": "PayPal",
+  "brandName": "PayPal",
+  "brandDomain": "paypal.com",
+  "brandIconUrl": "/api/brand-assets/icon/paypal.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status paypal\n\nConfig:\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
   "detailMarkdown": "# Paypal MCP Server for Claude\n\nIntegrate PayPal commerce capabilities, payment processing, and transaction management\n\n## Install\n```bash\nclaude mcp list && claude mcp status paypal\n```\n\n## Config\n```json\n{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status paypal",
   "webUrl": "https://heyclau.de/mcp/paypal-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/paypal-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/paypal-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/paypal-mcp-server",
+  "seoTitle": "Paypal MCP Server for Claude",
+  "seoDescription": "Integrate PayPal commerce capabilities, payment processing, and transaction management Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://www.paypal.ai/"
 }

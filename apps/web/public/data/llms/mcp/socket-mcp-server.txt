@@ -10,6 +10,9 @@ Download: /downloads/mcp/socket-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/socket-mcp-server
 - Source URLs: https://github.com/SocketDev/socket-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx
+- Brand: Socket
+- Brand domain: socket.dev
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/socket-mcp-server.mcpb
 - Package SHA256: d2e6263bc6e0ec724a61ac9a348aa5f0fd9c28f7ec07fcd66ca36f4a1185151a
 - Author: Socket

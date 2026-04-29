@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine\n\nUsage:\nUse this skill to structure pricing tests that improve revenue signals while protecting retention and trust.\n\nAsset:\n# Trigger\n\"Apply the SaaS pricing experimentation engine skill to this offer model.\"\n\n# Required output\n1) Test hypotheses and success metrics\n2) Segment and cohort strategy\n3) Guardrails and stop-loss criteria\n4) Rollout decision framework",
   "detailMarkdown": "# SaaS Pricing Experimentation Engine Skill\n\nRun low-risk SaaS pricing experiments with clear hypotheses, segment-aware metrics, and decision-safe rollout controls.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/saas-pricing-experimentation-engine.zip -o saas-pricing-experimentation-engine.zip && unzip -o saas-pricing-experimentation-engine.zip -d ./saas-pricing-experimentation-engine\n```\n\n## Usage\nUse this skill to structure pricing tests that improve revenue signals while protecting retention and trust.",
   "webUrl": "https://heyclau.de/skills/saas-pricing-experimentation-engine",
+  "canonicalUrl": "https://heyclau.de/skills/saas-pricing-experimentation-engine",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/saas-pricing-experimentation-engine.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/saas-pricing-experimentation-engine",
+  "seoTitle": "SaaS Pricing Experimentation Engine Skill",
+  "seoDescription": "Reusable AI skill for SaaS pricing experiments, including hypothesis design, guardrail metrics, and rollout decision frameworks.",
   "repoUrl": "",
   "documentationUrl": "https://stripe.com/docs"
 }

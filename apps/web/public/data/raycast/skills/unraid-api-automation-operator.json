@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/unraid-api-automation-operator.zip -o unraid-api-automation-operator.zip && unzip -o unraid-api-automation-operator.zip -d ./unraid-api-automation-operator\n\nUsage:\nUse this skill for safe Unraid automations that reduce repetitive admin work without risking host stability.\n\nAsset:\n# Trigger\n\"Use the Unraid API automation operator skill for this operation workflow.\"\n\n# Required output\n1) Automation scope and guardrails\n2) API operation plan\n3) Idempotency and rollback handling\n4) Alerting/reporting output",
   "detailMarkdown": "# Unraid API Automation Operator Skill\n\nBuild practical Unraid API automations for server operations, health checks, and routine maintenance with safe execution controls.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/unraid-api-automation-operator.zip -o unraid-api-automation-operator.zip && unzip -o unraid-api-automation-operator.zip -d ./unraid-api-automation-operator\n```\n\n## Usage\nUse this skill for safe Unraid automations that reduce repetitive admin work without risking host stability.",
   "webUrl": "https://heyclau.de/skills/unraid-api-automation-operator",
+  "canonicalUrl": "https://heyclau.de/skills/unraid-api-automation-operator",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/unraid-api-automation-operator.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/unraid-api-automation-operator",
+  "seoTitle": "Unraid API Automation Operator Skill",
+  "seoDescription": "AI skill for automating Unraid operations using the Unraid API with secure auth, idempotent actions, and operational safeguards.",
   "repoUrl": "",
   "documentationUrl": "https://docs.unraid.net/API/"
 }

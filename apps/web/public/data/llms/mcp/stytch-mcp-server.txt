@@ -9,6 +9,9 @@ Download: /downloads/mcp/stytch-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/stytch-mcp-server
 - Source URLs: https://stytch.com/docs/workspace-management/stytch-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx
+- Brand: Stytch
+- Brand domain: stytch.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/stytch-mcp-server.mcpb
 - Package SHA256: 2669e215154068770a95ecb53f4b64a50fe86a076d8d0a6244e2f762153f949c
 - Author: Stytch

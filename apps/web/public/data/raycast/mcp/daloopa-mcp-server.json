@@ -5,9 +5,18 @@
   "slug": "daloopa-mcp-server",
   "title": "Daloopa MCP Server for Claude",
   "author": "Daloopa",
+  "brandName": "Daloopa",
+  "brandDomain": "daloopa.com",
+  "brandIconUrl": "/api/brand-assets/icon/daloopa.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status daloopa\n\nConfig:\n{\n  \"daloopa\": {\n    \"url\": \"https://mcp.daloopa.com/server/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"daloopa\": {\n    \"url\": \"https://mcp.daloopa.com/server/mcp\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Daloopa MCP Server for Claude\n\nAccess high-quality fundamental financial data from SEC filings and investor presentations\n\n## Install\n```bash\nclaude mcp list && claude mcp status daloopa\n```\n\n## Config\n```json\n{\n  \"daloopa\": {\n    \"url\": \"https://mcp.daloopa.com/server/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status daloopa",
   "webUrl": "https://heyclau.de/mcp/daloopa-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/daloopa-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/daloopa-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/daloopa-mcp-server",
+  "seoTitle": "Daloopa MCP Server for Claude",
+  "seoDescription": "Access high-quality fundamental financial data from SEC filings and investor presentations Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://docs.daloopa.com/docs/daloopa-mcp"
 }

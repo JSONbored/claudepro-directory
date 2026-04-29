@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nGiskard fits teams that want testing and monitoring workflows for LLM and machine learning system quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Giskard\n\nAI testing platform for evaluating, scanning, and monitoring machine learning and LLM application quality.",
   "webUrl": "https://heyclau.de/tools/giskard",
+  "canonicalUrl": "https://heyclau.de/tools/giskard",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/giskard.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/giskard",
+  "seoTitle": "Giskard AI testing platform",
+  "seoDescription": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/Giskard-AI/giskard",
   "documentationUrl": "https://docs.giskard.ai"
 }

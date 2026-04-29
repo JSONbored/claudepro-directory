@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nZapier AI is relevant for non-engineering and operations teams that need AI-assisted workflows across existing business apps.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Zapier AI\n\nAutomation platform with AI-assisted workflows, app integrations, agents, actions, and business process automation.",
   "webUrl": "https://heyclau.de/tools/zapier-ai",
+  "canonicalUrl": "https://heyclau.de/tools/zapier-ai",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/zapier-ai.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/zapier-ai",
+  "seoTitle": "Zapier AI workflow automation",
+  "seoDescription": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://help.zapier.com"
 }

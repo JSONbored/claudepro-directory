@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list\n\nConfig:\n{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Sentry MCP Server for Claude\n\nMonitor errors, debug production issues, and track application health\n\n## Install\n```bash\nclaude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list\n```\n\n## Config\n```json\n{\n  \"sentry\": {\n    \"url\": \"https://mcp.sentry.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http sentry https://mcp.sentry.dev/mcp && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/sentry-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/sentry-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/sentry-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/sentry-mcp-server",
+  "seoTitle": "Sentry MCP Server for Claude",
+  "seoDescription": "Monitor errors, debug production issues, and track application health Discover tools for AI development. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://docs.sentry.io/product/sentry-mcp/"
 }

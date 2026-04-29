@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nBraintrust is relevant when teams need structured evaluation, experiment tracking, and logging for AI product quality.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Braintrust\n\nEvaluation, prompt experimentation, logging, and data platform for production AI application development.",
   "webUrl": "https://heyclau.de/tools/braintrust",
+  "canonicalUrl": "https://heyclau.de/tools/braintrust",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/braintrust.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/braintrust",
+  "seoTitle": "Braintrust AI evaluation and logging platform",
+  "seoDescription": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://www.braintrust.dev/docs"
 }

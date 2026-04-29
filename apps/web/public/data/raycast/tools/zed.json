@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nZed belongs in the directory because AI coding workflows increasingly depend on low-latency editor collaboration and shared context.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Zed\n\nCollaborative code editor with AI assistance, fast native performance, and developer-focused collaboration workflows.",
   "webUrl": "https://heyclau.de/tools/zed",
+  "canonicalUrl": "https://heyclau.de/tools/zed",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/zed.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/zed",
+  "seoTitle": "Zed collaborative code editor with AI",
+  "seoDescription": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows. HeyClaude adds source links, install...",
   "repoUrl": "https://github.com/zed-industries/zed",
   "documentationUrl": "https://zed.dev/docs"
 }

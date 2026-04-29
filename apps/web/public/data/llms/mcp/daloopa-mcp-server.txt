@@ -9,6 +9,9 @@ Download: /downloads/mcp/daloopa-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/daloopa-mcp-server
 - Source URLs: https://docs.daloopa.com/docs/daloopa-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx
+- Brand: Daloopa
+- Brand domain: daloopa.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/daloopa-mcp-server.mcpb
 - Package SHA256: 3862b42d9655eff41883b09966e5f1007b51271479fb8d423b3c2c8f44876d98
 - Author: Daloopa

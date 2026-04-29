@@ -5,9 +5,18 @@
   "slug": "cloudinary-mcp-server",
   "title": "Cloudinary MCP Server - MCP Servers",
   "author": "Cloudinary",
+  "brandName": "Cloudinary",
+  "brandDomain": "cloudinary.com",
+  "brandIconUrl": "/api/brand-assets/icon/cloudinary.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET\n\nConfig:\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Cloudinary MCP Server - MCP Servers\n\nUpload, manage, transform, and analyze media assets in the cloud\n\n## Install\n```bash\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET\n```\n\n## Config\n```json\n{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET",
   "webUrl": "https://heyclau.de/mcp/cloudinary-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/cloudinary-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/cloudinary-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/cloudinary-mcp-server",
+  "seoTitle": "Cloudinary MCP Server - MCP Servers",
+  "seoDescription": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers"
 }

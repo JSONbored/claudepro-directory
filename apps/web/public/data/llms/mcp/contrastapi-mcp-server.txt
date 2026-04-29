@@ -9,6 +9,9 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/contrastapi-mcp-server
 - Source URLs: https://api.contrastcyber.com, https://github.com/UPinar/contrastapi, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx
+- Brand: ContrastAPI
+- Brand domain: contrastcyber.com
+- Brand asset source: brandfetch
 - Author: UPinar
 - Last verified: 2026-04-26T18:18:28-06:00
 - Robots: indexable

@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack\n\nUsage:\nUse this skill to build and ship Raycast extensions that are reliable, polished, and publish-ready.\n\nAsset:\n# Trigger\n\"Apply the Raycast extension dev/publish capability pack to this project.\"\n\n# Required output\n1) Extension command architecture\n2) API/auth/storage approach\n3) QA checklist and failure handling\n4) Store publication readiness report",
   "detailMarkdown": "# Raycast Extension Dev Publish Capability Pack Skill\n\nExpert Raycast extension capability skill for command design, extension architecture, testing, and store-ready publication workflows.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/raycast-extension-dev-publish-capability-pack.zip -o raycast-extension-dev-publish-capability-pack.zip && unzip -o raycast-extension-dev-publish-capability-pack.zip -d ./raycast-extension-dev-publish-capability-pack\n```\n\n## Usage\nUse this skill to build and ship Raycast extensions that are reliable, polished, and publish-ready.",
   "webUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/raycast-extension-dev-publish-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/raycast-extension-dev-publish-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/raycast-extension-dev-publish-capability-pack",
+  "seoTitle": "Raycast Extension Dev Publish Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for Raycast extension development and publishing, including architecture, quality checks, and store submission readiness.",
   "repoUrl": "",
   "documentationUrl": "https://developers.raycast.com/"
 }

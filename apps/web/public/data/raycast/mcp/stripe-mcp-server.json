@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list\n\nConfig:\n{\n  \"stripe\": {\n    \"url\": \"https://mcp.stripe.com\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"stripe\": {\n    \"url\": \"https://mcp.stripe.com\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Stripe MCP Server for Claude\n\nPayment processing, subscription management, and financial transaction handling\n\n## Install\n```bash\nclaude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list\n```\n\n## Config\n```json\n{\n  \"stripe\": {\n    \"url\": \"https://mcp.stripe.com\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http stripe https://mcp.stripe.com && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/stripe-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/stripe-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/stripe-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/stripe-mcp-server",
+  "seoTitle": "Stripe MCP Server for Claude",
+  "seoDescription": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://docs.stripe.com/mcp"
 }

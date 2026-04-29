@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nCline is useful for users who want a visible agent loop inside VS Code with command execution and file-editing control.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Cline\n\nOpen-source autonomous coding agent extension for planning, editing, running commands, and using tools from VS Code.",
   "webUrl": "https://heyclau.de/tools/cline",
+  "canonicalUrl": "https://heyclau.de/tools/cline",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/cline.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/cline",
+  "seoTitle": "Cline autonomous coding agent for VS Code",
+  "seoDescription": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/cline/cline",
   "documentationUrl": "https://docs.cline.bot"
 }

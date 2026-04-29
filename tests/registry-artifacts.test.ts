@@ -50,7 +50,7 @@ describe("registry artifacts", () => {
     kind: string;
     totalEntries: number;
     artifacts: Record<string, string>;
-    routes: Array<{ key: string; canonicalUrl: string }>;
+    routes: Array<{ key: string; canonicalUrl: string; llmsUrl: string }>;
     qualitySummary: Record<string, unknown>;
     artifactContracts: Record<
       string,
@@ -264,6 +264,24 @@ describe("registry artifacts", () => {
     ).toEqual(jsonLdSnapshotsPayload);
   });
 
+  it("derives search citation URLs from unhydrated source entries", () => {
+    const sourceEntry = {
+      ...contentEntries[0],
+      canonicalUrl: undefined,
+      llmsUrl: undefined,
+      apiUrl: undefined,
+    };
+    const [searchEntry] = buildSearchEntries([sourceEntry]);
+
+    expect(searchEntry?.canonicalUrl).toBe(searchEntry?.url);
+    expect(searchEntry?.llmsUrl).toBe(
+      `https://heyclau.de/data/llms/${sourceEntry.category}/${sourceEntry.slug}.txt`,
+    );
+    expect(searchEntry?.apiUrl).toBe(
+      `https://heyclau.de/api/registry/entries/${sourceEntry.category}/${sourceEntry.slug}`,
+    );
+  });
+
   it("publishes registry moat feeds with deterministic contract hashes", () => {
     const ecosystemFeed = readDataJson<{
       schemaVersion: number;
@@ -390,9 +408,27 @@ describe("registry artifacts", () => {
       expect(entry.body).toBeUndefined();
       expect(entry.sections).toBeUndefined();
       expect(entry.scriptBody).toBeUndefined();
+      expect(entry.canonicalUrl).toBe(
+        `https://heyclau.de/${entry.category}/${entry.slug}`,
+      );
+      expect(entry.llmsUrl).toBe(
+        `https://heyclau.de/data/llms/${entry.category}/${entry.slug}.txt`,
+      );
+      expect(entry.apiUrl).toBe(
+        `https://heyclau.de/api/registry/entries/${entry.category}/${entry.slug}`,
+      );
     }
     for (const entry of searchEntries) {
       expect(entry.url).toBeTruthy();
+      expect(entry.seoTitle).toBeTruthy();
+      expect(entry.seoDescription).toBeTruthy();
+      expect(entry.canonicalUrl).toBe(entry.url);
+      expect(entry.llmsUrl).toBe(
+        `https://heyclau.de/data/llms/${entry.category}/${entry.slug}.txt`,
+      );
+      expect(entry.apiUrl).toBe(
+        `https://heyclau.de/api/registry/entries/${entry.category}/${entry.slug}`,
+      );
       expect((entry as Record<string, unknown>).body).toBeUndefined();
       expect((entry as Record<string, unknown>).copySnippet).toBeUndefined();
     }
@@ -442,6 +478,12 @@ describe("registry artifacts", () => {
         key,
         copyText,
       });
+      expect(raycastFeedEntry.canonicalUrl).toBe(
+        `https://heyclau.de/${entry.category}/${entry.slug}`,
+      );
+      expect(raycastFeedEntry.llmsUrl).toBe(
+        `https://heyclau.de/data/llms/${entry.category}/${entry.slug}.txt`,
+      );
       expect(raycastFeedEntry.copyTextLength).toBe(copyText.length);
       expect(raycastFeedEntry.copyText.length).toBeLessThanOrEqual(
         RAYCAST_COPY_PREVIEW_LIMIT + 3,
@@ -522,6 +564,9 @@ describe("registry artifacts", () => {
     expect(manifest.routes).toHaveLength(contentEntries.length);
     expect(manifest.routes[0]?.canonicalUrl).toMatch(
       /^https:\/\/heyclau\.de\//,
+    );
+    expect(manifest.routes[0]?.llmsUrl).toMatch(
+      /^https:\/\/heyclau\.de\/data\/llms\//,
     );
     expect(manifest.qualitySummary).toBeTruthy();
     expect(manifest.artifacts.llmsFull).toBe("/data/llms-full.txt");

@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/openclaw-operator-capability-pack.zip -o openclaw-operator-capability-pack.zip && unzip -o openclaw-operator-capability-pack.zip -d ./openclaw-operator-capability-pack\n\nUsage:\nUse this skill to run OpenClaw environments with clear governance, operational controls, and resilient production behavior.\n\nAsset:\n# Trigger\n\"Use the OpenClaw operator capability pack for this environment.\"\n\n# Required output\n1) Deployment and trust-boundary map\n2) Tool and permission policy matrix\n3) Observability and SLO plan\n4) Incident and recovery procedures",
   "detailMarkdown": "# OpenClaw Operator Capability Pack Skill\n\nExpert OpenClaw operator capability skill for secure deployment, policy governance, tool boundaries, and production observability.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/openclaw-operator-capability-pack.zip -o openclaw-operator-capability-pack.zip && unzip -o openclaw-operator-capability-pack.zip -d ./openclaw-operator-capability-pack\n```\n\n## Usage\nUse this skill to run OpenClaw environments with clear governance, operational controls, and resilient production behavior.",
   "webUrl": "https://heyclau.de/skills/openclaw-operator-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/openclaw-operator-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/openclaw-operator-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/openclaw-operator-capability-pack",
+  "seoTitle": "OpenClaw Operator Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for OpenClaw operations, including deployment hardening, policy controls, observability, and incident response.",
   "repoUrl": "https://github.com/openclaw/openclaw",
   "documentationUrl": "https://github.com/openclaw/openclaw"
 }

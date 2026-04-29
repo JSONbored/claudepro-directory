@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status jira\n\nConfig:\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}",
   "detailMarkdown": "# Jira MCP Server for Claude\n\nManage Jira tickets and Confluence documentation\n\n## Install\n```bash\nclaude mcp list && claude mcp status jira\n```\n\n## Config\n```json\n{\n  \"atlassian\": {\n    \"url\": \"https://mcp.atlassian.com/v1/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status jira",
   "webUrl": "https://heyclau.de/mcp/jira-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/jira-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/jira-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/jira-mcp-server",
+  "seoTitle": "Jira MCP Server for Claude",
+  "seoDescription": "Manage Jira tickets and Confluence documentation Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
   "repoUrl": "",
   "documentationUrl": "https://www.atlassian.com/platform/remote-mcp-server"
 }

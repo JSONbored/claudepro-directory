@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack\n\nUsage:\nUse this skill to harden n8n workflows for production reliability, security, and fast incident response.\n\nAsset:\n# Trigger\n\"Apply the n8n operations resilience capability pack.\"\n\n# Required output\n1) Workflow reliability design\n2) Credential/security controls\n3) Failure recovery runbooks\n4) Monitoring and alert map",
   "detailMarkdown": "# n8n Operations Resilience Capability Pack Skill\n\nExpert n8n operations capability pack for resilient workflow execution, incident recovery, credential safety, and production reliability.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/n8n-operations-resilience-capability-pack.zip -o n8n-operations-resilience-capability-pack.zip && unzip -o n8n-operations-resilience-capability-pack.zip -d ./n8n-operations-resilience-capability-pack\n```\n\n## Usage\nUse this skill to harden n8n workflows for production reliability, security, and fast incident response.",
   "webUrl": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/n8n-operations-resilience-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/n8n-operations-resilience-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/n8n-operations-resilience-capability-pack",
+  "seoTitle": "n8n Operations Resilience Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for production n8n operations including reliability patterns, security controls, and workflow incident response.",
   "repoUrl": "",
   "documentationUrl": "https://docs.n8n.io/"
 }

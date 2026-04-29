@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails\n\nUsage:\nUse this skill whenever an agent consumes untrusted input or can trigger external tools/actions.\n\nAsset:\n# Trigger\n\"Run the prompt injection defense guardrails skill on this agent flow.\"\n\n# Required output\n1) Injection threat map by input source\n2) Guardrail architecture (prevent, detect, contain)\n3) Red-team prompts and expected safe behavior\n4) Blocking policy and audit log schema",
   "detailMarkdown": "# Prompt Injection Defense Guardrails Skill\n\nBuild layered defenses against prompt injection, data exfiltration, and unsafe tool execution in AI agent systems.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/prompt-injection-defense-guardrails.zip -o prompt-injection-defense-guardrails.zip && unzip -o prompt-injection-defense-guardrails.zip -d ./prompt-injection-defense-guardrails\n```\n\n## Usage\nUse this skill whenever an agent consumes untrusted input or can trigger external tools/actions.",
   "webUrl": "https://heyclau.de/skills/prompt-injection-defense-guardrails",
+  "canonicalUrl": "https://heyclau.de/skills/prompt-injection-defense-guardrails",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/prompt-injection-defense-guardrails.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/prompt-injection-defense-guardrails",
+  "seoTitle": "Prompt Injection Defense Guardrails Skill",
+  "seoDescription": "Reusable AI skill for detecting and mitigating prompt injection attacks with layered controls and validation tests. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://genai.owasp.org/llmrisk/llm01-prompt-injection/"
 }

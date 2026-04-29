@@ -78,6 +78,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/airtable-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/airtable-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/airtable-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -94,8 +97,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/airtable-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -170,6 +172,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/asana-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/asana-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -186,8 +191,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -262,6 +266,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/aws-services-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/aws-services-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/aws-services-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -278,8 +285,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/aws-services-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -315,6 +321,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://box.dev/guides/box-mcp/remote/",
+      "brandName": "Box",
+      "brandDomain": "box.com",
+      "brandIconUrl": "/api/brand-assets/icon/box.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Access enterprise content, analyze unstructured data, and automate workflows",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status box",
@@ -350,6 +360,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/box-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/box-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/box-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -366,8 +379,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/box-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -403,6 +415,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+      "brandName": "Canva",
+      "brandDomain": "canva.com",
+      "brandIconUrl": "/api/brand-assets/icon/canva.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Browse, summarize, and generate Canva designs directly from Claude",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status canva",
@@ -438,6 +454,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/canva-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/canva-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/canva-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -454,8 +473,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/canva-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -490,6 +508,10 @@
       ],
       "readingTime": 4,
       "difficultyScore": 100,
+      "brandName": "Anthropic",
+      "brandDomain": "anthropic.com",
+      "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Master Claude Desktop MCP server setup in 20 minutes.",
       "installable": true,
       "installCommand": "claude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list",
@@ -525,6 +547,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/desktop-mcp-setup",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/desktop-mcp-setup.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/desktop-mcp-setup",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -540,8 +565,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/desktop-mcp-setup"
+      }
     },
     {
       "category": "mcp",
@@ -616,6 +640,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/clickup-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/clickup-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/clickup-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -632,8 +659,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/clickup-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -708,6 +734,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/cloudflare-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/cloudflare-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/cloudflare-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -724,8 +753,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/cloudflare-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -761,6 +789,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+      "brandName": "Cloudinary",
+      "brandDomain": "cloudinary.com",
+      "brandIconUrl": "/api/brand-assets/icon/cloudinary.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Upload, manage, transform, and analyze media assets in the cloud",
       "installable": true,
       "installCommand": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET",
@@ -796,6 +828,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/cloudinary-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/cloudinary-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/cloudinary-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -812,8 +847,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/cloudinary-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -849,6 +883,10 @@
         "mcp"
       ],
       "documentationUrl": "https://api.contrastcyber.com",
+      "brandName": "ContrastAPI",
+      "brandDomain": "contrastcyber.com",
+      "brandIconUrl": "/api/brand-assets/icon/contrastcyber.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",
       "installable": true,
       "installCommand": "claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/",
@@ -866,6 +904,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -883,8 +924,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -920,6 +960,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
+      "brandName": "Daloopa",
+      "brandDomain": "daloopa.com",
+      "brandIconUrl": "/api/brand-assets/icon/daloopa.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Access high-quality fundamental financial data from SEC filings and investor presentations",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status daloopa",
@@ -955,6 +999,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/daloopa-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/daloopa-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/daloopa-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -971,8 +1018,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/daloopa-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1047,6 +1093,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/discord-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/discord-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/discord-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1063,8 +1112,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/discord-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1140,6 +1188,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/docker-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/docker-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/docker-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1156,8 +1207,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/docker-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1232,6 +1282,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/figma-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/figma-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/figma-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1248,8 +1301,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/figma-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1324,6 +1376,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/filesystem-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/filesystem-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/filesystem-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1340,8 +1395,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/filesystem-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1377,6 +1431,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+      "brandName": "Fireflies",
+      "brandDomain": "fireflies.ai",
+      "brandIconUrl": "/api/brand-assets/icon/fireflies.ai",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Extract valuable insights from meeting transcripts and summaries",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status fireflies",
@@ -1412,6 +1470,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/fireflies-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/fireflies-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/fireflies-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1428,8 +1489,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/fireflies-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1504,6 +1564,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/git-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/git-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/git-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1520,8 +1583,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/git-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1596,6 +1658,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/github-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/github-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/github-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1612,8 +1677,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/github-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1654,6 +1718,10 @@
       "readingTime": 1,
       "difficultyScore": 1,
       "documentationUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "brandName": "HeyClaude",
+      "brandDomain": "heyclau.de",
+      "brandIconUrl": "/favicon.svg",
+      "brandAssetSource": "manual",
       "cardDescription": "Access the complete HeyClaude directory through HeyClaude's official MCP server.",
       "installable": true,
       "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
@@ -1689,6 +1757,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/heyclaude-mcp.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/heyclaude-mcp",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1705,8 +1776,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp"
+      }
     },
     {
       "category": "mcp",
@@ -1781,6 +1851,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/hubspot-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/hubspot-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/hubspot-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1797,8 +1870,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/hubspot-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1834,6 +1906,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://huggingface.co/settings/mcp",
+      "brandName": "Hugging Face",
+      "brandDomain": "huggingface.co",
+      "brandIconUrl": "/api/brand-assets/icon/huggingface.co",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Access Hugging Face Hub and Gradio AI applications",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status hugging-face",
@@ -1869,6 +1945,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/hugging-face-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/hugging-face-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/hugging-face-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1885,8 +1964,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/hugging-face-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -1922,6 +2000,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://developers.intercom.com/docs/guides/mcp",
+      "brandName": "Intercom",
+      "brandDomain": "intercom.com",
+      "brandIconUrl": "/api/brand-assets/icon/intercom.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Access customer conversations, tickets, and user data in real-time",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status intercom",
@@ -1957,6 +2039,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/intercom-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/intercom-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/intercom-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -1973,8 +2058,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/intercom-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2010,6 +2094,10 @@
       "readingTime": 1,
       "difficultyScore": 1,
       "documentationUrl": "https://invideo.io/ai/mcp",
+      "brandName": "Invideo",
+      "brandDomain": "invideo.io",
+      "brandIconUrl": "/api/brand-assets/icon/invideo.io",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Build video creation capabilities into your applications",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status invideo",
@@ -2045,6 +2133,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/invideo-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/invideo-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/invideo-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2061,8 +2152,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/invideo-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2098,6 +2188,10 @@
       "readingTime": 1,
       "difficultyScore": 0,
       "documentationUrl": "https://jam.dev/docs/debug-a-jam/mcp",
+      "brandName": "Jam",
+      "brandDomain": "jam.dev",
+      "brandIconUrl": "/api/brand-assets/icon/jam.dev",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Debug faster with AI agents that access video recordings, console logs, and network requests",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status jam",
@@ -2133,6 +2227,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/jam-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/jam-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/jam-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2149,8 +2246,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/jam-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2225,6 +2321,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/jira-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/jira-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/jira-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2241,8 +2340,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/jira-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2317,6 +2415,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/kubernetes-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/kubernetes-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/kubernetes-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2333,8 +2434,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/kubernetes-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2409,6 +2509,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/linear-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/linear-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/linear-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2425,8 +2528,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/linear-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2462,6 +2564,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+      "brandName": "Monday.com",
+      "brandDomain": "monday.com",
+      "brandIconUrl": "/api/brand-assets/icon/monday.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Manage monday.com boards, items, and CRM activities",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status monday",
@@ -2497,6 +2603,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/monday-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/monday-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/monday-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2513,8 +2622,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/monday-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2589,6 +2697,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/netlify-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/netlify-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/netlify-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2605,8 +2716,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/netlify-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2681,6 +2791,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/notion-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/notion-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/notion-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2697,8 +2810,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/notion-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2734,6 +2846,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://www.paypal.ai/",
+      "brandName": "PayPal",
+      "brandDomain": "paypal.com",
+      "brandIconUrl": "/api/brand-assets/icon/paypal.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status paypal",
@@ -2769,6 +2885,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/paypal-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/paypal-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/paypal-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2785,8 +2904,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/paypal-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2822,6 +2940,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+      "brandName": "Plaid",
+      "brandDomain": "plaid.com",
+      "brandIconUrl": "/api/brand-assets/icon/plaid.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking",
       "installable": true,
       "installCommand": "claude mcp list && claude mcp status plaid",
@@ -2857,6 +2979,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/plaid-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/plaid-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/plaid-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2873,8 +2998,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/plaid-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -2949,6 +3073,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/postgresql-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/postgresql-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/postgresql-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -2965,8 +3092,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/postgresql-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3019,6 +3145,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/prompt-to-asset.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/prompt-to-asset",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3036,8 +3165,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/prompt-to-asset"
+      }
     },
     {
       "category": "mcp",
@@ -3074,6 +3202,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+      "brandName": "Reddit",
+      "brandDomain": "reddit.com",
+      "brandIconUrl": "/api/brand-assets/icon/reddit.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
       "installable": true,
       "installCommand": "claude mcp add reddit-buddy -- npx reddit-mcp-buddy && claude mcp list",
@@ -3109,6 +3241,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/reddit-mcp-buddy",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/reddit-mcp-buddy.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/reddit-mcp-buddy",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3125,8 +3260,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/reddit-mcp-buddy"
+      }
     },
     {
       "category": "mcp",
@@ -3163,6 +3297,10 @@
       "readingTime": 1,
       "difficultyScore": 1,
       "documentationUrl": "https://github.com/redis/mcp-redis",
+      "brandName": "Redis",
+      "brandDomain": "redis.io",
+      "brandIconUrl": "/api/brand-assets/icon/redis.io",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Official Redis MCP server providing natural language interface for Redis data management and operations",
       "installable": true,
       "installCommand": "uvx --from git+https://github.com/redis/mcp-redis.git redis-mcp-server --url redis://localhost:6379/0 && claude mcp list",
@@ -3198,6 +3336,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/redis-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/redis-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/redis-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3214,8 +3355,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/redis-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3291,6 +3431,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/sentry-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/sentry-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/sentry-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3307,8 +3450,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/sentry-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3344,6 +3486,10 @@
       "readingTime": 1,
       "difficultyScore": 11,
       "documentationUrl": "https://github.com/SocketDev/socket-mcp",
+      "brandName": "Socket",
+      "brandDomain": "socket.dev",
+      "brandIconUrl": "/api/brand-assets/icon/socket.dev",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Security analysis and vulnerability scanning for dependencies",
       "installable": true,
       "installCommand": "claude mcp add --transport http socket https://mcp.socket.dev/ && claude mcp list",
@@ -3379,6 +3525,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/socket-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/socket-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/socket-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3395,8 +3544,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/socket-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3432,6 +3580,10 @@
       "readingTime": 1,
       "difficultyScore": 6,
       "documentationUrl": "https://developer.squareup.com/docs/mcp",
+      "brandName": "Square",
+      "brandDomain": "squareup.com",
+      "brandIconUrl": "/api/brand-assets/icon/squareup.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Build on Square APIs for payments, inventory, and order management",
       "installable": true,
       "installCommand": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
@@ -3467,6 +3619,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/square-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/square-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/square-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3483,8 +3638,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/square-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3559,6 +3713,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/stripe-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/stripe-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/stripe-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3575,8 +3732,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/stripe-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3612,6 +3768,10 @@
       "readingTime": 1,
       "difficultyScore": 11,
       "documentationUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+      "brandName": "Stytch",
+      "brandDomain": "stytch.com",
+      "brandIconUrl": "/api/brand-assets/icon/stytch.com",
+      "brandAssetSource": "brandfetch",
       "cardDescription": "Configure and manage Stytch authentication services and workspace settings",
       "installable": true,
       "installCommand": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list",
@@ -3647,6 +3807,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/stytch-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/stytch-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/stytch-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3663,8 +3826,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/stytch-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3739,6 +3901,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/vercel-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/vercel-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/vercel-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3755,8 +3920,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/vercel-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3831,6 +3995,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/workato-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/workato-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/workato-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3847,8 +4014,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/workato-mcp-server"
+      }
     },
     {
       "category": "mcp",
@@ -3923,6 +4089,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/zapier-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/zapier-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zapier-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": true,
@@ -3939,8 +4108,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/mcp/zapier-mcp-server"
+      }
     }
   ]
 }

@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list\n\nConfig:\n{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
   "detailMarkdown": "# Cloudflare MCP Server - MCP Servers\n\nBuild applications, analyze traffic, and manage security settings through Cloudflare\n\n## Install\n```bash\nclaude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list\n```\n\n## Config\n```json\n{\n  \"cloudflare\": {\n    \"env\": {\n      \"CLOUDFLARE_API_TOKEN\": \"${CLOUDFLARE_API_TOKEN}\",\n      \"CLOUDFLARE_ACCOUNT_ID\": \"${CLOUDFLARE_ACCOUNT_ID}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@cloudflare/mcp-server-cloudflare\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add cloudflare --env CLOUDFLARE_API_TOKEN=YOUR_TOKEN --env CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/cloudflare-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/cloudflare-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/cloudflare-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/cloudflare-mcp-server",
+  "seoTitle": "Cloudflare MCP Server - MCP Servers",
+  "seoDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://developers.cloudflare.com/agents/model-context-protocol/mcp-servers-for-cloudflare/"
 }

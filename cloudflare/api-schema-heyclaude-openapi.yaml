@@ -81,7 +81,11 @@ components:
           type: string
         title:
           type: string
+        seoTitle:
+          type: string
         description:
+          type: string
+        seoDescription:
           type: string
         tags:
           type: array
@@ -121,6 +125,15 @@ components:
           type: string
         url:
           type: string
+        canonicalUrl:
+          type: string
+          format: uri
+        llmsUrl:
+          type: string
+          format: uri
+        apiUrl:
+          type: string
+          format: uri
         trustSignals:
           type: object
           properties:
@@ -180,6 +193,9 @@ components:
         - documentationUrl
         - repoUrl
         - url
+        - canonicalUrl
+        - llmsUrl
+        - apiUrl
         - trustSignals
       additionalProperties: {}
     RegistryTrustSignals:
@@ -824,7 +840,11 @@ paths:
                           type: string
                         title:
                           type: string
+                        seoTitle:
+                          type: string
                         description:
+                          type: string
+                        seoDescription:
                           type: string
                         tags:
                           type: array
@@ -864,6 +884,15 @@ paths:
                           type: string
                         url:
                           type: string
+                        canonicalUrl:
+                          type: string
+                          format: uri
+                        llmsUrl:
+                          type: string
+                          format: uri
+                        apiUrl:
+                          type: string
+                          format: uri
                         trustSignals:
                           type: object
                           properties:
@@ -923,6 +952,9 @@ paths:
                         - documentationUrl
                         - repoUrl
                         - url
+                        - canonicalUrl
+                        - llmsUrl
+                        - apiUrl
                         - trustSignals
                       additionalProperties: {}
                     maxItems: 50

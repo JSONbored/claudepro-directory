@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation\n\nUsage:\nUse this skill for high-leverage internal productivity automations powered by Gemini and Google Workspace tools.\n\nAsset:\n# Trigger\n\"Apply the Google Workspace Gemini automation skill to this process.\"\n\n# Required output\n1) Automation architecture and data flow\n2) Prompt/template design with quality checks\n3) Approval and exception handling\n4) Monitoring and cost controls",
   "detailMarkdown": "# Google Workspace Gemini Automation Skill\n\nCreate useful Gemini-powered Google Workspace automations for docs, sheets, email triage, and internal workflow productivity.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/google-workspace-gemini-automation.zip -o google-workspace-gemini-automation.zip && unzip -o google-workspace-gemini-automation.zip -d ./google-workspace-gemini-automation\n```\n\n## Usage\nUse this skill for high-leverage internal productivity automations powered by Gemini and Google Workspace tools.",
   "webUrl": "https://heyclau.de/skills/google-workspace-gemini-automation",
+  "canonicalUrl": "https://heyclau.de/skills/google-workspace-gemini-automation",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/google-workspace-gemini-automation.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/google-workspace-gemini-automation",
+  "seoTitle": "Google Workspace Gemini Automation Skill",
+  "seoDescription": "Reusable AI skill for Gemini-powered Google Workspace automation, including Docs, Sheets, and communication workflows. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://ai.google.dev/gemini-api/docs"
 }

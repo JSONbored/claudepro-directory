@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status postgres\n\nConfig:\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
   "detailMarkdown": "# Postgresql MCP Server - MCP Servers\n\nOfficial MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities\n\n## Install\n```bash\nclaude mcp list && claude mcp status postgres\n```\n\n## Config\n```json\n{\n  \"postgres\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-postgres\",\n      \"postgresql://localhost/mydb\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status postgres",
   "webUrl": "https://heyclau.de/mcp/postgresql-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/postgresql-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/postgresql-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/postgresql-mcp-server",
+  "seoTitle": "Postgresql MCP Server - MCP Servers",
+  "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://modelcontextprotocol.io/examples"
 }

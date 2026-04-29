@@ -5,6 +5,8 @@ const requiredPaths = [
   "/data/feeds/index.json",
 ];
 const indexNowKeyPath = "/48486ebc7ddc47af875118345161ae70.txt";
+const requiredRenderedPaths = ["/sitemap.xml", "/robots.txt", "/api/jobs"];
+const canonicalOrigin = "https://heyclau.de";
 
 function parseArgs(argv) {
   const args = new Map();
@@ -80,10 +82,41 @@ for (const pathname of requiredPaths) {
   }
 }
 
+for (const pathname of requiredRenderedPaths) {
+  try {
+    await fetchText(baseUrl, pathname);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : String(error));
+  }
+}
+
 try {
   const key = (await fetchText(baseUrl, indexNowKeyPath)).trim();
   if (key !== "48486ebc7ddc47af875118345161ae70") {
     fail(`${indexNowKeyPath} did not return the expected IndexNow key`);
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
+  const directory = await fetchJson(baseUrl, "/data/directory-index.json");
+  const search = await fetchJson(baseUrl, "/data/search-index.json");
+  const directoryEntries = readEntries(directory);
+  const searchEntries = readEntries(search);
+
+  if (!directoryEntries?.length || !searchEntries?.length) {
+    fail("/data directory and search artifacts must contain entries");
+  } else if (directoryEntries.length !== searchEntries.length) {
+    fail("/data directory and search artifact counts must match");
+  } else {
+    for (const entry of [directoryEntries[0], searchEntries[0]]) {
+      for (const field of ["canonicalUrl", "llmsUrl", "apiUrl"]) {
+        if (!String(entry?.[field] || "").startsWith(`${canonicalOrigin}/`)) {
+          fail(`${field} must be an absolute URL in deployment artifacts`);
+        }
+      }
+    }
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));
@@ -118,6 +151,35 @@ try {
   } else {
     await fetchJson(baseUrl, skillsFeed);
     await fetchJson(baseUrl, claudeFeed);
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
+  const jobs = await fetchJson(baseUrl, "/api/jobs");
+  if (!jobs || typeof jobs !== "object") {
+    fail("/api/jobs did not return a JSON object");
+  }
+  const jobEntries = Array.isArray(jobs.jobs)
+    ? jobs.jobs
+    : Array.isArray(jobs.entries)
+      ? jobs.entries
+      : null;
+  if (!Array.isArray(jobEntries)) {
+    fail("/api/jobs must return a jobs or entries array");
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
+  const sitemap = await fetchText(baseUrl, "/sitemap.xml");
+  if (!sitemap.includes(`${canonicalOrigin}/browse`)) {
+    fail("/sitemap.xml must include canonical site URLs");
+  }
+  if (sitemap.includes("robotsIndex:false")) {
+    fail("/sitemap.xml must not expose robotsIndex:false markers");
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

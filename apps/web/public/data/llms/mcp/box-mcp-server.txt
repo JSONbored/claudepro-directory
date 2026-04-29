@@ -9,6 +9,9 @@ Download: /downloads/mcp/box-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/box-mcp-server
 - Source URLs: https://box.dev/guides/box-mcp/remote/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx
+- Brand: Box
+- Brand domain: box.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/box-mcp-server.mcpb
 - Package SHA256: 973bd359536505c1000cffb3e754727c536496bc0b05fd56503a91184b6d5d6d
 - Author: Box

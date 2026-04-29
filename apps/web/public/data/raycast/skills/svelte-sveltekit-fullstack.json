@@ -8,6 +8,11 @@
   "copyText": "Install:\nnpm create svelte@latest my-app\n\nUsage:\nnpm create svelte@latest my-app\n\nAsset:\n<script>\n  let count = 0;\n  \n  // Reactive statement - automatically re-runs when count changes\n  $: doubled = count * 2;\n  $: console.log(`Count is now ${count}`);\n  \n  function increment() {\n    count += 1;\n  }\n</script>\n\n<div>\n  <button on:click={increment}>Count: {count}</button>\n  <p>Doubled: {doubled}</p>\n</div>",
   "detailMarkdown": "# Svelte SvelteKit Full-Stack Development Skill\n\nBuild full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend framework of 2025. Svelte compiles components to vanilla JavaScript at build time, resulting in zero runtime overhead and exceptional performance.\n\n## Install\n```bash\nnpm create svelte@latest my-app\n```\n\n## Usage\nnpm create svelte@latest my-app",
   "webUrl": "https://heyclau.de/skills/svelte-sveltekit-fullstack",
+  "canonicalUrl": "https://heyclau.de/skills/svelte-sveltekit-fullstack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/svelte-sveltekit-fullstack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/svelte-sveltekit-fullstack",
+  "seoTitle": "Svelte SvelteKit Full-Stack Development Skill",
+  "seoDescription": "Build full-stack web apps with Svelte and SvelteKit. Minimal runtime overhead, reactive components, and server-side rendering. The most admired frontend fram...",
   "repoUrl": "",
   "documentationUrl": "https://kit.svelte.dev/"
 }

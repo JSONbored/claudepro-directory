@@ -9,6 +9,9 @@ Download: /downloads/mcp/cloudinary-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/cloudinary-mcp-server
 - Source URLs: https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudinary-mcp-server.mdx
+- Brand: Cloudinary
+- Brand domain: cloudinary.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/cloudinary-mcp-server.mcpb
 - Package SHA256: 40ee1633161361f65ee12c6766e87277e3e062ea6e30ff65ad609334cdb0ae8d
 - Author: Cloudinary

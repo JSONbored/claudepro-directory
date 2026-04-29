@@ -9,6 +9,9 @@ Download: /downloads/mcp/jam-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/jam-mcp-server
 - Source URLs: https://jam.dev/docs/debug-a-jam/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jam-mcp-server.mdx
+- Brand: Jam
+- Brand domain: jam.dev
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/jam-mcp-server.mcpb
 - Package SHA256: 18adeb9b457cec2ce115e3518419308f0abe2f847480af657148f0a14ae13ab5
 - Author: Jam

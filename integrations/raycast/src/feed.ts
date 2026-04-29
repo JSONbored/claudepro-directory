@@ -31,6 +31,11 @@ export type RaycastEntry = {
   detailMarkdown: string;
   detailUrl?: string;
   webUrl: string;
+  canonicalUrl?: string;
+  llmsUrl?: string;
+  apiUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   repoUrl: string;
   documentationUrl: string;
   downloadTrust: DownloadTrust;
@@ -343,6 +348,11 @@ export function normalizeRaycastEntry(value: unknown): RaycastEntry | null {
     detailMarkdown,
     detailUrl: optionalString(value.detailUrl) || undefined,
     webUrl,
+    canonicalUrl: optionalString(value.canonicalUrl) || undefined,
+    llmsUrl: optionalString(value.llmsUrl) || undefined,
+    apiUrl: optionalString(value.apiUrl) || undefined,
+    seoTitle: optionalString(value.seoTitle) || undefined,
+    seoDescription: optionalString(value.seoDescription) || undefined,
     repoUrl: optionalString(value.repoUrl),
     documentationUrl: optionalString(value.documentationUrl),
     downloadTrust: normalizeDownloadTrust(value.downloadTrust),

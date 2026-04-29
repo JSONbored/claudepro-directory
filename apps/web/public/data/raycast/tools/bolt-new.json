@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nBolt is relevant for users who want prompt-to-running-app workflows in a browser environment with deployment-oriented iteration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Bolt\n\nBrowser-based AI app builder for creating, editing, running, and deploying web projects from prompts.",
   "webUrl": "https://heyclau.de/tools/bolt-new",
+  "canonicalUrl": "https://heyclau.de/tools/bolt-new",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/bolt-new.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/bolt-new",
+  "seoTitle": "Bolt browser AI app builder",
+  "seoDescription": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://support.bolt.new"
 }

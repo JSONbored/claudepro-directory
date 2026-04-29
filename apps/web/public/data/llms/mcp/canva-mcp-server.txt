@@ -9,6 +9,9 @@ Download: /downloads/mcp/canva-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/canva-mcp-server
 - Source URLs: https://www.canva.dev/docs/connect/canva-mcp-server-setup/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/canva-mcp-server.mdx
+- Brand: Canva
+- Brand domain: canva.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/canva-mcp-server.mcpb
 - Package SHA256: 461bfddb65f343a48e35a1dfcfbec79028101aebeebb217c5c0ed6dd55e48afe
 - Author: Canva

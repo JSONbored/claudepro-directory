@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening\n\nUsage:\nApply this skill before exposing any MCP server to third-party clients or shared environments.\n\nAsset:\n# Trigger\n\"Run the MCP server security hardening skill against this MCP implementation.\"\n\n# Required output\n1) Threat model (auth, tool abuse, prompt injection, supply chain)\n2) Concrete hardening patch plan\n3) Logging and alerting requirements\n4) Deployment gate checklist",
   "detailMarkdown": "# MCP Server Security Hardening Skill\n\nSecure MCP servers with strict tool boundaries, auth controls, dependency hygiene, and abuse-resistant runtime policies.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/mcp-server-security-hardening.zip -o mcp-server-security-hardening.zip && unzip -o mcp-server-security-hardening.zip -d ./mcp-server-security-hardening\n```\n\n## Usage\nApply this skill before exposing any MCP server to third-party clients or shared environments.",
   "webUrl": "https://heyclau.de/skills/mcp-server-security-hardening",
+  "canonicalUrl": "https://heyclau.de/skills/mcp-server-security-hardening",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/mcp-server-security-hardening.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/mcp-server-security-hardening",
+  "seoTitle": "MCP Server Security Hardening Skill for AI Engineers",
+  "seoDescription": "Reusable security skill for MCP server hardening, including auth, tool permissions, validation, logging, and incident response.",
   "repoUrl": "",
   "documentationUrl": "https://modelcontextprotocol.io/specification/2025-06-18"
 }

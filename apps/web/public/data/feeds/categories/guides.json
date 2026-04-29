@@ -57,6 +57,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/build-mcp-server",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/build-mcp-server.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/build-mcp-server",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -72,8 +75,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/build-mcp-server"
+      }
     },
     {
       "category": "guides",
@@ -125,6 +127,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/chatgpt-migration-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/chatgpt-migration-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/chatgpt-migration-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -140,8 +145,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/chatgpt-migration-guide"
+      }
     },
     {
       "category": "guides",
@@ -193,6 +197,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-4-extended-thinking-tutorial",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-4-extended-thinking-tutorial.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-4-extended-thinking-tutorial",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -208,8 +215,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-4-extended-thinking-tutorial"
+      }
     },
     {
       "category": "guides",
@@ -260,6 +266,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-agent-development-framework",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-agent-development-framework.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-agent-development-framework",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -275,8 +284,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-agent-development-framework"
+      }
     },
     {
       "category": "guides",
@@ -329,6 +337,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/healthcare-hipaa-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/healthcare-hipaa-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/healthcare-hipaa-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -344,8 +355,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/healthcare-hipaa-guide"
+      }
     },
     {
       "category": "guides",
@@ -397,6 +407,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/multi-directory-setup",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/multi-directory-setup.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/multi-directory-setup",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -412,8 +425,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/multi-directory-setup"
+      }
     },
     {
       "category": "guides",
@@ -469,6 +481,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-vs-cursor-codeium",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-vs-cursor-codeium.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-vs-cursor-codeium",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -484,8 +499,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-vs-cursor-codeium"
+      }
     },
     {
       "category": "guides",
@@ -537,6 +551,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/wsl-setup-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/wsl-setup-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/wsl-setup-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -552,8 +569,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/wsl-setup-guide"
+      }
     },
     {
       "category": "guides",
@@ -605,6 +621,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/financial-services-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/financial-services-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/financial-services-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -620,8 +639,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/financial-services-guide"
+      }
     },
     {
       "category": "guides",
@@ -674,6 +692,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-mcp-server-setup-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-mcp-server-setup-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-mcp-server-setup-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -689,8 +710,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-mcp-server-setup-guide"
+      }
     },
     {
       "category": "guides",
@@ -742,6 +762,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/business-process-automation",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/business-process-automation.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/business-process-automation",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -757,8 +780,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/business-process-automation"
+      }
     },
     {
       "category": "guides",
@@ -810,6 +832,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-rate-limits-fix",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-rate-limits-fix.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-rate-limits-fix",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -825,8 +850,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-rate-limits-fix"
+      }
     },
     {
       "category": "guides",
@@ -882,6 +906,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-vs-codewhisperer-gemini",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-vs-codewhisperer-gemini.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-vs-codewhisperer-gemini",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -897,8 +924,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-vs-codewhisperer-gemini"
+      }
     },
     {
       "category": "guides",
@@ -954,6 +980,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/claude-vs-copilot-python",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/claude-vs-copilot-python.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/claude-vs-copilot-python",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -969,8 +998,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/claude-vs-copilot-python"
+      }
     },
     {
       "category": "guides",
@@ -1026,6 +1054,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/migration-workflow-guide",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/migration-workflow-guide.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/migration-workflow-guide",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1041,8 +1072,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/migration-workflow-guide"
+      }
     },
     {
       "category": "guides",
@@ -1096,6 +1126,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/fix-environment-variables",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/fix-environment-variables.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/fix-environment-variables",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1111,8 +1144,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/fix-environment-variables"
+      }
     },
     {
       "category": "guides",
@@ -1164,6 +1196,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/fix-installation-errors",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/fix-installation-errors.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/fix-installation-errors",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1179,8 +1214,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/fix-installation-errors"
+      }
     },
     {
       "category": "guides",
@@ -1234,6 +1268,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/fix-memory-leak-performance",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/fix-memory-leak-performance.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/fix-memory-leak-performance",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1249,8 +1286,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/fix-memory-leak-performance"
+      }
     },
     {
       "category": "guides",
@@ -1302,6 +1338,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/guides/fix-mcp-connection-errors",
+      "llmsUrl": "https://heyclau.de/data/llms/guides/fix-mcp-connection-errors.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/guides/fix-mcp-connection-errors",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1317,8 +1356,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/guides/fix-mcp-connection-errors"
+      }
     }
   ]
 }

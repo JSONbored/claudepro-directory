@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp add docker -- npx -y @docker/mcp-server && claude mcp list\n\nConfig:\n{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
   "detailMarkdown": "# Docker MCP Server for Claude\n\nManage Docker containers, images, and services directly through Claude with comprehensive Docker API integration\n\n## Install\n```bash\nclaude mcp add docker -- npx -y @docker/mcp-server && claude mcp list\n```\n\n## Config\n```json\n{\n  \"docker\": {\n    \"env\": {\n      \"DOCKER_HOST\": \"${DOCKER_HOST:-unix:///var/run/docker.sock}\",\n      \"DOCKER_API_VERSION\": \"${DOCKER_API_VERSION:-1.43}\"\n    },\n    \"args\": [\n      \"-y\",\n      \"@docker/mcp-server\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp add docker -- npx -y @docker/mcp-server && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/docker-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/docker-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/docker-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/docker-mcp-server",
+  "seoTitle": "Docker MCP Server for Claude",
+  "seoDescription": "Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://docs.docker.com/engine/api/"
 }

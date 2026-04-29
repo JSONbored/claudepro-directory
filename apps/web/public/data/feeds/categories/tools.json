@@ -52,6 +52,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/aider",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/aider.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/aider",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -70,8 +73,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/aider"
+      }
     },
     {
       "category": "tools",
@@ -120,6 +122,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/apify",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/apify.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/apify",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -137,8 +142,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/apify"
+      }
     },
     {
       "category": "tools",
@@ -187,6 +191,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/arcade-ai",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/arcade-ai.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/arcade-ai",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -204,8 +211,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/arcade-ai"
+      }
     },
     {
       "category": "tools",
@@ -254,6 +260,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/arize-phoenix",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/arize-phoenix.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/arize-phoenix",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -272,8 +281,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/arize-phoenix"
+      }
     },
     {
       "category": "tools",
@@ -322,6 +330,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/bolt-new",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/bolt-new.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/bolt-new",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -339,8 +350,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/bolt-new"
+      }
     },
     {
       "category": "tools",
@@ -389,6 +399,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/braintrust",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/braintrust.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/braintrust",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -406,8 +419,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/braintrust"
+      }
     },
     {
       "category": "tools",
@@ -456,6 +468,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/browser-use",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/browser-use.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/browser-use",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -474,8 +489,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/browser-use"
+      }
     },
     {
       "category": "tools",
@@ -524,6 +538,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/browserbase",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/browserbase.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/browserbase",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -541,8 +558,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/browserbase"
+      }
     },
     {
       "category": "tools",
@@ -588,6 +604,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/claude-code",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/claude-code.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/claude-code",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -605,8 +624,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/claude-code"
+      }
     },
     {
       "category": "tools",
@@ -655,6 +673,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/cline",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/cline.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/cline",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -673,8 +694,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/cline"
+      }
     },
     {
       "category": "tools",
@@ -723,6 +743,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/cloudflare-agents-sdk",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/cloudflare-agents-sdk.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/cloudflare-agents-sdk",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -740,8 +763,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/cloudflare-agents-sdk"
+      }
     },
     {
       "category": "tools",
@@ -790,6 +812,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/coderabbit",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/coderabbit.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/coderabbit",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -807,8 +832,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/coderabbit"
+      }
     },
     {
       "category": "tools",
@@ -856,6 +880,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/composio",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/composio.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/composio",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -874,8 +901,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/composio"
+      }
     },
     {
       "category": "tools",
@@ -924,6 +950,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/continue",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/continue.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/continue",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -942,8 +971,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/continue"
+      }
     },
     {
       "category": "tools",
@@ -992,6 +1020,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/crewai",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/crewai.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/crewai",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1010,8 +1041,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/crewai"
+      }
     },
     {
       "category": "tools",
@@ -1060,6 +1090,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/cursor",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/cursor.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/cursor",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -1077,8 +1110,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/cursor"
+      }
     },
     {
       "category": "tools",
@@ -1127,6 +1159,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/devin",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/devin.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/devin",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1144,8 +1179,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/devin"
+      }
     },
     {
       "category": "tools",
@@ -1194,6 +1228,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/exa",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/exa.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/exa",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1211,8 +1248,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/exa"
+      }
     },
     {
       "category": "tools",
@@ -1261,6 +1297,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/firecrawl",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/firecrawl.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/firecrawl",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1279,8 +1318,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/firecrawl"
+      }
     },
     {
       "category": "tools",
@@ -1329,6 +1367,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/garak",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/garak.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/garak",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1345,8 +1386,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/garak"
+      }
     },
     {
       "category": "tools",
@@ -1395,6 +1435,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/giskard",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/giskard.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/giskard",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1413,8 +1456,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/giskard"
+      }
     },
     {
       "category": "tools",
@@ -1462,6 +1504,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/github-copilot",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/github-copilot.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/github-copilot",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1479,8 +1524,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/github-copilot"
+      }
     },
     {
       "category": "tools",
@@ -1528,6 +1572,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/graphite-diamond",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/graphite-diamond.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/graphite-diamond",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1545,8 +1592,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/graphite-diamond"
+      }
     },
     {
       "category": "tools",
@@ -1595,6 +1641,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/helicone",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/helicone.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/helicone",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1613,8 +1662,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/helicone"
+      }
     },
     {
       "category": "tools",
@@ -1663,6 +1711,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/hyperbrowser",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/hyperbrowser.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/hyperbrowser",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1680,8 +1731,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/hyperbrowser"
+      }
     },
     {
       "category": "tools",
@@ -1730,6 +1780,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/lakera-guard",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/lakera-guard.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/lakera-guard",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1747,8 +1800,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/lakera-guard"
+      }
     },
     {
       "category": "tools",
@@ -1797,6 +1849,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/langfuse",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/langfuse.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/langfuse",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -1815,8 +1870,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/langfuse"
+      }
     },
     {
       "category": "tools",
@@ -1865,6 +1919,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/langgraph",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/langgraph.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/langgraph",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1883,8 +1940,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/langgraph"
+      }
     },
     {
       "category": "tools",
@@ -1933,6 +1989,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/langsmith",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/langsmith.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/langsmith",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1950,8 +2009,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/langsmith"
+      }
     },
     {
       "category": "tools",
@@ -2000,6 +2058,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/lovable",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/lovable.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/lovable",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2017,8 +2078,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/lovable"
+      }
     },
     {
       "category": "tools",
@@ -2067,6 +2127,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/make",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/make.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/make",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2084,8 +2147,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/make"
+      }
     },
     {
       "category": "tools",
@@ -2134,6 +2196,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/mastra",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/mastra.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/mastra",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -2152,8 +2217,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/mastra"
+      }
     },
     {
       "category": "tools",
@@ -2202,6 +2266,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/microsoft-autogen.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/microsoft-autogen",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2219,8 +2286,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/microsoft-autogen"
+      }
     },
     {
       "category": "tools",
@@ -2269,6 +2335,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/n8n",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/n8n.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/n8n",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -2287,8 +2356,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/n8n"
+      }
     },
     {
       "category": "tools",
@@ -2337,6 +2405,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/opencode",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/opencode.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/opencode",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2354,8 +2425,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/opencode"
+      }
     },
     {
       "category": "tools",
@@ -2404,6 +2474,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/pipedream",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/pipedream.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/pipedream",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2421,8 +2494,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/pipedream"
+      }
     },
     {
       "category": "tools",
@@ -2470,6 +2542,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/promptfoo",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/promptfoo.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/promptfoo",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -2488,8 +2563,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/promptfoo"
+      }
     },
     {
       "category": "tools",
@@ -2538,6 +2612,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/protect-ai",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/protect-ai.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/protect-ai",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2555,8 +2632,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/protect-ai"
+      }
     },
     {
       "category": "tools",
@@ -2605,6 +2681,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/raycast",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/raycast.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/raycast",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2622,8 +2701,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/raycast"
+      }
     },
     {
       "category": "tools",
@@ -2672,6 +2750,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/replit-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/replit-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/replit-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2689,8 +2770,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/replit-agent"
+      }
     },
     {
       "category": "tools",
@@ -2739,6 +2819,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/roo-code",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/roo-code.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/roo-code",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2757,8 +2840,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/roo-code"
+      }
     },
     {
       "category": "tools",
@@ -2807,6 +2889,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/smithery",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/smithery.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/smithery",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2824,8 +2909,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/smithery"
+      }
     },
     {
       "category": "tools",
@@ -2873,6 +2957,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/sourcegraph-cody",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/sourcegraph-cody.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/sourcegraph-cody",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2890,8 +2977,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/sourcegraph-cody"
+      }
     },
     {
       "category": "tools",
@@ -2940,6 +3026,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/stagehand",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/stagehand.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/stagehand",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -2958,8 +3047,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/stagehand"
+      }
     },
     {
       "category": "tools",
@@ -3008,6 +3096,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/trigger-dev",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/trigger-dev.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/trigger-dev",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3026,8 +3117,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/trigger-dev"
+      }
     },
     {
       "category": "tools",
@@ -3076,6 +3166,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/vercel-v0",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/vercel-v0.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/vercel-v0",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3093,8 +3186,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/vercel-v0"
+      }
     },
     {
       "category": "tools",
@@ -3142,6 +3234,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/vercel-ai-sdk",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/vercel-ai-sdk.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/vercel-ai-sdk",
       "trustSignals": {
         "firstPartyEditorial": true,
         "packageVerified": false,
@@ -3160,8 +3255,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/vercel-ai-sdk"
+      }
     },
     {
       "category": "tools",
@@ -3210,6 +3304,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/weave",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/weave.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/weave",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3227,8 +3324,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/weave"
+      }
     },
     {
       "category": "tools",
@@ -3276,6 +3372,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/windsurf",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/windsurf.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/windsurf",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3293,8 +3392,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/windsurf"
+      }
     },
     {
       "category": "tools",
@@ -3343,6 +3441,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/workato",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/workato.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/workato",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3360,8 +3461,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/workato"
+      }
     },
     {
       "category": "tools",
@@ -3410,6 +3510,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/zapier-ai",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/zapier-ai.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/zapier-ai",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3427,8 +3530,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/zapier-ai"
+      }
     },
     {
       "category": "tools",
@@ -3477,6 +3579,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/tools/zed",
+      "llmsUrl": "https://heyclau.de/data/llms/tools/zed.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/tools/zed",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -3495,8 +3600,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/tools/zed"
+      }
     }
   ]
 }

@@ -5,9 +5,18 @@
   "slug": "contrastapi-mcp-server",
   "title": "ContrastAPI Security Tools",
   "author": "UPinar",
+  "brandName": "ContrastAPI",
+  "brandDomain": "contrastcyber.com",
+  "brandIconUrl": "/api/brand-assets/icon/contrastcyber.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/\n\nConfig:\n{\n  \"contrastapi\": {\n    \"url\": \"https://api.contrastcyber.com/mcp/\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\nclaude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/\nclaude mcp list",
   "detailMarkdown": "# ContrastAPI Security Tools\n\n31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.\n\n## Install\n```bash\nclaude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/\n```\n\n## Config\n```json\n{\n  \"contrastapi\": {\n    \"url\": \"https://api.contrastcyber.com/mcp/\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/\nclaude mcp list",
   "webUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/contrastapi-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/contrastapi-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/contrastapi-mcp-server",
+  "seoTitle": "ContrastAPI MCP Server for Claude Security Research",
+  "seoDescription": "Add ContrastAPI to Claude as a remote MCP server for CVE lookup, EPSS, KEV enrichment, domain audits, IP reputation, and dependency vulnerability scanning.",
   "repoUrl": "https://github.com/UPinar/contrastapi",
   "documentationUrl": "https://api.contrastcyber.com"
 }

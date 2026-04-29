@@ -5,9 +5,18 @@
   "slug": "hugging-face-mcp-server",
   "title": "Hugging Face MCP Server - MCP Servers",
   "author": "Hugging Face",
+  "brandName": "Hugging Face",
+  "brandDomain": "huggingface.co",
+  "brandIconUrl": "/api/brand-assets/icon/huggingface.co",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status hugging-face\n\nConfig:\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Hugging Face MCP Server - MCP Servers\n\nAccess Hugging Face Hub and Gradio AI applications\n\n## Install\n```bash\nclaude mcp list && claude mcp status hugging-face\n```\n\n## Config\n```json\n{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status hugging-face",
   "webUrl": "https://heyclau.de/mcp/hugging-face-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/hugging-face-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/hugging-face-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/hugging-face-mcp-server",
+  "seoTitle": "Hugging Face MCP Server - MCP Servers",
+  "seoDescription": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
   "repoUrl": "",
   "documentationUrl": "https://huggingface.co/settings/mcp"
 }

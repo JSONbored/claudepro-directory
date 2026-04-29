@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nCrewAI is relevant for users exploring role-based multi-agent systems and process automation patterns.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# CrewAI\n\nFramework and platform for building multi-agent workflows, role-based agents, process automation, and AI crews.",
   "webUrl": "https://heyclau.de/tools/crewai",
+  "canonicalUrl": "https://heyclau.de/tools/crewai",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/crewai.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/crewai",
+  "seoTitle": "CrewAI multi-agent workflow framework",
+  "seoDescription": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/crewAIInc/crewAI",
   "documentationUrl": "https://docs.crewai.com"
 }

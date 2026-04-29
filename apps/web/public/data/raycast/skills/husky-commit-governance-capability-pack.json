@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack\n\nUsage:\nUse this skill to install lean local hooks that prevent bad commits before CI.\n\nAsset:\n# Trigger\n\"Apply the husky commit governance capability pack to this repository.\"\n\n# Required output\n1) Hook matrix (pre-commit, commit-msg, optional pre-push)\n2) Fast-path command list (< 10s target)\n3) Contributor bypass/override policy\n4) Drift and maintenance checklist",
   "detailMarkdown": "# Husky Commit Governance Capability Pack Skill\n\nExpert husky capability pack for lightweight local quality gates, commit message enforcement, and low-friction contributor workflows.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/husky-commit-governance-capability-pack.zip -o husky-commit-governance-capability-pack.zip && unzip -o husky-commit-governance-capability-pack.zip -d ./husky-commit-governance-capability-pack\n```\n\n## Usage\nUse this skill to install lean local hooks that prevent bad commits before CI.",
   "webUrl": "https://heyclau.de/skills/husky-commit-governance-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/husky-commit-governance-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/husky-commit-governance-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/husky-commit-governance-capability-pack",
+  "seoTitle": "Husky Commit Governance Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for Husky hook design, commit quality enforcement, and maintainable local developer guardrails. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://typicode.github.io/husky/"
 }

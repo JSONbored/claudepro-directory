@@ -35,6 +35,10 @@
       "mcp"
     ],
     "documentationUrl": "https://api.contrastcyber.com",
+    "brandName": "ContrastAPI",
+    "brandDomain": "contrastcyber.com",
+    "brandIconUrl": "/api/brand-assets/icon/contrastcyber.com",
+    "brandAssetSource": "brandfetch",
     "cardDescription": "31 remote security tools: CVE+EPSS/KEV, domain audit, IP threat intel, dep scan. Free tier 100/hr, no key.",
     "installable": true,
     "installCommand": "claude mcp add --transport http contrastapi https://api.contrastcyber.com/mcp/",

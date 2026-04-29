@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip -o ethereum-solidity-security-foundry.zip && unzip -o ethereum-solidity-security-foundry.zip -d ./ethereum-solidity-security-foundry\n\nUsage:\nUse this skill to design secure Solidity contracts and enforce quality with Foundry test, fuzz, and invariant workflows.\n\nAsset:\n# Trigger\n\"Apply the Ethereum Solidity security Foundry skill to this contract.\"\n\n# Required output\n1) Threat model and asset flow\n2) Contract architecture with security controls\n3) Test/fuzz/invariant plan\n4) Deployment and verification checklist",
   "detailMarkdown": "# Ethereum Solidity Security Foundry Skill\n\nBuild and harden Ethereum smart contracts with Foundry, invariant testing, and battle-tested OpenZeppelin security patterns.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/ethereum-solidity-security-foundry.zip -o ethereum-solidity-security-foundry.zip && unzip -o ethereum-solidity-security-foundry.zip -d ./ethereum-solidity-security-foundry\n```\n\n## Usage\nUse this skill to design secure Solidity contracts and enforce quality with Foundry test, fuzz, and invariant workflows.",
   "webUrl": "https://heyclau.de/skills/ethereum-solidity-security-foundry",
+  "canonicalUrl": "https://heyclau.de/skills/ethereum-solidity-security-foundry",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/ethereum-solidity-security-foundry.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/ethereum-solidity-security-foundry",
+  "seoTitle": "Ethereum Solidity Security Foundry Skill",
+  "seoDescription": "Reusable AI skill for secure Ethereum smart contract development using Solidity, Foundry tests, fuzzing, and OpenZeppelin standards.",
   "repoUrl": "",
   "documentationUrl": "https://ethereum.org/developers/docs/"
 }

@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/base-l2-smart-contract-launchpad.zip -o base-l2-smart-contract-launchpad.zip && unzip -o base-l2-smart-contract-launchpad.zip -d ./base-l2-smart-contract-launchpad\n\nUsage:\nUse this skill to move Base contract releases from idea to verified deployment with fewer operational mistakes.\n\nAsset:\n# Trigger\n\"Run the Base L2 smart contract launchpad skill for this release.\"\n\n# Required output\n1) Deployment plan and environment config\n2) Verification and explorer checklist\n3) Risk controls and emergency procedures\n4) Post-launch monitoring actions",
   "detailMarkdown": "# Base L2 Smart Contract Launchpad Skill\n\nShip smart contracts on Base with secure deployment, verification, environment management, and production-readiness checklists.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/base-l2-smart-contract-launchpad.zip -o base-l2-smart-contract-launchpad.zip && unzip -o base-l2-smart-contract-launchpad.zip -d ./base-l2-smart-contract-launchpad\n```\n\n## Usage\nUse this skill to move Base contract releases from idea to verified deployment with fewer operational mistakes.",
   "webUrl": "https://heyclau.de/skills/base-l2-smart-contract-launchpad",
+  "canonicalUrl": "https://heyclau.de/skills/base-l2-smart-contract-launchpad",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/base-l2-smart-contract-launchpad.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/base-l2-smart-contract-launchpad",
+  "seoTitle": "Base L2 Smart Contract Launchpad Skill",
+  "seoDescription": "AI skill for deploying and hardening Base L2 smart contracts with secure rollout, verification, and operational checks. HeyClaude adds source links, install...",
   "repoUrl": "",
   "documentationUrl": "https://docs.base.org/get-started/deploy-smart-contracts"
 }

@@ -9,6 +9,9 @@ Download: /downloads/mcp/square-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/square-mcp-server
 - Source URLs: https://developer.squareup.com/docs/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx
+- Brand: Square
+- Brand domain: squareup.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/square-mcp-server.mcpb
 - Package SHA256: d641dab1566fd2d5550a21872559701a301470bcfdedd9565a77d8090b301316
 - Author: Square

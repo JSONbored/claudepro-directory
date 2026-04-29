@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack\n\nUsage:\nUse this skill to scaffold and harden Codex plugins with explicit capabilities and low operational risk.\n\nAsset:\n# Trigger\n\"Apply the Codex plugin creator capability pack.\"\n\n# Required output\n1) Plugin architecture and capability boundaries\n2) Manifest and permissions review\n3) Security and observability checklist\n4) Release and maintenance plan",
   "detailMarkdown": "# Codex Plugin Creator Capability Pack Skill\n\nExpert Codex plugin capability pack for safe plugin scaffolding, manifest quality, MCP integration, and maintainable distribution.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/codex-plugin-creator-capability-pack.zip -o codex-plugin-creator-capability-pack.zip && unzip -o codex-plugin-creator-capability-pack.zip -d ./codex-plugin-creator-capability-pack\n```\n\n## Usage\nUse this skill to scaffold and harden Codex plugins with explicit capabilities and low operational risk.",
   "webUrl": "https://heyclau.de/skills/codex-plugin-creator-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/codex-plugin-creator-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/codex-plugin-creator-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/codex-plugin-creator-capability-pack",
+  "seoTitle": "Codex Plugin Creator Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for Codex plugin architecture, secure manifest authoring, and plugin lifecycle operations. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/openai/codex",
   "documentationUrl": "https://github.com/openai/codex"
 }

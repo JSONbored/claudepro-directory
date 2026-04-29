@@ -9,6 +9,9 @@ Download: /downloads/mcp/plaid-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/plaid-mcp-server
 - Source URLs: https://plaid.com/blog/plaid-mcp-ai-assistant-claude/, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/plaid-mcp-server.mdx
+- Brand: Plaid
+- Brand domain: plaid.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/plaid-mcp-server.mcpb
 - Package SHA256: 40696c214bbf5776242e5d6fe366cda848a7dea1612d838562604655e269f4ef
 - Author: Plaid

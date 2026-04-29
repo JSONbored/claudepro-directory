@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nHyperbrowser belongs in the agent infrastructure category for teams running browser automation beyond local developer machines.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Hyperbrowser\n\nBrowser automation infrastructure for AI agents, web scraping, browser sessions, and large-scale web workflows.",
   "webUrl": "https://heyclau.de/tools/hyperbrowser",
+  "canonicalUrl": "https://heyclau.de/tools/hyperbrowser",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/hyperbrowser.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/hyperbrowser",
+  "seoTitle": "Hyperbrowser browser automation infrastructure",
+  "seoDescription": "Hyperbrowser provides browser automation infrastructure for AI agents, web scraping, browser sessions, and web workflows.",
   "repoUrl": "",
   "documentationUrl": "https://docs.hyperbrowser.ai"
 }

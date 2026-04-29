@@ -56,6 +56,10 @@
       "title": "Box MCP Server for Claude",
       "description": "Access enterprise content, analyze unstructured data, and automate workflows",
       "websiteUrl": "https://box.dev/guides/box-mcp/remote/",
+      "brandName": "Box",
+      "brandDomain": "box.com",
+      "brandIconUrl": "/api/brand-assets/icon/box.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status box",
       "configSnippet": "{\n  \"box\": {\n    \"url\": \"https://mcp.box.com/\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/box-mcp-server"
@@ -65,6 +69,10 @@
       "title": "Canva MCP Server for Claude",
       "description": "Browse, summarize, and generate Canva designs directly from Claude",
       "websiteUrl": "https://www.canva.dev/docs/connect/canva-mcp-server-setup/",
+      "brandName": "Canva",
+      "brandDomain": "canva.com",
+      "brandIconUrl": "/api/brand-assets/icon/canva.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status canva",
       "configSnippet": "{\n  \"canva\": {\n    \"url\": \"https://mcp.canva.com/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/canva-mcp-server"
@@ -74,6 +82,10 @@
       "title": "Claude Desktop MCP Setup",
       "description": "Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.",
       "websiteUrl": "",
+      "brandName": "Anthropic",
+      "brandDomain": "anthropic.com",
+      "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list",
       "configSnippet": "{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/Users/username/Documents\"]\n    }\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/desktop-mcp-setup"
@@ -113,6 +125,10 @@
       "title": "Cloudinary MCP Server - MCP Servers",
       "description": "Upload, manage, transform, and analyze media assets in the cloud",
       "websiteUrl": "https://cloudinary.com/documentation/cloudinary_llm_mcp#mcp_servers",
+      "brandName": "Cloudinary",
+      "brandDomain": "cloudinary.com",
+      "brandIconUrl": "/api/brand-assets/icon/cloudinary.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add cloudinary --env CLOUDINARY_CLOUD_NAME=YOUR_CLOUD_NAME --env CLOUDINARY_API_KEY=YOUR_KEY --env CLOUDINARY_API_SECRET=YOUR_SECRET",
       "configSnippet": "{\n  \"cloudinary\": {\n    \"env\": {\n      \"CLOUDINARY_API_KEY\": \"${CLOUDINARY_API_KEY}\",\n      \"CLOUDINARY_API_SECRET\": \"${CLOUDINARY_API_SECRET}\",\n      \"CLOUDINARY_CLOUD_NAME\": \"${CLOUDINARY_CLOUD_NAME}\"\n    },\n    \"url\": \"https://mcp.cloudinary.com/\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/cloudinary-mcp-server"
@@ -122,6 +138,10 @@
       "title": "ContrastAPI Security Tools",
       "description": "31 security research tools over remote MCP: CVE lookup with EPSS + CISA KEV enrichment, domain audit (SSL/DNS/SPF/DMARC), IP threat intel (Shodan + AbuseIPDB + ASN), dependency vulnerability scanner, IOC enrichment, and more. Free tier: 100 credits/hour, no API key required. Streamable-HTTP transport.",
       "websiteUrl": "https://api.contrastcyber.com",
+      "brandName": "ContrastAPI",
+      "brandDomain": "contrastcyber.com",
+      "brandIconUrl": "/api/brand-assets/icon/contrastcyber.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/UPinar/contrastapi",
         "source": "github"
@@ -135,6 +155,10 @@
       "title": "Daloopa MCP Server for Claude",
       "description": "Access high-quality fundamental financial data from SEC filings and investor presentations",
       "websiteUrl": "https://docs.daloopa.com/docs/daloopa-mcp",
+      "brandName": "Daloopa",
+      "brandDomain": "daloopa.com",
+      "brandIconUrl": "/api/brand-assets/icon/daloopa.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status daloopa",
       "configSnippet": "{\n  \"daloopa\": {\n    \"url\": \"https://mcp.daloopa.com/server/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/daloopa-mcp-server"
@@ -200,6 +224,10 @@
       "title": "Fireflies MCP Server for Claude",
       "description": "Extract valuable insights from meeting transcripts and summaries",
       "websiteUrl": "https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol",
+      "brandName": "Fireflies",
+      "brandDomain": "fireflies.ai",
+      "brandIconUrl": "/api/brand-assets/icon/fireflies.ai",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status fireflies",
       "configSnippet": "{\n  \"fireflies\": {\n    \"url\": \"https://api.fireflies.ai/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/fireflies-mcp-server"
@@ -235,6 +263,10 @@
       "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
       "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.",
       "websiteUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "brandName": "HeyClaude",
+      "brandDomain": "heyclau.de",
+      "brandIconUrl": "/favicon.svg",
+      "brandAssetSource": "manual",
       "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
       "configSnippet": "{\n  \"heyclaude-mcp\": {\n    \"url\": \"https://mcp.heyclau.de/mcp\",\n    \"oauth\": {\n      \"scopes\": [\n        \"mcp:tools\"\n      ],\n      \"resource\": \"https://mcp.heyclau.de/mcp\",\n      \"tokenEndpoint\": \"https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token\",\n      \"authorizationEndpoint\": \"https://mcp.heyclau.de/oauth/authorize\"\n    },\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/heyclaude-mcp"
@@ -257,6 +289,10 @@
       "title": "Hugging Face MCP Server - MCP Servers",
       "description": "Access Hugging Face Hub and Gradio AI applications",
       "websiteUrl": "https://huggingface.co/settings/mcp",
+      "brandName": "Hugging Face",
+      "brandDomain": "huggingface.co",
+      "brandIconUrl": "/api/brand-assets/icon/huggingface.co",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status hugging-face",
       "configSnippet": "{\n  \"huggingface\": {\n    \"url\": \"https://huggingface.co/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/hugging-face-mcp-server"
@@ -266,6 +302,10 @@
       "title": "Intercom MCP Server for Claude",
       "description": "Access customer conversations, tickets, and user data in real-time",
       "websiteUrl": "https://developers.intercom.com/docs/guides/mcp",
+      "brandName": "Intercom",
+      "brandDomain": "intercom.com",
+      "brandIconUrl": "/api/brand-assets/icon/intercom.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status intercom",
       "configSnippet": "{\n  \"intercom\": {\n    \"url\": \"https://mcp.intercom.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/intercom-mcp-server"
@@ -275,6 +315,10 @@
       "title": "Invideo MCP Server for Claude",
       "description": "Build video creation capabilities into your applications",
       "websiteUrl": "https://invideo.io/ai/mcp",
+      "brandName": "Invideo",
+      "brandDomain": "invideo.io",
+      "brandIconUrl": "/api/brand-assets/icon/invideo.io",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status invideo",
       "configSnippet": "{\n  \"invideo\": {\n    \"url\": \"https://mcp.invideo.io/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/invideo-mcp-server"
@@ -284,6 +328,10 @@
       "title": "Jam MCP Server for Claude",
       "description": "Debug faster with AI agents that access video recordings, console logs, and network requests",
       "websiteUrl": "https://jam.dev/docs/debug-a-jam/mcp",
+      "brandName": "Jam",
+      "brandDomain": "jam.dev",
+      "brandIconUrl": "/api/brand-assets/icon/jam.dev",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status jam",
       "configSnippet": "{\n  \"jam\": {\n    \"url\": \"https://mcp.jam.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/jam-mcp-server"
@@ -336,6 +384,10 @@
       "title": "Monday MCP Server for Claude",
       "description": "Manage monday.com boards, items, and CRM activities",
       "websiteUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration",
+      "brandName": "Monday.com",
+      "brandDomain": "monday.com",
+      "brandIconUrl": "/api/brand-assets/icon/monday.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status monday",
       "configSnippet": "{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/monday-mcp-server"
@@ -371,6 +423,10 @@
       "title": "Paypal MCP Server for Claude",
       "description": "Integrate PayPal commerce capabilities, payment processing, and transaction management",
       "websiteUrl": "https://www.paypal.ai/",
+      "brandName": "PayPal",
+      "brandDomain": "paypal.com",
+      "brandIconUrl": "/api/brand-assets/icon/paypal.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status paypal",
       "configSnippet": "{\n  \"paypal\": {\n    \"url\": \"https://mcp.paypal.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/paypal-mcp-server"
@@ -380,6 +436,10 @@
       "title": "Plaid MCP Server for Claude",
       "description": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking",
       "websiteUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/",
+      "brandName": "Plaid",
+      "brandDomain": "plaid.com",
+      "brandIconUrl": "/api/brand-assets/icon/plaid.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp list && claude mcp status plaid",
       "configSnippet": "{\n  \"plaid\": {\n    \"url\": \"https://api.dashboard.plaid.com/mcp/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/plaid-mcp-server"
@@ -415,6 +475,10 @@
       "title": "Reddit MCP Buddy for Claude",
       "description": "Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required",
       "websiteUrl": "https://github.com/karanb192/reddit-mcp-buddy",
+      "brandName": "Reddit",
+      "brandDomain": "reddit.com",
+      "brandIconUrl": "/api/brand-assets/icon/reddit.com",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/karanb192/reddit-mcp-buddy",
         "source": "github"
@@ -428,6 +492,10 @@
       "title": "Redis MCP Server for Claude",
       "description": "Official Redis MCP server providing natural language interface for Redis data management and operations",
       "websiteUrl": "https://github.com/redis/mcp-redis",
+      "brandName": "Redis",
+      "brandDomain": "redis.io",
+      "brandIconUrl": "/api/brand-assets/icon/redis.io",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/redis/mcp-redis",
         "source": "github"
@@ -454,6 +522,10 @@
       "title": "Socket MCP Server for Claude",
       "description": "Security analysis and vulnerability scanning for dependencies",
       "websiteUrl": "https://github.com/SocketDev/socket-mcp",
+      "brandName": "Socket",
+      "brandDomain": "socket.dev",
+      "brandIconUrl": "/api/brand-assets/icon/socket.dev",
+      "brandAssetSource": "brandfetch",
       "repository": {
         "url": "https://github.com/SocketDev/socket-mcp",
         "source": "github"
@@ -467,6 +539,10 @@
       "title": "Square MCP Server for Claude",
       "description": "Build on Square APIs for payments, inventory, and order management",
       "websiteUrl": "https://developer.squareup.com/docs/mcp",
+      "brandName": "Square",
+      "brandDomain": "squareup.com",
+      "brandIconUrl": "/api/brand-assets/icon/squareup.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport sse square https://mcp.squareup.com/sse && claude mcp list",
       "configSnippet": "{\n  \"square\": {\n    \"url\": \"https://mcp.squareup.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/square-mcp-server"
@@ -489,6 +565,10 @@
       "title": "Stytch MCP Server for Claude",
       "description": "Configure and manage Stytch authentication services and workspace settings",
       "websiteUrl": "https://stytch.com/docs/workspace-management/stytch-mcp",
+      "brandName": "Stytch",
+      "brandDomain": "stytch.com",
+      "brandIconUrl": "/api/brand-assets/icon/stytch.com",
+      "brandAssetSource": "brandfetch",
       "installCommand": "claude mcp add --transport http stytch http://mcp.stytch.dev/mcp && claude mcp list",
       "configSnippet": "{\n  \"stytch\": {\n    \"url\": \"http://mcp.stytch.dev/mcp\",\n    \"transport\": \"http\"\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/stytch-mcp-server"

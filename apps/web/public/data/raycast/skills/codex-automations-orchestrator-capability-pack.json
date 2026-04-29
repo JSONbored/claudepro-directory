@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack\n\nUsage:\nUse this skill to design robust recurring automations with bounded scope, explicit outputs, and low alert fatigue.\n\nAsset:\n# Trigger\n\"Apply the Codex automations orchestrator capability pack.\"\n\n# Required output\n1) Automation inventory and purpose\n2) Schedule/risk matrix\n3) Prompt and output contract per automation\n4) Alerting and rollback plan",
   "detailMarkdown": "# Codex Automations Orchestrator Capability Pack Skill\n\nExpert automation-orchestration capability pack for designing safe, low-noise recurring Codex workflows with clear runbooks.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/codex-automations-orchestrator-capability-pack.zip -o codex-automations-orchestrator-capability-pack.zip && unzip -o codex-automations-orchestrator-capability-pack.zip -d ./codex-automations-orchestrator-capability-pack\n```\n\n## Usage\nUse this skill to design robust recurring automations with bounded scope, explicit outputs, and low alert fatigue.",
   "webUrl": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/codex-automations-orchestrator-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/codex-automations-orchestrator-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/codex-automations-orchestrator-capability-pack",
+  "seoTitle": "Codex Automations Orchestrator Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for Codex automation design, recurring task governance, and safe long-running operational workflows. HeyClaude adds source links, install...",
   "repoUrl": "https://github.com/openai/codex",
   "documentationUrl": "https://github.com/openai/codex"
 }

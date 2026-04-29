@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip -o ai-search-ranking-content-cluster-strategy.zip && unzip -o ai-search-ranking-content-cluster-strategy.zip -d ./ai-search-ranking-content-cluster-strategy\n\nUsage:\nUse this skill to build and operate content clusters that compound traffic and ranking over time.\n\nAsset:\n# Trigger\n\"Apply the AI search ranking content cluster strategy skill to this niche.\"\n\n# Required output\n1) Keyword and intent map\n2) Cluster/pillar architecture\n3) Internal linking strategy\n4) Publishing and refresh cadence",
   "detailMarkdown": "# AI Search Ranking Content Cluster Strategy Skill\n\nBuild SEO-forward content clusters that align with search intent, topical authority, and conversion pathways for AI tooling niches.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/ai-search-ranking-content-cluster-strategy.zip -o ai-search-ranking-content-cluster-strategy.zip && unzip -o ai-search-ranking-content-cluster-strategy.zip -d ./ai-search-ranking-content-cluster-strategy\n```\n\n## Usage\nUse this skill to build and operate content clusters that compound traffic and ranking over time.",
   "webUrl": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy",
+  "canonicalUrl": "https://heyclau.de/skills/ai-search-ranking-content-cluster-strategy",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/ai-search-ranking-content-cluster-strategy.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/ai-search-ranking-content-cluster-strategy",
+  "seoTitle": "AI Search Ranking Content Cluster Strategy Skill",
+  "seoDescription": "Reusable AI skill for planning and executing SEO content clusters that improve rankings, authority, and qualified traffic.",
   "repoUrl": "",
   "documentationUrl": "https://developers.google.com/search/docs"
 }

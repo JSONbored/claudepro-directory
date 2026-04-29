@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nRaycast is relevant for Claude-native users because it provides a daily launcher surface for extensions, commands, and AI workflows.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Raycast\n\nmacOS launcher and extension platform with AI commands, automations, team workflows, and developer-focused integrations.",
   "webUrl": "https://heyclau.de/tools/raycast",
+  "canonicalUrl": "https://heyclau.de/tools/raycast",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/raycast.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/raycast",
+  "seoTitle": "Raycast launcher and AI extension platform",
+  "seoDescription": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://developers.raycast.com"
 }

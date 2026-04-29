@@ -9,6 +9,9 @@ Download: /downloads/mcp/heyclaude-mcp.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/heyclaude-mcp
 - Source URLs: https://heyclau.de/mcp/heyclaude-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
+- Brand: HeyClaude
+- Brand domain: heyclau.de
+- Brand asset source: manual
 - Package URL: /downloads/mcp/heyclaude-mcp.mcpb
 - Package SHA256: 35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa
 - Author: HeyClaude Team

@@ -9,6 +9,9 @@ Download: /downloads/mcp/fireflies-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/fireflies-mcp-server
 - Source URLs: https://guide.fireflies.ai/articles/8272956938-learn-about-the-fireflies-mcp-server-model-context-protocol, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/fireflies-mcp-server.mdx
+- Brand: Fireflies
+- Brand domain: fireflies.ai
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/fireflies-mcp-server.mcpb
 - Package SHA256: 21b16bcef6c23c95d81241c4937bf0c89f4582fb57748f12da8da13a01ba7038
 - Author: Fireflies

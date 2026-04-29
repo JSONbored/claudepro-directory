@@ -5,9 +5,18 @@
   "slug": "plaid-mcp-server",
   "title": "Plaid MCP Server for Claude",
   "author": "Plaid",
+  "brandName": "Plaid",
+  "brandDomain": "plaid.com",
+  "brandIconUrl": "/api/brand-assets/icon/plaid.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status plaid\n\nConfig:\n{\n  \"plaid\": {\n    \"url\": \"https://api.dashboard.plaid.com/mcp/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"plaid\": {\n    \"url\": \"https://api.dashboard.plaid.com/mcp/sse\",\n    \"transport\": \"sse\"\n  }\n}",
   "detailMarkdown": "# Plaid MCP Server for Claude\n\nAnalyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking\n\n## Install\n```bash\nclaude mcp list && claude mcp status plaid\n```\n\n## Config\n```json\n{\n  \"plaid\": {\n    \"url\": \"https://api.dashboard.plaid.com/mcp/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status plaid",
   "webUrl": "https://heyclau.de/mcp/plaid-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/plaid-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/plaid-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/plaid-mcp-server",
+  "seoTitle": "Plaid MCP Server for Claude",
+  "seoDescription": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://plaid.com/blog/plaid-mcp-ai-assistant-claude/"
 }

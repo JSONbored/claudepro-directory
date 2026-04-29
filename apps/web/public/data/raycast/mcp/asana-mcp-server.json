@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status asana\n\nConfig:\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
   "detailMarkdown": "# Asana MCP Server for Claude\n\nInteract with Asana workspaces to manage projects and tasks\n\n## Install\n```bash\nclaude mcp list && claude mcp status asana\n```\n\n## Config\n```json\n{\n  \"asana\": {\n    \"url\": \"https://mcp.asana.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status asana",
   "webUrl": "https://heyclau.de/mcp/asana-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/asana-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/asana-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/asana-mcp-server",
+  "seoTitle": "Asana MCP Server for Claude",
+  "seoDescription": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
   "repoUrl": "",
   "documentationUrl": "https://developers.asana.com/docs/using-asanas-model-control-protocol-mcp-server"
 }

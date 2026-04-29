@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator\n\nUsage:\nClaude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.\n\nAsset:\nfrom docxtpl import DocxTemplate\n\ndoc = DocxTemplate('template.docx')\ncontext = { 'client': 'Acme', 'items': [{'name': 'Widget', 'price': 9.99}] }\ndoc.render(context)\ndoc.save('invoice.docx')",
   "detailMarkdown": "# DOCX Report Generator Skill\n\nFill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx or use Jinja2 templates with docxtpl for dynamic content insertion. Support tables, images, headers, footers, and custom styling.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/docx-report-generator.zip -o docx-report-generator.zip && unzip -o docx-report-generator.zip -d ./docx-report-generator\n```\n\n## Usage\nClaude can create, edit, and format Microsoft Word documents (.docx) programmatically. Generate professional reports, proposals, documentation, and formatted documents with tables, charts, headers, and custom styling.",
   "webUrl": "https://heyclau.de/skills/docx-report-generator",
+  "canonicalUrl": "https://heyclau.de/skills/docx-report-generator",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/docx-report-generator.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/docx-report-generator",
+  "seoTitle": "DOCX Report Generator Skill",
+  "seoDescription": "Fill templated DOCX with data to produce reports, invoices, and formatted documents. Generate professional Word documents programmatically with python-docx o...",
   "repoUrl": "",
   "documentationUrl": "https://docxtpl.readthedocs.io/"
 }

@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status netlify\n\nConfig:\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Netlify MCP Server for Claude\n\nCreate, deploy, and manage websites on Netlify platform\n\n## Install\n```bash\nclaude mcp list && claude mcp status netlify\n```\n\n## Config\n```json\n{\n  \"netlify\": {\n    \"url\": \"https://netlify-mcp.netlify.app/mcp\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status netlify",
   "webUrl": "https://heyclau.de/mcp/netlify-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/netlify-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/netlify-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/netlify-mcp-server",
+  "seoTitle": "Netlify MCP Server for Claude",
+  "seoDescription": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
   "repoUrl": "",
   "documentationUrl": "https://docs.netlify.com/build/build-with-ai/netlify-mcp-server/"
 }

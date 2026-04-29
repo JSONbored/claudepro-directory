@@ -12,6 +12,11 @@
   "copyText": "Install:\nuvx awslabs.core-mcp-server@latest && claude mcp list\n\nConfig:\n{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n\nUsage:\n{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}",
   "detailMarkdown": "# AWS Services MCP Server - MCP Servers\n\nComprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring\n\n## Install\n```bash\nuvx awslabs.core-mcp-server@latest && claude mcp list\n```\n\n## Config\n```json\n{\n  \"aws\": {\n    \"env\": {\n      \"AWS_REGION\": \"${AWS_REGION:-us-east-1}\",\n      \"AWS_PROFILE\": \"${AWS_PROFILE}\",\n      \"FASTMCP_LOG_LEVEL\": \"${FASTMCP_LOG_LEVEL:-ERROR}\"\n    },\n    \"args\": [\n      \"awslabs.core-mcp-server@latest\"\n    ],\n    \"command\": \"uvx\"\n  }\n}\n```\n\n## Usage\nuvx awslabs.core-mcp-server@latest && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/aws-services-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/aws-services-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/aws-services-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/aws-services-mcp-server",
+  "seoTitle": "AWS Services MCP Server - MCP Servers",
+  "seoDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring Discover tools for AI development.",
   "repoUrl": "https://github.com/awslabs/mcp",
   "documentationUrl": "https://github.com/awslabs/mcp"
 }

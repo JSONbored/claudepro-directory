@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack\n\nUsage:\nUse this skill when designing edge applications that need reliable storage coordination across D1, KV, and R2.\n\nAsset:\n# Trigger\n\"Apply the Cloudflare Workers D1/KV/R2 capability pack to this system.\"\n\n# Required output\n1) Data placement strategy\n2) Read/write consistency model\n3) Cache and invalidation plan\n4) Security and abuse controls",
   "detailMarkdown": "# Cloudflare Workers D1 KV R2 Capability Pack Skill\n\nExpert Cloudflare capability skill for designing workers that combine D1, KV, and R2 with clear consistency, caching, and security boundaries.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/cloudflare-workers-d1-kv-r2-capability-pack.zip -o cloudflare-workers-d1-kv-r2-capability-pack.zip && unzip -o cloudflare-workers-d1-kv-r2-capability-pack.zip -d ./cloudflare-workers-d1-kv-r2-capability-pack\n```\n\n## Usage\nUse this skill when designing edge applications that need reliable storage coordination across D1, KV, and R2.",
   "webUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-d1-kv-r2-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/cloudflare-workers-d1-kv-r2-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/cloudflare-workers-d1-kv-r2-capability-pack",
+  "seoTitle": "Cloudflare Workers D1 KV R2 Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for Cloudflare Workers architecture with D1, KV, and R2, focused on consistency, performance, and secure operation.",
   "repoUrl": "",
   "documentationUrl": "https://developers.cloudflare.com/workers/"
 }

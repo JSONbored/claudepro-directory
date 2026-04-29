@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status hubspot\n\nConfig:\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}\n\nUsage:\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}",
   "detailMarkdown": "# Hubspot MCP Server for Claude\n\nAccess and manage HubSpot CRM data including contacts, companies, and deals\n\n## Install\n```bash\nclaude mcp list && claude mcp status hubspot\n```\n\n## Config\n```json\n{\n  \"hubspot\": {\n    \"url\": \"https://mcp.hubspot.com/anthropic\",\n    \"transport\": \"http\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status hubspot",
   "webUrl": "https://heyclau.de/mcp/hubspot-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/hubspot-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/hubspot-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/hubspot-mcp-server",
+  "seoTitle": "Hubspot MCP Server for Claude",
+  "seoDescription": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://developers.hubspot.com/mcp"
 }

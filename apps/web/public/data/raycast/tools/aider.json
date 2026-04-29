@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nAider is a practical option for developers who want tight Git-centered AI editing without adopting a new editor.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Aider\n\nOpen-source terminal coding assistant that edits files in Git repositories using chat-driven development loops.",
   "webUrl": "https://heyclau.de/tools/aider",
+  "canonicalUrl": "https://heyclau.de/tools/aider",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/aider.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/aider",
+  "seoTitle": "Aider terminal AI coding assistant",
+  "seoDescription": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/Aider-AI/aider",
   "documentationUrl": "https://aider.chat/docs"
 }

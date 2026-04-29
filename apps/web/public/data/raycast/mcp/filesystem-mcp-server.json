@@ -12,6 +12,11 @@
   "copyText": "Install:\nclaude mcp list && claude mcp status filesystem\n\nConfig:\n{\n  \"filesystem\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-filesystem\",\n      \"/path/to/allowed/directory\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n\nUsage:\n{\n  \"filesystem\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-filesystem\",\n      \"/path/to/allowed/directory\"\n    ],\n    \"command\": \"npx\"\n  }\n}",
   "detailMarkdown": "# Filesystem MCP Server - MCP Servers\n\nOfficial MCP server providing secure file system operations for Claude Desktop and Claude Code\n\n## Install\n```bash\nclaude mcp list && claude mcp status filesystem\n```\n\n## Config\n```json\n{\n  \"filesystem\": {\n    \"args\": [\n      \"-y\",\n      \"@modelcontextprotocol/server-filesystem\",\n      \"/path/to/allowed/directory\"\n    ],\n    \"command\": \"npx\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status filesystem",
   "webUrl": "https://heyclau.de/mcp/filesystem-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/filesystem-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/filesystem-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/filesystem-mcp-server",
+  "seoTitle": "Filesystem MCP Server - MCP Servers",
+  "seoDescription": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code Discover tools for AI development.",
   "repoUrl": "",
   "documentationUrl": "https://modelcontextprotocol.io/examples"
 }

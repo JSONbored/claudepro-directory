@@ -8,6 +8,11 @@
   "copyText": "Install:\nnpm install zod\n\nUsage:\nnpm install zod\n\nAsset:\nimport { z } from 'zod';\n\nconst passwordSchema = z\n  .string()\n  .min(8, 'Password must be at least 8 characters')\n  .regex(/[0-9]/, 'Password must contain a number')\n  .regex(/[^a-zA-Z0-9]/, 'Password must contain a special character');\n\nconst userRegistrationSchema = z.object({\n  email: z.string().email('Invalid email address'),\n  password: passwordSchema,\n  confirmPassword: z.string(),\n  age: z.number().int().min(18, 'Must be 18 or older').max(100),\n  phone: z.string().regex(/^\\\\+?[1-9]\\\\d{1,14}$/).optional(),\n  acceptTerms: z.literal(true, {\n    errorMap: () => ({ message: 'You must accept the terms' }),\n  }),\n}).refine((data) => data.password === data.confirmPassword, {\n  message: 'Passwords do not match',\n  path: ['confirmPassword'],\n});\n\ntype UserRegistration = z.infer<typeof userRegistrationSchema>;\n\n// Usage with safeParse for error handling\nconst result = userRegistrationSchema.safeParse({\n  email: 'user@example.com',\n  password: 'SecureP@ss1',\n  confirmPassword: 'SecureP@ss1',\n  age: 25,\n  acceptTerms: true,\n});\n\nif (!result.success) {\n  console.error(result.error.format());\n} else {\n  console.log('Valid user:', result.data);\n}",
   "detailMarkdown": "# Zod Schema Validation Skill\n\nBuild type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference.\n\n## Install\n```bash\nnpm install zod\n```\n\n## Usage\nnpm install zod",
   "webUrl": "https://heyclau.de/skills/zod-schema-validator",
+  "canonicalUrl": "https://heyclau.de/skills/zod-schema-validator",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/zod-schema-validator.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/zod-schema-validator",
+  "seoTitle": "Zod Schema Validation Skill",
+  "seoDescription": "Build type-safe runtime validation with Zod for APIs, forms, and data pipelines with TypeScript 5.5+ integration and automatic type inference. Zod is a TypeS...",
   "repoUrl": "",
   "documentationUrl": "https://zod.dev/"
 }

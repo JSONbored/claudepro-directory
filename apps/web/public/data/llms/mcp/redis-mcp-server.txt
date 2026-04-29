@@ -10,6 +10,9 @@ Download: /downloads/mcp/redis-mcp-server.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/redis-mcp-server
 - Source URLs: https://github.com/redis/mcp-redis, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx
+- Brand: Redis
+- Brand domain: redis.io
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/redis-mcp-server.mcpb
 - Package SHA256: 53ca24ed61d13c6d40277f385286fcc089c13b173c7829913b02ddb4d669c68a
 - Author: Redis

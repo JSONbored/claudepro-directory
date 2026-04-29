@@ -58,6 +58,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/agent-skills-framework-engineer",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/agent-skills-framework-engineer.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/agent-skills-framework-engineer",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -74,8 +77,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/agent-skills-framework-engineer"
+      }
     },
     {
       "category": "agents",
@@ -130,6 +132,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/ai-code-review-security-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/ai-code-review-security-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/ai-code-review-security-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -145,8 +150,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/ai-code-review-security-agent"
+      }
     },
     {
       "category": "agents",
@@ -201,6 +205,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/ai-devops-automation-engineer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/ai-devops-automation-engineer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/ai-devops-automation-engineer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -216,8 +223,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/ai-devops-automation-engineer-agent"
+      }
     },
     {
       "category": "agents",
@@ -272,6 +278,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/api-builder-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/api-builder-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/api-builder-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -287,8 +296,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/api-builder-agent"
+      }
     },
     {
       "category": "agents",
@@ -346,6 +354,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/autogen-conversation-agent-builder",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/autogen-conversation-agent-builder.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/autogen-conversation-agent-builder",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -361,8 +372,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/autogen-conversation-agent-builder"
+      }
     },
     {
       "category": "agents",
@@ -417,6 +427,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/backend-architect-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/backend-architect-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/backend-architect-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -432,8 +445,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/backend-architect-agent"
+      }
     },
     {
       "category": "agents",
@@ -489,6 +501,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/claude-haiku-45-speed-optimizer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/claude-haiku-45-speed-optimizer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/claude-haiku-45-speed-optimizer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -505,8 +520,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/claude-haiku-45-speed-optimizer-agent"
+      }
     },
     {
       "category": "agents",
@@ -562,6 +576,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/claude-mcp-skills-integration-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/claude-mcp-skills-integration-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/claude-mcp-skills-integration-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -578,8 +595,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/claude-mcp-skills-integration-agent"
+      }
     },
     {
       "category": "agents",
@@ -636,6 +652,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/claude-md-knowledge-manager-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/claude-md-knowledge-manager-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/claude-md-knowledge-manager-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -652,8 +671,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/claude-md-knowledge-manager-agent"
+      }
     },
     {
       "category": "agents",
@@ -713,6 +731,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/cloud-infrastructure-architect-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/cloud-infrastructure-architect-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/cloud-infrastructure-architect-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -728,8 +749,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/cloud-infrastructure-architect-agent"
+      }
     },
     {
       "category": "agents",
@@ -784,6 +804,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/code-reviewer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/code-reviewer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/code-reviewer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -800,8 +823,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/code-reviewer-agent"
+      }
     },
     {
       "category": "agents",
@@ -860,6 +882,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/codebase-migration-refactoring-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/codebase-migration-refactoring-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/codebase-migration-refactoring-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -876,8 +901,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/codebase-migration-refactoring-agent"
+      }
     },
     {
       "category": "agents",
@@ -933,6 +957,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/context-window-optimizer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/context-window-optimizer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/context-window-optimizer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -949,8 +976,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/context-window-optimizer-agent"
+      }
     },
     {
       "category": "agents",
@@ -1006,6 +1032,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/data-pipeline-engineering-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/data-pipeline-engineering-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/data-pipeline-engineering-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1021,8 +1050,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/data-pipeline-engineering-agent"
+      }
     },
     {
       "category": "agents",
@@ -1079,6 +1107,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/database-expert",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/database-expert.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/database-expert",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1095,8 +1126,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/database-expert"
+      }
     },
     {
       "category": "agents",
@@ -1151,6 +1181,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/database-specialist-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/database-specialist-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/database-specialist-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1167,8 +1200,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/database-specialist-agent"
+      }
     },
     {
       "category": "agents",
@@ -1222,6 +1254,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/debugging-assistant-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/debugging-assistant-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/debugging-assistant-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1237,8 +1272,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/debugging-assistant-agent"
+      }
     },
     {
       "category": "agents",
@@ -1298,6 +1332,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/devops-sre-expert",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/devops-sre-expert.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/devops-sre-expert",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1314,8 +1351,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/devops-sre-expert"
+      }
     },
     {
       "category": "agents",
@@ -1369,6 +1405,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/domain-specialist-ai-agents",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/domain-specialist-ai-agents.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/domain-specialist-ai-agents",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1384,8 +1423,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/domain-specialist-ai-agents"
+      }
     },
     {
       "category": "agents",
@@ -1440,6 +1478,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/extended-thinking-orchestrator",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/extended-thinking-orchestrator.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/extended-thinking-orchestrator",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1455,8 +1496,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/extended-thinking-orchestrator"
+      }
     },
     {
       "category": "agents",
@@ -1512,6 +1552,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/frontend-specialist-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/frontend-specialist-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/frontend-specialist-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1528,8 +1571,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/frontend-specialist-agent"
+      }
     },
     {
       "category": "agents",
@@ -1585,6 +1627,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/full-stack-ai-development-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/full-stack-ai-development-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/full-stack-ai-development-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1600,8 +1645,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/full-stack-ai-development-agent"
+      }
     },
     {
       "category": "agents",
@@ -1660,6 +1704,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/github-copilot-interop-bridge",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/github-copilot-interop-bridge.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/github-copilot-interop-bridge",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1675,8 +1722,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/github-copilot-interop-bridge"
+      }
     },
     {
       "category": "agents",
@@ -1730,6 +1776,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/life-sciences-research-specialist",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/life-sciences-research-specialist.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/life-sciences-research-specialist",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1745,8 +1794,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/life-sciences-research-specialist"
+      }
     },
     {
       "category": "agents",
@@ -1804,6 +1852,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/multi-agent-orchestration-specialist",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/multi-agent-orchestration-specialist.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/multi-agent-orchestration-specialist",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1819,8 +1870,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/multi-agent-orchestration-specialist"
+      }
     },
     {
       "category": "agents",
@@ -1875,6 +1925,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/parallel-subagent-distributor",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/parallel-subagent-distributor.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/parallel-subagent-distributor",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1891,8 +1944,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/parallel-subagent-distributor"
+      }
     },
     {
       "category": "agents",
@@ -1947,6 +1999,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/performance-optimizer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/performance-optimizer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/performance-optimizer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -1963,8 +2018,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/performance-optimizer-agent"
+      }
     },
     {
       "category": "agents",
@@ -2018,6 +2072,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/plugin-ecosystem-architect",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/plugin-ecosystem-architect.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/plugin-ecosystem-architect",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2033,8 +2090,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/plugin-ecosystem-architect"
+      }
     },
     {
       "category": "agents",
@@ -2088,6 +2144,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/product-management-ai-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/product-management-ai-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/product-management-ai-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2103,8 +2162,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/product-management-ai-agent"
+      }
     },
     {
       "category": "agents",
@@ -2159,6 +2217,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/production-reliability-engineer",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/production-reliability-engineer.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/production-reliability-engineer",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2174,8 +2235,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/production-reliability-engineer"
+      }
     },
     {
       "category": "agents",
@@ -2229,6 +2289,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/prompt-optimization-specialist",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/prompt-optimization-specialist.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/prompt-optimization-specialist",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2244,8 +2307,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/prompt-optimization-specialist"
+      }
     },
     {
       "category": "agents",
@@ -2304,6 +2366,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/semantic-kernel-enterprise-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/semantic-kernel-enterprise-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/semantic-kernel-enterprise-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2319,8 +2384,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/semantic-kernel-enterprise-agent"
+      }
     },
     {
       "category": "agents",
@@ -2376,6 +2440,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/slash-command-orchestrator-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/slash-command-orchestrator-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/slash-command-orchestrator-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2392,8 +2459,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/slash-command-orchestrator-agent"
+      }
     },
     {
       "category": "agents",
@@ -2449,6 +2515,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/subagent-factory-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/subagent-factory-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/subagent-factory-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2465,8 +2534,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/subagent-factory-agent"
+      }
     },
     {
       "category": "agents",
@@ -2519,6 +2587,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/technical-documentation-writer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/technical-documentation-writer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/technical-documentation-writer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2534,8 +2605,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/technical-documentation-writer-agent"
+      }
     },
     {
       "category": "agents",
@@ -2591,6 +2661,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/test-automation-engineer-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/test-automation-engineer-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/test-automation-engineer-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2607,8 +2680,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/test-automation-engineer-agent"
+      }
     },
     {
       "category": "agents",
@@ -2663,6 +2735,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/token-cost-budget-optimizer",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/token-cost-budget-optimizer.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/token-cost-budget-optimizer",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2678,8 +2753,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/token-cost-budget-optimizer"
+      }
     },
     {
       "category": "agents",
@@ -2733,6 +2807,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/ui-ux-design-expert-agent",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/ui-ux-design-expert-agent.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/ui-ux-design-expert-agent",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2748,8 +2825,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/ui-ux-design-expert-agent"
+      }
     },
     {
       "category": "agents",
@@ -2804,6 +2880,9 @@
       "githubStars": null,
       "githubForks": null,
       "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/agents/web-async-agent-coordinator",
+      "llmsUrl": "https://heyclau.de/data/llms/agents/web-async-agent-coordinator.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/agents/web-async-agent-coordinator",
       "trustSignals": {
         "firstPartyEditorial": false,
         "packageVerified": false,
@@ -2820,8 +2899,7 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
-      },
-      "canonicalUrl": "https://heyclau.de/agents/web-async-agent-coordinator"
+      }
     }
   ]
 }

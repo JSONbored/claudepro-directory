@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nComposio is relevant when agent products need durable integrations, auth flows, and action execution across third-party tools.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Composio\n\nIntegration platform for connecting AI agents and applications to external tools, APIs, auth, and workflows.",
   "webUrl": "https://heyclau.de/tools/composio",
+  "canonicalUrl": "https://heyclau.de/tools/composio",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/composio.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/composio",
+  "seoTitle": "Composio tool integrations for AI agents",
+  "seoDescription": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations. HeyClaude adds source links, install steps,...",
   "repoUrl": "https://github.com/ComposioHQ/composio",
   "documentationUrl": "https://docs.composio.dev"
 }

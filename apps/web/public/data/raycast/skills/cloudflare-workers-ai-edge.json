@@ -13,6 +13,11 @@
   "copyText": "Install:\nnpm install -g wrangler\n\nUsage:\nnpm install -g wrangler\n\nAsset:\nexport interface Env {\n  AI: any;\n}\n\nexport default {\n  async fetch(request: Request, env: Env): Promise<Response> {\n    if (request.method !== 'POST') {\n      return new Response('Method not allowed', { status: 405 });\n    }\n\n    const { messages } = await request.json<{ messages: any[] }>();\n\n    const response = await env.AI.run('@cf/meta/llama-2-7b-chat-int8', {\n      messages: [\n        { role: 'system', content: 'You are a helpful assistant.' },\n        ...messages,\n      ],\n      stream: true,\n    });\n\n    return new Response(response, {\n      headers: {\n        'content-type': 'text/event-stream',\n        'cache-control': 'no-cache',\n      },\n    });\n  },\n};",
   "detailMarkdown": "# Cloudflare Workers AI Edge Functions Skill\n\nDeploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-source AI models (Llama-2, Whisper, Stable Diffusion) with pay-per-use pricing.\n\n## Install\n```bash\nnpm install -g wrangler\n```\n\n## Usage\nnpm install -g wrangler",
   "webUrl": "https://heyclau.de/skills/cloudflare-workers-ai-edge",
+  "canonicalUrl": "https://heyclau.de/skills/cloudflare-workers-ai-edge",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/cloudflare-workers-ai-edge.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/cloudflare-workers-ai-edge",
+  "seoTitle": "Cloudflare Workers AI Edge Functions Skill",
+  "seoDescription": "Deploy AI models and serverless functions to Cloudflare's global edge network with sub-5ms cold starts and 40% edge computing market share. Access 50+ open-s...",
   "repoUrl": "",
   "documentationUrl": "https://developers.cloudflare.com/workers-ai/"
 }

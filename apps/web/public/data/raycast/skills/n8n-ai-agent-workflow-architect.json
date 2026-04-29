@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/n8n-ai-agent-workflow-architect.zip -o n8n-ai-agent-workflow-architect.zip && unzip -o n8n-ai-agent-workflow-architect.zip -d ./n8n-ai-agent-workflow-architect\n\nUsage:\nUse this skill to create reliable n8n workflows that include AI decisioning but remain debuggable and safe in production.\n\nAsset:\n# Trigger\n\"Apply the n8n AI workflow architect skill to design this automation.\"\n\n# Required output\n1) Workflow graph (triggers, transforms, AI nodes, side effects)\n2) Failure/retry policy per node\n3) Human approval checkpoints\n4) Monitoring + alerting plan\n\n# Constraints\n- No silent failures\n- Idempotent external writes\n- Clear rollback path",
   "detailMarkdown": "# n8n AI Agent Workflow Architect Skill\n\nDesign production-safe n8n automations with AI agents, retries, human approval gates, and observable error handling.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/n8n-ai-agent-workflow-architect.zip -o n8n-ai-agent-workflow-architect.zip && unzip -o n8n-ai-agent-workflow-architect.zip -d ./n8n-ai-agent-workflow-architect\n```\n\n## Usage\nUse this skill to create reliable n8n workflows that include AI decisioning but remain debuggable and safe in production.",
   "webUrl": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect",
+  "canonicalUrl": "https://heyclau.de/skills/n8n-ai-agent-workflow-architect",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/n8n-ai-agent-workflow-architect.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/n8n-ai-agent-workflow-architect",
+  "seoTitle": "n8n AI Agent Workflow Architect Skill",
+  "seoDescription": "Reusable AI skill for creating n8n AI automations with resilient execution, human-in-the-loop review, and operational safety.",
   "repoUrl": "",
   "documentationUrl": "https://docs.n8n.io/advanced-ai/"
 }

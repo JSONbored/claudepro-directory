@@ -5,9 +5,18 @@
   "slug": "monday-mcp-server",
   "title": "Monday MCP Server for Claude",
   "author": "Monday.com",
+  "brandName": "Monday.com",
+  "brandDomain": "monday.com",
+  "brandIconUrl": "/api/brand-assets/icon/monday.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp list && claude mcp status monday\n\nConfig:\n{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n\nUsage:\n{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}",
   "detailMarkdown": "# Monday MCP Server for Claude\n\nManage monday.com boards, items, and CRM activities\n\n## Install\n```bash\nclaude mcp list && claude mcp status monday\n```\n\n## Config\n```json\n{\n  \"monday\": {\n    \"url\": \"https://mcp.monday.com/sse\",\n    \"transport\": \"sse\"\n  }\n}\n```\n\n## Usage\nclaude mcp list && claude mcp status monday",
   "webUrl": "https://heyclau.de/mcp/monday-mcp-server",
+  "canonicalUrl": "https://heyclau.de/mcp/monday-mcp-server",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/monday-mcp-server.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/monday-mcp-server",
+  "seoTitle": "Monday MCP Server for Claude",
+  "seoDescription": "Manage monday.com boards, items, and CRM activities Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
   "repoUrl": "",
   "documentationUrl": "https://developer.monday.com/apps/docs/mondaycom-mcp-integration"
 }

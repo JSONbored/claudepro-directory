@@ -87,7 +87,9 @@ export const registrySearchResultSchema = registryBrandAssetSchema
     category: z.string(),
     slug: z.string(),
     title: z.string(),
+    seoTitle: z.string().optional(),
     description: z.string(),
+    seoDescription: z.string().optional(),
     tags: z.array(z.string()).max(32),
     keywords: z.array(z.string()).max(64),
     author: z.string(),
@@ -100,6 +102,9 @@ export const registrySearchResultSchema = registryBrandAssetSchema
     documentationUrl: z.string(),
     repoUrl: z.string(),
     url: z.string(),
+    canonicalUrl: z.string().url(),
+    llmsUrl: z.string().url(),
+    apiUrl: z.string().url(),
     trustSignals: registryTrustSignalsSchema,
   })
   .passthrough();

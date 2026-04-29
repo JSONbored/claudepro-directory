@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nMastra is useful for JavaScript and TypeScript teams building agent products with workflow, memory, and tool abstractions.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# Mastra\n\nTypeScript agent framework for building AI agents, workflows, memory, tool calling, and evaluation-backed applications.",
   "webUrl": "https://heyclau.de/tools/mastra",
+  "canonicalUrl": "https://heyclau.de/tools/mastra",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/mastra.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/mastra",
+  "seoTitle": "Mastra TypeScript agent framework",
+  "seoDescription": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications. HeyClaude adds source links, install...",
   "repoUrl": "https://github.com/mastra-ai/mastra",
   "documentationUrl": "https://mastra.ai/docs"
 }

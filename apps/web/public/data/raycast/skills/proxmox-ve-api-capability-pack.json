@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack\n\nUsage:\nUse this skill when an agent must automate Proxmox tasks with cluster-safe sequencing and production-grade verification.\n\nAsset:\n# Trigger\n\"Use the Proxmox VE API capability pack skill for this infrastructure operation.\"\n\n# Required output\n1) Endpoint and task-state mapping\n2) Pre-flight and capacity checks\n3) Operation sequence with stop conditions\n4) Post-flight validation and rollback guidance",
   "detailMarkdown": "# Proxmox VE API Capability Pack Skill\n\nExpert Proxmox VE API capability skill for VM/LXC lifecycle orchestration, task polling, auth safety, and cluster-aware operations.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/proxmox-ve-api-capability-pack.zip -o proxmox-ve-api-capability-pack.zip && unzip -o proxmox-ve-api-capability-pack.zip -d ./proxmox-ve-api-capability-pack\n```\n\n## Usage\nUse this skill when an agent must automate Proxmox tasks with cluster-safe sequencing and production-grade verification.",
   "webUrl": "https://heyclau.de/skills/proxmox-ve-api-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/proxmox-ve-api-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/proxmox-ve-api-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/proxmox-ve-api-capability-pack",
+  "seoTitle": "Proxmox VE API Capability Pack Skill",
+  "seoDescription": "Advanced AI capability skill for Proxmox VE API operations, including lifecycle orchestration, auth, and failure-safe runbooks.",
   "repoUrl": "",
   "documentationUrl": "https://pve.proxmox.com/mediawiki/index.php?title=Proxmox_VE_API"
 }

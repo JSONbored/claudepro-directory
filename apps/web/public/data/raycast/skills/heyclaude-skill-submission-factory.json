@@ -8,6 +8,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip -o heyclaude-skill-submission-factory.zip && unzip -o heyclaude-skill-submission-factory.zip -d ./heyclaude-skill-submission-factory\n\nUsage:\nUse this skill when creating a portable Agent Skill and submitting it to the HeyClaude skills registry.\n\nAsset:\n# Trigger\n\"Create a portable Agent Skill and prepare a HeyClaude issue-first submission.\"\n\n# Required output\n1) Valid SKILL.md package\n2) Platform compatibility table\n3) Cursor adapter draft when applicable\n4) HeyClaude submission issue fields",
   "detailMarkdown": "# HeyClaude Skill Submission Factory\n\nCreate portable Agent Skills, generate platform adapters, validate package metadata, and prepare issue-first HeyClaude submissions.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/heyclaude-skill-submission-factory.zip -o heyclaude-skill-submission-factory.zip && unzip -o heyclaude-skill-submission-factory.zip -d ./heyclaude-skill-submission-factory\n```\n\n## Usage\nUse this skill when creating a portable Agent Skill and submitting it to the HeyClaude skills registry.",
   "webUrl": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+  "canonicalUrl": "https://heyclau.de/skills/heyclaude-skill-submission-factory",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-skill-submission-factory.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-skill-submission-factory",
+  "seoTitle": "HeyClaude Skill Submission Factory Skill",
+  "seoDescription": "Reusable skill for creating Agent Skills, Cursor adapters, compatibility metadata, and issue-first HeyClaude registry submissions.",
   "repoUrl": "",
   "documentationUrl": "https://heyclau.de/submit"
 }

@@ -87,6 +87,18 @@ export function dataUrl(...segments) {
   return `/data/${segments.map((segment) => encodeURIComponent(String(segment))).join("/")}`;
 }
 
+function entryCanonicalUrl(entry, siteUrl = SITE_URL) {
+  return `${siteUrl.replace(/\/$/, "")}/${entry.category}/${entry.slug}`;
+}
+
+function entryLlmsUrl(entry, siteUrl = SITE_URL) {
+  return `${siteUrl.replace(/\/$/, "")}${dataUrl("llms", entry.category, `${entry.slug}.txt`)}`;
+}
+
+function entryApiUrl(entry, siteUrl = SITE_URL) {
+  return `${siteUrl.replace(/\/$/, "")}/api/registry/entries/${entry.category}/${entry.slug}`;
+}
+
 export function buildDirectoryEntries(entries) {
   return entries.map((entry) => {
     const {
@@ -99,6 +111,9 @@ export function buildDirectoryEntries(entries) {
     } = entry;
     return {
       ...directoryEntry,
+      canonicalUrl: entryCanonicalUrl(entry),
+      llmsUrl: entryLlmsUrl(entry),
+      apiUrl: entryApiUrl(entry),
       trustSignals: buildEntryTrustSignals(entry),
     };
   });
@@ -109,7 +124,9 @@ export function buildSearchEntries(entries) {
     category: entry.category,
     slug: entry.slug,
     title: entry.title,
+    seoTitle: entry.seoTitle || entry.title,
     description: entry.cardDescription || entry.description,
+    seoDescription: entry.seoDescription || entry.description,
     tags: entry.tags ?? [],
     keywords: entry.keywords ?? [],
     author: entry.author || "",
@@ -128,7 +145,10 @@ export function buildSearchEntries(entries) {
     ),
     documentationUrl: entry.documentationUrl || "",
     repoUrl: entry.repoUrl || "",
-    url: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    url: entryCanonicalUrl(entry),
+    canonicalUrl: entryCanonicalUrl(entry),
+    llmsUrl: entryLlmsUrl(entry),
+    apiUrl: entryApiUrl(entry),
     trustSignals: buildEntryTrustSignals(entry),
   }));
 }
@@ -292,7 +312,12 @@ export function buildRaycastEntries(entries) {
       copyTextTruncated: copyText.length > RAYCAST_COPY_PREVIEW_LIMIT,
       detailMarkdown: buildRaycastDetailMarkdown(entry),
       detailUrl: dataUrl("raycast", entry.category, `${entry.slug}.json`),
-      webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+      webUrl: entryCanonicalUrl(entry),
+      canonicalUrl: entryCanonicalUrl(entry),
+      llmsUrl: entryLlmsUrl(entry),
+      apiUrl: entryApiUrl(entry),
+      seoTitle: entry.seoTitle || entry.title,
+      seoDescription: entry.seoDescription || entry.description,
       repoUrl: entry.repoUrl || "",
       documentationUrl: entry.documentationUrl || "",
       downloadTrust: entry.downloadTrust,
@@ -322,7 +347,12 @@ export function buildRaycastDetail(entry) {
     ...buildEntryBrandFields(entry),
     copyText: getCopyText(entry),
     detailMarkdown: buildRaycastDetailMarkdown(entry),
-    webUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+    webUrl: entryCanonicalUrl(entry),
+    canonicalUrl: entryCanonicalUrl(entry),
+    llmsUrl: entryLlmsUrl(entry),
+    apiUrl: entryApiUrl(entry),
+    seoTitle: entry.seoTitle || entry.title,
+    seoDescription: entry.seoDescription || entry.description,
     repoUrl: entry.repoUrl || "",
     documentationUrl: entry.documentationUrl || "",
   };
@@ -480,7 +510,9 @@ export function buildRegistryChangelogFeed(entries) {
       slug: entry.slug,
       title: entry.title,
       dateAdded: entry.dateAdded || "",
-      canonicalUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+      canonicalUrl: entryCanonicalUrl(entry),
+      llmsUrl: entryLlmsUrl(entry),
+      apiUrl: entryApiUrl(entry),
       artifactHash: buildArtifactHash(buildEntryDetail(entry)),
     }));
 
@@ -614,7 +646,9 @@ export function buildRegistryManifest(entries, extra = {}) {
       key: `${entry.category}:${entry.slug}`,
       category: entry.category,
       slug: entry.slug,
-      canonicalUrl: `${SITE_URL}/${entry.category}/${entry.slug}`,
+      canonicalUrl: entryCanonicalUrl(entry),
+      llmsUrl: entryLlmsUrl(entry),
+      apiUrl: entryApiUrl(entry),
     })),
     qualitySummary: buildContentQualityReport(entries).summary,
     artifacts: {

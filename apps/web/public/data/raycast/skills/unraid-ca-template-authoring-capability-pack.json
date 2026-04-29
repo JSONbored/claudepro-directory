@@ -13,6 +13,11 @@
   "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip -o unraid-ca-template-authoring-capability-pack.zip && unzip -o unraid-ca-template-authoring-capability-pack.zip -d ./unraid-ca-template-authoring-capability-pack\n\nUsage:\nUse this skill to author Unraid CA templates that are beginner-safe, operationally honest, and ready for review.\n\nAsset:\n# Trigger\n\"Apply the Unraid CA template authoring capability pack.\"\n\n# Required output\n1) Template XML with validated metadata fields\n2) Beginner-safe default config and caveats\n3) Support and documentation linkage\n4) CA submission checklist",
   "detailMarkdown": "# Unraid CA Template Authoring Capability Pack Skill\n\nExpert Unraid Community Apps template capability pack for high-quality XML metadata, safer defaults, and CA submission readiness.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/unraid-ca-template-authoring-capability-pack.zip -o unraid-ca-template-authoring-capability-pack.zip && unzip -o unraid-ca-template-authoring-capability-pack.zip -d ./unraid-ca-template-authoring-capability-pack\n```\n\n## Usage\nUse this skill to author Unraid CA templates that are beginner-safe, operationally honest, and ready for review.",
   "webUrl": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack",
+  "canonicalUrl": "https://heyclau.de/skills/unraid-ca-template-authoring-capability-pack",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/unraid-ca-template-authoring-capability-pack.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/unraid-ca-template-authoring-capability-pack",
+  "seoTitle": "Unraid CA Template Authoring Capability Pack Skill",
+  "seoDescription": "Advanced AI skill for creating and validating Unraid Community Apps templates with polished metadata and submission standards.",
   "repoUrl": "",
   "documentationUrl": "https://forums.unraid.net/forum/64-docker-engine/"
 }

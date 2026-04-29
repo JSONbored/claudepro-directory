@@ -5,9 +5,18 @@
   "slug": "desktop-mcp-setup",
   "title": "Claude Desktop MCP Setup",
   "author": "JSONbored",
+  "brandName": "Anthropic",
+  "brandDomain": "anthropic.com",
+  "brandIconUrl": "/api/brand-assets/icon/anthropic.com",
+  "brandAssetSource": "brandfetch",
   "copyText": "Install:\nclaude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list\n\nConfig:\n{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/Users/username/Documents\"]\n    }\n  }\n}\n\nUsage:\n{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/Users/username/Documents\"]\n    }\n  }\n}",
   "detailMarkdown": "# Claude Desktop MCP Setup\n\nMaster Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.\n\n## Install\n```bash\nclaude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list\n```\n\n## Config\n```json\n{\n  \"mcpServers\": {\n    \"filesystem\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"@modelcontextprotocol/server-filesystem\", \"/Users/username/Documents\"]\n    }\n  }\n}\n```\n\n## Usage\nclaude mcp add --transport http server-name https://api.example.com/mcp && claude mcp list",
   "webUrl": "https://heyclau.de/mcp/desktop-mcp-setup",
+  "canonicalUrl": "https://heyclau.de/mcp/desktop-mcp-setup",
+  "llmsUrl": "https://heyclau.de/data/llms/mcp/desktop-mcp-setup.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/mcp/desktop-mcp-setup",
+  "seoTitle": "Claude Desktop MCP Setup",
+  "seoDescription": "Master Claude Desktop MCP server setup in 20 minutes. Complete config JSON tutorial with filesystem integration, troubleshooting, and proven solutions.",
   "repoUrl": "",
   "documentationUrl": ""
 }

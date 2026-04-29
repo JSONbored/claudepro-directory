@@ -8,6 +8,9 @@ Download: /downloads/mcp/desktop-mcp-setup.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/desktop-mcp-setup
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx
+- Brand: Anthropic
+- Brand domain: anthropic.com
+- Brand asset source: brandfetch
 - Package URL: /downloads/mcp/desktop-mcp-setup.mcpb
 - Package SHA256: 57690091c83e5827fb0e82a2a6193d2da2171c6637fae598edb894029828d1b5
 - Author: JSONbored

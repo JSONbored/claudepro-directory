@@ -12,6 +12,11 @@
   "copyText": "## Editorial notes\n\nv0 is useful when the task is interface generation, component iteration, and React-first product UI exploration.\n\n## Disclosure\n\nEditorial listing. No paid placement or affiliate link is used.",
   "detailMarkdown": "# v0\n\nVercel AI interface builder for generating, editing, and iterating on React and web UI from prompts.",
   "webUrl": "https://heyclau.de/tools/vercel-v0",
+  "canonicalUrl": "https://heyclau.de/tools/vercel-v0",
+  "llmsUrl": "https://heyclau.de/data/llms/tools/vercel-v0.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/tools/vercel-v0",
+  "seoTitle": "v0 AI interface builder for React",
+  "seoDescription": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
   "repoUrl": "",
   "documentationUrl": "https://v0.dev/docs"
 }

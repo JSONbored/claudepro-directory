@@ -137,6 +137,9 @@ export type ContentEntry = {
   githubStars?: number | null;
   githubForks?: number | null;
   repoUpdatedAt?: string | null;
+  canonicalUrl?: string;
+  llmsUrl?: string;
+  apiUrl?: string;
   trustSignals?: EntryTrustSignals;
 };
 
@@ -460,7 +463,9 @@ export type SearchDocument = {
   category: string;
   slug: string;
   title: string;
+  seoTitle?: string;
   description: string;
+  seoDescription?: string;
   tags: string[];
   keywords: string[];
   author: string;
@@ -478,6 +483,9 @@ export type SearchDocument = {
   documentationUrl: string;
   repoUrl: string;
   url: string;
+  canonicalUrl: string;
+  llmsUrl: string;
+  apiUrl: string;
   trustSignals: EntryTrustSignals;
 };
 
@@ -494,6 +502,8 @@ export type ArtifactManifestV2 = {
     category: string;
     slug: string;
     canonicalUrl: string;
+    llmsUrl?: string;
+    apiUrl?: string;
   }>;
   qualitySummary?: Record<string, unknown>;
   artifactContracts?: Record<
