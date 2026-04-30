@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "plugin-export-feed",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 243,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 244,
   "plugins": [
     {
       "name": "cursor-rules",
@@ -2284,6 +2284,54 @@
       "installCommand": "mkdir -p .claude/hooks && touch .claude/hooks/graphql-schema-validator.sh && chmod +x .claude/hooks/graphql-schema-validator.sh",
       "platformCompatibility": [],
       "heyclaudeUrl": "https://heyclau.de/hooks/graphql-schema-validator"
+    },
+    {
+      "name": "heyclaude-content-submission-factory",
+      "title": "HeyClaude Content Submission Factory",
+      "description": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "category": "skills",
+      "sourceUrl": "https://heyclau.de/submit",
+      "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/heyclaude-content-submission-factory.mdc",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-30"
+        }
+      ],
+      "heyclaudeUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory"
     },
     {
       "name": "heyclaude-mcp",

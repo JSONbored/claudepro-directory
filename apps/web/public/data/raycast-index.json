@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "raycast-index",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 379,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 380,
   "entries": [
     {
       "category": "commands",
@@ -7248,6 +7248,76 @@
       "downloadTrust": null,
       "verificationStatus": "",
       "platformCompatibility": []
+    },
+    {
+      "category": "skills",
+      "slug": "heyclaude-content-submission-factory",
+      "title": "HeyClaude Content Submission Factory",
+      "description": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "tags": [
+        "heyclaude",
+        "submissions",
+        "registry",
+        "content-workflow",
+        "seo"
+      ],
+      "author": "JSONbored",
+      "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",
+      "configSnippet": "",
+      "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory\n\nUsage:\nUse this skill when preparing a new HeyClaude content submission or improving an existing registry entry.\n\nAsset:\n# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) Source and brand metadata\n4) SEO and citation notes\n5) GitHub issue-first submission URL",
+      "copyTextLength": 639,
+      "copyTextTruncated": false,
+      "detailMarkdown": "# HeyClaude Content Submission Factory\n\nPrepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory\n```\n\n## Usage\nUse this skill when preparing a new HeyClaude content submission or improving an existing registry entry.",
+      "detailUrl": "/data/raycast/skills/heyclaude-content-submission-factory.json",
+      "webUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+      "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+      "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
+      "seoTitle": "HeyClaude Content Submission Factory Skill",
+      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+      "repoUrl": "",
+      "documentationUrl": "https://heyclau.de/submit",
+      "downloadTrust": "first-party",
+      "verificationStatus": "validated",
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/heyclaude-content-submission-factory.mdc",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-30"
+        }
+      ]
     },
     {
       "category": "mcp",

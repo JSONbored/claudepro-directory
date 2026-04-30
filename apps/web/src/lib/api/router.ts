@@ -150,6 +150,17 @@ async function enforceRateLimit(
   });
 }
 
+export function getApiRequestId(request: Request) {
+  return getRequestId(request);
+}
+
+export async function enforceApiRateLimit(
+  definition: ApiRouteDefinition,
+  request: Request,
+) {
+  return enforceRateLimit(definition, request);
+}
+
 async function parseRequest(
   definition: ApiRouteDefinition,
   request: Request,

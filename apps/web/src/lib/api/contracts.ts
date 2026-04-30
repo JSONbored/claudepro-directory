@@ -506,6 +506,24 @@ export const apiRouteDefinitions = {
       binding: "API_REGISTRY_RATE_LIMIT",
     },
   }),
+  "mcp.streamable": route({
+    id: "mcp.streamable",
+    method: "POST",
+    path: "/api/mcp",
+    summary: "Read-only HeyClaude MCP endpoint",
+    description:
+      "Exposes read-only HeyClaude MCP tools over Streamable HTTP for registry search, entry detail, compatibility lookup, install guidance, platform adapters, and feed discovery. This endpoint does not publish registry content or create submissions.",
+    tags: ["MCP"],
+    originCheck: true,
+    requiresJsonBody: true,
+    bodyLimitBytes: 64 * 1024,
+    rateLimit: {
+      scope: "mcp-streamable",
+      limit: 60,
+      windowMs: 60_000,
+      binding: "API_REGISTRY_RATE_LIMIT",
+    },
+  }),
   "brandAsset.read": route({
     id: "brandAsset.read",
     method: "GET",

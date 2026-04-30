@@ -17,6 +17,7 @@ The check verifies:
 - `/data/raycast-index.json`
 - `/data/feeds/index.json`
 - the `/data/feeds/categories/skills.json` and `/data/feeds/platforms/claude.json` shards referenced by the feed index
+- `/api/mcp` tools/list and `search_registry` over Streamable HTTP
 - `/48486ebc7ddc47af875118345161ae70.txt` for IndexNow verification
 - the first `/data/raycast/...` detail payload referenced by the Raycast index
 

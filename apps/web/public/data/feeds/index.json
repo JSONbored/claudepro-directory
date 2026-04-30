@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "kind": "distribution-feed-index",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
+  "generatedAt": "2026-04-30T00:00:00.000Z",
   "categories": [
     {
       "category": "agents",
@@ -27,7 +27,7 @@
     {
       "category": "skills",
       "label": "Skills",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/categories/skills.json",
       "canonicalUrl": "https://heyclau.de/skills"
     },
@@ -78,37 +78,37 @@
     {
       "platform": "Claude",
       "platformSlug": "claude",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/claude.json"
     },
     {
       "platform": "Codex",
       "platformSlug": "codex",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/codex.json"
     },
     {
       "platform": "Windsurf",
       "platformSlug": "windsurf",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/windsurf.json"
     },
     {
       "platform": "Gemini",
       "platformSlug": "gemini",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/gemini.json"
     },
     {
       "platform": "Cursor",
       "platformSlug": "cursor",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/cursor.json"
     },
     {
       "platform": "Generic AGENTS",
       "platformSlug": "generic-agents",
-      "count": 67,
+      "count": 68,
       "feedUrl": "/data/feeds/platforms/generic-agents.json"
     }
   ]

@@ -1,9 +1,21 @@
 {
   "schemaVersion": 2,
   "kind": "registry-changelog",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 379,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 380,
   "entries": [
+    {
+      "key": "skills:heyclaude-content-submission-factory",
+      "type": "added",
+      "category": "skills",
+      "slug": "heyclaude-content-submission-factory",
+      "title": "HeyClaude Content Submission Factory",
+      "dateAdded": "2026-04-30",
+      "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+      "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
+      "artifactHash": "ae40a2c934357bc1b56ed597d2d10b1916c61b74d18aeff4aa831806df23df99"
+    },
     {
       "key": "tools:aider",
       "type": "added",
@@ -4554,5 +4566,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "ca98d2e87425f01ff2e0c6f6b53663249c294425efccd3dcea760a9a254f4b23"
+  "signature": "e573f1e52fbc14e4405683612d69557899659551d6107118f70c275bd9a0bcdc"
 }

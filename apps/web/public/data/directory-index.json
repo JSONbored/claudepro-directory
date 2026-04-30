@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "directory-index",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 379,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 380,
   "entries": [
     {
       "category": "commands",
@@ -16901,6 +16901,163 @@
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
+      }
+    },
+    {
+      "category": "skills",
+      "slug": "heyclaude-content-submission-factory",
+      "title": "HeyClaude Content Submission Factory",
+      "description": "Prepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.",
+      "seoTitle": "HeyClaude Content Submission Factory Skill",
+      "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+      "author": "JSONbored",
+      "authorProfileUrl": "https://github.com/JSONbored",
+      "dateAdded": "2026-04-30",
+      "contentUpdatedAt": "2026-04-30T00:18:10-06:00",
+      "tags": [
+        "heyclaude",
+        "submissions",
+        "registry",
+        "content-workflow",
+        "seo"
+      ],
+      "keywords": [
+        "submit content to heyclaude",
+        "heyclaude registry submission",
+        "ai directory content fields",
+        "github issue submission",
+        "registry seo metadata",
+        "heyclaude",
+        "submissions",
+        "registry",
+        "content-workflow",
+        "seo",
+        "skills",
+        "claude"
+      ],
+      "readingTime": 6,
+      "difficultyScore": 52,
+      "documentationUrl": "https://heyclau.de/submit",
+      "cardDescription": "Create validated HeyClaude submission drafts with category fit, brand metadata, source URLs, SEO fields, and issue-first review notes.",
+      "installable": true,
+      "installCommand": "curl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory",
+      "usageSnippet": "Use this skill when preparing a new HeyClaude content submission or improving an existing registry entry.",
+      "copySnippet": "# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) Source and brand metadata\n4) SEO and citation notes\n5) GitHub issue-first submission URL",
+      "skillType": "general",
+      "skillLevel": "advanced",
+      "verificationStatus": "validated",
+      "verifiedAt": "2026-04-30",
+      "retrievalSources": [
+        "https://heyclau.de/submit",
+        "https://heyclau.de/submissions",
+        "https://github.com/JSONbored/claudepro-directory/issues/new/choose"
+      ],
+      "testedPlatforms": [
+        "Claude",
+        "Codex",
+        "Windsurf",
+        "Gemini",
+        "Cursor",
+        "Generic AGENTS"
+      ],
+      "prerequisites": [
+        "Canonical source URL for the resource",
+        "Category candidate or content type",
+        "Short description of what the resource does"
+      ],
+      "hasPrerequisites": true,
+      "hasTroubleshooting": true,
+      "hasBreakingChanges": false,
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "packageVerified": true,
+      "downloadUrl": "/downloads/skills/heyclaude-content-submission-factory.zip",
+      "skillPackage": {
+        "format": "agent-skill",
+        "entrypoint": "SKILL.md",
+        "downloadUrl": "/downloads/skills/heyclaude-content-submission-factory.zip",
+        "sha256": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f"
+      },
+      "platformCompatibility": [
+        {
+          "platform": "Claude",
+          "supportLevel": "native-skill",
+          "installPath": ".claude/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Codex",
+          "supportLevel": "native-skill",
+          "installPath": ".agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Windsurf",
+          "supportLevel": "native-skill",
+          "installPath": ".windsurf/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Gemini",
+          "supportLevel": "native-skill",
+          "installPath": ".gemini/skills/<skill-name>/SKILL.md or .agents/skills/<skill-name>/SKILL.md",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Cursor",
+          "supportLevel": "adapter",
+          "installPath": ".cursor/rules/<skill-name>.mdc",
+          "adapterPath": "/data/skill-adapters/cursor/heyclaude-content-submission-factory.mdc",
+          "verifiedAt": "2026-04-30"
+        },
+        {
+          "platform": "Generic AGENTS",
+          "supportLevel": "manual-context",
+          "installPath": "AGENTS.md or tool-specific context file",
+          "verifiedAt": "2026-04-30"
+        }
+      ],
+      "downloadTrust": "first-party",
+      "downloadSha256": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+      "filePath": "content/skills/heyclaude-content-submission-factory.mdx",
+      "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx",
+      "repoUrl": null,
+      "githubStars": null,
+      "githubForks": null,
+      "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+      "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": true,
+        "packageTrust": "first-party",
+        "packageChecksum": "8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f",
+        "checksumPresent": true,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://heyclau.de/submit",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-30",
+        "adapterGenerated": true,
+        "platforms": [
+          "Claude",
+          "Codex",
+          "Windsurf",
+          "Gemini",
+          "Cursor",
+          "Generic AGENTS"
+        ],
+        "supportLevels": [
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "native-skill",
+          "adapter",
+          "manual-context"
+        ]
       }
     },
     {

@@ -6,7 +6,7 @@ import {
   buildSkillPlatformCompatibility,
   platformFeedSlug,
   SITE_URL,
-} from "@heyclaude/registry/artifacts";
+} from "./platforms.js";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -143,12 +143,20 @@ function safeRelativePath(relativePath) {
 }
 
 async function readTextArtifact(relativePath, options = {}) {
+  if (typeof options.readTextArtifact === "function") {
+    return options.readTextArtifact(relativePath);
+  }
+
   const dataDir = dataDirFromOptions(options);
   const filePath = path.join(dataDir, safeRelativePath(relativePath));
   return readFile(filePath, "utf8");
 }
 
 async function readJsonArtifact(relativePath, options = {}) {
+  if (typeof options.readJsonArtifact === "function") {
+    return options.readJsonArtifact(relativePath);
+  }
+
   return JSON.parse(await readTextArtifact(relativePath, options));
 }
 
@@ -186,6 +194,8 @@ function entryMatchesQuery(entry, query) {
     entry.category,
     entry.slug,
     entry.author,
+    entry.brandName,
+    entry.brandDomain,
     ...(entry.tags || []),
     ...(entry.keywords || []),
   ]
@@ -208,7 +218,13 @@ function toSearchResult(entry) {
     description: entry.description,
     tags: entry.tags || [],
     platforms: entry.platforms || [],
+    brandName: entry.brandName || "",
+    brandDomain: entry.brandDomain || "",
     url: entry.url || `${SITE_URL}/${entry.category}/${entry.slug}`,
+    canonicalUrl:
+      entry.canonicalUrl ||
+      entry.url ||
+      `${SITE_URL}/${entry.category}/${entry.slug}`,
   };
 }
 

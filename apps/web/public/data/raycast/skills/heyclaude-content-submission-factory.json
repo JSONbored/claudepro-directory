@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "key": "skills:heyclaude-content-submission-factory",
+  "category": "skills",
+  "slug": "heyclaude-content-submission-factory",
+  "title": "HeyClaude Content Submission Factory",
+  "author": "JSONbored",
+  "copyText": "Install:\ncurl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory\n\nUsage:\nUse this skill when preparing a new HeyClaude content submission or improving an existing registry entry.\n\nAsset:\n# Trigger\n\"Prepare a complete HeyClaude content submission for this resource.\"\n\n# Required output\n1) Recommended category and category-fit rationale\n2) Review-ready HeyClaude submission fields\n3) Source and brand metadata\n4) SEO and citation notes\n5) GitHub issue-first submission URL",
+  "detailMarkdown": "# HeyClaude Content Submission Factory\n\nPrepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.\n\n## Install\n```bash\ncurl -L https://heyclau.de/downloads/skills/heyclaude-content-submission-factory.zip -o heyclaude-content-submission-factory.zip && unzip -o heyclaude-content-submission-factory.zip -d ./heyclaude-content-submission-factory\n```\n\n## Usage\nUse this skill when preparing a new HeyClaude content submission or improving an existing registry entry.",
+  "webUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+  "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
+  "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
+  "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
+  "seoTitle": "HeyClaude Content Submission Factory Skill",
+  "seoDescription": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
+  "repoUrl": "",
+  "documentationUrl": "https://heyclau.de/submit"
+}

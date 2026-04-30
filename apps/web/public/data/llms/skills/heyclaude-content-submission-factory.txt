@@ -1,0 +1,113 @@
+# HeyClaude Content Submission Factory
+URL: https://heyclau.de/skills/heyclaude-content-submission-factory
+Category: skills
+Author: JSONbored
+Date added: 2026-04-30
+Documentation: https://heyclau.de/submit
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx
+Download: /downloads/skills/heyclaude-content-submission-factory.zip
+## Citation Facts
+- Canonical URL: https://heyclau.de/skills/heyclaude-content-submission-factory
+- Source URLs: https://heyclau.de/submit, https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx
+- Package URL: /downloads/skills/heyclaude-content-submission-factory.zip
+- Package SHA256: 8b3afae3b4346e9af7876114988d890ff277c1d15eaf8dcb545b1073b761db0f
+- Platform compatibility: Claude (native-skill), Codex (native-skill), Windsurf (native-skill), Gemini (native-skill), Cursor (adapter), Generic AGENTS (manual-context)
+- Author: JSONbored
+- Last verified: 2026-04-30
+- Robots: indexable
+## Summary
+Prepare complete, source-backed HeyClaude content submissions for agents, MCP servers, tools, skills, rules, commands, hooks, guides, collections, and statuslines.
+## Tags
+- heyclaude
+- submissions
+- registry
+- content-workflow
+- seo
+## Content
+## Knowledge Freshness
+This skill is pinned to HeyClaude issue-first submission behavior verified on **2026-04-30**.
+
+## Retrieval Sources
+- https://heyclau.de/submit
+- https://heyclau.de/submissions
+- https://github.com/JSONbored/claudepro-directory/issues/new/choose
+
+## Core Workflow
+1. Identify the best HeyClaude category from the evidence, not from the submitter's guess.
+2. Collect a canonical source URL and any official docs, repo, package, or demo URLs.
+3. Extract only public, non-secret facts.
+4. Add brand metadata when safe: `brandName`, `brandDomain`, and official source links.
+5. Write a concise original description and card description.
+6. Draft SEO metadata from the resource title, category, tags, and source-backed value.
+7. Produce issue-first submission fields and a prefilled HeyClaude or GitHub submission URL.
+
+## Category Scope
+- Agents
+- MCP servers
+- Tools
+- Skills
+- Rules
+- Commands
+- Hooks
+- Guides
+- Collections
+- Statuslines
+
+Jobs are intentionally out of scope. Job listings use HeyClaude's jobs lead and review workflow.
+
+## Review Rules
+- Do not auto-publish registry content.
+- Do not create PRs, write files, or mutate local project config.
+- Do not include private repo names, credentials, tokens, internal URLs, or unpublished customer information.
+- Do not mirror full third-party pages. Use original summaries and canonical source links.
+- Do not claim platform compatibility, validation, package checksums, or first-party status unless source evidence supports it.
+
+## Output Shape
+Return a compact submission packet:
+
+```yaml
+category: mcp
+title: Example MCP Server
+slug: example-mcp-server
+description: Short source-backed summary.
+cardDescription: One-line preview text.
+sourceUrl: https://example.com/docs/mcp
+documentationUrl: https://example.com/docs
+repoUrl: https://github.com/example/example
+brandName: Example
+brandDomain: example.com
+tags:
+  - mcp
+  - automation
+seoTitle: Example MCP Server for Claude
+seoDescription: Source-backed description suitable for search previews.
+maintainerNotes: Why this belongs in HeyClaude and what still needs review.
+```
+```yaml
+category: mcp
+title: Example MCP Server
+slug: example-mcp-server
+description: Short source-backed summary.
+cardDescription: One-line preview text.
+sourceUrl: https://example.com/docs/mcp
+documentationUrl: https://example.com/docs
+repoUrl: https://github.com/example/example
+brandName: Example
+brandDomain: example.com
+tags:
+  - mcp
+  - automation
+seoTitle: Example MCP Server for Claude
+seoDescription: Source-backed description suitable for search previews.
+maintainerNotes: Why this belongs in HeyClaude and what still needs review.
+```
+
+## Troubleshooting
+**Issue:** The category is ambiguous  
+**Fix:** Prefer the category that matches the install or usage surface. An MCP server is not a skill unless it ships a valid `SKILL.md` skill package.
+
+**Issue:** The source page is mostly marketing copy  
+**Fix:** Use docs, repo, package, or release pages as supporting sources, and mark unsupported claims as unverified.
+
+**Issue:** Brand domain is unclear  
+**Fix:** Leave brand fields blank rather than guessing from GitHub, docs subdomains, or mirrors.

@@ -1,18 +1,63 @@
 {
   "name": "@heyclaude/mcp",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "description": "Read-only MCP server for the HeyClaude registry.",
+  "license": "MIT",
+  "main": "./src/registry.js",
+  "types": "./src/registry.d.ts",
+  "homepage": "https://heyclau.de",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JSONbored/claudepro-directory.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/JSONbored/claudepro-directory/issues"
+  },
+  "keywords": [
+    "heyclaude",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "ai-registry",
+    "agents",
+    "skills"
+  ],
+  "files": [
+    "README.md",
+    "src/**/*.d.ts",
+    "src/**/*.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/registry.d.ts",
+      "default": "./src/registry.js"
+    },
+    "./registry": {
+      "types": "./src/registry.d.ts",
+      "default": "./src/registry.js"
+    },
+    "./server": {
+      "types": "./src/server.d.ts",
+      "default": "./src/server.js"
+    },
+    "./platforms": {
+      "types": "./src/platforms.d.ts",
+      "default": "./src/platforms.js"
+    }
+  },
   "bin": {
     "heyclaude-mcp": "./src/cli.js"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "start": "node src/cli.js",
     "test": "vitest run ../../tests/mcp-server.test.ts"
   },
   "dependencies": {
-    "@heyclaude/registry": "workspace:*",
     "@modelcontextprotocol/sdk": "1.29.0"
   }
 }

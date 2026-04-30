@@ -27,6 +27,25 @@ function firstSkill() {
 const skill = firstSkill();
 
 describe("HeyClaude read-only MCP helpers", () => {
+  it("keeps the MCP package publishable without private workspace dependencies", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(repoRoot, "packages/mcp/package.json"), "utf8"),
+    ) as {
+      private?: boolean;
+      bin?: Record<string, string>;
+      dependencies?: Record<string, string>;
+      exports?: Record<string, unknown>;
+    };
+
+    expect(packageJson.private).not.toBe(true);
+    expect(packageJson.bin).toHaveProperty("heyclaude-mcp", "./src/cli.js");
+    expect(packageJson.dependencies).not.toHaveProperty("@heyclaude/registry");
+    expect(Object.values(packageJson.dependencies ?? {})).not.toContain(
+      "workspace:*",
+    );
+    expect(packageJson.exports).toHaveProperty("./server");
+  });
+
   it("exposes only read-only registry tools", () => {
     expect(TOOL_DEFINITIONS.map((tool) => tool.name)).toEqual(
       READ_ONLY_TOOL_NAMES,

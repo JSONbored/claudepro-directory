@@ -22,6 +22,7 @@ const apiRoutes = [
   "/api/registry/diff",
   "/api/registry/entries/{category}/{slug}",
   "/api/registry/entries/{category}/{slug}/llms",
+  "/api/mcp",
   "/api/brand-assets/{kind}/{domain}",
   "/api/votes/query",
   "/api/votes/toggle",
@@ -83,6 +84,18 @@ describe("OpenAPI route coverage", () => {
     expect(routeFiles.length).toBeGreaterThan(0);
     for (const filePath of routeFiles) {
       const source = fs.readFileSync(filePath, "utf8");
+      if (
+        filePath.endsWith(`${path.sep}api${path.sep}mcp${path.sep}route.ts`)
+      ) {
+        expect(source, filePath).toContain(
+          'getApiRouteDefinition("mcp.streamable")',
+        );
+        expect(source, filePath).toContain(
+          "WebStandardStreamableHTTPServerTransport",
+        );
+        expect(source, filePath).not.toContain("NextResponse");
+        continue;
+      }
       expect(source, filePath).toContain("createApiHandler");
       expect(source, filePath).not.toContain("NextResponse");
       expect(source, filePath).not.toContain("isAllowedOrigin");

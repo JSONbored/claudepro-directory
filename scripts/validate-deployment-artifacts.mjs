@@ -49,6 +49,21 @@ async function fetchText(baseUrl, pathname) {
   return response.text();
 }
 
+async function fetchMcpJson(baseUrl, body) {
+  const response = await fetch(`${baseUrl}/api/mcp`, {
+    method: "POST",
+    headers: {
+      accept: "application/json, text/event-stream",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`/api/mcp returned ${response.status}`);
+  }
+  return response.json();
+}
+
 function readEntries(payload) {
   if (payload && Array.isArray(payload.entries)) return payload.entries;
   return null;
@@ -168,6 +183,35 @@ try {
       : null;
   if (!Array.isArray(jobEntries)) {
     fail("/api/jobs must return a jobs or entries array");
+  }
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
+
+try {
+  const tools = await fetchMcpJson(baseUrl, {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/list",
+    params: {},
+  });
+  const toolNames = tools?.result?.tools?.map((tool) => tool?.name) || [];
+  if (!toolNames.includes("search_registry")) {
+    fail("/api/mcp must expose read-only registry tools");
+  }
+
+  const search = await fetchMcpJson(baseUrl, {
+    jsonrpc: "2.0",
+    id: 2,
+    method: "tools/call",
+    params: {
+      name: "search_registry",
+      arguments: { query: "mcp", limit: 1 },
+    },
+  });
+  const result = JSON.parse(search?.result?.content?.[0]?.text || "{}");
+  if (result?.ok !== true || !Array.isArray(result.entries)) {
+    fail("/api/mcp search_registry tool did not return entries");
   }
 } catch (error) {
   fail(error instanceof Error ? error.message : String(error));

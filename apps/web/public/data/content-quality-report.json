@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "kind": "content-quality-report",
-  "generatedAt": "2026-04-27T00:00:00.000Z",
-  "count": 379,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 380,
   "summary": {
     "averageScore": 81,
     "noExternalSourceCount": 101,
@@ -28,7 +28,7 @@
       "warningCount": 0
     },
     "skills": {
-      "count": 67,
+      "count": 68,
       "averageScore": 90,
       "warningCount": 15
     },
@@ -5593,6 +5593,35 @@
           "https://docs.helicone.ai",
           "https://github.com/Helicone/helicone",
           "https://www.helicone.ai"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "skills:heyclaude-content-submission-factory",
+      "category": "skills",
+      "slug": "heyclaude-content-submission-factory",
+      "title": "HeyClaude Content Submission Factory",
+      "scores": {
+        "total": 90,
+        "usefulness": 100,
+        "source": 65,
+        "copyability": 85,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": true,
+        "sourceUrls": [
+          "https://heyclau.de/submit",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/skills/heyclaude-content-submission-factory.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://heyclau.de/submit"
         ]
       },
       "warnings": []

@@ -61,9 +61,15 @@ importers:
 
   apps/web:
     dependencies:
+      '@heyclaude/mcp':
+        specifier: workspace:*
+        version: link:../../packages/mcp
       '@heyclaude/registry':
         specifier: workspace:*
         version: link:../../packages/registry
+      '@modelcontextprotocol/sdk':
+        specifier: 1.29.0
+        version: 1.29.0(zod@4.3.6)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -134,9 +140,6 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@heyclaude/registry':
-        specifier: workspace:*
-        version: link:../registry
       '@modelcontextprotocol/sdk':
         specifier: 1.29.0
         version: 1.29.0(zod@4.3.6)
