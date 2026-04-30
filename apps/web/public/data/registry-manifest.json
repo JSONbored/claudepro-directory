@@ -3124,12 +3124,12 @@
     "directory-index.json": {
       "path": "/data/directory-index.json",
       "type": "json",
-      "sha256": "e9670c8a6530ca2266af5e30bbae51d70f5c509cb00289e2284687ad9c1a8b98"
+      "sha256": "12691d9400f96b8027a6aacbf35b2cc1b3b0c7d28bc13b340530c846112dc165"
     },
     "search-index.json": {
       "path": "/data/search-index.json",
       "type": "json",
-      "sha256": "fe5e0e48a5f67efbee3adb63ac664673e70fbc3ab4ce349e56357bef8c742fad"
+      "sha256": "33936e0bbada2a48d71a86fc7adf9226e2f5162bd0116d6becd7afd59e862743"
     },
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
@@ -3139,7 +3139,7 @@
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",
       "type": "json",
-      "sha256": "2b022001c2aa3ed9b0022ffef11e72f91f00183c8686e1a9c7f56597a32637b5"
+      "sha256": "00870748e9b8e46a6069857c03f753cdb74acc3b0b7a55ff12823f682e9c8fdc"
     },
     "mcp-registry-feed.json": {
       "path": "/data/mcp-registry-feed.json",
@@ -3154,7 +3154,7 @@
     "registry-changelog.json": {
       "path": "/data/registry-changelog.json",
       "type": "json",
-      "sha256": "e9c21cfa21957826d475dfc16883089d68d7180b04e4a2939e4f357cb290e0a6"
+      "sha256": "292abe425d69168b3473893af92376701ca3d11520cbcebca7cb2378a9ba4c6c"
     },
     "feeds/index.json": {
       "path": "/data/feeds%2Findex.json",
@@ -3174,12 +3174,12 @@
     "jsonld-snapshots.json": {
       "path": "/data/jsonld-snapshots.json",
       "type": "json",
-      "sha256": "531141c71eca500ae649025edd9e5a320cd2aefefa4bc8da4c2072ad6a104056"
+      "sha256": "3b8317926f269a8554f3f0e53b44681ba102767a82e53f82ab4072a038655db7"
     },
     "llms-full.txt": {
       "path": "/data/llms-full.txt",
       "type": "text",
-      "sha256": "2383271b513d9da98a1c82a61bf8e3e0c88c1849cfde9df3d048f0b6b477b7f7"
+      "sha256": "a8dc275e6d27b4319cb4acd738e99a570461208692f574846046c955f3f29b70"
     },
     "entries/commands/cursor-rules.json": {
       "path": "/data/entries%2Fcommands%2Fcursor-rules.json",
@@ -4904,12 +4904,12 @@
     "entries/mcp/contrastapi-mcp-server.json": {
       "path": "/data/entries%2Fmcp%2Fcontrastapi-mcp-server.json",
       "type": "json",
-      "sha256": "490f22c44e9fa2f29af158bdcd77560d22d4152137887225e838a18cd7174005"
+      "sha256": "ccb550fc7ebe20496d521f95c9a6766896ca76f3829e6b6cd8b0e05b8cb9e00d"
     },
     "llms/mcp/contrastapi-mcp-server.txt": {
       "path": "/data/llms%2Fmcp%2Fcontrastapi-mcp-server.txt",
       "type": "text",
-      "sha256": "beb4754acbdb9529cb69086833c74dc80cd539a3d3ed7197ffd061b32f734197"
+      "sha256": "2c795d28e4182892553cd00e30c1be359f9643ea5cdbdf85a606bf6f68ffafff"
     },
     "raycast/mcp/contrastapi-mcp-server.json": {
       "path": "/data/raycast%2Fmcp%2Fcontrastapi-mcp-server.json",
@@ -9209,7 +9209,7 @@
     "feeds/categories/mcp.json": {
       "path": "/data/feeds%2Fcategories%2Fmcp.json",
       "type": "json",
-      "sha256": "187817b5ab34e69e304322383b11d14f07205c5c9d12919ed0674aac2356b450"
+      "sha256": "529a318373402a88808753c74ca120e275195ec6a162c3daea680674ef7ceaed"
     },
     "feeds/categories/tools.json": {
       "path": "/data/feeds%2Fcategories%2Ftools.json",
