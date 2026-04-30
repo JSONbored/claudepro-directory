@@ -24,6 +24,7 @@ import {
   detectKnownBrand,
   getCopyText,
   isAllowedBrandAssetUrl,
+  truncateText,
 } from "@heyclaude/registry";
 
 import {
@@ -103,6 +104,16 @@ describe("registry artifacts", () => {
     });
     expect(directoryEntries.length).toBe(contentEntries.length);
     expect(searchEntries.length).toBe(contentEntries.length);
+  });
+
+  it("does not split surrogate pairs when truncating JSON-backed text", () => {
+    const value = `${"a".repeat(RAYCAST_COPY_PREVIEW_LIMIT - 3)}📚 tail`;
+    const truncated = truncateText(value, RAYCAST_COPY_PREVIEW_LIMIT);
+
+    expect(truncated).toContain("...");
+    expect(truncated).not.toMatch(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/u);
+    expect(truncated).not.toMatch(/(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/u);
+    expect(() => JSON.parse(JSON.stringify({ truncated }))).not.toThrow();
   });
 
   it("preserves verified brand metadata across registry surfaces", () => {

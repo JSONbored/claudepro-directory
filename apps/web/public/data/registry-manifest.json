@@ -3134,7 +3134,7 @@
     "raycast-index.json": {
       "path": "/data/raycast-index.json",
       "type": "json",
-      "sha256": "7239d343dd5c5d944777d895dc2198ce62d489dbd7839c7b0a0c8015cae7bff7"
+      "sha256": "02ea53f8770f89edb05deab19a336fd0f4fee030f710dd5ec3ff7136c11a2f0e"
     },
     "ecosystem-feed.json": {
       "path": "/data/ecosystem-feed.json",

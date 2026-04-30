@@ -16,10 +16,41 @@ export const REGISTRY_ARTIFACT_SCHEMA_VERSION = 2;
 export const SITE_URL = "https://heyclau.de";
 export const RAYCAST_COPY_PREVIEW_LIMIT = 800;
 
+function stripLoneSurrogates(value) {
+  const text = String(value || "");
+  let output = "";
+
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const nextCode = text.charCodeAt(index + 1);
+      if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
+        output += text[index] + text[index + 1];
+        index += 1;
+      }
+      continue;
+    }
+
+    if (code >= 0xdc00 && code <= 0xdfff) continue;
+    output += text[index];
+  }
+
+  return output;
+}
+
 export function truncateText(value, maxLength) {
-  const normalized = String(value || "").trim();
+  const normalized = stripLoneSurrogates(value).trim();
   if (normalized.length <= maxLength) return normalized;
-  return `${normalized.slice(0, maxLength - 3).trimEnd()}...`;
+
+  let truncated = "";
+  const bodyLimit = maxLength - 3;
+  for (const codepoint of normalized) {
+    if (truncated.length + codepoint.length > bodyLimit) break;
+    truncated += codepoint;
+  }
+
+  return `${truncated.trimEnd()}...`;
 }
 
 function codeBlock(language, value) {

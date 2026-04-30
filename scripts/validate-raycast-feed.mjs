@@ -58,6 +58,41 @@ function readSource(filePath) {
   return fs.readFileSync(filePath, "utf8");
 }
 
+function stringHasLoneSurrogate(value) {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const nextCode = value.charCodeAt(index + 1);
+      if (nextCode >= 0xdc00 && nextCode <= 0xdfff) {
+        index += 1;
+        continue;
+      }
+      return true;
+    }
+    if (code >= 0xdc00 && code <= 0xdfff) return true;
+  }
+  return false;
+}
+
+function assertNoLoneSurrogates(value, label) {
+  if (typeof value === "string") {
+    if (stringHasLoneSurrogate(value))
+      fail(`${label}: contains invalid UTF-16`);
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) =>
+      assertNoLoneSurrogates(item, `${label}[${index}]`),
+    );
+    return;
+  }
+  if (value && typeof value === "object") {
+    for (const [key, item] of Object.entries(value)) {
+      assertNoLoneSurrogates(item, `${label}.${key}`);
+    }
+  }
+}
+
 function objectBlock(source, name) {
   const match = source.match(
     new RegExp(`(?:const|export const)\\s+${name}[^=]*=\\s*{([\\s\\S]*?)\\n};`),
@@ -88,6 +123,8 @@ const registryCommandSource = readSource(raycastRegistryCommandSourcePath);
 const categoryLabelsBlock = objectBlock(feedSource, "categoryLabels");
 const issueTemplateBlock = objectBlock(feedSource, "issueTemplateByCategory");
 const categoryIconsBlock = objectBlock(registryCommandSource, "categoryIcons");
+
+assertNoLoneSurrogates(payload, "Raycast feed");
 
 if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
   fail("Raycast feed must be a versioned object envelope");
@@ -189,6 +226,7 @@ for (const entry of payload.entries) {
   }
 
   const detail = JSON.parse(fs.readFileSync(detailPath, "utf8"));
+  assertNoLoneSurrogates(detail, `${key} detail`);
   if (detail.schemaVersion !== 2)
     fail(`${key}: detail schemaVersion must be 2`);
   if (typeof detail.copyText !== "string" || detail.copyText.trim() === "") {
