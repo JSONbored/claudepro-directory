@@ -54,12 +54,8 @@ jobs:
             --issues-json .github/tmp/open-issues.json \
             --output .github/tmp/submission-queue.json
 
-      - name: Upload queue artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: submission-queue
-          path: .github/tmp/submission-queue.json
-          if-no-files-found: error
+      - name: Validate queue artifact
+        run: test -s .github/tmp/submission-queue.json
 
       - name: Write queue summary
         run: |

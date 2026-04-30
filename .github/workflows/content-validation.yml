@@ -42,6 +42,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
@@ -90,14 +92,15 @@ jobs:
         working-directory: integrations/raycast
         run: npm run test:junit
 
+      - name: Install Trunk CLI
+        run: |
+          curl https://get.trunk.io -fsSL | bash -s -- -y
+          echo "$HOME/.trunk/bin" >> "$GITHUB_PATH"
+
       - name: Upload test results to Trunk
         if: ${{ always() && env.TRUNK_API_TOKEN != '' && env.TRUNK_ORG_URL_SLUG != '' }}
         continue-on-error: true
-        uses: trunk-io/analytics-uploader@0e6c416c9d47c105654657984e5e4f0506dd84aa
-        with:
-          junit-paths: reports/junit/*.xml
-          org-slug: ${{ env.TRUNK_ORG_URL_SLUG }}
-          token: ${{ env.TRUNK_API_TOKEN }}
+        run: trunk flakytests upload --junit-paths "reports/junit/*.xml" --org-url-slug "$TRUNK_ORG_URL_SLUG" --token "$TRUNK_API_TOKEN"
 
       - name: Validate content schema
         run: pnpm validate:content:strict
@@ -147,9 +150,7 @@ jobs:
         run: npm run build
 
       - name: Trunk Check
-        uses: trunk-io/trunk-action@75699af9e26881e564e9d832ef7dc3af25ec031b
-        with:
-          check-mode: all
+        run: trunk check --ci --all
 
   validate-pr-preview:
     if: ${{ github.event_name == 'pull_request' }}
@@ -165,6 +166,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@4f4305e1fe60ad818b8ae6fc4a697cc47eab0b2d
@@ -189,7 +192,7 @@ jobs:
         id: preview-url
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          PREVIEW_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.base-url }}
+          PREVIEW_DEPLOYMENT_URL: ${{ steps.deploy-preview.outputs.base-url || env.CLOUDFLARE_DEV_WORKER_URL }}
         run: node scripts/resolve-pr-preview-url.mjs
 
       - name: Validate deployed artifact contract
