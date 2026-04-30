@@ -52,8 +52,9 @@ export default async function ContributorsPage() {
         <span className="eyebrow">Contributors</span>
         <h1 className="section-title">Accepted contributor profiles.</h1>
         <p className="max-w-3xl text-sm leading-8 text-muted-foreground">
-          Attribution is built from accepted registry entries. Profile pages are
-          source-backed and stay maintainer-reviewed.
+          Attribution is built from accepted registry entries and explicit UGC
+          provenance. Profile pages are source-backed and stay
+          maintainer-reviewed.
         </p>
       </div>
 

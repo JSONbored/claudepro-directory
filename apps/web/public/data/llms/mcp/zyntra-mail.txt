@@ -1,0 +1,56 @@
+# Zyntra - Temp e-mails MCP
+URL: https://heyclau.de/mcp/zyntra-mail
+Category: mcp
+Author: dd77ss
+Submitted by: dd77ss
+Submission issue: https://github.com/JSONbored/claudepro-directory/issues/310
+Import PR: https://github.com/JSONbored/claudepro-directory/pull/314
+Date added: 2026-04-30
+Documentation: https://docs.zyntra.app/mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/zyntra-mail
+- Source URLs: https://docs.zyntra.app/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx
+- Brand: Zyntra
+- Brand domain: zyntra.app
+- Brand asset source: brandfetch
+- Author: dd77ss
+- Submitted by: dd77ss
+- Submission issue: https://github.com/JSONbored/claudepro-directory/issues/310
+- Import PR: https://github.com/JSONbored/claudepro-directory/pull/314
+- Reviewed by: JSONbored
+- Claim status: unclaimed
+- Last verified: 2026-04-30
+- Robots: indexable
+## Summary
+MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
+## Tags
+- email
+- testing
+- disposable
+- temp-mail
+- automation
+## Content
+## Overview
+MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
+
+## Usage
+claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp
+
+Then add your API key in Claude settings (see config snippet below).
+
+## Auth Requirements
+Requires a Zyntra API key in the `X-API-Key` header. Use a test-only key from https://app.zyntra.app/ and avoid connecting production inboxes. The MCP can read email contents and delete messages in configured Zyntra inboxes.
+
+## Security Notes
+- Treat the Zyntra API key as a secret.
+- Prefer dedicated test inboxes and scoped test credentials.
+- Review the available MCP tools before use; Zyntra documents `delete_email` as a destructive action.
+
+## Verification
+After adding, run: claude mcp list
+You should see zyntra-mail listed as connected.

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "content-quality-report",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 380,
+  "count": 381,
   "summary": {
     "averageScore": 81,
     "noExternalSourceCount": 102,
@@ -18,7 +18,7 @@
       "warningCount": 22
     },
     "mcp": {
-      "count": 44,
+      "count": 45,
       "averageScore": 90,
       "warningCount": 3
     },
@@ -11140,6 +11140,35 @@
         ],
         "externalSourceUrls": [
           "https://zod.dev/"
+        ]
+      },
+      "warnings": []
+    },
+    {
+      "key": "mcp:zyntra-mail",
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "scores": {
+        "total": 86,
+        "usefulness": 100,
+        "source": 40,
+        "copyability": 90,
+        "freshness": 100,
+        "seo": 100
+      },
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://docs.zyntra.app/mcp"
         ]
       },
       "warnings": []

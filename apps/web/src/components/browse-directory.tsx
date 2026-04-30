@@ -321,6 +321,7 @@ export function BrowseDirectory({
         entry.title,
         entry.description,
         entry.author,
+        entry.submittedBy,
         entry.brandName,
         entry.brandDomain,
         entry.trigger,

@@ -66,6 +66,9 @@ jobs:
         run: node scripts/ci/fail-invalid-submission-report.mjs
 
       - name: Import accepted submission
+        env:
+          SUBMISSION_REVIEWED_BY: ${{ github.actor }}
+          SUBMISSION_REVIEWED_AT: ${{ github.event.issue.updated_at }}
         run: |
           node scripts/import-submission-issue.mjs \
             --issue-json .github/tmp/issue.json

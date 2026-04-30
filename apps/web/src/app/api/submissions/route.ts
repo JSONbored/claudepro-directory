@@ -207,7 +207,10 @@ export const POST = createApiHandler(
       payload.fields && typeof payload.fields === "object"
         ? payload.fields
         : {};
-    const issue = buildSubmissionIssueDraft(fields);
+    const issue = buildSubmissionIssueDraft({
+      ...fields,
+      submitted_via: "website",
+    });
     const report = validateSubmission({
       title: issue.title,
       body: issue.body,

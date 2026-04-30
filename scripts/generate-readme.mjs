@@ -98,11 +98,12 @@ const total = categoryOrder.reduce(
   0,
 );
 
-const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
+const readme = `<div align="center">
 
-<div align="center">
-
-# HeyClaude
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/heyclaude-wordmark-dark.svg">
+  <img src="apps/web/public/heyclaude-wordmark.svg" alt="HeyClaude" width="300">
+</picture>
 
 **Discover and share the best Claude configurations**
 ${total}+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.

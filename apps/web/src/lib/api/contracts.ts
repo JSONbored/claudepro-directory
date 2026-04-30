@@ -160,7 +160,24 @@ export const registryBrandAssetSchema = z.object({
   brandColors: z.array(z.string()).max(6).optional(),
 });
 
+export const registryProvenanceSchema = z.object({
+  submittedBy: z.string().optional(),
+  submittedByUrl: z.string().url().optional(),
+  submittedAt: z.string().optional(),
+  submissionIssueNumber: z.number().int().positive().optional(),
+  submissionIssueUrl: z.string().url().optional(),
+  importPrNumber: z.number().int().positive().optional(),
+  importPrUrl: z.string().url().optional(),
+  reviewedBy: z.string().optional(),
+  reviewedAt: z.string().optional(),
+  claimStatus: z.enum(["unclaimed", "pending", "verified"]).optional(),
+  claimedBy: z.string().optional(),
+  claimedByUrl: z.string().url().optional(),
+  claimedAt: z.string().optional(),
+});
+
 export const registrySearchResultSchema = registryBrandAssetSchema
+  .merge(registryProvenanceSchema)
   .extend({
     category: z.string(),
     slug: z.string(),

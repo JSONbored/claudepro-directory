@@ -78,12 +78,97 @@ function normalizeHttpsUrl(value) {
   }
 }
 
-function issueAuthorProfileUrl(issue) {
-  return normalizeHttpsUrl(
-    issue.user?.html_url ||
-      issue.author?.url ||
-      (issue.author?.login ? `https://github.com/${issue.author.login}` : ""),
+function normalizeGitHubHandle(value) {
+  const normalized = normalizeValue(value).replace(/^@/, "");
+  if (
+    normalized.length >= 1 &&
+    normalized.length <= 39 &&
+    !normalized.startsWith("-") &&
+    !normalized.endsWith("-") &&
+    [...normalized].every(
+      (char) =>
+        (char >= "A" && char <= "Z") ||
+        (char >= "a" && char <= "z") ||
+        (char >= "0" && char <= "9") ||
+        char === "-",
+    )
+  ) {
+    return normalized;
+  }
+  return "";
+}
+
+function githubHandleFromProfileUrl(value) {
+  const normalized = normalizeValue(value);
+  if (!normalized) return "";
+  try {
+    const url = new URL(normalized);
+    if (url.protocol !== "https:" || url.hostname !== "github.com") return "";
+    const parts = url.pathname.split("/").filter(Boolean);
+    return parts.length === 1 ? normalizeGitHubHandle(parts[0]) : "";
+  } catch {
+    return "";
+  }
+}
+
+function githubProfileUrl(handle) {
+  const normalized = normalizeGitHubHandle(handle);
+  return normalized ? `https://github.com/${normalized}` : "";
+}
+
+function githubIdentityFromPublicContact(value) {
+  const normalized = normalizeValue(value);
+  if (
+    !normalized ||
+    (normalized.includes("@") && !normalized.startsWith("@"))
+  ) {
+    return null;
+  }
+  const handle =
+    githubHandleFromProfileUrl(normalized) || normalizeGitHubHandle(normalized);
+  if (!handle) return null;
+  return { name: handle, url: githubProfileUrl(handle) };
+}
+
+function githubIdentityFromIssueAuthor(issue) {
+  const login = normalizeGitHubHandle(
+    issue.user?.login || issue.author?.login || issue.author?.name || "",
   );
+  if (!login) return null;
+  return {
+    name: login,
+    url: normalizeHttpsUrl(issue.user?.html_url) || githubProfileUrl(login),
+  };
+}
+
+function submissionIdentity(issue, fields) {
+  const submittedVia = normalizeValue(fields.submitted_via).toLowerCase();
+  const contactIdentity = githubIdentityFromPublicContact(fields.contact_email);
+  if (submittedVia === "website") return contactIdentity;
+  return githubIdentityFromIssueAuthor(issue) || contactIdentity;
+}
+
+function authorProfileUrlFromFields(fields) {
+  return (
+    normalizeHttpsUrl(fields.author_profile_url) ||
+    githubProfileUrl(
+      githubHandleFromProfileUrl(fields.author) ||
+        normalizeGitHubHandle(fields.author),
+    )
+  );
+}
+
+function issueCreatedAt(issue) {
+  return normalizeValue(issue.created_at || issue.createdAt);
+}
+
+function issueHtmlUrl(issue) {
+  return normalizeHttpsUrl(issue.html_url || issue.url);
+}
+
+function issueNumber(issue) {
+  const parsed = Number(issue.number);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : "";
 }
 
 function yamlScalar(value) {
@@ -168,8 +253,14 @@ function buildContent(issue, report) {
   const fields = report.fields;
   const category = report.category;
   const slug = fields.slug;
-  const dateAdded = issue.createdAt
-    ? String(issue.createdAt).slice(0, 10)
+  const createdAt = issueCreatedAt(issue);
+  const submitted = submissionIdentity(issue, fields);
+  const reviewedBy = normalizeGitHubHandle(
+    process.env.SUBMISSION_REVIEWED_BY || "",
+  );
+  const reviewedAt = normalizeValue(process.env.SUBMISSION_REVIEWED_AT);
+  const dateAdded = createdAt
+    ? String(createdAt).slice(0, 10)
     : new Date().toISOString().slice(0, 10);
   const installCommand = normalizeCommand(
     fields.install_command || fields.install_or_usage,
@@ -205,8 +296,16 @@ function buildContent(issue, report) {
     seoTitle: seo.seoTitle,
     seoDescription: seo.seoDescription,
     author: fields.author,
-    authorProfileUrl: issueAuthorProfileUrl(issue),
+    authorProfileUrl: authorProfileUrlFromFields(fields),
     dateAdded,
+    submittedBy: submitted?.name,
+    submittedByUrl: submitted?.url,
+    submittedAt: createdAt,
+    submissionIssueNumber: issueNumber(issue),
+    submissionIssueUrl: issueHtmlUrl(issue),
+    reviewedBy,
+    reviewedAt,
+    claimStatus: "unclaimed",
     brandName: fields.brand_name,
     brandDomain: fields.brand_domain,
     brandAssetSource: fields.brand_domain ? "brandfetch" : "",

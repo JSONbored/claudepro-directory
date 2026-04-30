@@ -84,6 +84,19 @@ function displayUrlWithoutProtocol(value: string) {
   return value;
 }
 
+function displayGitHubHandle(value: string) {
+  const normalized = value.trim().replace(/^@/, "");
+  return normalized ? `@${normalized}` : "";
+}
+
+function displayClaimStatus(value: string) {
+  return value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function getSuggestChangeUrl(entry: {
   category: string;
   slug: string;
@@ -815,6 +828,62 @@ export default async function DetailPage({ params }: DetailPageProps) {
                     </span>
                     <span className="truncate text-foreground">
                       {githubStars.toLocaleString()}
+                    </span>
+                  </div>
+                ) : null}
+                {entry.submittedBy ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Submitted
+                    </span>
+                    {entry.submittedByUrl ? (
+                      <a
+                        href={entry.submittedByUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex min-w-0 items-center gap-2 text-foreground transition hover:text-primary"
+                      >
+                        <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
+                        <span className="truncate">
+                          {displayGitHubHandle(entry.submittedBy)}
+                        </span>
+                      </a>
+                    ) : (
+                      <span className="flex min-w-0 items-center gap-2 text-foreground">
+                        <UserRound className="size-3.5 shrink-0 text-muted-foreground" />
+                        <span className="truncate">
+                          {displayGitHubHandle(entry.submittedBy)}
+                        </span>
+                      </span>
+                    )}
+                  </div>
+                ) : null}
+                {entry.reviewedBy ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Reviewed
+                    </span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <ShieldCheck className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">
+                        {displayGitHubHandle(entry.reviewedBy)}
+                        {entry.reviewedAt
+                          ? ` on ${entry.reviewedAt.slice(0, 10)}`
+                          : ""}
+                      </span>
+                    </span>
+                  </div>
+                ) : null}
+                {entry.claimStatus ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                      Claim
+                    </span>
+                    <span className="flex min-w-0 items-center gap-2 text-foreground">
+                      <CheckCircle2 className="size-3.5 shrink-0 text-muted-foreground" />
+                      <span className="truncate">
+                        {displayClaimStatus(entry.claimStatus)}
+                      </span>
                     </span>
                   </div>
                 ) : null}

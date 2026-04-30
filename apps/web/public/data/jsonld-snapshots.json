@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "jsonld-snapshots",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 380,
+  "count": 381,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -29783,6 +29783,83 @@
               "value": "Claude: native-skill, Codex: native-skill, Windsurf: native-skill, Gemini: native-skill, Cursor: adapter, Generic AGENTS: manual-context"
             }
           ]
+        }
+      ]
+    },
+    {
+      "key": "mcp:zyntra-mail",
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "url": "https://heyclau.de/mcp/zyntra-mail",
+      "documents": [
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "@id": "https://heyclau.de/mcp/zyntra-mail#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://heyclau.de"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "MCP Servers",
+              "item": "https://heyclau.de/mcp"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "Zyntra - Temp e-mails MCP",
+              "item": "https://heyclau.de/mcp/zyntra-mail"
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://heyclau.de/mcp/zyntra-mail#webpage",
+          "name": "Zyntra - Temp e-mails MCP",
+          "description": "Disposable email inboxes for AI agents and test automation. HeyClaude adds source links, install steps, compatibility, and metadata.",
+          "url": "https://heyclau.de/mcp/zyntra-mail",
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "breadcrumb": {
+            "@id": "https://heyclau.de/mcp/zyntra-mail#breadcrumb"
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "SoftwareSourceCode",
+          "@id": "https://heyclau.de/mcp/zyntra-mail#entry",
+          "name": "Zyntra - Temp e-mails MCP",
+          "headline": "Zyntra - Temp e-mails MCP",
+          "description": "Disposable email inboxes for AI agents and test automation. HeyClaude adds source links, install steps, compatibility, and metadata.",
+          "url": "https://heyclau.de/mcp/zyntra-mail",
+          "datePublished": "2026-04-30",
+          "dateModified": "2026-04-30",
+          "keywords": "email, testing, disposable, temp-mail, automation, mcp servers, mcp, claude, heyclaude, zyntra - temp e-mails mcp, email, testing, disposable, temp-mail, automation",
+          "genre": "MCP Servers",
+          "author": {
+            "@type": "Person",
+            "name": "dd77ss",
+            "url": "https://github.com/dd77ss"
+          },
+          "isPartOf": {
+            "@id": "https://heyclau.de/#website"
+          },
+          "sameAs": [
+            "https://docs.zyntra.app/mcp"
+          ],
+          "isBasedOn": [
+            "https://docs.zyntra.app/mcp",
+            "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+          ],
+          "codeRepository": null,
+          "runtimePlatform": "Claude Code"
         }
       ]
     }

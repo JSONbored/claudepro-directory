@@ -28,6 +28,7 @@ export const FORBIDDEN_CONTENT_FIELDS = [
 export const SKILL_TYPE_VALUES = categorySpec.skillTypeValues;
 export const SKILL_LEVEL_VALUES = categorySpec.skillLevelValues;
 export const VERIFICATION_STATUS_VALUES = categorySpec.verificationStatusValues;
+export const CLAIM_STATUS_VALUES = ["unclaimed", "pending", "verified"];
 const DEFAULT_TESTED_PLATFORMS = categorySpec.defaultTestedPlatforms;
 
 export function headingId(text) {
@@ -130,6 +131,26 @@ function keywordKey(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-");
+}
+
+function isHttpsUrl(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return true;
+  try {
+    const url = new URL(normalized);
+    return url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isIsoDateOrDateTime(value) {
+  const normalized = String(value || "").trim();
+  if (!normalized) return true;
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(normalized) ||
+    !Number.isNaN(Date.parse(normalized))
+  );
 }
 
 export function deriveSeoFields(data = {}, category = "") {
@@ -751,6 +772,44 @@ export function validateEntry(category, data, inferred = {}) {
     semanticErrors.push("brandColors must be hex colors such as #796eff");
   }
 
+  for (const field of [
+    "submittedByUrl",
+    "submissionIssueUrl",
+    "importPrUrl",
+    "claimedByUrl",
+  ]) {
+    if (!isHttpsUrl(merged[field])) {
+      semanticErrors.push(`${field} must use https`);
+    }
+  }
+
+  for (const field of ["submittedAt", "reviewedAt", "claimedAt"]) {
+    if (!isIsoDateOrDateTime(merged[field])) {
+      semanticErrors.push(`${field} must be an ISO date or datetime`);
+    }
+  }
+
+  for (const field of ["submissionIssueNumber", "importPrNumber"]) {
+    const value = merged[field];
+    if (
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== "" &&
+      (!Number.isInteger(Number(value)) || Number(value) <= 0)
+    ) {
+      semanticErrors.push(`${field} must be a positive integer`);
+    }
+  }
+
+  const claimStatus = String(merged.claimStatus || "")
+    .trim()
+    .toLowerCase();
+  if (claimStatus && !CLAIM_STATUS_VALUES.includes(claimStatus)) {
+    semanticErrors.push(
+      `claimStatus must be one of ${CLAIM_STATUS_VALUES.join(", ")}`,
+    );
+  }
+
   if (category === "tools") {
     const websiteUrl = String(merged.websiteUrl || "").trim();
     const affiliateUrl = String(merged.affiliateUrl || "").trim();
@@ -815,6 +874,19 @@ export function orderFrontmatter(data) {
     "author",
     "authorProfileUrl",
     "dateAdded",
+    "submittedBy",
+    "submittedByUrl",
+    "submittedAt",
+    "submissionIssueNumber",
+    "submissionIssueUrl",
+    "importPrNumber",
+    "importPrUrl",
+    "reviewedBy",
+    "reviewedAt",
+    "claimStatus",
+    "claimedBy",
+    "claimedByUrl",
+    "claimedAt",
     "brandName",
     "brandDomain",
     "brandAssetSource",
