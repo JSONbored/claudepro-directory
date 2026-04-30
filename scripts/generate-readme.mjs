@@ -98,9 +98,12 @@ const total = categoryOrder.reduce(
   0,
 );
 
-const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
+const readme = `<div align="center">
 
-<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/heyclaude-wordmark-dark.svg">
+  <img src="apps/web/public/heyclaude-wordmark.svg" alt="HeyClaude" width="300">
+</picture>
 
 # HeyClaude
 

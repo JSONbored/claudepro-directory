@@ -1,6 +1,9 @@
-![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
-
 <div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/heyclaude-wordmark-dark.svg">
+  <img src="apps/web/public/heyclaude-wordmark.svg" alt="HeyClaude" width="300">
+</picture>
 
 # HeyClaude
 
