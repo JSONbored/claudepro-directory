@@ -577,7 +577,7 @@
     "metadataOnly": false,
     "missingRequired": [],
     "missingRecommended": [],
-    "issues": []
+    "issues": ["uses_default_directory_repo_url"]
   },
   {
     "category": "mcp",
@@ -1593,6 +1593,16 @@
     "category": "skills",
     "filePath": "content/skills/google-workspace-gemini-automation.mdx",
     "slug": "google-workspace-gemini-automation",
+    "sourceType": "external",
+    "metadataOnly": false,
+    "missingRequired": [],
+    "missingRecommended": [],
+    "issues": []
+  },
+  {
+    "category": "skills",
+    "filePath": "content/skills/heyclaude-content-submission-factory.mdx",
+    "slug": "heyclaude-content-submission-factory",
     "sourceType": "external",
     "metadataOnly": false,
     "missingRequired": [],

@@ -7,9 +7,9 @@
 **Discover and share the best Claude configurations**
 380+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
-[Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
+[Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Jobs](https://heyclau.de/jobs) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [MCP](packages/mcp) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
-[Feeds](https://heyclau.de/api/registry/feed) • [RSS](https://heyclau.de/feed.xml) • [Atom](https://heyclau.de/atom.xml) • [LLM export](https://heyclau.de/llms-full.txt) • [Raycast](integrations/raycast) • [MCP](packages/mcp) • [Claim/update](https://heyclau.de/claim)
+[Feeds](https://heyclau.de/api/registry/feed) • [RSS](https://heyclau.de/feed.xml) • [Atom](https://heyclau.de/atom.xml) • [LLM export](https://heyclau.de/llms-full.txt) • [Raycast](integrations/raycast) • [MCP endpoint](https://heyclau.de/api/mcp) • [Claim/update](https://heyclau.de/claim)
 
 </div>
 
@@ -47,6 +47,9 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 - Machine-readable registry feed: [`/api/registry/feed`](https://heyclau.de/api/registry/feed)
 - Platform compatibility pages: [`/platforms`](https://heyclau.de/platforms)
 - Read-only MCP server: [`packages/mcp`](packages/mcp)
+- Remote MCP endpoint: [`/api/mcp`](https://heyclau.de/api/mcp)
+- Jobs board: [`/jobs`](https://heyclau.de/jobs)
+- Post a role: [`/jobs/post`](https://heyclau.de/jobs/post)
 - Full LLM export: [`/llms-full.txt`](https://heyclau.de/llms-full.txt)
 - RSS updates: [`/feed.xml`](https://heyclau.de/feed.xml)
 - Atom updates: [`/atom.xml`](https://heyclau.de/atom.xml)
@@ -166,7 +169,7 @@ content issues.
 - **[Fireflies MCP Server for Claude](https://heyclau.de/mcp/fireflies-mcp-server)** - Extract valuable insights from meeting transcripts and summaries
 - **[Git MCP Server for Claude](https://heyclau.de/mcp/git-mcp-server)** - Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories
 - **[GitHub MCP Server for Claude](https://heyclau.de/mcp/github-mcp-server)** - Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality
-- **[HeyClaude MCP Server - Access HeyClaude via MCP](https://heyclau.de/mcp/heyclaude-mcp)** - Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.
+- **[HeyClaude MCP Server](https://heyclau.de/mcp/heyclaude-mcp)** - Search the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.
 - **[Hubspot MCP Server for Claude](https://heyclau.de/mcp/hubspot-mcp-server)** - Access and manage HubSpot CRM data including contacts, companies, and deals
 - **[Hugging Face MCP Server - MCP Servers](https://heyclau.de/mcp/hugging-face-mcp-server)** - Access Hugging Face Hub and Gradio AI applications
 - **[Intercom MCP Server for Claude](https://heyclau.de/mcp/intercom-mcp-server)** - Access customer conversations, tickets, and user data in real-time

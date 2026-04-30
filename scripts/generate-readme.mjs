@@ -107,9 +107,9 @@ const readme = `![HeyClaude](apps/web/public/heyclaude-wordmark.svg)
 **Discover and share the best Claude configurations**
 ${total}+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
-[Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
+[Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Jobs](https://heyclau.de/jobs) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [MCP](packages/mcp) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
-[Feeds](https://heyclau.de/api/registry/feed) • [RSS](https://heyclau.de/feed.xml) • [Atom](https://heyclau.de/atom.xml) • [LLM export](https://heyclau.de/llms-full.txt) • [Raycast](integrations/raycast) • [MCP](packages/mcp) • [Claim/update](https://heyclau.de/claim)
+[Feeds](https://heyclau.de/api/registry/feed) • [RSS](https://heyclau.de/feed.xml) • [Atom](https://heyclau.de/atom.xml) • [LLM export](https://heyclau.de/llms-full.txt) • [Raycast](integrations/raycast) • [MCP endpoint](https://heyclau.de/api/mcp) • [Claim/update](https://heyclau.de/claim)
 
 </div>
 
@@ -138,6 +138,9 @@ ${categoryRows}
 - Machine-readable registry feed: [\`/api/registry/feed\`](https://heyclau.de/api/registry/feed)
 - Platform compatibility pages: [\`/platforms\`](https://heyclau.de/platforms)
 - Read-only MCP server: [\`packages/mcp\`](packages/mcp)
+- Remote MCP endpoint: [\`/api/mcp\`](https://heyclau.de/api/mcp)
+- Jobs board: [\`/jobs\`](https://heyclau.de/jobs)
+- Post a role: [\`/jobs/post\`](https://heyclau.de/jobs/post)
 - Full LLM export: [\`/llms-full.txt\`](https://heyclau.de/llms-full.txt)
 - RSS updates: [\`/feed.xml\`](https://heyclau.de/feed.xml)
 - Atom updates: [\`/atom.xml\`](https://heyclau.de/atom.xml)

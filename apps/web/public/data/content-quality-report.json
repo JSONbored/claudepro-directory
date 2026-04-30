@@ -5,9 +5,9 @@
   "count": 380,
   "summary": {
     "averageScore": 81,
-    "noExternalSourceCount": 101,
+    "noExternalSourceCount": 102,
     "firstPartyEditorialCount": 100,
-    "unprovenancedSourceCount": 0,
+    "unprovenancedSourceCount": 1,
     "missingSeoCount": 0,
     "duplicateBodyGroupCount": 0
   },
@@ -20,7 +20,7 @@
     "mcp": {
       "count": 44,
       "averageScore": 90,
-      "warningCount": 2
+      "warningCount": 3
     },
     "tools": {
       "count": 52,
@@ -5630,30 +5630,30 @@
       "key": "mcp:heyclaude-mcp",
       "category": "mcp",
       "slug": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "title": "HeyClaude MCP Server",
       "scores": {
-        "total": 93,
+        "total": 86,
         "usefulness": 100,
-        "source": 65,
-        "copyability": 100,
+        "source": 40,
+        "copyability": 90,
         "freshness": 100,
         "seo": 100
       },
       "provenance": {
         "sourceQuality": "docs",
-        "hasExternalSource": true,
+        "hasExternalSource": false,
         "hasRepository": false,
         "hasDocumentation": true,
-        "hasFirstPartyPackage": true,
+        "hasFirstPartyPackage": false,
         "sourceUrls": [
-          "https://heyclau.de/mcp/heyclaude-mcp",
+          "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
-        "externalSourceUrls": [
-          "https://heyclau.de/mcp/heyclaude-mcp"
-        ]
+        "externalSourceUrls": []
       },
-      "warnings": []
+      "warnings": [
+        "No external docs/repo source; label as editorial first-party content."
+      ]
     },
     {
       "key": "skills:heyclaude-skill-submission-factory",

@@ -1,232 +1,166 @@
-# HeyClaude MCP Server - Access HeyClaude via MCP
+# HeyClaude MCP Server
 URL: https://heyclau.de/mcp/heyclaude-mcp
 Category: mcp
 Author: HeyClaude Team
 Date added: 2025-11-25
-Documentation: https://heyclau.de/mcp/heyclaude-mcp
+Documentation: https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp
 Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
-Download: /downloads/mcp/heyclaude-mcp.mcpb
 ## Citation Facts
 - Canonical URL: https://heyclau.de/mcp/heyclaude-mcp
-- Source URLs: https://heyclau.de/mcp/heyclaude-mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
+- Source URLs: https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx
 - Brand: HeyClaude
 - Brand domain: heyclau.de
 - Brand asset source: manual
-- Package URL: /downloads/mcp/heyclaude-mcp.mcpb
-- Package SHA256: 35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa
 - Author: HeyClaude Team
-- Last verified: 2026-04-28T23:02:39-06:00
+- Last verified: 2026-04-30T02:43:14-06:00
 - Robots: indexable
 ## Summary
-Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.
+Search the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.
 ## Tags
-- mcp
-- directory
-- api
-- tools
-- community
 - heyclaude
-- claude-pro-directory
+- mcp
+- registry
 - search
-- discovery
+- directory
+- submissions
+- compatibility
+- feeds
 ## Content
-## Content
-Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client. Real-time access to our community-driven directory with 11 powerful tools for discovery, search, and content exploration. Supports OAuth 2.1 authentication with resource parameter (RFC 8707), JWT token audience validation, Row-Level Security enforcement, and comprehensive directory access across all categories.
+## Overview
+The official HeyClaude MCP server exposes the public HeyClaude registry to MCP
+clients. It is designed for read-only discovery: search registry entries, fetch
+details, inspect platform compatibility, copy install guidance, discover feeds,
+and prepare reviewable content submissions.
 
-## Features
-- 11 powerful tools for directory exploration (search, trending, popular, recent, related)
-- Real-time access to HeyClaude directory data via authenticated queries
-- Search with filters, tags, and pagination (max 50 items per request)
-- Trending and popular content discovery (engagement-based sorting)
-- Related content recommendations (semantic similarity and tag matching)
-- One-click .mcpb installation (MCP bundle format support)
-- OAuth 2.1 authentication with resource parameter (RFC 8707 compliance)
-- JWT token audience validation (prevents token passthrough attacks)
-- Row-Level Security (RLS) enforcement (per-user data access control)
-- Streamable HTTP transport (MCP Protocol 2025-06-18)
-- Advanced HeyClaude platform integration with content management, user analytics, and community engagement features
-- Batch operations support for efficient bulk content operations, user management, and analytics processing with automatic rate limit handling and retry logic
-- Real-time platform synchronization capabilities with webhook integration support for monitoring platform events and triggering automated workflows
+The server does not publish content, create GitHub issues, open pull requests,
+manage accounts, write local project files, or mutate editor configuration.
+Submission helpers validate drafts and generate prefilled HeyClaude/GitHub URLs
+for a human-reviewed issue-first workflow.
 
-## Use Cases
-- Search for prompts, agents, and MCP servers (comprehensive directory search)
-- Discover trending content across categories (popularity-based discovery)
-- Get detailed information about specific items (complete metadata retrieval)
-- Find related content based on tags and similarity (semantic recommendations)
-- Browse recently added content (latest directory additions)
-- Access directory from Claude Desktop or Cursor IDE (MCP client integration)
-- Secure token-based directory access (OAuth 2.1 compliant authentication)
-- Row-Level Security compliant queries (per-user data access enforcement)
-- Build automated platform management workflows that sync external systems with HeyClaude for real-time content management and community engagement
+## Tools
+- `search_registry`: search public registry entries by query, category, and platform.
+- `get_entry_detail`: fetch an entry detail payload by category and slug.
+- `get_compatibility`: inspect skill platform compatibility metadata.
+- `get_install_guidance`: fetch install commands, config snippets, package links, and usage notes.
+- `get_platform_adapter`: fetch generated platform adapter content such as Cursor rule adapters for skills.
+- `list_distribution_feeds`: discover registry JSON, RSS, Atom, category, platform, and artifact feeds.
+- `get_submission_schema`: inspect category-specific submission fields and issue-template metadata.
+- `validate_submission_draft`: validate a content submission draft without making write calls.
+- `search_duplicate_entries`: check for likely duplicate registry entries before submitting.
+- `build_submission_urls`: build prefilled HeyClaude submit and GitHub issue URLs.
+- `get_category_submission_guidance`: fetch category-specific contribution guidance and review expectations.
 
-## Installation
-### Claude Code
+## Install
+### Remote endpoint through mcp-remote
 
-1. Run: claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp
-2. Verify installation: claude mcp list
-3. Test connection: claude mcp status heyclaude-mcp
-4. Authenticate with OAuth 2.1 flow (authorization code with PKCE)
-5. Grant required permissions (mcp:tools scope)
-6. Verify token audience includes MCP server URL
+Use this when your MCP client expects a stdio command but you want to connect to
+the hosted HeyClaude endpoint.
 
-### Claude Desktop
-
-1. Open Claude Desktop settings
-2. Navigate to Developer > MCP Settings
-3. Add the following configuration to your claude_desktop_config.json
-4. Save the file and restart Claude Desktop
-5. Authenticate with OAuth 2.1 flow (authorization code with PKCE)
-6. Grant required permissions (mcp:tools scope)
-7. Verify token audience includes MCP server URL
-8. Verify connection in Claude Desktop
-
-## Requirements
-- HeyClaude account (Supabase Auth account required)
-- OAuth 2.1 authentication (authorization code flow with PKCE)
-- Network access to mcp.heyclau.de (HTTPS required, HTTP transport)
-- Understanding of MCP protocol (Model Context Protocol 2025-06-18)
-- Claude Desktop 0.7.0+ or Claude Code with MCP support
-- Understanding of OAuth 2.1 flow (authorization code with PKCE, resource parameter)
-- Understanding of JWT token audience validation (RFC 8707)
-- Understanding of Row-Level Security (RLS) policies
-- Understanding of tool pagination limits (max 50 items per request, some tools max 20)
-- Optional: Supabase account (for OAuth authentication)
-
-## Configuration
 ```json
 {
-  "heyclaude-mcp": {
-    "url": "https://mcp.heyclau.de/mcp",
-    "oauth": {
-      "scopes": ["mcp:tools"],
-      "resource": "https://mcp.heyclau.de/mcp",
-      "tokenEndpoint": "https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token",
-      "authorizationEndpoint": "https://mcp.heyclau.de/oauth/authorize"
-    },
-    "transport": "http"
-  }
-}
-```
-```json
-{
-  "heyclaude-mcp": {
-    "url": "https://mcp.heyclau.de/mcp",
-    "oauth": {
-      "scopes": ["mcp:tools"],
-      "resource": "https://mcp.heyclau.de/mcp",
-      "tokenEndpoint": "https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token",
-      "authorizationEndpoint": "https://mcp.heyclau.de/oauth/authorize"
-    },
-    "transport": "http"
+  "mcpServers": {
+    "heyclaude": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://heyclau.de/api/mcp"]
+    }
   }
 }
 ```
 
-## Examples
-### Search for MCP servers
+### Streamable HTTP endpoint
 
-Use searchContent tool to find MCP servers matching a query
+Use the hosted endpoint directly if your MCP client supports remote Streamable
+HTTP servers.
 
-```plaintext
-Ask Claude: "Search for MCP servers related to GitHub"
+```text
+https://heyclau.de/api/mcp
 ```
 
-### Get trending content
+### Local stdio from the repository
 
-Use getTrending tool to discover popular agents
+Use this when developing HeyClaude locally or testing generated registry
+artifacts before deploy.
 
-```plaintext
-Ask Claude: "Get trending agents from the directory"
+```bash
+pnpm --filter @heyclaude/mcp start
 ```
 
-### Get content details
-
-Use getContentDetail tool to retrieve full metadata for a specific item
-
-```plaintext
-Ask Claude: "Show me details for the github-mcp-server"
+Set `HEYCLAUDE_DATA_DIR=/absolute/path/to/apps/web/public/data` if you need to
+point the server at a specific generated artifact directory.
+```json
+{
+  "mcpServers": {
+    "heyclaude": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://heyclau.de/api/mcp"]
+    }
+  }
+}
+```
+```text
+https://heyclau.de/api/mcp
+```
+```bash
+pnpm --filter @heyclaude/mcp start
 ```
 
-### Find related content
-
-Use getRelatedContent tool to discover similar items
-
-```plaintext
-Ask Claude: "Find content related to the stripe-mcp-server"
+## Example prompts
+```text
+Search HeyClaude for MCP servers related to GitHub.
 ```
 
-### Get Content Item
-
-Retrieve a content item from HeyClaude with metadata
-
-```typescript
-// Get HeyClaude content item
-const content = await heyclaude.content.get({
-  content_id: "content-id",
-  include_metadata: true,
-});
-```
-```plaintext
-Ask Claude: "Search for MCP servers related to GitHub"
-```
-```plaintext
-Ask Claude: "Get trending agents from the directory"
-```
-```plaintext
-Ask Claude: "Show me details for the github-mcp-server"
-```
-```plaintext
-Ask Claude: "Find content related to the stripe-mcp-server"
-```
-```typescript
-// Get HeyClaude content item
-const content = await heyclaude.content.get({
-  content_id: "content-id",
-  include_metadata: true,
-});
+```text
+Show install guidance for mcp/github-mcp-server.
 ```
 
-## Security
-- OAuth 2.1 authentication with resource parameter (RFC 8707) required
-- JWT token audience validation (prevents token passthrough attacks)
-- Row-Level Security (RLS) enforcement via authenticated Supabase client
-- HTTPS required for all connections (secure transport)
-- Bearer token authentication (Authorization: Bearer <token> header)
-- HeyClaude API keys and access tokens must be securely stored and never exposed in client-side code or public repositories - use environment variables and secure credential management
-- HeyClaude OAuth access tokens should be used for third-party integrations to ensure proper access control, token lifecycle management, and automatic token refresh
-- HeyClaude content IDs and user identifiers may expose platform structure and user information - ensure HeyClaude resource identifiers are kept private and not shared in public configurations
-- Rate limiting and API quota management are critical for HeyClaude MCP servers - implement proper rate limit handling, retry logic, and quota monitoring to prevent service disruption
-- HeyClaude webhook configurations and payloads may contain sensitive content and user data - ensure webhook endpoints are properly secured with authentication and HTTPS encryption
+```text
+Validate this HeyClaude content submission draft and build a prefilled issue URL.
+```
+
+```text
+Find possible duplicate entries before I submit this new Claude skill.
+```
+```text
+Search HeyClaude for MCP servers related to GitHub.
+```
+```text
+Show install guidance for mcp/github-mcp-server.
+```
+```text
+Validate this HeyClaude content submission draft and build a prefilled issue URL.
+```
+```text
+Find possible duplicate entries before I submit this new Claude skill.
+```
+
+## Security model
+- Read-only registry artifacts are the source of truth.
+- Hosted MCP requests are schema validated and rate limited.
+- Submission tools return validation reports and URLs only.
+- No GitHub tokens, OAuth grants, API keys, PR creation, or issue creation are exposed through MCP.
+- No local project files, `.cursor`, `.claude`, or MCP client config files are written by the server.
+- Accepted submissions remain maintainer reviewed before content is imported.
 
 ## Troubleshooting
-### OAuth authentication failed or token audience mismatch
+### The client cannot connect to the hosted endpoint
 
-Verify OAuth 2.1 flow completed correctly (authorization code with PKCE). Check token audience claim includes MCP server URL (https://mcp.heyclau.de/mcp). Ensure resource parameter (RFC 8707) was included in authorization request. Verify redirect URI matches registered URI in Supabase Auth. Check token not expired (refresh if needed). Review OAuth metadata endpoints: /.well-known/oauth-protected-resource and /.well-known/oauth-authorization-server. Ensure JWT token includes correct audience in 'aud' claim. Re-authenticate if token was issued without resource parameter.
+Confirm the client supports Streamable HTTP MCP servers. If it only supports
+stdio, use `mcp-remote` with `https://heyclau.de/api/mcp`.
 
-### JWT token validation errors or missing audience claim
+### Search returns no results
 
-OAuth 2.1 requires resource parameter (RFC 8707) to include MCP server URL in token audience. Verify token was issued with resource parameter in authorization request. Check token 'aud' claim includes https://mcp.heyclau.de/mcp. Re-authenticate if token was issued without resource parameter. Review authorization endpoint: /oauth/authorize (proxies to Supabase Auth with resource parameter). Ensure client uses OAuth 2.1 flow, not OAuth 2.0. Check token expiration and refresh if needed. Verify client ID and redirect URI are correct in Supabase Auth configuration.
+Try a broader query or pass only one filter at a time. Categories use HeyClaude
+slugs such as `agents`, `mcp`, `tools`, `skills`, `rules`, `commands`, `hooks`,
+`guides`, `collections`, and `statuslines`.
 
-### Tool execution errors or database query failures
+### A submission draft is invalid
 
-Check Row-Level Security (RLS) policies allow access for authenticated user. Verify Supabase client authenticated correctly (token in Authorization header). Review tool pagination limits (max 50 items per request, some tools max 20). Check database connection and RPC availability. Review error messages in tool responses for specific issues. Verify category and slug parameters are correct (valid categories: agents, rules, commands, skills, collections, mcp). Check content exists in directory for specified category/slug. Review tool input schema requirements (required vs optional parameters).
+Call `get_submission_schema` for the target category, then pass the required
+fields into `validate_submission_draft`. The MCP server will report missing
+fields, unsafe URLs, likely duplicates, and the next review step.
 
-### Connection errors or endpoint unreachable
+### I need to publish content automatically
 
-Verify network access to mcp.heyclau.de (HTTPS required). Check endpoint URL correct: https://mcp.heyclau.de/mcp. Test health endpoint: https://mcp.heyclau.de/ (should return server info with version 1.0.0, protocol 2025-06-18). Verify CORS headers allow requests from your client. Check MCP Protocol Version header matches 2025-06-18. Review Mcp-Session-Id header if using session management. Verify HTTP transport (not STDIO) for remote server. Check firewall or network restrictions blocking HTTPS connections.
-
-### HeyClaude MCP server authentication errors with API keys
-
-Verify API key is valid and not expired. Check API key permissions match required operations. Ensure API key format is correct (Bearer token in Authorization header). For OAuth integrations, verify token refresh logic is working correctly.
-
-### HeyClaude rate limit errors when processing multiple requests
-
-Implement exponential backoff retry logic with jitter. Use HeyClaude API rate limit headers to monitor usage. Reduce concurrent requests. Cache frequently accessed content data. Check HeyClaude documentation for specific rate limits.
-
-### HeyClaude content or user access denied errors
-
-Verify API key has access to the content or user. Check content permissions and account membership. Ensure API key has required permissions for target operations.
-
-### HeyClaude MCP server connection timeouts or network errors
-
-Check network connectivity and firewall settings. Verify HeyClaude API endpoints are accessible. Increase request timeout values. Implement connection pooling and retry mechanisms with exponential backoff.
+That is intentionally outside the MCP v1 boundary. Use the generated submit URL
+or GitHub issue URL, then let the maintainer-reviewed import workflow handle
+accepted submissions.

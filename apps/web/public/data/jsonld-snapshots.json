@@ -14727,7 +14727,7 @@
           "description": "Reusable skill for preparing high-quality HeyClaude registry submissions with category fields, brand metadata, sources, SEO, and review-ready issue content.",
           "url": "https://heyclau.de/skills/heyclaude-content-submission-factory",
           "datePublished": "2026-04-30",
-          "dateModified": "2026-04-30T00:18:10-06:00",
+          "dateModified": "2026-04-29T23:49:58-06:00",
           "keywords": "submit content to heyclaude, heyclaude registry submission, ai directory content fields, github issue submission, registry seo metadata, heyclaude, submissions, registry, content-workflow, seo, skills, claude, heyclaude, submissions, registry, content-workflow, seo",
           "genre": "Skills",
           "author": {
@@ -14786,7 +14786,7 @@
             {
               "@type": "ListItem",
               "position": 3,
-              "name": "HeyClaude MCP Server - Access HeyClaude via MCP",
+              "name": "HeyClaude MCP Server",
               "item": "https://heyclau.de/mcp/heyclaude-mcp"
             }
           ]
@@ -14795,8 +14795,8 @@
           "@context": "https://schema.org",
           "@type": "WebPage",
           "@id": "https://heyclau.de/mcp/heyclaude-mcp#webpage",
-          "name": "HeyClaude MCP Server - Access HeyClaude via MCP",
-          "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly fro...",
+          "name": "HeyClaude MCP Server",
+          "description": "Use the official HeyClaude MCP server to search registry entries, fetch install guidance, inspect compatibility, and prepare issue-first content submissions.",
           "url": "https://heyclau.de/mcp/heyclaude-mcp",
           "isPartOf": {
             "@id": "https://heyclau.de/#website"
@@ -14809,13 +14809,13 @@
           "@context": "https://schema.org",
           "@type": "SoftwareSourceCode",
           "@id": "https://heyclau.de/mcp/heyclaude-mcp#entry",
-          "name": "HeyClaude MCP Server - Access HeyClaude via MCP",
-          "headline": "HeyClaude MCP Server - Access HeyClaude via MCP",
-          "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly fro...",
+          "name": "HeyClaude MCP Server",
+          "headline": "HeyClaude MCP Server",
+          "description": "Use the official HeyClaude MCP server to search registry entries, fetch install guidance, inspect compatibility, and prepare issue-first content submissions.",
           "url": "https://heyclau.de/mcp/heyclaude-mcp",
           "datePublished": "2025-11-25",
-          "dateModified": "2026-04-28T23:02:39-06:00",
-          "keywords": "api, claude, claude-pro-directory, community, development, directory, discovery, heyclaude, mcp, mcp servers, search, server, mcp, directory, api, tools, community, heyclaude, claude-pro-directory, search, discovery",
+          "dateModified": "2026-04-30T02:43:14-06:00",
+          "keywords": "heyclaude mcp, claude registry mcp, mcp registry search, ai directory mcp, content submission mcp, model context protocol, heyclaude, mcp, registry, search, directory, submissions, heyclaude, mcp, registry, search, directory, submissions, compatibility, feeds",
           "genre": "MCP Servers",
           "author": {
             "@type": "Person",
@@ -14826,21 +14826,14 @@
             "@id": "https://heyclau.de/#website"
           },
           "sameAs": [
-            "https://heyclau.de/mcp/heyclaude-mcp"
+            "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp"
           ],
           "isBasedOn": [
-            "https://heyclau.de/mcp/heyclaude-mcp",
+            "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
             "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
           ],
           "codeRepository": null,
-          "runtimePlatform": "Claude Code",
-          "additionalProperty": [
-            {
-              "@type": "PropertyValue",
-              "name": "Package SHA256",
-              "value": "35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa"
-            }
-          ]
+          "runtimePlatform": "Claude Code"
         }
       ]
     },

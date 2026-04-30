@@ -150,7 +150,7 @@ function gitContentUpdatedAt(filePath) {
     const relativePath = path.relative(repoRoot, filePath);
     const output = execFileSync(
       "git",
-      ["log", "-1", "--format=%cI", "--", relativePath],
+      ["log", "--no-merges", "-1", "--format=%aI", "--", relativePath],
       {
         cwd: repoRoot,
         encoding: "utf8",

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import matter from "gray-matter";
+import prettier from "prettier";
 
 import {
   CATEGORY_SCHEMAS,
@@ -130,7 +131,10 @@ for (const category of Object.keys(CATEGORY_SCHEMAS)) {
   }
 }
 
-fs.writeFileSync(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+fs.writeFileSync(
+  reportPath,
+  await prettier.format(JSON.stringify(report), { parser: "json" }),
+);
 
 const requiredIssues = report.filter(
   (item) => item.missingRequired.length > 0,

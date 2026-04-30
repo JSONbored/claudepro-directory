@@ -75,6 +75,8 @@ describe("generated README catalog", () => {
     expect(top).toContain("https://heyclau.de/llms-full.txt");
     expect(top).toContain("integrations/raycast");
     expect(top).toContain("packages/mcp");
+    expect(top).toContain("https://heyclau.de/api/mcp");
+    expect(top).toContain("https://heyclau.de/jobs");
     expect(top).toContain("https://heyclau.de/claim");
   });
 });

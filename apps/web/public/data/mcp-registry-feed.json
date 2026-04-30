@@ -260,15 +260,15 @@
     },
     {
       "name": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
-      "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server. Search prompts, agents, MCP servers, rules, commands, and more directly from Claude Desktop, Cursor, or any MCP client.",
-      "websiteUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "title": "HeyClaude MCP Server",
+      "description": "Search the public HeyClaude registry, fetch entry details, inspect compatibility, and build issue-first submission URLs through MCP.",
+      "websiteUrl": "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
       "brandName": "HeyClaude",
       "brandDomain": "heyclau.de",
       "brandIconUrl": "/favicon.svg",
       "brandAssetSource": "manual",
-      "installCommand": "claude mcp add --transport http heyclaude-mcp https://mcp.heyclau.de/mcp && claude mcp list",
-      "configSnippet": "{\n  \"heyclaude-mcp\": {\n    \"url\": \"https://mcp.heyclau.de/mcp\",\n    \"oauth\": {\n      \"scopes\": [\n        \"mcp:tools\"\n      ],\n      \"resource\": \"https://mcp.heyclau.de/mcp\",\n      \"tokenEndpoint\": \"https://hgtjdifxfapoltfflowc.supabase.co/auth/v1/token\",\n      \"authorizationEndpoint\": \"https://mcp.heyclau.de/oauth/authorize\"\n    },\n    \"transport\": \"http\"\n  }\n}",
+      "installCommand": "npx -y mcp-remote https://heyclau.de/api/mcp",
+      "configSnippet": "{\n  \"mcpServers\": {\n    \"heyclaude\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"mcp-remote\", \"https://heyclau.de/api/mcp\"]\n    }\n  }\n}",
       "heyclaudeUrl": "https://heyclau.de/mcp/heyclaude-mcp"
     },
     {

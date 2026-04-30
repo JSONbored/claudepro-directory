@@ -14,7 +14,7 @@
       "canonicalUrl": "https://heyclau.de/skills/heyclaude-content-submission-factory",
       "llmsUrl": "https://heyclau.de/data/llms/skills/heyclaude-content-submission-factory.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/skills/heyclaude-content-submission-factory",
-      "artifactHash": "ae40a2c934357bc1b56ed597d2d10b1916c61b74d18aeff4aa831806df23df99"
+      "artifactHash": "b402eced4f6051e3db791763089b5fc9b9d8d0a1fe296a17ab5d3f03247cbd33"
     },
     {
       "key": "tools:aider",
@@ -1173,12 +1173,12 @@
       "type": "added",
       "category": "mcp",
       "slug": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
+      "title": "HeyClaude MCP Server",
       "dateAdded": "2025-11-25",
       "canonicalUrl": "https://heyclau.de/mcp/heyclaude-mcp",
       "llmsUrl": "https://heyclau.de/data/llms/mcp/heyclaude-mcp.txt",
       "apiUrl": "https://heyclau.de/api/registry/entries/mcp/heyclaude-mcp",
-      "artifactHash": "0b1b5c9c4f3dea8dc9949ead7188bf69a5545a262f2f2ad7e5d9cdccb7d76743"
+      "artifactHash": "40184e885ca6dc1f8514d1ba72bd6df31b02da3446622760323ab65e5c2a217a"
     },
     {
       "key": "guides:build-mcp-server",
@@ -4566,5 +4566,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "e573f1e52fbc14e4405683612d69557899659551d6107118f70c275bd9a0bcdc"
+  "signature": "a73e3769da67617ae67f0cf4f68a1ac1c1755e87f169462d6d2713a9a7f784c2"
 }

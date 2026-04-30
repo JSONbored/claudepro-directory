@@ -10405,57 +10405,54 @@
       "key": "mcp:heyclaude-mcp",
       "category": "mcp",
       "slug": "heyclaude-mcp",
-      "title": "HeyClaude MCP Server - Access HeyClaude via MCP",
-      "description": "Access the complete HeyClaude directory through HeyClaude's official MCP server.",
+      "title": "HeyClaude MCP Server",
+      "description": "Read-only MCP access to the HeyClaude registry.",
       "url": "https://heyclau.de/mcp/heyclaude-mcp",
       "brandName": "HeyClaude",
       "brandDomain": "heyclau.de",
       "brandIconUrl": "/favicon.svg",
       "brandAssetSource": "manual",
       "websiteUrl": "",
-      "documentationUrl": "https://heyclau.de/mcp/heyclaude-mcp",
+      "documentationUrl": "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
       "repoUrl": "",
       "pricingModel": "",
       "disclosure": "editorial",
       "tags": [
-        "mcp",
-        "directory",
-        "api",
-        "tools",
-        "community",
         "heyclaude",
-        "claude-pro-directory",
+        "mcp",
+        "registry",
         "search",
-        "discovery"
+        "directory",
+        "submissions",
+        "compatibility",
+        "feeds"
       ],
-      "qualityScore": 93,
+      "qualityScore": 86,
       "provenance": {
         "sourceQuality": "docs",
-        "hasExternalSource": true,
+        "hasExternalSource": false,
         "hasRepository": false,
         "hasDocumentation": true,
-        "hasFirstPartyPackage": true,
+        "hasFirstPartyPackage": false,
         "sourceUrls": [
-          "https://heyclau.de/mcp/heyclaude-mcp",
+          "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
-        "externalSourceUrls": [
-          "https://heyclau.de/mcp/heyclaude-mcp"
-        ]
+        "externalSourceUrls": []
       },
       "trustSignals": {
         "firstPartyEditorial": false,
-        "packageVerified": true,
-        "packageTrust": "first-party",
-        "packageChecksum": "35f33ee3e805a9f4304ed2157e54d63798be596953a7b7c4cfc371b8b420fdfa",
-        "checksumPresent": true,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
         "sourceUrlCount": 2,
         "sourceUrls": [
-          "https://heyclau.de/mcp/heyclaude-mcp",
+          "https://github.com/JSONbored/claudepro-directory/tree/main/packages/mcp",
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-28T23:02:39-06:00",
+        "lastVerifiedAt": "2026-04-30T02:43:14-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -21054,5 +21051,5 @@
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "af44a46f01d8730187413dce4a1c2698d760e540110a6c27c3367be0696776ed"
+  "signature": "8d5f10d6859aeb1a5825d5df965983459276a5bc12c733d1eaf0ff80baf4f0b2"
 }
