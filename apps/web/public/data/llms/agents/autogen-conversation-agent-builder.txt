@@ -11,7 +11,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: microsoft.com
 - Brand asset source: brandfetch
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 AutoGen v0.4 conversation agent specialist using actor model architecture for building multi-turn dialogue systems with cross-language messaging and real-time tool invocation

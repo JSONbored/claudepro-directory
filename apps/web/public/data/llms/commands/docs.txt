@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/docs
 - Source URLs: https://docs.claude.ai/commands/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/docs.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Intelligent documentation generator with API specs, code examples, tutorials, and interactive guides

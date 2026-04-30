@@ -15,7 +15,7 @@ Download: /downloads/mcp/notion-mcp-server.mcpb
 - Package URL: /downloads/mcp/notion-mcp-server.mcpb
 - Package SHA256: 5be293afa3eadf51565061c1b49445b1f1f14610e7d3a275ded73155086d3d79
 - Author: Notion
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Read docs, update pages, and manage tasks in Notion workspaces

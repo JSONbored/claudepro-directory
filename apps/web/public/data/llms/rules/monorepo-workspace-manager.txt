@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/monorepo-workspace-manager
 - Source URLs: https://turbo.build/repo/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/monorepo-workspace-manager.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Monorepo workspace management expert with Turborepo, pnpm workspaces, Nx integration, package coordination, and cross-package dependency optimization for scalable multi-package repositories.

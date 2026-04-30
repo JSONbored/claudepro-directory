@@ -15,7 +15,7 @@ Download: /downloads/mcp/docker-mcp-server.mcpb
 - Package URL: /downloads/mcp/docker-mcp-server.mcpb
 - Package SHA256: b426e4d04a6da772ba591f1326d26e4da80e4903e9095ef1d822178889e82b5e
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Manage Docker containers, images, and services directly through Claude with comprehensive Docker API integration

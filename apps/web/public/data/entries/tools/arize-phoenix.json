@@ -10,7 +10,7 @@
     "seoDescription": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
     "author": "Arize AI",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "observability",
       "evaluation"
@@ -91,7 +91,7 @@
       "https://phoenix.arize.com"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

@@ -1,0 +1,40 @@
+# Zyntra - Temp e-mails MCP
+URL: https://heyclau.de/mcp/zyntra-mail
+Category: mcp
+Author: dd77ss
+Date added: 2026-04-30
+Documentation: https://docs.zyntra.app/mcp
+Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx
+## Citation Facts
+- Canonical URL: https://heyclau.de/mcp/zyntra-mail
+- Source URLs: https://docs.zyntra.app/mcp, https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx
+- Author: dd77ss
+- Last verified: 2026-04-30
+- Robots: indexable
+## Summary
+MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
+## Tags
+- email
+- testing
+- disposable
+- temp-mail
+- automation
+## Content
+## Overview
+MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
+
+## Usage
+claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp
+
+Then add your API key in Claude settings (see config snippet below).
+
+## Auth Requirements
+X-API-Key header — get a free API key at https://app.zyntra.app/
+
+## Verification
+After adding, run: claude mcp list
+You should see zyntra-mail listed as connected.

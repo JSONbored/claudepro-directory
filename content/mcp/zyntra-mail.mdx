@@ -1,0 +1,73 @@
+---
+title: Zyntra - Temp e-mails MCP
+slug: zyntra-mail
+category: mcp
+description: |-
+  MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+  
+  Get a free API key on https://app.zyntra.app/
+cardDescription: Disposable email inboxes for AI agents and test automation.
+seoTitle: Zyntra - Temp e-mails MCP - MCP Servers for Claude
+seoDescription: Disposable email inboxes for AI agents and test automation. HeyClaude adds source links, install steps, compatibility, and metadata.
+author: dd77ss
+authorProfileUrl: "https://github.com/dd77ss"
+dateAdded: "2026-04-30"
+documentationUrl: "https://docs.zyntra.app/mcp"
+installable: true
+installCommand: "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp"
+usageSnippet: |-
+  claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp
+  
+  Then add your API key in Claude settings (see config snippet below).
+configSnippet: |-
+  {
+    "mcpServers": {
+      "zyntra-mail": {
+        "type": "http",
+        "url": "https://mcp.zyntra.app/mcp",
+        "headers": {
+          "X-API-Key": "YOUR_API_KEY"
+        }
+      }
+    }
+  }
+tags:
+  - email
+  - testing
+  - disposable
+  - temp-mail
+  - automation
+keywords:
+  - email
+  - testing
+  - disposable
+  - temp-mail
+  - automation
+  - mcp servers
+  - mcp
+  - claude
+  - heyclaude
+  - zyntra - temp e-mails mcp
+robotsIndex: true
+robotsFollow: true
+---
+## Overview
+
+MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
+
+## Usage
+
+claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp
+
+Then add your API key in Claude settings (see config snippet below).
+
+## Auth Requirements
+
+X-API-Key header — get a free API key at https://app.zyntra.app/
+
+## Verification
+
+After adding, run: claude mcp list
+You should see zyntra-mail listed as connected.

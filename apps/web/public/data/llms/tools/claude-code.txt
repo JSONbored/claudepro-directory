@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: anthropic.com
 - Brand asset source: brandfetch
 - Author: Anthropic
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Anthropic command-line coding agent for codebase questions, edits, tests, and terminal-centered development tasks.

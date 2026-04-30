@@ -10,7 +10,7 @@
     "seoDescription": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
     "author": "Vercel",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "ui-generation",
       "react"
@@ -90,7 +90,7 @@
       "https://v0.dev"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

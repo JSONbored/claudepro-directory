@@ -16,7 +16,7 @@ Download: /downloads/mcp/airtable-mcp-server.mcpb
 - Package URL: /downloads/mcp/airtable-mcp-server.mcpb
 - Package SHA256: de3543063d919647fdf25c518ccd6679e32c5e9ae49d94150344fee4dabc3856
 - Author: domdomegg
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Read and write records, manage bases and tables in Airtable directly from Claude

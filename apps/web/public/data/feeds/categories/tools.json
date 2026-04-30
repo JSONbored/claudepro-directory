@@ -14,7 +14,7 @@
       "seoDescription": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
       "author": "Aider",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "terminal-agent",
         "open-source"
@@ -69,7 +69,7 @@
           "https://aider.chat"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -84,7 +84,7 @@
       "seoDescription": "Apify provides actors, datasets, APIs, and integrations for web automation and data extraction workflows. HeyClaude adds source links, install steps,...",
       "author": "Apify",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "web-automation",
         "data-extraction"
@@ -138,7 +138,7 @@
           "https://apify.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -153,7 +153,7 @@
       "seoDescription": "Arcade supports authenticated tool calls, user approvals, and external service integrations for AI agents. HeyClaude adds source links, install steps,...",
       "author": "Arcade",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "tool-calling",
         "agents"
@@ -207,7 +207,7 @@
           "https://www.arcade.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -222,7 +222,7 @@
       "seoDescription": "Arize Phoenix provides open-source observability and evaluation for LLM applications, traces, datasets, and experiments.",
       "author": "Arize AI",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "observability",
         "evaluation"
@@ -277,7 +277,7 @@
           "https://phoenix.arize.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -292,7 +292,7 @@
       "seoDescription": "Bolt is a browser-based AI app builder for creating, editing, running, and deploying web projects from prompts. HeyClaude adds source links, install steps,...",
       "author": "StackBlitz",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "app-builder",
         "prototyping"
@@ -346,7 +346,7 @@
           "https://bolt.new"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -361,7 +361,7 @@
       "seoDescription": "Braintrust supports AI evaluation, prompt experiments, logging, and data workflows for production AI applications. HeyClaude adds source links, install...",
       "author": "Braintrust",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "evaluation",
         "prompt-testing"
@@ -415,7 +415,7 @@
           "https://www.braintrust.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -430,7 +430,7 @@
       "seoDescription": "Browser Use is an open-source library for building AI agents that navigate, click, type, and inspect websites. HeyClaude adds source links, install steps,...",
       "author": "Browser Use",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "browser-automation",
         "open-source"
@@ -485,7 +485,7 @@
           "https://browser-use.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -500,7 +500,7 @@
       "seoDescription": "Browserbase provides cloud browser infrastructure for browser automation, AI agents, scraping, and web interaction. HeyClaude adds source links, install...",
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "browser-automation",
         "agent-infrastructure"
@@ -554,7 +554,7 @@
           "https://www.browserbase.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -569,7 +569,7 @@
       "seoDescription": "Claude Code is Anthropic's terminal coding agent for codebase questions, edits, tests, and development workflows. HeyClaude adds source links, install...",
       "author": "Anthropic",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "claude-code",
         "terminal-agent"
@@ -620,7 +620,7 @@
           "https://www.anthropic.com/claude-code"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -635,7 +635,7 @@
       "seoDescription": "Cline is an open-source autonomous coding agent extension for planning, editing, terminal commands, and tools. HeyClaude adds source links, install steps,...",
       "author": "Cline",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "vs-code",
         "coding-agent"
@@ -690,7 +690,7 @@
           "https://cline.bot"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -705,7 +705,7 @@
       "seoDescription": "Cloudflare Agents SDK helps build, deploy, and run AI agents on Workers with Cloudflare platform primitives. HeyClaude adds source links, install steps,...",
       "author": "Cloudflare",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "agent-framework",
         "cloudflare"
@@ -759,7 +759,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -774,7 +774,7 @@
       "seoDescription": "CodeRabbit provides AI code review for pull requests, summaries, comments, repository context, and feedback loops. HeyClaude adds source links, install...",
       "author": "CodeRabbit",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "code-review",
         "pull-requests"
@@ -828,7 +828,7 @@
           "https://www.coderabbit.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -843,7 +843,7 @@
       "seoDescription": "Composio connects AI agents and applications to external tools, APIs, authentication, and workflow integrations. HeyClaude adds source links, install steps,...",
       "author": "Composio",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "tool-integrations",
         "agents"
@@ -897,7 +897,7 @@
           "https://composio.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -912,7 +912,7 @@
       "seoDescription": "Continue is an open-source AI coding assistant for editor chat, autocomplete, custom models, and coding workflows. HeyClaude adds source links, install...",
       "author": "Continue",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-coding",
         "open-source"
@@ -967,7 +967,7 @@
           "https://continue.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -982,7 +982,7 @@
       "seoDescription": "CrewAI helps build multi-agent workflows, role-based agents, process automation, and AI crew systems. HeyClaude adds source links, install steps,...",
       "author": "CrewAI",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "agent-framework",
         "multi-agent"
@@ -1037,7 +1037,7 @@
           "https://www.crewai.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1052,7 +1052,7 @@
       "seoDescription": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Cursor",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-coding",
         "code-editor"
@@ -1106,7 +1106,7 @@
           "https://cursor.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1121,7 +1121,7 @@
       "seoDescription": "Devin is an AI software engineering agent for planning, coding, debugging, and executing development tasks. HeyClaude adds source links, install steps,...",
       "author": "Cognition",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "coding-agent",
         "autonomous-agent"
@@ -1175,7 +1175,7 @@
           "https://devin.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1190,7 +1190,7 @@
       "seoDescription": "Exa provides search and web retrieval APIs for AI applications, agents, research workflows, and semantic discovery. HeyClaude adds source links, install...",
       "author": "Exa",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "search",
         "retrieval"
@@ -1244,7 +1244,7 @@
           "https://exa.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1259,7 +1259,7 @@
       "seoDescription": "Firecrawl turns websites into clean markdown, structured data, and LLM-ready content for AI applications. HeyClaude adds source links, install steps,...",
       "author": "Firecrawl",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "web-crawling",
         "data-extraction"
@@ -1314,7 +1314,7 @@
           "https://www.firecrawl.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1329,7 +1329,7 @@
       "seoDescription": "Garak is an open-source LLM vulnerability scanner for probing model behavior, prompt attacks, and safety risks. HeyClaude adds source links, install steps,...",
       "author": "NVIDIA",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "security",
         "red-teaming"
@@ -1382,7 +1382,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1397,7 +1397,7 @@
       "seoDescription": "Giskard supports AI testing, evaluation, scanning, and monitoring for ML and LLM application quality. HeyClaude adds source links, install steps,...",
       "author": "Giskard",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "evaluation",
         "security"
@@ -1452,7 +1452,7 @@
           "https://www.giskard.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1467,7 +1467,7 @@
       "seoDescription": "GitHub Copilot supports AI coding, chat, review, and agentic development workflows across GitHub and editors. HeyClaude adds source links, install steps,...",
       "author": "GitHub",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-coding",
         "code-review"
@@ -1520,7 +1520,7 @@
           "https://github.com/features/copilot"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1535,7 +1535,7 @@
       "seoDescription": "Graphite Diamond supports AI-assisted pull request review, engineering feedback, and faster code review workflows. HeyClaude adds source links, install...",
       "author": "Graphite",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "code-review",
         "pull-requests"
@@ -1588,7 +1588,7 @@
           "https://graphite.dev/diamond"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1603,7 +1603,7 @@
       "seoDescription": "Helicone provides LLM logging, metrics, cost tracking, feedback, and gateway workflows for AI applications. HeyClaude adds source links, install steps,...",
       "author": "Helicone",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "observability",
         "cost-tracking"
@@ -1658,7 +1658,7 @@
           "https://www.helicone.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1673,7 +1673,7 @@
       "seoDescription": "Hyperbrowser provides browser automation infrastructure for AI agents, web scraping, browser sessions, and web workflows.",
       "author": "Hyperbrowser",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "browser-automation",
         "agent-infrastructure"
@@ -1727,7 +1727,7 @@
           "https://www.hyperbrowser.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1742,7 +1742,7 @@
       "seoDescription": "Lakera Guard helps detect prompt injection, unsafe content, data leakage, and abuse in LLM applications. HeyClaude adds source links, install steps,...",
       "author": "Lakera",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "security",
         "guardrails"
@@ -1796,7 +1796,7 @@
           "https://www.lakera.ai/guard"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1811,7 +1811,7 @@
       "seoDescription": "Langfuse is an open-source LLM engineering platform for tracing, prompt management, metrics, and evaluation. HeyClaude adds source links, install steps,...",
       "author": "Langfuse",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "observability",
         "open-source"
@@ -1866,7 +1866,7 @@
           "https://langfuse.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1881,7 +1881,7 @@
       "seoDescription": "LangGraph helps build stateful, controllable, multi-step LLM and agent workflows with graph-based orchestration. HeyClaude adds source links, install steps,...",
       "author": "LangChain",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "agent-framework",
         "orchestration"
@@ -1936,7 +1936,7 @@
           "https://www.langchain.com/langgraph"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1951,7 +1951,7 @@
       "seoDescription": "LangSmith provides tracing, observability, evaluation, and testing workflows for LLM applications and agents. HeyClaude adds source links, install steps,...",
       "author": "LangChain",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "observability",
         "evaluation"
@@ -2005,7 +2005,7 @@
           "https://www.langchain.com/langsmith"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2020,7 +2020,7 @@
       "seoDescription": "Lovable helps teams generate and iterate on web applications from natural language product and design requests. HeyClaude adds source links, install steps,...",
       "author": "Lovable",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "app-builder",
         "prototyping"
@@ -2074,7 +2074,7 @@
           "https://lovable.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2089,7 +2089,7 @@
       "seoDescription": "Make helps build visual integrations, scenarios, API workflows, and AI-connected business processes. HeyClaude adds source links, install steps,...",
       "author": "Make",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -2143,7 +2143,7 @@
           "https://www.make.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2158,7 +2158,7 @@
       "seoDescription": "Mastra is a TypeScript framework for AI agents, workflows, memory, tool calling, and evaluation-backed applications. HeyClaude adds source links, install...",
       "author": "Mastra",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "agent-framework",
         "typescript"
@@ -2213,7 +2213,7 @@
           "https://mastra.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2228,7 +2228,7 @@
       "seoDescription": "Microsoft AutoGen is an open-source framework for multi-agent AI applications, workflows, and autonomous systems. HeyClaude adds source links, install...",
       "author": "Microsoft",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "agent-framework",
         "multi-agent"
@@ -2282,7 +2282,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2297,7 +2297,7 @@
       "seoDescription": "n8n is a source-available workflow automation platform for integrations, AI workflows, triggers, and data pipelines. HeyClaude adds source links, install...",
       "author": "n8n",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "self-hosted"
@@ -2352,7 +2352,7 @@
           "https://n8n.io"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2367,7 +2367,7 @@
       "seoDescription": "OpenCode is a terminal-first AI coding agent for local codebase edits, model-flexible workflows, and automation. HeyClaude adds source links, install steps,...",
       "author": "SST",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "terminal-agent",
         "ai-coding"
@@ -2421,7 +2421,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2436,7 +2436,7 @@
       "seoDescription": "Pipedream connects APIs and services for event-driven automations, workflows, and developer integrations. HeyClaude adds source links, install steps,...",
       "author": "Pipedream",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -2490,7 +2490,7 @@
           "https://pipedream.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2505,7 +2505,7 @@
       "seoDescription": "Promptfoo is an open-source framework for prompt testing, LLM evaluations, red teaming, and regression checks. HeyClaude adds source links, install steps,...",
       "author": "Promptfoo",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "prompt-testing",
         "security"
@@ -2559,7 +2559,7 @@
           "https://www.promptfoo.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2574,7 +2574,7 @@
       "seoDescription": "Protect AI focuses on securing AI and ML supply chains, models, applications, and infrastructure. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Protect AI",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "security",
         "ai-supply-chain"
@@ -2628,7 +2628,7 @@
           "https://protectai.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2643,7 +2643,7 @@
       "seoDescription": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations. HeyClaude adds source links, install steps,...",
       "author": "Raycast",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "launcher",
         "extensions"
@@ -2697,7 +2697,7 @@
           "https://www.raycast.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2712,7 +2712,7 @@
       "seoDescription": "Replit Agent helps build, edit, deploy, and iterate on applications through Replit's browser-based development platform.",
       "author": "Replit",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "app-builder",
         "ai-coding"
@@ -2766,7 +2766,7 @@
           "https://replit.com/ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2781,7 +2781,7 @@
       "seoDescription": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation. HeyClaude adds source links, install steps,...",
       "author": "Roo Code",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "vs-code",
         "coding-agent"
@@ -2836,7 +2836,7 @@
           "https://roocode.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2851,7 +2851,7 @@
       "seoDescription": "Smithery helps users discover, install, deploy, and run MCP servers for model context protocol workflows. HeyClaude adds source links, install steps,...",
       "author": "Smithery",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "mcp",
         "tool-discovery"
@@ -2905,7 +2905,7 @@
           "https://smithery.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2920,7 +2920,7 @@
       "seoDescription": "Sourcegraph Cody helps developers query, understand, and edit large codebases with AI context and search. HeyClaude adds source links, install steps,...",
       "author": "Sourcegraph",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-coding",
         "code-search"
@@ -2973,7 +2973,7 @@
           "https://sourcegraph.com/cody"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2988,7 +2988,7 @@
       "seoDescription": "Stagehand is an open-source browser automation framework for combining code, browser control, and AI actions. HeyClaude adds source links, install steps,...",
       "author": "Browserbase",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "browser-automation",
         "open-source"
@@ -3043,7 +3043,7 @@
           "https://www.stagehand.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3058,7 +3058,7 @@
       "seoDescription": "Trigger.dev supports background jobs, schedules, long-running tasks, and durable workflows for TypeScript applications. HeyClaude adds source links, install...",
       "author": "Trigger.dev",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "typescript"
@@ -3113,7 +3113,7 @@
           "https://trigger.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3128,7 +3128,7 @@
       "seoDescription": "v0 is Vercel's AI interface builder for generating, editing, and iterating on React and web UI from prompts. HeyClaude adds source links, install steps,...",
       "author": "Vercel",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ui-generation",
         "react"
@@ -3182,7 +3182,7 @@
           "https://v0.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3197,7 +3197,7 @@
       "seoDescription": "Vercel AI SDK helps build AI applications with model providers, streaming UI, tools, agents, and framework adapters. HeyClaude adds source links, install...",
       "author": "Vercel",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-sdk",
         "typescript"
@@ -3251,7 +3251,7 @@
           "https://ai-sdk.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3266,7 +3266,7 @@
       "seoDescription": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling. HeyClaude adds source links, install steps,...",
       "author": "Weights and Biases",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "evaluation",
         "observability"
@@ -3320,7 +3320,7 @@
           "https://wandb.ai/site/weave"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3335,7 +3335,7 @@
       "seoDescription": "Windsurf is an agentic coding environment for codebase context, multi-file edits, and AI development workflows. HeyClaude adds source links, install steps,...",
       "author": "Windsurf",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai-coding",
         "agentic-editor"
@@ -3388,7 +3388,7 @@
           "https://windsurf.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3403,7 +3403,7 @@
       "seoDescription": "Workato supports enterprise integrations, workflow automation, data processes, and AI-assisted business automation. HeyClaude adds source links, install...",
       "author": "Workato",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "enterprise"
@@ -3457,7 +3457,7 @@
           "https://www.workato.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3472,7 +3472,7 @@
       "seoDescription": "Zapier AI supports app integrations, AI-assisted workflows, agents, actions, and business process automation. HeyClaude adds source links, install steps,...",
       "author": "Zapier",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "workflow-automation",
         "integrations"
@@ -3526,7 +3526,7 @@
           "https://zapier.com/ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3541,7 +3541,7 @@
       "seoDescription": "Zed is a fast collaborative code editor with AI assistance, native performance, and developer collaboration workflows. HeyClaude adds source links, install...",
       "author": "Zed Industries",
       "dateAdded": "2026-04-27",
-      "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "code-editor",
         "collaboration"
@@ -3596,7 +3596,7 @@
           "https://zed.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

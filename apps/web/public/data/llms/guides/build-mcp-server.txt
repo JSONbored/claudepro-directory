@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/build-mcp-server
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/build-mcp-server.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Master MCP server development from scratch. Create custom Claude Desktop integrations with TypeScript/Python in 60 minutes using production-ready patterns.

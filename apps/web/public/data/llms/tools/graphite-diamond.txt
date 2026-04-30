@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: graphite.dev
 - Brand asset source: brandfetch
 - Author: Graphite
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 AI code review assistant for pull requests, engineering feedback, and review workflow acceleration inside Graphite.

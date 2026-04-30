@@ -10,7 +10,7 @@
     "seoDescription": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
     "author": "Notion",
     "dateAdded": "2025-09-18",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "documentation",
       "notion",
@@ -318,7 +318,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

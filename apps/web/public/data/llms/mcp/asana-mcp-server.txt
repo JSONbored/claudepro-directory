@@ -15,7 +15,7 @@ Download: /downloads/mcp/asana-mcp-server.mcpb
 - Package URL: /downloads/mcp/asana-mcp-server.mcpb
 - Package SHA256: 686fda20bfa3699a449ee489e34d4d57de5279ee41755d346bf90c8289e7a7a1
 - Author: Asana
-- Last verified: 2026-04-28T13:43:35-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Interact with Asana workspaces to manage projects and tasks

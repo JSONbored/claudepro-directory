@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/golang-expert
 - Source URLs: https://go.dev/doc/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/golang-expert.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Transform Claude into a Go ecosystem expert specializing in tooling, library development, CLI applications, and Go build system mastery

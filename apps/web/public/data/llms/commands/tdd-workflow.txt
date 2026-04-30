@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/tdd-workflow
 - Source URLs: https://docs.claude.com/en/docs/claude-code/testing, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/tdd-workflow.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Implement test-driven development workflows with Claude Code using red-green-refactor cycles, automatic test generation, and AI-guided iteration until all tests pass

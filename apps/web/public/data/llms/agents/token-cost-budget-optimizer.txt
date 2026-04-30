@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/token-cost-budget-optimizer
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/token-cost-budget-optimizer.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Analyze and optimize token costs with real-time budget tracking. Provides cost projection, usage analytics, and model selection recommendations using Sonnet/Haiku pricing.

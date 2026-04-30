@@ -13,7 +13,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: opencode.ai
 - Brand asset source: brandfetch
 - Author: SST
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Terminal-first AI coding agent for local development workflows, codebase edits, and model-flexible automation.

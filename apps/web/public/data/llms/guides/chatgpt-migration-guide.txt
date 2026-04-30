@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/chatgpt-migration-guide
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/chatgpt-migration-guide.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Switch from ChatGPT to Claude in 30 minutes. Complete migration tutorial covering API transitions, prompt engineering, and workflow optimization strategies.

@@ -10,7 +10,7 @@
     "seoDescription": "Aider is an open-source terminal coding assistant that edits files in Git repositories through chat workflows. HeyClaude adds source links, install steps,...",
     "author": "Aider",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "terminal-agent",
       "open-source"
@@ -91,7 +91,7 @@
       "https://aider.chat"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

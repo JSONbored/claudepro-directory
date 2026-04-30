@@ -10,7 +10,7 @@
     "seoDescription": "Weave helps teams track, evaluate, and debug LLM applications and agent workflows with W&B tooling. HeyClaude adds source links, install steps,...",
     "author": "Weights and Biases",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "evaluation",
       "observability"
@@ -90,7 +90,7 @@
       "https://wandb.ai/site/weave"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

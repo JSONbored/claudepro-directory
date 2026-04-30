@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/nextjs-15-performance-architect
 - Source URLs: https://nextjs.org/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/nextjs-15-performance-architect.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Expert in Next.js 15 performance optimization with Turbopack, partial prerendering, advanced caching strategies, and Core Web Vitals excellence

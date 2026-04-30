@@ -15,7 +15,7 @@ Download: /downloads/mcp/paypal-mcp-server.mcpb
 - Package URL: /downloads/mcp/paypal-mcp-server.mcpb
 - Package SHA256: 4418a41748dff3d809983b7f75e0ba83d90bf6d54df0f8360f97b198087763f2
 - Author: PayPal
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Integrate PayPal commerce capabilities, payment processing, and transaction management

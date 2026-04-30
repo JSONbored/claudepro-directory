@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/statuslines/api-latency-breakdown
 - Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/api-latency-breakdown.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 API latency breakdown monitor showing network time vs processing time split, p95 latency tracking, and performance bottleneck detection for Claude Code sessions.

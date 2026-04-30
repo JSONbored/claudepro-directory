@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/prompt-optimization-specialist
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/prompt-optimization-specialist.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Optimize agent prompts and system instructions with meta-prompting techniques. Improves prompt performance through A/B testing, chaining, and ROI measurement.

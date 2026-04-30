@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/fix-memory-leak-performance
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-memory-leak-performance.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Fix Claude Code memory leaks consuming 120GB RAM and performance issues. Resolve crashes, session freezes, and slow performance with proven fix methods.

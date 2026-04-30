@@ -15,7 +15,7 @@ Download: /downloads/mcp/jira-mcp-server.mcpb
 - Package URL: /downloads/mcp/jira-mcp-server.mcpb
 - Package SHA256: a12b0119f2e3f98912c5f5121fd64ae779b3da1488d2a6862bd0069e2f8fa3ed
 - Author: Atlassian
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Manage Jira tickets and Confluence documentation

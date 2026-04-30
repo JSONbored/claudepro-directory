@@ -15,7 +15,7 @@ Download: /downloads/mcp/filesystem-mcp-server.mcpb
 - Package URL: /downloads/mcp/filesystem-mcp-server.mcpb
 - Package SHA256: da141637f603f2298808a0aa503696894f46ec0b651afd4a4042c9464e44eb97
 - Author: Anthropic
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Official MCP server providing secure file system operations for Claude Desktop and Claude Code

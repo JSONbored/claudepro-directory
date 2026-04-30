@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/python-data-science-expert
 - Source URLs: https://pandas.pydata.org/docs/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science-expert.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Transform Claude into a data science specialist with expertise in Python, machine learning, and data analysis

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/security-audit
 - Source URLs: https://docs.claude.ai/commands/security-audit, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security-audit.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Deploy 100 specialized sub-agents for comprehensive enterprise-grade security, performance, and optimization audit of production codebase

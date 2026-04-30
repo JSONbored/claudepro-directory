@@ -16,7 +16,7 @@ Download: /downloads/mcp/clickup-mcp-server.mcpb
 - Package URL: /downloads/mcp/clickup-mcp-server.mcpb
 - Package SHA256: f790c531d131631b690c489a7219a986c27295cdddc53fa73f732584bfe5611f
 - Author: hauptsacheNet
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Task management and project tracking with ClickUp integration

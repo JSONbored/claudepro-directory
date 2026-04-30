@@ -10,7 +10,7 @@
     "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
     "author": "GitHub",
     "dateAdded": "2025-09-18",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "github",
       "git",
@@ -349,7 +349,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/github-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

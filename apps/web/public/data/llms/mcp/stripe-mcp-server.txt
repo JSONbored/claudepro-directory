@@ -15,7 +15,7 @@ Download: /downloads/mcp/stripe-mcp-server.mcpb
 - Package URL: /downloads/mcp/stripe-mcp-server.mcpb
 - Package SHA256: c9da8acb0af76bc240e21f66deab75e26380909a1d2dfb27e7d9965c679b8d9c
 - Author: Stripe
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Payment processing, subscription management, and financial transaction handling

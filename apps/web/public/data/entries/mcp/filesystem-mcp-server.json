@@ -10,7 +10,7 @@
     "seoDescription": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code Discover tools for AI development.",
     "author": "Anthropic",
     "dateAdded": "2025-09-15",
-    "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "filesystem",
       "files",
@@ -344,7 +344,7 @@
       "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/filesystem-mcp-server.mdx"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

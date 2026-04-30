@@ -15,7 +15,7 @@ Download: /downloads/mcp/hugging-face-mcp-server.mcpb
 - Package URL: /downloads/mcp/hugging-face-mcp-server.mcpb
 - Package SHA256: 15b13953a5ce71275805521b92e911501486da07034cdaaf9b5466926890e0b5
 - Author: Hugging Face
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Access Hugging Face Hub and Gradio AI applications

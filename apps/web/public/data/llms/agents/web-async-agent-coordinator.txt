@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/web-async-agent-coordinator
 - Source URLs: https://docs.claude.com/en/docs/claude-code/web-interface, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/web-async-agent-coordinator.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Web-based asynchronous agent coordinator leveraging Claude Code for Web's browser interface for managing long-running autonomous coding tasks with async workflows.

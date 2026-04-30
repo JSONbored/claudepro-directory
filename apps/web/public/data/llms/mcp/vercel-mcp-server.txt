@@ -15,7 +15,7 @@ Download: /downloads/mcp/vercel-mcp-server.mcpb
 - Package URL: /downloads/mcp/vercel-mcp-server.mcpb
 - Package SHA256: 8e7de38d9166a354c4cae17e0384a395f88a8851cb8ff1e92dfc5a6c4fcb0bcf
 - Author: Vercel
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Manage deployments, analyze logs, and control Vercel projects

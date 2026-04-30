@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "plugin-export-feed",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 244,
+  "count": 245,
   "plugins": [
     {
       "name": "cursor-rules",
@@ -5338,6 +5338,16 @@
         }
       ],
       "heyclaudeUrl": "https://heyclau.de/skills/zod-schema-validator"
+    },
+    {
+      "name": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "description": "Disposable email inboxes for AI agents and test automation.",
+      "category": "mcp",
+      "sourceUrl": "https://docs.zyntra.app/mcp",
+      "installCommand": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp",
+      "platformCompatibility": [],
+      "heyclaudeUrl": "https://heyclau.de/mcp/zyntra-mail"
     }
   ]
 }

@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "kind": "ecosystem-feed",
   "generatedAt": "2026-04-30T00:00:00.000Z",
-  "count": 380,
+  "count": 381,
   "entries": [
     {
       "key": "commands:cursor-rules",
@@ -54,7 +54,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/cursor-rules.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -106,7 +106,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/debug.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -158,7 +158,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/docs.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -210,7 +210,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/explain.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -262,7 +262,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/optimize.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -314,7 +314,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/refactor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -366,7 +366,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/refactor-code.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -418,7 +418,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/review.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -470,7 +470,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -527,7 +527,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security-audit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -579,7 +579,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/test-advanced.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -636,7 +636,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/zod-audit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -688,7 +688,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/accessibility-checker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -741,7 +741,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/accessibility-first-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -855,7 +855,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/agent-operator-growth-master-pack.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -907,7 +907,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/agent-skills-framework-engineer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -960,7 +960,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/skills-installer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1140,7 +1140,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ai-code-review-security-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1188,7 +1188,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ai-devops-automation-engineer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1242,7 +1242,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/ai-model-performance-dashboard.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1298,7 +1298,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/ai-prompt-engineering-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1423,7 +1423,7 @@
           "https://aider.chat"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1481,7 +1481,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1530,7 +1530,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/api-builder-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1583,7 +1583,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-design-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1632,7 +1632,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/api-development-starter-kit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1684,7 +1684,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/api-endpoint-documentation-generator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1738,7 +1738,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/api-first-development-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1790,7 +1790,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/api-latency-breakdown.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1846,7 +1846,7 @@
           "https://apify.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1902,7 +1902,7 @@
           "https://www.arcade.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1961,7 +1961,7 @@
           "https://phoenix.arize.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2017,7 +2017,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-28T13:43:35-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2136,7 +2136,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-code-formatter-hook.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2183,7 +2183,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/auto-save-backup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2235,7 +2235,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/autogen-conversation-agent-builder.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2287,7 +2287,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/autogen-workflow.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2343,7 +2343,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/aws-cloud-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2399,7 +2399,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/aws-cloudformation-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2452,7 +2452,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/aws-cloud-infrastructure-bundle.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2510,7 +2510,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2558,7 +2558,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/backend-architect-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2611,7 +2611,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/backend-development-suite.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2731,7 +2731,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/biome-strict-linting-rules.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2784,7 +2784,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/block-timer-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2840,7 +2840,7 @@
           "https://bolt.new"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2896,7 +2896,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2952,7 +2952,7 @@
           "https://www.braintrust.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3077,7 +3077,7 @@
           "https://browser-use.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3133,7 +3133,7 @@
           "https://www.browserbase.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3182,7 +3182,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/build-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3300,7 +3300,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/burn-rate-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3352,7 +3352,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/cache-efficiency-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3408,7 +3408,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/canva-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3463,7 +3463,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/catppuccin-mocha-theme.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3510,7 +3510,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/chatgpt-migration-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3563,7 +3563,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/checkpoint-manager.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3610,7 +3610,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-4-extended-thinking-tutorial.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3657,7 +3657,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-agent-development-framework.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3705,7 +3705,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/healthcare-hipaa-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3761,7 +3761,7 @@
           "https://www.anthropic.com/claude-code"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3820,7 +3820,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/docker-health-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3867,7 +3867,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/multi-directory-setup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3918,7 +3918,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-cursor-codeium.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3965,7 +3965,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/wsl-setup-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4016,7 +4016,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-28T23:02:39-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4063,7 +4063,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/financial-services-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4116,7 +4116,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-haiku-45-speed-optimizer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4164,7 +4164,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-mcp-server-setup-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4217,7 +4217,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-mcp-skills-integration-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4264,7 +4264,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/business-process-automation.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4311,7 +4311,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-rate-limits-fix.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4362,7 +4362,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-codewhisperer-gemini.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4413,7 +4413,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-vs-copilot-python.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4466,7 +4466,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/claudemd-builder.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4519,7 +4519,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/claude-md-knowledge-manager-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4642,7 +4642,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4701,7 +4701,7 @@
           "https://cline.bot"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4753,7 +4753,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/cloud-backup-on-session-stop.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4806,7 +4806,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/cloud-infrastructure-architect-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4864,7 +4864,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/cloudflare-agents-sdk.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4920,7 +4920,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5118,7 +5118,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudinary-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5166,7 +5166,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-complexity-alert-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5214,7 +5214,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/code-quality-toolkit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5331,7 +5331,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/code-review-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5383,7 +5383,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/code-reviewer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5435,7 +5435,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/code-test-runner-hook.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5490,7 +5490,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/codebase-migration-refactoring-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5546,7 +5546,7 @@
           "https://www.coderabbit.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5733,7 +5733,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/migration-workflow-guide.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5792,7 +5792,7 @@
           "https://composio.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5841,7 +5841,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/content-creation-workflow.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5894,7 +5894,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/context-analyzer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -5947,7 +5947,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/context-window-optimizer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6006,7 +6006,7 @@
           "https://continue.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6072,7 +6072,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6131,7 +6131,7 @@
           "https://www.crewai.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6179,7 +6179,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/css-unused-selector-detector.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6301,7 +6301,7 @@
           "https://cursor.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6424,7 +6424,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/daily-usage-percentage-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6480,7 +6480,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6529,7 +6529,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/data-engineering-suite.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6578,7 +6578,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/data-pipeline-engineering-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6626,7 +6626,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-connection-cleanup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6680,7 +6680,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/database-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6732,7 +6732,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-migration-runner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6784,7 +6784,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/database-query-performance-logger.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6836,7 +6836,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/database-specialist-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6890,7 +6890,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dead-code-eliminator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6938,7 +6938,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/debugging-troubleshooting-system.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -6986,7 +6986,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/debugging-assistant-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7034,7 +7034,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-security-audit-on-stop.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7086,7 +7086,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-security-scanner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7138,7 +7138,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/dependency-update-checker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7194,7 +7194,7 @@
           "https://devin.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7251,7 +7251,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/devops-sre-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7307,7 +7307,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/discord-activity-notifier.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7365,7 +7365,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7413,7 +7413,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-auto-generator-on-stop.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7539,7 +7539,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-container-auto-rebuild.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7595,7 +7595,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/docker-image-security-scanner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7651,7 +7651,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7703,7 +7703,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-coverage-checker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7755,7 +7755,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-generator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7868,7 +7868,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/domain-specialist-ai-agents.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7916,7 +7916,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-cleanup-handler.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -7968,7 +7968,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/environment-variable-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8016,7 +8016,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/error-rate-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8204,7 +8204,7 @@
           "https://exa.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8252,7 +8252,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/extended-thinking-orchestrator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8374,7 +8374,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8422,7 +8422,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/file-size-warning-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8478,7 +8478,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/filesystem-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8526,7 +8526,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/final-bundle-size-reporter.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8585,7 +8585,7 @@
           "https://www.firecrawl.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8641,7 +8641,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/fireflies-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8693,7 +8693,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/five-hour-window-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8742,7 +8742,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-environment-variables.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8789,7 +8789,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-installation-errors.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8838,7 +8838,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-memory-leak-performance.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8885,7 +8885,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/fix-mcp-connection-errors.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8937,7 +8937,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/frontend-specialist-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -8986,7 +8986,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/full-stack-ai-development-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9043,7 +9043,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/garak.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9095,7 +9095,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/generate-tests.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9154,7 +9154,7 @@
           "https://www.giskard.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9202,7 +9202,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-auto-commit-on-stop.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9249,7 +9249,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-branch-protection.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9305,7 +9305,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9357,7 +9357,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/git-pre-commit-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9408,7 +9408,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/git-smart-commit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9461,7 +9461,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/git-status-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9725,7 +9725,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/github-actions-workflow-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9781,7 +9781,7 @@
           "https://github.com/features/copilot"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9833,7 +9833,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/github-copilot-interop-bridge.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9889,7 +9889,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/github-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9941,7 +9941,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/go-golang-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -9995,7 +9995,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/golang-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10043,7 +10043,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/go-module-tidy.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10170,7 +10170,7 @@
           "https://graphite.dev/diamond"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10222,7 +10222,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/graphql-federation-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10270,7 +10270,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/graphql-schema-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10329,7 +10329,7 @@
           "https://www.helicone.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10452,7 +10452,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T02:43:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10571,7 +10571,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/hooks-generator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10627,7 +10627,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10683,7 +10683,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hugging-face-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10805,7 +10805,7 @@
           "https://www.hyperbrowser.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -10853,7 +10853,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/i18n-translation-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11041,7 +11041,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/intercom-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11097,7 +11097,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11153,7 +11153,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jam-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11201,7 +11201,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/jest-snapshot-auto-updater.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11257,7 +11257,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jira-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11371,7 +11371,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/json-schema-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11427,7 +11427,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/kubernetes-devsecops-engineer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11479,7 +11479,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/kubernetes-manifest-validator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11537,7 +11537,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11593,7 +11593,7 @@
           "https://www.lakera.ai/guard"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11652,7 +11652,7 @@
           "https://langfuse.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11711,7 +11711,7 @@
           "https://www.langchain.com/langgraph"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11767,7 +11767,7 @@
           "https://www.langchain.com/langsmith"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11815,7 +11815,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/life-sciences-research-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11871,7 +11871,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -11923,7 +11923,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/lines-per-minute-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12046,7 +12046,7 @@
           "https://lovable.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12102,7 +12102,7 @@
           "https://www.make.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12217,7 +12217,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/markdown-link-checker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12276,7 +12276,7 @@
           "https://mastra.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12461,7 +12461,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mcp-setup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12509,7 +12509,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/mcp-server-status-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12623,7 +12623,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/memory-usage-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12681,7 +12681,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/microsoft-autogen.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12735,7 +12735,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/minimal-powerline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12853,7 +12853,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/mintlify-docs.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12907,7 +12907,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-developer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -12961,7 +12961,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/mobile-app-development-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13079,7 +13079,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/model-switch-history-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13135,7 +13135,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13188,7 +13188,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/monorepo-workspace-manager.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13240,7 +13240,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/multi-agent-orchestration-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13289,7 +13289,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-line-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13341,7 +13341,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-provider-token-counter.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13393,7 +13393,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-session-overlap-indicator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13452,7 +13452,7 @@
           "https://n8n.io"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13721,7 +13721,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/netlify-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13773,7 +13773,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/nextjs-15-performance-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13821,7 +13821,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/nextjs-route-analyzer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13877,7 +13877,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -13930,7 +13930,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/oh-my-zsh-robbyrussell.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14192,7 +14192,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/tools/opencode.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14311,7 +14311,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/package-vulnerability-scanner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14429,7 +14429,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/parallel-subagent-distributor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14485,7 +14485,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14533,7 +14533,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-benchmark-report.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14581,7 +14581,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-impact-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14633,7 +14633,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-monitor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14685,7 +14685,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/performance-optimizer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14741,7 +14741,7 @@
           "https://pipedream.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14797,7 +14797,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/plaid-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -14850,7 +14850,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/plan-mode.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15034,7 +15034,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/playwright-test-runner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-27T01:30:00-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15082,7 +15082,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/plugin-ecosystem-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15138,7 +15138,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15256,7 +15256,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/prisma-schema-sync.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15304,7 +15304,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/product-management-ai-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15360,7 +15360,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/production-codebase-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15409,7 +15409,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/production-reliability-engineer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-27T01:30:00-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15458,7 +15458,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/production-readiness-toolkit.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15506,7 +15506,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/collections/developer-productivity-booster.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15620,7 +15620,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/prompt-optimization-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15677,7 +15677,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15736,7 +15736,7 @@
           "https://www.promptfoo.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15792,7 +15792,7 @@
           "https://protectai.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -15977,7 +15977,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16030,7 +16030,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/python-data-science-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16078,7 +16078,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-import-optimizer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16125,7 +16125,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/python-linter-integration.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16178,7 +16178,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16234,7 +16234,7 @@
           "https://www.raycast.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16357,7 +16357,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-19-concurrent-features-specialist.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16409,7 +16409,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16461,7 +16461,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16513,7 +16513,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-server-components-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16561,7 +16561,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/react-component-test-generator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16609,7 +16609,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/real-time-activity-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16657,7 +16657,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/real-time-cost-tracker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16715,7 +16715,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16767,7 +16767,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/redis-cache-invalidator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16825,7 +16825,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -16881,7 +16881,7 @@
           "https://replit.com/ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17006,7 +17006,7 @@
           "https://roocode.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17054,7 +17054,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/rust-cargo-check.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17168,7 +17168,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/scss-auto-compiler.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17220,7 +17220,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17272,7 +17272,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-auditor-penetration-tester.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17324,7 +17324,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/security-scanner-hook.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17376,7 +17376,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-first-react-components.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17429,7 +17429,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/semantic-kernel-enterprise-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17477,7 +17477,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/sensitive-data-alert-scanner.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17533,7 +17533,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17585,7 +17585,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-health-score.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17633,7 +17633,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/session-metrics-collector.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17682,7 +17682,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/session-timer-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17731,7 +17731,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/simple-text-statusline.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17783,7 +17783,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/slack-progress-notifier.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17836,7 +17836,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/slash-command-gen.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-27T01:30:00-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17889,7 +17889,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/slash-command-orchestrator-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-27T01:30:00-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -17945,7 +17945,7 @@
           "https://smithery.ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18003,7 +18003,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18059,7 +18059,7 @@
           "https://sourcegraph.com/cody"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18115,7 +18115,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18174,7 +18174,7 @@
           "https://www.stagehand.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18222,7 +18222,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/starship-powerline-theme.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18278,7 +18278,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18334,7 +18334,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18387,7 +18387,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/subagent-create.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18440,7 +18440,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/subagent-factory-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18559,7 +18559,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/svelte-component-compiler.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18678,7 +18678,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/tdd-workflow.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18726,7 +18726,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/team-summary-email-generator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18773,7 +18773,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/technical-documentation-writer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18825,7 +18825,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/terraform-infrastructure-architect.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18873,7 +18873,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/terraform-plan-executor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18925,7 +18925,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/test-automation-engineer-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -18973,7 +18973,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/test-coverage-final-report.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19025,7 +19025,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/test-runner-hook.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19078,7 +19078,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/test-driven-development-enforcer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19126,7 +19126,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/token-cost-budget-optimizer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19185,7 +19185,7 @@
           "https://trigger.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19303,7 +19303,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/typescript-5x-strict-mode-expert.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19350,7 +19350,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/typescript-compilation-checker.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19398,7 +19398,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ui-ux-design-expert-agent.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19657,7 +19657,7 @@
           "https://v0.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19709,7 +19709,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/v0-generate.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19834,7 +19834,7 @@
           "https://ai-sdk.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -19890,7 +19890,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20004,7 +20004,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/vue-composition-api-linter.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20056,7 +20056,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/wcag-accessibility-auditor.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20112,7 +20112,7 @@
           "https://wandb.ai/site/weave"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20164,7 +20164,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/web-async-agent-coordinator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20278,7 +20278,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/webpack-bundle-analyzer.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20401,7 +20401,7 @@
           "https://windsurf.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20528,7 +20528,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/windsurf-ai-native-ide-patterns.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20584,7 +20584,7 @@
           "https://www.workato.com"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20640,7 +20640,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20688,7 +20688,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/workflow-completion-report.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20740,7 +20740,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/workspace-project-depth-indicator.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20796,7 +20796,7 @@
           "https://zapier.com/ai"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20852,7 +20852,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -20911,7 +20911,7 @@
           "https://zed.dev"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -21048,8 +21048,60 @@
           "manual-context"
         ]
       }
+    },
+    {
+      "key": "mcp:zyntra-mail",
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "description": "Disposable email inboxes for AI agents and test automation.",
+      "url": "https://heyclau.de/mcp/zyntra-mail",
+      "websiteUrl": "",
+      "documentationUrl": "https://docs.zyntra.app/mcp",
+      "repoUrl": "",
+      "pricingModel": "",
+      "disclosure": "editorial",
+      "tags": [
+        "email",
+        "testing",
+        "disposable",
+        "temp-mail",
+        "automation"
+      ],
+      "qualityScore": 86,
+      "provenance": {
+        "sourceQuality": "docs",
+        "hasExternalSource": true,
+        "hasRepository": false,
+        "hasDocumentation": true,
+        "hasFirstPartyPackage": false,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "externalSourceUrls": [
+          "https://docs.zyntra.app/mcp"
+        ]
+      },
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-30",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      }
     }
   ],
   "signatureAlgorithm": "sha256",
-  "signature": "1f646b664aa20a0107babb12fa8814103bcede39a65349db859e891a1b633cf0"
+  "signature": "759e6c40a17bd74240f94cd9cb372445916e237c6912e9854e3e172d17ad86df"
 }

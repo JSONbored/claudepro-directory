@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/performance-monitor
 - Source URLs: https://web.dev/vitals/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/performance-monitor.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Monitors application performance metrics, identifies bottlenecks, and provides optimization recommendations.

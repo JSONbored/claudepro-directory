@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/statuslines/lines-per-minute-tracker
 - Source URLs: https://docs.claude.com/en/docs/claude-code/statusline, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/lines-per-minute-tracker.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Real-time coding velocity monitor tracking lines added/removed per minute with productivity scoring and daily output projection for Claude Code sessions.

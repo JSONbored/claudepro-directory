@@ -16,7 +16,7 @@ Download: /downloads/mcp/redis-mcp-server.mcpb
 - Package URL: /downloads/mcp/redis-mcp-server.mcpb
 - Package SHA256: 53ca24ed61d13c6d40277f385286fcc089c13b173c7829913b02ddb4d669c68a
 - Author: Redis
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Official Redis MCP server providing natural language interface for Redis data management and operations

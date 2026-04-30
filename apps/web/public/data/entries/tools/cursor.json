@@ -10,7 +10,7 @@
     "seoDescription": "Cursor is an AI-native code editor for codebase-aware chat, agent edits, and developer workflows. HeyClaude adds source links, install steps, compatibility,...",
     "author": "Cursor",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "ai-coding",
       "code-editor"
@@ -90,7 +90,7 @@
       "https://cursor.com"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

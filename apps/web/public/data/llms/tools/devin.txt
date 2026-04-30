@@ -12,7 +12,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Brand domain: devin.ai
 - Brand asset source: brandfetch
 - Author: Cognition
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 AI software engineering agent for planning, coding, debugging, and executing development tasks with autonomous workflows.

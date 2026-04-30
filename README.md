@@ -5,7 +5,7 @@
 # HeyClaude
 
 **Discover and share the best Claude configurations**
-380+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
+381+ file-backed entries covering agents, MCP servers, tools, skills, hooks, rules, commands, guides, collections, and statuslines.
 
 [Website](https://heyclau.de) • [Browse](https://heyclau.de/browse) • [Jobs](https://heyclau.de/jobs) • [Submit](https://heyclau.de/submit) • [API](https://heyclau.de/api-docs) • [MCP](packages/mcp) • [Discussions](https://github.com/JSONbored/claudepro-directory/discussions)
 
@@ -30,7 +30,7 @@ HeyClaude is a fast, GitHub-native directory for Claude assets.
 | Section                     | Entries | Scope                                                                     |
 | --------------------------- | ------: | ------------------------------------------------------------------------- |
 | [Agents](#ai-agents)        |      39 | Specialized Claude agents and expert roles.                               |
-| [MCP Servers](#mcp-servers) |      44 | Model Context Protocol servers and integrations.                          |
+| [MCP Servers](#mcp-servers) |      45 | Model Context Protocol servers and integrations.                          |
 | [Tools](#tools)             |      52 | Apps, developer tools, services, and products for Claude-native builders. |
 | [Skills](#skills)           |      68 | Installable skill packs and reusable capabilities.                        |
 | [Rules](#rules)             |      29 | Prompt guardrails, project rules, and operating constraints.              |
@@ -149,7 +149,7 @@ content issues.
 - **[UI UX Design Expert Agent - Agents](https://heyclau.de/agents/ui-ux-design-expert-agent)** - Specialized in creating beautiful, intuitive user interfaces and exceptional user experiences
 - **[Web Async Agent Coordinator - Agents](https://heyclau.de/agents/web-async-agent-coordinator)** - Web-based asynchronous agent coordinator leveraging Claude Code for Web's browser interface for managing long-running autonomous coding tasks with async workflows.
 
-## 🔌 MCP Servers (44)
+## 🔌 MCP Servers (45)
 
 - **[Airtable MCP Server for Claude](https://heyclau.de/mcp/airtable-mcp-server)** - Read and write records, manage bases and tables in Airtable directly from Claude
 - **[Asana MCP Server for Claude](https://heyclau.de/mcp/asana-mcp-server)** - Interact with Asana workspaces to manage projects and tasks
@@ -195,6 +195,9 @@ content issues.
 - **[Vercel MCP Server for Claude](https://heyclau.de/mcp/vercel-mcp-server)** - Manage deployments, analyze logs, and control Vercel projects
 - **[Workato MCP Server for Claude](https://heyclau.de/mcp/workato-mcp-server)** - Access any application, workflows, or data via Workato's integration platform
 - **[Zapier MCP Server for Claude](https://heyclau.de/mcp/zapier-mcp-server)** - Connect to nearly 8,000 apps through Zapier's automation platform
+- **[Zyntra - Temp e-mails MCP](https://heyclau.de/mcp/zyntra-mail)** - MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.
+
+Get a free API key on https://app.zyntra.app/
 
 ## 🧰 Tools (52)
 

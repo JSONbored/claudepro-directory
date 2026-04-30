@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/ai-code-review-security-agent
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/ai-code-review-security-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 AI-powered code review specialist focusing on security vulnerabilities, OWASP Top 10, static analysis, secrets detection, and automated security best practices enforcement

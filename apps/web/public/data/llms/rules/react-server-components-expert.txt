@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/react-server-components-expert
 - Source URLs: https://react.dev/reference/rsc/server-components, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-server-components-expert.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Expert in React Server Components (RSC) with React 19 and Next.js 15, specializing in server-first rendering patterns, data fetching strategies, and streaming architectures

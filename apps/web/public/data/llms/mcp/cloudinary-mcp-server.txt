@@ -15,7 +15,7 @@ Download: /downloads/mcp/cloudinary-mcp-server.mcpb
 - Package URL: /downloads/mcp/cloudinary-mcp-server.mcpb
 - Package SHA256: 40ee1633161361f65ee12c6766e87277e3e062ea6e30ff65ad609334cdb0ae8d
 - Author: Cloudinary
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Upload, manage, transform, and analyze media assets in the cloud

@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "kind": "category-feed",
   "category": "mcp",
-  "generatedAt": "2026-04-25T00:00:00.000Z",
-  "count": 44,
+  "generatedAt": "2026-04-30T00:00:00.000Z",
+  "count": 45,
   "entries": [
     {
       "category": "mcp",
@@ -14,7 +14,7 @@
       "seoDescription": "Read and write records, manage bases and tables in Airtable directly from Claude. Discover tools for AI development. HeyClaude adds source links, install...",
       "author": "domdomegg",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "database",
         "airtable",
@@ -93,7 +93,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/airtable-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -108,7 +108,7 @@
       "seoDescription": "Interact with Asana workspaces to manage projects and tasks Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Asana",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-28T13:43:35-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "asana",
         "project-management",
@@ -187,7 +187,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/asana-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-28T13:43:35-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -202,7 +202,7 @@
       "seoDescription": "Comprehensive AWS cloud services integration for infrastructure management, deployment, and monitoring Discover tools for AI development.",
       "author": "AWS Labs",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "aws",
         "cloud",
@@ -281,7 +281,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/aws-services-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -296,7 +296,7 @@
       "seoDescription": "Access enterprise content, analyze unstructured data, and automate workflows Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Box",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "storage",
         "box",
@@ -375,7 +375,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/box-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -390,7 +390,7 @@
       "seoDescription": "Browse, summarize, and generate Canva designs directly from Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Canva",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "design",
         "canva",
@@ -469,7 +469,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/canva-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -485,7 +485,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-10-27",
-      "contentUpdatedAt": "2026-04-28T23:02:39-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "tutorial",
         "intermediate",
@@ -561,7 +561,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/desktop-mcp-setup.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-28T23:02:39-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -576,7 +576,7 @@
       "seoDescription": "Task management and project tracking with ClickUp integration Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
       "author": "hauptsacheNet",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "project-management",
         "clickup",
@@ -655,7 +655,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/clickup-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -670,7 +670,7 @@
       "seoDescription": "Build applications, analyze traffic, and manage security settings through Cloudflare Discover tools for AI development. HeyClaude adds source links, install...",
       "author": "Cloudflare",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "cloudflare",
         "cdn",
@@ -749,7 +749,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudflare-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -764,7 +764,7 @@
       "seoDescription": "Upload, manage, transform, and analyze media assets in the cloud Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Cloudinary",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "media",
         "cloudinary",
@@ -843,7 +843,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/cloudinary-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -859,7 +859,7 @@
       "author": "UPinar",
       "authorProfileUrl": "https://github.com/UPinar",
       "dateAdded": "2026-04-20",
-      "contentUpdatedAt": "2026-04-30T04:13:44-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "security",
         "mcp-server",
@@ -926,7 +926,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/contrastapi-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -941,7 +941,7 @@
       "seoDescription": "Access high-quality fundamental financial data from SEC filings and investor presentations Discover tools for AI development.",
       "author": "Daloopa",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "finance",
         "daloopa",
@@ -1020,7 +1020,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/daloopa-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1035,7 +1035,7 @@
       "seoDescription": "Discord bot integration for community management, moderation, and server automation Discover tools for AI development. HeyClaude adds source links, install...",
       "author": "saseq",
       "dateAdded": "2025-09-20",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "discord",
         "bot",
@@ -1114,7 +1114,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/discord-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1130,7 +1130,7 @@
       "author": "JSONbored",
       "authorProfileUrl": "https://github.com/JSONbored",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "docker",
         "containers",
@@ -1209,7 +1209,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/docker-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1224,7 +1224,7 @@
       "seoDescription": "Access designs, export assets, and interact with Figma files through Claude Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Figma",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "design",
         "figma",
@@ -1303,7 +1303,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/figma-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1318,7 +1318,7 @@
       "seoDescription": "Official MCP server providing secure file system operations for Claude Desktop and Claude Code Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-15",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "filesystem",
         "files",
@@ -1397,7 +1397,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/filesystem-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1412,7 +1412,7 @@
       "seoDescription": "Extract valuable insights from meeting transcripts and summaries Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Fireflies",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "meetings",
         "fireflies",
@@ -1491,7 +1491,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/fireflies-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1506,7 +1506,7 @@
       "seoDescription": "Official MCP server providing Git repository tools for reading, searching, and manipulating Git repositories Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "git",
         "version-control",
@@ -1585,7 +1585,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/git-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1600,7 +1600,7 @@
       "seoDescription": "Official GitHub MCP server providing comprehensive GitHub API access for repository management, file operations, and search functionality Discover tools for ...",
       "author": "GitHub",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "github",
         "git",
@@ -1679,7 +1679,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/github-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1695,7 +1695,7 @@
       "author": "HeyClaude Team",
       "authorProfileUrl": "https://heyclau.de",
       "dateAdded": "2025-11-25",
-      "contentUpdatedAt": "2026-04-30T02:43:14-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "heyclaude",
         "mcp",
@@ -1769,7 +1769,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/heyclaude-mcp.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T02:43:14-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1784,7 +1784,7 @@
       "seoDescription": "Access and manage HubSpot CRM data including contacts, companies, and deals Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "HubSpot",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "crm",
         "hubspot",
@@ -1863,7 +1863,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hubspot-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1878,7 +1878,7 @@
       "seoDescription": "Access Hugging Face Hub and Gradio AI applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
       "author": "Hugging Face",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "ai",
         "hugging-face",
@@ -1957,7 +1957,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/hugging-face-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -1972,7 +1972,7 @@
       "seoDescription": "Access customer conversations, tickets, and user data in real-time Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Intercom",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "customer-support",
         "intercom",
@@ -2051,7 +2051,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/intercom-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2066,7 +2066,7 @@
       "seoDescription": "Build video creation capabilities into your applications Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
       "author": "invideo",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "video",
         "invideo",
@@ -2145,7 +2145,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/invideo-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2160,7 +2160,7 @@
       "seoDescription": "Debug faster with AI agents that access video recordings, console logs, and network requests Discover tools for AI development.",
       "author": "Jam",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "debugging",
         "jam",
@@ -2239,7 +2239,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jam-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2254,7 +2254,7 @@
       "seoDescription": "Manage Jira tickets and Confluence documentation Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
       "author": "Atlassian",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "jira",
         "confluence",
@@ -2333,7 +2333,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/jira-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2348,7 +2348,7 @@
       "seoDescription": "Kubernetes cluster management and container orchestration through MCP integration Discover tools for AI development. HeyClaude adds source links, install...",
       "author": "feiskyer",
       "dateAdded": "2025-09-20",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "kubernetes",
         "k8s",
@@ -2427,7 +2427,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/kubernetes-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2442,7 +2442,7 @@
       "seoDescription": "Integrate with Linear's issue tracking and project management system Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Linear",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "project-management",
         "linear",
@@ -2521,7 +2521,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/linear-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2536,7 +2536,7 @@
       "seoDescription": "Manage monday.com boards, items, and CRM activities Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and metadata.",
       "author": "Monday.com",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "monday",
         "project-management",
@@ -2615,7 +2615,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/monday-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2630,7 +2630,7 @@
       "seoDescription": "Create, deploy, and manage websites on Netlify platform Discover tools for AI development. HeyClaude adds source links, install steps, compatibility, and...",
       "author": "Netlify",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "deployment",
         "netlify",
@@ -2709,7 +2709,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/netlify-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2724,7 +2724,7 @@
       "seoDescription": "Read docs, update pages, and manage tasks in Notion workspaces Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Notion",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "documentation",
         "notion",
@@ -2803,7 +2803,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/notion-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2818,7 +2818,7 @@
       "seoDescription": "Integrate PayPal commerce capabilities, payment processing, and transaction management Discover tools for AI development.",
       "author": "PayPal",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "payments",
         "paypal",
@@ -2897,7 +2897,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/paypal-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -2912,7 +2912,7 @@
       "seoDescription": "Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking Discover tools for AI development.",
       "author": "Plaid",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "banking",
         "plaid",
@@ -2991,7 +2991,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/plaid-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3006,7 +3006,7 @@
       "seoDescription": "Official MCP server providing read-only access to PostgreSQL databases with schema inspection and query capabilities Discover tools for AI development.",
       "author": "Anthropic",
       "dateAdded": "2025-09-16",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "postgresql",
         "database",
@@ -3085,7 +3085,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/postgresql-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3101,7 +3101,7 @@
       "author": "MohamedAbdallah-14",
       "authorProfileUrl": "https://github.com/MohamedAbdallah-14",
       "dateAdded": "2026-04-25",
-      "contentUpdatedAt": "2026-04-30T04:13:44-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "mcp",
         "image-generation",
@@ -3159,7 +3159,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/prompt-to-asset.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-30T04:13:44-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3175,7 +3175,7 @@
       "author": "karanb192",
       "authorProfileUrl": "https://github.com/karanb192",
       "dateAdded": "2025-09-27",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "reddit",
         "social-media",
@@ -3254,7 +3254,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/reddit-mcp-buddy.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3270,7 +3270,7 @@
       "author": "Redis",
       "authorProfileUrl": "https://redis.io/",
       "dateAdded": "2025-09-20",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "redis",
         "cache",
@@ -3349,7 +3349,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/redis-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3365,7 +3365,7 @@
       "author": "Sentry",
       "authorProfileUrl": "https://sentry.io/",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "monitoring",
         "sentry",
@@ -3444,7 +3444,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/sentry-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3459,7 +3459,7 @@
       "seoDescription": "Security analysis and vulnerability scanning for dependencies Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Socket",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "security",
         "dependencies",
@@ -3538,7 +3538,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/socket-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3553,7 +3553,7 @@
       "seoDescription": "Build on Square APIs for payments, inventory, and order management Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Square",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "payments",
         "square",
@@ -3632,7 +3632,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/square-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3647,7 +3647,7 @@
       "seoDescription": "Payment processing, subscription management, and financial transaction handling Discover tools for AI development. HeyClaude adds source links, install...",
       "author": "Stripe",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "payments",
         "stripe",
@@ -3726,7 +3726,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stripe-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3741,7 +3741,7 @@
       "seoDescription": "Configure and manage Stytch authentication services and workspace settings Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Stytch",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "authentication",
         "stytch",
@@ -3820,7 +3820,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/stytch-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3835,7 +3835,7 @@
       "seoDescription": "Manage deployments, analyze logs, and control Vercel projects Discover tools for AI development. HeyClaude adds source links, install steps, compatibility,...",
       "author": "Vercel",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "deployment",
         "vercel",
@@ -3914,7 +3914,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/vercel-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -3929,7 +3929,7 @@
       "seoDescription": "Access any application, workflows, or data via Workato's integration platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Workato",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "automation",
         "workato",
@@ -4008,7 +4008,7 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/workato-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []
@@ -4023,7 +4023,7 @@
       "seoDescription": "Connect to nearly 8,000 apps through Zapier's automation platform Discover tools for AI development. HeyClaude adds source links, install steps,...",
       "author": "Zapier",
       "dateAdded": "2025-09-18",
-      "contentUpdatedAt": "2026-04-26T18:18:28-06:00",
+      "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
       "tags": [
         "automation",
         "zapier",
@@ -4102,7 +4102,77 @@
           "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zapier-mcp-server.mdx"
         ],
         "sourceStatus": "available",
-        "lastVerifiedAt": "2026-04-26T18:18:28-06:00",
+        "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
+        "adapterGenerated": false,
+        "platforms": [],
+        "supportLevels": []
+      }
+    },
+    {
+      "category": "mcp",
+      "slug": "zyntra-mail",
+      "title": "Zyntra - Temp e-mails MCP",
+      "description": "MCP server for e-mail testing: create disposable inboxes, wait for delivery, and extract e-mail content or links - all from your AI agent or test automation workflow.\n\nGet a free API key on https://app.zyntra.app/",
+      "seoTitle": "Zyntra - Temp e-mails MCP - MCP Servers for Claude",
+      "seoDescription": "Disposable email inboxes for AI agents and test automation. HeyClaude adds source links, install steps, compatibility, and metadata.",
+      "author": "dd77ss",
+      "authorProfileUrl": "https://github.com/dd77ss",
+      "dateAdded": "2026-04-30",
+      "tags": [
+        "email",
+        "testing",
+        "disposable",
+        "temp-mail",
+        "automation"
+      ],
+      "keywords": [
+        "email",
+        "testing",
+        "disposable",
+        "temp-mail",
+        "automation",
+        "mcp servers",
+        "mcp",
+        "claude",
+        "heyclaude",
+        "zyntra - temp e-mails mcp"
+      ],
+      "documentationUrl": "https://docs.zyntra.app/mcp",
+      "cardDescription": "Disposable email inboxes for AI agents and test automation.",
+      "installable": true,
+      "installCommand": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp",
+      "usageSnippet": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp\n\nThen add your API key in Claude settings (see config snippet below).",
+      "copySnippet": "claude mcp add zyntra-mail --transport http https://mcp.zyntra.app/mcp\n\nThen add your API key in Claude settings (see config snippet below).",
+      "configSnippet": "{\n  \"mcpServers\": {\n    \"zyntra-mail\": {\n      \"type\": \"http\",\n      \"url\": \"https://mcp.zyntra.app/mcp\",\n      \"headers\": {\n        \"X-API-Key\": \"YOUR_API_KEY\"\n      }\n    }\n  }\n}",
+      "hasPrerequisites": false,
+      "hasTroubleshooting": false,
+      "robotsIndex": true,
+      "robotsFollow": true,
+      "downloadUrl": "",
+      "downloadTrust": null,
+      "downloadSha256": null,
+      "filePath": "content/mcp/zyntra-mail.mdx",
+      "githubUrl": "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx",
+      "repoUrl": null,
+      "githubStars": null,
+      "githubForks": null,
+      "repoUpdatedAt": null,
+      "canonicalUrl": "https://heyclau.de/mcp/zyntra-mail",
+      "llmsUrl": "https://heyclau.de/data/llms/mcp/zyntra-mail.txt",
+      "apiUrl": "https://heyclau.de/api/registry/entries/mcp/zyntra-mail",
+      "trustSignals": {
+        "firstPartyEditorial": false,
+        "packageVerified": false,
+        "packageTrust": null,
+        "packageChecksum": "",
+        "checksumPresent": false,
+        "sourceUrlCount": 2,
+        "sourceUrls": [
+          "https://docs.zyntra.app/mcp",
+          "https://github.com/JSONbored/claudepro-directory/blob/main/content/mcp/zyntra-mail.mdx"
+        ],
+        "sourceStatus": "available",
+        "lastVerifiedAt": "2026-04-30",
         "adapterGenerated": false,
         "platforms": [],
         "supportLevels": []

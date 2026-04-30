@@ -10,7 +10,7 @@
     "seoDescription": "Raycast is a macOS launcher and extension platform with AI commands, automations, and developer integrations. HeyClaude adds source links, install steps,...",
     "author": "Raycast",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "launcher",
       "extensions"
@@ -90,7 +90,7 @@
       "https://www.raycast.com"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

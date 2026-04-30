@@ -15,7 +15,7 @@ Download: /downloads/mcp/figma-mcp-server.mcpb
 - Package URL: /downloads/mcp/figma-mcp-server.mcpb
 - Package SHA256: 0ff339ff6bb2328f6058233db30fe13eac93fd2805270f6817df9cf5ff1c2eee
 - Author: Figma
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Access designs, export assets, and interact with Figma files through Claude

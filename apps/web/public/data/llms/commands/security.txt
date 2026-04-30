@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/commands/security
 - Source URLs: https://docs.claude.ai/commands/security, https://github.com/JSONbored/claudepro-directory/blob/main/content/commands/security.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Comprehensive security audit with vulnerability detection, threat analysis, and automated remediation recommendations

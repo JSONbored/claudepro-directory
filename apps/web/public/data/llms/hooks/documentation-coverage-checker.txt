@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/documentation-coverage-checker
 - Source URLs: https://jsdoc.app/, https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/documentation-coverage-checker.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Automated documentation coverage analysis with missing docstring detection, API documentation validation, and completeness scoring. This PostToolUse hook automatically checks documentation coverage when code files are modified, providing real-time documentation quality validation during development.

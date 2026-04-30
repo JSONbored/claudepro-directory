@@ -16,7 +16,7 @@ Download: /downloads/mcp/socket-mcp-server.mcpb
 - Package URL: /downloads/mcp/socket-mcp-server.mcpb
 - Package SHA256: d2e6263bc6e0ec724a61ac9a348aa5f0fd9c28f7ec07fcd66ca36f4a1185151a
 - Author: Socket
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Security analysis and vulnerability scanning for dependencies

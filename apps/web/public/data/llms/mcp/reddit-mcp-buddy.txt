@@ -16,7 +16,7 @@ Download: /downloads/mcp/reddit-mcp-buddy.mcpb
 - Package URL: /downloads/mcp/reddit-mcp-buddy.mcpb
 - Package SHA256: 4789d95508464215c52e523a39bd41dd04909b297e06af2e37e4ce8ea6320a30
 - Author: karanb192
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Browse Reddit, search posts, and analyze user activity directly from Claude - no API keys required

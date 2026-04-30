@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/security-first-react-components
 - Source URLs: https://owasp.org/www-project-top-ten/, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/security-first-react-components.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Security-first React component architect with XSS prevention, CSP integration, input sanitization, and OWASP Top 10 mitigation patterns

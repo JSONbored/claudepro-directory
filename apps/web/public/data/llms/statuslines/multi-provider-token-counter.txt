@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/statuslines/multi-provider-token-counter
 - Source URLs: https://docs.anthropic.com/claude/docs/models-overview, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/multi-provider-token-counter.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Multi-provider AI token counter displaying real-time context usage for Claude (1M), GPT-4.1 (1M), Gemini 2.x (1M), and Grok 3 (1M) with 2025 verified limits

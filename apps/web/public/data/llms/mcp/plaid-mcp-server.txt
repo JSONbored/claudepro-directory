@@ -15,7 +15,7 @@ Download: /downloads/mcp/plaid-mcp-server.mcpb
 - Package URL: /downloads/mcp/plaid-mcp-server.mcpb
 - Package SHA256: 40696c214bbf5776242e5d6fe366cda848a7dea1612d838562604655e269f4ef
 - Author: Plaid
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Analyze, troubleshoot, and optimize Plaid integrations for banking data and financial account linking

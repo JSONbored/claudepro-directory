@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/full-stack-ai-development-agent
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/full-stack-ai-development-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Full-stack AI development specialist bridging frontend, backend, and AI/ML with AI-assisted coding workflows, intelligent code generation, and end-to-end type safety

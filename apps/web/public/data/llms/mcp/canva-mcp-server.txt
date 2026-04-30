@@ -15,7 +15,7 @@ Download: /downloads/mcp/canva-mcp-server.mcpb
 - Package URL: /downloads/mcp/canva-mcp-server.mcpb
 - Package SHA256: 461bfddb65f343a48e35a1dfcfbec79028101aebeebb217c5c0ed6dd55e48afe
 - Author: Canva
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Browse, summarize, and generate Canva designs directly from Claude

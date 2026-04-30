@@ -10,7 +10,7 @@
     "seoDescription": "Roo Code is an open-source VS Code AI coding agent with modes for planning, editing, debugging, and automation. HeyClaude adds source links, install steps,...",
     "author": "Roo Code",
     "dateAdded": "2026-04-27",
-    "contentUpdatedAt": "2026-04-26T23:21:14-06:00",
+    "contentUpdatedAt": "2026-04-30T05:16:20-06:00",
     "tags": [
       "vs-code",
       "coding-agent"
@@ -91,7 +91,7 @@
       "https://roocode.com"
     ],
     "sourceStatus": "available",
-    "lastVerifiedAt": "2026-04-26T23:21:14-06:00",
+    "lastVerifiedAt": "2026-04-30T05:16:20-06:00",
     "adapterGenerated": false,
     "platforms": [],
     "supportLevels": []

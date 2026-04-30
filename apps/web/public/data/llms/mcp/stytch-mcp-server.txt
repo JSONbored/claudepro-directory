@@ -15,7 +15,7 @@ Download: /downloads/mcp/stytch-mcp-server.mcpb
 - Package URL: /downloads/mcp/stytch-mcp-server.mcpb
 - Package SHA256: 2669e215154068770a95ecb53f4b64a50fe86a076d8d0a6244e2f762153f949c
 - Author: Stytch
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Configure and manage Stytch authentication services and workspace settings

@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/rules/react-next-js-expert
 - Source URLs: https://nextjs.org/docs, https://github.com/JSONbored/claudepro-directory/blob/main/content/rules/react-next-js-expert.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T23:21:14-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Transform Claude into a React and Next.js specialist with deep knowledge of modern patterns, performance optimization, and best practices

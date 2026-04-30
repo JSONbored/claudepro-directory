@@ -15,7 +15,7 @@ Download: /downloads/mcp/jam-mcp-server.mcpb
 - Package URL: /downloads/mcp/jam-mcp-server.mcpb
 - Package SHA256: 18adeb9b457cec2ce115e3518419308f0abe2f847480af657148f0a14ae13ab5
 - Author: Jam
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Debug faster with AI agents that access video recordings, console logs, and network requests

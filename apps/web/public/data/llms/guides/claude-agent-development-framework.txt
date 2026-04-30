@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/guides/claude-agent-development-framework
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/guides/claude-agent-development-framework.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Build Claude autonomous agents with 90.2% better performance. Learn multi-agent orchestration, subagents implementation, and deployment achieving $0.045/task.

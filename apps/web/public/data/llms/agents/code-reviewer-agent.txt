@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/agents/code-reviewer-agent
 - Source URLs: https://google.github.io/eng-practices/review/, https://github.com/JSONbored/claudepro-directory/blob/main/content/agents/code-reviewer-agent.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Expert code reviewer that provides thorough, constructive feedback on code quality, security, performance, and best practices

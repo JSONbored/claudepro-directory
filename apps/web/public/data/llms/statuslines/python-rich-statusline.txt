@@ -9,7 +9,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/statuslines/python-rich-statusline
 - Source URLs: https://rich.readthedocs.io/, https://github.com/JSONbored/claudepro-directory/blob/main/content/statuslines/python-rich-statusline.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Feature-rich statusline using Python's Rich library for beautiful formatting, progress bars, and real-time token cost tracking

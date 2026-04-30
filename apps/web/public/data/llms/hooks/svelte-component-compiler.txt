@@ -8,7 +8,7 @@ Directory source: https://github.com/JSONbored/claudepro-directory/blob/main/con
 - Canonical URL: https://heyclau.de/hooks/svelte-component-compiler
 - Source URLs: https://github.com/JSONbored/claudepro-directory/blob/main/content/hooks/svelte-component-compiler.mdx
 - Author: JSONbored
-- Last verified: 2026-04-26T18:18:28-06:00
+- Last verified: 2026-04-30T05:16:20-06:00
 - Robots: indexable
 ## Summary
 Automatically compiles and validates Svelte components when they are modified.
